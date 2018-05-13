@@ -78,4 +78,7 @@
     <!-- drawer -->
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
+    <string name="progress_uploading">progress uploading</string>
+    <string name="upload_success">upload success</string>
+    <string name="upload_failure">upload failure</string>
 </resources>

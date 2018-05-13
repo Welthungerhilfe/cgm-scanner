@@ -44,7 +44,6 @@ import de.welthungerhilfe.cgm.scanner.R;
 
 import de.welthungerhilfe.cgm.scanner.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.activities.RecorderActivity;
-import de.welthungerhilfe.cgm.scanner.activities.ScreenRecordActivity;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerMeasureAdapter;
 import de.welthungerhilfe.cgm.scanner.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -108,7 +107,8 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                     dialog.setManualMeasureListener(MeasuresDataFragment.this);
                     dialog.show();
                 } else if (which == 1) {
-                    Intent intent = new Intent(getContext(), ScreenRecordActivity.class);
+                    //Intent intent = new Intent(getContext(), ScreenRecordActivity.class);
+                    Intent intent = new Intent(getContext(), RecorderActivity.class);
                     intent.putExtra(AppConstants.EXTRA_PERSON, ((CreateDataActivity)context).person);
                     startActivity(intent);
                 }

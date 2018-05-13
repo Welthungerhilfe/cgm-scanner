@@ -91,6 +91,7 @@ import de.welthungerhilfe.cgm.scanner.fragments.InfantFullFrontFragment;
 import de.welthungerhilfe.cgm.scanner.fragments.InfantTurnFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
+import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.tango.CameraSurfaceRenderer;
@@ -544,8 +545,11 @@ public class RecorderActivity extends Activity {
                 Log.e(TAG,"Folder: \"" + personalFilesDir + "\" could not be created!\n");
             }
         }
-        mScanArtefactsOutputFolder  = new File(extFileDir,mQrCode+"/"+mNowTimeString+"/");
         // TODO Create when needed!
+        File measurementsFolder = new File(extFileDir,mQrCode+"/measurements/");
+        measurementsFolder.mkdir();
+        mScanArtefactsOutputFolder  = new File(extFileDir,mQrCode+"/measurements/"+mNowTimeString+"/");
+
         if(!mScanArtefactsOutputFolder.exists()) {
             boolean created = mScanArtefactsOutputFolder.mkdir();
             if (created) {
@@ -555,7 +559,7 @@ public class RecorderActivity extends Activity {
             }
         }
         mVideoOutputFile = new File(mScanArtefactsOutputFolder,mQrCode+".mp4");
-        mPointCloudSaveFolderPath = mScanArtefactsOutputFolder.getAbsolutePath()+"/pc/";
+        mPointCloudSaveFolderPath = mScanArtefactsOutputFolder.getAbsolutePath();
         Log.v(TAG,"mPointCloudSaveFolderPath: "+mPointCloudSaveFolderPath);
         // must be called after setting mVideoOutputFile and sVideoEncoder was created!
         setupRenderer();
@@ -1071,6 +1075,8 @@ public class RecorderActivity extends Activity {
             out.writeFloat((float) pointCloudData.timestamp);
 
             out.close();
+            // Direct Upload to Firebase Storage
+            uploadFromUri(Uri.fromFile(file));
             mNumberOfFilesWritten++;
             //mTimeToTakeSnap = false;
 
@@ -1090,6 +1096,8 @@ public class RecorderActivity extends Activity {
         // Start Recording
         Log.v(TAG,"record_SwitchChanged to "+mIsRecording);
         if (mIsRecording) {
+            mNowTime = System.currentTimeMillis();
+            mNowTimeString = String.valueOf(mNowTime);
             Log.v(TAG,"now: "+mNowTimeString);
             mNumberOfFilesWritten = 0;
         }
@@ -1122,6 +1130,13 @@ public class RecorderActivity extends Activity {
                     String zipFilename = mPointCloudSaveFolderPath + "/TangoData_" +mQrCode+"_"+ mNowTimeString +
                             "_" + mPointCloudFilenameBuffer.size() + "files.zip";
                     String[] fileList = mPointCloudFilenameBuffer.toArray(new String[mPointCloudFilenameBuffer.size()]);
+                    // TODO: Upload instead of zipping
+
+
+                    // TODO: build service for sync of offline and firebase storage files
+                    // TODO: while they are written
+
+                    /*
                     ZipWriter zipper = new ZipWriter(fileList, zipFilename);
                     zipper.zip();
 
@@ -1132,7 +1147,7 @@ public class RecorderActivity extends Activity {
                         if (!deleted) {
                             Log.w(TAG, "File \"" + s + "\" not deleted\n");
                         }
-                    }
+                    }*/
 
                     mPointCloudFilenameBuffer.clear();
 
@@ -1170,6 +1185,23 @@ public class RecorderActivity extends Activity {
 
     }
 
+    private void uploadFromUri(Uri fileUri) {
+        Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
+
+        // Start MyUploadService to upload the file, so that the file is uploaded
+        // even if this Activity is killed or put in the background
+        startService(new Intent(this, FirebaseUploadService.class)
+                .putExtra(FirebaseUploadService.EXTRA_FILE_URI, fileUri)
+                .putExtra(AppConstants.EXTRA_QR, mQrCode)
+                .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, mNowTimeString)
+                .setAction(FirebaseUploadService.ACTION_UPLOAD));
+
+        // TODO Show loading spinner
+
+        //showProgressDialog(getString(R.string.progress_uploading));
+    }
+
+
     // This function writes the pose data and timestamps to .vtk files in binary
     private void writePoseToFile(int numPoints) {
 
@@ -1188,6 +1220,7 @@ public class RecorderActivity extends Activity {
             DataOutputStream out = new DataOutputStream(new BufferedOutputStream(
                     new FileOutputStream(file)));
 
+            // TODO: why pose method for writing VTK Polydata? (Line 1050 vs. 1192)
             out.write(("# vtk DataFile Version 3.0\n" +
                     "vtk output\n" +
                     "BINARY\n" +

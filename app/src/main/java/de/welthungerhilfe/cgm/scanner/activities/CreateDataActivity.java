@@ -305,7 +305,8 @@ public class CreateDataActivity extends BaseActivity {
                                 });
 
                         // Start measuring
-                        Intent intent =new Intent(CreateDataActivity.this, ScreenRecordActivity.class);
+                        //Intent intent =new Intent(CreateDataActivity.this, ScreenRecordActivity.class);
+                        Intent intent = new Intent(CreateDataActivity.this, RecorderActivity.class);
                         intent.putExtra(AppConstants.EXTRA_PERSON, person);
                         startActivity(intent);
                     }

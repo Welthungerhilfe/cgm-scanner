@@ -30,7 +30,7 @@ public class AppConstants {
     public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor.appspot.com";
     //public static final String STORAGE_CONSENT_URL = "/data/person/{id}/consent/";
     public static final String STORAGE_CONSENT_URL = "/data/person/{qrcode}/";
-    public static final String STORAGE_MEASURE_URL = "/data/person/{id}/measures/";
+    public static final String STORAGE_MEASURE_URL = "/data/person/{qrcode}/measurements/{scantimestamp}/";
 
     public static final String VAL_SEX_FEMALE = "female";
     public static final String VAL_SEX_MALE = "male";
@@ -46,6 +46,8 @@ public class AppConstants {
     public static final String EXTRA_RADIUS = "extra_radius";
     public static final String EXTRA_PERSON_LIST = "extra_person_list";
     public static final String EXTRA_PERSON = "extra_person";
+    public static final String EXTRA_SCANTIMESTAMP = "extra_scantimestamp";
+
 
     // Workflow
     public static final int CHOOSE_BABY_OR_INFANT = 0;

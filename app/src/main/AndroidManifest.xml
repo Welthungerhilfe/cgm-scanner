@@ -104,9 +104,10 @@
         <activity android:name=".activities.RecorderActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.ScreenRecordActivity"
-            android:label="Screen Recording"
-            android:screenOrientation="portrait" />
+        <service
+            android:name=".helper.service.FirebaseUploadService"
+            android:exported="false"/>
+
     </application>
 
 </manifest>
