@@ -28,6 +28,21 @@ import android.widget.EditText;
 import de.welthungerhilfe.cgm.scanner.R;
 
 public class BaseActivity extends AppCompatActivity {
+    private boolean running = false;
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        running = true;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        running = false;
+
+        hideProgressDialog();
+    }
 
     @VisibleForTesting
     public ProgressDialog mProgressDialog;
@@ -39,7 +54,8 @@ public class BaseActivity extends AppCompatActivity {
             mProgressDialog.setIndeterminate(true);
         }
 
-        mProgressDialog.show();
+        if (running)
+            mProgressDialog.show();
     }
 
     public void hideProgressDialog() {
@@ -57,12 +73,5 @@ public class BaseActivity extends AppCompatActivity {
     public void closeKeyboard(EditText editText) {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
-    }
-
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        hideProgressDialog();
     }
 }

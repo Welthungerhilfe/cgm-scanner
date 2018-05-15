@@ -23,6 +23,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -135,10 +136,10 @@ public class GrowthDataFragment extends Fragment {
         }
 
         ScatterDataSet set1 = new ScatterDataSet(yVals1, "");
-        set1.setScatterShapeHoleColor(getResources().getColor(R.color.colorPrimary));
+        set1.setScatterShapeHoleColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
         set1.setScatterShapeHoleRadius(5f);
         set1.setScatterShape(ScatterChart.ScatterShape.CIRCLE);
-        set1.setColor(getResources().getColor(R.color.colorWhite));
+        set1.setColor(ContextCompat.getColor(getContext(), R.color.colorWhite));
         set1.setScatterShapeSize(30f);
 
         ArrayList<IScatterDataSet> dataSets = new ArrayList<IScatterDataSet>();

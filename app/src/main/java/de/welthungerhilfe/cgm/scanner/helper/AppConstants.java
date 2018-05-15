@@ -27,7 +27,8 @@ public class AppConstants {
     public static final int MAX_IMAGE_SIZE = 800;
 
     public static final String GOOGLE_GEO_URL = "https://maps.googleapis.com/maps/api/geocode/json";
-    public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor.appspot.com";
+    //public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor.appspot.com";
+    public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor-dev.appspot.com";
     //public static final String STORAGE_CONSENT_URL = "/data/person/{id}/consent/";
     public static final String STORAGE_CONSENT_URL = "/data/person/{qrcode}/";
     public static final String STORAGE_MEASURE_URL = "/data/person/{qrcode}/measurements/{scantimestamp}/";

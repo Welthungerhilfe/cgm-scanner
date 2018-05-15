@@ -288,10 +288,14 @@ public class CreateDataActivity extends BaseActivity {
                         // because we uploaded the consent to storage before there was a database
                         // reference we need to recover the timestamp from the filename
                         // in order to use the same timestamp later on to check for a thumbnail
-                        String createdString = qrPath.split("_"+consent.getQrcode()+".png")[0].split("data%2Fperson%2F"+qrCode+"%2F")[1];
-                        Log.v(TAG,"createdString: "+createdString);
-                        Long created = Long.parseLong(createdString);
-                        consent.setCreated(created);
+                        if (qrPath == "offline") {
+                            consent.setCreated(System.currentTimeMillis());
+                        } else {
+                            String createdString = qrPath.split("_" + consent.getQrcode()+".png")[0].split("data%2Fperson%2F"+qrCode+"%2F")[1];
+                            Log.v(TAG,"createdString: "+createdString);
+                            Long created = Long.parseLong(createdString);
+                            consent.setCreated(created);
+                        }
 
                         consent.setConsent(qrPath);
 

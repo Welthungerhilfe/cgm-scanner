@@ -141,6 +141,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void initUI() {
+        if (context == null)
+            return;
+
         if (((CreateDataActivity)context).person != null) {
             txtDate.setText(Utils.beautifyDate(((CreateDataActivity)context).person.getCreated()));
 
@@ -323,8 +326,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 @Override
                 public void onSuccess(Uri downloadUrl)
                 {
-                    Log.v(TAG,"found thumbnail at: "+downloadUrl.toString());
-                    Glide.with(context).load(downloadUrl.toString()).into(imgConsent);
+                    Log.v(TAG,"found thumbnail at: " + downloadUrl.toString());
+                    if (context != null)
+                        Glide.with(context).load(downloadUrl.toString()).into(imgConsent);
                     //do something with downloadurl
                 }
 
@@ -334,7 +338,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 public void onFailure(@NonNull Exception e) {
                     Log.w(TAG,"error getting thumbnail");
                     e.printStackTrace();
-                    Glide.with(context).load(qrUrl).into(imgConsent);
+                    if (context != null)
+                        Glide.with(context).load(qrUrl).into(imgConsent);
                 }
             });
 /*
