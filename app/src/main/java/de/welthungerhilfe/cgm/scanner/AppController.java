@@ -43,9 +43,10 @@ import de.welthungerhilfe.cgm.scanner.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.offline.DbConstants;
 import de.welthungerhilfe.cgm.scanner.helper.offline.OfflineDatabase;
+import de.welthungerhilfe.cgm.scanner.helper.service.NetworkMonitorService;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class AppController extends Application implements Connectable, Disconnectable {
+public class AppController extends Application {
     public static final String TAG = AppController.class.getSimpleName();
 
     private static AppController mInstance;
@@ -61,9 +62,6 @@ public class AppController extends Application implements Connectable, Disconnec
     public OfflineDatabase offlineDb;
 
     public boolean networkStatus = false;
-
-    private Merlin merlin;
-
 
     @Override
     public void onCreate() {
@@ -90,11 +88,7 @@ public class AppController extends Application implements Connectable, Disconnec
                 .fallbackToDestructiveMigration()
                 .build();
 
-        merlin = new Merlin.Builder().withConnectableCallbacks().withDisconnectableCallbacks().build(this);
-        merlin.registerConnectable(this);
-        merlin.registerDisconnectable(this);
-
-        merlin.bind();
+        startService(new Intent(this, NetworkMonitorService.class));
 
         mInstance = this;
     }
@@ -105,49 +99,5 @@ public class AppController extends Application implements Connectable, Disconnec
 
     public void prepareFirebaseUser() {
         firebaseUser = firebaseAuth.getCurrentUser();
-    }
-
-    @Override
-    public void onConnect() {
-        networkStatus = true;
-
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        int icon = R.drawable.logo;
-        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-
-        Notification notification = builder.setContentIntent(contentIntent)
-                .setSmallIcon(icon)
-                .setTicker("Firebase" + Math.random())
-                .setWhen(System.currentTimeMillis())
-                .setAutoCancel(true)
-                .setContentTitle("Network Connectivity")
-                .setContentText("Network Connected").build();
-
-        mNotificationManager.notify(0, notification);
-    }
-
-    @Override
-    public void onDisconnect() {
-        networkStatus = false;
-
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        int icon = R.drawable.logo;
-        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-
-        Notification notification = builder.setContentIntent(contentIntent)
-                .setSmallIcon(icon)
-                .setTicker("Firebase" + Math.random())
-                .setWhen(System.currentTimeMillis())
-                .setAutoCancel(true)
-                .setContentTitle("Network Connectivity")
-                .setContentText("Network Disconnected").build();
-
-        mNotificationManager.notify(0, notification);
     }
 }

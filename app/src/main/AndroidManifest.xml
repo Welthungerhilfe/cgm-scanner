@@ -105,6 +105,8 @@
             android:name=".helper.service.FirebaseUploadService"
             android:exported="false"/>
 
+        <service android:name=".helper.service.NetworkMonitorService" />
+
         <service
             android:name="com.novoda.merlin.service.MerlinService"
             android:exported="false" />
