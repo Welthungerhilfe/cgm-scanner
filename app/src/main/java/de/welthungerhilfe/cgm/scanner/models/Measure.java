@@ -19,23 +19,72 @@
 
 package de.welthungerhilfe.cgm.scanner.models;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
+
 import java.io.Serializable;
+
+import de.welthungerhilfe.cgm.scanner.helper.offline.DbConstants;
 
 /**
  * Created by Emerald on 2/19/2018.
  */
 
+@Entity(tableName = DbConstants.TABLE_MEASURE)
 public class Measure implements Serializable {
+    @PrimaryKey
+    @NonNull
+    private String id;
+    @ColumnInfo(name = DbConstants.DATE)
     private long date;
+    @ColumnInfo(name = DbConstants.TYPE)
     private String type;
+    @ColumnInfo(name = DbConstants.AGE)
     private long age; // age from birthday in days
+    @ColumnInfo(name = DbConstants.HEIGHT)
     private float height;
+    @ColumnInfo(name = DbConstants.WEIGHT)
     private float weight;
+    @ColumnInfo(name = DbConstants.MUAC)
     private float muac;
+    @ColumnInfo(name = DbConstants.HEAD_CIRCUMFERENCE)
     private float headCircumference;
-    private Loc location;
+    @ColumnInfo(name = DbConstants.ARTIFACT)
     private String artifact;
+    @ColumnInfo(name = DbConstants.VISIBLE)
     private boolean visible;
+
+    @Ignore
+    private Loc location;
+
+    public Measure() {
+
+    }
+
+    public Measure(String id, long date, String type, long age, float height, float weight, float muac, float headCircumference, String artifact, boolean visible) {
+        this.id = id;
+        this.date = date;
+        this.type = type;
+        this.age = age;
+        this.height = height;
+        this.weight = weight;
+        this.muac = muac;
+        this.headCircumference = headCircumference;
+        this.artifact = artifact;
+        this.visible = visible;
+    }
+
+    @NonNull
+    public String getId() {
+        return id;
+    }
+
+    public void setId(@NonNull String id) {
+        this.id = id;
+    }
 
     public long getDate() {
         return date;

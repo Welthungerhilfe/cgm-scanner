@@ -23,12 +23,18 @@
         <item
             android:id="@+id/menuHome"
             android:icon="@drawable/home"
-            android:title="Go to home" />
+            android:title="@string/menu_home" />
+    </group>
+    <group>
+        <item
+            android:id="@+id/menuOffline"
+            android:icon="@drawable/home"
+            android:title="@string/menu_offline" />
     </group>
     <group>
         <item
             android:id="@+id/menuLogout"
             android:icon="@drawable/logout"
-            android:title="Logout"/>
+            android:title="@string/menu_logout"/>
     </group>
 </menu>

@@ -20,6 +20,7 @@
 package de.welthungerhilfe.cgm.scanner.activities;
 
 import android.app.SearchManager;
+import android.arch.persistence.room.ColumnInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -53,6 +54,9 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,11 +71,16 @@ import de.welthungerhilfe.cgm.scanner.fragments.MeasuresDataFragment;
 import de.welthungerhilfe.cgm.scanner.fragments.PersonalDataFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
+import de.welthungerhilfe.cgm.scanner.helper.offline.DbConstants;
+import de.welthungerhilfe.cgm.scanner.helper.tasks.SaveOfflinePersonTask;
 import de.welthungerhilfe.cgm.scanner.models.Consent;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
+import de.welthungerhilfe.cgm.scanner.models.PersonConsent;
 import de.welthungerhilfe.cgm.scanner.models.QRNumber;
+import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 /**
  * Created by Emerald on 2/19/2018.
@@ -116,8 +125,6 @@ public class CreateDataActivity extends BaseActivity {
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
         measures = new ArrayList<>();
         consents = new ArrayList<>();
-
-
 
         if (qrCode != null) {
             checkQR();
@@ -180,7 +187,8 @@ public class CreateDataActivity extends BaseActivity {
                 qrPath="offline";
                 return;
             } else {
-                if (qrPath == "offline") Toast.makeText(CreateDataActivity.this, "Did not upload consent scan because you are offline!", Toast.LENGTH_SHORT).show();
+                if (qrPath == "offline")
+                    Toast.makeText(CreateDataActivity.this, "Did not upload consent scan because you are offline!", Toast.LENGTH_SHORT).show();
                 isNew = true;
 
                 person = new Person();
@@ -317,6 +325,28 @@ public class CreateDataActivity extends BaseActivity {
                 });
     }
 
+    private void createOfflinePerson() {
+        AppController.getInstance().offlineDb.personDao().insertAll(person);
+    }
+
+    private void saveQrOffline() {
+        long timestamp = System.currentTimeMillis();
+        qrPath = BitmapUtils.saveBitmap(qrSource, timestamp);
+
+        if (person != null) {
+            final Consent consent = new Consent();
+            consent.setCreated(timestamp);
+            consent.setConsent(qrPath);
+            if (qrCode != null)
+                consent.setQrcode(qrCode);
+            else
+                consent.setQrcode(person.getQrcode());
+
+            AppController.getInstance().offlineDb.consentDao().insertAll(consent);
+            AppController.getInstance().offlineDb.personConsentDao().insert(new PersonConsent(person.getId(), consent.getId()));
+        }
+    }
+
     private void updatePerson() {
         showProgressDialog();
 
@@ -365,54 +395,59 @@ public class CreateDataActivity extends BaseActivity {
     private void uploadQR() {
         if (qrSource == null)
             return;
-        //String consentPath = AppConstants.STORAGE_CONSENT_URL.replace("{id}", person.getId()) + System.currentTimeMillis() + "_" + qrCode + ".png";
-        final String consentPath = AppConstants.STORAGE_CONSENT_URL.replace("{qrcode}",  qrCode) + System.currentTimeMillis() + "_" + qrCode + ".png";
-        StorageReference consentRef = AppController.getInstance().storageRootRef.child(consentPath);
-        UploadTask uploadTask = consentRef.putBytes(qrSource);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                hideProgressDialog();
 
-                Toast.makeText(CreateDataActivity.this, "Uploading Consent Failed", Toast.LENGTH_SHORT).show();
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                hideProgressDialog();
+        if (Utils.isNetworkAvailable(this)) {
+            //String consentPath = AppConstants.STORAGE_CONSENT_URL.replace("{id}", person.getId()) + System.currentTimeMillis() + "_" + qrCode + ".png";
+            final String consentPath = AppConstants.STORAGE_CONSENT_URL.replace("{qrcode}",  qrCode) + System.currentTimeMillis() + "_" + qrCode + ".png";
+            StorageReference consentRef = AppController.getInstance().storageRootRef.child(consentPath);
+            UploadTask uploadTask = consentRef.putBytes(qrSource);
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    hideProgressDialog();
 
-                Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                qrPath = downloadUrl.toString();
-
-                if (person != null) {
-                    final Consent consent = new Consent();
-                    consent.setCreated(System.currentTimeMillis());
-                    consent.setConsent(qrPath);
-                    if (qrCode != null)
-                        consent.setQrcode(qrCode);
-                    else
-                        consent.setQrcode(person.getQrcode());
-                    AppController.getInstance().firebaseFirestore.collection("persons")
-                            .document(person.getId())
-                            .collection("consents")
-                            .add(consent)
-                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                @Override
-                                public void onSuccess(DocumentReference documentReference) {
-                                    consents.add(0, consent);
-                                }
-                            });
+                    saveQrOffline();
+                    //Toast.makeText(CreateDataActivity.this, "Uploading Consent Failed", Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    hideProgressDialog();
+
+                    Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                    qrPath = downloadUrl.toString();
+
+                    if (person != null) {
+                        final Consent consent = new Consent();
+                        consent.setCreated(System.currentTimeMillis());
+                        consent.setConsent(qrPath);
+                        if (qrCode != null)
+                            consent.setQrcode(qrCode);
+                        else
+                            consent.setQrcode(person.getQrcode());
+                        AppController.getInstance().firebaseFirestore.collection("persons")
+                                .document(person.getId())
+                                .collection("consents")
+                                .add(consent)
+                                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                    @Override
+                                    public void onSuccess(DocumentReference documentReference) {
+                                        consents.add(0, consent);
+                                    }
+                                });
+                    }
+                }
+            });
+        } else {
+            saveQrOffline();
+        }
     }
 
     private void loadMeasures() {
         showProgressDialog();
 
         if (person != null) {
-            AppController.getInstance().firebaseFirestore.collection("persons")
-                    .document(person.getId())
+            AppController.getInstance().firebaseFirestore.collection("persons").document(person.getId())
                     .collection("measures")
                     .orderBy("date", Query.Direction.DESCENDING)
                     .get()

@@ -342,7 +342,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         Glide.with(context).load(qrUrl).into(imgConsent);
                 }
             });
-/*
+            /*
             String[] arr = qrUrl.split(".png");
 			// TODO: replace .png_ to _ here and in Firebase Functions
             String thumbUrlString = arr[0] + ".png_thumb.png";

@@ -19,14 +19,48 @@
 
 package de.welthungerhilfe.cgm.scanner.models;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
+
+import de.welthungerhilfe.cgm.scanner.helper.offline.DbConstants;
+
 /**
  * Created by Emerald on 2/25/2018.
  */
 
+@Entity(tableName = DbConstants.TABLE_CONSENTS)
 public class Consent {
-    private long created;
+    @PrimaryKey
+    @NonNull
+    private String id;
+    @ColumnInfo(name = DbConstants.CONSENT)
     private String consent;
+    @ColumnInfo(name = DbConstants.QRCODE)
     private String qrcode;
+    @ColumnInfo(name = DbConstants.CREATED)
+    private long created;
+
+    public Consent() {
+
+    }
+
+    public Consent(String id, String consent, String qrcode, long created) {
+        this.id = id;
+        this.consent = consent;
+        this.qrcode = qrcode;
+        this.created = created;
+    }
+
+    @NonNull
+    public String getId() {
+        return id;
+    }
+
+    public void setId(@NonNull String id) {
+        this.id = id;
+    }
 
     public long getCreated() {
         return created;

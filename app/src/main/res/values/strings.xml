@@ -2,6 +2,8 @@
     <string name="app_name">CGM Scanner</string>
     <string name="app_name_long">Child Growth Monitor Scanner App</string>
 
+    <string name="service_upload_offline">Upload offline data</string>
+
     <string name="google_maps_key">AIzaSyA-2ofdxNlBpzHDRVa6NfgAfkx4u0QSg4Q</string>
 
     <string name="title_predictions_list_name">Frames Predicted</string>
@@ -81,4 +83,9 @@
     <string name="progress_uploading">progress uploading</string>
     <string name="upload_success">upload success</string>
     <string name="upload_failure">upload failure</string>
+
+
+    <string name="menu_home">Home</string>
+    <string name="menu_offline">Offline Data</string>
+    <string name="menu_logout">Log Out</string>
 </resources>
