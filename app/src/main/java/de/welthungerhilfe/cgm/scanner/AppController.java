@@ -43,6 +43,7 @@ import de.welthungerhilfe.cgm.scanner.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.offline.DbConstants;
 import de.welthungerhilfe.cgm.scanner.helper.offline.OfflineDatabase;
+import de.welthungerhilfe.cgm.scanner.helper.service.FirestoreMonitorService;
 import de.welthungerhilfe.cgm.scanner.helper.service.NetworkMonitorService;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -89,6 +90,8 @@ public class AppController extends Application {
                 .build();
 
         startService(new Intent(this, NetworkMonitorService.class));
+
+        startService(new Intent(this, FirestoreMonitorService.class));
 
         mInstance = this;
     }

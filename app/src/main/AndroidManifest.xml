@@ -105,8 +105,6 @@
             android:name=".helper.service.FirebaseUploadService"
             android:exported="false"/>
 
-        <service android:name=".helper.service.NetworkMonitorService" />
-
         <service
             android:name="com.novoda.merlin.service.MerlinService"
             android:exported="false" />
@@ -116,6 +114,12 @@
             android:exported="false"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/service_upload_offline" />
+
+        <!-- Monitor Firestore and Network for Offline Sync -->
+
+        <service android:name=".helper.service.NetworkMonitorService" />
+
+        <service android:name=".helper.service.FirestoreMonitorService" />
 
     </application>
 

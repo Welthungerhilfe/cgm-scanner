@@ -35,6 +35,7 @@ import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.activities.MainActivity;
+import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 
 public class NetworkMonitorService extends Service implements Connectable, Disconnectable {
     private Merlin merlin;
@@ -43,23 +44,19 @@ public class NetworkMonitorService extends Service implements Connectable, Disco
         merlin = new Merlin.Builder().withConnectableCallbacks().withDisconnectableCallbacks().build(this);
         merlin.registerConnectable(this);
         merlin.registerDisconnectable(this);
+
+        merlin.bind();
     }
-
-
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        merlin.bind();
-
         return null;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //TODO do something useful
-        merlin.bind();
-
         return Service.START_STICKY;
     }
 
@@ -80,7 +77,7 @@ public class NetworkMonitorService extends Service implements Connectable, Disco
                 .setContentTitle("Network Connectivity")
                 .setContentText("Network Connected").build();
 
-        mNotificationManager.notify(0, notification);
+        mNotificationManager.notify(AppConstants.NOTIF_NETWORK, notification);
     }
 
     @Override
@@ -100,6 +97,6 @@ public class NetworkMonitorService extends Service implements Connectable, Disco
                 .setContentTitle("Network Connectivity")
                 .setContentText("Network Disconnected").build();
 
-        mNotificationManager.notify(0, notification);
+        mNotificationManager.notify(AppConstants.NOTIF_NETWORK, notification);
     }
 }
