@@ -44,6 +44,7 @@ dependencies {
     implementation 'org.greenrobot:eventbus:3.1.1'
     implementation 'com.jaredrummler:material-spinner:1.2.4'
     implementation 'com.novoda:merlin:1.1.7'
+    implementation 'com.google.code.gson:gson:2.8.4'
     implementation 'com.google.firebase:firebase-auth:11.8.0'
     implementation 'com.google.firebase:firebase-storage:11.8.0'
     implementation 'com.google.firebase:firebase-firestore:11.8.0'

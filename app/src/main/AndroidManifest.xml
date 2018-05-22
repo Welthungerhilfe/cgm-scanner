@@ -115,6 +115,12 @@
             android:icon="@mipmap/ic_launcher"
             android:label="@string/service_upload_offline" />
 
+        <!-- Monitor Firestore and Network for Offline Sync -->
+
+        <service android:name=".helper.service.NetworkMonitorService" />
+
+        <service android:name=".helper.service.FirestoreMonitorService" />
+
     </application>
 
 </manifest>
