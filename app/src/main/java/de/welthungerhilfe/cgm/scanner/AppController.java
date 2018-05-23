@@ -27,7 +27,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.StrictMode;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
+import com.amitshekhar.DebugDB;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -95,6 +97,8 @@ public class AppController extends Application {
         startService(new Intent(this, NetworkMonitorService.class));
 
         startService(new Intent(this, FirestoreMonitorService.class));
+
+        Log.e("Offline DB", DebugDB.getAddressLog());
 
         mInstance = this;
     }
