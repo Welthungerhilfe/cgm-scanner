@@ -34,7 +34,7 @@ import de.welthungerhilfe.cgm.scanner.models.PersonMeasure;
 @Dao
 public interface PersonMeasureDao {
     @Insert
-    void insert(PersonMeasure personMeasure);
+    void insert(PersonMeasure... personMeasure);
 
     @Query(DbConstants.QUERY_MEASURES_BY_PERSON)
     List<Measure> getMeasuresByPerson(final String personId);

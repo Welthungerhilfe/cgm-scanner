@@ -34,10 +34,13 @@ import de.welthungerhilfe.cgm.scanner.models.Person;
 @Dao
 public interface ConsentDao {
     @Query("SELECT * FROM " + DbConstants.TABLE_CONSENTS)
-    List<Consent> getAll();
+    List<Consent> loadAll();
 
     @Query("SELECT * FROM " + DbConstants.TABLE_CONSENTS + " WHERE id =:consentId")
     Consent getById(String consentId);
+
+    @Query("SELECT * FROM " + DbConstants.TABLE_CONSENTS + " WHERE qrcode =:qrCode")
+    List<Consent> getByQrCode(String qrCode);
 
     @Insert
     void insertAll(Consent... consents);

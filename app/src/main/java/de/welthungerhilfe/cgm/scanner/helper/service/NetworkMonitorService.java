@@ -25,6 +25,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -34,26 +35,30 @@ import android.util.Log;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.novoda.merlin.Merlin;
 import com.novoda.merlin.registerable.connection.Connectable;
 import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.activities.MainActivity;
-import de.welthungerhilfe.cgm.scanner.activities.RecorderActivity;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.tasks.PersonOfflineTask;
 import de.welthungerhilfe.cgm.scanner.models.Consent;
+import de.welthungerhilfe.cgm.scanner.models.task.ConsentOfflineTask;
+import de.welthungerhilfe.cgm.scanner.models.task.PersonOfflineTask;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 
-public class NetworkMonitorService extends Service implements Connectable, Disconnectable, PersonOfflineTask.OnLoadAll {
+public class NetworkMonitorService extends Service implements Connectable, Disconnectable {
     private Merlin merlin;
 
     public void onCreate() {
@@ -78,7 +83,57 @@ public class NetworkMonitorService extends Service implements Connectable, Disco
 
     @Override
     public void onConnect() {
-        new PersonOfflineTask().loadAll(this);
+        new PersonOfflineTask().loadAll(new PersonOfflineTask.OnLoadAll() {
+            @Override
+            public void onLoadAll(List<Person> personList) {
+                Log.e("Offline Data Sync", "Sync started");
+
+                for (int i = 0; i < personList.size(); i++) {
+                    final Person person = personList.get(i);
+                    AppController.getInstance().firebaseFirestore.collection("persons")
+                            .add(personList.get(i))
+                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                @Override
+                                public void onSuccess(final DocumentReference documentReference) {
+                                    new PersonOfflineTask().delete(person, null);
+
+                                    person.setId(documentReference.getId());
+                                    Map<String, Object> personID = new HashMap<>();
+                                    personID.put("id", person.getId());
+                                    documentReference.update(personID);
+
+                                    Log.e("Offline Data Sync", personID + " synced");
+                                }
+                            });
+                }
+            }
+        });
+        new ConsentOfflineTask().loadAll(new ConsentOfflineTask.OnLoadAll() {
+            @Override
+            public void onLoadAll(List<Consent> consentList) {
+                for (int i = 0; i < consentList.size(); i++) {
+                    final Consent consent = consentList.get(i);
+
+                    try {
+                        InputStream is = new FileInputStream(consent.getConsent());
+
+                        final String consentPath = AppConstants.STORAGE_CONSENT_URL.replace("{qrcode}",  consent.getQrcode()) + consent.getCreated() + "_" + consent.getQrcode() + ".png";
+                        StorageReference consentRef = AppController.getInstance().storageRootRef.child(consentPath);
+
+                        UploadTask uploadTask = consentRef.putStream(is);
+                        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                                consent.setConsent(downloadUrl.toString());
+                            }
+                        });
+                    } catch (FileNotFoundException e) {
+                        new ConsentOfflineTask().delete(consent, null);
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -99,29 +154,5 @@ public class NetworkMonitorService extends Service implements Connectable, Disco
                 .setContentText("Network Disconnected").build();
 
         mNotificationManager.notify(AppConstants.NOTIF_NETWORK, notification);
-    }
-
-    @Override
-    public void onLoadAll(List<Person> personList) {
-        Log.e("Offline Data Sync", "Sync started");
-
-        for (int i = 0; i < personList.size(); i++) {
-            final Person person = personList.get(i);
-            AppController.getInstance().firebaseFirestore.collection("persons")
-                    .add(personList.get(i))
-                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                        @Override
-                        public void onSuccess(final DocumentReference documentReference) {
-                            new PersonOfflineTask().delete(person, null);
-
-                            person.setId(documentReference.getId());
-                            Map<String, Object> personID = new HashMap<>();
-                            personID.put("id", person.getId());
-                            documentReference.update(personID);
-
-                            Log.e("Offline Data Sync", personID + " synced");
-                        }
-                    });
-        }
     }
 }

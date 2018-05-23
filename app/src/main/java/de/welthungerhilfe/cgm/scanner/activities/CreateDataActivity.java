@@ -20,7 +20,6 @@
 package de.welthungerhilfe.cgm.scanner.activities;
 
 import android.app.SearchManager;
-import android.arch.persistence.room.ColumnInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -54,9 +53,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,15 +67,14 @@ import de.welthungerhilfe.cgm.scanner.fragments.MeasuresDataFragment;
 import de.welthungerhilfe.cgm.scanner.fragments.PersonalDataFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
-import de.welthungerhilfe.cgm.scanner.helper.offline.DbConstants;
-import de.welthungerhilfe.cgm.scanner.helper.tasks.PersonOfflineTask;
-import de.welthungerhilfe.cgm.scanner.helper.tasks.SaveOfflinePersonTask;
+import de.welthungerhilfe.cgm.scanner.models.task.ConsentOfflineTask;
+import de.welthungerhilfe.cgm.scanner.models.task.JoinOfflineTask;
+import de.welthungerhilfe.cgm.scanner.models.task.PersonOfflineTask;
 import de.welthungerhilfe.cgm.scanner.models.Consent;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.models.PersonConsent;
-import de.welthungerhilfe.cgm.scanner.models.QRNumber;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -339,6 +334,20 @@ public class CreateDataActivity extends BaseActivity {
                 hideProgressDialog();
             }
         }, person);
+
+        Consent consent = new Consent();
+        consent.setId("offline_" + Utils.getSaltString(20));
+
+        if (qrCode != null)
+            consent.setQrcode(qrCode);
+        else
+            consent.setQrcode(person.getQrcode());
+
+        consent.setCreated(System.currentTimeMillis());
+        consent.setConsent(qrPath);
+
+        new ConsentOfflineTask().insertAll(null, consent);
+        new JoinOfflineTask().joinPersonConsent(new PersonConsent(person.getId(), consent.getId()), null);
     }
 
     private void saveQrOffline() {
@@ -346,7 +355,8 @@ public class CreateDataActivity extends BaseActivity {
         qrPath = BitmapUtils.saveBitmap(qrSource, timestamp);
 
         if (person != null) {
-            final Consent consent = new Consent();
+            Consent consent = new Consent();
+            consent.setId("offline_" + Utils.getSaltString(20));
             consent.setCreated(timestamp);
             consent.setConsent(qrPath);
             if (qrCode != null)

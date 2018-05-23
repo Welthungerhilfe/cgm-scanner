@@ -32,7 +32,7 @@ import de.welthungerhilfe.cgm.scanner.models.PersonConsent;
 @Dao
 public interface PersonConsentDao {
     @Insert
-    void insert(PersonConsent personConsent);
+    void insert(PersonConsent... personConsent);
 
     @Query(DbConstants.QUERY_CONSENTS_BY_PERSON)
     List<Consent> getConsentsByPerson(final String personId);

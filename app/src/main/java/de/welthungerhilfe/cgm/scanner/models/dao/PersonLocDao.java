@@ -34,7 +34,7 @@ import de.welthungerhilfe.cgm.scanner.models.PersonMeasure;
 @Dao
 public interface PersonLocDao {
     @Insert
-    void insert(PersonLoc personLoc);
+    void insert(PersonLoc... personLoc);
 
     @Query(DbConstants.QUERY_LOCS_BY_PERSON)
     List<Loc> getLocsByPerson(final String personId);

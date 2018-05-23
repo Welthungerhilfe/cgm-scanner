@@ -1,4 +1,4 @@
-package de.welthungerhilfe.cgm.scanner.helper.tasks;
+package de.welthungerhilfe.cgm.scanner.models.task;
 
 import android.os.AsyncTask;
 

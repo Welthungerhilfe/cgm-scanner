@@ -17,8 +17,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerDataAdapter;
-import de.welthungerhilfe.cgm.scanner.helper.tasks.LoadOfflinePersonTask;
-import de.welthungerhilfe.cgm.scanner.helper.tasks.PersonOfflineTask;
+import de.welthungerhilfe.cgm.scanner.models.task.PersonOfflineTask;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 
 /**
