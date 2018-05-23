@@ -103,7 +103,7 @@ public class LoginActivity extends BaseActivity {
         super.onStart();
 
         if (AppController.getInstance().firebaseUser != null && session.isSigned()) {
-            Crashlytics.setUserName(AppController.getInstance().firebaseUser.getEmail());
+            Crashlytics.setUserIdentifier(AppController.getInstance().firebaseUser.getEmail());
 
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
@@ -157,7 +157,6 @@ public class LoginActivity extends BaseActivity {
         if (validate()) {
             String email = editUser.getText().toString();
             String password = editPassword.getText().toString();
-            Crashlytics.setUserIdentifier(email);
 
             showProgressDialog();
 
@@ -168,7 +167,7 @@ public class LoginActivity extends BaseActivity {
                             if (task.isSuccessful()) {
                                 session.setSigned(true);
                                 AppController.getInstance().prepareFirebaseUser();
-                                Crashlytics.setUserName(AppController.getInstance().firebaseUser.getEmail());
+                                Crashlytics.setUserIdentifier(AppController.getInstance().firebaseUser.getEmail());
                                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             } else {
                                 Toast.makeText(LoginActivity.this, "Login Failed", Toast.LENGTH_LONG).show();

@@ -10,6 +10,7 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.helper.offline.DbConstants;
 import de.welthungerhilfe.cgm.scanner.models.Consent;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
+import de.welthungerhilfe.cgm.scanner.models.Person;
 
 /**
  * Child Growth Monitor - quick and accurate data on malnutrition
@@ -32,6 +33,12 @@ import de.welthungerhilfe.cgm.scanner.models.Measure;
 
 @Dao
 public interface ConsentDao {
+    @Query("SELECT * FROM " + DbConstants.TABLE_CONSENTS)
+    List<Consent> getAll();
+
+    @Query("SELECT * FROM " + DbConstants.TABLE_CONSENTS + " WHERE id =:consentId")
+    Consent getById(String consentId);
+
     @Insert
     void insertAll(Consent... consents);
 

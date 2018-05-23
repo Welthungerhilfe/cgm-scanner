@@ -71,6 +71,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     private String TAG = this.getClass().getSimpleName();
 
+    private boolean initialized = false;
+
     private final int REQUEST_LOCATION = 0x1000;
 
     public Context context;
@@ -100,6 +102,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_personal, container, false);
+
+        initialized = true;
 
         view.findViewById(R.id.rytConsentDetail).setOnClickListener(this);
         /*
@@ -141,7 +145,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void initUI() {
-        if (context == null)
+        if (context == null || !initialized)
             return;
 
         if (((CreateDataActivity)context).person != null) {

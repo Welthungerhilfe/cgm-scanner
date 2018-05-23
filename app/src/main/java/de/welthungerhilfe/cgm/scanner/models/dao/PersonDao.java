@@ -33,10 +33,13 @@ import de.welthungerhilfe.cgm.scanner.models.Person;
 public interface PersonDao {
 
     @Query("SELECT * FROM " + DbConstants.TABLE_PERSON)
-    List<Person> getAll();
+    List<Person> loadAll();
 
-    @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE " + DbConstants.ID + " =:personId")
+    @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE id =:personId")
     Person getById(String personId);
+
+    @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE qrcode =:qrCode")
+    Person getByQrCode(String qrCode);
 
     @Insert
     void insertAll(Person... persons);

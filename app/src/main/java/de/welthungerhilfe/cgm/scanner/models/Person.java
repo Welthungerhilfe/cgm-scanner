@@ -40,21 +40,13 @@ public class Person implements Serializable {
     @PrimaryKey
     @NonNull
     private String id;  // firebase or database id
-    @ColumnInfo(name = DbConstants.NAME)
     private String name;
-    @ColumnInfo(name = DbConstants.SURNAME)
     private String surname;
-    @ColumnInfo(name = DbConstants.BIRTHDAY)
     private long birthday;
-    @ColumnInfo(name = DbConstants.SEX)
     private String sex;  // female, male, other
-    @ColumnInfo(name = DbConstants.GUARDIAN)
     private String guardian;
-    @ColumnInfo(name = DbConstants.AGE_ESTIMATED)
     private boolean isAgeEstimated;
-    @ColumnInfo(name = DbConstants.QRCODE)
     private String qrcode;
-    @ColumnInfo(name = DbConstants.CREATED)
     private long created;
 
     @Ignore

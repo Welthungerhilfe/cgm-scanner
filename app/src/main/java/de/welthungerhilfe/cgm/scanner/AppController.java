@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.os.StrictMode;
 import android.support.v4.app.NotificationCompat;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -80,10 +81,12 @@ public class AppController extends Application {
         storageRootRef = firebaseStorage.getReference();
 
         firebaseFirestore = FirebaseFirestore.getInstance();
+        /*
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
                 .build();
         firebaseFirestore.setFirestoreSettings(settings);
+        */
 
         offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE)
                 .fallbackToDestructiveMigration()

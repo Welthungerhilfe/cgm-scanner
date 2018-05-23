@@ -39,7 +39,7 @@ public class LoadOfflinePersonTask extends AsyncTask<Void, Void, List<Person>> {
 
     @Override
     protected List<Person> doInBackground(Void... voids) {
-        List<Person> personList = AppController.getInstance().offlineDb.personDao().getAll();
+        List<Person> personList = AppController.getInstance().offlineDb.personDao().loadAll();
 
         return personList;
     }

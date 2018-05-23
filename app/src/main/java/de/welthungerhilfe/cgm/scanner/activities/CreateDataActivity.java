@@ -72,6 +72,7 @@ import de.welthungerhilfe.cgm.scanner.fragments.PersonalDataFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.helper.offline.DbConstants;
+import de.welthungerhilfe.cgm.scanner.helper.tasks.PersonOfflineTask;
 import de.welthungerhilfe.cgm.scanner.helper.tasks.SaveOfflinePersonTask;
 import de.welthungerhilfe.cgm.scanner.models.Consent;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
@@ -203,6 +204,7 @@ public class CreateDataActivity extends BaseActivity {
             }
         }
 
+        person.setId("offline_" + Utils.getSaltString(20));
         person.setName(name);
         person.setSurname(surName);
         person.setLastLocation(loc);
@@ -269,64 +271,74 @@ public class CreateDataActivity extends BaseActivity {
     private void createPerson() {
         showProgressDialog();
 
-        AppController.getInstance().firebaseFirestore.collection("persons")
-                .add(person)
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        hideProgressDialog();
-                        Toast.makeText(CreateDataActivity.this, "Person create failed", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(final DocumentReference documentReference) {
-                        person.setId(documentReference.getId());
-                        Map<String, Object> personID = new HashMap<>();
-                        personID.put("id", person.getId());
-                        documentReference.update(personID);
-
-                        final Consent consent = new Consent();
-
-                        if (qrCode != null)
-                            consent.setQrcode(qrCode);
-                        else
-                            consent.setQrcode(person.getQrcode());
-
-                        // because we uploaded the consent to storage before there was a database
-                        // reference we need to recover the timestamp from the filename
-                        // in order to use the same timestamp later on to check for a thumbnail
-                        if (qrPath == "offline") {
-                            consent.setCreated(System.currentTimeMillis());
-                        } else {
-                            String createdString = qrPath.split("_" + consent.getQrcode()+".png")[0].split("data%2Fperson%2F"+qrCode+"%2F")[1];
-                            Log.v(TAG,"createdString: "+createdString);
-                            Long created = Long.parseLong(createdString);
-                            consent.setCreated(created);
+        if (Utils.isNetworkAvailable(this)) {
+            AppController.getInstance().firebaseFirestore.collection("persons")
+                    .add(person)
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            hideProgressDialog();
+                            //Toast.makeText(CreateDataActivity.this, "Person create failed", Toast.LENGTH_SHORT).show();
+                            createOfflinePerson();
                         }
+                    })
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(final DocumentReference documentReference) {
+                            person.setId(documentReference.getId());
+                            Map<String, Object> personID = new HashMap<>();
+                            personID.put("id", person.getId());
+                            documentReference.update(personID);
 
-                        consent.setConsent(qrPath);
+                            final Consent consent = new Consent();
 
-                        documentReference.collection("consents")
-                                .add(consent)
-                                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                    @Override
-                                    public void onSuccess(DocumentReference documentReference) {
-                                        consents.add(0, consent);
-                                    }
-                                });
+                            if (qrCode != null)
+                                consent.setQrcode(qrCode);
+                            else
+                                consent.setQrcode(person.getQrcode());
 
-                        // Start measuring
-                        //Intent intent =new Intent(CreateDataActivity.this, ScreenRecordActivity.class);
-                        Intent intent = new Intent(CreateDataActivity.this, RecorderActivity.class);
-                        intent.putExtra(AppConstants.EXTRA_PERSON, person);
-                        startActivity(intent);
-                    }
-                });
+                            // because we uploaded the consent to storage before there was a database
+                            // reference we need to recover the timestamp from the filename
+                            // in order to use the same timestamp later on to check for a thumbnail
+                            if (qrPath == "offline") {
+                                consent.setCreated(System.currentTimeMillis());
+                            } else {
+                                String createdString = qrPath.split("_" + consent.getQrcode()+".png")[0].split("data%2Fperson%2F"+qrCode+"%2F")[1];
+                                Log.v(TAG,"createdString: "+createdString);
+                                Long created = Long.parseLong(createdString);
+                                consent.setCreated(created);
+                            }
+
+                            consent.setConsent(qrPath);
+
+                            documentReference.collection("consents")
+                                    .add(consent)
+                                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                        @Override
+                                        public void onSuccess(DocumentReference documentReference) {
+                                            consents.add(0, consent);
+                                        }
+                                    });
+
+                            // Start measuring
+                            //Intent intent =new Intent(CreateDataActivity.this, ScreenRecordActivity.class);
+                            Intent intent = new Intent(CreateDataActivity.this, RecorderActivity.class);
+                            intent.putExtra(AppConstants.EXTRA_PERSON, person);
+                            startActivity(intent);
+                        }
+                    });
+        } else {
+            createOfflinePerson();
+        }
     }
 
     private void createOfflinePerson() {
-        AppController.getInstance().offlineDb.personDao().insertAll(person);
+        new PersonOfflineTask().insertAll(new PersonOfflineTask.OnComplete() {
+            @Override
+            public void onComplete() {
+                hideProgressDialog();
+            }
+        }, person);
     }
 
     private void saveQrOffline() {
@@ -369,27 +381,39 @@ public class CreateDataActivity extends BaseActivity {
     }
 
     private void checkQR() {
-        AppController.getInstance().firebaseFirestore.collection("persons")
-                .whereEqualTo("qrcode", qrCode)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        boolean exist = false;
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                person = document.toObject(Person.class);
-                                exist = true;
-                                loadMeasures();
-                                loadConsents();
-                                break;
+        if (Utils.isNetworkAvailable(this)) {
+            AppController.getInstance().firebaseFirestore.collection("persons")
+                    .whereEqualTo("qrcode", qrCode)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (DocumentSnapshot document : task.getResult()) {
+                                    person = document.toObject(Person.class);
+                                    loadMeasures();
+                                    loadConsents();
+                                    break;
+                                }
                             }
-                        }
-                        if (exist) {
+
                             personalFragment.initUI();
                         }
+                    });
+        } else {
+            new PersonOfflineTask().getByQrCode(qrCode, new PersonOfflineTask.OnSearch() {
+                @Override
+                public void onSearch(Person p) {
+                    person = p;
+                    if (person != null) {
+                        loadMeasures();
+                        loadConsents();
                     }
-                });
+
+                    personalFragment.initUI();
+                }
+            });
+        }
     }
 
     private void uploadQR() {

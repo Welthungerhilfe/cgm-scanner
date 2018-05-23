@@ -6,6 +6,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -17,6 +18,7 @@ import butterknife.ButterKnife;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerDataAdapter;
 import de.welthungerhilfe.cgm.scanner.helper.tasks.LoadOfflinePersonTask;
+import de.welthungerhilfe.cgm.scanner.helper.tasks.PersonOfflineTask;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 
 /**
@@ -38,7 +40,7 @@ import de.welthungerhilfe.cgm.scanner.models.Person;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class OfflineDataActivity extends BaseActivity implements LoadOfflinePersonTask.OnOfflineLoaded {
+public class OfflineDataActivity extends BaseActivity implements RecyclerDataAdapter.OnPersonDetail, PersonOfflineTask.OnLoadAll {
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.refreshLayout)
@@ -70,15 +72,28 @@ public class OfflineDataActivity extends BaseActivity implements LoadOfflinePers
 
     private void loadData() {
         adapterData = new RecyclerDataAdapter(this, new ArrayList<Person>());
-        //adapterData.setPersonDetailListener(this);
+        adapterData.setPersonDetailListener(this);
         recyclerData.setAdapter(adapterData);
         recyclerData.setLayoutManager(new LinearLayoutManager(OfflineDataActivity.this));
 
-        new LoadOfflinePersonTask(this).execute();
+        new PersonOfflineTask().loadAll(this);
     }
 
     @Override
-    public void onOfflineLoaded(List<Person> personList) {
+    public void onPersonDetail(Person person) {
+        int i = 0;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        if (menuItem.getItemId() == android.R.id.home) {
+            finish();
+        }
+        return super.onOptionsItemSelected(menuItem);
+    }
+
+    @Override
+    public void onLoadAll(List<Person> personList) {
         if (personList.size() > 0) {
             for (int i = 0; i < personList.size(); i++) {
                 adapterData.addPerson(personList.get(i));

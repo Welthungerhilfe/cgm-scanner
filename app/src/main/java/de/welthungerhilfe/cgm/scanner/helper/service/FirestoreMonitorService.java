@@ -13,6 +13,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -83,60 +84,37 @@ public class FirestoreMonitorService extends Service {
 
                     @Override
                     public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-                        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                        int icon = R.drawable.logo;
-                        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
-                        PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        final Gson gson = new Gson();
 
-                        NotificationCompat.Builder builder = new NotificationCompat.Builder(FirestoreMonitorService.this);
-
-                        Gson gson = new Gson();
-
-                        List<DocumentChange> changeList = documentSnapshots.getDocumentChanges();
+                        final List<DocumentChange> changeList = documentSnapshots.getDocumentChanges();
                         for (int i = 0; i < changeList.size(); i++) {
-                            Log.e("FIRESTORE_UPDATES", gson.toJson(changeList.get(i).getDocument().getData()));
+                            DocumentSnapshot snapshot = changeList.get(i).getDocument();
+                            snapshot.getReference().collection("consents")
+                                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
+
+                                        @Override
+                                        public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+                                            List<DocumentChange> changeList = documentSnapshots.getDocumentChanges();
+                                            for (int i = 0; i < changeList.size(); i++) {
+                                                Log.e("CONSENTS_UPDATES", gson.toJson(changeList.get(i).getDocument().getData()));
+                                            }
+                                        }
+                                    });
+
+                            snapshot.getReference().collection("measures")
+                                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
+
+                                        @Override
+                                        public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+                                            List<DocumentChange> changeList = documentSnapshots.getDocumentChanges();
+                                            for (int i = 0; i < changeList.size(); i++) {
+                                                Log.e("MEASURE_UPDATES", gson.toJson(changeList.get(i).getDocument().getData()));
+                                            }
+                                        }
+                                    });
+
+                            Log.e("PERSON_UPDATES", gson.toJson(changeList.get(i).getDocument().getData()));
                         }
-
-                        Notification notification = builder.setContentIntent(contentIntent)
-                                .setSmallIcon(icon)
-                                .setTicker("Firebase" + Math.random())
-                                .setWhen(System.currentTimeMillis())
-                                .setAutoCancel(true)
-                                .setContentTitle("Firestore Updated")
-                                .setContentText(documentSnapshots.getMetadata().toString()).build();
-
-                        mNotificationManager.notify(AppConstants.NOTIF_FIRESTORE, notification);
-                    }
-                });
-
-        AppController.getInstance().firebaseFirestore.collection("consents")
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-
-                    @Override
-                    public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-                        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                        int icon = R.drawable.logo;
-                        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
-                        PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-                        NotificationCompat.Builder builder = new NotificationCompat.Builder(FirestoreMonitorService.this);
-
-                        Gson gson = new Gson();
-
-                        List<DocumentChange> changeList = documentSnapshots.getDocumentChanges();
-                        for (int i = 0; i < changeList.size(); i++) {
-                            Log.e("FIRESTORE_UPDATES", gson.toJson(changeList.get(i).getDocument().getData()));
-                        }
-
-                        Notification notification = builder.setContentIntent(contentIntent)
-                                .setSmallIcon(icon)
-                                .setTicker("Firebase" + Math.random())
-                                .setWhen(System.currentTimeMillis())
-                                .setAutoCancel(true)
-                                .setContentTitle("Firestore Updated")
-                                .setContentText(documentSnapshots.getMetadata().toString()).build();
-
-                        mNotificationManager.notify(AppConstants.NOTIF_FIRESTORE, notification);
                     }
                 });
     }
