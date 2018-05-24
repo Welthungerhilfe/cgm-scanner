@@ -134,7 +134,7 @@ public class PersonOfflineTask {
 
         @Override
         protected Boolean doInBackground(Person... persons) {
-            AppController.getInstance().offlineDb.personDao().insertAll(persons);
+            AppController.getInstance().offlineDb.personDao().update(persons);
 
             return true;
         }

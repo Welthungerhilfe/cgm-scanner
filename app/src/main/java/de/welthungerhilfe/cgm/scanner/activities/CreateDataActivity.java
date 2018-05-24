@@ -212,6 +212,7 @@ public class CreateDataActivity extends BaseActivity {
         showProgressDialog();
 
         final Measure measure = new Measure();
+        measure.setId("offline_" + Utils.getSaltString(20));
         long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
         measure.setAge(age);
         measure.setHeight(height);
@@ -237,6 +238,13 @@ public class CreateDataActivity extends BaseActivity {
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
+                        measure.setId(documentReference.getId());
+                        measure.setTimestamp(Utils.getUniversalTimestamp());
+                        Map<String, Object> measureID = new HashMap<>();
+                        measureID.put("id", person.getId());
+                        measureID.put("timestamp", person.getTimestamp());
+                        documentReference.update(measureID);
+
                         personalFragment.initUI();
                         measureFragment.addMeasure(measure);
                         growthFragment.setChartData();
@@ -299,6 +307,7 @@ public class CreateDataActivity extends BaseActivity {
                                 consent.setTimestamp(created);
                             }
                             */
+                            consent.setId("offline_" + Utils.getSaltString(20));
                             consent.setTimestamp(Utils.getUniversalTimestamp());
                             consent.setConsent(qrPath);
 
@@ -314,6 +323,13 @@ public class CreateDataActivity extends BaseActivity {
                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                             @Override
                                             public void onSuccess(DocumentReference documentReference) {
+                                                consent.setId(documentReference.getId());
+                                                consent.setTimestamp(Utils.getUniversalTimestamp());
+                                                Map<String, Object> consentID = new HashMap<>();
+                                                consentID.put("id", consent.getId());
+                                                consentID.put("timestamp", consent.getTimestamp());
+                                                documentReference.update(consentID);
+
                                                 consents.add(0, consent);
                                             }
                                         });
@@ -471,6 +487,7 @@ public class CreateDataActivity extends BaseActivity {
 
                     if (person != null) {
                         final Consent consent = new Consent();
+                        consent.setId("offline_" + Utils.getSaltString(20));
                         consent.setTimestamp(Utils.getUniversalTimestamp());
                         consent.setConsent(qrPath);
                         if (qrCode != null)
@@ -484,6 +501,13 @@ public class CreateDataActivity extends BaseActivity {
                                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                     @Override
                                     public void onSuccess(DocumentReference documentReference) {
+                                        consent.setId(documentReference.getId());
+                                        consent.setTimestamp(Utils.getUniversalTimestamp());
+                                        Map<String, Object> consentID = new HashMap<>();
+                                        consentID.put("id", consent.getId());
+                                        consentID.put("timestamp", consent.getTimestamp());
+                                        documentReference.update(consentID);
+
                                         consents.add(0, consent);
                                     }
                                 });
