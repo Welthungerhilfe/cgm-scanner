@@ -238,7 +238,7 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
             ArrayList<Person> tempList = new ArrayList<>();
             for (int i = 0; i < personList.size(); i++) {
                 if (sortType == 1) {
-                    if (personList.get(i).getCreated() <= endDate && personList.get(i).getCreated() >= startDate)
+                    if (personList.get(i).getTimestamp() <= endDate && personList.get(i).getTimestamp() >= startDate)
                         tempList.add(personList.get(i));
                 } else if (sortType == 2) {
                     if (currentLoc == null || personList.get(i).getLastLocation() == null) {
@@ -261,7 +261,7 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
                     @Override
                     public int compare(Person person, Person t1) {
                         if (sortType == 1) {   // Sort by created date
-                            return person.getCreated() > t1.getCreated() ? 1 : person.getCreated() < t1.getCreated() ? -1 : 0;
+                            return person.getTimestamp() > t1.getTimestamp() ? 1 : person.getTimestamp() < t1.getTimestamp() ? -1 : 0;
                         } else if (sortType == 2) {   // Sort by distance from me
                             if (currentLoc == null || person.getLastLocation() == null)
                                 return  0;

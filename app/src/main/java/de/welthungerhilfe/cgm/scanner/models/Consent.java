@@ -35,22 +35,19 @@ public class Consent {
     @PrimaryKey
     @NonNull
     private String id;
-    @ColumnInfo(name = DbConstants.CONSENT)
     private String consent;
-    @ColumnInfo(name = DbConstants.QRCODE)
     private String qrcode;
-    @ColumnInfo(name = DbConstants.CREATED)
-    private long created;
+    private long timestamp;
 
     public Consent() {
 
     }
 
-    public Consent(String id, String consent, String qrcode, long created) {
+    public Consent(String id, String consent, String qrcode, long timestamp) {
         this.id = id;
         this.consent = consent;
         this.qrcode = qrcode;
-        this.created = created;
+        this.timestamp = timestamp;
     }
 
     @NonNull
@@ -60,14 +57,6 @@ public class Consent {
 
     public void setId(@NonNull String id) {
         this.id = id;
-    }
-
-    public long getCreated() {
-        return created;
-    }
-
-    public void setCreated(long created) {
-        this.created = created;
     }
 
     public String getConsent() {
@@ -84,5 +73,13 @@ public class Consent {
 
     public void setQrcode(String qrcode) {
         this.qrcode = qrcode;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

@@ -47,7 +47,7 @@ public class Person implements Serializable {
     private String guardian;
     private boolean isAgeEstimated;
     private String qrcode;
-    private long created;
+    private long timestamp;
 
     @Ignore
     private Loc lastLocation;
@@ -58,7 +58,7 @@ public class Person implements Serializable {
 
     }
 
-    public Person(@NonNull String id, String name, String surname, long birthday, String sex, String guardian, boolean isAgeEstimated, String qrcode, long created) {
+    public Person(@NonNull String id, String name, String surname, long birthday, String sex, String guardian, boolean isAgeEstimated, String qrcode, long timestamp) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -67,7 +67,7 @@ public class Person implements Serializable {
         this.guardian = guardian;
         this.isAgeEstimated = isAgeEstimated;
         this.qrcode = qrcode;
-        this.created = created;
+        this.timestamp = timestamp;
     }
 
     @NonNull
@@ -119,14 +119,6 @@ public class Person implements Serializable {
         this.guardian = guardian;
     }
 
-    public long getCreated() {
-        return created;
-    }
-
-    public void setCreated(long created) {
-        this.created = created;
-    }
-
     public String getQrcode() {
         return qrcode;
     }
@@ -157,5 +149,13 @@ public class Person implements Serializable {
 
     public void setAgeEstimated(boolean ageEstimated) {
         isAgeEstimated = ageEstimated;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

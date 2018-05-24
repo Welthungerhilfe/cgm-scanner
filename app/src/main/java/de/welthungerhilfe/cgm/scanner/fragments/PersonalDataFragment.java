@@ -149,7 +149,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             return;
 
         if (((CreateDataActivity)context).person != null) {
-            txtDate.setText(Utils.beautifyDate(((CreateDataActivity)context).person.getCreated()));
+            txtDate.setText(Utils.beautifyDate(((CreateDataActivity)context).person.getTimestamp()));
 
             editName.setText(((CreateDataActivity)context).person.getName());
             editPrename.setText(((CreateDataActivity)context).person.getSurname());
@@ -319,7 +319,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         } else if (((CreateDataActivity)context).consents.size() > 0) {
             final String qrUrl = ((CreateDataActivity)context).consents.get(0).getConsent();
 
-            long created = ((CreateDataActivity)context).consents.get(0).getCreated();
+            long created = ((CreateDataActivity)context).consents.get(0).getTimestamp();
             String qrcode = ((CreateDataActivity)context).consents.get(0).getQrcode();
             String thumbUrl = "/data/person/"+qrcode+"/"+created+"_"+qrcode+".png_thumb.png";
             Log.v(TAG,"thumbUrl: "+thumbUrl);

@@ -4,10 +4,12 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.helper.offline.DbConstants;
+import de.welthungerhilfe.cgm.scanner.models.Consent;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 
@@ -32,6 +34,18 @@ import de.welthungerhilfe.cgm.scanner.models.Person;
 
 @Dao
 public interface MeasureDao {
+    @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE)
+    List<Measure> loadAll();
+
+    @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE id =:measureId")
+    Measure getById(String measureId);
+
+    @Query("UPDATE " + DbConstants.TABLE_MEASURE + " SET id =:onlineId WHERE id =:offlineId")
+    void syncMeasureId(String offlineId, String onlineId);
+
+    @Update
+    void update(Measure... measures);
+
     @Insert
     void insertAll(Measure... measures);
 

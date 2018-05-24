@@ -38,24 +38,15 @@ public class Measure implements Serializable {
     @PrimaryKey
     @NonNull
     private String id;
-    @ColumnInfo(name = DbConstants.DATE)
-    private long date;
-    @ColumnInfo(name = DbConstants.TYPE)
     private String type;
-    @ColumnInfo(name = DbConstants.AGE)
     private long age; // age from birthday in days
-    @ColumnInfo(name = DbConstants.HEIGHT)
     private float height;
-    @ColumnInfo(name = DbConstants.WEIGHT)
     private float weight;
-    @ColumnInfo(name = DbConstants.MUAC)
     private float muac;
-    @ColumnInfo(name = DbConstants.HEAD_CIRCUMFERENCE)
     private float headCircumference;
-    @ColumnInfo(name = DbConstants.ARTIFACT)
     private String artifact;
-    @ColumnInfo(name = DbConstants.VISIBLE)
     private boolean visible;
+    private long timestamp;
 
     @Ignore
     private Loc location;
@@ -64,9 +55,8 @@ public class Measure implements Serializable {
 
     }
 
-    public Measure(String id, long date, String type, long age, float height, float weight, float muac, float headCircumference, String artifact, boolean visible) {
+    public Measure(String id, String type, long age, float height, float weight, float muac, float headCircumference, String artifact, boolean visible, long timestamp) {
         this.id = id;
-        this.date = date;
         this.type = type;
         this.age = age;
         this.height = height;
@@ -75,6 +65,7 @@ public class Measure implements Serializable {
         this.headCircumference = headCircumference;
         this.artifact = artifact;
         this.visible = visible;
+        this.timestamp = timestamp;
     }
 
     @NonNull
@@ -84,14 +75,6 @@ public class Measure implements Serializable {
 
     public void setId(@NonNull String id) {
         this.id = id;
-    }
-
-    public long getDate() {
-        return date;
-    }
-
-    public void setDate(long date) {
-        this.date = date;
     }
 
     public String getType() {
@@ -164,5 +147,13 @@ public class Measure implements Serializable {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

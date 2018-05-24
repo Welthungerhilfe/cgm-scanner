@@ -45,6 +45,8 @@ public class PersonOfflineTask {
 
     private OnSearch searchQr;
 
+    private OnComplete completeUpdate;
+
     private OnComplete completeInsert;
 
     private OnComplete completeDelete;
@@ -65,6 +67,12 @@ public class PersonOfflineTask {
         searchQr = s;
 
         new GetByQrCodeTask().execute(qr);
+    }
+
+    public void update(OnComplete c, Person... persons) {
+        completeUpdate = c;
+
+        new UpdateTask().execute(persons);
     }
 
     public void insertAll(OnComplete c, Person... persons) {
@@ -119,6 +127,22 @@ public class PersonOfflineTask {
         protected void onPostExecute(Person person) {
             if (searchQr != null)
                 searchQr.onSearch(person);
+        }
+    }
+
+    private class UpdateTask extends AsyncTask<Person, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Person... persons) {
+            AppController.getInstance().offlineDb.personDao().insertAll(persons);
+
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if (completeInsert != null)
+                completeInsert.onComplete();
         }
     }
 

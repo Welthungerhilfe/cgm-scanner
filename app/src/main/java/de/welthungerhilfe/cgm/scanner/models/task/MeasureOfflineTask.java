@@ -6,7 +6,7 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.models.Consent;
-import de.welthungerhilfe.cgm.scanner.models.Person;
+import de.welthungerhilfe.cgm.scanner.models.Measure;
 
 /**
  * Child Growth Monitor - quick and accurate data on malnutrition
@@ -27,13 +27,13 @@ import de.welthungerhilfe.cgm.scanner.models.Person;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class ConsentOfflineTask {
+public class MeasureOfflineTask {
     public interface OnLoadAll {
-        void onLoadAll(List<Consent> consentList);
+        void onLoadAll(List<Measure> measureList);
     }
 
     public interface OnSearch {
-        void onSearch(Consent consent);
+        void onSearch(Measure measure);
     }
 
     public interface OnComplete {
@@ -44,13 +44,11 @@ public class ConsentOfflineTask {
 
     private OnSearch searchId;
 
-    private OnLoadAll searchQr;
-
-    private OnComplete completeUpdate;
-
     private OnComplete completeInsert;
 
     private OnComplete completeDelete;
+
+    private OnComplete completeUpdate;
 
     public void loadAll(OnLoadAll l) {
         loadAll = l;
@@ -64,78 +62,58 @@ public class ConsentOfflineTask {
         new GetByIdTask().execute(id);
     }
 
-    public void getByQrCode(String qr, OnLoadAll s) {
-        searchQr = s;
-
-        new GetByQrCodeTask().execute(qr);
-    }
-
-    public void update (OnComplete c, Consent... consents) {
+    public void update(OnComplete c, Measure... measures) {
         completeUpdate = c;
 
-        new UpdateTask().execute(consents);
+        new UpdateTask().execute(measures);
     }
 
-    public void insertAll(OnComplete c, Consent... consents) {
+    public void insertAll(OnComplete c, Measure... measures) {
         completeInsert = c;
 
-        new InsertAllTask().execute(consents);
+        new InsertAllTask().execute(measures);
     }
 
-    public void delete(Consent consent, OnComplete c) {
+    public void delete(Measure measure, OnComplete c) {
         completeDelete = c;
 
-        new DeleteTask().execute(consent);
+        new DeleteTask().execute(measure);
     }
 
 
-    private class LoadAllTask extends AsyncTask<Void, Void, List<Consent>> {
+    private class LoadAllTask extends AsyncTask<Void, Void, List<Measure>> {
 
         @Override
-        protected List<Consent> doInBackground(Void... voids) {
-            return AppController.getInstance().offlineDb.consentDao().loadAll();
+        protected List<Measure> doInBackground(Void... voids) {
+            return AppController.getInstance().offlineDb.measureDao().loadAll();
         }
 
         @Override
-        protected void onPostExecute(List<Consent> consentList) {
+        protected void onPostExecute(List<Measure> measureList) {
             if (loadAll != null)
-                loadAll.onLoadAll(consentList);
+                loadAll.onLoadAll(measureList);
         }
     }
 
-    private class GetByIdTask extends AsyncTask<String, Void, Consent> {
+    private class GetByIdTask extends AsyncTask<String, Void, Measure> {
 
         @Override
-        protected Consent doInBackground(String... id) {
-            return AppController.getInstance().offlineDb.consentDao().getById(id[0]);
+        protected Measure doInBackground(String... id) {
+            return AppController.getInstance().offlineDb.measureDao().getById(id[0]);
         }
 
         @Override
-        protected void onPostExecute(Consent consent) {
+        protected void onPostExecute(Measure consent) {
             if (searchId != null)
                 searchId.onSearch(consent);
         }
     }
 
-    private class GetByQrCodeTask extends AsyncTask<String, Void, List<Consent>> {
+    private class UpdateTask extends AsyncTask<Measure, Void, Boolean> {
 
         @Override
-        protected List<Consent> doInBackground(String... qrCode) {
-            return AppController.getInstance().offlineDb.consentDao().getByQrCode(qrCode[0]);
-        }
-
-        @Override
-        protected void onPostExecute(List<Consent> consentList) {
-            if (searchQr != null)
-                searchQr.onLoadAll(consentList);
-        }
-    }
-
-    private class UpdateTask extends  AsyncTask<Consent, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(Consent... consents) {
-            AppController.getInstance().offlineDb.consentDao().update(consents);
+        protected Boolean doInBackground(Measure... measures) {
+            AppController.getInstance().offlineDb.measureDao().update(measures);
 
             return true;
         }
@@ -147,11 +125,11 @@ public class ConsentOfflineTask {
         }
     }
 
-    private class InsertAllTask extends AsyncTask<Consent, Void, Boolean> {
+    private class InsertAllTask extends AsyncTask<Measure, Void, Boolean> {
 
         @Override
-        protected Boolean doInBackground(Consent... consents) {
-            AppController.getInstance().offlineDb.consentDao().insertAll(consents);
+        protected Boolean doInBackground(Measure... measures) {
+            AppController.getInstance().offlineDb.measureDao().insertAll(measures);
 
             return true;
         }
@@ -163,11 +141,11 @@ public class ConsentOfflineTask {
         }
     }
 
-    private class DeleteTask extends AsyncTask<Consent, Void, Boolean> {
+    private class DeleteTask extends AsyncTask<Measure, Void, Boolean> {
 
         @Override
-        protected Boolean doInBackground(Consent... consent) {
-            AppController.getInstance().offlineDb.consentDao().delete(consent[0]);
+        protected Boolean doInBackground(Measure... measure) {
+            AppController.getInstance().offlineDb.measureDao().delete(measure[0]);
 
             return true;
         }

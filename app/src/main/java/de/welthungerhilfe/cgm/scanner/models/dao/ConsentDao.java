@@ -4,6 +4,7 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import java.util.List;
 
@@ -41,6 +42,12 @@ public interface ConsentDao {
 
     @Query("SELECT * FROM " + DbConstants.TABLE_CONSENTS + " WHERE qrcode =:qrCode")
     List<Consent> getByQrCode(String qrCode);
+
+    @Query("UPDATE " + DbConstants.TABLE_CONSENTS + " SET id =:onlineId WHERE id =:offlineId")
+    void syncConsentId(String offlineId, String onlineId);
+
+    @Update
+    void update(Consent... consents);
 
     @Insert
     void insertAll(Consent... consents);

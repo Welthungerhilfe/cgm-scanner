@@ -40,15 +40,17 @@ public class Loc implements Serializable {
     private double latitude;
     private double longitude;
     private String address;
+    private long timestamp;
 
     public Loc() {
     }
 
-    public Loc(@NonNull String id, double latitude, double longitude, String address) {
+    public Loc(@NonNull String id, double latitude, double longitude, String address, long timestamp) {
         this.id = id;
         this.latitude = latitude;
         this.longitude = longitude;
         this.address = address;
+        this.timestamp = timestamp;
     }
 
     @NonNull
@@ -82,5 +84,13 @@ public class Loc implements Serializable {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

@@ -4,6 +4,7 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import java.util.List;
 
@@ -40,6 +41,12 @@ public interface PersonDao {
 
     @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE qrcode =:qrCode")
     Person getByQrCode(String qrCode);
+
+    @Query("UPDATE " + DbConstants.TABLE_PERSON + " SET id =:onlineId WHERE id =:offlineId")
+    void syncPersonId(String offlineId, String onlineId);
+
+    @Update
+    void update(Person... persons);
 
     @Insert
     void insertAll(Person... persons);

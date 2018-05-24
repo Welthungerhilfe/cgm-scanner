@@ -35,9 +35,11 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.TimeZone;
 
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 
@@ -58,6 +60,13 @@ public class Utils {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    // Get UTC timestamp for offline database synchronization
+    public static long getUniversalTimestamp() {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+
+        return cal.getTimeInMillis();
     }
 
     public static String getSaltString(int length) {
