@@ -33,6 +33,12 @@
     </group>
     <group>
         <item
+            android:id="@+id/menuOnline"
+            android:icon="@drawable/home"
+            android:title="@string/menu_online" />
+    </group>
+    <group>
+        <item
             android:id="@+id/menuLogout"
             android:icon="@drawable/logout"
             android:title="@string/menu_logout"/>

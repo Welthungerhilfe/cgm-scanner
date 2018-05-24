@@ -79,6 +79,10 @@
             android:name=".activities.OfflineDataActivity"
             android:screenOrientation="portrait"/>
 
+        <activity
+            android:name=".activities.OnlineDataActivity"
+            android:screenOrientation="portrait"/>
+
         <activity android:name=".activities.QRScanActivity"
             android:screenOrientation="portrait"/>
 

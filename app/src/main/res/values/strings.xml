@@ -87,5 +87,6 @@
 
     <string name="menu_home">Home</string>
     <string name="menu_offline">Offline Data</string>
+    <string name="menu_online">Online Data</string>
     <string name="menu_logout">Log Out</string>
 </resources>
