@@ -241,8 +241,8 @@ public class CreateDataActivity extends BaseActivity {
                         measure.setId(documentReference.getId());
                         measure.setTimestamp(Utils.getUniversalTimestamp());
                         Map<String, Object> measureID = new HashMap<>();
-                        measureID.put("id", person.getId());
-                        measureID.put("timestamp", person.getTimestamp());
+                        measureID.put("id", measure.getId());
+                        measureID.put("timestamp", measure.getTimestamp());
                         documentReference.update(measureID);
 
                         personalFragment.initUI();
@@ -592,6 +592,13 @@ public class CreateDataActivity extends BaseActivity {
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
+                        measure.setId(documentReference.getId());
+                        measure.setTimestamp(Utils.getUniversalTimestamp());
+                        Map<String, Object> measureID = new HashMap<>();
+                        measureID.put("id", measure.getId());
+                        measureID.put("timestamp", measure.getTimestamp());
+                        documentReference.update(measureID);
+
                         personalFragment.initUI();
                         measureFragment.addMeasure(measure);
                         growthFragment.setChartData();

@@ -214,6 +214,7 @@ public class RecorderActivity extends Activity {
         if (mScanningWorkflowStep ==            AppConstants.CHOOSE_BABY_OR_INFANT)
         {
             measure = new Measure();
+            measure.setId("offline_" + Utils.getSaltString(20));
             measure.setTimestamp(mNowTime);
             BabyInfantChooserFragment babyInfantChooserFragment = new BabyInfantChooserFragment();
             ft.add(R.id.container, babyInfantChooserFragment);
