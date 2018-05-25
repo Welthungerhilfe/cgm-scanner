@@ -19,16 +19,48 @@
 
 package de.welthungerhilfe.cgm.scanner.models;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
+
 import java.io.Serializable;
+
+import de.welthungerhilfe.cgm.scanner.helper.offline.DbConstants;
 
 /**
  * Created by Emerald on 2/19/2018.
  */
 
+
+@Entity(tableName = DbConstants.TABLE_LOC)
 public class Loc implements Serializable {
+    @PrimaryKey
+    @NonNull
+    private String id;
     private double latitude;
     private double longitude;
     private String address;
+    private long timestamp;
+
+    public Loc() {
+    }
+
+    public Loc(@NonNull String id, double latitude, double longitude, String address, long timestamp) {
+        this.id = id;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.address = address;
+        this.timestamp = timestamp;
+    }
+
+    @NonNull
+    public String getId() {
+        return id;
+    }
+
+    public void setId(@NonNull String id) {
+        this.id = id;
+    }
 
     public double getLatitude() {
         return latitude;
@@ -52,5 +84,13 @@ public class Loc implements Serializable {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

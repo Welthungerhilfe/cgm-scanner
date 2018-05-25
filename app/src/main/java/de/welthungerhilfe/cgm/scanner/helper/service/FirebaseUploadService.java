@@ -207,5 +207,4 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
 
         return filter;
     }
-
 }

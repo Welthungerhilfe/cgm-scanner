@@ -19,21 +19,44 @@
 
 package de.welthungerhilfe.cgm.scanner.models;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
+
+import de.welthungerhilfe.cgm.scanner.helper.offline.DbConstants;
+
 /**
  * Created by Emerald on 2/25/2018.
  */
 
+@Entity(tableName = DbConstants.TABLE_CONSENTS)
 public class Consent {
-    private long created;
+    @PrimaryKey
+    @NonNull
+    private String id;
     private String consent;
     private String qrcode;
+    private long timestamp;
 
-    public long getCreated() {
-        return created;
+    public Consent() {
+
     }
 
-    public void setCreated(long created) {
-        this.created = created;
+    public Consent(String id, String consent, String qrcode, long timestamp) {
+        this.id = id;
+        this.consent = consent;
+        this.qrcode = qrcode;
+        this.timestamp = timestamp;
+    }
+
+    @NonNull
+    public String getId() {
+        return id;
+    }
+
+    public void setId(@NonNull String id) {
+        this.id = id;
     }
 
     public String getConsent() {
@@ -50,5 +73,13 @@ public class Consent {
 
     public void setQrcode(String qrcode) {
         this.qrcode = qrcode;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

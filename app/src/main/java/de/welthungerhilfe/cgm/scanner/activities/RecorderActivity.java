@@ -98,6 +98,7 @@ import de.welthungerhilfe.cgm.scanner.tango.CameraSurfaceRenderer;
 import de.welthungerhilfe.cgm.scanner.tango.ModelMatCalculator;
 import de.welthungerhilfe.cgm.scanner.tango.OverlaySurface;
 import de.welthungerhilfe.cgm.scanner.tango.TextureMovieEncoder;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.utils.ZipWriter;
 
 import static com.projecttango.tangosupport.TangoSupport.initialize;
@@ -213,7 +214,8 @@ public class RecorderActivity extends Activity {
         if (mScanningWorkflowStep ==            AppConstants.CHOOSE_BABY_OR_INFANT)
         {
             measure = new Measure();
-            measure.setDate(mNowTime);
+            measure.setId("offline_" + Utils.getSaltString(20));
+            measure.setTimestamp(mNowTime);
             BabyInfantChooserFragment babyInfantChooserFragment = new BabyInfantChooserFragment();
             ft.add(R.id.container, babyInfantChooserFragment);
             ft.commit();
@@ -388,7 +390,7 @@ public class RecorderActivity extends Activity {
 
             //TODO: set data and location async
             // location: https://developer.android.com/training/location/retrieve-current.html
-            measure.setDate(System.currentTimeMillis());
+            measure.setTimestamp(Utils.getUniversalTimestamp());
             long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
             measure.setAge(age);
             measure.setType(AppConstants.VAL_MEASURE_AUTO);

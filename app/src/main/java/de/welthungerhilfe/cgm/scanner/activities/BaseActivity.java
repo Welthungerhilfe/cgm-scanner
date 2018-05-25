@@ -20,15 +20,39 @@
 package de.welthungerhilfe.cgm.scanner.activities;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
 import android.support.v7.app.AppCompatActivity;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import com.novoda.merlin.Merlin;
+import com.novoda.merlin.registerable.connection.Connectable;
+import com.novoda.merlin.registerable.disconnection.Disconnectable;
+
 import de.welthungerhilfe.cgm.scanner.R;
 
 public class BaseActivity extends AppCompatActivity {
     private boolean running = false;
+    private Merlin merlin;
+
+    protected void onCreate(Bundle saveBundle) {
+        super.onCreate(saveBundle);
+    }
+
+    /*
+    @Override
+    protected void onResume() {
+        super.onResume();
+        merlin.bind();
+    }
+
+    @Override
+    protected void onPause() {
+        merlin.unbind();
+        super.onPause();
+    }
+    */
 
     @Override
     public void onStart() {

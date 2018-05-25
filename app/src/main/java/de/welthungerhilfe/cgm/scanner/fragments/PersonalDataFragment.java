@@ -71,6 +71,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     private String TAG = this.getClass().getSimpleName();
 
+    private boolean initialized = false;
+
     private final int REQUEST_LOCATION = 0x1000;
 
     public Context context;
@@ -100,6 +102,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_personal, container, false);
+
+        initialized = true;
 
         view.findViewById(R.id.rytConsentDetail).setOnClickListener(this);
         /*
@@ -141,11 +145,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void initUI() {
-        if (context == null)
+        if (context == null || !initialized)
             return;
 
         if (((CreateDataActivity)context).person != null) {
-            txtDate.setText(Utils.beautifyDate(((CreateDataActivity)context).person.getCreated()));
+            txtDate.setText(Utils.beautifyDate(((CreateDataActivity)context).person.getTimestamp()));
 
             editName.setText(((CreateDataActivity)context).person.getName());
             editPrename.setText(((CreateDataActivity)context).person.getSurname());
@@ -315,7 +319,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         } else if (((CreateDataActivity)context).consents.size() > 0) {
             final String qrUrl = ((CreateDataActivity)context).consents.get(0).getConsent();
 
-            long created = ((CreateDataActivity)context).consents.get(0).getCreated();
+            long created = ((CreateDataActivity)context).consents.get(0).getTimestamp();
             String qrcode = ((CreateDataActivity)context).consents.get(0).getQrcode();
             String thumbUrl = "/data/person/"+qrcode+"/"+created+"_"+qrcode+".png_thumb.png";
             Log.v(TAG,"thumbUrl: "+thumbUrl);
@@ -342,7 +346,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         Glide.with(context).load(qrUrl).into(imgConsent);
                 }
             });
-/*
+            /*
             String[] arr = qrUrl.split(".png");
 			// TODO: replace .png_ to _ here and in Firebase Functions
             String thumbUrlString = arr[0] + ".png_thumb.png";

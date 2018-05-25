@@ -11,7 +11,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -73,6 +75,14 @@
             android:name=".activities.MainActivity"
             android:screenOrientation="portrait"/>
 
+        <activity
+            android:name=".activities.OfflineDataActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity
+            android:name=".activities.OnlineDataActivity"
+            android:screenOrientation="portrait"/>
+
         <activity android:name=".activities.QRScanActivity"
             android:screenOrientation="portrait"/>
 
@@ -89,15 +99,6 @@
         <activity android:name=".activities.LocationDetectActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.BodySelectActivity"
-            android:screenOrientation="portrait" />
-
-        <activity android:name=".activities.BabyScanActivity"
-            android:screenOrientation="portrait" />
-
-        <activity android:name=".activities.InfantScanActivity"
-            android:screenOrientation="portrait" />
-
         <activity android:name=".activities.ImageDetailActivity"
             android:screenOrientation="portrait" />
 
@@ -107,6 +108,22 @@
         <service
             android:name=".helper.service.FirebaseUploadService"
             android:exported="false"/>
+
+        <service
+            android:name="com.novoda.merlin.service.MerlinService"
+            android:exported="false" />
+
+        <service
+            android:name=".helper.service.UploadOfflineService"
+            android:exported="false"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/service_upload_offline" />
+
+        <!-- Monitor Firestore and Network for Offline Sync -->
+
+        <service android:name=".helper.service.NetworkMonitorService" />
+
+        <service android:name=".helper.service.FirestoreMonitorService" />
 
     </application>
 

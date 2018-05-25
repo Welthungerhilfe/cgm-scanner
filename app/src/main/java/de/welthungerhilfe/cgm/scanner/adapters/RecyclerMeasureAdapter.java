@@ -72,7 +72,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
     public void onBindViewHolder(RecyclerMeasureAdapter.ViewHolder holder, int position) {
         Measure measure = measureList.get(position);
 
-        holder.editDate.setText(Utils.beautifyDate(measure.getDate()));
+        holder.editDate.setText(Utils.beautifyDate(measure.getTimestamp()));
         if (measure.getLocation() == null)
             holder.editLocation.setText("Location not available");
         else

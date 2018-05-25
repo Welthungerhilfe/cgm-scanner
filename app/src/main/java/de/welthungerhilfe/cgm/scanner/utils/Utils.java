@@ -18,10 +18,15 @@
 
 package de.welthungerhilfe.cgm.scanner.utils;
 
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -30,8 +35,11 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
+import java.util.TimeZone;
 
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 
@@ -46,6 +54,19 @@ public class Utils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    // Get UTC timestamp for offline database synchronization
+    public static long getUniversalTimestamp() {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+
+        return cal.getTimeInMillis();
     }
 
     public static String getSaltString(int length) {
@@ -102,5 +123,13 @@ public class Utils {
         loc2.setLongitude(l2.getLongitude());
 
         return loc1.distanceTo(loc2);
+    }
+
+    public static boolean checkActivityRunning(Context context, String myActivity) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> runningTaskInfo = manager.getRunningTasks(1);
+        ComponentName componentInfo = runningTaskInfo.get(0).topActivity;
+        Log.e("RUNNING", componentInfo.getShortClassName());
+        return componentInfo.getShortClassName().contains(myActivity);
     }
 }

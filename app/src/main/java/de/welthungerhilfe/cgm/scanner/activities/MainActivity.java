@@ -263,6 +263,12 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                 switch (menuItem.getItemId()) {
                     case R.id.menuHome:
                         break;
+                    case R.id.menuOffline:
+                        startActivity(new Intent(MainActivity.this, OfflineDataActivity.class));
+                        break;
+                    case R.id.menuOnline:
+                        startActivity(new Intent(MainActivity.this, OnlineDataActivity.class));
+                        break;
                     case R.id.menuLogout:
                         AppController.getInstance().firebaseAuth.signOut();
                         session.setSigned(false);

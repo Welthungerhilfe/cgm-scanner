@@ -19,16 +19,35 @@
 package de.welthungerhilfe.cgm.scanner;
 
 import android.app.Application;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.arch.persistence.room.Room;
+import android.content.Context;
+import android.content.Intent;
 import android.os.StrictMode;
+import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
+import com.amitshekhar.DebugDB;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.novoda.merlin.Merlin;
+import com.novoda.merlin.registerable.connection.Connectable;
+import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
+import de.welthungerhilfe.cgm.scanner.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.helper.offline.DbConstants;
+import de.welthungerhilfe.cgm.scanner.helper.offline.OfflineDatabase;
+import de.welthungerhilfe.cgm.scanner.helper.service.FirestoreMonitorService;
+import de.welthungerhilfe.cgm.scanner.helper.service.NetworkMonitorService;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AppController extends Application {
@@ -43,6 +62,10 @@ public class AppController extends Application {
     public StorageReference storageRootRef;
 
     public FirebaseFirestore firebaseFirestore;
+
+    public OfflineDatabase offlineDb;
+
+    public boolean networkStatus = false;
 
     @Override
     public void onCreate() {
@@ -60,6 +83,22 @@ public class AppController extends Application {
         storageRootRef = firebaseStorage.getReference();
 
         firebaseFirestore = FirebaseFirestore.getInstance();
+        /*
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        firebaseFirestore.setFirestoreSettings(settings);
+        */
+
+        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE)
+                .fallbackToDestructiveMigration()
+                .build();
+
+        startService(new Intent(this, NetworkMonitorService.class));
+
+        startService(new Intent(this, FirestoreMonitorService.class));
+
+        Log.e("Offline DB", DebugDB.getAddressLog());
 
         mInstance = this;
     }

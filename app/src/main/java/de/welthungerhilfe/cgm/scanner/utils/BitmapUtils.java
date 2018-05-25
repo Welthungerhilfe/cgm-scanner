@@ -37,20 +37,24 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
  */
 
 public class BitmapUtils {
-    public static void saveBitmap(byte[] imgData) {
+    public static String saveBitmap(byte[] imgData, long timestamp) {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "CGM Scanner");
         if (!mediaStorageDir.exists())
             mediaStorageDir.mkdir();
-        File pictureFile = new File(mediaStorageDir.getPath() + File.separator + "IMG_"+ System.currentTimeMillis() + ".png");
+        File pictureFile = new File(mediaStorageDir.getPath() + File.separator + timestamp + ".png");
         try {
             FileOutputStream fos = new FileOutputStream(pictureFile);
             fos.write(imgData);
             fos.close();
+
+            return pictureFile.getAbsolutePath();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return null;
     }
 
     public static void saveBitmap(Bitmap bitmap) {

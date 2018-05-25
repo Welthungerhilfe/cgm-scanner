@@ -35,7 +35,7 @@ public class AppConstants {
 
     public static final String VAL_SEX_FEMALE = "female";
     public static final String VAL_SEX_MALE = "male";
-    public static final String VAL_SEX_OTHER = "fluid";
+    public static final String VAL_SEX_OTHER = "other";
 
     public static final String VAL_MEASURE_MANUAL = "manual";
     public static final String VAL_MEASURE_AUTO = "v0.1";
@@ -49,6 +49,10 @@ public class AppConstants {
     public static final String EXTRA_PERSON = "extra_person";
     public static final String EXTRA_SCANTIMESTAMP = "extra_scantimestamp";
 
+    // Notification Id
+    public static final int NOTIF_NETWORK = 0x00;
+    public static final int NOTIF_FIRESTORE = 0x01;
+    public static final int NOTIF_LOCAL = 0x02;
 
     // Workflow
     public static final int CHOOSE_BABY_OR_INFANT = 0;

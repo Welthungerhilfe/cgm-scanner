@@ -19,30 +19,62 @@
 
 package de.welthungerhilfe.cgm.scanner.models;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
+
 import java.io.Serializable;
+
+import de.welthungerhilfe.cgm.scanner.helper.offline.DbConstants;
 
 /**
  * Created by Emerald on 2/19/2018.
  */
 
+@Entity(tableName = DbConstants.TABLE_MEASURE)
 public class Measure implements Serializable {
-    private long date;
+    @PrimaryKey
+    @NonNull
+    private String id;
     private String type;
     private long age; // age from birthday in days
     private float height;
     private float weight;
     private float muac;
     private float headCircumference;
-    private Loc location;
     private String artifact;
     private boolean visible;
+    private long timestamp;
 
-    public long getDate() {
-        return date;
+    @Ignore
+    private Loc location;
+
+    public Measure() {
+
     }
 
-    public void setDate(long date) {
-        this.date = date;
+    public Measure(String id, String type, long age, float height, float weight, float muac, float headCircumference, String artifact, boolean visible, long timestamp) {
+        this.id = id;
+        this.type = type;
+        this.age = age;
+        this.height = height;
+        this.weight = weight;
+        this.muac = muac;
+        this.headCircumference = headCircumference;
+        this.artifact = artifact;
+        this.visible = visible;
+        this.timestamp = timestamp;
+    }
+
+    @NonNull
+    public String getId() {
+        return id;
+    }
+
+    public void setId(@NonNull String id) {
+        this.id = id;
     }
 
     public String getType() {
@@ -115,5 +147,13 @@ public class Measure implements Serializable {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }
