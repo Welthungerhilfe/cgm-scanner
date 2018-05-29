@@ -43,6 +43,7 @@ public class BabyBack0Fragment extends Fragment implements View.OnClickListener 
         View view = inflater.inflate(R.layout.fragment_baby_back0, container, false);
 
         view.findViewById(R.id.btnStartScan).setOnClickListener(this);
+        view.findViewById(R.id.baby_back0).setOnClickListener(this);
 
         return view;
     }
@@ -63,6 +64,9 @@ public class BabyBack0Fragment extends Fragment implements View.OnClickListener 
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btnStartScan:
+                ((RecorderActivity)getActivity()).gotoNextStep();
+                break;
+            case R.id.baby_back0:
                 ((RecorderActivity)getActivity()).gotoNextStep();
                 break;
         }
