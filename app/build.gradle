@@ -7,8 +7,8 @@ android {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 23
         targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        versionCode 4
+        versionName "1.2.3_SNAPSHOT"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     allprojects {
@@ -21,6 +21,11 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    buildToolsVersion '27.0.3'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -56,5 +61,18 @@ dependencies {
     implementation 'com.google.firebase:firebase-config:11.8.0'
     // for FragmentPagerAdapter
     implementation 'com.android.support:support-v13:26.1.0'
+    implementation 'com.android.support:support-annotations:26.1.0'
+    // Room components
+    implementation "android.arch.persistence.room:runtime:$rootProject.roomVersion"
+    annotationProcessor "android.arch.persistence.room:compiler:$rootProject.roomVersion"
+    androidTestImplementation "android.arch.persistence.room:testing:$rootProject.roomVersion"
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.3'
+    // Lifecycle components
+    implementation "android.arch.lifecycle:runtime:$rootProject.archLifecycleVersion"
+    implementation "android.arch.lifecycle:extensions:$rootProject.archLifecycleVersion"
+    annotationProcessor "android.arch.lifecycle:compiler:$rootProject.archLifecycleVersion"
+    // Dagger
+    implementation 'com.google.dagger:dagger:2.13'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.13'
 }
 apply plugin: 'com.google.gms.google-services'

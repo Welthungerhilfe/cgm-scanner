@@ -71,7 +71,6 @@ import de.welthungerhilfe.cgm.scanner.models.Consent;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
-import de.welthungerhilfe.cgm.scanner.models.QRNumber;
 
 /**
  * Created by Emerald on 2/19/2018.

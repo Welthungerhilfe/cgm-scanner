@@ -19,13 +19,27 @@
 
 package de.welthungerhilfe.cgm.scanner.models;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
+
 import java.io.Serializable;
 
 /**
  * Created by Emerald on 2/19/2018.
  */
 
+@Entity
 public class Measure implements Serializable {
+    @PrimaryKey
+    @NonNull
+    private String id;
+
+    @ForeignKey(entity = Person.class, parentColumns = "id", childColumns = "personId")
+    private String personId;
+
     private long date;
     private String type;
     private long age; // age from birthday in days
@@ -33,9 +47,29 @@ public class Measure implements Serializable {
     private float weight;
     private float muac;
     private float headCircumference;
-    private Loc location;
     private String artifact;
     private boolean visible;
+    private long timestamp;
+
+    @Ignore
+    private Loc location;
+
+    @NonNull
+    public String getId() {
+        return id;
+    }
+
+    public void setId(@NonNull String id) {
+        this.id = id;
+    }
+
+    public String getPersonId() {
+        return personId;
+    }
+
+    public void setPersonId(String personId) {
+        this.personId = personId;
+    }
 
     public long getDate() {
         return date;
@@ -115,5 +149,13 @@ public class Measure implements Serializable {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

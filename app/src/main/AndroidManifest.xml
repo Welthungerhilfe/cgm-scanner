@@ -83,19 +83,13 @@
                 android:value=".activities.MainActivity"/>
         </activity>
 
+        <activity android:name=".activities.PersonListActivity"
+            android:screenOrientation="portrait" />
+
         <activity android:name=".activities.LocationSearchActivity"
             android:screenOrientation="portrait" />
 
         <activity android:name=".activities.LocationDetectActivity"
-            android:screenOrientation="portrait" />
-
-        <activity android:name=".activities.BodySelectActivity"
-            android:screenOrientation="portrait" />
-
-        <activity android:name=".activities.BabyScanActivity"
-            android:screenOrientation="portrait" />
-
-        <activity android:name=".activities.InfantScanActivity"
             android:screenOrientation="portrait" />
 
         <activity android:name=".activities.ImageDetailActivity"
