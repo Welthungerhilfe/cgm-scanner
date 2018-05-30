@@ -165,7 +165,9 @@ public class RecorderActivity extends Activity {
     private String mNowTimeString;
     private String mQrCode;
 
-    private int mScanningWorkflowStep = 0;
+    // removed the infant scanning workflow, so we start directly with the standard workflow 100
+    // no need anymore for choosing the workflow with step 0
+    private int mScanningWorkflowStep = 101;
 
     private final String BABY_FRONT_0 = "baby_front_0";
     private final String BABY_FRONT_1 = "baby_front_1";
@@ -174,6 +176,7 @@ public class RecorderActivity extends Activity {
     private BabyFront0Fragment babyFront0Fragment;
     private BabyBack0Fragment babyBack0Fragment;
     private BabyBack1Fragment babyBack1Fragment;
+
 
     private final String INFANT_FULL_FRONT = "infant_full_front";
     private final String INFANT_TURN = "infant_turn";
@@ -222,15 +225,20 @@ public class RecorderActivity extends Activity {
         // BABY
         else if (mScanningWorkflowStep ==     AppConstants.BABY_FULL_BODY_FRONT_ONBOARDING)
         {
-            mOverlaySurfaceView.setMode(OverlaySurface.BABY_OVERLAY);
+            // copy from workflow chooser..... TODO refactor
+            measure = new Measure();
+            measure.setDate(mNowTime);
+
             babyFront0Fragment = new BabyFront0Fragment();
-            ft.replace(R.id.container, babyFront0Fragment, BABY_FRONT_0);
+            ft.add(R.id.container, babyFront0Fragment);
+            //ft.replace(R.id.container, babyFront0Fragment, BABY_FRONT_0);
             ft.commit();
-            measure.setType("b_v1.0");
+            measure.setType("v1.1.1");
 
         }
         else if (mScanningWorkflowStep ==     AppConstants.BABY_FULL_BODY_FRONT_SCAN)
         {
+            mOverlaySurfaceView.setMode(OverlaySurface.BABY_OVERLAY);
             mDisplayTextView.setText(R.string.baby_full_body_front_scan_text);
             resumeScan();
 
@@ -548,6 +556,7 @@ public class RecorderActivity extends Activity {
         // TODO Create when needed!
         File measurementsFolder = new File(extFileDir,mQrCode+"/measurements/");
         measurementsFolder.mkdir();
+        
         mScanArtefactsOutputFolder  = new File(extFileDir,mQrCode+"/measurements/"+mNowTimeString+"/");
 
         if(!mScanArtefactsOutputFolder.exists()) {
@@ -558,6 +567,7 @@ public class RecorderActivity extends Activity {
                 Log.e(TAG,"Folder: \"" + mScanArtefactsOutputFolder + "\" could not be created!\n");
             }
         }
+
         mVideoOutputFile = new File(mScanArtefactsOutputFolder,mQrCode+".mp4");
         mPointCloudSaveFolderPath = mScanArtefactsOutputFolder.getAbsolutePath();
         Log.v(TAG,"mPointCloudSaveFolderPath: "+mPointCloudSaveFolderPath);

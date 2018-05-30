@@ -18,10 +18,11 @@
   ~
   -->
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/baby_front0"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clickable="true"
     android:background="@color/colorPrimary"
     android:padding="20dp">
 
@@ -32,7 +33,7 @@
         android:text="01. Front View"
         android:textColor="@color/colorWhite"
         android:textSize="22sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -40,14 +41,14 @@
         android:layout_above="@+id/txtMessage"
         android:layout_below="@+id/txtTitle"
         android:gravity="center"
-        android:padding="30dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="30dp">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/baby"/>
+            android:src="@drawable/baby" />
 
     </LinearLayout>
 
@@ -68,12 +69,12 @@
         android:id="@+id/btnStartScan"
         android:layout_width="wrap_content"
         android:layout_height="38dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:background="@drawable/button_white_round"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:text="Start Scan"
-        android:textColor="@color/colorPrimary"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"/>
+        android:textColor="@color/colorPrimary" />
 
 </RelativeLayout>
