@@ -159,6 +159,7 @@ public class RecorderActivity extends Activity {
     private LinearLayout container;
     private FloatingActionButton fab;
 
+    private File mExtFileDir;
     private File mScanArtefactsOutputFolder;
     private String mPointCloudSaveFolderPath;
     private long mNowTime;
@@ -543,8 +544,8 @@ public class RecorderActivity extends Activity {
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
         mQrCode = person.getQrcode();
-        File extFileDir = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
-        File personalFilesDir = new File(extFileDir,mQrCode+"/");
+        mExtFileDir = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
+        File personalFilesDir = new File(mExtFileDir,mQrCode+"/");
         if(!personalFilesDir.exists()) {
             boolean created = personalFilesDir.mkdir();
             if (created) {
@@ -554,10 +555,10 @@ public class RecorderActivity extends Activity {
             }
         }
         // TODO Create when needed!
-        File measurementsFolder = new File(extFileDir,mQrCode+"/measurements/");
+        File measurementsFolder = new File(mExtFileDir,mQrCode+"/measurements/");
         measurementsFolder.mkdir();
-        
-        mScanArtefactsOutputFolder  = new File(extFileDir,mQrCode+"/measurements/"+mNowTimeString+"/");
+
+        mScanArtefactsOutputFolder  = new File(mExtFileDir,mQrCode+"/measurements/"+mNowTimeString+"/");
 
         if(!mScanArtefactsOutputFolder.exists()) {
             boolean created = mScanArtefactsOutputFolder.mkdir();
