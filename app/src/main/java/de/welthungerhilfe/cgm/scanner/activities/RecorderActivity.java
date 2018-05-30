@@ -159,7 +159,6 @@ public class RecorderActivity extends Activity {
     private LinearLayout container;
     private FloatingActionButton fab;
 
-    private File mExtFileDir;
     private File mScanArtefactsOutputFolder;
     private String mPointCloudSaveFolderPath;
     private long mNowTime;
@@ -440,33 +439,11 @@ public class RecorderActivity extends Activity {
     }
 
     private void resumeScan() {
-        setupScanArtifacts();
         container.setVisibility(View.INVISIBLE);
         mCameraSurfaceView.setVisibility(View.VISIBLE);
         mOverlaySurfaceView.setVisibility(View.VISIBLE);
         mDisplayTextView.setVisibility(View.VISIBLE);
         fab.setVisibility(View.VISIBLE);
-    }
-
-    private void setupScanArtifacts() {
-        mScanArtefactsOutputFolder  = new File(mExtFileDir,mQrCode+"/measurements/"+mNowTimeString+
-            "_"+mScanningWorkflowStep+"/");
-
-        if(!mScanArtefactsOutputFolder.exists()) {
-            boolean created = mScanArtefactsOutputFolder.mkdir();
-            if (created) {
-                Log.i(TAG, "Folder: \"" + mScanArtefactsOutputFolder + "\" created\n");
-            } else {
-                Log.e(TAG,"Folder: \"" + mScanArtefactsOutputFolder + "\" could not be created!\n");
-            }
-        }
-
-        mVideoOutputFile = new File(mScanArtefactsOutputFolder,mQrCode+".mp4");
-        mPointCloudSaveFolderPath = mScanArtefactsOutputFolder.getAbsolutePath();
-        Log.v(TAG,"mPointCloudSaveFolderPath: "+mPointCloudSaveFolderPath);
-        // must be called after setting mVideoOutputFile and sVideoEncoder was created!
-        setupRenderer();
-
     }
 
     /**
@@ -566,8 +543,8 @@ public class RecorderActivity extends Activity {
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
         mQrCode = person.getQrcode();
-        mExtFileDir = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
-        File personalFilesDir = new File(mExtFileDir,mQrCode+"/");
+        File extFileDir = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
+        File personalFilesDir = new File(extFileDir,mQrCode+"/");
         if(!personalFilesDir.exists()) {
             boolean created = personalFilesDir.mkdir();
             if (created) {
@@ -577,8 +554,25 @@ public class RecorderActivity extends Activity {
             }
         }
         // TODO Create when needed!
-        File measurementsFolder = new File(mExtFileDir,mQrCode+"/measurements/");
+        File measurementsFolder = new File(extFileDir,mQrCode+"/measurements/");
         measurementsFolder.mkdir();
+        
+        mScanArtefactsOutputFolder  = new File(extFileDir,mQrCode+"/measurements/"+mNowTimeString+"/");
+
+        if(!mScanArtefactsOutputFolder.exists()) {
+            boolean created = mScanArtefactsOutputFolder.mkdir();
+            if (created) {
+                Log.i(TAG, "Folder: \"" + mScanArtefactsOutputFolder + "\" created\n");
+            } else {
+                Log.e(TAG,"Folder: \"" + mScanArtefactsOutputFolder + "\" could not be created!\n");
+            }
+        }
+
+        mVideoOutputFile = new File(mScanArtefactsOutputFolder,mQrCode+".mp4");
+        mPointCloudSaveFolderPath = mScanArtefactsOutputFolder.getAbsolutePath();
+        Log.v(TAG,"mPointCloudSaveFolderPath: "+mPointCloudSaveFolderPath);
+        // must be called after setting mVideoOutputFile and sVideoEncoder was created!
+        setupRenderer();
     }
 
     public static boolean hasPermissions(Context context, String... permissions) {
