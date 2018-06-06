@@ -1,6 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.models.dao;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -10,6 +11,8 @@ import android.arch.persistence.room.Update;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.helper.DbConstants;
+import de.welthungerhilfe.cgm.scanner.models.Consent;
+import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 
 import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
@@ -35,8 +38,17 @@ import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
 
 @Dao
 public interface OfflineDao {
+
+    // ---------------------- Person --------------------------//
+
     @Query("SELECT * FROM " + DbConstants.TABLE_PERSON)
-    List<Person> getPersons();
+    LiveData<List<Person>> getPersons();
+
+    @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE id=:id")
+    LiveData<Person> getPerson(String id);
+
+    @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE qrcode=:qrCode")
+    LiveData<Person> getPersonByQr(String qrCode);
 
     @Insert(onConflict = REPLACE)
     void savePerson(Person person);
@@ -46,4 +58,32 @@ public interface OfflineDao {
 
     @Delete
     void deletePerson(Person person);
+
+    // ---------------------- Consent --------------------------//
+
+    @Query("SELECT * FROM " + DbConstants.TABLE_CONSENT + " WHERE personId=:personId")
+    LiveData<List<Consent>> findConsents(String personId);
+
+    @Insert(onConflict = REPLACE)
+    void saveConsent(Consent consent);
+
+    @Insert(onConflict = REPLACE)
+    void updatePerson(Consent consent);
+
+    @Delete
+    void deleteConsent(Consent consent);
+
+    // ---------------------- Measure --------------------------//
+
+    @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE personId=:personId")
+    LiveData<List<Measure>> findMeasures(String personId);
+
+    @Insert(onConflict = REPLACE)
+    void saveMeasure(Measure measure);
+
+    @Insert(onConflict = REPLACE)
+    void updateMeasure(Measure measure);
+
+    @Delete
+    void deleteMeasure(Measure measure);
 }

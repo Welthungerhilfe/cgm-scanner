@@ -30,8 +30,10 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
+import java.util.TimeZone;
 
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 
@@ -57,8 +59,14 @@ public class Utils {
             salt.append(SALTCHARS.charAt(index));
         }
         String saltStr = salt.toString();
-        return saltStr;
 
+        return saltStr;
+    }
+
+    public static long getUniversalTimestamp() {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+
+        return calendar.getTimeInMillis();
     }
 
     public static boolean checkPermission (Context context, String permission) {

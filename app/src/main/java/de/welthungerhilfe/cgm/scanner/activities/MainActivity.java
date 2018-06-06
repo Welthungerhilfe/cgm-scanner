@@ -20,10 +20,15 @@ package de.welthungerhilfe.cgm.scanner.activities;
 
 import android.app.Activity;
 import android.app.SearchManager;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -57,6 +62,11 @@ import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.OnClickListener;
 import com.orhanobut.dialogplus.ViewHolder;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -67,12 +77,14 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.adapters.PersonListAdapter;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerDataAdapter;
 import de.welthungerhilfe.cgm.scanner.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.viewmodels.PersonListViewModel;
 
 public class MainActivity extends BaseActivity implements RecyclerDataAdapter.OnPersonDetail, DateRangePickerDialog.Callback, EventListener<QuerySnapshot> {
     private final String TAG = MainActivity.class.getSimpleName();
@@ -81,6 +93,8 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     private int sortType = 0;
     private int diffDays = 0;
     private ArrayList<Person> personList = new ArrayList<>();
+
+    private PersonListViewModel viewModel;
 
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
@@ -238,7 +252,20 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
 
         showProgressDialog();
 
-        loadData();
+        viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
+        viewModel.getObservablePersonList().observe(this, personList->{
+            /*
+            personListAdapter = new PersonListAdapter(PersonListActivity.this, personList);
+            recyclerPersonList.setAdapter(personListAdapter);
+            recyclerPersonList.setLayoutManager(new LinearLayoutManager(PersonListActivity.this));
+            */
+            adapterData = new RecyclerDataAdapter(this, personList);
+            adapterData.setPersonDetailListener(this);
+            recyclerData.setAdapter(adapterData);
+            recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        });
+
+        //loadData();
     }
 
     private void initUI() {
@@ -277,6 +304,14 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         View headerView = navMenu.getHeaderView(0);
         TextView txtUsername = headerView.findViewById(R.id.txtUsername);
         txtUsername.setText(AppController.getInstance().firebaseUser.getEmail());
+
+        Menu menu = navMenu.getMenu();
+        MenuItem menuVersion = menu.findItem(R.id.menuVersion);
+        try {
+            menuVersion.setTitle(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupActionBar() {

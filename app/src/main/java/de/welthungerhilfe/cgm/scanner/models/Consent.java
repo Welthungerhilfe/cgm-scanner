@@ -24,17 +24,21 @@ import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
+import de.welthungerhilfe.cgm.scanner.helper.DbConstants;
+
+import static android.arch.persistence.room.ForeignKey.CASCADE;
+
 /**
  * Created by Emerald on 2/25/2018.
  */
 
-@Entity
+@Entity(tableName = DbConstants.TABLE_CONSENT)
 public class Consent {
     @PrimaryKey
     @NonNull
     private String id;
 
-    @ForeignKey(entity = Person.class, parentColumns = "id", childColumns = "personId")
+    @ForeignKey(entity = Person.class, parentColumns = "id", childColumns = "personId", onDelete = CASCADE, onUpdate = CASCADE)
     private String personId;
 
     private String consent;

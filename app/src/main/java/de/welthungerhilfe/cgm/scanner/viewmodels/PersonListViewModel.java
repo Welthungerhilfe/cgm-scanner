@@ -7,8 +7,10 @@ import android.arch.lifecycle.MutableLiveData;
 
 import java.util.List;
 
+import de.welthungerhilfe.cgm.scanner.models.Consent;
+import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
-import de.welthungerhilfe.cgm.scanner.repositories.PersonListRepository;
+import de.welthungerhilfe.cgm.scanner.repositories.OfflineRepository;
 
 /**
  * Child Growth Monitor - quick and accurate data on malnutrition
@@ -30,15 +32,46 @@ import de.welthungerhilfe.cgm.scanner.repositories.PersonListRepository;
  */
 
 public class PersonListViewModel extends AndroidViewModel {
-    private MutableLiveData<List<Person>> personListObservable;
+    private OfflineRepository offlineRepo;
+
+    private LiveData<Person> observablePerson;
+    private LiveData<List<Person>> observablePersonList;
+    private LiveData<List<Consent>> observableConsentList;
+    private LiveData<List<Measure>> observableMeasureList;
 
     public PersonListViewModel(Application app) {
         super(app);
 
-        personListObservable = PersonListRepository.getInstance().getPersonList();
+        offlineRepo = OfflineRepository.getInstance();
+
+        observablePersonList = offlineRepo.getPersonList();
     }
 
-    public LiveData<List<Person>> getPersonListObservable() {
-        return personListObservable;
+    public LiveData<Person> getObservablePerson(String personId) {
+        observablePerson = OfflineRepository.getInstance().getPerson(personId);
+        return observablePerson;
+    }
+
+    public LiveData<Person> getObservablePersonByQr(String qrCode) {
+        observablePerson = OfflineRepository.getInstance().getPersonByQr(qrCode);
+        return observablePerson;
+    }
+
+    public LiveData<List<Person>> getObservablePersonList() {
+        return observablePersonList;
+    }
+
+    public LiveData<List<Consent>> getObservableConsentList(Person person) {
+        observableConsentList = offlineRepo.getConsentList(person);
+        return observableConsentList;
+    }
+
+    public LiveData<List<Measure>> getObservableMeasureList(Person person) {
+        observableMeasureList = offlineRepo.getMeasureList(person);
+        return observableMeasureList;
+    }
+
+    public void createPerson(Person person) {
+        OfflineRepository.getInstance().createPerson(person);
     }
 }

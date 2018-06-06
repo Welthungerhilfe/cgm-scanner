@@ -31,6 +31,7 @@ public class AppConstants {
     public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor-dev.appspot.com";
     //public static final String STORAGE_CONSENT_URL = "/data/person/{id}/consent/";
     public static final String STORAGE_CONSENT_URL = "/data/person/{qrcode}/";
+    public static final String LOCAL_CONSENT_URL = "/{qrcode}/";
     public static final String STORAGE_MEASURE_URL = "/data/person/{qrcode}/measurements/{scantimestamp}/";
 
     public static final String VAL_SEX_FEMALE = "female";
@@ -48,6 +49,14 @@ public class AppConstants {
     public static final String EXTRA_PERSON_LIST = "extra_person_list";
     public static final String EXTRA_PERSON = "extra_person";
     public static final String EXTRA_SCANTIMESTAMP = "extra_scantimestamp";
+
+    public static final String PARAM_AUTHTOKEN_TYPE = "authtoken_type";
+    public static final String PARAM_AUTH_NAME = "auth_name";
+    public static final String PARAM_AUTH_CONFIRM = "auth_confirm";
+
+
+    public static final String AUTHTOKEN_TYPE = "de.welthungerhilfe.cgm.scanner";
+    public static final String ACCOUNT_TYPE = "de.welthungerhilfe.cgm.scanner";
 
 
     // Workflow

@@ -1,10 +1,13 @@
 package de.welthungerhilfe.cgm.scanner.models.tasks;
 
+import android.arch.lifecycle.LiveData;
 import android.os.AsyncTask;
 
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
+import de.welthungerhilfe.cgm.scanner.models.Consent;
+import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 
 /**
@@ -27,29 +30,40 @@ import de.welthungerhilfe.cgm.scanner.models.Person;
  */
 
 public class OfflineTask {
-    public interface OnLoad<T> {
-        void onLoad(List<T> listData);
+
+    public void savePerson(Person person) {
+        new SaveTask().execute(person);
     }
 
-    public void getPersonList(OnLoad<Person> listener) {
-        new LoadPersonTask(listener).execute();
+    public void saveConsent(Consent consent) {
+        new SaveTask().execute(consent);
     }
 
-    private static class LoadPersonTask extends AsyncTask<Void, Void, List<Person>> {
-        private OnLoad<Person> listener;
+    public void saveMeasure(Measure measure) {
+        new SaveTask().execute(measure);
+    }
 
-        public LoadPersonTask(OnLoad<Person> l) {
-            listener = l;
-        }
-
-        @Override
-        protected List<Person> doInBackground(Void... voids) {
-            return AppController.getInstance().offlineDb.offlineDao().getPersons();
-        }
+    private static class SaveTask extends AsyncTask<Object, Void, Boolean> {
 
         @Override
-        protected void onPostExecute(List<Person> personList) {
-            listener.onLoad(personList);
+        protected Boolean doInBackground(Object... objects) {
+            if (objects[0].getClass() == Person.class) {
+                AppController.getInstance().offlineDb.offlineDao().savePerson((Person) objects[0]);
+            } else if (objects[0].getClass() == Consent.class) {
+                AppController.getInstance().offlineDb.offlineDao().saveConsent((Consent) objects[0]);
+            } else if (objects[0].getClass() == Measure.class) {
+                AppController.getInstance().offlineDb.offlineDao().saveMeasure((Measure) objects[0]);
+            }
+
+            return true;
+        }
+    }
+
+    private static class CheckQrTask extends AsyncTask<String, Void, LiveData<Person>> {
+
+        @Override
+        protected LiveData<Person> doInBackground(String... qrCode) {
+            return AppController.getInstance().offlineDb.offlineDao().getPersonByQr(qrCode[0]);
         }
     }
 }

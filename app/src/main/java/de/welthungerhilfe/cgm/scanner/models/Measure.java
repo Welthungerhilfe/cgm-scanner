@@ -27,17 +27,21 @@ import android.support.annotation.NonNull;
 
 import java.io.Serializable;
 
+import de.welthungerhilfe.cgm.scanner.helper.DbConstants;
+
+import static android.arch.persistence.room.ForeignKey.CASCADE;
+
 /**
  * Created by Emerald on 2/19/2018.
  */
 
-@Entity
+@Entity(tableName = DbConstants.TABLE_MEASURE)
 public class Measure implements Serializable {
     @PrimaryKey
     @NonNull
     private String id;
 
-    @ForeignKey(entity = Person.class, parentColumns = "id", childColumns = "personId")
+    @ForeignKey(entity = Person.class, parentColumns = "id", childColumns = "personId", onDelete = CASCADE, onUpdate = CASCADE)
     private String personId;
 
     private long date;

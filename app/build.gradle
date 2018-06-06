@@ -2,11 +2,11 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
     defaultConfig {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 23
-        targetSdkVersion 23
+        targetSdkVersion 27
         versionCode 4
         versionName "1.2.3_SNAPSHOT"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -22,7 +22,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    buildToolsVersion '27.0.3'
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -32,8 +31,8 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     //noinspection GradleCompatible
-    implementation 'com.android.support:appcompat-v7:26.1.0'
-    implementation 'com.android.support:design:26.1.0'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
@@ -60,8 +59,8 @@ dependencies {
     implementation 'com.google.tango:support-base:1.54'
     implementation 'com.google.firebase:firebase-config:11.8.0'
     // for FragmentPagerAdapter
-    implementation 'com.android.support:support-v13:26.1.0'
-    implementation 'com.android.support:support-annotations:26.1.0'
+    implementation 'com.android.support:support-v13:27.1.1'
+    implementation 'com.android.support:support-annotations:27.1.1'
     // Room components
     implementation "android.arch.persistence.room:runtime:$rootProject.roomVersion"
     annotationProcessor "android.arch.persistence.room:compiler:$rootProject.roomVersion"

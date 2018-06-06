@@ -15,6 +15,12 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- sync data -->
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+
     <supports-screens
         android:anyDensity="true"
         android:largeScreens="true"
@@ -83,9 +89,6 @@
                 android:value=".activities.MainActivity"/>
         </activity>
 
-        <activity android:name=".activities.PersonListActivity"
-            android:screenOrientation="portrait" />
-
         <activity android:name=".activities.LocationSearchActivity"
             android:screenOrientation="portrait" />
 
@@ -102,6 +105,31 @@
             android:name=".helper.service.FirebaseUploadService"
             android:exported="false"/>
 
+        <service android:name=".authenticator.AuthenticatorService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+        <service android:name=".syncdata.SyncService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+
+        <provider
+            android:name=".syncdata.StubProvider"
+            android:authorities="@string/sync_authority"
+            android:exported="false"
+            android:syncable="true" />
     </application>
 
 </manifest>
