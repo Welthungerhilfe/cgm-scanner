@@ -43,6 +43,10 @@ public class OfflineRepository {
         new OfflineTask().savePerson(person);
     }
 
+    public void updatePerson(Person person) {
+        new OfflineTask().updatePerson(person);
+    }
+
     public LiveData<Person> getPerson(String personId) {
         return AppController.getInstance().offlineDb.offlineDao().getPerson(personId);
     }

@@ -30,17 +30,54 @@ import de.welthungerhilfe.cgm.scanner.models.Person;
  */
 
 public class OfflineTask {
+    public interface OnLoadPerson {
+        void onLoaded(List<Person> personList);
+    }
+
+    public void getSyncablePerson(OnLoadPerson l, long timestamp) {
+        new LoadTask(l).execute(timestamp);
+    }
 
     public void savePerson(Person person) {
         new SaveTask().execute(person);
+    }
+
+    public void updatePerson(Person person) {
+        new UpdateTask().execute(person);
     }
 
     public void saveConsent(Consent consent) {
         new SaveTask().execute(consent);
     }
 
+    public void updateConsent(Consent consent) {
+        new UpdateTask().execute(consent);
+    }
+
     public void saveMeasure(Measure measure) {
         new SaveTask().execute(measure);
+    }
+
+    public void updateMeasure(Measure measure) {
+        new UpdateTask().execute(measure);
+    }
+
+    private static class LoadTask extends AsyncTask<Long, Void, List<Person>> {
+        OnLoadPerson listener;
+
+        LoadTask(OnLoadPerson listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        protected List<Person> doInBackground(Long... timestamp) {
+            return AppController.getInstance().offlineDb.offlineDao().getSyncablePersons(timestamp[0]);
+        }
+
+        @Override
+        public void onPostExecute(List<Person> persons) {
+            listener.onLoaded(persons);
+        }
     }
 
     private static class SaveTask extends AsyncTask<Object, Void, Boolean> {
@@ -53,6 +90,22 @@ public class OfflineTask {
                 AppController.getInstance().offlineDb.offlineDao().saveConsent((Consent) objects[0]);
             } else if (objects[0].getClass() == Measure.class) {
                 AppController.getInstance().offlineDb.offlineDao().saveMeasure((Measure) objects[0]);
+            }
+
+            return true;
+        }
+    }
+
+    private static class UpdateTask extends AsyncTask<Object, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Object... objects) {
+            if (objects[0].getClass() == Person.class) {
+                AppController.getInstance().offlineDb.offlineDao().updatePerson((Person) objects[0]);
+            } else if (objects[0].getClass() == Consent.class) {
+                //AppController.getInstance().offlineDb.offlineDao().updateConsent((Consent) objects[0]);
+            } else if (objects[0].getClass() == Measure.class) {
+                AppController.getInstance().offlineDb.offlineDao().updateMeasure((Measure) objects[0]);
             }
 
             return true;

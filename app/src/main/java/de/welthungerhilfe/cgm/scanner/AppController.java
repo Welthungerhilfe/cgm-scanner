@@ -24,7 +24,6 @@ import android.os.StrictMode;
 import android.util.Log;
 
 import com.amitshekhar.DebugDB;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -68,7 +67,7 @@ public class AppController extends Application {
 
         firebaseFirestore = FirebaseFirestore.getInstance();
 
-        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).fallbackToDestructiveMigration()                .build();
+        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).fallbackToDestructiveMigration().build();
 
         Log.e("Offline DB", DebugDB.getAddressLog());
 
@@ -81,5 +80,9 @@ public class AppController extends Application {
 
     public void prepareFirebaseUser() {
         firebaseUser = firebaseAuth.getCurrentUser();
+    }
+
+    public String getPersonId(String name) {
+        return Utils.getAndroidID(getContentResolver()) + "_" + name + "_" + Utils.getUniversalTimestamp() + "_" + Utils.getSaltString(16);
     }
 }

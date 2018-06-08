@@ -36,6 +36,7 @@ public class SessionManager {
     private final String KEY_USER_LOCATION_LATITUDE = "key_user_location_latitude";
     private final String KEY_USER_LOCATION_LONGITUDE = "key_user_location_longitude";
     private final String KEY_USER_LOCATION_ADDRESS = "key_user_location_address";
+    private final String KEY_SYNC_TIMESTAMP = "sync_timestamp";
 
     SharedPreferences pref;
     SharedPreferences.Editor editor;
@@ -73,5 +74,15 @@ public class SessionManager {
         location.setAddress(pref.getString(KEY_USER_LOCATION_ADDRESS, ""));
 
         return location;
+    }
+
+    public void setSyncTimestamp(long timestamp) {
+        editor.putLong(KEY_SYNC_TIMESTAMP, timestamp);
+
+        editor.commit();
+    }
+
+    public long getSyncTimestamp() {
+        return pref.getLong(KEY_SYNC_TIMESTAMP, 0);
     }
 }

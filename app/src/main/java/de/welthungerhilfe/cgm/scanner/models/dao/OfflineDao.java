@@ -50,6 +50,9 @@ public interface OfflineDao {
     @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE qrcode=:qrCode")
     LiveData<Person> getPersonByQr(String qrCode);
 
+    @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE timestamp>:timestamp")
+    List<Person> getSyncablePersons(long timestamp);
+
     @Insert(onConflict = REPLACE)
     void savePerson(Person person);
 

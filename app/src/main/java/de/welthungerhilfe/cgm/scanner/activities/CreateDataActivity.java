@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
@@ -40,6 +41,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -221,7 +224,7 @@ public class CreateDataActivity extends BaseActivity {
             isNew = true;
 
             person = new Person();
-            person.setId("offline_" + Utils.getSaltString(20));
+            person.setId(AppController.getInstance().getPersonId(name));
         }
 
         person.setQrcode(qrCode);
@@ -243,7 +246,7 @@ public class CreateDataActivity extends BaseActivity {
 
     public void setMeasureData(float height, float weight, float muac, float headCircumference, String additional, Loc location) {
         final Measure measure = new Measure();
-        measure.setId("offline_" + Utils.getSaltString(20));
+        measure.setId(Utils.getSaltString(20));
         measure.setDate(System.currentTimeMillis());
         long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
         measure.setAge(age);
@@ -390,12 +393,14 @@ public class CreateDataActivity extends BaseActivity {
         viewModel.getObservablePersonByQr(qrCode).observe(this, p->{
             person = p;
 
-            loadMeasures();
-            loadConsents();
+            if (person != null) {
+                loadMeasures();
+                loadConsents();
 
-            viewModel.getObservableMeasureList(person).observe(this, measures->{
-                measureFragment.addMeasures(measures);
-            });
+                viewModel.getObservableMeasureList(person).observe(this, measures->{
+                    measureFragment.addMeasures(measures);
+                });
+            }
         });
         /*
         AppController.getInstance().firebaseFirestore.collection("persons")
