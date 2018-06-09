@@ -1183,7 +1183,7 @@ public class RecorderActivity extends Activity {
             }
         }
 
-        mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + String.format("%03d", mNumberOfFilesWritten) +
+        mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mScanningWorkflowStep + "_" + String.format("%03d", mNumberOfFilesWritten) +
                 ".vtk";
         mPointCloudFilenameBuffer.add(mPointCloudSaveFolderPath + mPointCloudFilename);
         Log.v(TAG,"added pointcloud "+mPointCloudSaveFolderPath + mPointCloudFilename);
