@@ -956,6 +956,8 @@ public class RecorderActivity extends Activity {
             yuvImage.compressToJpeg(new Rect(0, 0, currentTangoImageBuffer.width, currentTangoImageBuffer.height), 50, out);
             out.flush();
             out.close();
+            // Direct Upload to Firebase Storage
+            uploadFromUri(Uri.fromFile(currentImg));
         } catch (IOException e) {
             e.printStackTrace();
         }
