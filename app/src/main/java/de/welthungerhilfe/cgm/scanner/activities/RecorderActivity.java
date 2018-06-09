@@ -947,7 +947,9 @@ public class RecorderActivity extends Activity {
         File currentImgFolder = new File (mScanArtefactsOutputFolder, "rgb/");
         if (!currentImgFolder.exists())
             currentImgFolder.mkdirs();
-        File currentImg = new File(currentImgFolder,mCurrentTimeStamp+".png");
+        String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
+                mScanningWorkflowStep + "_" + String.format("%03d", mNumberOfFilesWritten) + ".png";
+        File currentImg = new File(currentImgFolder,currentImgFilename);
 
         try (FileOutputStream out = new FileOutputStream(currentImg)) {
             YuvImage yuvImage = new YuvImage(currentTangoImageBuffer.data.array(), ImageFormat.NV21, currentTangoImageBuffer.width, currentTangoImageBuffer.height, null);
@@ -1183,8 +1185,8 @@ public class RecorderActivity extends Activity {
             }
         }
 
-        mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mScanningWorkflowStep + "_" + String.format("%03d", mNumberOfFilesWritten) +
-                ".vtk";
+        mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mScanningWorkflowStep +
+                "_" + String.format("%03d", mNumberOfFilesWritten) + ".vtk";
         mPointCloudFilenameBuffer.add(mPointCloudSaveFolderPath + mPointCloudFilename);
         Log.v(TAG,"added pointcloud "+mPointCloudSaveFolderPath + mPointCloudFilename);
         File file = new File(dir, mPointCloudFilename);
@@ -1340,10 +1342,6 @@ public class RecorderActivity extends Activity {
                 .putExtra(AppConstants.EXTRA_QR, mQrCode)
                 .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, mNowTimeString)
                 .setAction(FirebaseUploadService.ACTION_UPLOAD));
-
-        // TODO Show loading spinner
-
-        //showProgressDialog(getString(R.string.progress_uploading));
     }
 
 
