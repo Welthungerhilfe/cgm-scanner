@@ -1,5 +1,5 @@
 
-/**
+/*
  * Child Growth Monitor - quick and accurate data on malnutrition
  * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
  * Copyright (c) 2018 Welthungerhilfe Innovation
@@ -28,6 +28,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
@@ -59,6 +64,7 @@ import com.google.atap.tangoservice.TangoInvalidException;
 import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
+import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
@@ -67,6 +73,7 @@ import com.projecttango.tangosupport.TangoSupport;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -544,6 +551,14 @@ public class RecorderActivity extends Activity {
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
         mQrCode = person.getQrcode();
+
+        setupScanArtefacts();
+        // setupRenderer must be called after
+        // setupScanArtefacts for setting mVideoOutputFile and sVideoEncoder was done!
+        setupRenderer();
+    }
+
+    private void setupScanArtefacts() {
         mExtFileDir = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
         File personalFilesDir = new File(mExtFileDir,mQrCode+"/");
         if(!personalFilesDir.exists()) {
@@ -572,8 +587,6 @@ public class RecorderActivity extends Activity {
         mVideoOutputFile = new File(mScanArtefactsOutputFolder,mQrCode+".mp4");
         mPointCloudSaveFolderPath = mScanArtefactsOutputFolder.getAbsolutePath();
         Log.v(TAG,"mPointCloudSaveFolderPath: "+mPointCloudSaveFolderPath);
-        // must be called after setting mVideoOutputFile and sVideoEncoder was created!
-        setupRenderer();
     }
 
     public static boolean hasPermissions(Context context, String... permissions) {
@@ -875,6 +888,75 @@ public class RecorderActivity extends Activity {
                 }
             }
         });
+
+        mTango.experimentalConnectOnFrameListener(TangoCameraIntrinsics.TANGO_CAMERA_COLOR,
+                new Tango.OnFrameAvailableListener() {
+                    @Override
+                    public  void onFrameAvailable(TangoImageBuffer tangoImageBuffer, int i) {
+                        if ( ! mIsRecording ) {
+                            return;
+                        }
+
+                        final TangoImageBuffer currentTangoImageBuffer = copyImageBuffer(tangoImageBuffer);
+
+                        // Background task for writing to file
+                        class SendCommandTask extends AsyncTask<Void, Void, Boolean> {
+                            /** The system calls this to perform work in a worker thread and
+                             * delivers it the parameters given to AsyncTask.execute() */
+                            @Override
+                            protected Boolean doInBackground(Void... params) {
+
+                                try {
+                                    mutex_on_mIsRecording.acquire();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                // Saving the frame or not, depending on the current mode.
+                                if ( mIsRecording ) {
+                                    writeImageToFile(currentTangoImageBuffer);
+                                }
+                                mutex_on_mIsRecording.release();
+                                return true;
+                            }
+
+                            /** The system calls this to perform work in the UI thread and delivers
+                             * the result from doInBackground() */
+                            @Override
+                            protected void onPostExecute(Boolean done) {
+
+                            }
+                        }
+                        new SendCommandTask().execute();
+
+                    }
+
+                    TangoImageBuffer copyImageBuffer(TangoImageBuffer imageBuffer) {
+                        ByteBuffer clone = ByteBuffer.allocateDirect(imageBuffer.data.capacity());
+                        imageBuffer.data.rewind();
+                        clone.put(imageBuffer.data);
+                        imageBuffer.data.rewind();
+                        clone.flip();
+                        return new TangoImageBuffer(imageBuffer.width, imageBuffer.height,
+                                imageBuffer.stride, imageBuffer.frameNumber,
+                                imageBuffer.timestamp, imageBuffer.format, clone);
+                    }
+                });
+    }
+
+    private void writeImageToFile(TangoImageBuffer currentTangoImageBuffer) {
+        File currentImgFolder = new File (mScanArtefactsOutputFolder, "rgb/");
+        if (!currentImgFolder.exists())
+            currentImgFolder.mkdirs();
+        File currentImg = new File(currentImgFolder,mCurrentTimeStamp+".png");
+
+        try (FileOutputStream out = new FileOutputStream(currentImg)) {
+            YuvImage yuvImage = new YuvImage(currentTangoImageBuffer.data.array(), ImageFormat.NV21, currentTangoImageBuffer.width, currentTangoImageBuffer.height, null);
+            yuvImage.compressToJpeg(new Rect(0, 0, currentTangoImageBuffer.width, currentTangoImageBuffer.height), 50, out);
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -912,6 +994,58 @@ public class RecorderActivity extends Activity {
         average[0] = averageZ;
         average[1] = averageC;
         return average;
+    }
+
+    /**
+     * Converts YUV420 NV21 to RGB8888
+     *
+     * @param data byte array on YUV420 NV21 format.
+     * @param width pixels width
+     * @param height pixels height
+     * @return a RGB8888 pixels int array. Where each int is a pixels ARGB.
+     */
+    //@AddTrace(name = "convertYUV420_NV21toRGB8888")
+    public static int[] convertYUV420_NV21toRGB8888(byte [] data, int width, int height) {
+        int size = width*height;
+        int offset = size;
+        int[] pixels = new int[size];
+        int u, v, y1, y2, y3, y4;
+
+        // i percorre os Y and the final pixels
+        // k percorre os pixles U e V
+        for(int i=0, k=0; i < size; i+=2, k+=2) {
+            y1 = data[i  ]&0xff;
+            y2 = data[i+1]&0xff;
+            y3 = data[width+i  ]&0xff;
+            y4 = data[width+i+1]&0xff;
+
+            u = data[offset+k  ]&0xff;
+            v = data[offset+k+1]&0xff;
+            u = u-128;
+            v = v-128;
+
+            pixels[i  ] = convertYUVtoRGB(y1, u, v);
+            pixels[i+1] = convertYUVtoRGB(y2, u, v);
+            pixels[width+i  ] = convertYUVtoRGB(y3, u, v);
+            pixels[width+i+1] = convertYUVtoRGB(y4, u, v);
+
+            if (i!=0 && (i+2)%width==0)
+                i+=width;
+        }
+
+        return pixels;
+    }
+
+    private static int convertYUVtoRGB(int y, int u, int v) {
+        int r,g,b;
+
+        r = y + (int)(1.402f*v);
+        g = y - (int)(0.344f*u +0.714f*v);
+        b = y + (int)(1.772f*u);
+        r = r>255? 255 : r<0 ? 0 : r;
+        g = g>255? 255 : g<0 ? 0 : g;
+        b = b>255? 255 : b<0 ? 0 : b;
+        return 0xff000000 | (b<<16) | (g<<8) | r;
     }
 
     @Override
@@ -1172,7 +1306,7 @@ public class RecorderActivity extends Activity {
                     return Uri.fromFile(myZipFile);
                 }
 
-                /** The system calls this to perform work in the UI thread and delivers
+                /* * The system calls this to perform work in the UI thread and delivers
                  * the result from doInBackground() */
 /*
                 @Override
