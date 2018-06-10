@@ -24,6 +24,7 @@ import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.SyncRequest;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
@@ -47,6 +48,7 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.syncdata.SyncAdapter;
 
 public class LoginActivity extends AccountAuthenticatorActivity {
 
@@ -172,7 +174,17 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
                                 accountManager.addAccountExplicitly(account, password, null);
 
+                                SyncAdapter.startPeriodicSync(account, getApplicationContext());
+
+                                /*
                                 ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true);
+
+                                SyncRequest request = new SyncRequest.Builder().
+                                        syncPeriodic(AppConstants.SYNC_INTERVAL, AppConstants.SYNC_FLEXTIME).
+                                        setSyncAdapter(account, ContactsContract.AUTHORITY).
+                                        setExtras(new Bundle()).build();
+                                ContentResolver.requestSync(request);
+                                */
 
                                 final Intent intent = new Intent();
                                 intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, email);

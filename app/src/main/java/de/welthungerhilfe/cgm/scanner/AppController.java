@@ -20,6 +20,8 @@ package de.welthungerhilfe.cgm.scanner;
 
 import android.app.Application;
 import android.arch.persistence.room.Room;
+import android.content.ContentResolver;
+import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
 
@@ -33,6 +35,7 @@ import com.google.firebase.storage.StorageReference;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.DbConstants;
 import de.welthungerhilfe.cgm.scanner.helper.OfflineDatabase;
+import de.welthungerhilfe.cgm.scanner.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AppController extends Application {
@@ -68,6 +71,8 @@ public class AppController extends Application {
         firebaseFirestore = FirebaseFirestore.getInstance();
 
         offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).fallbackToDestructiveMigration().build();
+
+        //SyncAdapter.initializeSyncAdapter(getApplicationContext());
 
         Log.e("Offline DB", DebugDB.getAddressLog());
 

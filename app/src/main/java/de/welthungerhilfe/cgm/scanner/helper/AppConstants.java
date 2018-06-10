@@ -26,6 +26,9 @@ package de.welthungerhilfe.cgm.scanner.helper;
 public class AppConstants {
     public static final int MAX_IMAGE_SIZE = 800;
 
+    public static final long SYNC_INTERVAL = 60 * 5;
+    public static final long SYNC_FLEXTIME = SYNC_INTERVAL / 3;
+
     public static final String GOOGLE_GEO_URL = "https://maps.googleapis.com/maps/api/geocode/json";
     //public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor.appspot.com";
     public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor-dev.appspot.com";

@@ -81,6 +81,7 @@ import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
+import de.welthungerhilfe.cgm.scanner.repositories.OfflineRepository;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.viewmodels.PersonListViewModel;
@@ -369,6 +370,7 @@ public class CreateDataActivity extends BaseActivity {
     }
 
     private void updatePerson() {
+        /*
         showProgressDialog();
 
         AppController.getInstance().firebaseFirestore.collection("persons")
@@ -387,6 +389,8 @@ public class CreateDataActivity extends BaseActivity {
                         hideProgressDialog();
                     }
                 });
+                */
+        OfflineRepository.getInstance().updatePerson(person);
     }
 
     private void checkQR() {

@@ -4,11 +4,13 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SyncRequest;
 import android.content.SyncResult;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.view.View;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -19,11 +21,15 @@ import java.util.Date;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
+import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.repositories.OfflineRepository;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineTask.OnLoadPerson {
     private final AccountManager mAccountManager;
@@ -67,8 +73,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                                     }
                                 }
                             }
-
-                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
                         }
                     }
                 });
@@ -76,11 +80,47 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
 
     @Override
     public void onLoaded(List<Person> personList) {
+        long timestamp = session.getSyncTimestamp();
+
         for (int i = 0; i < personList.size(); i++) {
             AppController.getInstance().firebaseFirestore.collection("persons")
                     .document(personList.get(i).getId())
                     .set(personList.get(i));
-
         }
+
+        session.setSyncTimestamp(Utils.getUniversalTimestamp());
+    }
+
+    public static void syncImmediately(Account account, Context context) {
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        ContentResolver.requestSync(account, context.getString(R.string.sync_authority), bundle);
+    }
+
+    public static void configurePeriodicSync(Account account, Context context, long syncInterval, long flexTime) {
+
+        String authority = context.getString(R.string.sync_authority);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            SyncRequest request = new SyncRequest.Builder().
+                    syncPeriodic(syncInterval, flexTime).
+                    setSyncAdapter(account, authority).
+                    setExtras(new Bundle()).build();
+
+            ContentResolver.requestSync(request);
+        } else {
+            ContentResolver.addPeriodicSync(account, authority, new Bundle(), syncInterval);
+        }
+    }
+
+    public static void startPeriodicSync(Account newAccount, Context context) {
+
+        configurePeriodicSync(newAccount, context, SYNC_INTERVAL, SYNC_FLEXTIME);
+
+        ContentResolver.setSyncAutomatically(newAccount, context.getString(R.string.sync_authority), true);
+
+        syncImmediately(newAccount, context);
+
     }
 }
