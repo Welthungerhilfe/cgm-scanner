@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -35,7 +37,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
     private final AccountManager mAccountManager;
     private final Context mContext;
 
-    private Date mLastUpdate;
+    private long prevTimestamp;
     private SessionManager session;
 
     public SyncAdapter(Context context, boolean autoInitialize) {
@@ -49,13 +51,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        long timestamp = session.getSyncTimestamp();
+        prevTimestamp = session.getSyncTimestamp();
 
-        new OfflineTask().getSyncablePerson(this, timestamp);
-
+        new OfflineTask().getSyncablePerson(this, prevTimestamp);
 
         AppController.getInstance().firebaseFirestore.collection("persons")
-                .whereGreaterThan("timestamp", timestamp)
+                .whereGreaterThan("timestamp", prevTimestamp)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -66,7 +67,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
 
                                 String[] arr = person.getId().split("_");
                                 if (!arr[0].equals(Utils.getAndroidID(mContext.getContentResolver()))) {    // not created on my device, so should be synced
-                                    if (Long.valueOf(arr[2]) > timestamp) {     // person created after sync, so must add to local room
+                                    if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
                                         OfflineRepository.getInstance().createPerson(person);
                                     } else {    // created before sync, after sync person was updates, so must update in local room
                                         OfflineRepository.getInstance().updatePerson(person);
@@ -80,25 +81,40 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
 
     @Override
     public void onLoaded(List<Person> personList) {
-        long timestamp = session.getSyncTimestamp();
-
         for (int i = 0; i < personList.size(); i++) {
+            personList.get(i).setTimestamp(Utils.getUniversalTimestamp());
+
+            int finalI = i;
             AppController.getInstance().firebaseFirestore.collection("persons")
                     .document(personList.get(i).getId())
-                    .set(personList.get(i));
-        }
+                    .set(personList.get(i))
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            personList.get(finalI).setTimestamp(prevTimestamp);
 
-        session.setSyncTimestamp(Utils.getUniversalTimestamp());
+                            session.setSyncTimestamp(prevTimestamp);
+                        }
+                    })
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            OfflineRepository.getInstance().updatePerson(personList.get(finalI));
+
+                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
+                        }
+                    });
+        }
     }
 
-    public static void syncImmediately(Account account, Context context) {
+    private static void syncImmediately(Account account, Context context) {
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         ContentResolver.requestSync(account, context.getString(R.string.sync_authority), bundle);
     }
 
-    public static void configurePeriodicSync(Account account, Context context, long syncInterval, long flexTime) {
+    private static void configurePeriodicSync(Account account, Context context, long syncInterval, long flexTime) {
 
         String authority = context.getString(R.string.sync_authority);
 

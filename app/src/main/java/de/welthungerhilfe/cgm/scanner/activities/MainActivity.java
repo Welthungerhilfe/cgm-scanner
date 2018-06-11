@@ -27,12 +27,15 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -83,6 +86,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.adapters.PersonListAdapter;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerDataAdapter;
 import de.welthungerhilfe.cgm.scanner.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -92,17 +96,28 @@ import de.welthungerhilfe.cgm.scanner.viewmodels.PersonListViewModel;
 public class MainActivity extends BaseActivity implements RecyclerDataAdapter.OnPersonDetail, DateRangePickerDialog.Callback, EventListener<QuerySnapshot> {
     private final String TAG = MainActivity.class.getSimpleName();
     private final int REQUEST_LOCATION = 0x1000;
+    private final int REQUEST_CAMERA = 0x1001;
+
+    private final int PERMISSION_CAMERA = 0x1002;
 
     private int sortType = 0;
     private int diffDays = 0;
     private ArrayList<Person> personList = new ArrayList<>();
+
+    private File mFileTemp;
 
     private PersonListViewModel viewModel;
 
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
         Crashlytics.log("Add person by QR");
-        startActivity(new Intent(MainActivity.this, QRScanActivity.class));
+        //startActivity(new Intent(MainActivity.this, QRScanActivity.class));
+
+        if (!Utils.checkPermission(MainActivity.this, "android.permission.CAMERA") || !Utils.checkPermission(MainActivity.this, "android.permission.WRITE_EXTERNAL_STORAGE")) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_CAMERA);
+        } else {
+            takePhoto();
+        }
     }
 
     @OnClick(R.id.txtSort)
@@ -340,6 +355,33 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         drawerLayout.addDrawerListener(mDrawerToggle);
     }
 
+    private void createTempFile() {
+        String state = Environment.getExternalStorageState();
+
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "CGM Scanner");
+        if (!mediaStorageDir.exists())
+            mediaStorageDir.mkdir();
+
+        String tmp = "IMG_" + Long.toString(Utils.getUniversalTimestamp()) + ".png";
+
+        mFileTemp = new File(mediaStorageDir.getPath() + File.separator + tmp);
+    }
+
+    public void takePhoto() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        createTempFile();
+        Uri mImageCaptureUri = null;
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            mImageCaptureUri = Uri.fromFile(mFileTemp);
+        } else {
+            mImageCaptureUri = InternalStorageContentProvider.CONTENT_URI;
+        }
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
+        takePictureIntent.putExtra("return-data", true);
+        startActivityForResult(takePictureIntent, REQUEST_CAMERA);
+    }
+
     private void loadData() {
         AppController.getInstance().firebaseFirestore.collection("persons")
                 .get()
@@ -413,44 +455,6 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         adapterData.clearFitlers();
     }
 
-    public void onActivityResult(int reqCode, int resCode, Intent result) {
-        if (reqCode == REQUEST_LOCATION && resCode == Activity.RESULT_OK) {
-            int radius = result.getIntExtra(AppConstants.EXTRA_RADIUS, 0);
-
-            adapterData.setLocationFilter(session.getLocation(), radius);
-        }
-    }
-
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.menu_search, menu);
-
-        MenuItem searchItem = menu.findItem(R.id.actionSearch);
-        SearchManager searchManager = (SearchManager) MainActivity.this.getSystemService(Context.SEARCH_SERVICE);
-
-        SearchView searchView = null;
-        if (searchItem != null) {
-            searchView = (SearchView) searchItem.getActionView();
-        }
-        if (searchView != null) {
-            searchView.setSearchableInfo(searchManager.getSearchableInfo(MainActivity.this.getComponentName()));
-            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    adapterData.search(query);
-                    return false;
-                }
-
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    return false;
-                }
-            });
-        }
-
-        return super.onCreateOptionsMenu(menu);
-    }
-
     @Override
     public void onPersonDetail(Person person) {
         Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
@@ -496,6 +500,59 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             } else {
                 recyclerData.setVisibility(View.VISIBLE);
                 txtNoPerson.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_search, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.actionSearch);
+        SearchManager searchManager = (SearchManager) MainActivity.this.getSystemService(Context.SEARCH_SERVICE);
+
+        SearchView searchView = null;
+        if (searchItem != null) {
+            searchView = (SearchView) searchItem.getActionView();
+        }
+        if (searchView != null) {
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(MainActivity.this.getComponentName()));
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    adapterData.search(query);
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    return false;
+                }
+            });
+        }
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSION_CAMERA && grantResults[0] >= 0 && grantResults[1] >= 0) {
+            takePhoto();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int reqCode, int resCode, Intent result) {
+        if (reqCode == REQUEST_LOCATION && resCode == Activity.RESULT_OK) {
+            int radius = result.getIntExtra(AppConstants.EXTRA_RADIUS, 0);
+
+            adapterData.setLocationFilter(session.getLocation(), radius);
+        } else if (reqCode == REQUEST_CAMERA) {
+            if (resCode == RESULT_OK) {
+                Uri mImageUri = Uri.fromFile(mFileTemp);
+
+
             }
         }
     }
