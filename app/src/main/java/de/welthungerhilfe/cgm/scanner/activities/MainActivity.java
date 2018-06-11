@@ -57,12 +57,19 @@ import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.ml.vision.FirebaseVision;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions;
+import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.OnClickListener;
 import com.orhanobut.dialogplus.ViewHolder;
@@ -111,13 +118,15 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
         Crashlytics.log("Add person by QR");
-        //startActivity(new Intent(MainActivity.this, QRScanActivity.class));
+        startActivity(new Intent(MainActivity.this, QRScanActivity.class));
 
+        /*
         if (!Utils.checkPermission(MainActivity.this, "android.permission.CAMERA") || !Utils.checkPermission(MainActivity.this, "android.permission.WRITE_EXTERNAL_STORAGE")) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_CAMERA);
         } else {
             takePhoto();
         }
+        */
     }
 
     @OnClick(R.id.txtSort)
@@ -284,9 +293,6 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         });
 
         //loadData();
-
-        Log.e("ANDROID_ID", Utils.getAndroidID(getContentResolver()));
-        Log.e("UUID", Utils.getUUID());
     }
 
     private void initUI() {
@@ -552,7 +558,35 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             if (resCode == RESULT_OK) {
                 Uri mImageUri = Uri.fromFile(mFileTemp);
 
+                try {
+                    FirebaseVisionImage image = FirebaseVisionImage.fromFilePath(MainActivity.this, mImageUri);
 
+                    FirebaseVisionBarcodeDetectorOptions options = new FirebaseVisionBarcodeDetectorOptions.Builder()
+                            .setBarcodeFormats(FirebaseVisionBarcode.FORMAT_QR_CODE, FirebaseVisionBarcode.FORMAT_AZTEC)
+                            .build();
+
+
+                    FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
+                            .getVisionBarcodeDetector();
+
+                    Task<List<FirebaseVisionBarcode>> scanResult = detector.detectInImage(image)
+                            .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
+                                @Override
+                                public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
+                                    // Task completed successfully
+                                    // ...
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    // Task failed with an exception
+                                    // ...
+                                }
+                            });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

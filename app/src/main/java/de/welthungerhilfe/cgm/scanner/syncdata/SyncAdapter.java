@@ -66,14 +66,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                                 Person person = document.toObject(Person.class);
 
                                 String[] arr = person.getId().split("_");
-                                if (!arr[0].equals(Utils.getAndroidID(mContext.getContentResolver()))) {    // not created on my device, so should be synced
-                                    if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
-                                        OfflineRepository.getInstance().createPerson(person);
-                                    } else {    // created before sync, after sync person was updates, so must update in local room
-                                        OfflineRepository.getInstance().updatePerson(person);
-                                    }
+                                if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
+                                    OfflineRepository.getInstance().createPerson(person);
+                                } else {    // created before sync, after sync person was updates, so must update in local room
+                                    OfflineRepository.getInstance().updatePerson(person);
                                 }
                             }
+
+                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
                         }
                     }
                 });

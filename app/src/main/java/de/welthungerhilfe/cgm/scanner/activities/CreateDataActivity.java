@@ -226,6 +226,7 @@ public class CreateDataActivity extends BaseActivity {
 
             person = new Person();
             person.setId(AppController.getInstance().getPersonId(name));
+            person.setCreated(System.currentTimeMillis());
         }
 
         person.setQrcode(qrCode);
@@ -236,7 +237,6 @@ public class CreateDataActivity extends BaseActivity {
         person.setGuardian(guardian);
         person.setSex(sex);
         person.setAgeEstimated(age);
-        person.setCreated(System.currentTimeMillis());
         person.setTimestamp(Utils.getUniversalTimestamp());
 
         if (isNew)
