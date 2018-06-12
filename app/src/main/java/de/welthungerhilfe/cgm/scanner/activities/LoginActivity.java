@@ -19,8 +19,14 @@
 
 package de.welthungerhilfe.cgm.scanner.activities;
 
+import android.accounts.Account;
+import android.accounts.AccountAuthenticatorActivity;
+import android.accounts.AccountManager;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.SyncRequest;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.view.KeyEvent;
 import android.view.WindowManager;
@@ -40,9 +46,11 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.syncdata.SyncAdapter;
 
-public class LoginActivity extends BaseActivity {
+public class LoginActivity extends AccountAuthenticatorActivity {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
 
@@ -75,6 +83,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     private SessionManager session;
+    private AccountManager accountManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -83,6 +92,8 @@ public class LoginActivity extends BaseActivity {
         setContentView(R.layout.activity_login);
 
         ButterKnife.bind(this);
+
+        accountManager = AccountManager.get(this);
 
         editPassword.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -133,7 +144,6 @@ public class LoginActivity extends BaseActivity {
 
     public void createUser(String email, String password) {
         if (true) { // Validation check
-            showProgressDialog();
             AppController.getInstance().firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -144,8 +154,6 @@ public class LoginActivity extends BaseActivity {
                         } else {
 
                         }
-
-                        hideProgressDialog();
                     }
                 });
         }
@@ -157,20 +165,42 @@ public class LoginActivity extends BaseActivity {
             String password = editPassword.getText().toString();
             Crashlytics.setUserIdentifier(email);
 
-            showProgressDialog();
-
             AppController.getInstance().firebaseAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
+                                final Account account = new Account(email, AppConstants.ACCOUNT_TYPE);
+
+                                accountManager.addAccountExplicitly(account, password, null);
+
+                                SyncAdapter.startPeriodicSync(account, getApplicationContext());
+
+                                /*
+                                ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true);
+
+                                SyncRequest request = new SyncRequest.Builder().
+                                        syncPeriodic(AppConstants.SYNC_INTERVAL, AppConstants.SYNC_FLEXTIME).
+                                        setSyncAdapter(account, ContactsContract.AUTHORITY).
+                                        setExtras(new Bundle()).build();
+                                ContentResolver.requestSync(request);
+                                */
+
+                                final Intent intent = new Intent();
+                                intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, email);
+                                intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
+                                intent.putExtra(AccountManager.KEY_AUTHTOKEN, password);
+
+                                setAccountAuthenticatorResult(intent.getExtras());
+                                setResult(RESULT_OK, intent);
+
+
                                 session.setSigned(true);
                                 AppController.getInstance().prepareFirebaseUser();
                                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             } else {
                                 Toast.makeText(LoginActivity.this, "Login Failed", Toast.LENGTH_LONG).show();
                             }
-                            hideProgressDialog();
                         }
                     });
         }

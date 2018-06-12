@@ -20,13 +20,22 @@ package de.welthungerhilfe.cgm.scanner.activities;
 
 import android.app.Activity;
 import android.app.SearchManager;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -36,6 +45,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -47,45 +57,76 @@ import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.ml.vision.FirebaseVision;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions;
+import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.OnClickListener;
 import com.orhanobut.dialogplus.ViewHolder;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.adapters.PersonListAdapter;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerDataAdapter;
 import de.welthungerhilfe.cgm.scanner.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.viewmodels.PersonListViewModel;
 
 public class MainActivity extends BaseActivity implements RecyclerDataAdapter.OnPersonDetail, DateRangePickerDialog.Callback, EventListener<QuerySnapshot> {
     private final String TAG = MainActivity.class.getSimpleName();
     private final int REQUEST_LOCATION = 0x1000;
+    private final int REQUEST_CAMERA = 0x1001;
+
+    private final int PERMISSION_CAMERA = 0x1002;
 
     private int sortType = 0;
     private int diffDays = 0;
     private ArrayList<Person> personList = new ArrayList<>();
 
+    private File mFileTemp;
+
+    private PersonListViewModel viewModel;
+
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
         Crashlytics.log("Add person by QR");
         startActivity(new Intent(MainActivity.this, QRScanActivity.class));
+
+        /*
+        if (!Utils.checkPermission(MainActivity.this, "android.permission.CAMERA") || !Utils.checkPermission(MainActivity.this, "android.permission.WRITE_EXTERNAL_STORAGE")) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_CAMERA);
+        } else {
+            takePhoto();
+        }
+        */
     }
 
     @OnClick(R.id.txtSort)
@@ -238,7 +279,20 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
 
         showProgressDialog();
 
-        loadData();
+        viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
+        viewModel.getObservablePersonList().observe(this, personList->{
+            /*
+            personListAdapter = new PersonListAdapter(PersonListActivity.this, personList);
+            recyclerPersonList.setAdapter(personListAdapter);
+            recyclerPersonList.setLayoutManager(new LinearLayoutManager(PersonListActivity.this));
+            */
+            adapterData = new RecyclerDataAdapter(this, personList);
+            adapterData.setPersonDetailListener(this);
+            recyclerData.setAdapter(adapterData);
+            recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        });
+
+        //loadData();
     }
 
     private void initUI() {
@@ -277,6 +331,14 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         View headerView = navMenu.getHeaderView(0);
         TextView txtUsername = headerView.findViewById(R.id.txtUsername);
         txtUsername.setText(AppController.getInstance().firebaseUser.getEmail());
+
+        Menu menu = navMenu.getMenu();
+        MenuItem menuVersion = menu.findItem(R.id.menuVersion);
+        try {
+            menuVersion.setTitle(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupActionBar() {
@@ -297,6 +359,33 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         };
 
         drawerLayout.addDrawerListener(mDrawerToggle);
+    }
+
+    private void createTempFile() {
+        String state = Environment.getExternalStorageState();
+
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "CGM Scanner");
+        if (!mediaStorageDir.exists())
+            mediaStorageDir.mkdir();
+
+        String tmp = "IMG_" + Long.toString(Utils.getUniversalTimestamp()) + ".png";
+
+        mFileTemp = new File(mediaStorageDir.getPath() + File.separator + tmp);
+    }
+
+    public void takePhoto() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        createTempFile();
+        Uri mImageCaptureUri = null;
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            mImageCaptureUri = Uri.fromFile(mFileTemp);
+        } else {
+            mImageCaptureUri = InternalStorageContentProvider.CONTENT_URI;
+        }
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
+        takePictureIntent.putExtra("return-data", true);
+        startActivityForResult(takePictureIntent, REQUEST_CAMERA);
     }
 
     private void loadData() {
@@ -372,44 +461,6 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         adapterData.clearFitlers();
     }
 
-    public void onActivityResult(int reqCode, int resCode, Intent result) {
-        if (reqCode == REQUEST_LOCATION && resCode == Activity.RESULT_OK) {
-            int radius = result.getIntExtra(AppConstants.EXTRA_RADIUS, 0);
-
-            adapterData.setLocationFilter(session.getLocation(), radius);
-        }
-    }
-
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.menu_search, menu);
-
-        MenuItem searchItem = menu.findItem(R.id.actionSearch);
-        SearchManager searchManager = (SearchManager) MainActivity.this.getSystemService(Context.SEARCH_SERVICE);
-
-        SearchView searchView = null;
-        if (searchItem != null) {
-            searchView = (SearchView) searchItem.getActionView();
-        }
-        if (searchView != null) {
-            searchView.setSearchableInfo(searchManager.getSearchableInfo(MainActivity.this.getComponentName()));
-            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    adapterData.search(query);
-                    return false;
-                }
-
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    return false;
-                }
-            });
-        }
-
-        return super.onCreateOptionsMenu(menu);
-    }
-
     @Override
     public void onPersonDetail(Person person) {
         Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
@@ -455,6 +506,87 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             } else {
                 recyclerData.setVisibility(View.VISIBLE);
                 txtNoPerson.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_search, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.actionSearch);
+        SearchManager searchManager = (SearchManager) MainActivity.this.getSystemService(Context.SEARCH_SERVICE);
+
+        SearchView searchView = null;
+        if (searchItem != null) {
+            searchView = (SearchView) searchItem.getActionView();
+        }
+        if (searchView != null) {
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(MainActivity.this.getComponentName()));
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    adapterData.search(query);
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    return false;
+                }
+            });
+        }
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSION_CAMERA && grantResults[0] >= 0 && grantResults[1] >= 0) {
+            takePhoto();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int reqCode, int resCode, Intent result) {
+        if (reqCode == REQUEST_LOCATION && resCode == Activity.RESULT_OK) {
+            int radius = result.getIntExtra(AppConstants.EXTRA_RADIUS, 0);
+
+            adapterData.setLocationFilter(session.getLocation(), radius);
+        } else if (reqCode == REQUEST_CAMERA) {
+            if (resCode == RESULT_OK) {
+                Uri mImageUri = Uri.fromFile(mFileTemp);
+
+                try {
+                    FirebaseVisionImage image = FirebaseVisionImage.fromFilePath(MainActivity.this, mImageUri);
+
+                    FirebaseVisionBarcodeDetectorOptions options = new FirebaseVisionBarcodeDetectorOptions.Builder()
+                            .setBarcodeFormats(FirebaseVisionBarcode.FORMAT_QR_CODE, FirebaseVisionBarcode.FORMAT_AZTEC)
+                            .build();
+
+
+                    FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
+                            .getVisionBarcodeDetector();
+
+                    Task<List<FirebaseVisionBarcode>> scanResult = detector.detectInImage(image)
+                            .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
+                                @Override
+                                public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
+                                    // Task completed successfully
+                                    // ...
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    // Task failed with an exception
+                                    // ...
+                                }
+                            });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

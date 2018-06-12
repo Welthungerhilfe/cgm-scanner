@@ -81,4 +81,10 @@
     <string name="progress_uploading">progress uploading</string>
     <string name="upload_success">upload success</string>
     <string name="upload_failure">upload failure</string>
+
+
+    <!-- Sync Adapter -->
+    <string name="account_type">de.welthungerhilfe.cgm.scanner</string>
+    <string name="sync_authority">de.welthungerhilfe.cgm.scanner</string>
+    <string name="sync_provider">de.welthungerhilfe.cgm.scanner.provider</string>
 </resources>

@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,8 +48,8 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapter.ViewHolder> implements Filterable {
     private Context context;
-    private ArrayList<Person> personList;
-    private ArrayList<Person> filteredList;
+    private List<Person> personList;
+    private List<Person> filteredList;
     private int lastPosition = -1;
 
     private int sortType = 0; // 0 : All, 1 : date, 2 : location, 3 : wasting, 4 : stunting;
@@ -60,7 +61,7 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
 
     private OnPersonDetail personDetailListener;
 
-    public RecyclerDataAdapter(Context ctx, ArrayList<Person> pl) {
+    public RecyclerDataAdapter(Context ctx, List<Person> pl) {
         context = ctx;
         personList = pl;
         filteredList = pl;

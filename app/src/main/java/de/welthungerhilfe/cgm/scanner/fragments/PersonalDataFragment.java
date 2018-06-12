@@ -31,6 +31,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.AppCompatRadioButton;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,9 +59,12 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.activities.ImageDetailActivity;
 import de.welthungerhilfe.cgm.scanner.activities.LocationDetectActivity;
+import de.welthungerhilfe.cgm.scanner.activities.MainActivity;
+import de.welthungerhilfe.cgm.scanner.adapters.RecyclerDataAdapter;
 import de.welthungerhilfe.cgm.scanner.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 /**
@@ -102,15 +106,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         View view = inflater.inflate(R.layout.fragment_personal, container, false);
 
         view.findViewById(R.id.rytConsentDetail).setOnClickListener(this);
-        /*
-        imgBirth = view.findViewById(R.id.imgBirth);
-        imgBirth.setOnClickListener(this);
-        */
         view.findViewById(R.id.imgBirth).setOnClickListener(this);
-        /*
-        imgLocation = view.findViewById(R.id.imgLocation);
-        imgLocation.setOnClickListener(this);
-        */
+
         imgLocation = view.findViewById(R.id.imgLocation);
         imgLocation.setOnClickListener(this);
         view.findViewById(R.id.txtBack).setOnClickListener(this);
@@ -331,8 +328,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         Glide.with(context).load(downloadUrl.toString()).into(imgConsent);
                     //do something with downloadurl
                 }
-
-
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
