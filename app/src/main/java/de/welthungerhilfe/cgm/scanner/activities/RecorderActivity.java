@@ -394,7 +394,7 @@ public class RecorderActivity extends Activity {
             mOverlaySurfaceView.setMode(OverlaySurface.NO_OVERLAY);
             mIsRecording=true;
 
-            
+
         } else {
             // TODO: Now needed for screen recording during Pre-Test
             // TODO: remove when video recording for ML is implemented
@@ -951,16 +951,17 @@ public class RecorderActivity extends Activity {
                 mScanningWorkflowStep + "_" + String.format("%03d", mNumberOfFilesWritten) + ".png";
         File currentImg = new File(currentImgFolder,currentImgFilename);
 
-        try (FileOutputStream out = new FileOutputStream(currentImg)) {
-            YuvImage yuvImage = new YuvImage(currentTangoImageBuffer.data.array(), ImageFormat.NV21, currentTangoImageBuffer.width, currentTangoImageBuffer.height, null);
-            yuvImage.compressToJpeg(new Rect(0, 0, currentTangoImageBuffer.width, currentTangoImageBuffer.height), 50, out);
+        int[] pixels = convertYUV420_NV21toRGB8888(currentTangoImageBuffer.data.array(), currentTangoImageBuffer.width, currentTangoImageBuffer.height);
+        Bitmap inputBitmap = Bitmap.createBitmap(pixels, currentTangoImageBuffer.width, currentTangoImageBuffer.height, Bitmap.Config.ARGB_8888);
+        try {
+            FileOutputStream out = new FileOutputStream(currentImg);
+            inputBitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
             out.flush();
             out.close();
-            // Direct Upload to Firebase Storage
-            uploadFromUri(Uri.fromFile(currentImg));
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     /**
