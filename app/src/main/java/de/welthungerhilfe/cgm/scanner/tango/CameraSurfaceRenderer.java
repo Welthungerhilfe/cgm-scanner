@@ -51,10 +51,6 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
     private static final int RECORDING_ON = 1;
     private static final int RECORDING_RESUMED = 2;
 
-    private TextureMovieEncoder mVideoEncoder;
-    private File mOutputFile;
-
-
     private final float[] mSTMatrix = new float[16];
     private int mTextureId;
 
@@ -111,14 +107,10 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
      * Constructs CameraSurfaceRenderer.
      * <p>
      * @param callback A small callback to allow the caller to introduce application-specific code to be executed
-     * @param movieEncoder video encoder object
-     * @param outputFile output file for encoded video; forwarded to movieEncoder
      */
 
-    public CameraSurfaceRenderer(TextureMovieEncoder movieEncoder, File outputFile, RenderCallback callback) {
+    public CameraSurfaceRenderer(RenderCallback callback) {
         mRenderCallback = callback;
-        mVideoEncoder = movieEncoder;
-        mOutputFile = outputFile;
 
         mTextureId = INVALID_TEXTURE_ID;
 
@@ -213,7 +205,7 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
         // We're starting up or coming back.  Either way we've got a new EGLContext that will
         // need to be shared with the video encoder, so figure out if a recording is already
         // in progress.
-        mRecordingEnabled = mVideoEncoder.isRecording();
+        //mRecordingEnabled = mVideoEncoder.isRecording();
         if (mRecordingEnabled) {
             mRecordingStatus = RECORDING_RESUMED;
         } else {
@@ -249,57 +241,6 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
         // Call application-specific code that needs to run on the OpenGL thread.
         // This is where updateTexImage is called in contrast to grafikas Show+Capture Camera example.
         mRenderCallback.preRender();
-
-        // If the recording state is changing, take care of it here.  Ideally we wouldn't
-        // be doing all this in onDrawFrame(), but the EGLContext sharing with GLSurfaceView
-        // makes it hard to do elsewhere.
-        if (mRecordingEnabled) {
-            switch (mRecordingStatus) {
-                case RECORDING_OFF:
-                    Log.d(TAG, "START recording");
-                    // start recording
-                    mVideoEncoder.startRecording(new TextureMovieEncoder.EncoderConfig(
-                            mOutputFile, 640, 480, 1000000, EGL14.eglGetCurrentContext()));
-                    mRecordingStatus = RECORDING_ON;
-                    break;
-                case RECORDING_RESUMED:
-                    Log.d(TAG, "RESUME recording");
-                    mVideoEncoder.updateSharedContext(EGL14.eglGetCurrentContext());
-                    mRecordingStatus = RECORDING_ON;
-                    break;
-                case RECORDING_ON:
-                    // yay
-                    break;
-                default:
-                    throw new RuntimeException("unknown status " + mRecordingStatus);
-            }
-        } else {
-            switch (mRecordingStatus) {
-                case RECORDING_ON:
-                case RECORDING_RESUMED:
-                    // stop recording
-                    Log.d(TAG, "STOP recording");
-                    mVideoEncoder.stopRecording();
-                    mRecordingStatus = RECORDING_OFF;
-                    break;
-                case RECORDING_OFF:
-                    // yay
-                    break;
-                default:
-                    throw new RuntimeException("unknown status " + mRecordingStatus);
-            }
-        }
-
-        // Set the video encoder's texture name.  We only need to do this once, but in the
-        // current implementation it has to happen after the video encoder is started, so
-        // we just do it here.
-        //
-        // TODO: be less lame.
-        mVideoEncoder.setTextureId(mTextureId);
-
-        // Tell the video encoder thread that a new frame is available.
-        // This will be ignored if we're not actually recording.
-        mVideoEncoder.frameAvailable(mSurfaceTexture);
 
         if (mIncomingWidth <= 0 || mIncomingHeight <= 0) {
             // Texture size isn't set yet.  This is only used for the filters, but to be
