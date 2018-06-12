@@ -138,11 +138,14 @@ public class CreateDataActivity extends BaseActivity {
         if (qrCode != null) {
             checkQR();
         } else {
+            /*
             loadMeasures();
             loadConsents();
+            */
 
             viewModel.getObservableMeasureList(person).observe(this, measures->{
-                measureFragment.addMeasures(measures);
+                if (measures != null)
+                    measureFragment.addMeasures(measures);
                 //growthFragment.setChartData();
             });
         }
@@ -247,7 +250,7 @@ public class CreateDataActivity extends BaseActivity {
 
     public void setMeasureData(float height, float weight, float muac, float headCircumference, String additional, Loc location) {
         final Measure measure = new Measure();
-        measure.setId(Utils.getSaltString(20));
+        measure.setId(AppController.getInstance().getMeasureId());
         measure.setDate(System.currentTimeMillis());
         long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
         measure.setAge(age);
@@ -259,6 +262,7 @@ public class CreateDataActivity extends BaseActivity {
         measure.setLocation(location);
         measure.setType(AppConstants.VAL_MEASURE_MANUAL);
         measure.setPersonId(person.getId());
+        measure.setTimestamp(Utils.getUniversalTimestamp());
 
 
         new OfflineTask().saveMeasure(measure);
@@ -553,7 +557,13 @@ public class CreateDataActivity extends BaseActivity {
         long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
         measure.setAge(age);
         measure.setType(AppConstants.VAL_MEASURE_AUTO);
+        measure.setTimestamp(Utils.getUniversalTimestamp());
+        measure.setPersonId(person.getId());
+        measure.setId(AppController.getInstance().getMeasureId());
 
+        new OfflineTask().saveMeasure(measure);
+
+        /*
         AppController.getInstance().firebaseFirestore.collection("persons")
                 .document(person.getId())
                 .collection("measures")
@@ -583,6 +593,7 @@ public class CreateDataActivity extends BaseActivity {
                         viewpager.setCurrentItem(1);
                     }
                 });
+                */
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {

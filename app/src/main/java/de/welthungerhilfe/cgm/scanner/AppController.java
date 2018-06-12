@@ -87,4 +87,8 @@ public class AppController extends Application {
     public String getPersonId(String name) {
         return Utils.getAndroidID(getContentResolver()) + "_" + name + "_" + Utils.getUniversalTimestamp() + "_" + Utils.getSaltString(16);
     }
+
+    public String getMeasureId() {
+        return Utils.getAndroidID(getContentResolver()) + "_measure_" + Utils.getUniversalTimestamp() + "_" + Utils.getSaltString(16);
+    }
 }

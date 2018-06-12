@@ -31,11 +31,19 @@ import de.welthungerhilfe.cgm.scanner.models.Person;
 
 public class OfflineTask {
     public interface OnLoadPerson {
-        void onLoaded(List<Person> personList);
+        void onPersonLoaded(List<Person> list);
+    }
+
+    public interface OnLoadMeasure {
+        void onMeasureLoaded(List<Measure> list);
     }
 
     public void getSyncablePerson(OnLoadPerson l, long timestamp) {
-        new LoadTask(l).execute(timestamp);
+        new LoadPersonTask(l).execute(timestamp);
+    }
+
+    public void getSyncableMeasure(OnLoadMeasure l, long timestamp) {
+        new LoadMeasureTask(l).execute(timestamp);
     }
 
     public void savePerson(Person person) {
@@ -62,10 +70,10 @@ public class OfflineTask {
         new UpdateTask().execute(measure);
     }
 
-    private static class LoadTask extends AsyncTask<Long, Void, List<Person>> {
+    private static class LoadPersonTask extends AsyncTask<Long, Void, List<Person>> {
         OnLoadPerson listener;
 
-        LoadTask(OnLoadPerson listener) {
+        LoadPersonTask(OnLoadPerson listener) {
             this.listener = listener;
         }
 
@@ -75,8 +83,26 @@ public class OfflineTask {
         }
 
         @Override
-        public void onPostExecute(List<Person> persons) {
-            listener.onLoaded(persons);
+        public void onPostExecute(List<Person> data) {
+            listener.onPersonLoaded(data);
+        }
+    }
+
+    private static class LoadMeasureTask extends AsyncTask<Long, Void, List<Measure>> {
+        OnLoadMeasure listener;
+
+        LoadMeasureTask(OnLoadMeasure listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        protected List<Measure> doInBackground(Long... timestamp) {
+            return AppController.getInstance().offlineDb.offlineDao().getSyncableMeasure(timestamp[0]);
+        }
+
+        @Override
+        public void onPostExecute(List<Measure> data) {
+            listener.onMeasureLoaded(data);
         }
     }
 

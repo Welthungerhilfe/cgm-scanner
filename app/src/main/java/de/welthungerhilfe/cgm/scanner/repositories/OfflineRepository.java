@@ -47,6 +47,10 @@ public class OfflineRepository {
         new OfflineTask().updatePerson(person);
     }
 
+    public void updateMeasure(Measure measure) {
+        new OfflineTask().updateMeasure(measure);
+    }
+
     public LiveData<Person> getPerson(String personId) {
         return AppController.getInstance().offlineDb.offlineDao().getPerson(personId);
     }

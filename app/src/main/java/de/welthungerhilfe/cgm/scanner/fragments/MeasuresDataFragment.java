@@ -96,7 +96,8 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void addMeasures(List<Measure> measures) {
-        adapterMeasure.addMeasures(measures);
+        if (adapterMeasure != null)
+            adapterMeasure.addMeasures(measures);
     }
 
     public void createMeasure() {

@@ -81,6 +81,9 @@ public interface OfflineDao {
     @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE personId=:personId")
     LiveData<List<Measure>> findMeasures(String personId);
 
+    @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE timestamp>:timestamp")
+    List<Measure> getSyncableMeasure(long timestamp);
+
     @Insert(onConflict = REPLACE)
     void saveMeasure(Measure measure);
 

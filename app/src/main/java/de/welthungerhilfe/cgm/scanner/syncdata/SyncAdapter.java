@@ -16,6 +16,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -25,6 +26,7 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.repositories.OfflineRepository;
@@ -33,7 +35,7 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
-public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineTask.OnLoadPerson {
+public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineTask.OnLoadPerson, OfflineTask.OnLoadMeasure {
     private final AccountManager mAccountManager;
     private final Context mContext;
 
@@ -54,6 +56,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
         prevTimestamp = session.getSyncTimestamp();
 
         new OfflineTask().getSyncablePerson(this, prevTimestamp);
+        new OfflineTask().getSyncableMeasure(this, prevTimestamp);
 
         AppController.getInstance().firebaseFirestore.collection("persons")
                 .whereGreaterThan("timestamp", prevTimestamp)
@@ -77,34 +80,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                         }
                     }
                 });
-    }
-
-    @Override
-    public void onLoaded(List<Person> personList) {
-        for (int i = 0; i < personList.size(); i++) {
-            personList.get(i).setTimestamp(Utils.getUniversalTimestamp());
-
-            int finalI = i;
-            AppController.getInstance().firebaseFirestore.collection("persons")
-                    .document(personList.get(i).getId())
-                    .set(personList.get(i))
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            personList.get(finalI).setTimestamp(prevTimestamp);
-
-                            session.setSyncTimestamp(prevTimestamp);
-                        }
-                    })
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            OfflineRepository.getInstance().updatePerson(personList.get(finalI));
-
-                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                        }
-                    });
-        }
     }
 
     private static void syncImmediately(Account account, Context context) {
@@ -138,5 +113,62 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
 
         syncImmediately(newAccount, context);
 
+    }
+
+    @Override
+    public void onPersonLoaded(List<Person> personList) {
+        for (int i = 0; i < personList.size(); i++) {
+            personList.get(i).setTimestamp(Utils.getUniversalTimestamp());
+
+            int finalI = i;
+            AppController.getInstance().firebaseFirestore.collection("persons")
+                    .document(personList.get(i).getId())
+                    .set(personList.get(i))
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            personList.get(finalI).setTimestamp(prevTimestamp);
+
+                            session.setSyncTimestamp(prevTimestamp);
+                        }
+                    })
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            OfflineRepository.getInstance().updatePerson(personList.get(finalI));
+
+                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
+                        }
+                    });
+        }
+    }
+
+    @Override
+    public void onMeasureLoaded(List<Measure> measureList) {
+        for (int i = 0; i < measureList.size(); i++) {
+            measureList.get(i).setTimestamp(Utils.getUniversalTimestamp());
+
+            int finalI = i;
+            AppController.getInstance().firebaseFirestore.collection("persons")
+                    .document(measureList.get(i).getPersonId())
+                    .collection("measures")
+                    .add(measureList.get(i))
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            measureList.get(finalI).setTimestamp(prevTimestamp);
+
+                            session.setSyncTimestamp(prevTimestamp);
+                        }
+                    })
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            OfflineRepository.getInstance().updateMeasure(measureList.get(finalI));
+
+                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
+                        }
+                    });
+        }
     }
 }
