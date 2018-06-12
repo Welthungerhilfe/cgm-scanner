@@ -115,9 +115,6 @@ public class RecorderActivity extends Activity {
     private static OverlaySurface mOverlaySurfaceView;
 
     private TextView mDisplayTextView;
-
-    // this is static so it survives activity restarts
-    private static TextureMovieEncoder sVideoEncoder = new TextureMovieEncoder();
     private CameraSurfaceRenderer mRenderer;
 
     private Tango mTango;
@@ -138,8 +135,12 @@ public class RecorderActivity extends Activity {
     private int mDisplayRotation = Surface.ROTATION_0;
 
     private Semaphore mutex_on_mIsRecording;
-    private File mVideoOutputFile;
 
+    // variables for Pose and point clouds
+    private float mDeltaTime;
+    private int mValidPoseCallbackCount;
+    private int mPointCloudCallbackCount;
+    private boolean mTimeToTakeSnap;
     private String mPointCloudFilename;
     private int mNumberOfFilesWritten;
     private ArrayList<float[]> mPosePositionBuffer;
@@ -148,16 +149,10 @@ public class RecorderActivity extends Activity {
     private ArrayList<String> mPointCloudFilenameBuffer;
     private float[] cam2dev_Transform;
     private int mNumPoseInSequence;
-    private Boolean mTimeToTakeSnap;
-
-    private int mValidPoseCallbackCount;
     private int mPreviousPoseStatus;
-    private float mDeltaTime;
     private float mPosePreviousTimeStamp;
     private float mPointCloudPreviousTimeStamp;
     private float mCurrentTimeStamp;
-
-    private int mPointCloudCallbackCount;
 
     boolean mIsRecording;
 
@@ -184,16 +179,6 @@ public class RecorderActivity extends Activity {
     private BabyFront0Fragment babyFront0Fragment;
     private BabyBack0Fragment babyBack0Fragment;
     private BabyBack1Fragment babyBack1Fragment;
-
-
-    private final String INFANT_FULL_FRONT = "infant_full_front";
-    private final String INFANT_TURN = "infant_turn";
-    private final String INFANT_FRONT = "infant_front";
-    private final String INFANT_BACK = "infant_back";
-    private InfantFullFrontFragment infantFullFrontFragment;
-    private InfantTurnFragment infantTurnFragment;
-    private InfantFrontFragment infantFrontFragment;
-    private InfantBackFragment infantBackFragment;
 
 
     // TODO: make available in Settings
@@ -300,106 +285,7 @@ public class RecorderActivity extends Activity {
             fab.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorPink)));
             mIsRecording = true;
 
-        // INFANT
-        }
-        else if (mScanningWorkflowStep ==     AppConstants.INFANT_FULL_BODY_FRONT_ONBOARDING)
-        {
-            mOverlaySurfaceView.setMode(OverlaySurface.INFANT_OVERLAY);
-            mDisplayTextView.setText(R.string.empty_string);
-            infantFullFrontFragment = new InfantFullFrontFragment();
-            ft.replace(R.id.container, infantFullFrontFragment, INFANT_FULL_FRONT);
-            ft.commit();
-            pauseScan();
-
-        }
-        else if (mScanningWorkflowStep ==     AppConstants.INFANT_FULL_BODY_FRONT_SCAN)
-        {
-            mDisplayTextView.setText(R.string.infant_full_body_front_scan_text);
-            resumeScan();
-
-        }
-        else if (mScanningWorkflowStep ==     AppConstants.INFANT_FULL_BODY_FRONT_RECORDING)
-        {
-            fab.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorPink)));
-            mIsRecording = true;
-
-        }
-        else if (mScanningWorkflowStep ==     AppConstants.INFANT_360_TURN_ONBOARDING)
-        {
-            mDisplayTextView.setText(R.string.empty_string);
-            fab.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorGreen)));
-            infantTurnFragment = new InfantTurnFragment();
-            ft.replace(R.id.container, infantTurnFragment, INFANT_TURN);
-            ft.commit();
-            pauseScan();
-
-        }
-        else if (mScanningWorkflowStep ==     AppConstants.INFANT_360_TURN_SCAN)
-        {
-            mDisplayTextView.setText(R.string.infant_360_turn_scan_text);
-            resumeScan();
-            mOverlaySurfaceView.setMode(OverlaySurface.INFANT_CLOSE_DOWN_UP_OVERLAY);
-
-        }
-        else if (mScanningWorkflowStep ==     AppConstants.INFANT_360_TURN_RECORDING)
-        {
-            fab.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorPink)));
-            mIsRecording = true;
-
-        }
-        else if (mScanningWorkflowStep ==     AppConstants.INFANT_FRONT_UP_DOWN_ONBOARDING)
-        {
-            mDisplayTextView.setText(R.string.empty_string);
-            fab.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorGreen)));
-            infantFrontFragment = new InfantFrontFragment();
-            ft.replace(R.id.container, infantFrontFragment, INFANT_FRONT);
-            ft.commit();
-            pauseScan();
-
-        }
-        else if (mScanningWorkflowStep ==     AppConstants.INFANT_FRONT_UP_DOWN_SCAN)
-        {
-            mDisplayTextView.setText(R.string.infant_front_up_down_scan_text);
-            mOverlaySurfaceView.setMode(OverlaySurface.INFANT_CLOSE_DOWN_UP_OVERLAY);
-            resumeScan();
-
-        }
-        else if (mScanningWorkflowStep ==     AppConstants.INFANT_FRONT_UP_DOWN_RECORDING)
-        {
-            fab.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorPink)));
-            mOverlaySurfaceView.setMode(OverlaySurface.NO_OVERLAY);
-            mIsRecording = true;
-
-        }
-        else if (mScanningWorkflowStep ==     AppConstants.INFANT_BACK_UP_DOWN_ONBOARDING)
-        {
-            mDisplayTextView.setText(R.string.empty_string);
-            fab.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorGreen)));
-            infantBackFragment = new InfantBackFragment();
-            ft.replace(R.id.container, infantBackFragment, INFANT_BACK);
-            ft.commit();
-            pauseScan();
-
-        }
-        else if (mScanningWorkflowStep ==     AppConstants.INFANT_BACK_UP_DOWN_SCAN)
-        {
-            mDisplayTextView.setText(R.string.infant_back_up_down_scan_text);
-            mOverlaySurfaceView.setMode(OverlaySurface.INFANT_CLOSE_DOWN_UP_OVERLAY);
-            resumeScan();
-
-        }
-        else if (mScanningWorkflowStep ==     AppConstants.INFANT_BACK_UP_DOWN_RECORDING)
-        {
-            fab.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorPink)));
-            mOverlaySurfaceView.setMode(OverlaySurface.NO_OVERLAY);
-            mIsRecording=true;
-
-
         } else {
-            // TODO: Now needed for screen recording during Pre-Test
-            // TODO: remove when video recording for ML is implemented
-            measurementFinished();
-
             Log.v(TAG,"ScanningWorkflow finished for person "+person.getSurname());
 
             //TODO: set data and location async
@@ -463,18 +349,6 @@ public class RecorderActivity extends Activity {
         return R.layout.activity_recorder;
     }
 
-    /*
-     * get path to video output
-     */
-    protected File getVideoOutputFile ()
-    {
-        return mVideoOutputFile;
-    }
-
-    protected void measurementFinished ()
-    {
-
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -501,7 +375,6 @@ public class RecorderActivity extends Activity {
         };
         if(!hasPermissions(this, PERMISSIONS)){
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
-            //Activity.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
         }
 
         fab = findViewById(R.id.fab_scan_result);
@@ -544,7 +417,6 @@ public class RecorderActivity extends Activity {
         mPoseTimestampBuffer = new ArrayList<Float>();
         mPointCloudFilenameBuffer = new ArrayList<String>();
         mNumPoseInSequence = 0;
-        mPointCloudCallbackCount = 0;
         mutex_on_mIsRecording = new Semaphore(1,true);
         mIsRecording = false;
 
@@ -559,6 +431,7 @@ public class RecorderActivity extends Activity {
     }
 
     private void setupScanArtefacts() {
+        // TODO: use mkdirs
         mExtFileDir = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
         File personalFilesDir = new File(mExtFileDir,mQrCode+"/");
         if(!personalFilesDir.exists()) {
@@ -584,7 +457,6 @@ public class RecorderActivity extends Activity {
             }
         }
 
-        mVideoOutputFile = new File(mScanArtefactsOutputFolder,mQrCode+".mp4");
         mPointCloudSaveFolderPath = mScanArtefactsOutputFolder.getAbsolutePath();
         Log.v(TAG,"mPointCloudSaveFolderPath: "+mPointCloudSaveFolderPath);
     }
@@ -603,7 +475,7 @@ public class RecorderActivity extends Activity {
     // TODO: setup own renderer for scanning process (or attribute Apache License 2.0 from Google)
     private void setupRenderer() {
         mCameraSurfaceView.setEGLContextClientVersion(2);
-        mRenderer = new CameraSurfaceRenderer(sVideoEncoder, mVideoOutputFile, new CameraSurfaceRenderer.RenderCallback() {
+        mRenderer = new CameraSurfaceRenderer(new CameraSurfaceRenderer.RenderCallback() {
 
             @Override
             public void preRender() {
@@ -766,7 +638,6 @@ public class RecorderActivity extends Activity {
 
             String[] poseStatusCode = {"POSE_INITIALIZING","POSE_VALID","POSE_INVALID","POSE_UNKNOWN"};
 
-            // TODO: save pose data
             @Override
             public void onPoseAvailable(final TangoPoseData pose) {
                 mDeltaTime = (float) (pose.timestamp - mPosePreviousTimeStamp)
@@ -821,6 +692,7 @@ public class RecorderActivity extends Activity {
 
 
                 // Background task for writing to file
+                // TODO refactor to top-level class or make static?
                 class SendCommandTask extends AsyncTask<Void, Void, Boolean> {
                     /** The system calls this to perform work in a worker thread and
                      * delivers it the parameters given to AsyncTask.execute() */
@@ -900,7 +772,8 @@ public class RecorderActivity extends Activity {
                         final TangoImageBuffer currentTangoImageBuffer = copyImageBuffer(tangoImageBuffer);
 
                         // Background task for writing to file
-                        class SendCommandTask extends AsyncTask<Void, Void, Boolean> {
+                        // TODO refactor to top-level class or make static?
+                        class SendImgCommandTask extends AsyncTask<Void, Void, Boolean> {
                             /** The system calls this to perform work in a worker thread and
                              * delivers it the parameters given to AsyncTask.execute() */
                             @Override
@@ -913,7 +786,10 @@ public class RecorderActivity extends Activity {
                                 }
                                 // Saving the frame or not, depending on the current mode.
                                 if ( mIsRecording ) {
+                                    /*
+                                    TODO fix memory leak and crash
                                     writeImageToFile(currentTangoImageBuffer);
+                                    */
                                 }
                                 mutex_on_mIsRecording.release();
                                 return true;
@@ -926,7 +802,7 @@ public class RecorderActivity extends Activity {
 
                             }
                         }
-                        new SendCommandTask().execute();
+                        new SendImgCommandTask().execute();
 
                     }
 
@@ -953,15 +829,15 @@ public class RecorderActivity extends Activity {
 
         int[] pixels = convertYUV420_NV21toRGB8888(currentTangoImageBuffer.data.array(), currentTangoImageBuffer.width, currentTangoImageBuffer.height);
         Bitmap inputBitmap = Bitmap.createBitmap(pixels, currentTangoImageBuffer.width, currentTangoImageBuffer.height, Bitmap.Config.ARGB_8888);
+
         try {
             FileOutputStream out = new FileOutputStream(currentImg);
-            inputBitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+            inputBitmap.compress(Bitmap.CompressFormat.PNG, 50, out);
             out.flush();
             out.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     /**
@@ -1061,6 +937,7 @@ public class RecorderActivity extends Activity {
     /**
      * Set the color camera background texture rotation and save the camera to display rotation.
      */
+
     private void setDisplayRotation() {
         Display display = getWindowManager().getDefaultDisplay();
         mDisplayRotation = display.getRotation();
@@ -1259,6 +1136,7 @@ public class RecorderActivity extends Activity {
             //mWaitingTextView.setText(R.string.waitSavingScan);
             //mWaitingLinearLayout.setVisibility(View.VISIBLE);
             // Background task for writing poses to file
+            // TODO refactor to top-level class or make static?
             class SendCommandTask extends AsyncTask<Context, Void, Uri> {
                 /** The system calls this to perform work in a worker thread and
                  * delivers it the parameters given to AsyncTask.execute() */
