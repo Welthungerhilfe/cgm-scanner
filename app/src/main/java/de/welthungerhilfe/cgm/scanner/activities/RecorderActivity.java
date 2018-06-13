@@ -668,7 +668,10 @@ public class RecorderActivity extends Activity {
             @Override
             public void onPointCloudAvailable(final TangoPointCloudData pointCloudData) {
 
+                // set to true for next RGB image to be written
+                // TODO remove when not necessary anymore (performance/video capture)
                 mPointCloudAvailable = true;
+
                 float[] average = calculateAveragedDepth(pointCloudData.points, pointCloudData.numPoints);
 
                 mOverlaySurfaceView.setDistance(average[0]);
@@ -768,17 +771,10 @@ public class RecorderActivity extends Activity {
                             public void run() {
                                 TangoImageBuffer currentTangoImageBuffer = copyImageBuffer(tangoImageBuffer);
 
-                                try {
-                                    mutex_on_mIsRecording.acquire();
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-
                                 Uri uri = writeImageToFile(currentTangoImageBuffer);
                                 // Direct Upload to Firebase Storage
                                 uploadFromUri(uri,"rgb");
 
-                                mutex_on_mIsRecording.release();
                             }
                         };
                         thread.run();
