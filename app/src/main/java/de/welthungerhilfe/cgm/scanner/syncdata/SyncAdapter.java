@@ -152,7 +152,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
             AppController.getInstance().firebaseFirestore.collection("persons")
                     .document(measureList.get(i).getPersonId())
                     .collection("measures")
-                    .add(measureList.get(i))
+                    .document(measureList.get(i).getId())
+                    .set(measureList.get(i))
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
@@ -161,9 +162,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                             session.setSyncTimestamp(prevTimestamp);
                         }
                     })
-                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
-                        public void onSuccess(DocumentReference documentReference) {
+                        public void onSuccess(Void aVoid) {
                             OfflineRepository.getInstance().updateMeasure(measureList.get(finalI));
 
                             session.setSyncTimestamp(Utils.getUniversalTimestamp());

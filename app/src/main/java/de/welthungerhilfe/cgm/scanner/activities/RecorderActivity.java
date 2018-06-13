@@ -41,6 +41,8 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 
@@ -769,15 +771,11 @@ public class RecorderActivity extends Activity {
                             return;
                         }
 
-                        final TangoImageBuffer currentTangoImageBuffer = copyImageBuffer(tangoImageBuffer);
-
-                        // Background task for writing to file
-                        // TODO refactor to top-level class or make static?
-                        class SendImgCommandTask extends AsyncTask<Void, Void, Boolean> {
-                            /** The system calls this to perform work in a worker thread and
-                             * delivers it the parameters given to AsyncTask.execute() */
+                        Handler handler = new Handler(Looper.getMainLooper());
+                        handler.post(new Runnable() {
                             @Override
-                            protected Boolean doInBackground(Void... params) {
+                            public void run() {
+                                final TangoImageBuffer currentTangoImageBuffer = copyImageBuffer(tangoImageBuffer);
 
                                 try {
                                     mutex_on_mIsRecording.acquire();
@@ -790,33 +788,25 @@ public class RecorderActivity extends Activity {
                                     TODO fix memory leak and crash
                                     writeImageToFile(currentTangoImageBuffer);
                                     */
+
+                                    writeImageToFile(currentTangoImageBuffer);
                                 }
                                 mutex_on_mIsRecording.release();
-                                return true;
                             }
-
-                            /** The system calls this to perform work in the UI thread and delivers
-                             * the result from doInBackground() */
-                            @Override
-                            protected void onPostExecute(Boolean done) {
-
-                            }
-                        }
-                        new SendImgCommandTask().execute();
-
-                    }
-
-                    TangoImageBuffer copyImageBuffer(TangoImageBuffer imageBuffer) {
-                        ByteBuffer clone = ByteBuffer.allocateDirect(imageBuffer.data.capacity());
-                        imageBuffer.data.rewind();
-                        clone.put(imageBuffer.data);
-                        imageBuffer.data.rewind();
-                        clone.flip();
-                        return new TangoImageBuffer(imageBuffer.width, imageBuffer.height,
-                                imageBuffer.stride, imageBuffer.frameNumber,
-                                imageBuffer.timestamp, imageBuffer.format, clone);
+                        });
                     }
                 });
+    }
+
+    private TangoImageBuffer copyImageBuffer(TangoImageBuffer imageBuffer) {
+        ByteBuffer clone = ByteBuffer.allocateDirect(imageBuffer.data.capacity());
+        imageBuffer.data.rewind();
+        clone.put(imageBuffer.data);
+        imageBuffer.data.rewind();
+        clone.flip();
+        return new TangoImageBuffer(imageBuffer.width, imageBuffer.height,
+                imageBuffer.stride, imageBuffer.frameNumber,
+                imageBuffer.timestamp, imageBuffer.format, clone);
     }
 
     private void writeImageToFile(TangoImageBuffer currentTangoImageBuffer) {
@@ -1290,5 +1280,4 @@ public class RecorderActivity extends Activity {
             e.printStackTrace();
         }
     }
-
 }
