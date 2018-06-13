@@ -84,4 +84,8 @@ public class ImageDetailActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(menuItem);
     }
+
+    public void onBackPressed() {
+        finish();
+    }
 }

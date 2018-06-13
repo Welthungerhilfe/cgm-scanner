@@ -106,6 +106,9 @@
         <activity android:name=".activities.RecorderActivity"
             android:screenOrientation="portrait" />
 
+        <activity android:name=".activities.SettingsActivity"
+            android:screenOrientation="portrait" />
+
         <service
             android:name=".helper.service.FirebaseUploadService"
             android:exported="false"/>
