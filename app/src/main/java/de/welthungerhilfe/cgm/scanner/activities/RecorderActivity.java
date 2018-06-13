@@ -814,18 +814,15 @@ public class RecorderActivity extends Activity {
         if (!currentImgFolder.exists())
             currentImgFolder.mkdirs();
         String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
-                mScanningWorkflowStep + "_" + String.format("%03d", mNumberOfFilesWritten) + ".png";
+                mScanningWorkflowStep + "_" + currentTangoImageBuffer.timestamp + ".jpg";
         File currentImg = new File(currentImgFolder,currentImgFilename);
 
-        int[] pixels = convertYUV420_NV21toRGB8888(currentTangoImageBuffer.data.array(), currentTangoImageBuffer.width, currentTangoImageBuffer.height);
-        Bitmap inputBitmap = Bitmap.createBitmap(pixels, currentTangoImageBuffer.width, currentTangoImageBuffer.height, Bitmap.Config.ARGB_8888);
-
-        try {
-            FileOutputStream out = new FileOutputStream(currentImg);
-            inputBitmap.compress(Bitmap.CompressFormat.PNG, 50, out);
+        try (FileOutputStream out = new FileOutputStream(currentImg)) {
+            YuvImage yuvImage = new YuvImage(currentTangoImageBuffer.data.array(), ImageFormat.NV21, currentTangoImageBuffer.width, currentTangoImageBuffer.height, null);
+            yuvImage.compressToJpeg(new Rect(0, 0, currentTangoImageBuffer.width, currentTangoImageBuffer.height), 50, out);
             out.flush();
             out.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
