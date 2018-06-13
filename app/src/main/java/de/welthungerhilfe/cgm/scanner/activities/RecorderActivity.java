@@ -156,7 +156,8 @@ public class RecorderActivity extends Activity {
     private float mPointCloudPreviousTimeStamp;
     private float mCurrentTimeStamp;
 
-    boolean mIsRecording;
+    private boolean mPointCloudAvailable;
+    private boolean mIsRecording;
 
     private Person person;
     private Measure measure;
@@ -166,6 +167,8 @@ public class RecorderActivity extends Activity {
     private File mExtFileDir;
     private File mScanArtefactsOutputFolder;
     private String mPointCloudSaveFolderPath;
+    private File mPointCloudSaveFolder;
+    private File mRgbSaveFolder;
     private long mNowTime;
     private String mNowTimeString;
     private String mQrCode;
@@ -421,6 +424,7 @@ public class RecorderActivity extends Activity {
         mNumPoseInSequence = 0;
         mutex_on_mIsRecording = new Semaphore(1,true);
         mIsRecording = false;
+        mPointCloudAvailable = false;
 
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
@@ -433,34 +437,32 @@ public class RecorderActivity extends Activity {
     }
 
     private void setupScanArtefacts() {
-        // TODO: use mkdirs
         mExtFileDir = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
-        File personalFilesDir = new File(mExtFileDir,mQrCode+"/");
-        if(!personalFilesDir.exists()) {
-            boolean created = personalFilesDir.mkdir();
-            if (created) {
-                Log.i(TAG, "Folder: \"" + personalFilesDir + "\" created\n");
-            } else {
-                Log.e(TAG,"Folder: \"" + personalFilesDir + "\" could not be created!\n");
-            }
-        }
-        // TODO Create when needed!
-        File measurementsFolder = new File(mExtFileDir,mQrCode+"/measurements/");
-        measurementsFolder.mkdir();
 
         mScanArtefactsOutputFolder  = new File(mExtFileDir,mQrCode+"/measurements/"+mNowTimeString+"/");
+        mPointCloudSaveFolder = new File(mScanArtefactsOutputFolder,"pc");
+        mRgbSaveFolder = new File(mScanArtefactsOutputFolder,"rgb");
 
-        if(!mScanArtefactsOutputFolder.exists()) {
-            boolean created = mScanArtefactsOutputFolder.mkdir();
+        if(!mPointCloudSaveFolder.exists()) {
+            boolean created = mPointCloudSaveFolder.mkdirs();
             if (created) {
-                Log.i(TAG, "Folder: \"" + mScanArtefactsOutputFolder + "\" created\n");
+                Log.i(TAG, "Folder: \"" + mPointCloudSaveFolder + "\" created\n");
             } else {
-                Log.e(TAG,"Folder: \"" + mScanArtefactsOutputFolder + "\" could not be created!\n");
+                Log.e(TAG,"Folder: \"" + mPointCloudSaveFolder + "\" could not be created!\n");
             }
         }
 
-        mPointCloudSaveFolderPath = mScanArtefactsOutputFolder.getAbsolutePath();
-        Log.v(TAG,"mPointCloudSaveFolderPath: "+mPointCloudSaveFolderPath);
+        if(!mRgbSaveFolder.exists()) {
+            boolean created = mRgbSaveFolder.mkdirs();
+            if (created) {
+                Log.i(TAG, "Folder: \"" + mRgbSaveFolder + "\" created\n");
+            } else {
+                Log.e(TAG,"Folder: \"" + mRgbSaveFolder + "\" could not be created!\n");
+            }
+        }
+
+        Log.v(TAG,"mPointCloudSaveFolder: "+mPointCloudSaveFolder);
+        Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
     }
 
     public static boolean hasPermissions(Context context, String... permissions) {
@@ -665,8 +667,8 @@ public class RecorderActivity extends Activity {
 
             @Override
             public void onPointCloudAvailable(final TangoPointCloudData pointCloudData) {
-                StringBuilder stringBuilder = new StringBuilder();
-                //stringBuilder.append("Point count: " + pointCloudData.numPoints);
+
+                mPointCloudAvailable = true;
                 float[] average = calculateAveragedDepth(pointCloudData.points, pointCloudData.numPoints);
 
                 mOverlaySurfaceView.setDistance(average[0]);
@@ -757,7 +759,7 @@ public class RecorderActivity extends Activity {
                 new Tango.OnFrameAvailableListener() {
                     @Override
                     public  void onFrameAvailable(TangoImageBuffer tangoImageBuffer, int i) {
-                        if ( ! mIsRecording ) {
+                        if ( ! mIsRecording || ! mPointCloudAvailable) {
                             return;
                         }
 
@@ -772,7 +774,9 @@ public class RecorderActivity extends Activity {
                                     e.printStackTrace();
                                 }
 
-                                writeImageToFile(currentTangoImageBuffer);
+                                Uri uri = writeImageToFile(currentTangoImageBuffer);
+                                // Direct Upload to Firebase Storage
+                                uploadFromUri(uri,"rgb");
 
                                 mutex_on_mIsRecording.release();
                             }
@@ -793,13 +797,10 @@ public class RecorderActivity extends Activity {
                 imageBuffer.timestamp, imageBuffer.format, clone);
     }
 
-    private void writeImageToFile(TangoImageBuffer currentTangoImageBuffer) {
-        File currentImgFolder = new File (mScanArtefactsOutputFolder, "rgb/");
-        if (!currentImgFolder.exists())
-            currentImgFolder.mkdirs();
+    private Uri writeImageToFile(TangoImageBuffer currentTangoImageBuffer) {
         String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
                 mScanningWorkflowStep + "_" + currentTangoImageBuffer.timestamp + ".jpg";
-        File currentImg = new File(currentImgFolder,currentImgFilename);
+        File currentImg = new File(mRgbSaveFolder,currentImgFilename);
 
         try (FileOutputStream out = new FileOutputStream(currentImg)) {
             YuvImage yuvImage = new YuvImage(currentTangoImageBuffer.data.array(), ImageFormat.NV21, currentTangoImageBuffer.width, currentTangoImageBuffer.height, null);
@@ -809,6 +810,7 @@ public class RecorderActivity extends Activity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return Uri.fromFile(currentImg);
     }
 
     /**
@@ -1021,26 +1023,11 @@ public class RecorderActivity extends Activity {
 
         myBuffer.asFloatBuffer().put(pointCloudData.points);
 
-        if(!mScanArtefactsOutputFolder.exists()) {
-            boolean created = mScanArtefactsOutputFolder.mkdir();
-            if (created) {
-                Log.i(TAG, "Folder: \"" + mScanArtefactsOutputFolder.getAbsolutePath() + "\" created\n");
-            }
-        }
-
-        File dir = new File(mPointCloudSaveFolderPath);
-        if(!dir.exists()) {
-            boolean created = dir.mkdir();
-            if (created) {
-                Log.i(TAG, "Folder: \"" + mPointCloudSaveFolderPath + "\" created\n");
-            }
-        }
-
         mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mScanningWorkflowStep +
                 "_" + String.format("%03d", mNumberOfFilesWritten) + ".vtk";
-        mPointCloudFilenameBuffer.add(mPointCloudSaveFolderPath + mPointCloudFilename);
-        Log.v(TAG,"added pointcloud "+mPointCloudSaveFolderPath + mPointCloudFilename);
-        File file = new File(dir, mPointCloudFilename);
+        mPointCloudFilenameBuffer.add(mPointCloudSaveFolder + mPointCloudFilename);
+        Log.v(TAG,"added pointcloud "+mPointCloudSaveFolder + mPointCloudFilename);
+        File file = new File(mPointCloudSaveFolder, mPointCloudFilename);
 
 
         try {
@@ -1074,7 +1061,7 @@ public class RecorderActivity extends Activity {
 
             out.close();
             // Direct Upload to Firebase Storage
-            uploadFromUri(Uri.fromFile(file));
+            uploadFromUri(Uri.fromFile(file), "pc");
             mNumberOfFilesWritten++;
             //mTimeToTakeSnap = false;
 
@@ -1184,7 +1171,7 @@ public class RecorderActivity extends Activity {
 
     }
 
-    private void uploadFromUri(Uri fileUri) {
+    private void uploadFromUri(Uri fileUri, String subfolder) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
         // Start MyUploadService to upload the file, so that the file is uploaded
@@ -1193,6 +1180,7 @@ public class RecorderActivity extends Activity {
                 .putExtra(FirebaseUploadService.EXTRA_FILE_URI, fileUri)
                 .putExtra(AppConstants.EXTRA_QR, mQrCode)
                 .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, mNowTimeString)
+                .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, subfolder)
                 .setAction(FirebaseUploadService.ACTION_UPLOAD));
     }
 
@@ -1200,16 +1188,9 @@ public class RecorderActivity extends Activity {
     // This function writes the pose data and timestamps to .vtk files in binary
     private void writePoseToFile(int numPoints) {
 
-        File dir = new File(mPointCloudSaveFolderPath);
-        if(!dir.exists()) {
-            boolean created = dir.mkdir();
-            if (created) {
-                Log.i(TAG, "Folder: \"" + mPointCloudSaveFolderPath + "\" created\n");
-            }
-        }
         String poseFileName = "pc_" +mQrCode+"_"+ mNowTimeString + "_poses.vtk";
-        mPointCloudFilenameBuffer.add(mPointCloudSaveFolderPath + poseFileName);
-        File file = new File(dir, poseFileName);
+        mPointCloudFilenameBuffer.add(mPointCloudSaveFolder + poseFileName);
+        File file = new File(mPointCloudSaveFolder, poseFileName);
 
         try {
             DataOutputStream out = new DataOutputStream(new BufferedOutputStream(

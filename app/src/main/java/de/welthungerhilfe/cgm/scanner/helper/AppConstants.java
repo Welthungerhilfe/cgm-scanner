@@ -52,6 +52,7 @@ public class AppConstants {
     public static final String EXTRA_PERSON_LIST = "extra_person_list";
     public static final String EXTRA_PERSON = "extra_person";
     public static final String EXTRA_SCANTIMESTAMP = "extra_scantimestamp";
+    public static final String EXTRA_SCANARTEFACT_SUBFOLDER = "extra_scanartefact_subfolder";
 
     public static final String PARAM_AUTHTOKEN_TYPE = "authtoken_type";
     public static final String PARAM_AUTH_NAME = "auth_name";
@@ -75,17 +76,5 @@ public class AppConstants {
     public static final int BABY_FULL_BODY_BACK_SCAN = 108;
     public static final int BABY_FULL_BODY_BACK_RECORDING = 109;
     public static final int STANDING_INFANT_SCAN = 200;
-    public static final int INFANT_FULL_BODY_FRONT_ONBOARDING = 201;
-    public static final int INFANT_FULL_BODY_FRONT_SCAN = 202;
-    public static final int INFANT_FULL_BODY_FRONT_RECORDING = 203;
-    public static final int INFANT_360_TURN_ONBOARDING = 204;
-    public static final int INFANT_360_TURN_SCAN = 205;
-    public static final int INFANT_360_TURN_RECORDING = 206;
-    public static final int INFANT_FRONT_UP_DOWN_ONBOARDING = 207;
-    public static final int INFANT_FRONT_UP_DOWN_SCAN = 208;
-    public static final int INFANT_FRONT_UP_DOWN_RECORDING = 209;
-    public static final int INFANT_BACK_UP_DOWN_ONBOARDING = 210;
-    public static final int INFANT_BACK_UP_DOWN_SCAN = 211;
-    public static final int INFANT_BACK_UP_DOWN_RECORDING = 212;
 
 }
