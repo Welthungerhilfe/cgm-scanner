@@ -317,6 +317,9 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                 switch (menuItem.getItemId()) {
                     case R.id.menuHome:
                         break;
+                    case R.id.menuSettings:
+                        startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                        break;
                     case R.id.menuLogout:
                         AppController.getInstance().firebaseAuth.signOut();
                         session.setSigned(false);
@@ -331,14 +334,6 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         View headerView = navMenu.getHeaderView(0);
         TextView txtUsername = headerView.findViewById(R.id.txtUsername);
         txtUsername.setText(AppController.getInstance().firebaseUser.getEmail());
-
-        Menu menu = navMenu.getMenu();
-        MenuItem menuVersion = menu.findItem(R.id.menuVersion);
-        try {
-            menuVersion.setTitle(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
     private void setupActionBar() {
