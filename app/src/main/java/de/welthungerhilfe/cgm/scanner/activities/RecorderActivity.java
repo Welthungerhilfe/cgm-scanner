@@ -549,6 +549,7 @@ public class RecorderActivity extends Activity {
         // Initialize Tango Service as a normal Android Service. Since we call mTango.disconnect()
         // in onPause, this will unbind Tango Service, so every time onResume gets called we
         // should create a new Tango object.
+
         mTango = new Tango(RecorderActivity.this, new Runnable() {
             // Pass in a Runnable to be called from UI thread when Tango is ready; this Runnable
             // will be running on a new thread.
@@ -581,6 +582,7 @@ public class RecorderActivity extends Activity {
                 }
             }
         });
+
         mCameraSurfaceView.onResume();
         Log.d(TAG, "onResume complete: " + this);
     }
@@ -695,12 +697,9 @@ public class RecorderActivity extends Activity {
 
                 // Background task for writing to file
                 // TODO refactor to top-level class or make static?
-                class SendCommandTask extends AsyncTask<Void, Void, Boolean> {
-                    /** The system calls this to perform work in a worker thread and
-                     * delivers it the parameters given to AsyncTask.execute() */
+                Runnable thread = new Runnable() {
                     @Override
-                    protected Boolean doInBackground(Void... params) {
-
+                    public void run() {
                         try {
                             mutex_on_mIsRecording.acquire();
                         } catch (InterruptedException e) {
@@ -711,18 +710,9 @@ public class RecorderActivity extends Activity {
                             writePointCloudToFile(pointCloudData, framePairs);
                         }
                         mutex_on_mIsRecording.release();
-                        return true;
                     }
-
-                    /** The system calls this to perform work in the UI thread and delivers
-                     * the result from doInBackground() */
-                    @Override
-                    protected void onPostExecute(Boolean done) {
-
-                    }
-                }
-                new SendCommandTask().execute();
-
+                };
+                thread.run();
             }
 
 
@@ -771,29 +761,23 @@ public class RecorderActivity extends Activity {
                             return;
                         }
 
-                        Handler handler = new Handler(Looper.getMainLooper());
-                        handler.post(new Runnable() {
+                        Runnable thread = new Runnable() {
                             @Override
                             public void run() {
-                                final TangoImageBuffer currentTangoImageBuffer = copyImageBuffer(tangoImageBuffer);
+                                TangoImageBuffer currentTangoImageBuffer = copyImageBuffer(tangoImageBuffer);
 
                                 try {
                                     mutex_on_mIsRecording.acquire();
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
-                                // Saving the frame or not, depending on the current mode.
-                                if ( mIsRecording ) {
-                                    /*
-                                    TODO fix memory leak and crash
-                                    writeImageToFile(currentTangoImageBuffer);
-                                    */
 
-                                    writeImageToFile(currentTangoImageBuffer);
-                                }
+                                writeImageToFile(currentTangoImageBuffer);
+
                                 mutex_on_mIsRecording.release();
                             }
-                        });
+                        };
+                        thread.run();
                     }
                 });
     }

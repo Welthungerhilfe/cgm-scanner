@@ -145,7 +145,7 @@ public class CreateDataActivity extends BaseActivity {
 
             viewModel.getObservableMeasureList(person).observe(this, measures->{
                 if (measures != null)
-                    measureFragment.addMeasures(measures);
+                    measureFragment.resetMeasures(measures);
                 //growthFragment.setChartData();
             });
         }
@@ -406,7 +406,8 @@ public class CreateDataActivity extends BaseActivity {
                 loadConsents();
 
                 viewModel.getObservableMeasureList(person).observe(this, measures->{
-                    measureFragment.addMeasures(measures);
+                    if (measures != null)
+                        measureFragment.resetMeasures(measures);
                 });
             }
         });
