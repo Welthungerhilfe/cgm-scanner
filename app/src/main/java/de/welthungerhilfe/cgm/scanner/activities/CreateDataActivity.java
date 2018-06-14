@@ -63,6 +63,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -95,7 +96,7 @@ public class CreateDataActivity extends BaseActivity {
     private final int PERMISSION_STORAGE = 0x001;
 
     public Person person;
-    public ArrayList<Measure> measures;
+    public List<Measure> measures;
     public ArrayList<Consent> consents;
 
     public String qrCode;
@@ -144,9 +145,11 @@ public class CreateDataActivity extends BaseActivity {
             */
 
             viewModel.getObservableMeasureList(person).observe(this, measures->{
+                this.measures = measures;
+
                 if (measures != null)
-                    measureFragment.addMeasures(measures);
-                //growthFragment.setChartData();
+                    measureFragment.refreshMeasures(measures);
+                growthFragment.setChartData();
             });
         }
 
@@ -402,11 +405,15 @@ public class CreateDataActivity extends BaseActivity {
             person = p;
 
             if (person != null) {
+                /*
                 loadMeasures();
                 loadConsents();
+                */
 
                 viewModel.getObservableMeasureList(person).observe(this, measures->{
-                    measureFragment.addMeasures(measures);
+                    this.measures = measures;
+                    if (measures != null)
+                        measureFragment.refreshMeasures(measures);
                 });
             }
         });
