@@ -100,7 +100,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             adapterMeasure.addMeasures(measures);
     }
 
-    public void resetMeasures(List<Measure> measures) {
+    public void refreshMeasures(List<Measure> measures) {
         if (adapterMeasure != null)
             adapterMeasure.resetData(measures);
     }
