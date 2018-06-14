@@ -18,6 +18,8 @@
 
 package de.welthungerhilfe.cgm.scanner.activities;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.arch.lifecycle.ViewModelProviders;
@@ -256,6 +258,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     private ActionBarDrawerToggle mDrawerToggle;
 
     private SessionManager session;
+    private AccountManager accountManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -265,6 +268,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         ButterKnife.bind(this);
 
         session = new SessionManager(MainActivity.this);
+        accountManager = AccountManager.get(this);
 
         setupSidemenu();
         setupActionBar();
@@ -323,6 +327,12 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                     case R.id.menuLogout:
                         AppController.getInstance().firebaseAuth.signOut();
                         session.setSigned(false);
+
+                        Account[] accounts = accountManager.getAccounts();
+                        for (int i = 0; i < accounts.length; i++) {
+                            accountManager.removeAccount(accounts[i], null, null);
+                        }
+
                         startActivity(new Intent(MainActivity.this, LoginActivity.class));
                         finish();
                         break;

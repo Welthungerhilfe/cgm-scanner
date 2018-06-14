@@ -1,5 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.activities;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -21,6 +23,8 @@ public class SettingsActivity extends BaseActivity {
     TextView txtSettingVersion;
     @BindView(R.id.txtSettingUuid)
     TextView txtSettingUuid;
+    @BindView(R.id.txtSettingAccount)
+    TextView txtSettingAccount;
 
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
@@ -50,6 +54,13 @@ public class SettingsActivity extends BaseActivity {
             e.printStackTrace();
 
             txtSettingVersion.setText("1.0");
+        }
+
+        AccountManager accountManager = AccountManager.get(this);
+        Account[] accounts = accountManager.getAccounts();
+
+        if (accounts.length > 0) {
+            txtSettingAccount.setText(accounts[0].name);
         }
     }
 

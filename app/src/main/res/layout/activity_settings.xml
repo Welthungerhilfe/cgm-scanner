@@ -136,9 +136,10 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/txtSettingAccount"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="zhang Nemo"
+                            android:text=""
                             android:textSize="18sp"
                             android:textColor="@color/colorBlack" />
 
@@ -147,7 +148,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/activity_section_margin"
                             android:textSize="18sp"
-                            android:text="zhangnemo34@gmail.com"/>
+                            android:text="@string/app_name_long"/>
                     </LinearLayout>
 
                 </com.balysv.materialripple.MaterialRippleLayout>
