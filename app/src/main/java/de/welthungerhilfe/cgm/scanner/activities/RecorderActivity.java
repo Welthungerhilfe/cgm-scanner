@@ -41,6 +41,8 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 
@@ -154,7 +156,8 @@ public class RecorderActivity extends Activity {
     private float mPointCloudPreviousTimeStamp;
     private float mCurrentTimeStamp;
 
-    boolean mIsRecording;
+    private boolean mPointCloudAvailable;
+    private boolean mIsRecording;
 
     private Person person;
     private Measure measure;
@@ -164,6 +167,8 @@ public class RecorderActivity extends Activity {
     private File mExtFileDir;
     private File mScanArtefactsOutputFolder;
     private String mPointCloudSaveFolderPath;
+    private File mPointCloudSaveFolder;
+    private File mRgbSaveFolder;
     private long mNowTime;
     private String mNowTimeString;
     private String mQrCode;
@@ -419,6 +424,7 @@ public class RecorderActivity extends Activity {
         mNumPoseInSequence = 0;
         mutex_on_mIsRecording = new Semaphore(1,true);
         mIsRecording = false;
+        mPointCloudAvailable = false;
 
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
@@ -431,34 +437,32 @@ public class RecorderActivity extends Activity {
     }
 
     private void setupScanArtefacts() {
-        // TODO: use mkdirs
         mExtFileDir = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
-        File personalFilesDir = new File(mExtFileDir,mQrCode+"/");
-        if(!personalFilesDir.exists()) {
-            boolean created = personalFilesDir.mkdir();
-            if (created) {
-                Log.i(TAG, "Folder: \"" + personalFilesDir + "\" created\n");
-            } else {
-                Log.e(TAG,"Folder: \"" + personalFilesDir + "\" could not be created!\n");
-            }
-        }
-        // TODO Create when needed!
-        File measurementsFolder = new File(mExtFileDir,mQrCode+"/measurements/");
-        measurementsFolder.mkdir();
 
         mScanArtefactsOutputFolder  = new File(mExtFileDir,mQrCode+"/measurements/"+mNowTimeString+"/");
+        mPointCloudSaveFolder = new File(mScanArtefactsOutputFolder,"pc");
+        mRgbSaveFolder = new File(mScanArtefactsOutputFolder,"rgb");
 
-        if(!mScanArtefactsOutputFolder.exists()) {
-            boolean created = mScanArtefactsOutputFolder.mkdir();
+        if(!mPointCloudSaveFolder.exists()) {
+            boolean created = mPointCloudSaveFolder.mkdirs();
             if (created) {
-                Log.i(TAG, "Folder: \"" + mScanArtefactsOutputFolder + "\" created\n");
+                Log.i(TAG, "Folder: \"" + mPointCloudSaveFolder + "\" created\n");
             } else {
-                Log.e(TAG,"Folder: \"" + mScanArtefactsOutputFolder + "\" could not be created!\n");
+                Log.e(TAG,"Folder: \"" + mPointCloudSaveFolder + "\" could not be created!\n");
             }
         }
 
-        mPointCloudSaveFolderPath = mScanArtefactsOutputFolder.getAbsolutePath();
-        Log.v(TAG,"mPointCloudSaveFolderPath: "+mPointCloudSaveFolderPath);
+        if(!mRgbSaveFolder.exists()) {
+            boolean created = mRgbSaveFolder.mkdirs();
+            if (created) {
+                Log.i(TAG, "Folder: \"" + mRgbSaveFolder + "\" created\n");
+            } else {
+                Log.e(TAG,"Folder: \"" + mRgbSaveFolder + "\" could not be created!\n");
+            }
+        }
+
+        Log.v(TAG,"mPointCloudSaveFolder: "+mPointCloudSaveFolder);
+        Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
     }
 
     public static boolean hasPermissions(Context context, String... permissions) {
@@ -547,6 +551,7 @@ public class RecorderActivity extends Activity {
         // Initialize Tango Service as a normal Android Service. Since we call mTango.disconnect()
         // in onPause, this will unbind Tango Service, so every time onResume gets called we
         // should create a new Tango object.
+
         mTango = new Tango(RecorderActivity.this, new Runnable() {
             // Pass in a Runnable to be called from UI thread when Tango is ready; this Runnable
             // will be running on a new thread.
@@ -579,6 +584,7 @@ public class RecorderActivity extends Activity {
                 }
             }
         });
+
         mCameraSurfaceView.onResume();
         Log.d(TAG, "onResume complete: " + this);
     }
@@ -661,8 +667,11 @@ public class RecorderActivity extends Activity {
 
             @Override
             public void onPointCloudAvailable(final TangoPointCloudData pointCloudData) {
-                StringBuilder stringBuilder = new StringBuilder();
-                //stringBuilder.append("Point count: " + pointCloudData.numPoints);
+
+                // set to true for next RGB image to be written
+                // TODO remove when not necessary anymore (performance/video capture)
+                mPointCloudAvailable = true;
+
                 float[] average = calculateAveragedDepth(pointCloudData.points, pointCloudData.numPoints);
 
                 mOverlaySurfaceView.setDistance(average[0]);
@@ -693,12 +702,9 @@ public class RecorderActivity extends Activity {
 
                 // Background task for writing to file
                 // TODO refactor to top-level class or make static?
-                class SendCommandTask extends AsyncTask<Void, Void, Boolean> {
-                    /** The system calls this to perform work in a worker thread and
-                     * delivers it the parameters given to AsyncTask.execute() */
+                Runnable thread = new Runnable() {
                     @Override
-                    protected Boolean doInBackground(Void... params) {
-
+                    public void run() {
                         try {
                             mutex_on_mIsRecording.acquire();
                         } catch (InterruptedException e) {
@@ -709,18 +715,9 @@ public class RecorderActivity extends Activity {
                             writePointCloudToFile(pointCloudData, framePairs);
                         }
                         mutex_on_mIsRecording.release();
-                        return true;
                     }
-
-                    /** The system calls this to perform work in the UI thread and delivers
-                     * the result from doInBackground() */
-                    @Override
-                    protected void onPostExecute(Boolean done) {
-
-                    }
-                }
-                new SendCommandTask().execute();
-
+                };
+                thread.run();
             }
 
 
@@ -765,79 +762,51 @@ public class RecorderActivity extends Activity {
                 new Tango.OnFrameAvailableListener() {
                     @Override
                     public  void onFrameAvailable(TangoImageBuffer tangoImageBuffer, int i) {
-                        if ( ! mIsRecording ) {
+                        if ( ! mIsRecording || ! mPointCloudAvailable) {
                             return;
                         }
 
-                        final TangoImageBuffer currentTangoImageBuffer = copyImageBuffer(tangoImageBuffer);
-
-                        // Background task for writing to file
-                        // TODO refactor to top-level class or make static?
-                        class SendImgCommandTask extends AsyncTask<Void, Void, Boolean> {
-                            /** The system calls this to perform work in a worker thread and
-                             * delivers it the parameters given to AsyncTask.execute() */
+                        Runnable thread = new Runnable() {
                             @Override
-                            protected Boolean doInBackground(Void... params) {
+                            public void run() {
+                                TangoImageBuffer currentTangoImageBuffer = copyImageBuffer(tangoImageBuffer);
 
-                                try {
-                                    mutex_on_mIsRecording.acquire();
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                                // Saving the frame or not, depending on the current mode.
-                                if ( mIsRecording ) {
-                                    /*
-                                    TODO fix memory leak and crash
-                                    writeImageToFile(currentTangoImageBuffer);
-                                    */
-                                }
-                                mutex_on_mIsRecording.release();
-                                return true;
-                            }
-
-                            /** The system calls this to perform work in the UI thread and delivers
-                             * the result from doInBackground() */
-                            @Override
-                            protected void onPostExecute(Boolean done) {
+                                Uri uri = writeImageToFile(currentTangoImageBuffer);
+                                // Direct Upload to Firebase Storage
+                                uploadFromUri(uri,"rgb");
 
                             }
-                        }
-                        new SendImgCommandTask().execute();
-
-                    }
-
-                    TangoImageBuffer copyImageBuffer(TangoImageBuffer imageBuffer) {
-                        ByteBuffer clone = ByteBuffer.allocateDirect(imageBuffer.data.capacity());
-                        imageBuffer.data.rewind();
-                        clone.put(imageBuffer.data);
-                        imageBuffer.data.rewind();
-                        clone.flip();
-                        return new TangoImageBuffer(imageBuffer.width, imageBuffer.height,
-                                imageBuffer.stride, imageBuffer.frameNumber,
-                                imageBuffer.timestamp, imageBuffer.format, clone);
+                        };
+                        thread.run();
                     }
                 });
     }
 
-    private void writeImageToFile(TangoImageBuffer currentTangoImageBuffer) {
-        File currentImgFolder = new File (mScanArtefactsOutputFolder, "rgb/");
-        if (!currentImgFolder.exists())
-            currentImgFolder.mkdirs();
+    private TangoImageBuffer copyImageBuffer(TangoImageBuffer imageBuffer) {
+        ByteBuffer clone = ByteBuffer.allocateDirect(imageBuffer.data.capacity());
+        imageBuffer.data.rewind();
+        clone.put(imageBuffer.data);
+        imageBuffer.data.rewind();
+        clone.flip();
+        return new TangoImageBuffer(imageBuffer.width, imageBuffer.height,
+                imageBuffer.stride, imageBuffer.frameNumber,
+                imageBuffer.timestamp, imageBuffer.format, clone);
+    }
+
+    private Uri writeImageToFile(TangoImageBuffer currentTangoImageBuffer) {
         String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
-                mScanningWorkflowStep + "_" + String.format("%03d", mNumberOfFilesWritten) + ".png";
-        File currentImg = new File(currentImgFolder,currentImgFilename);
+                mScanningWorkflowStep + "_" + currentTangoImageBuffer.timestamp + ".jpg";
+        File currentImg = new File(mRgbSaveFolder,currentImgFilename);
 
-        int[] pixels = convertYUV420_NV21toRGB8888(currentTangoImageBuffer.data.array(), currentTangoImageBuffer.width, currentTangoImageBuffer.height);
-        Bitmap inputBitmap = Bitmap.createBitmap(pixels, currentTangoImageBuffer.width, currentTangoImageBuffer.height, Bitmap.Config.ARGB_8888);
-
-        try {
-            FileOutputStream out = new FileOutputStream(currentImg);
-            inputBitmap.compress(Bitmap.CompressFormat.PNG, 50, out);
+        try (FileOutputStream out = new FileOutputStream(currentImg)) {
+            YuvImage yuvImage = new YuvImage(currentTangoImageBuffer.data.array(), ImageFormat.NV21, currentTangoImageBuffer.width, currentTangoImageBuffer.height, null);
+            yuvImage.compressToJpeg(new Rect(0, 0, currentTangoImageBuffer.width, currentTangoImageBuffer.height), 50, out);
             out.flush();
             out.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
+        return Uri.fromFile(currentImg);
     }
 
     /**
@@ -1050,26 +1019,11 @@ public class RecorderActivity extends Activity {
 
         myBuffer.asFloatBuffer().put(pointCloudData.points);
 
-        if(!mScanArtefactsOutputFolder.exists()) {
-            boolean created = mScanArtefactsOutputFolder.mkdir();
-            if (created) {
-                Log.i(TAG, "Folder: \"" + mScanArtefactsOutputFolder.getAbsolutePath() + "\" created\n");
-            }
-        }
-
-        File dir = new File(mPointCloudSaveFolderPath);
-        if(!dir.exists()) {
-            boolean created = dir.mkdir();
-            if (created) {
-                Log.i(TAG, "Folder: \"" + mPointCloudSaveFolderPath + "\" created\n");
-            }
-        }
-
         mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mScanningWorkflowStep +
                 "_" + String.format("%03d", mNumberOfFilesWritten) + ".vtk";
-        mPointCloudFilenameBuffer.add(mPointCloudSaveFolderPath + mPointCloudFilename);
-        Log.v(TAG,"added pointcloud "+mPointCloudSaveFolderPath + mPointCloudFilename);
-        File file = new File(dir, mPointCloudFilename);
+        mPointCloudFilenameBuffer.add(mPointCloudSaveFolder + mPointCloudFilename);
+        Log.v(TAG,"added pointcloud "+mPointCloudSaveFolder + mPointCloudFilename);
+        File file = new File(mPointCloudSaveFolder, mPointCloudFilename);
 
 
         try {
@@ -1103,7 +1057,7 @@ public class RecorderActivity extends Activity {
 
             out.close();
             // Direct Upload to Firebase Storage
-            uploadFromUri(Uri.fromFile(file));
+            uploadFromUri(Uri.fromFile(file), "pc");
             mNumberOfFilesWritten++;
             //mTimeToTakeSnap = false;
 
@@ -1213,7 +1167,7 @@ public class RecorderActivity extends Activity {
 
     }
 
-    private void uploadFromUri(Uri fileUri) {
+    private void uploadFromUri(Uri fileUri, String subfolder) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
         // Start MyUploadService to upload the file, so that the file is uploaded
@@ -1222,6 +1176,7 @@ public class RecorderActivity extends Activity {
                 .putExtra(FirebaseUploadService.EXTRA_FILE_URI, fileUri)
                 .putExtra(AppConstants.EXTRA_QR, mQrCode)
                 .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, mNowTimeString)
+                .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, subfolder)
                 .setAction(FirebaseUploadService.ACTION_UPLOAD));
     }
 
@@ -1229,16 +1184,9 @@ public class RecorderActivity extends Activity {
     // This function writes the pose data and timestamps to .vtk files in binary
     private void writePoseToFile(int numPoints) {
 
-        File dir = new File(mPointCloudSaveFolderPath);
-        if(!dir.exists()) {
-            boolean created = dir.mkdir();
-            if (created) {
-                Log.i(TAG, "Folder: \"" + mPointCloudSaveFolderPath + "\" created\n");
-            }
-        }
         String poseFileName = "pc_" +mQrCode+"_"+ mNowTimeString + "_poses.vtk";
-        mPointCloudFilenameBuffer.add(mPointCloudSaveFolderPath + poseFileName);
-        File file = new File(dir, poseFileName);
+        mPointCloudFilenameBuffer.add(mPointCloudSaveFolder + poseFileName);
+        File file = new File(mPointCloudSaveFolder, poseFileName);
 
         try {
             DataOutputStream out = new DataOutputStream(new BufferedOutputStream(
@@ -1290,5 +1238,4 @@ public class RecorderActivity extends Activity {
             e.printStackTrace();
         }
     }
-
 }

@@ -100,6 +100,11 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             adapterMeasure.addMeasures(measures);
     }
 
+    public void refreshMeasures(List<Measure> measures) {
+        if (adapterMeasure != null)
+            adapterMeasure.resetData(measures);
+    }
+
     public void createMeasure() {
 		// TODO: Strings.xml
         final CharSequence[] options = {"Add Manual Measure", "Scan Measure"};
