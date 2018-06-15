@@ -120,7 +120,7 @@
 
         </android.support.design.widget.TextInputLayout>
 
-        <RelativeLayout
+        <!--RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp">
@@ -148,7 +148,7 @@
                 android:src="@drawable/location"
                 android:visibility="invisible" />
 
-        </RelativeLayout>
+        </RelativeLayout-->
 
         <RelativeLayout
             android:layout_width="match_parent"
