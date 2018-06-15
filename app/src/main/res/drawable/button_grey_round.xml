@@ -28,8 +28,8 @@
         android:right="5dp"
         android:bottom="5dp"/>
 
-    <corners android:bottomRightRadius="100in"
-        android:bottomLeftRadius="100in"
-        android:topLeftRadius="100in"
-        android:topRightRadius="100in"/>
+    <corners android:bottomRightRadius="5dp"
+        android:bottomLeftRadius="5dp"
+        android:topLeftRadius="5dp"
+        android:topRightRadius="5dp"/>
 </shape>
