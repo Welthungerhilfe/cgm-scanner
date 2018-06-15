@@ -30,6 +30,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.delegators.OnConfirmListener;
 
 /**
  * Created by Emerald on 2/19/2018.
@@ -54,10 +55,6 @@ public class ConfirmDialog extends Dialog {
         if (confirmListener != null) {
             confirmListener.onConfirm(false);
         }
-    }
-
-    public interface OnConfirmListener {
-        void onConfirm(boolean result);
     }
 
     private OnConfirmListener confirmListener;

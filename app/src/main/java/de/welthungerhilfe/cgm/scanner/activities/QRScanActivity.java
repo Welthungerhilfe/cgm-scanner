@@ -27,6 +27,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
+import de.welthungerhilfe.cgm.scanner.delegators.OnConfirmListener;
 import de.welthungerhilfe.cgm.scanner.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
@@ -36,7 +37,7 @@ import de.welthungerhilfe.cgm.scanner.views.QRScanView;
  * Created by Emerald on 2/19/2018.
  */
 
-public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.OnConfirmListener, QRScanView.QRScanHandler {
+public class QRScanActivity extends AppCompatActivity implements OnConfirmListener, QRScanView.QRScanHandler {
     private final String TAG = QRScanActivity.class.getSimpleName();
     private final int PERMISSION_LOCATION = 0x1000;
 

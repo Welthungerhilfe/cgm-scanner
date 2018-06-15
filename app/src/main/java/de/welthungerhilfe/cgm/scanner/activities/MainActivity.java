@@ -52,6 +52,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
@@ -60,6 +61,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -70,10 +72,12 @@ import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
+import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.OnClickListener;
 import com.orhanobut.dialogplus.ViewHolder;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -92,15 +96,18 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.adapters.PersonListAdapter;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerDataAdapter;
+import de.welthungerhilfe.cgm.scanner.delegators.OnConfirmListener;
 import de.welthungerhilfe.cgm.scanner.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.dialogs.DocumentAskDialog;
 import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.viewmodels.PersonListViewModel;
 
-public class MainActivity extends BaseActivity implements RecyclerDataAdapter.OnPersonDetail, DateRangePickerDialog.Callback, EventListener<QuerySnapshot> {
+public class MainActivity extends BaseActivity implements RecyclerDataAdapter.OnPersonDetail, DateRangePickerDialog.Callback, EventListener<QuerySnapshot>,OnConfirmListener {
     private final String TAG = MainActivity.class.getSimpleName();
     private final int REQUEST_LOCATION = 0x1000;
     private final int REQUEST_CAMERA = 0x1001;
@@ -118,15 +125,13 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
         Crashlytics.log("Add person by QR");
-        startActivity(new Intent(MainActivity.this, QRScanActivity.class));
+        //startActivity(new Intent(MainActivity.this, QRScanActivity.class));
 
-        /*
         if (!Utils.checkPermission(MainActivity.this, "android.permission.CAMERA") || !Utils.checkPermission(MainActivity.this, "android.permission.WRITE_EXTERNAL_STORAGE")) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_CAMERA);
         } else {
             takePhoto();
         }
-        */
     }
 
     @OnClick(R.id.txtSort)
@@ -558,36 +563,62 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             if (resCode == RESULT_OK) {
                 Uri mImageUri = Uri.fromFile(mFileTemp);
 
+                FirebaseVisionImageMetadata metadata = new FirebaseVisionImageMetadata.Builder()
+                        .setWidth(400)
+                        .setHeight(400)
+                        .setFormat(FirebaseVisionImageMetadata.IMAGE_FORMAT_NV21)
+                        .build();
+
+                byte[] bytes = BitmapUtils.getByteFromFile(mFileTemp);
+                //FirebaseVisionImage image = FirebaseVisionImage.fromByteArray(bytes, metadata);
+                FirebaseVisionImage image = null;
                 try {
-                    FirebaseVisionImage image = FirebaseVisionImage.fromFilePath(MainActivity.this, mImageUri);
-
-                    FirebaseVisionBarcodeDetectorOptions options = new FirebaseVisionBarcodeDetectorOptions.Builder()
-                            .setBarcodeFormats(FirebaseVisionBarcode.FORMAT_QR_CODE, FirebaseVisionBarcode.FORMAT_AZTEC)
-                            .build();
-
-
-                    FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
-                            .getVisionBarcodeDetector();
-
-                    Task<List<FirebaseVisionBarcode>> scanResult = detector.detectInImage(image)
-                            .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
-                                @Override
-                                public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
-                                    // Task completed successfully
-                                    // ...
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    // Task failed with an exception
-                                    // ...
-                                }
-                            });
+                    image = FirebaseVisionImage.fromFilePath(MainActivity.this, mImageUri);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
+                FirebaseVisionBarcodeDetectorOptions options = new FirebaseVisionBarcodeDetectorOptions.Builder()
+                        .setBarcodeFormats(FirebaseVisionBarcode.FORMAT_QR_CODE)
+                        .build();
+
+                FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
+                        .getVisionBarcodeDetector(options);
+
+                Task<List<FirebaseVisionBarcode>> scanResult = detector.detectInImage(image)
+                        .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
+                            @Override
+                            public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
+                                // Task completed successfully
+                                // ...
+                                if (barcodes.size() > 0) {
+                                    DocumentAskDialog dialog =  new DocumentAskDialog(MainActivity.this);
+                                    dialog.setDocumentImage(mImageUri);
+                                    dialog.setConfirmListener(MainActivity.this);
+                                    dialog.show();
+                                } else {
+                                    Toast.makeText(MainActivity.this, R.string.error_qrscan, Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // Task failed with an exception
+                                // ...
+                                Toast.makeText(MainActivity.this, R.string.error_qrscan, Toast.LENGTH_LONG).show();
+                            }
+                        });
             }
+        }
+    }
+
+    @Override
+    public void onConfirm(boolean result) {
+        if (result) {
+
+        } else {
+            //mFileTemp.delete();
         }
     }
 }
