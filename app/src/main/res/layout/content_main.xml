@@ -92,6 +92,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        app:fabSize="mini"
+        app:fabCustomSize="@dimen/design_fab_size_mini"
         android:layout_margin="@dimen/activity_horizontal_margin"
         app:srcCompat="@drawable/plus" />
 
