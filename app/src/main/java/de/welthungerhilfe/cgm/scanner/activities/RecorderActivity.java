@@ -53,6 +53,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -163,6 +164,7 @@ public class RecorderActivity extends Activity {
     private Measure measure;
     private LinearLayout container;
     private FloatingActionButton fab;
+    private ProgressBar progressBar;
 
     private File mExtFileDir;
     private File mScanArtefactsOutputFolder;
@@ -335,6 +337,7 @@ public class RecorderActivity extends Activity {
         mOverlaySurfaceView.setVisibility(View.INVISIBLE);
         mDisplayTextView.setVisibility(View.INVISIBLE);
         fab.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
     }
 
     private void resumeScan() {
@@ -343,6 +346,9 @@ public class RecorderActivity extends Activity {
         mOverlaySurfaceView.setVisibility(View.VISIBLE);
         mDisplayTextView.setVisibility(View.VISIBLE);
         fab.setVisibility(View.VISIBLE);
+
+        progressBar.setProgress(0);
+        progressBar.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -390,10 +396,15 @@ public class RecorderActivity extends Activity {
                     mIsRecording = false;
                     record_SwitchChanged();
                     fab.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorGreen)));
+
+                    progressBar.setProgress(100);
                 }
+                progressBar.setProgress(50);
                 gotoNextStep();
             }
         });
+
+        progressBar = findViewById(R.id.progressBar);
 
         DisplayManager displayManager = (DisplayManager) getSystemService(DISPLAY_SERVICE);
         if (displayManager != null) {
