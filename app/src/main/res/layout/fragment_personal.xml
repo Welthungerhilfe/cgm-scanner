@@ -210,13 +210,13 @@
                 android:text="@string/sex_male"
                 android:textColor="@color/colorGreyDark" />
 
-            <android.support.v7.widget.AppCompatRadioButton
+            <!--android.support.v7.widget.AppCompatRadioButton
                 android:id="@+id/radioFluid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/sex_fluid"
-                android:textColor="@color/colorGreyDark" />
+                android:textColor="@color/colorGreyDark" /-->
 
         </RadioGroup>
 
