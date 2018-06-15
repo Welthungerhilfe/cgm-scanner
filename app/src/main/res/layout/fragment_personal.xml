@@ -18,7 +18,8 @@
   ~
   -->
 
-<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorWhite">
@@ -224,6 +225,7 @@
             android:id="@+id/lytCreate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:padding="@dimen/activity_horizontal_margin"
             android:layout_marginTop="10dp"
             android:gravity="right|center_vertical"
             android:orientation="horizontal">
@@ -241,7 +243,9 @@
             <Button
                 android:id="@+id/btnNext"
                 android:layout_width="100dp"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
+                android:background="@drawable/button_grey_round"
+                android:layout_margin="15dp"
                 android:text="@string/next"
                 android:textColor="@color/colorGreyDark"
                 android:textSize="18sp" />

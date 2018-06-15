@@ -31,11 +31,14 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.AppCompatRadioButton;
-import android.support.v7.widget.LinearLayoutManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -44,13 +47,9 @@ import android.widget.TextView;
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.util.Date;
 
@@ -59,19 +58,16 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.activities.ImageDetailActivity;
 import de.welthungerhilfe.cgm.scanner.activities.LocationDetectActivity;
-import de.welthungerhilfe.cgm.scanner.activities.MainActivity;
-import de.welthungerhilfe.cgm.scanner.adapters.RecyclerDataAdapter;
 import de.welthungerhilfe.cgm.scanner.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 /**
  * Created by Emerald on 2/19/2018.
  */
 
-public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback {
+public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, TextWatcher {
 
     private String TAG = this.getClass().getSimpleName();
 
@@ -90,6 +86,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private EditText editName, editPrename, editLocation, editBirth, editGuardian;
 
     private AppCompatRadioButton radioFemale, radioMale/*, radioFluid*/;
+
+    private Button btnNext;
 
     private Loc location = null;
     private long birthday = 0;
@@ -110,8 +108,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         imgLocation = view.findViewById(R.id.imgLocation);
         imgLocation.setOnClickListener(this);
+
         view.findViewById(R.id.txtBack).setOnClickListener(this);
-        view.findViewById(R.id.btnNext).setOnClickListener(this);
+        btnNext = view.findViewById(R.id.btnNext);
+        btnNext.setOnClickListener(this);
 
         lytCreate = view.findViewById(R.id.lytCreate);
 
@@ -120,15 +120,28 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         checkAge = view.findViewById(R.id.checkAge);
 
         txtDate = view.findViewById(R.id.txtDate);
+
         editName = view.findViewById(R.id.editName);
+        editName.addTextChangedListener(this);
+
         editPrename = view.findViewById(R.id.editPrename);
+        editPrename.addTextChangedListener(this);
+
         editLocation = view.findViewById(R.id.editLocation);
+        editLocation.addTextChangedListener(this);
+
         editBirth = view.findViewById(R.id.editBirth);
+        editBirth.addTextChangedListener(this);
         editBirth.setOnClickListener(this);
+
         editGuardian = view.findViewById(R.id.editGuardian);
+        editGuardian.addTextChangedListener(this);
 
         radioFemale = view.findViewById(R.id.radioFemale);
+        radioFemale.setOnCheckedChangeListener(this);
+
         radioMale = view.findViewById(R.id.radioMale);
+        radioMale.setOnCheckedChangeListener(this);
         //radioFluid = view.findViewById(R.id.radioFluid);
 
         initUI();
@@ -365,5 +378,42 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 }
             }).into(imgConsent);*/
         }
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (validate()) {
+            btnNext.setBackground(getResources().getDrawable(R.drawable.button_green_round));
+            btnNext.setTextColor(getResources().getColor(R.color.colorWhite));
+        } else {
+            btnNext.setBackground(getResources().getDrawable(R.drawable.button_grey_round));
+            btnNext.setTextColor(getResources().getColor(R.color.colorGreyDark));
+        }
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+        String name = editName.getText().toString();
+        String prename = editPrename.getText().toString();
+        String birth = editBirth.getText().toString();
+        String guardian = editGuardian.getText().toString();
+
+        if (!name.isEmpty() && !prename.isEmpty() && !birth.isEmpty() && !guardian.isEmpty() && (radioMale.isChecked() || radioFemale.isChecked())) {
+            btnNext.setTextColor(getResources().getColor(R.color.colorWhite));
+            btnNext.setBackground(getResources().getDrawable(R.drawable.button_green_round));
+        } else {
+            btnNext.setTextColor(getResources().getColor(R.color.colorGreyDark));
+            btnNext.setBackground(getResources().getDrawable(R.drawable.button_grey_round));
+        }
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+
     }
 }
