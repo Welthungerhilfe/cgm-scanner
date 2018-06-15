@@ -249,6 +249,8 @@ public class CreateDataActivity extends BaseActivity {
             createPerson();
         else
             updatePerson();
+
+        viewpager.setCurrentItem(1);
     }
 
     public void setMeasureData(float height, float weight, float muac, float headCircumference, String additional, Loc location) {
