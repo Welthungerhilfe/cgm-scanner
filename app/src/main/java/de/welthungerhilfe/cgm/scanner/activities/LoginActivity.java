@@ -49,6 +49,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class LoginActivity extends AccountAuthenticatorActivity {
 
@@ -160,7 +161,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     }
 
     private void doSignInAction() {
-        if (validate()) {
+        if (!Utils.isNetworkConnectionAvailable(LoginActivity.this)) {
+            Toast.makeText(LoginActivity.this, R.string.error_network, Toast.LENGTH_LONG).show();
+        } else if (validate()) {
             String email = editUser.getText().toString();
             String password = editPassword.getText().toString();
             Crashlytics.setUserIdentifier(email);

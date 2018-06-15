@@ -89,7 +89,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     private EditText editName, editPrename, editLocation, editBirth, editGuardian;
 
-    private AppCompatRadioButton radioFemale, radioMale, radioFluid;
+    private AppCompatRadioButton radioFemale, radioMale/*, radioFluid*/;
 
     private Loc location = null;
     private long birthday = 0;
@@ -129,7 +129,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         radioFemale = view.findViewById(R.id.radioFemale);
         radioMale = view.findViewById(R.id.radioMale);
-        radioFluid = view.findViewById(R.id.radioFluid);
+        //radioFluid = view.findViewById(R.id.radioFluid);
 
         initUI();
         showConsent();
@@ -157,9 +157,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 radioFemale.setChecked(true);
             } else if (((CreateDataActivity)context).person.getSex().equals(AppConstants.VAL_SEX_MALE)) {
                 radioMale.setChecked(true);
-            } else if (((CreateDataActivity)context).person.getSex().equals(AppConstants.VAL_SEX_OTHER)) {
+            } /*else if (((CreateDataActivity)context).person.getSex().equals(AppConstants.VAL_SEX_OTHER)) {
                 radioFluid.setChecked(true);
-            }
+            }*/
 
             checkAge.setChecked(((CreateDataActivity)context).person.isAgeEstimated());
         } else {
@@ -227,7 +227,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             editGuardian.setError(null);
         }
 
-        if (radioFemale.isChecked() || radioMale.isChecked() || radioFluid.isChecked()) {
+        if (radioFemale.isChecked() || radioMale.isChecked() /* || radioFluid.isChecked() */) {
 
         } else {
             valid = false;
@@ -265,8 +265,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         sex = radioMale.getText().toString();
                     else if (radioFemale.isChecked())
                         sex = radioFemale.getText().toString();
+                    /*
                     else if (radioFluid.isChecked())
                         sex = radioFluid.getText().toString();
+                    */
 
                     ((CreateDataActivity)context).setPersonalData(
                             editName.getText().toString(),
