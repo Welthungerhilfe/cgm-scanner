@@ -195,6 +195,8 @@ public class RecorderActivity extends Activity {
     private boolean Verbose = true;
     private FirebaseAnalytics mFirebaseAnalytics;
 
+    private int mProgress;
+
     // Workflow
     public void gotoNextStep(int babyInfantChoice) {
         mScanningWorkflowStep = babyInfantChoice+1;
@@ -206,9 +208,6 @@ public class RecorderActivity extends Activity {
         // mScanningWorkflowStep 100+ = baby
         // mScanningWorkflowStep 200+ = infant
         // onBoarding steps are odd, scanning process steps are even 0,2,4,6
-        // TODO steps are done when a certain number of points with certain confidence have been collected
-
-        // TODO better icon for fab
 
         FragmentTransaction ft = getFragmentManager().beginTransaction();
 
@@ -235,7 +234,6 @@ public class RecorderActivity extends Activity {
             //ft.replace(R.id.container, babyFront0Fragment, BABY_FRONT_0);
             ft.commit();
             measure.setType("v1.1.1");
-
         }
         else if (mScanningWorkflowStep ==     AppConstants.BABY_FULL_BODY_FRONT_SCAN)
         {
@@ -348,7 +346,8 @@ public class RecorderActivity extends Activity {
         mDisplayTextView.setVisibility(View.VISIBLE);
         fab.setVisibility(View.VISIBLE);
 
-        progressBar.setProgress(0);
+        mProgress = 0;
+        progressBar.setProgress(mProgress);
         progressBar.setVisibility(View.VISIBLE);
     }
 
@@ -397,10 +396,7 @@ public class RecorderActivity extends Activity {
                     mIsRecording = false;
                     record_SwitchChanged();
                     fab.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorGreen)));
-
-                    progressBar.setProgress(100);
                 }
-                progressBar.setProgress(50);
                 gotoNextStep();
             }
         });
@@ -639,6 +635,19 @@ public class RecorderActivity extends Activity {
         return config;
     }
 
+    private void updateScanningProgress(int numPoints, float distance, float confidence) {
+        float minPointsToCompleteScan = 199500.0f;
+        float progressToAddFloat = numPoints / minPointsToCompleteScan;
+        progressToAddFloat = progressToAddFloat*100;
+        int progressToAdd = (int) progressToAddFloat;
+        Log.d(TAG, "numPoints: "+numPoints+" float: "+progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
+        if (mProgress+progressToAdd > 100) {
+            mProgress = 100;
+        } else {
+            mProgress = mProgress+progressToAdd;
+        }
+    }
+
     /**
      * Set up the callback listeners for the Tango Service and obtain other parameters required
      * after Tango connection.
@@ -682,6 +691,7 @@ public class RecorderActivity extends Activity {
             @Override
             public void onPointCloudAvailable(final TangoPointCloudData pointCloudData) {
 
+                Log.d(TAG, "recording:"+mIsRecording);
                 // set to true for next RGB image to be written
                 // TODO remove when not necessary anymore (performance/video capture)
                 mPointCloudAvailable = true;
@@ -690,7 +700,6 @@ public class RecorderActivity extends Activity {
 
                 mOverlaySurfaceView.setDistance(average[0]);
                 mOverlaySurfaceView.setConfidence(average[1]);
-
 
                 // Get pose transforms for openGL to depth/color cameras.
                 TangoPoseData oglTdepthPose = TangoSupport.getPoseAtTime(
@@ -726,12 +735,29 @@ public class RecorderActivity extends Activity {
                         }
                         // Saving the frame or not, depending on the current mode.
                         if ( mIsRecording ) {
+                            updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
+                            progressBar.setProgress(mProgress);
                             writePointCloudToFile(pointCloudData, framePairs);
                         }
                         mutex_on_mIsRecording.release();
                     }
                 };
                 thread.run();
+                /*
+                if (mProgress == 100) {
+                    Log.d(TAG, "enough data, stopping scan, mProgress:"+mProgress);
+                    try {
+                        mutex_on_mIsRecording.acquire();
+                        mIsRecording = false;
+                        record_SwitchChanged();
+                        // Saving the frame or not, depending on the current mode.
+                        mutex_on_mIsRecording.release();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    //gotoNextStep();
+                }
+                */
             }
 
 
@@ -765,9 +791,6 @@ public class RecorderActivity extends Activity {
                     mIsFrameAvailableTangoThread.set(true);
                     // Trigger an OpenGL render to update the OpenGL scene with the new RGB data.
                     mCameraSurfaceView.requestRender();
-                    // TODO: be less lame
-                    //sVideoEncoder.setTextureId(mConnectedTextureIdGlThread);
-                    // we have no surfacetexture? sVideoEncoder.frameAvailable();
                 }
             }
         });
@@ -882,58 +905,6 @@ public class RecorderActivity extends Activity {
         average[0] = averageZ;
         average[1] = averageC;
         return average;
-    }
-
-    /**
-     * Converts YUV420 NV21 to RGB8888
-     *
-     * @param data byte array on YUV420 NV21 format.
-     * @param width pixels width
-     * @param height pixels height
-     * @return a RGB8888 pixels int array. Where each int is a pixels ARGB.
-     */
-    //@AddTrace(name = "convertYUV420_NV21toRGB8888")
-    public static int[] convertYUV420_NV21toRGB8888(byte [] data, int width, int height) {
-        int size = width*height;
-        int offset = size;
-        int[] pixels = new int[size];
-        int u, v, y1, y2, y3, y4;
-
-        // i percorre os Y and the final pixels
-        // k percorre os pixles U e V
-        for(int i=0, k=0; i < size; i+=2, k+=2) {
-            y1 = data[i  ]&0xff;
-            y2 = data[i+1]&0xff;
-            y3 = data[width+i  ]&0xff;
-            y4 = data[width+i+1]&0xff;
-
-            u = data[offset+k  ]&0xff;
-            v = data[offset+k+1]&0xff;
-            u = u-128;
-            v = v-128;
-
-            pixels[i  ] = convertYUVtoRGB(y1, u, v);
-            pixels[i+1] = convertYUVtoRGB(y2, u, v);
-            pixels[width+i  ] = convertYUVtoRGB(y3, u, v);
-            pixels[width+i+1] = convertYUVtoRGB(y4, u, v);
-
-            if (i!=0 && (i+2)%width==0)
-                i+=width;
-        }
-
-        return pixels;
-    }
-
-    private static int convertYUVtoRGB(int y, int u, int v) {
-        int r,g,b;
-
-        r = y + (int)(1.402f*v);
-        g = y - (int)(0.344f*u +0.714f*v);
-        b = y + (int)(1.772f*u);
-        r = r>255? 255 : r<0 ? 0 : r;
-        g = g>255? 255 : g<0 ? 0 : g;
-        b = b>255? 255 : b<0 ? 0 : b;
-        return 0xff000000 | (b<<16) | (g<<8) | r;
     }
 
     @Override
@@ -1127,81 +1098,22 @@ public class RecorderActivity extends Activity {
         }
         // Finish Recording
         else {
-            // Disable snapshot button
-            //mTakeSnapButton.setEnabled(false);
-            // Display a waiting progress bar
-            //mWaitingTextView.setText(R.string.waitSavingScan);
-            //mWaitingLinearLayout.setVisibility(View.VISIBLE);
             // Background task for writing poses to file
             // TODO refactor to top-level class or make static?
-            class SendCommandTask extends AsyncTask<Context, Void, Uri> {
+            class SendCommandTask extends AsyncTask<Context, Void, Void> {
                 /** The system calls this to perform work in a worker thread and
                  * delivers it the parameters given to AsyncTask.execute() */
                 @Override
-                protected Uri doInBackground(Context... myAppContext) {
+                protected Void doInBackground(Context... contexts) {
 
                     // Stop the Pose Recording, and write them to a file.
                     writePoseToFile(mNumPoseInSequence);
-                    // If a snap has been asked just before, but not saved, ignore it, otherwise,
-                    // it will be saved at the end dof this function, and the 2nd archive will override
-                    // the first.
-                    mTimeToTakeSnap = false;
                     mNumPoseInSequence = 0;
                     mPoseOrientationBuffer.clear();
                     mPoseOrientationBuffer.clear();
                     mPoseTimestampBuffer.clear();
-
-                    // Zip all the files from this sequence
-                    String zipFilename = mPointCloudSaveFolderPath + "/TangoData_" +mQrCode+"_"+ mNowTimeString +
-                            "_" + mPointCloudFilenameBuffer.size() + "files.zip";
-                    String[] fileList = mPointCloudFilenameBuffer.toArray(new String[mPointCloudFilenameBuffer.size()]);
-                    // TODO: Upload instead of zipping
-
-
-                    // TODO: build service for sync of offline and firebase storage files
-                    // TODO: while they are written
-
-                    /*
-                    ZipWriter zipper = new ZipWriter(fileList, zipFilename);
-                    zipper.zip();
-
-                    // Delete the data files now that they are archived
-                    for (String s : mPointCloudFilenameBuffer) {
-                        File file = new File(s);
-                        boolean deleted = file.delete();
-                        if (!deleted) {
-                            Log.w(TAG, "File \"" + s + "\" not deleted\n");
-                        }
-                    }*/
-
-                    mPointCloudFilenameBuffer.clear();
-
-                    // Send the zip file to another app
-                    File myZipFile = new File(zipFilename);
-
-                    // was Uri instead of void
-                    //return FileProvider.getUriForFile(myAppContext[0], "com.kitware." +
-                    //        "tangoproject.paraviewtangorecorder.fileprovider", myZipFile);
-
-                    return Uri.fromFile(myZipFile);
+                    return null;
                 }
-
-                /* * The system calls this to perform work in the UI thread and delivers
-                 * the result from doInBackground() */
-/*
-                @Override
-                protected void onPostExecute(Uri fileURI) {
-
-                    Intent shareIntent = new Intent();
-                    shareIntent.setAction(Intent.ACTION_SEND);
-                    shareIntent.putExtra(Intent.EXTRA_STREAM, fileURI);
-                    shareIntent.setType("application/zip");
-                    startActivity(Intent.createChooser(shareIntent, "Send Scan To..."));
-                    mWaitingLinearLayout.setVisibility(View.GONE);
-                    //TODO: Upload to Firebase
-                }
-                  */
-
             }
             new SendCommandTask().execute(this);
 
