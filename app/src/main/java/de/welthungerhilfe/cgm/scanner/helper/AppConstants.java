@@ -31,15 +31,15 @@ public class AppConstants {
 
     public static final String GOOGLE_GEO_URL = "https://maps.googleapis.com/maps/api/geocode/json";
     //public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor.appspot.com";
-    public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor-dev.appspot.com";
-    //public static final String STORAGE_CONSENT_URL = "/data/person/{id}/consent/";
-    public static final String STORAGE_CONSENT_URL = "/data/person/{qrcode}/";
-    public static final String LOCAL_CONSENT_URL = "/{qrcode}/";
-    public static final String STORAGE_MEASURE_URL = "/data/person/{qrcode}/measurements/{scantimestamp}/";
+    //public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor-dev.appspot.com";
+
+    public static final String LOCAL_CONSENT_URL = "/{qrcode}/consent/";
+    public static final String STORAGE_CONSENT_URL = "/data/person/{qrcode}/consent/";
+    public static final String STORAGE_PC_URL = "/data/person/{qrcode}/measurements/{scantimestamp}/pc/";
+    public static final String STORAGE_RGB_URL = "/data/person/{qrcode}/measurements/{scantimestamp}/rgb/";
 
     public static final String VAL_SEX_FEMALE = "female";
     public static final String VAL_SEX_MALE = "male";
-    public static final String VAL_SEX_OTHER = "fluid";
 
     public static final String VAL_MEASURE_MANUAL = "manual";
     public static final String VAL_MEASURE_AUTO = "v0.1";

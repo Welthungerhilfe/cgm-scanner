@@ -111,6 +111,7 @@ import de.welthungerhilfe.cgm.scanner.tango.TextureMovieEncoder;
 import de.welthungerhilfe.cgm.scanner.utils.ZipWriter;
 
 import static com.projecttango.tangosupport.TangoSupport.initialize;
+import static de.welthungerhilfe.cgm.scanner.utils.BitmapUtils.rotateYUV420Degree90;
 
 public class RecorderActivity extends Activity {
 
@@ -448,8 +449,10 @@ public class RecorderActivity extends Activity {
     }
 
     private void setupScanArtefacts() {
+        // TODO make part of AppController?
         mExtFileDir = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
 
+        // TODO make part of AppConstants
         mScanArtefactsOutputFolder  = new File(mExtFileDir,mQrCode+"/measurements/"+mNowTimeString+"/");
         mPointCloudSaveFolder = new File(mScanArtefactsOutputFolder,"pc");
         mRgbSaveFolder = new File(mScanArtefactsOutputFolder,"rgb");
@@ -784,8 +787,14 @@ public class RecorderActivity extends Activity {
 
                                 Uri uri = writeImageToFile(currentTangoImageBuffer);
                                 // Direct Upload to Firebase Storage
-                                uploadFromUri(uri,"rgb");
-
+                                // Start MyUploadService to upload the file, so that the file is uploaded
+                                // even if this Activity is killed or put in the background
+                                startService(new Intent(RecorderActivity.this, FirebaseUploadService.class)
+                                        .putExtra(FirebaseUploadService.EXTRA_FILE_URI, uri)
+                                        .putExtra(AppConstants.EXTRA_QR, mQrCode)
+                                        .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, mNowTimeString)
+                                        .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_RGB_URL)
+                                        .setAction(FirebaseUploadService.ACTION_UPLOAD));
                             }
                         };
                         thread.run();
@@ -804,14 +813,21 @@ public class RecorderActivity extends Activity {
                 imageBuffer.timestamp, imageBuffer.format, clone);
     }
 
+    // TODO move to BitmapUtils?
     private Uri writeImageToFile(TangoImageBuffer currentTangoImageBuffer) {
         String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
                 mScanningWorkflowStep + "_" + currentTangoImageBuffer.timestamp + ".jpg";
         File currentImg = new File(mRgbSaveFolder,currentImgFilename);
 
         try (FileOutputStream out = new FileOutputStream(currentImg)) {
-            YuvImage yuvImage = new YuvImage(currentTangoImageBuffer.data.array(), ImageFormat.NV21, currentTangoImageBuffer.width, currentTangoImageBuffer.height, null);
-            yuvImage.compressToJpeg(new Rect(0, 0, currentTangoImageBuffer.width, currentTangoImageBuffer.height), 50, out);
+            byte[] YuvImageByteArray = rotateYUV420Degree90(currentTangoImageBuffer.data.array(),currentTangoImageBuffer.width, currentTangoImageBuffer.height);
+            // switched heigth and width for rotated image
+            // TODO performance:
+            // 1. write only to file here (or write video from GLSurface)
+            // 2. queue in upload service #18
+            // 3. post-processing (rotate) in UploadService
+            YuvImage yuvImage = new YuvImage(YuvImageByteArray, ImageFormat.NV21, currentTangoImageBuffer.height, currentTangoImageBuffer.width, null);
+            yuvImage.compressToJpeg(new Rect(0, 0, currentTangoImageBuffer.height, currentTangoImageBuffer.width), 50, out);
             out.flush();
             out.close();
         } catch (IOException e) {
@@ -1068,7 +1084,12 @@ public class RecorderActivity extends Activity {
 
             out.close();
             // Direct Upload to Firebase Storage
-            uploadFromUri(Uri.fromFile(file), "pc");
+            startService(new Intent(RecorderActivity.this, FirebaseUploadService.class)
+                    .putExtra(FirebaseUploadService.EXTRA_FILE_URI, Uri.fromFile(file))
+                    .putExtra(AppConstants.EXTRA_QR, mQrCode)
+                    .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, mNowTimeString)
+                    .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_PC_URL)
+                    .setAction(FirebaseUploadService.ACTION_UPLOAD));
             mNumberOfFilesWritten++;
             //mTimeToTakeSnap = false;
 
@@ -1177,20 +1198,6 @@ public class RecorderActivity extends Activity {
         mutex_on_mIsRecording.release();
 
     }
-
-    private void uploadFromUri(Uri fileUri, String subfolder) {
-        Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
-
-        // Start MyUploadService to upload the file, so that the file is uploaded
-        // even if this Activity is killed or put in the background
-        startService(new Intent(this, FirebaseUploadService.class)
-                .putExtra(FirebaseUploadService.EXTRA_FILE_URI, fileUri)
-                .putExtra(AppConstants.EXTRA_QR, mQrCode)
-                .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, mNowTimeString)
-                .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, subfolder)
-                .setAction(FirebaseUploadService.ACTION_UPLOAD));
-    }
-
 
     // This function writes the pose data and timestamps to .vtk files in binary
     private void writePoseToFile(int numPoints) {
