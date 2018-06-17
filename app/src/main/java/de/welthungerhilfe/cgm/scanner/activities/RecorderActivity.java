@@ -819,15 +819,26 @@ public class RecorderActivity extends Activity {
                 mScanningWorkflowStep + "_" + currentTangoImageBuffer.timestamp + ".jpg";
         File currentImg = new File(mRgbSaveFolder,currentImgFilename);
 
+        int currentImgWidth = currentTangoImageBuffer.width;
+        int currentImgHeight = currentTangoImageBuffer.height;
+
+        // TODO performance:
+        // 1. write only to file here (or write video from GLSurface)
+        // 2. queue in upload service #18
+        // 3. post-processing (rotate) in UploadService
+
+        // switched heigth and width for rotated image
+            /*
+            byte[] YuvImageByteArray = rotateYUV420Degree90(currentTangoImageBuffer.data.array(), currentImgWidth, currentImgHeight);
+            int tmp = currentImgWidth;
+            currentImgWidth = currentImgHeight;
+            currentImgHeight = tmp;
+            */
+        byte[] YuvImageByteArray = currentTangoImageBuffer.data.array();
+
         try (FileOutputStream out = new FileOutputStream(currentImg)) {
-            byte[] YuvImageByteArray = rotateYUV420Degree90(currentTangoImageBuffer.data.array(),currentTangoImageBuffer.width, currentTangoImageBuffer.height);
-            // switched heigth and width for rotated image
-            // TODO performance:
-            // 1. write only to file here (or write video from GLSurface)
-            // 2. queue in upload service #18
-            // 3. post-processing (rotate) in UploadService
-            YuvImage yuvImage = new YuvImage(YuvImageByteArray, ImageFormat.NV21, currentTangoImageBuffer.height, currentTangoImageBuffer.width, null);
-            yuvImage.compressToJpeg(new Rect(0, 0, currentTangoImageBuffer.height, currentTangoImageBuffer.width), 50, out);
+            YuvImage yuvImage = new YuvImage(YuvImageByteArray, ImageFormat.NV21, currentImgWidth, currentImgHeight, null);
+            yuvImage.compressToJpeg(new Rect(0, 0, currentImgWidth, currentImgHeight), 50, out);
             out.flush();
             out.close();
         } catch (IOException e) {
