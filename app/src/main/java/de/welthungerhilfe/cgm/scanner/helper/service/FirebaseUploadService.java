@@ -32,6 +32,7 @@ import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -39,10 +40,8 @@ import com.google.firebase.storage.UploadTask;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.activities.BaseActivity;
-import de.welthungerhilfe.cgm.scanner.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.STORAGE_MEASURE_URL;
 
 /**
  * Service to handle uploading files to Firebase Storage.
@@ -62,7 +61,9 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
 
     // [START declare_ref]
     private StorageReference mStorageRef;
+    private FirebaseAuth mAuth;
     // [END declare_ref]
+
 
     private String qrCode;
     private String scanTimestamp;
@@ -76,6 +77,8 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
         mStorageRef = FirebaseStorage.getInstance().getReference();
         // [END get_storage_ref]
 
+        mAuth = FirebaseAuth.getInstance();
+
     }
 
     @Nullable
@@ -87,20 +90,28 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand:" + intent + ":" + startId);
+        Log.d(TAG, "starting FirebaseUploadService as user: "+mAuth.getCurrentUser().getDisplayName());
+        /*
+        if (mAuth.getCurrentUser() == null) {
+            return START_FLAG_RETRY;
+        }
+        */
+        Log.d(TAG, "starting FirebaseUploadService as user: "+mAuth.getCurrentUser().getDisplayName());
         if (ACTION_UPLOAD.equals(intent.getAction())) {
             Uri fileUri = intent.getParcelableExtra(EXTRA_FILE_URI);
             qrCode = intent.getStringExtra(AppConstants.EXTRA_QR);
             scanTimestamp = intent.getStringExtra(AppConstants.EXTRA_SCANTIMESTAMP);
             subfolder = intent.getStringExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER);
-            uploadFromUri(fileUri, subfolder);
+            uploadFromUri(fileUri, subfolder, false);
         }
 
         return START_REDELIVER_INTENT;
     }
 
     // [START upload_from_uri]
-    private void uploadFromUri(final Uri fileUri, String subfolder) {
-        Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
+    private void uploadFromUri(final Uri fileUri, String storageUrl, boolean deleteAfterUpload ) {
+        Log.d(TAG, "uploadFromUri:src:" + fileUri.toString() + " qrCode: "+qrCode+
+                " scanTimestamp: "+scanTimestamp);
 
         // [START_EXCLUDE]
         taskStarted();
@@ -109,7 +120,7 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
 
         // [START get_child_ref]
         // Get a reference to store file at STORAGE_MEASURE_URL = "/data/person/{qrcode}/measurements/{scantimestamp}/";
-        final String pcPath = STORAGE_MEASURE_URL.replace("{qrcode}",  qrCode).replace("{scantimestamp}", scanTimestamp) + "/" + subfolder;
+        final String pcPath = storageUrl.replace("{qrcode}",  qrCode).replace("{scantimestamp}", scanTimestamp);
         final StorageReference photoRef = mStorageRef.child(pcPath)
                 .child(fileUri.getLastPathSegment());
         // [END get_child_ref]
@@ -134,6 +145,10 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
                         }
 
                         Log.d(TAG, "uploadFromUri: upload success");
+
+                        // TODO deleteAfterUpload
+                        if (deleteAfterUpload)
+                            Log.w(TAG, "delete after update not yet implemented");
 
                         // Request the public download URL
                         return photoRef.getDownloadUrl();

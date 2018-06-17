@@ -106,8 +106,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         view.findViewById(R.id.rytConsentDetail).setOnClickListener(this);
         view.findViewById(R.id.imgBirth).setOnClickListener(this);
 
+        /*
+        TODO fix
         imgLocation = view.findViewById(R.id.imgLocation);
         imgLocation.setOnClickListener(this);
+ */
 
         view.findViewById(R.id.txtBack).setOnClickListener(this);
         btnNext = view.findViewById(R.id.btnNext);
@@ -127,9 +130,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         editPrename = view.findViewById(R.id.editPrename);
         editPrename.addTextChangedListener(this);
 
+        /*
+        TODO fix
         editLocation = view.findViewById(R.id.editLocation);
         editLocation.addTextChangedListener(this);
-
+*/
         editBirth = view.findViewById(R.id.editBirth);
         editBirth.addTextChangedListener(this);
         editBirth.setOnClickListener(this);
@@ -161,10 +166,12 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             editPrename.setText(((CreateDataActivity)context).person.getSurname());
             editBirth.setText(Utils.beautifyDate(((CreateDataActivity)context).person.getBirthday()));
             editGuardian.setText(((CreateDataActivity)context).person.getGuardian());
+            /*
+            TODO fix
             if (((CreateDataActivity)context).person.getLastLocation() != null) {
                 editLocation.setText(((CreateDataActivity)context).person.getLastLocation().getAddress());
                 imgLocation.setVisibility(View.VISIBLE);
-            }
+            }*/
 
             if (((CreateDataActivity)context).person.getSex().equals(AppConstants.VAL_SEX_FEMALE)) {
                 radioFemale.setChecked(true);
@@ -178,7 +185,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         } else {
             txtDate.setText(Utils.beautifyDate(new Date()));
 
-            byte[] data = ((CreateDataActivity)context).qrSource;
+            byte[] data = ((CreateDataActivity)context).qrBitmapByteArray;
             if (data != null) {
                 imgConsent.setImageBitmap(BitmapFactory.decodeByteArray(data, 0, data.length));
             }
@@ -190,7 +197,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         String name = editName.getText().toString();
         String prename = editPrename.getText().toString();
-        String location = editLocation.getText().toString();
+        // TODO fix String location = editLocation.getText().toString();
         String birth = editBirth.getText().toString();
         String guardian = editGuardian.getText().toString();
 
@@ -253,9 +260,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+            /* TODO fix
             case R.id.imgLocation:
                 startActivityForResult(new Intent(context, LocationDetectActivity.class), REQUEST_LOCATION);
                 break;
+                */
             case R.id.editBirth:
                 DateRangePickerDialog pickerDialog = new DateRangePickerDialog();
                 pickerDialog.setCallback(this);
@@ -295,7 +304,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             case R.id.rytConsentDetail:
                 Intent intent = new Intent(context, ImageDetailActivity.class);
                 if (((CreateDataActivity)context).qrCode != null) {
-                    intent.putExtra(AppConstants.EXTRA_QR_BITMAP, ((CreateDataActivity)context).qrSource);
+                    intent.putExtra(AppConstants.EXTRA_QR_BITMAP, ((CreateDataActivity)context).qrBitmapByteArray);
                 } else if (((CreateDataActivity)context).consents.size() > 0) {
                     intent.putExtra(AppConstants.EXTRA_QR_URL, ((CreateDataActivity)context).consents.get(0).getConsent());
                 }
@@ -311,7 +320,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void onActivityResult(int reqCode, int resCode, Intent data) {
         if (reqCode == REQUEST_LOCATION && resCode == Activity.RESULT_OK) {
             location = (Loc)data.getSerializableExtra(AppConstants.EXTRA_LOCATION);
-            editLocation.setText(location.getAddress());
+            // TODO fix editLocation.setText(location.getAddress());
         }
     }
 
@@ -323,7 +332,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     public void showConsent() {
         if (((CreateDataActivity)context).qrCode != null) {
-            imgConsent.setImageBitmap(BitmapFactory.decodeByteArray(((CreateDataActivity)context).qrSource, 0, ((CreateDataActivity)context).qrSource.length));
+            imgConsent.setImageBitmap(BitmapFactory.decodeByteArray(((CreateDataActivity)context).qrBitmapByteArray, 0, ((CreateDataActivity)context).qrBitmapByteArray.length));
         } else if (((CreateDataActivity)context).consents.size() > 0) {
             final String qrUrl = ((CreateDataActivity)context).consents.get(0).getConsent();
 

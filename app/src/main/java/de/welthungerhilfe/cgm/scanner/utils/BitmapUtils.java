@@ -37,7 +37,8 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
  */
 
 public class BitmapUtils {
-    public static void saveBitmap(byte[] imgData, String fileName) {
+
+    public static File saveBitmap(byte[] imgData, String fileName) {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "CGM Scanner");
         if (!mediaStorageDir.exists())
             mediaStorageDir.mkdir();
@@ -51,6 +52,7 @@ public class BitmapUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return pictureFile;
     }
 
     public static void saveBitmap(Bitmap bitmap, String fileName) {
@@ -172,5 +174,33 @@ public class BitmapUtils {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
         return stream.toByteArray();
+    }
+
+    public static byte[] rotateYUV420Degree90(byte[] data, int imageWidth, int imageHeight)
+    {
+        byte [] yuv = new byte[imageWidth*imageHeight*3/2];
+        // Rotate the Y luma
+        int i = 0;
+        for(int x = 0;x < imageWidth;x++)
+        {
+            for(int y = imageHeight-1;y >= 0;y--)
+            {
+                yuv[i] = data[y*imageWidth+x];
+                i++;
+            }
+        }
+        // Rotate the U and V color components
+        i = imageWidth*imageHeight*3/2-1;
+        for(int x = imageWidth-1;x > 0;x=x-2)
+        {
+            for(int y = 0;y < imageHeight/2;y++)
+            {
+                yuv[i] = data[(imageWidth*imageHeight)+(y*imageWidth)+x];
+                i--;
+                yuv[i] = data[(imageWidth*imageHeight)+(y*imageWidth)+(x-1)];
+                i--;
+            }
+        }
+        return yuv;
     }
 }
