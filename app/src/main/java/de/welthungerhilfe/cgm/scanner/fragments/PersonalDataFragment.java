@@ -58,6 +58,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.activities.ImageDetailActivity;
 import de.welthungerhilfe.cgm.scanner.activities.LocationDetectActivity;
+import de.welthungerhilfe.cgm.scanner.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -361,31 +362,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         Glide.with(context).load(qrUrl).into(imgConsent);
                 }
             });
-/*
-            String[] arr = qrUrl.split(".png");
-			// TODO: replace .png_ to _ here and in Firebase Functions
-            String thumbUrlString = arr[0] + ".png_thumb.png";
-
-            // TODO: building the URL to thumbnail doesn't seem to work like this, probably need to get a new StorageReference
-            // TODO: Catch 404
-            StorageReference qrThumbRef = AppController.getInstance().firebaseStorage.getReferenceFromUrl(thumbUrlString);
-
-
-
-            Glide.with(context).load(qrThumbUrl).listener(new RequestListener<String, GlideDrawable>() {
-                @Override
-                public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                    Glide.with(context).load(qrUrl).into(imgConsent);
-                    Log.w(TAG, qrThumbUrl+" not found, loading full size consent image into preview. Are Firebase Functions for thumbnail creation configured?");
-
-                    return false;
-                }
-
-                @Override
-                public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                    return false;
-                }
-            }).into(imgConsent);*/
         }
     }
 
