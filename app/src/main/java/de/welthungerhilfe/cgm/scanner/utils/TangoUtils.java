@@ -51,7 +51,7 @@ public class TangoUtils {
 
         myBuffer.asFloatBuffer().put(pointCloudData.points);
 
-        File file = new File(pointCloudSaveFolder, pointCloudFilename);
+        File file = new File(pointCloudSaveFolder, pointCloudFilename+".vtk");
 
         try {
 
@@ -81,6 +81,53 @@ public class TangoUtils {
 
             out.write(("\nFIELD FieldData 1\n" + "timestamp 1 1 float\n").getBytes());
             out.writeFloat((float) pointCloudData.timestamp);
+
+            out.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Uri.fromFile(file);
+    }
+
+    // This function writes the XYZC points to .pcd files in binary
+    public static Uri writePointCloudToPcdFile(TangoPointCloudData pointCloudData,
+                                               File pointCloudSaveFolder, String pointCloudFilename) {
+
+        ByteBuffer myBuffer = ByteBuffer.allocate(pointCloudData.numPoints * 4 * 4);
+        myBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        myBuffer.asFloatBuffer().put(pointCloudData.points);
+        File file = new File(pointCloudSaveFolder, pointCloudFilename+".pcd");
+
+        try {
+            DataOutputStream out = new DataOutputStream(new BufferedOutputStream(
+                    new FileOutputStream(file)));
+            float confidence;
+
+
+            out.write(("# timestamp 1 1 float "+pointCloudData.timestamp+"\n").getBytes());
+
+            out.write(("# .PCD v.7 - Point Cloud Data file format\n" +
+                    "VERSION .7\n" +
+                    "FIELDS x y z c\n" +
+                    "SIZE 4 4 4 4\n" +
+                    "TYPE F F F F\n" +
+                    "COUNT 1 1 1 1\n" +
+                    "WIDTH " + pointCloudData.numPoints + "\n"+
+                    "HEIGHT 1\n" +
+                    // TODO Pose Data to VIEWPOINT http://pointclouds.org/documentation/tutorials/pcd_file_format.php
+                    "VIEWPOINT 0 0 0 1 0 0 0\n" +
+                    "POINTS " + pointCloudData.numPoints + "\n" +
+                    // TODO "DATA binary"
+                    "DATA ascii\n").getBytes());
+
+            for (int i = 0; i < pointCloudData.numPoints; i++) {
+                float pcx =  myBuffer.getFloat(4 * i * 4);
+                float pcy =  myBuffer.getFloat((4 * i + 1) * 4);
+                float pcz = myBuffer.getFloat((4 * i + 2) * 4);
+                float pcc = myBuffer.getFloat((4 * i + 3) * 4);
+                out.write((pcx+" "+pcy+" "+pcz+" "+pcc+"\n").getBytes());
+            }
 
             out.close();
 
