@@ -108,6 +108,7 @@ import de.welthungerhilfe.cgm.scanner.tango.CameraSurfaceRenderer;
 import de.welthungerhilfe.cgm.scanner.tango.ModelMatCalculator;
 import de.welthungerhilfe.cgm.scanner.tango.OverlaySurface;
 import de.welthungerhilfe.cgm.scanner.tango.TextureMovieEncoder;
+import de.welthungerhilfe.cgm.scanner.utils.PointCloudUtils;
 import de.welthungerhilfe.cgm.scanner.utils.ZipWriter;
 
 import static com.projecttango.tangosupport.TangoSupport.initialize;
@@ -737,7 +738,19 @@ public class RecorderActivity extends Activity {
                         if ( mIsRecording ) {
                             updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
                             progressBar.setProgress(mProgress);
-                            writePointCloudToFile(pointCloudData, framePairs);
+                            mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mScanningWorkflowStep +
+                                    "_" + String.format("%03d", mNumberOfFilesWritten) + ".vtk";
+                            Uri pcUri = PointCloudUtils.writePointCloudToVtkFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
+                            // Direct Upload to Firebase Storage
+                            startService(new Intent(RecorderActivity.this, FirebaseUploadService.class)
+                                    .putExtra(FirebaseUploadService.EXTRA_FILE_URI, pcUri)
+                                    .putExtra(AppConstants.EXTRA_QR, mQrCode)
+                                    .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, mNowTimeString)
+                                    .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_PC_URL)
+                                    .setAction(FirebaseUploadService.ACTION_UPLOAD));
+                            mNumberOfFilesWritten++;
+                            //mTimeToTakeSnap = false;
+
                         }
                         mutex_on_mIsRecording.release();
                     }
@@ -1016,70 +1029,6 @@ public class RecorderActivity extends Activity {
         Matrix.setIdentityM(cam2dev_Transform, 0);
         Matrix.multiplyMM(cam2dev_Transform, 0, IMU2dev, 0, cam2IMU, 0);
     }
-
-
-    // This function writes the XYZ points to .vtk files in binary
-    private void writePointCloudToFile(TangoPointCloudData pointCloudData,
-                                       ArrayList<TangoCoordinateFramePair> framePairs) {
-
-
-        ByteBuffer myBuffer = ByteBuffer.allocate(pointCloudData.numPoints * 4 * 4);
-        myBuffer.order(ByteOrder.LITTLE_ENDIAN);
-
-        myBuffer.asFloatBuffer().put(pointCloudData.points);
-
-        mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mScanningWorkflowStep +
-                "_" + String.format("%03d", mNumberOfFilesWritten) + ".vtk";
-        mPointCloudFilenameBuffer.add(mPointCloudSaveFolder + mPointCloudFilename);
-        Log.v(TAG,"added pointcloud "+mPointCloudSaveFolder + mPointCloudFilename);
-        File file = new File(mPointCloudSaveFolder, mPointCloudFilename);
-
-
-        try {
-
-            DataOutputStream out = new DataOutputStream(new BufferedOutputStream(
-                    new FileOutputStream(file)));
-            float confidence;
-
-            out.write(("# vtk DataFile Version 3.0\n" +
-                    "vtk output\n" +
-                    "BINARY\n" +
-                    "DATASET POLYDATA\n" +
-                    "POINTS " + pointCloudData.numPoints + " float\n").getBytes());
-
-            for (int i = 0; i < pointCloudData.numPoints; i++) {
-
-                out.writeFloat(myBuffer.getFloat(4 * i * 4));
-                out.writeFloat(myBuffer.getFloat((4 * i + 1) * 4));
-                out.writeFloat(myBuffer.getFloat((4 * i + 2) * 4));
-                confidence = myBuffer.getFloat((4 * i + 3) * 4);
-            }
-
-            out.write(("\nVERTICES 1 " + String.valueOf(pointCloudData.numPoints + 1) + "\n").getBytes());
-            out.writeInt(pointCloudData.numPoints);
-            for (int i = 0; i < pointCloudData.numPoints; i++) {
-                out.writeInt(i);
-            }
-
-            out.write(("\nFIELD FieldData 1\n" + "timestamp 1 1 float\n").getBytes());
-            out.writeFloat((float) pointCloudData.timestamp);
-
-            out.close();
-            // Direct Upload to Firebase Storage
-            startService(new Intent(RecorderActivity.this, FirebaseUploadService.class)
-                    .putExtra(FirebaseUploadService.EXTRA_FILE_URI, Uri.fromFile(file))
-                    .putExtra(AppConstants.EXTRA_QR, mQrCode)
-                    .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, mNowTimeString)
-                    .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_PC_URL)
-                    .setAction(FirebaseUploadService.ACTION_UPLOAD));
-            mNumberOfFilesWritten++;
-            //mTimeToTakeSnap = false;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     // This function is called when the Record Switch is changed
     private void record_SwitchChanged() {
