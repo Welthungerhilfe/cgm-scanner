@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoPointCloudData;
+import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -14,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
 import de.welthungerhilfe.cgm.scanner.activities.RecorderActivity;
@@ -38,7 +40,7 @@ import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class PointCloudUtils {
+public class TangoUtils {
 
     // This function writes the XYZ points to .vtk files in binary
     public static Uri writePointCloudToVtkFile(TangoPointCloudData pointCloudData,
@@ -87,5 +89,55 @@ public class PointCloudUtils {
         }
         return Uri.fromFile(file);
     }
+
+
+    public static TangoImageBuffer copyImageBuffer(TangoImageBuffer imageBuffer) {
+        ByteBuffer clone = ByteBuffer.allocateDirect(imageBuffer.data.capacity());
+        imageBuffer.data.rewind();
+        clone.put(imageBuffer.data);
+        imageBuffer.data.rewind();
+        clone.flip();
+        return new TangoImageBuffer(imageBuffer.width, imageBuffer.height,
+                imageBuffer.stride, imageBuffer.frameNumber,
+                imageBuffer.timestamp, imageBuffer.format, clone);
+    }
+
+    /**
+     * Calculates the average depth at Center from a point cloud buffer.
+     */
+    public static float[] calculateAveragedDepth(FloatBuffer pointCloudBuffer, int numPoints) {
+        float totalZ = 0;
+        float averageZ = 0;
+        float totalC = 0;
+        float averageC = 0;
+        float currentX;
+        float currentY;
+        int countingPoints = 0;
+
+        if (numPoints != 0) {
+            int numFloats = 4 * numPoints;
+            for (int i = 0; i < numFloats; i++) {
+                currentX = pointCloudBuffer.get(i);
+                i++;
+                currentY = pointCloudBuffer.get(i);
+                i++;
+                if (currentX < 0.01 && currentX > -0.01 && currentY < 0.01 && currentY > -0.1) {
+                    totalZ = totalZ + pointCloudBuffer.get(i);
+                    countingPoints++;
+                    i++;
+                    totalC = totalC + pointCloudBuffer.get(i);
+                } else {
+                    i++;
+                }
+            }
+            averageZ = totalZ / countingPoints;
+            averageC = totalC / countingPoints;
+        }
+        float[] average = new float[2];
+        average[0] = averageZ;
+        average[1] = averageC;
+        return average;
+    }
+
 
 }
