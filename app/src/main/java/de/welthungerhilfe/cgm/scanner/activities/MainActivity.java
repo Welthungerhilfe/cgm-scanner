@@ -239,8 +239,6 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         sortDialog.show();
     }
 
-    @BindView(R.id.refreshLayout)
-    SwipeRefreshLayout refreshLayout;
     @BindView(R.id.recyclerData)
     RecyclerView recyclerData;
     RecyclerDataAdapter adapterData;
@@ -275,39 +273,18 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
 
         initUI();
 
-        /*
-        AppController.getInstance().firebaseFirestore.collection("persons")
-                //.orderBy("created", Query.Direction.DESCENDING)
-                .addSnapshotListener(this);
-        */
-
         showProgressDialog();
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         viewModel.getObservablePersonList().observe(this, personList->{
-            /*
-            personListAdapter = new PersonListAdapter(PersonListActivity.this, personList);
-            recyclerPersonList.setAdapter(personListAdapter);
-            recyclerPersonList.setLayoutManager(new LinearLayoutManager(PersonListActivity.this));
-            */
             adapterData = new RecyclerDataAdapter(this, personList);
             adapterData.setPersonDetailListener(this);
             recyclerData.setAdapter(adapterData);
             recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         });
-
-        //loadData();
     }
 
     private void initUI() {
-        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                adapterData.resetData(new ArrayList<Person>());
-                loadData();
-            }
-        });
-
         adapterData = new RecyclerDataAdapter(this, new ArrayList<Person>());
         adapterData.setPersonDetailListener(this);
         recyclerData.setAdapter(adapterData);
@@ -367,8 +344,6 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     }
 
     private void createTempFile() {
-        String state = Environment.getExternalStorageState();
-
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "CGM Scanner");
         if (!mediaStorageDir.exists())
             mediaStorageDir.mkdir();
@@ -391,34 +366,6 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
         takePictureIntent.putExtra("return-data", true);
         startActivityForResult(takePictureIntent, REQUEST_CAMERA);
-    }
-
-    private void loadData() {
-        AppController.getInstance().firebaseFirestore.collection("persons")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        hideProgressDialog();
-                        boolean noData = true;
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Person person = document.toObject(Person.class);
-
-                                adapterData.addPerson(person);
-                                noData = false;
-                            }
-                        }
-                        if (noData) {
-                            recyclerData.setVisibility(View.GONE);
-                            txtNoPerson.setVisibility(View.VISIBLE);
-                        } else {
-                            recyclerData.setVisibility(View.VISIBLE);
-                            txtNoPerson.setVisibility(View.GONE);
-                        }
-                        refreshLayout.setRefreshing(false);
-                    }
-                });
     }
 
     @Override
