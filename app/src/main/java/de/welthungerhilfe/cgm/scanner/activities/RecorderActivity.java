@@ -28,11 +28,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.ImageFormat;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
@@ -41,8 +36,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 
@@ -57,7 +50,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoConfig;
@@ -76,17 +68,11 @@ import com.projecttango.tangosupport.TangoSupport;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -95,10 +81,6 @@ import de.welthungerhilfe.cgm.scanner.fragments.BabyBack0Fragment;
 import de.welthungerhilfe.cgm.scanner.fragments.BabyBack1Fragment;
 import de.welthungerhilfe.cgm.scanner.fragments.BabyFront0Fragment;
 import de.welthungerhilfe.cgm.scanner.fragments.BabyInfantChooserFragment;
-import de.welthungerhilfe.cgm.scanner.fragments.InfantBackFragment;
-import de.welthungerhilfe.cgm.scanner.fragments.InfantFrontFragment;
-import de.welthungerhilfe.cgm.scanner.fragments.InfantFullFrontFragment;
-import de.welthungerhilfe.cgm.scanner.fragments.InfantTurnFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
@@ -107,11 +89,10 @@ import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.tango.CameraSurfaceRenderer;
 import de.welthungerhilfe.cgm.scanner.tango.ModelMatCalculator;
 import de.welthungerhilfe.cgm.scanner.tango.OverlaySurface;
-import de.welthungerhilfe.cgm.scanner.tango.TextureMovieEncoder;
-import de.welthungerhilfe.cgm.scanner.utils.ZipWriter;
+import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
+import de.welthungerhilfe.cgm.scanner.utils.TangoUtils;
 
 import static com.projecttango.tangosupport.TangoSupport.initialize;
-import static de.welthungerhilfe.cgm.scanner.utils.BitmapUtils.rotateYUV420Degree90;
 
 public class RecorderActivity extends Activity {
 
@@ -696,7 +677,7 @@ public class RecorderActivity extends Activity {
                 // TODO remove when not necessary anymore (performance/video capture)
                 mPointCloudAvailable = true;
 
-                float[] average = calculateAveragedDepth(pointCloudData.points, pointCloudData.numPoints);
+                float[] average = TangoUtils.calculateAveragedDepth(pointCloudData.points, pointCloudData.numPoints);
 
                 mOverlaySurfaceView.setDistance(average[0]);
                 mOverlaySurfaceView.setConfidence(average[1]);
@@ -737,7 +718,19 @@ public class RecorderActivity extends Activity {
                         if ( mIsRecording ) {
                             updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
                             progressBar.setProgress(mProgress);
-                            writePointCloudToFile(pointCloudData, framePairs);
+                            mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mScanningWorkflowStep +
+                                    "_" + String.format("%03d", mNumberOfFilesWritten);
+                            Uri pcUri = TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
+                            // Direct Upload to Firebase Storage
+                            startService(new Intent(RecorderActivity.this, FirebaseUploadService.class)
+                                    .putExtra(FirebaseUploadService.EXTRA_FILE_URI, pcUri)
+                                    .putExtra(AppConstants.EXTRA_QR, mQrCode)
+                                    .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, mNowTimeString)
+                                    .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_PC_URL)
+                                    .setAction(FirebaseUploadService.ACTION_UPLOAD));
+                            mNumberOfFilesWritten++;
+                            //mTimeToTakeSnap = false;
+
                         }
                         mutex_on_mIsRecording.release();
                     }
@@ -806,9 +799,11 @@ public class RecorderActivity extends Activity {
                         Runnable thread = new Runnable() {
                             @Override
                             public void run() {
-                                TangoImageBuffer currentTangoImageBuffer = copyImageBuffer(tangoImageBuffer);
+                                TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
 
-                                Uri uri = writeImageToFile(currentTangoImageBuffer);
+                                String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
+                                        mScanningWorkflowStep + "_" + currentTangoImageBuffer.timestamp + ".jpg";
+                                Uri uri = BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
                                 // Direct Upload to Firebase Storage
                                 // Start MyUploadService to upload the file, so that the file is uploaded
                                 // even if this Activity is killed or put in the background
@@ -823,88 +818,6 @@ public class RecorderActivity extends Activity {
                         thread.run();
                     }
                 });
-    }
-
-    private TangoImageBuffer copyImageBuffer(TangoImageBuffer imageBuffer) {
-        ByteBuffer clone = ByteBuffer.allocateDirect(imageBuffer.data.capacity());
-        imageBuffer.data.rewind();
-        clone.put(imageBuffer.data);
-        imageBuffer.data.rewind();
-        clone.flip();
-        return new TangoImageBuffer(imageBuffer.width, imageBuffer.height,
-                imageBuffer.stride, imageBuffer.frameNumber,
-                imageBuffer.timestamp, imageBuffer.format, clone);
-    }
-
-    // TODO move to BitmapUtils?
-    private Uri writeImageToFile(TangoImageBuffer currentTangoImageBuffer) {
-        String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
-                mScanningWorkflowStep + "_" + currentTangoImageBuffer.timestamp + ".jpg";
-        File currentImg = new File(mRgbSaveFolder,currentImgFilename);
-
-        int currentImgWidth = currentTangoImageBuffer.width;
-        int currentImgHeight = currentTangoImageBuffer.height;
-
-        // TODO performance:
-        // 1. write only to file here (or write video from GLSurface)
-        // 2. queue in upload service #18
-        // 3. post-processing (rotate) in UploadService
-
-        // switched heigth and width for rotated image
-            /*
-            byte[] YuvImageByteArray = rotateYUV420Degree90(currentTangoImageBuffer.data.array(), currentImgWidth, currentImgHeight);
-            int tmp = currentImgWidth;
-            currentImgWidth = currentImgHeight;
-            currentImgHeight = tmp;
-            */
-        byte[] YuvImageByteArray = currentTangoImageBuffer.data.array();
-
-        try (FileOutputStream out = new FileOutputStream(currentImg)) {
-            YuvImage yuvImage = new YuvImage(YuvImageByteArray, ImageFormat.NV21, currentImgWidth, currentImgHeight, null);
-            yuvImage.compressToJpeg(new Rect(0, 0, currentImgWidth, currentImgHeight), 50, out);
-            out.flush();
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Uri.fromFile(currentImg);
-    }
-
-    /**
-     * Calculates the average depth at Center from a point cloud buffer.
-     */
-    private float[] calculateAveragedDepth(FloatBuffer pointCloudBuffer, int numPoints) {
-        float totalZ = 0;
-        float averageZ = 0;
-        float totalC = 0;
-        float averageC = 0;
-        float currentX;
-        float currentY;
-        int countingPoints = 0;
-
-        if (numPoints != 0) {
-            int numFloats = 4 * numPoints;
-            for (int i = 0; i < numFloats; i++) {
-                currentX = pointCloudBuffer.get(i);
-                i++;
-                currentY = pointCloudBuffer.get(i);
-                i++;
-                if (currentX < 0.01 && currentX > -0.01 && currentY < 0.01 && currentY > -0.1) {
-                    totalZ = totalZ + pointCloudBuffer.get(i);
-                    countingPoints++;
-                    i++;
-                    totalC = totalC + pointCloudBuffer.get(i);
-                } else {
-                    i++;
-                }
-            }
-            averageZ = totalZ / countingPoints;
-            averageC = totalC / countingPoints;
-        }
-        float[] average = new float[2];
-        average[0] = averageZ;
-        average[1] = averageC;
-        return average;
     }
 
     @Override
@@ -1016,70 +929,6 @@ public class RecorderActivity extends Activity {
         Matrix.setIdentityM(cam2dev_Transform, 0);
         Matrix.multiplyMM(cam2dev_Transform, 0, IMU2dev, 0, cam2IMU, 0);
     }
-
-
-    // This function writes the XYZ points to .vtk files in binary
-    private void writePointCloudToFile(TangoPointCloudData pointCloudData,
-                                       ArrayList<TangoCoordinateFramePair> framePairs) {
-
-
-        ByteBuffer myBuffer = ByteBuffer.allocate(pointCloudData.numPoints * 4 * 4);
-        myBuffer.order(ByteOrder.LITTLE_ENDIAN);
-
-        myBuffer.asFloatBuffer().put(pointCloudData.points);
-
-        mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mScanningWorkflowStep +
-                "_" + String.format("%03d", mNumberOfFilesWritten) + ".vtk";
-        mPointCloudFilenameBuffer.add(mPointCloudSaveFolder + mPointCloudFilename);
-        Log.v(TAG,"added pointcloud "+mPointCloudSaveFolder + mPointCloudFilename);
-        File file = new File(mPointCloudSaveFolder, mPointCloudFilename);
-
-
-        try {
-
-            DataOutputStream out = new DataOutputStream(new BufferedOutputStream(
-                    new FileOutputStream(file)));
-            float confidence;
-
-            out.write(("# vtk DataFile Version 3.0\n" +
-                    "vtk output\n" +
-                    "BINARY\n" +
-                    "DATASET POLYDATA\n" +
-                    "POINTS " + pointCloudData.numPoints + " float\n").getBytes());
-
-            for (int i = 0; i < pointCloudData.numPoints; i++) {
-
-                out.writeFloat(myBuffer.getFloat(4 * i * 4));
-                out.writeFloat(myBuffer.getFloat((4 * i + 1) * 4));
-                out.writeFloat(myBuffer.getFloat((4 * i + 2) * 4));
-                confidence = myBuffer.getFloat((4 * i + 3) * 4);
-            }
-
-            out.write(("\nVERTICES 1 " + String.valueOf(pointCloudData.numPoints + 1) + "\n").getBytes());
-            out.writeInt(pointCloudData.numPoints);
-            for (int i = 0; i < pointCloudData.numPoints; i++) {
-                out.writeInt(i);
-            }
-
-            out.write(("\nFIELD FieldData 1\n" + "timestamp 1 1 float\n").getBytes());
-            out.writeFloat((float) pointCloudData.timestamp);
-
-            out.close();
-            // Direct Upload to Firebase Storage
-            startService(new Intent(RecorderActivity.this, FirebaseUploadService.class)
-                    .putExtra(FirebaseUploadService.EXTRA_FILE_URI, Uri.fromFile(file))
-                    .putExtra(AppConstants.EXTRA_QR, mQrCode)
-                    .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, mNowTimeString)
-                    .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_PC_URL)
-                    .setAction(FirebaseUploadService.ACTION_UPLOAD));
-            mNumberOfFilesWritten++;
-            //mTimeToTakeSnap = false;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     // This function is called when the Record Switch is changed
     private void record_SwitchChanged() {
