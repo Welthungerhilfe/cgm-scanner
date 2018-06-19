@@ -205,10 +205,10 @@ public class CreateDataActivity extends BaseActivity {
 
             person = new Person();
             person.setId(AppController.getInstance().getPersonId(name));
+            person.setQrcode(qrCode);
             person.setCreated(System.currentTimeMillis());
         }
 
-        person.setQrcode(qrCode);
         person.setName(name);
         person.setSurname(surName);
         person.setLastLocation(loc);
