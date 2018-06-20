@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="UnitEditText">
+        <attr name="unit" format="string|reference" />
+        <attr name="unitPadding" format="dimension" />
+        <attr name="unitMargin" format="dimension" />
+    </declare-styleable>
+</resources>
