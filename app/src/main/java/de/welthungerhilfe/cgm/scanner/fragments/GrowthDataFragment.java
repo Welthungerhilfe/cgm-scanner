@@ -123,15 +123,15 @@ public class GrowthDataFragment extends Fragment {
             if (chartType == 1) {
                 txtXAxis.setText("Age");
                 txtYAxis.setText("Height");
-                yVals1.add(new Entry(measure.getAge(), measure.getHeight()));
+                yVals1.add(new Entry(measure.getAge(), (float) measure.getHeight()));
             } else if (chartType == 2) {
                 txtXAxis.setText("Age");
                 txtYAxis.setText("Weight");
-                yVals1.add(new Entry(measure.getAge(), measure.getWeight()));
+                yVals1.add(new Entry(measure.getAge(), (float)  measure.getWeight()));
             } else if (chartType == 3) {
                 txtXAxis.setText("Height");
                 txtYAxis.setText("Weight");
-                yVals1.add(new Entry(measure.getHeight(), measure.getWeight()));
+                yVals1.add(new Entry((float) measure.getHeight(), (float) measure.getWeight()));
             }
         }
 

@@ -18,10 +18,10 @@
   ~
   -->
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/colorWhite"
     android:orientation="vertical"
     android:layout_margin="20dp"
@@ -54,13 +54,16 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-        <EditText
+        <de.welthungerhilfe.cgm.scanner.views.UnitEditText
             android:id="@+id/editManualHeight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:inputType="numberDecimal"
-            android:hint="01 Height"/>
+            android:hint="01 Height"
+            app:unit="@string/unit_cm"
+            app:unitMargin="3dp"
+            app:unitPadding="2dp"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -69,13 +72,16 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-        <EditText
+        <de.welthungerhilfe.cgm.scanner.views.UnitEditText
             android:id="@+id/editManualWeight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:inputType="numberDecimal"
-            android:hint="02 Weight"/>
+            android:hint="02 Weight"
+            app:unit="@string/unit_kg"
+            app:unitMargin="3dp"
+            app:unitPadding="2dp"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -84,13 +90,16 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-        <EditText
+        <de.welthungerhilfe.cgm.scanner.views.UnitEditText
             android:id="@+id/editManualMuac"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:inputType="numberDecimal"
-            android:hint="03 MUAC"/>
+            android:hint="03 MUAC"
+            app:unit="@string/unit_cm"
+            app:unitMargin="3dp"
+            app:unitPadding="2dp"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -99,13 +108,16 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-        <EditText
+        <de.welthungerhilfe.cgm.scanner.views.UnitEditText
             android:id="@+id/editManualHead"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:inputType="numberDecimal"
-            android:hint="03 Head Circumference"/>
+            android:hint="03 Head Circumference"
+            app:unit="@string/unit_cm"
+            app:unitMargin="3dp"
+            app:unitPadding="2dp"/>
 
     </android.support.design.widget.TextInputLayout>
 

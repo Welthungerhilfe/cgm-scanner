@@ -80,11 +80,11 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
 
         holder.txtName.setText(person.getName() + " " + person.getSurname());
         if (person.getLastMeasure() == null) {
-            holder.txtWeight.setText(Float.toString(0f));
-            holder.txtHeight.setText(Float.toString(0f));
+            holder.txtWeight.setText("0.0");
+            holder.txtHeight.setText("0.0");
         } else {
-            holder.txtWeight.setText(Float.toString(person.getLastMeasure().getWeight()));
-            holder.txtHeight.setText(Float.toString(person.getLastMeasure().getHeight()));
+            holder.txtWeight.setText(Double.toString(person.getLastMeasure().getWeight()));
+            holder.txtHeight.setText(Double.toString(person.getLastMeasure().getHeight()));
         }
 
         if (personDetailListener != null) {

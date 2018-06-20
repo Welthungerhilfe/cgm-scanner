@@ -226,7 +226,7 @@ public class CreateDataActivity extends BaseActivity {
         viewpager.setCurrentItem(1);
     }
 
-    public void setMeasureData(float height, float weight, float muac, float headCircumference, String additional, Loc location) {
+    public void setMeasureData(double height, double weight, double muac, double headCircumference, String additional, Loc location) {
         final Measure measure = new Measure();
         measure.setId(AppController.getInstance().getMeasureId());
         measure.setDate(System.currentTimeMillis());
