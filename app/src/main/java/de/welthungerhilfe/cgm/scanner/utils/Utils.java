@@ -133,4 +133,25 @@ public class Utils {
 
         return loc1.distanceTo(loc2);
     }
+
+    public static boolean checkDouble(String number) {
+        try {
+            Integer.parseInt(number);
+
+            return false;
+        } catch (NumberFormatException ex) {
+            return true;
+        }
+    }
+
+    public static int checkDoubleDecimals(String number) {
+        int integerPlaces = number.indexOf('.');
+
+        if (integerPlaces < 0)
+            return 0;
+
+        int decimalPlaces = number.length() - integerPlaces - 1;
+
+        return decimalPlaces;
+    }
 }

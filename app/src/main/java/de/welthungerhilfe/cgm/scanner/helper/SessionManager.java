@@ -37,6 +37,7 @@ public class SessionManager {
     private final String KEY_USER_LOCATION_LONGITUDE = "key_user_location_longitude";
     private final String KEY_USER_LOCATION_ADDRESS = "key_user_location_address";
     private final String KEY_SYNC_TIMESTAMP = "sync_timestamp";
+    private final String KEY_LANGUAGE = "key_language";
 
     SharedPreferences pref;
     SharedPreferences.Editor editor;
@@ -57,6 +58,16 @@ public class SessionManager {
 
     public boolean isSigned() {
         return pref.getBoolean(KEY_USER_SIGNED, false);
+    }
+
+    public void setLanguage(String code) {
+        editor.putString(KEY_LANGUAGE, code);
+
+        editor.commit();
+    }
+
+    public String getLanguage() {
+        return pref.getString(KEY_LANGUAGE, "en");
     }
 
     public void setLocation(Loc location) {

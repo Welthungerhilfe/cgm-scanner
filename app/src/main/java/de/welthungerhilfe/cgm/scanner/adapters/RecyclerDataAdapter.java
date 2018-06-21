@@ -43,7 +43,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
+import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
+import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapter.ViewHolder> implements Filterable {
@@ -79,13 +81,20 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
         Person person = filteredList.get(position);
 
         holder.txtName.setText(person.getName() + " " + person.getSurname());
-        if (person.getLastMeasure() == null) {
-            holder.txtWeight.setText(Float.toString(0f));
-            holder.txtHeight.setText(Float.toString(0f));
-        } else {
-            holder.txtWeight.setText(Float.toString(person.getLastMeasure().getWeight()));
-            holder.txtHeight.setText(Float.toString(person.getLastMeasure().getHeight()));
-        }
+
+        new OfflineTask().getLasteMeasure(person, new OfflineTask.OnLoadLastMeasure() {
+
+            @Override
+            public void onLastMeasureLoaded(Measure measure) {
+                if (measure != null) {
+                    holder.txtWeight.setText(Double.toString(measure.getWeight()));
+                    holder.txtHeight.setText(Double.toString(measure.getHeight()));
+                } else {
+                    holder.txtWeight.setText("0.0");
+                    holder.txtHeight.setText("0.0");
+                }
+            }
+        });
 
         if (personDetailListener != null) {
             holder.bindPersonDetail(person);

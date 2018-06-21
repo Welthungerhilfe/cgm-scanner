@@ -53,7 +53,7 @@
             android:id="@+id/txtYAxis"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Y Axis"
+            android:text="@string/axis_y"
             android:rotation="180"/>
 
         <com.github.mikephil.charting.charts.ScatterChart
@@ -67,7 +67,7 @@
             android:id="@+id/txtXAxis"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="X Axis"
+            android:text="@string/axis_x"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"/>
 

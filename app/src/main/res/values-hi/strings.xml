@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">CGM Scanner</string>
     <string name="app_name_long">Child Growth Monitor Scanner App</string>
@@ -42,7 +43,7 @@
 
     <string name="validate_user">Please input user name</string>
     <string name="validate_password">Please input password</string>
-    
+
     <string name="label_login">Please log-in:</string>
     <string name="user">User</string>
     <string name="password">Password</string>
@@ -56,7 +57,7 @@
     <string name="sex_male">male</string>
     <string name="sex_female">female</string>
     <string name="sex_fluid">other</string>
-    
+
     <string name="forgot"><u>Forgot password?</u></string>
     <string name="ok">OK</string>
     <string name="yes">Yes</string>

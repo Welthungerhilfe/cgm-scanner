@@ -18,10 +18,10 @@
   ~
   -->
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/colorWhite"
     android:orientation="vertical"
     android:layout_margin="20dp"
@@ -42,7 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:text="Manual measure"
+            android:text="@string/manual_measure"
             android:textSize="16sp"
             android:textColor="@color/colorGreyDark"
             android:textStyle="bold"/>
@@ -54,13 +54,16 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-        <EditText
+        <de.welthungerhilfe.cgm.scanner.views.UnitEditText
             android:id="@+id/editManualHeight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:inputType="numberDecimal"
-            android:hint="01 Height"/>
+            android:hint="@string/height_01"
+            app:unit="@string/unit_cm"
+            app:unitMargin="3dp"
+            app:unitPadding="2dp"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -69,13 +72,16 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-        <EditText
+        <de.welthungerhilfe.cgm.scanner.views.UnitEditText
             android:id="@+id/editManualWeight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:inputType="numberDecimal"
-            android:hint="02 Weight"/>
+            android:hint="@string/weight_02"
+            app:unit="@string/unit_kg"
+            app:unitMargin="3dp"
+            app:unitPadding="2dp"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -84,13 +90,16 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-        <EditText
+        <de.welthungerhilfe.cgm.scanner.views.UnitEditText
             android:id="@+id/editManualMuac"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:inputType="numberDecimal"
-            android:hint="03 MUAC"/>
+            android:hint="@string/muac_03"
+            app:unit="@string/unit_cm"
+            app:unitMargin="3dp"
+            app:unitPadding="2dp"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -99,13 +108,16 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-        <EditText
+        <de.welthungerhilfe.cgm.scanner.views.UnitEditText
             android:id="@+id/editManualHead"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:inputType="numberDecimal"
-            android:hint="03 Head Circumference"/>
+            android:hint="@string/head_04"
+            app:unit="@string/unit_cm"
+            app:unitMargin="3dp"
+            app:unitPadding="2dp"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -123,7 +135,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:hint="04 Location"/>
+                android:hint="@string/location_05"/>
 
         </android.support.design.widget.TextInputLayout>
 
@@ -159,12 +171,12 @@
         android:layout_marginTop="10dp"
         android:orientation="vertical">
 
-        <Button
+        <android.support.v7.widget.AppCompatCheckBox
             android:id="@+id/btnAlert"
             android:layout_width="match_parent"
             android:layout_height="38dp"
             android:background="@color/colorPink"
-            android:text="Kwashiorkor"
+            android:text="@string/oedema"
             android:textSize="18sp"
             android:textColor="@color/colorWhite"/>
 

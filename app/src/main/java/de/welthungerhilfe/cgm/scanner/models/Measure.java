@@ -47,10 +47,10 @@ public class Measure implements Serializable {
     private long date;
     private String type;
     private long age; // age from birthday in days
-    private float height;
-    private float weight;
-    private float muac;
-    private float headCircumference;
+    private double height;
+    private double weight;
+    private double muac;
+    private double headCircumference;
     private String artifact;
     private boolean visible;
     private long timestamp;
@@ -99,35 +99,35 @@ public class Measure implements Serializable {
         this.age = age;
     }
 
-    public float getHeight() {
+    public double getHeight() {
         return height;
     }
 
-    public void setHeight(float height) {
+    public void setHeight(double height) {
         this.height = height;
     }
 
-    public float getWeight() {
+    public double getWeight() {
         return weight;
     }
 
-    public void setWeight(float weight) {
+    public void setWeight(double weight) {
         this.weight = weight;
     }
 
-    public float getMuac() {
+    public double getMuac() {
         return muac;
     }
 
-    public void setMuac(float muac) {
+    public void setMuac(double muac) {
         this.muac = muac;
     }
 
-    public float getHeadCircumference() {
+    public double getHeadCircumference() {
         return headCircumference;
     }
 
-    public void setHeadCircumference(float headCircumference) {
+    public void setHeadCircumference(double headCircumference) {
         this.headCircumference = headCircumference;
     }
 

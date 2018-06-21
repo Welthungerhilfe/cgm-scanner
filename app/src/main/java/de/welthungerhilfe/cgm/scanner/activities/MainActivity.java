@@ -25,29 +25,22 @@ import android.app.SearchManager;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -58,12 +51,10 @@ import android.widget.TextView;
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 import com.crashlytics.android.Crashlytics;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -76,23 +67,18 @@ import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.OnClickListener;
 import com.orhanobut.dialogplus.ViewHolder;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.adapters.PersonListAdapter;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerDataAdapter;
 import de.welthungerhilfe.cgm.scanner.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
@@ -170,7 +156,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                                 dialog.getHolderView().findViewById(R.id.imgSortStunting).setVisibility(View.INVISIBLE);
                                 dialog.getHolderView().findViewById(R.id.imgSortClear).setVisibility(View.INVISIBLE);
 
-                                txtSortCase.setText("worst weight/height on top");
+                                txtSortCase.setText(R.string.wasting_weight_height);
                                 dialog.dismiss();
 
                                 doSortByWasting();
@@ -182,7 +168,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                                 dialog.getHolderView().findViewById(R.id.imgSortStunting).setVisibility(View.VISIBLE);
                                 dialog.getHolderView().findViewById(R.id.imgSortClear).setVisibility(View.INVISIBLE);
 
-                                txtSortCase.setText("worst height/age on top");
+                                txtSortCase.setText(R.string.stunting_height_age);
                                 dialog.dismiss();
 
                                 doSortByStunting();
@@ -194,7 +180,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                                 dialog.getHolderView().findViewById(R.id.imgSortStunting).setVisibility(View.INVISIBLE);
                                 dialog.getHolderView().findViewById(R.id.imgSortClear).setVisibility(View.VISIBLE);
 
-                                txtSortCase.setText("No filter");
+                                txtSortCase.setText(R.string.no_filter);
                                 dialog.dismiss();
 
                                 clearFilters();
@@ -204,11 +190,11 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                 })
                 .create();
         TextView txtSortDate = sortDialog.getHolderView().findViewById(R.id.txtSortDate);
-        txtSortDate.setText("last " + Integer.toString(diffDays) + " days");
+        txtSortDate.setText(getResources().getString(R.string.last_days, diffDays));
 
         TextView txtSortLocation = sortDialog.getHolderView().findViewById(R.id.txtSortLocation);
         if (session.getLocation().getAddress().equals("")) {
-            txtSortLocation.setText("last location not available");
+            txtSortLocation.setText(R.string.last_location_error);
         } else {
             txtSortLocation.setText(session.getLocation().getAddress());
         }
@@ -289,6 +275,8 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         adapterData.setPersonDetailListener(this);
         recyclerData.setAdapter(adapterData);
         recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
+        txtSortCase.setText(getResources().getString(R.string.last_scans, 0));
     }
 
     private void setupSidemenu() {
@@ -328,7 +316,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
-        actionBar.setTitle("All Scans");
+        actionBar.setTitle(R.string.title_scans);
 
         mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close) {
             public void onDrawerClosed(View view) {
@@ -436,7 +424,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             endDate = startDate + (3600 * 24 - 1) * 1000;
         }
 
-        txtSortCase.setText("Last Scans (" + Integer.toString(Math.abs(diffDays)) + " days)");
+        txtSortCase.setText(getResources().getString(R.string.last_scans, diffDays));
         adapterData.setDateFilter(startDate, endDate);
     }
 

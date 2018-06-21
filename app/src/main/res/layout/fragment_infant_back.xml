@@ -29,7 +29,7 @@
         android:id="@+id/txtTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="04. Back View"
+        android:text="@string/back_view_04"
         android:textColor="@color/colorPrimary"
         android:textSize="22sp"
         android:textStyle="bold" />
@@ -69,7 +69,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Scan the back of the child from the head down to the feet and back up again."
+            android:text="@string/help_back_view_2"
             android:textColor="@color/colorPrimary"
             android:textSize="20sp" />
 
@@ -82,7 +82,7 @@
         android:background="@drawable/button_green_round"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:text="Start Scan"
+        android:text="@string/start_scan"
         android:textColor="@color/colorWhite"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"/>
