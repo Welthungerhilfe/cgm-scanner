@@ -28,6 +28,7 @@ android {
     }
     dexOptions {
         javaMaxHeapSize "4g"
+        incremental true
     }
     buildToolsVersion '27.0.3'
 }
