@@ -35,7 +35,7 @@
             android:id="@+id/txtSortCase"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Last scans (5 days)"
+            android:text="@string/last_scans"
             android:textSize="16sp"/>
         <ImageView
             android:layout_width="20dp"
@@ -50,7 +50,7 @@
                 android:id="@+id/txtSort"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sort By"
+                android:text="@string/sortby"
                 android:textAllCaps="true"
                 android:textColor="@color/colorGreen"
                 android:textSize="18sp"/>
@@ -74,7 +74,7 @@
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:layout_centerInParent="true"
-            android:text="NO PERSONS REGISTERED"
+            android:text="@string/no_persons"
             android:textSize="18sp"/>
 
     </RelativeLayout>

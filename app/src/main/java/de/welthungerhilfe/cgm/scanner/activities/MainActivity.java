@@ -156,7 +156,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                                 dialog.getHolderView().findViewById(R.id.imgSortStunting).setVisibility(View.INVISIBLE);
                                 dialog.getHolderView().findViewById(R.id.imgSortClear).setVisibility(View.INVISIBLE);
 
-                                txtSortCase.setText("worst weight/height on top");
+                                txtSortCase.setText(R.string.wasting_weight_height);
                                 dialog.dismiss();
 
                                 doSortByWasting();
@@ -168,7 +168,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                                 dialog.getHolderView().findViewById(R.id.imgSortStunting).setVisibility(View.VISIBLE);
                                 dialog.getHolderView().findViewById(R.id.imgSortClear).setVisibility(View.INVISIBLE);
 
-                                txtSortCase.setText("worst height/age on top");
+                                txtSortCase.setText(R.string.stunting_height_age);
                                 dialog.dismiss();
 
                                 doSortByStunting();
@@ -180,7 +180,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                                 dialog.getHolderView().findViewById(R.id.imgSortStunting).setVisibility(View.INVISIBLE);
                                 dialog.getHolderView().findViewById(R.id.imgSortClear).setVisibility(View.VISIBLE);
 
-                                txtSortCase.setText("No filter");
+                                txtSortCase.setText(R.string.no_filter);
                                 dialog.dismiss();
 
                                 clearFilters();
@@ -190,11 +190,11 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                 })
                 .create();
         TextView txtSortDate = sortDialog.getHolderView().findViewById(R.id.txtSortDate);
-        txtSortDate.setText("last " + Integer.toString(diffDays) + " days");
+        txtSortDate.setText(getResources().getString(R.string.last_days, diffDays));
 
         TextView txtSortLocation = sortDialog.getHolderView().findViewById(R.id.txtSortLocation);
         if (session.getLocation().getAddress().equals("")) {
-            txtSortLocation.setText("last location not available");
+            txtSortLocation.setText(R.string.last_location_error);
         } else {
             txtSortLocation.setText(session.getLocation().getAddress());
         }
@@ -275,6 +275,8 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         adapterData.setPersonDetailListener(this);
         recyclerData.setAdapter(adapterData);
         recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
+        txtSortCase.setText(getResources().getString(R.string.last_scans, 0));
     }
 
     private void setupSidemenu() {
@@ -314,7 +316,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
-        actionBar.setTitle("All Scans");
+        actionBar.setTitle(R.string.title_scans);
 
         mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close) {
             public void onDrawerClosed(View view) {
@@ -422,7 +424,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             endDate = startDate + (3600 * 24 - 1) * 1000;
         }
 
-        txtSortCase.setText("Last Scans (" + Integer.toString(Math.abs(diffDays)) + " days)");
+        txtSortCase.setText(getResources().getString(R.string.last_scans, diffDays));
         adapterData.setDateFilter(startDate, endDate);
     }
 
