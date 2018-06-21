@@ -41,7 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:text="Manual measure"
+            android:text="@string/manual_measure"
             android:textSize="16sp"
             android:textColor="@color/colorGreyDark"
             android:textStyle="bold"/>
@@ -59,7 +59,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:editable="false"
-            android:hint="01 Scan Date"/>
+            android:hint="@string/scan_date_01"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -74,7 +74,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:editable="false"
-            android:hint="02 Scan Location"/>
+            android:hint="@string/scan_location_02"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -89,7 +89,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:editable="false"
-            android:hint="03 Height"/>
+            android:hint="@string/height_03"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -104,7 +104,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:editable="false"
-            android:hint="04 Weight"/>
+            android:hint="@string/weight_04"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -119,7 +119,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:editable="false"
-            android:hint="05 MUAC"/>
+            android:hint="@string/muac_05"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -134,7 +134,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:editable="false"
-            android:hint="06 Head Circumference"/>
+            android:hint="@string/head_06"/>
 
     </android.support.design.widget.TextInputLayout>
 

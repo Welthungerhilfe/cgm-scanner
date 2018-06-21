@@ -160,38 +160,6 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
 
     private void getAddressFromLocation() {
         new AddressTask(location.getLatitude(), location.getLongitude(), this).execute();
-
-        /*
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                Geocoder geocoder = new Geocoder(LocationDetectActivity.this, Locale.getDefault());
-                String result = null;
-                try {
-                    List<Address> addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                    if (addressList != null && addressList.size() > 0) {
-                        Address address = addressList.get(0);
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
-                            sb.append(address.getAddressLine(i));
-                        }
-                        sb.append(address.getLocality()).append("\n");
-                        sb.append(address.getPostalCode()).append("\n");
-                        sb.append(address.getCountryName());
-                        result = sb.toString();
-                    }
-                } catch (IOException e) {
-                    Log.e("Location Address Loader", "Unable connect to Geocoder", e);
-                } finally {
-                    if (result != null) {
-                        location.setAddress(result);
-                        txtAddress.setText(result);
-                    }
-                }
-            }
-        };
-        thread.start();
-        */
     }
 
     private void getCurrentLocation() {

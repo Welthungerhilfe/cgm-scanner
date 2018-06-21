@@ -29,7 +29,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:singleLine="true"
-                    android:text="Marla Miller"
+                    android:text=""
                     android:textSize="20sp"
                     android:textColor="@color/colorBlack"/>
                 <LinearLayout
@@ -41,33 +41,44 @@
                         android:layout_height="wrap_content"
                         android:singleLine="true"
                         android:textSize="16sp"
-                        android:text="Height: "/>
+                        android:text="@string/label_height"/>
                     <TextView
                         android:id="@+id/txtHeight"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
                         android:singleLine="true"
                         android:textSize="16sp"
-                        android:text="64.3"/>
+                        android:text="0.0"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:singleLine="true"
                         android:textSize="16sp"
-                        android:text=" CM,  Weight: "/>
+                        android:text="@string/unit_cm"
+                        android:textAllCaps="true"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                        android:singleLine="true"
+                        android:textSize="16sp"
+                        android:text="@string/label_weight"/>
                     <TextView
                         android:id="@+id/txtWeight"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
                         android:singleLine="true"
                         android:textSize="16sp"
-                        android:text="12.4"/>
+                        android:text="0.0"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:singleLine="true"
                         android:textSize="16sp"
-                        android:text=" KG"/>
+                        android:text="@string/unit_kg"
+                        android:textAllCaps="true"/>
                 </LinearLayout>
             </LinearLayout>
 
