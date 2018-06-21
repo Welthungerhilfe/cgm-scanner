@@ -23,7 +23,7 @@ import android.arch.persistence.room.Room;
 import android.os.StrictMode;
 import android.util.Log;
 
-import com.amitshekhar.DebugDB;
+//import com.amitshekhar.DebugDB;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -74,7 +74,7 @@ public class AppController extends Application {
 
         //SyncAdapter.initializeSyncAdapter(getApplicationContext());
 
-        Log.e("Offline DB", DebugDB.getAddressLog());
+        //Log.e("Offline DB", DebugDB.getAddressLog());
 
         mInstance = this;
     }
