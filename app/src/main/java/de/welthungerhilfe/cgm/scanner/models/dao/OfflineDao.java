@@ -92,4 +92,7 @@ public interface OfflineDao {
 
     @Delete
     void deleteMeasure(Measure measure);
+
+    @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE personId=:personId ORDER BY timestamp DESC Limit 1")
+    Measure getLastMeasure(String personId);
 }

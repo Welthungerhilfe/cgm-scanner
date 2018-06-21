@@ -38,6 +38,10 @@ public class OfflineTask {
         void onMeasureLoaded(List<Measure> list);
     }
 
+    public interface OnLoadLastMeasure {
+        void onLastMeasureLoaded(Measure measure);
+    }
+
     public void getSyncablePerson(OnLoadPerson l, long timestamp) {
         new LoadPersonTask(l).execute(timestamp);
     }
@@ -68,6 +72,10 @@ public class OfflineTask {
 
     public void updateMeasure(Measure measure) {
         new UpdateTask().execute(measure);
+    }
+
+    public void getLasteMeasure(Person person, OnLoadLastMeasure listener) {
+        new LoadLastMeasureTask(listener).execute(person);
     }
 
     private static class LoadPersonTask extends AsyncTask<Long, Void, List<Person>> {
@@ -143,6 +151,24 @@ public class OfflineTask {
         @Override
         protected LiveData<Person> doInBackground(String... qrCode) {
             return AppController.getInstance().offlineDb.offlineDao().getPersonByQr(qrCode[0]);
+        }
+    }
+
+    private static class LoadLastMeasureTask extends AsyncTask<Person, Void, Measure> {
+        OnLoadLastMeasure listener;
+
+        public LoadLastMeasureTask(OnLoadLastMeasure listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        protected Measure doInBackground(Person... people) {
+            return AppController.getInstance().offlineDb.offlineDao().getLastMeasure(people[0].getId());
+        }
+
+        @Override
+        public void onPostExecute(Measure data) {
+            listener.onLastMeasureLoaded(data);
         }
     }
 }
