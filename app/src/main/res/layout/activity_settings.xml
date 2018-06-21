@@ -31,7 +31,6 @@
             android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/lytSettingAbout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
@@ -107,7 +106,6 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/lytSettingAccount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
@@ -121,7 +119,6 @@
                     android:textColor="@color/colorPrimary"/>
 
                 <com.balysv.materialripple.MaterialRippleLayout
-                    android:id="@+id/rplSettingAccount"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     android:layout_marginTop="@dimen/activity_group_margin"
@@ -156,7 +153,6 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/lytSettingLanguage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
