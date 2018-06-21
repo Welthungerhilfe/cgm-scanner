@@ -173,32 +173,15 @@ public class CreateDataActivity extends BaseActivity {
 
     private void initUI() {
         FragmentAdapter adapter = new FragmentAdapter(getFragmentManager());
-        adapter.addFragment(personalFragment, "PERSONAL");
-        adapter.addFragment(measureFragment, "MEASURES");
-        adapter.addFragment(growthFragment, "GROWTH");
+        adapter.addFragment(personalFragment, getResources().getString(R.string.tab_personal));
+        adapter.addFragment(measureFragment, getResources().getString(R.string.tab_measures));
+        adapter.addFragment(growthFragment, getResources().getString(R.string.tab_growth));
         viewpager.setAdapter(adapter);
 
         tabs.setupWithViewPager(viewpager);
     }
 
     public void setPersonalData(String name, String surName, long birthday, boolean age, String sex, Loc loc, String guardian) {
-        /*
-        boolean isNew = false;
-        if (person == null) {
-            if (qrPath == null) {
-                Toast.makeText(CreateDataActivity.this, "Still uploading QR code, please try after a while", Toast.LENGTH_SHORT).show();
-                qrPath="offline";
-                return;
-            } else {
-                if (qrPath == "offline") Toast.makeText(CreateDataActivity.this, "Did not upload consent scan because you are offline!", Toast.LENGTH_SHORT).show();
-                isNew = true;
-
-                person = new Person();
-                person.setQrcode(qrCode);
-            }
-        }
-        */
-
         boolean isNew = false;
         if (person == null) {
             isNew = true;
@@ -226,7 +209,7 @@ public class CreateDataActivity extends BaseActivity {
         viewpager.setCurrentItem(1);
     }
 
-    public void setMeasureData(float height, float weight, float muac, float headCircumference, String additional, Loc location) {
+    public void setMeasureData(double height, double weight, double muac, double headCircumference, String additional, Loc location) {
         final Measure measure = new Measure();
         measure.setId(AppController.getInstance().getMeasureId());
         measure.setDate(System.currentTimeMillis());
@@ -266,11 +249,6 @@ public class CreateDataActivity extends BaseActivity {
             person = p;
 
             if (person != null) {
-                /*
-                loadMeasures();
-                loadConsents();
-                */
-
                 viewModel.getObservableMeasureList(person).observe(this, measures->{
                     this.measures = measures;
                     if (measures != null)
@@ -329,59 +307,6 @@ public class CreateDataActivity extends BaseActivity {
                 else
                     consent.setQrcode(qrCode);
             }
-        }
-    }
-
-    private void loadMeasures() {
-        showProgressDialog();
-
-        if (person != null) {
-            AppController.getInstance().firebaseFirestore.collection("persons")
-                    .document(person.getId())
-                    .collection("measures")
-                    .orderBy("date", Query.Direction.DESCENDING)
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            hideProgressDialog();
-                            if (task.isSuccessful()) {
-                                for (DocumentSnapshot document : task.getResult()) {
-                                    Measure measure = document.toObject(Measure.class);
-
-                                    measures.add(measure);
-                                }
-                            }
-                        }
-                    });
-        }
-    }
-
-    private void loadConsents() {
-        showProgressDialog();
-
-        if (person != null) {
-            AppController.getInstance().firebaseFirestore.collection("persons")
-                    .document(person.getId())
-                    .collection("consents")
-                    .orderBy("created", Query.Direction.DESCENDING)
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            hideProgressDialog();
-                            if (task.isSuccessful()) {
-                                for (DocumentSnapshot document : task.getResult()) {
-                                    Consent consent = document.toObject(Consent.class);
-                                    consents.add(consent);
-
-                                }
-                                if (consents.size() > 0) {
-                                    personalFragment.showConsent();
-                                }
-                            }
-                        }
-                    });
         }
     }
 

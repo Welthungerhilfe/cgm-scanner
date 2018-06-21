@@ -77,10 +77,10 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.editLocation.setText("Location not available");
         else
             holder.editLocation.setText(measure.getLocation().getAddress());
-        holder.editHeight.setText(Float.toString(measure.getHeight()));
-        holder.editWeight.setText(Float.toString(measure.getWeight()));
-        holder.editMuac.setText(Float.toString(measure.getMuac()));
-        holder.editHead.setText(Float.toString(measure.getHeadCircumference()));
+        holder.editHeight.setText(Double.toString(measure.getHeight()));
+        holder.editWeight.setText(Double.toString(measure.getWeight()));
+        holder.editMuac.setText(Double.toString(measure.getMuac()));
+        holder.editHead.setText(Double.toString(measure.getHeadCircumference()));
 
         setAnimation(holder.itemView, position);
     }

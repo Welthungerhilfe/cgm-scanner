@@ -33,7 +33,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Your scan has been successful!"
+            android:text="@string/success_scan"
             android:textColor="@color/colorPrimary"
             android:textSize="18sp"/>
 
@@ -45,7 +45,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="The measured height is "
+                android:text="@string/height_result"
                 android:textColor="@color/colorPrimary"
                 android:textSize="18sp"/>
 
@@ -53,6 +53,7 @@
                 android:id="@+id/txtHeight"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
                 android:text="64"
                 android:textColor="@color/colorPrimary"
                 android:textSize="18sp"
@@ -61,7 +62,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=" cm."
+                android:text="@string/unit_cm"
                 android:textColor="@color/colorPrimary"
                 android:textSize="18sp"
                 android:textStyle="bold"/>

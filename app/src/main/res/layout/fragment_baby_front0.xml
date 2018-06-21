@@ -30,7 +30,7 @@
         android:id="@+id/txtTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="01. Front View"
+        android:text="@string/front_view_01"
         android:textColor="@color/colorWhite"
         android:textSize="22sp"
         android:textStyle="bold" />
@@ -61,7 +61,7 @@
         android:gravity="center"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
-        android:text="Try to place the child inside of the outline."
+        android:text="@string/help_front_view_2"
         android:textColor="@color/colorWhite"
         android:textSize="20sp" />
 
@@ -74,7 +74,7 @@
         android:background="@drawable/button_white_round"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:text="Start Scan"
+        android:text="@string/start_scan"
         android:textColor="@color/colorPrimary" />
 
 </RelativeLayout>

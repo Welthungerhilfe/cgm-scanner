@@ -74,7 +74,7 @@ public class ImageDetailActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
-        actionBar.setTitle("Image View");
+        actionBar.setTitle(R.string.title_image_view);
     }
 
     @Override

@@ -179,16 +179,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
                                 SyncAdapter.startPeriodicSync(account, getApplicationContext());
 
-                                /*
-                                ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true);
-
-                                SyncRequest request = new SyncRequest.Builder().
-                                        syncPeriodic(AppConstants.SYNC_INTERVAL, AppConstants.SYNC_FLEXTIME).
-                                        setSyncAdapter(account, ContactsContract.AUTHORITY).
-                                        setExtras(new Bundle()).build();
-                                ContentResolver.requestSync(request);
-                                */
-
                                 final Intent intent = new Intent();
                                 intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, email);
                                 intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
@@ -202,7 +192,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                                 AppController.getInstance().prepareFirebaseUser();
                                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             } else {
-                                Toast.makeText(LoginActivity.this, "Login Failed", Toast.LENGTH_LONG).show();
+                                Toast.makeText(LoginActivity.this, R.string.error_login, Toast.LENGTH_LONG).show();
                             }
                         }
                     });

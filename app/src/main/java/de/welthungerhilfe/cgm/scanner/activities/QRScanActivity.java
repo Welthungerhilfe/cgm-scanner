@@ -27,6 +27,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
+import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
@@ -78,7 +79,7 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSION_LOCATION) {
             if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(QRScanActivity.this, "Camera permission required for QR scanning", Toast.LENGTH_LONG).show();
+                Toast.makeText(QRScanActivity.this, R.string.permission_camera, Toast.LENGTH_LONG).show();
             } else {
                 qrScanView.setResultHandler(this);
                 qrScanView.startCamera();

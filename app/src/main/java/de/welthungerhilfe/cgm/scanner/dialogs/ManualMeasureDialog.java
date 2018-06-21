@@ -36,6 +36,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -47,6 +48,8 @@ import de.welthungerhilfe.cgm.scanner.helper.events.LocationResult;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.views.UnitEditText;
 
 /**
  * Created by Emerald on 2/23/2018.
@@ -56,13 +59,13 @@ public class ManualMeasureDialog extends Dialog {
     private final int REQUEST_LOCATION = 0x1000;
 
     @BindView(R.id.editManualHeight)
-    EditText editManualHeight;
+    UnitEditText editManualHeight;
     @BindView(R.id.editManualWeight)
-    EditText editManualWeight;
+    UnitEditText editManualWeight;
     @BindView(R.id.editManualMuac)
-    EditText editManualMuac;
+    UnitEditText editManualMuac;
     @BindView(R.id.editManualHead)
-    EditText editManualHead;
+    UnitEditText editManualHead;
     @BindView(R.id.editManualAddition)
     EditText editManualAddition;
     @BindView(R.id.editManualLocation)
@@ -86,14 +89,14 @@ public class ManualMeasureDialog extends Dialog {
     void OnConfirm(Button btnOK) {
         if (validate()) {
             if (measureListener != null) {
-                float head = 0f;
+                double head = 0;
                 if (!editManualHead.getText().toString().isEmpty()) {
-                    head = Float.parseFloat(editManualHead.getText().toString());
+                    head = Double.parseDouble(editManualHead.getText().toString());
                 }
                 measureListener.onManualMeasure(
-                        Float.parseFloat(editManualHeight.getText().toString()),
-                        Float.parseFloat(editManualWeight.getText().toString()),
-                        Float.parseFloat(editManualMuac.getText().toString()),
+                        Double.parseDouble(editManualHeight.getText().toString()),
+                        Double.parseDouble(editManualWeight.getText().toString()),
+                        Double.parseDouble(editManualMuac.getText().toString()),
                         head,
                         location
                 );
@@ -101,6 +104,19 @@ public class ManualMeasureDialog extends Dialog {
             dismiss();
         }
     }
+
+    @BindString(R.string.tooltip_kg)
+    String tooltip_kg;
+    @BindString(R.string.tooltip_decimal)
+    String tooltip_decimal;
+    @BindString(R.string.tooltip_weight_ex)
+    String tooltip_weight_ex;
+    @BindString(R.string.tooltip_cm)
+    String tooltip_cm;
+    @BindString(R.string.tooltip_precision)
+    String tooltip_precision;
+    @BindString(R.string.tooltip_height_ex)
+    String tooltip_height_ex;
 
     private Loc location = null;
 
@@ -145,32 +161,52 @@ public class ManualMeasureDialog extends Dialog {
         String height = editManualHeight.getText().toString();
         String weight = editManualWeight.getText().toString();
         String muac = editManualMuac.getText().toString();
+        String head = editManualHead.getText().toString();
 
         if (height.isEmpty()) {
-            editManualHeight.setError("Please input height");
+            editManualHeight.setError(tooltip_cm);
+            valid = false;
+        } else if (Utils.checkDoubleDecimals(height) != 1) {
+            editManualHeight.setError(tooltip_precision);
             valid = false;
         } else {
             editManualHeight.setError(null);
         }
 
         if (weight.isEmpty()) {
-            editManualWeight.setError("Please input weight");
+            editManualWeight.setError(tooltip_kg);
+            valid = false;
+        } else if (!Utils.checkDouble(weight)) {
+            editManualWeight.setError(tooltip_decimal);
             valid = false;
         } else {
             editManualWeight.setError(null);
         }
 
         if (muac.isEmpty()) {
-            editManualMuac.setError("Please input MUAC");
+            editManualMuac.setError(tooltip_cm);
+            valid = false;
+        } else if (Utils.checkDoubleDecimals(muac) != 1) {
+            editManualMuac.setError(tooltip_precision);
             valid = false;
         } else {
             editManualMuac.setError(null);
+        }
+
+        if (head.isEmpty()) {
+            editManualHead.setError(tooltip_cm);
+            valid = false;
+        } else if (Utils.checkDoubleDecimals(head) != 1) {
+            editManualHead.setError(tooltip_precision);
+            valid = false;
+        } else {
+            editManualHead.setError(null);
         }
 
         return valid;
     }
 
     public interface OnManualMeasureListener {
-        void onManualMeasure(float height, float weight, float muac, float headCircumference, Loc location);
+        void onManualMeasure(double height, double weight, double muac, double headCircumference, Loc location);
     }
 }
