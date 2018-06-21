@@ -135,7 +135,7 @@
 
         <provider
             android:name=".syncdata.StubProvider"
-            android:authorities="@string/sync_authority"
+            android:authorities="de.welthungerhilfe.cgm.scanner"
             android:exported="false"
             android:syncable="true" />
     </application>

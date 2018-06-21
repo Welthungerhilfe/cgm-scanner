@@ -62,7 +62,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
-                android:text="Date : "
+                android:text="@string/label_date"
                 android:textColor="@color/colorGreyDark"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -187,7 +187,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="age is estimated" />
+            android:text="@string/age_estimate" />
 
         <RadioGroup
             android:layout_width="match_parent"

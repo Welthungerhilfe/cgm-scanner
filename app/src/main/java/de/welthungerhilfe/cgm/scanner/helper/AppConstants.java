@@ -44,6 +44,10 @@ public class AppConstants {
     public static final String VAL_MEASURE_MANUAL = "manual";
     public static final String VAL_MEASURE_AUTO = "v0.1";
 
+    public static final String LANG_ENGLISH = "en";
+    public static final String LANG_GERMAN = "de";
+    public static final String LANG_HINDI = "hi";
+
     public static final String EXTRA_QR = "extra_qr";
     public static final String EXTRA_QR_BITMAP = "extra_qr_bitmap";
     public static final String EXTRA_QR_URL = "extra_qr_url";

@@ -19,6 +19,7 @@
 
 package de.welthungerhilfe.cgm.scanner.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -87,7 +88,8 @@ public class GrowthDataFragment extends Fragment {
         chartGrowth = view.findViewById(R.id.chartGrowth);
         dropChart = view.findViewById(R.id.dropChart);
 
-        dropChart.setItems("Age / Height", "Age / Weight", "Height / Weight");
+        @SuppressLint("ResourceType") String[] filters = getResources().getStringArray(R.array.filters);
+        dropChart.setItems(filters);
         dropChart.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
             @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
                 chartType = position + 1;
@@ -121,16 +123,16 @@ public class GrowthDataFragment extends Fragment {
             Measure measure = ((CreateDataActivity)context).measures.get(i);
 
             if (chartType == 1) {
-                txtXAxis.setText("Age");
-                txtYAxis.setText("Height");
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_height);
                 yVals1.add(new Entry(measure.getAge(), (float) measure.getHeight()));
             } else if (chartType == 2) {
-                txtXAxis.setText("Age");
-                txtYAxis.setText("Weight");
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_weight);
                 yVals1.add(new Entry(measure.getAge(), (float)  measure.getWeight()));
             } else if (chartType == 3) {
-                txtXAxis.setText("Height");
-                txtYAxis.setText("Weight");
+                txtXAxis.setText(R.string.axis_height);
+                txtYAxis.setText(R.string.axis_weight);
                 yVals1.add(new Entry((float) measure.getHeight(), (float) measure.getWeight()));
             }
         }

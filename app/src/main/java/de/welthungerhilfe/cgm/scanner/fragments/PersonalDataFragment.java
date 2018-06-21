@@ -203,14 +203,14 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         String guardian = editGuardian.getText().toString();
 
         if (name.isEmpty()) {
-            editName.setError("Please input name");
+            editName.setError(getResources().getString(R.string.tooltip_name));
             valid = false;
         } else {
             editName.setError(null);
         }
 
         if (prename.isEmpty()) {
-            editPrename.setError("Please input prename");
+            editPrename.setError(getResources().getString(R.string.tooltip_prename));
             valid = false;
         } else {
             editPrename.setError(null);
@@ -218,7 +218,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         /*
         if (location.isEmpty()) {
-            editLocation.setError("Please input location");
+            editLocation.setError(getResources().getString(R.string.tooltip_location);
             valid = false;
         } else {
             editLocation.setError(null);
@@ -226,7 +226,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         */
 
         if (birth.isEmpty()) {
-            editBirth.setError("Please input birthday");
+            editBirth.setError(getResources().getString(R.string.tooltip_birthday));
             valid = false;
         } else {
             editBirth.setError(null);
@@ -234,7 +234,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         /*
         if (age.isEmpty()) {
-            editAge.setError("Please input age");
+            editAge.setError(getResources().getString(R.string.tooltip_age));
             valid = false;
         } else {
             editName.setError(null);
@@ -242,7 +242,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         */
 
         if (guardian.isEmpty()) {
-            editGuardian.setError("Please input guardian");
+            editGuardian.setError(getResources().getString(R.string.tooltip_guardian));
             valid = false;
         } else {
             editGuardian.setError(null);
@@ -252,7 +252,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         } else {
             valid = false;
-            Snackbar.make(radioFemale, "Please select sex", Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(radioFemale, R.string.tooltipe_sex, Snackbar.LENGTH_SHORT).show();
         }
 
         return valid;

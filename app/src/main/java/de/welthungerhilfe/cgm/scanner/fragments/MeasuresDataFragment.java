@@ -106,12 +106,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void createMeasure() {
-		// TODO: Strings.xml
-        final CharSequence[] options = {"Add Manual Measure", "Scan Measure"};
-
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Add Measure");
-        builder.setItems(options, new DialogInterface.OnClickListener() {
+        builder.setTitle(R.string.title_add_measure);
+        builder.setItems(R.array.selector_measure, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface d, int which) {
                 if (which == 0) {
@@ -135,7 +132,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             case R.id.fabCreate:
                 Crashlytics.log("Add Measure to person");
                 if (((CreateDataActivity)context).person == null) {
-                    Snackbar.make(fabCreate, "Please register person first", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(fabCreate, R.string.error_person_first, Snackbar.LENGTH_LONG).show();
                 } else {
                     createMeasure();
                 }
