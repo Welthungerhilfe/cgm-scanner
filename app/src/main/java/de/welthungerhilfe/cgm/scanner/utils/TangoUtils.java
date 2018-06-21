@@ -7,6 +7,7 @@ import android.util.Log;
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
+import com.google.firebase.perf.metrics.AddTrace;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -43,6 +44,7 @@ import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
 public class TangoUtils {
 
     // This function writes the XYZ points to .vtk files in binary
+    @AddTrace(name = "writePointCloudToVtkFile", enabled = true)
     public static Uri writePointCloudToVtkFile(TangoPointCloudData pointCloudData,
                                        File pointCloudSaveFolder, String pointCloudFilename) {
 
@@ -91,6 +93,7 @@ public class TangoUtils {
     }
 
     // This function writes the XYZC points to .pcd files in binary
+    @AddTrace(name = "writePointCloudToPcdFile", enabled = true)
     public static Uri writePointCloudToPcdFile(TangoPointCloudData pointCloudData,
                                                File pointCloudSaveFolder, String pointCloudFilename) {
 

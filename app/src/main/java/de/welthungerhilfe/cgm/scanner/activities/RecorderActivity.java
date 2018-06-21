@@ -61,6 +61,7 @@ import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.perf.metrics.AddTrace;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 import com.projecttango.tangosupport.TangoSupport;
@@ -670,6 +671,7 @@ public class RecorderActivity extends Activity {
             }
 
             @Override
+            @AddTrace(name = "onPointCloudAvailable", enabled = true)
             public void onPointCloudAvailable(final TangoPointCloudData pointCloudData) {
 
                 Log.d(TAG, "recording:"+mIsRecording);
@@ -708,6 +710,7 @@ public class RecorderActivity extends Activity {
                 // TODO refactor to top-level class or make static?
                 Runnable thread = new Runnable() {
                     @Override
+                    @AddTrace(name = "pcRunnable", enabled = true)
                     public void run() {
                         try {
                             mutex_on_mIsRecording.acquire();
@@ -798,6 +801,7 @@ public class RecorderActivity extends Activity {
 
                         Runnable thread = new Runnable() {
                             @Override
+                            @AddTrace(name = "onFrameAvailableRunnable", enabled = true)
                             public void run() {
                                 TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
 
@@ -972,6 +976,7 @@ public class RecorderActivity extends Activity {
     }
 
     // This function writes the pose data and timestamps to .vtk files in binary
+    @AddTrace(name = "writePoseToFile", enabled = true)
     private void writePoseToFile(int numPoints) {
 
         String poseFileName = "pc_" +mQrCode+"_"+ mNowTimeString + "_poses.vtk";

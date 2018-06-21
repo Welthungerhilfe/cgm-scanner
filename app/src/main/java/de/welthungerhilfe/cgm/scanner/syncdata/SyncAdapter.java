@@ -20,6 +20,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.perf.metrics.AddTrace;
 
 import java.util.Date;
 import java.util.List;
@@ -53,6 +54,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
     }
 
     @Override
+    @AddTrace(name = "onPerformSync", enabled = true)
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         prevTimestamp = session.getSyncTimestamp();
 
@@ -115,6 +117,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                 });
     }
 
+    @AddTrace(name = "syncImmediately", enabled = true)
     private static void syncImmediately(Account account, Context context) {
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
@@ -122,6 +125,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
         ContentResolver.requestSync(account, context.getString(R.string.sync_authority), bundle);
     }
 
+    @AddTrace(name = "configurePeriodicSync", enabled = true)
     private static void configurePeriodicSync(Account account, Context context, long syncInterval, long flexTime) {
 
         String authority = context.getString(R.string.sync_authority);
@@ -138,6 +142,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
         }
     }
 
+    @AddTrace(name = "startPeriodicSync", enabled = true)
     public static void startPeriodicSync(Account newAccount, Context context) {
 
         configurePeriodicSync(newAccount, context, SYNC_INTERVAL, SYNC_FLEXTIME);
@@ -149,6 +154,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
     }
 
     @Override
+    @AddTrace(name = "onPersonLoaded", enabled = true)
     public void onPersonLoaded(List<Person> personList) {
         for (int i = 0; i < personList.size(); i++) {
             personList.get(i).setTimestamp(Utils.getUniversalTimestamp());
@@ -177,6 +183,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
     }
 
     @Override
+    @AddTrace(name = "onMeasureLoaded", enabled = true)
     public void onMeasureLoaded(List<Measure> measureList) {
         for (int i = 0; i < measureList.size(); i++) {
             measureList.get(i).setTimestamp(Utils.getUniversalTimestamp());
