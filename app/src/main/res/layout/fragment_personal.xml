@@ -120,7 +120,7 @@
 
         </android.support.design.widget.TextInputLayout>
 
-        <!--RelativeLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp">
@@ -134,9 +134,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:editable="false"
-                    android:hint="@string/location"
-                    android:singleLine="true"
-                    android:text="@string/no_location" />
+                    android:hint="@string/label_location"
+                    android:singleLine="false" />
             </android.support.design.widget.TextInputLayout>
 
             <ImageView
@@ -148,7 +147,7 @@
                 android:src="@drawable/location"
                 android:visibility="invisible" />
 
-        </RelativeLayout-->
+        </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"

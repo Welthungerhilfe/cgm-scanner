@@ -111,7 +111,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         TODO fix
         imgLocation = view.findViewById(R.id.imgLocation);
         imgLocation.setOnClickListener(this);
- */
+        */
 
         view.findViewById(R.id.txtBack).setOnClickListener(this);
         btnNext = view.findViewById(R.id.btnNext);
@@ -131,11 +131,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         editPrename = view.findViewById(R.id.editPrename);
         editPrename.addTextChangedListener(this);
 
-        /*
-        TODO fix
         editLocation = view.findViewById(R.id.editLocation);
-        editLocation.addTextChangedListener(this);
-*/
+        //editLocation.addTextChangedListener(this);
+
         editBirth = view.findViewById(R.id.editBirth);
         editBirth.addTextChangedListener(this);
         editBirth.setOnClickListener(this);
@@ -167,12 +165,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             editPrename.setText(((CreateDataActivity)context).person.getSurname());
             editBirth.setText(Utils.beautifyDate(((CreateDataActivity)context).person.getBirthday()));
             editGuardian.setText(((CreateDataActivity)context).person.getGuardian());
-            /*
-            TODO fix
+
             if (((CreateDataActivity)context).person.getLastLocation() != null) {
                 editLocation.setText(((CreateDataActivity)context).person.getLastLocation().getAddress());
-                imgLocation.setVisibility(View.VISIBLE);
-            }*/
+                //imgLocation.setVisibility(View.VISIBLE);
+            }
 
             if (((CreateDataActivity)context).person.getSex().equals(AppConstants.VAL_SEX_FEMALE)) {
                 radioFemale.setChecked(true);
