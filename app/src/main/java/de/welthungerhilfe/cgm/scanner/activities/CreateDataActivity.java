@@ -228,6 +228,9 @@ public class CreateDataActivity extends BaseActivity {
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
         new OfflineTask().saveMeasure(measure);
+
+        person.setLastLocation(location);
+        new OfflineTask().updatePerson(person);
     }
 
     private void createPerson() {

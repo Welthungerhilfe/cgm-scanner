@@ -19,6 +19,7 @@
 
 package de.welthungerhilfe.cgm.scanner.models;
 
+import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
@@ -49,7 +50,7 @@ public class Person implements Serializable {
     private long timestamp;
     private String createdBy;
 
-    @Ignore
+    @Embedded
     private Loc lastLocation;
     @Ignore
     private Measure lastMeasure;
