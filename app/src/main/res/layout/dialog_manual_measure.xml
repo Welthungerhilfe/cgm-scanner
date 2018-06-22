@@ -174,10 +174,10 @@
             android:id="@+id/btnAlert"
             android:layout_width="match_parent"
             android:layout_height="38dp"
-            android:background="@color/colorPink"
+            android:background="@color/colorWhite"
             android:text="@string/oedema"
             android:textSize="18sp"
-            android:textColor="@color/colorWhite"/>
+            android:textColor="@color/colorBlack"/>
 
         <LinearLayout
             android:layout_width="match_parent"

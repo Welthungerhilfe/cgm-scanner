@@ -25,9 +25,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.AppCompatCheckBox;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -39,6 +41,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.activities.CreateDataActivity;
@@ -73,9 +76,15 @@ public class ManualMeasureDialog extends Dialog {
     @BindView(R.id.btnOK)
     Button btnOK;
 
-    @OnClick(R.id.btnAlert)
-    void onAlert(Button btnAlert) {
-
+    @OnCheckedChanged(R.id.btnAlert)
+    void onAlert(CompoundButton buttonView, boolean isChecked) {
+        if (isChecked) {
+            buttonView.setBackgroundResource(R.color.colorPink);
+            buttonView.setTextColor(getContext().getColor(R.color.colorWhite));
+        } else {
+            buttonView.setBackgroundResource(R.color.colorWhite);
+            buttonView.setTextColor(getContext().getColor(R.color.colorBlack));
+        }
     }
     @OnClick(R.id.imgLocation)
     void onLocation(ImageView imgLocation) {
