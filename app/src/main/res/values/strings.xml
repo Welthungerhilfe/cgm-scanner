@@ -52,7 +52,7 @@
     <string name="no_filter">No filter</string>
     <string name="clear_filters">Clear all filters</string>
     <string name="no_persons">NO PERSONS REGISTERED</string>
-    <string name="circuit">Circuit</string>
+    <string name="circuit">circumcircle</string>
 
     <string name="manual_measure">Manual measure</string>
     <string name="machine_measure">Machine measure</string>
@@ -80,7 +80,7 @@
 
     <string name="label_height">Height: </string>
     <string name="label_weight">Weight: </string>
-    <string name="label_date">Date : </string>
+    <string name="label_date">Date: </string>
 
     <string name="unit_km">km</string>
     <string name="unit_cm">cm</string>
@@ -99,7 +99,7 @@
     <string name="tooltipe_sex">Please select sex</string>
 
     <string name="baby_full_body_front_scan_text">1/3. Front</string>
-    <string name="baby_left_right_scan_text">2/3. Left-Right</string>
+    <string name="baby_left_right_scan_text">2/3. all around 360\'</string>
     <string name="baby_full_body_back_scan_text">3/3. Back</string>
     <string name="empty_string"/>
     <!-- drawer -->
