@@ -2,11 +2,6 @@
     <string name="app_name">CGM Scanner</string>
     <string name="app_name_long">Child Growth Monitor Scanner App</string>
 
-    <string name="google_maps_key">AIzaSyA-2ofdxNlBpzHDRVa6NfgAfkx4u0QSg4Q</string>
-
-    <string name="exception_tango_error">"Tango exception! Try again!"</string>
-    <string name="exception_tango_invalid">"Tango invalid exception! Try again!"</string>
-    <string name="exception_out_of_date">"Tango service outdated!"</string>
     <string name="permission_camera">"Camera permission needed!"</string>
     <string name="loading">loading…</string>
 
@@ -29,7 +24,6 @@
 
     <string name="forgot"><u>Forgot password?</u></string>
     <string name="ok">OK</string>
-    <string name="select">Select</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
     <string name="back">Back</string>
@@ -82,19 +76,11 @@
     <string name="starting">Starting…</string>
 
     <string name="front_view_01">01. Front View</string>
-    <string name="front_view_03">03. Front View</string>
-    <string name="lateral_view_02">02. Lateral View</string>
-    <string name="full_front_view_01">01. Full Frontal View</string>
+    <string name="lateral_view_02">02. 360\' View</string>
     <string name="back_view_03">03. Back View</string>
-    <string name="back_view_04">04. Back View</string>
-    <string name="turn360_02">02. 360\' Turn</string>
-    <string name="help_front_view">Scan from the head down to the feet and back up again.</string>
-    <string name="help_front_view_2">Try to place the child inside of the outline.</string>
-    <string name="help_full_front_view">Try placing the infant inside of the outlined child.</string>
-    <string name="help_back_view">Turn the baby over on the stomach to scan the back.</string>
-    <string name="help_back_view_2">Scan the back of the child from the head down to the feet and back up again.</string>
-    <string name="help_turn360">Let the infant turn by 360\' around its own axis.</string>
-    <string name="help_lateral_view">Move the phone around the child to get lateral views.</string>
+    <string name="help_front_view_2">Try to place the child inside of the outline. Scan the front of the child.</string>
+    <string name="help_lateral_view">Walk with the phone around the child to get views from all sides.</string>
+    <string name="help_back_view">Scan the back of the child.</string>
 
     <string name="label_height">Height: </string>
     <string name="label_weight">Weight: </string>
@@ -165,4 +151,11 @@
         <item>@string/selector_manual</item>
         <item>@string/selector_scan</item>
     </string-array>
+
+    <string name="google_maps_key">AIzaSyA-2ofdxNlBpzHDRVa6NfgAfkx4u0QSg4Q</string>
+
+    <string name="exception_tango_error">"Tango exception! Try again!"</string>
+    <string name="exception_tango_invalid">"Tango invalid exception! Try again!"</string>
+    <string name="exception_out_of_date">"Please update Tango Core App!"</string>
+
 </resources>

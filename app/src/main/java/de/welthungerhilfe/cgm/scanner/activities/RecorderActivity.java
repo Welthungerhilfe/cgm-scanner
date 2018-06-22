@@ -81,7 +81,6 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.fragments.BabyBack0Fragment;
 import de.welthungerhilfe.cgm.scanner.fragments.BabyBack1Fragment;
 import de.welthungerhilfe.cgm.scanner.fragments.BabyFront0Fragment;
-import de.welthungerhilfe.cgm.scanner.fragments.BabyInfantChooserFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
@@ -195,25 +194,13 @@ public class RecorderActivity extends Activity {
 
         if (Verbose) Log.v("ScanningWorkflow","starting mScanningWorkflowStep: "+ mScanningWorkflowStep);
 
-        if (mScanningWorkflowStep ==            AppConstants.CHOOSE_BABY_OR_INFANT)
+        if (mScanningWorkflowStep ==     AppConstants.BABY_FULL_BODY_FRONT_ONBOARDING)
         {
-            measure = new Measure();
-            measure.setDate(mNowTime);
-            BabyInfantChooserFragment babyInfantChooserFragment = new BabyInfantChooserFragment();
-            ft.add(R.id.container, babyInfantChooserFragment);
-            ft.commit();
-        }
-
-        // BABY
-        else if (mScanningWorkflowStep ==     AppConstants.BABY_FULL_BODY_FRONT_ONBOARDING)
-        {
-            // copy from workflow chooser..... TODO refactor
             measure = new Measure();
             measure.setDate(mNowTime);
 
             babyFront0Fragment = new BabyFront0Fragment();
             ft.add(R.id.container, babyFront0Fragment);
-            //ft.replace(R.id.container, babyFront0Fragment, BABY_FRONT_0);
             ft.commit();
             measure.setType("v1.1.1");
         }
