@@ -19,6 +19,7 @@
 
 package de.welthungerhilfe.cgm.scanner.models;
 
+import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
@@ -47,8 +48,9 @@ public class Person implements Serializable {
     private String qrcode;
     private long created;
     private long timestamp;
+    private String createdBy;
 
-    @Ignore
+    @Embedded
     private Loc lastLocation;
     @Ignore
     private Measure lastMeasure;
@@ -148,5 +150,13 @@ public class Person implements Serializable {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 }

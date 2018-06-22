@@ -24,11 +24,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -45,7 +48,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -60,7 +65,7 @@ import de.welthungerhilfe.cgm.scanner.helper.tasks.AddressTask;
  * Created by Emerald on 2/20/2018.
  */
 
-public class LocationDetectActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerDragListener, AddressTask.OnAddressResult {
+public class LocationDetectActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerDragListener {
     private final int PERMISSION_LOCATION = 0x1001;
     private Marker marker = null;
 
@@ -159,7 +164,31 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
     }
 
     private void getAddressFromLocation() {
-        new AddressTask(location.getLatitude(), location.getLongitude(), this).execute();
+        //new AddressTask(location.getLatitude(), location.getLongitude(), this).execute();
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Geocoder geocoder = new Geocoder(LocationDetectActivity.this, Locale.getDefault());
+                String result = null;
+                try {
+                    List <Address> addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                    if (addressList != null && addressList.size() > 0) {
+                        Address address = addressList.get(0);
+                        StringBuilder sb = new StringBuilder();
+
+                        sb.append(address.getAddressLine(0));
+
+                        result = sb.toString();
+                    }
+                } catch (IOException e) {
+                    Log.e("Location Address Loader", "Unable connect to Geocoder", e);
+                } finally {
+                    location.setAddress(result);
+                    txtAddress.setText(result);
+                }
+            }
+        });
     }
 
     private void getCurrentLocation() {
@@ -187,10 +216,11 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
                     }
                 }
                 if (loc != null) {
-                    new AddressTask(loc.getLatitude(), loc.getLongitude(), this).execute();
+                    // new AddressTask(loc.getLatitude(), loc.getLongitude(), this).execute();
                     location = new Loc();
                     location.setLatitude(loc.getLatitude());
                     location.setLongitude(loc.getLongitude());
+                    getAddressFromLocation();
                     if (googleMap != null) {
                         drawMarker();
                     }
@@ -200,8 +230,9 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
     }
 
     @Override
-    public void onAddress(String address) {
-        location.setAddress(address);
-        txtAddress.setText(address);
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSION_LOCATION && grantResults[0] >= 0) {
+            getCurrentLocation();
+        }
     }
 }

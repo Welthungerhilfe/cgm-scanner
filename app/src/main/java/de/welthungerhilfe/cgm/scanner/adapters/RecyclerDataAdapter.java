@@ -82,7 +82,7 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
 
         holder.txtName.setText(person.getName() + " " + person.getSurname());
 
-        new OfflineTask().getLasteMeasure(person, new OfflineTask.OnLoadLastMeasure() {
+        new OfflineTask().getLastMeasure(person, new OfflineTask.OnLoadLastMeasure() {
 
             @Override
             public void onLastMeasureLoaded(Measure measure) {

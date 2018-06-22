@@ -19,6 +19,7 @@
 
 package de.welthungerhilfe.cgm.scanner.models;
 
+import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Ignore;
@@ -54,8 +55,9 @@ public class Measure implements Serializable {
     private String artifact;
     private boolean visible;
     private long timestamp;
+    private String createdBy;
 
-    @Ignore
+    @Embedded
     private Loc location;
 
     @NonNull
@@ -161,5 +163,13 @@ public class Measure implements Serializable {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 }
