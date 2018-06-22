@@ -29,6 +29,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.hardware.display.DisplayManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -74,9 +78,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.fragments.BabyBack0Fragment;
 import de.welthungerhilfe.cgm.scanner.fragments.BabyBack1Fragment;
@@ -84,6 +91,7 @@ import de.welthungerhilfe.cgm.scanner.fragments.BabyFront0Fragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
+import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.tango.CameraSurfaceRenderer;
@@ -95,6 +103,7 @@ import de.welthungerhilfe.cgm.scanner.utils.TangoUtils;
 import static com.projecttango.tangosupport.TangoSupport.initialize;
 
 public class RecorderActivity extends Activity {
+    private final int PERMISSION_LOCATION = 0x0001;
 
     private static GLSurfaceView mCameraSurfaceView;
     private static OverlaySurface mOverlaySurfaceView;
@@ -178,6 +187,8 @@ public class RecorderActivity extends Activity {
 
     private int mProgress;
 
+    private Loc location;
+
     // Workflow
     public void gotoNextStep(int babyInfantChoice) {
         mScanningWorkflowStep = babyInfantChoice+1;
@@ -197,6 +208,9 @@ public class RecorderActivity extends Activity {
         if (mScanningWorkflowStep ==     AppConstants.BABY_FULL_BODY_FRONT_ONBOARDING)
         {
             measure = new Measure();
+            if (location != null)
+                measure.setLocation(location);
+            measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
             measure.setDate(mNowTime);
 
             babyFront0Fragment = new BabyFront0Fragment();
@@ -411,6 +425,8 @@ public class RecorderActivity extends Activity {
         // setupRenderer must be called after
         // setupScanArtefacts for setting mVideoOutputFile and sVideoEncoder was done!
         setupRenderer();
+
+        getCurrentLocation();
     }
 
     private void setupScanArtefacts() {
@@ -1018,6 +1034,78 @@ public class RecorderActivity extends Activity {
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void getCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, PERMISSION_LOCATION);
+        } else {
+            LocationManager lm = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+
+            boolean isGPSEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            boolean isNetworkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+            Location loc = null;
+
+            if (!isGPSEnabled && !isNetworkEnabled) {
+                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            } else if (isNetworkEnabled || isGPSEnabled) {
+                List<String> providers = lm.getProviders(true);
+                for (String provider : providers) {
+                    Location l = lm.getLastKnownLocation(provider);
+                    if (l == null) {
+                        continue;
+                    }
+                    if (loc == null || l.getAccuracy() < loc.getAccuracy()) {
+                        loc = l;
+                    }
+                }
+                if (loc != null) {
+                    getAddressFromLocation(loc.getLatitude(), loc.getLongitude());
+                }
+            }
+        }
+    }
+
+    private void getAddressFromLocation(double latitude, double longitude) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Geocoder geocoder = new Geocoder(RecorderActivity.this, Locale.getDefault());
+                String result = null;
+                try {
+                    List <Address> addressList = geocoder.getFromLocation(latitude, longitude, 1);
+                    if (addressList != null && addressList.size() > 0) {
+                        Address address = addressList.get(0);
+                        StringBuilder sb = new StringBuilder();
+
+                        for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
+                            sb.append(address.getAddressLine(i));
+
+                        result = sb.toString();
+                    }
+                } catch (IOException e) {
+                    Log.e("Location Address Loader", "Unable connect to Geocoder", e);
+                } finally {
+                    location = new Loc();
+
+                    location.setLatitude(latitude);
+                    location.setLongitude(longitude);
+                    location.setAddress(result);
+
+                    if (measure != null)
+                        measure.setLocation(location);
+                }
+            }
+        });
+        thread.start();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSION_LOCATION && grantResults[0] >= 0) {
+            getCurrentLocation();
         }
     }
 }

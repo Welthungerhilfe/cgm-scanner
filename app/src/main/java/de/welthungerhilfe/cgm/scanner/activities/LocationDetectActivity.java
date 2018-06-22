@@ -177,7 +177,8 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
                         Address address = addressList.get(0);
                         StringBuilder sb = new StringBuilder();
 
-                        sb.append(address.getAddressLine(0));
+                        for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
+                            sb.append(address.getAddressLine(i));
 
                         result = sb.toString();
                     }
