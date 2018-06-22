@@ -62,7 +62,6 @@
         android:shadowDx="-2"
         android:shadowDy="-2"
         android:shadowRadius="1"
-        android:text="@string/starting"
         android:textColor="@color/colorGreen"
         android:textSize="30sp"
         android:visibility="visible" />
