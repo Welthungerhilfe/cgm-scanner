@@ -200,6 +200,7 @@ public class CreateDataActivity extends BaseActivity {
         person.setSex(sex);
         person.setAgeEstimated(age);
         person.setTimestamp(Utils.getUniversalTimestamp());
+        person.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
         if (isNew)
             createPerson();
@@ -224,6 +225,7 @@ public class CreateDataActivity extends BaseActivity {
         measure.setType(AppConstants.VAL_MEASURE_MANUAL);
         measure.setPersonId(person.getId());
         measure.setTimestamp(Utils.getUniversalTimestamp());
+        measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
         new OfflineTask().saveMeasure(measure);
     }
