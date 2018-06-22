@@ -9,6 +9,7 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.models.Consent;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 /**
  * Child Growth Monitor - quick and accurate data on malnutrition
@@ -55,6 +56,7 @@ public class OfflineTask {
     }
 
     public void updatePerson(Person person) {
+        person.setTimestamp(Utils.getUniversalTimestamp());
         new UpdateTask().execute(person);
     }
 
@@ -63,6 +65,7 @@ public class OfflineTask {
     }
 
     public void updateConsent(Consent consent) {
+        consent.setTimestamp(Utils.getUniversalTimestamp());
         new UpdateTask().execute(consent);
     }
 
@@ -71,6 +74,7 @@ public class OfflineTask {
     }
 
     public void updateMeasure(Measure measure) {
+        measure.setTimestamp(Utils.getUniversalTimestamp());
         new UpdateTask().execute(measure);
     }
 
