@@ -54,6 +54,7 @@ public class Measure implements Serializable {
     private String artifact;
     private boolean visible;
     private long timestamp;
+    private String createdBy;
 
     @Ignore
     private Loc location;
@@ -161,5 +162,13 @@ public class Measure implements Serializable {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 }

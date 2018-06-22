@@ -47,6 +47,7 @@ public class Person implements Serializable {
     private String qrcode;
     private long created;
     private long timestamp;
+    private String createdBy;
 
     @Ignore
     private Loc lastLocation;
@@ -148,5 +149,13 @@ public class Person implements Serializable {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 }

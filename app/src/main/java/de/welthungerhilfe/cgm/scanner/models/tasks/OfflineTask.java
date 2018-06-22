@@ -74,7 +74,7 @@ public class OfflineTask {
         new UpdateTask().execute(measure);
     }
 
-    public void getLasteMeasure(Person person, OnLoadLastMeasure listener) {
+    public void getLastMeasure(Person person, OnLoadLastMeasure listener) {
         new LoadLastMeasureTask(listener).execute(person);
     }
 
