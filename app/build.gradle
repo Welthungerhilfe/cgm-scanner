@@ -29,7 +29,6 @@ android {
     }
     dexOptions {
         javaMaxHeapSize "4g"
-        incremental false
     }
     buildToolsVersion '27.0.3'
 }
@@ -62,7 +61,7 @@ dependencies {
         transitive = true
     }
     implementation 'com.google.firebase:firebase-core:16.0.0'
-    implementation 'com.google.tango:sdk-base:1.54'
+    implementation 'com.google.tango:sdk-base:1.55'
     implementation 'com.google.tango:support-base:1.54'
     implementation 'com.google.firebase:firebase-config:16.0.0'
     implementation 'com.google.firebase:firebase-ml-vision:16.0.0'
