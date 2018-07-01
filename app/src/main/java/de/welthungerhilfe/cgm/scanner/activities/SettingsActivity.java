@@ -10,12 +10,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.balysv.materialripple.MaterialRippleLayout;
-import com.google.android.gms.vision.text.Line;
 
 import java.util.Locale;
 

@@ -36,7 +36,8 @@
         <ImageView
             android:layout_width="34dp"
             android:layout_height="34dp"
-            android:src="@drawable/manual"/>
+            android:src="@drawable/manual"
+            android:contentDescription="@string/content_image"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -145,7 +146,8 @@
             android:layout_height="22dp"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
-            android:src="@drawable/location"/>
+            android:src="@drawable/location"
+            android:contentDescription="@string/content_image"/>
 
     </RelativeLayout>
 

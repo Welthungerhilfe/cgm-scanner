@@ -1,10 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.utils;
 
-import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 
-import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 import com.google.firebase.perf.metrics.AddTrace;
@@ -17,11 +14,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-
-import de.welthungerhilfe.cgm.scanner.activities.RecorderActivity;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
 
 /**
  * Child Growth Monitor - quick and accurate data on malnutrition

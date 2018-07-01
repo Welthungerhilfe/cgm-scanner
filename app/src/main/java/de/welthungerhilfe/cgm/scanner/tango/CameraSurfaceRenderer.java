@@ -22,13 +22,11 @@ package de.welthungerhilfe.cgm.scanner.tango;
 import com.projecttango.tangosupport.TangoSupport;
 
 import android.graphics.SurfaceTexture;
-import android.opengl.EGL14;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;

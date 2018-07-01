@@ -12,8 +12,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
-
 public class InternalStorageContentProvider extends ContentProvider {
     public static final Uri CONTENT_URI = Uri.parse("content://de.welthungerhilfe.cgm.scanner.qrconsent/");
     private static final HashMap<String, String> MIME_TYPES = new HashMap<String, String>();

@@ -51,7 +51,8 @@
                 android:src="@drawable/check"
                 android:visibility="invisible"
                 android:tint="@color/colorPrimary"
-                android:layout_centerVertical="true"/>
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/content_image"/>
 
             <LinearLayout
                 android:layout_toRightOf="@+id/imgSortDate"
@@ -86,7 +87,8 @@
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:src="@drawable/right"
-                    android:tint="@color/colorGreyDark"/>
+                    android:tint="@color/colorGreyDark"
+                    android:contentDescription="@string/content_image"/>
 
             </LinearLayout>
 
@@ -118,7 +120,8 @@
                 android:src="@drawable/check"
                 android:visibility="invisible"
                 android:tint="@color/colorPrimary"
-                android:layout_centerVertical="true"/>
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/content_image"/>
 
             <LinearLayout
                 android:layout_toRightOf="@+id/imgSortLocation"
@@ -153,7 +156,8 @@
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:src="@drawable/right"
-                    android:tint="@color/colorGreyDark"/>
+                    android:tint="@color/colorGreyDark"
+                    android:contentDescription="@string/content_image"/>
 
             </LinearLayout>
 
@@ -185,7 +189,8 @@
                 android:src="@drawable/check"
                 android:visibility="invisible"
                 android:tint="@color/colorPrimary"
-                android:layout_centerVertical="true"/>
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/content_image"/>
 
             <LinearLayout
                 android:layout_toRightOf="@+id/imgSortWasting"
@@ -245,7 +250,8 @@
                 android:src="@drawable/check"
                 android:visibility="invisible"
                 android:tint="@color/colorPrimary"
-                android:layout_centerVertical="true"/>
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/content_image"/>
 
             <LinearLayout
                 android:layout_toRightOf="@+id/imgSortStunting"
@@ -305,7 +311,8 @@
                 android:src="@drawable/check"
                 android:visibility="invisible"
                 android:tint="@color/colorPrimary"
-                android:layout_centerVertical="true"/>
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/content_image"/>
 
             <LinearLayout
                 android:layout_toRightOf="@+id/imgSortClear"

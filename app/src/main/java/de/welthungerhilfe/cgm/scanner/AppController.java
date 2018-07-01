@@ -21,7 +21,6 @@ package de.welthungerhilfe.cgm.scanner;
 import android.app.Application;
 import android.arch.persistence.room.Room;
 import android.os.StrictMode;
-import android.util.Log;
 
 //import com.amitshekhar.DebugDB;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,7 +30,6 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.DbConstants;
 import de.welthungerhilfe.cgm.scanner.helper.OfflineDatabase;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;

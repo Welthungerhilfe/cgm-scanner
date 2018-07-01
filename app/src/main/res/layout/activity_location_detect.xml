@@ -47,7 +47,8 @@
             android:id="@+id/imgClose"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/close"/>
+            android:src="@drawable/close"
+            android:contentDescription="@string/content_image"/>
 
     </LinearLayout>
 
@@ -72,7 +73,8 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginRight="5dp"
-            android:src="@drawable/route"/>
+            android:src="@drawable/route"
+            android:contentDescription="@string/content_image"/>
 
         <TextView
             android:layout_width="wrap_content"

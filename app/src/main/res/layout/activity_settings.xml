@@ -187,7 +187,8 @@
                             <ImageView
                                 android:layout_width="42dp"
                                 android:layout_height="42dp"
-                                android:src="@drawable/usa"/>
+                                android:src="@drawable/usa"
+                                android:contentDescription="@string/content_image"/>
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -224,7 +225,8 @@
                             <ImageView
                                 android:layout_width="42dp"
                                 android:layout_height="42dp"
-                                android:src="@drawable/germany"/>
+                                android:src="@drawable/germany"
+                                android:contentDescription="@string/content_image"/>
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -261,7 +263,8 @@
                             <ImageView
                                 android:layout_width="42dp"
                                 android:layout_height="42dp"
-                                android:src="@drawable/india"/>
+                                android:src="@drawable/india"
+                                android:contentDescription="@string/content_image"/>
 
                             <TextView
                                 android:layout_width="match_parent"

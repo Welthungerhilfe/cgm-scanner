@@ -72,6 +72,9 @@
             android:value="barcode" />
 
         <activity
+            android:name=".activities.BaseActivity" />
+
+        <activity
             android:name=".activities.LoginActivity"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -138,6 +141,11 @@
             android:authorities="de.welthungerhilfe.cgm.scanner"
             android:exported="false"
             android:syncable="true" />
+
+        <provider
+            android:name=".helper.InternalStorageContentProvider"
+            android:authorities="de.welthungerhilfe.cgm.scanner"
+            android:exported="false"/>
     </application>
 
 </manifest>

@@ -47,7 +47,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import me.dm7.barcodescanner.core.BarcodeScannerView;
 import me.dm7.barcodescanner.core.DisplayUtils;

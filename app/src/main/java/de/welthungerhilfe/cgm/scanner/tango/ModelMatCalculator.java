@@ -40,8 +40,8 @@ import android.opengl.Matrix;
 
 /**
  * Utility class to manage the calculation of a Model Matrix from the
- * translation and quaternion arrays obtained from an {@link TangoPose} object.
- * Delegates some mathematical computations to the {@link MathUtils}.
+ * translation and quaternion arrays obtained from an TangoPose object.
+ * Delegates some mathematical computations to the MathUtils.
  */
 public class ModelMatCalculator {
 

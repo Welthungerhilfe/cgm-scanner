@@ -57,7 +57,8 @@
                 android:layout_height="24dp"
                 android:layout_alignParentRight="true"
                 android:layout_centerInParent="true"
-                android:src="@drawable/location"/>
+                android:src="@drawable/location"
+                android:contentDescription="@string/content_image"/>
         </RelativeLayout>
 
     </LinearLayout>
