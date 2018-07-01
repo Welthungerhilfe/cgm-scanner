@@ -26,9 +26,6 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
-import android.util.Log;
-
-import com.google.android.gms.maps.model.LatLng;
 
 import java.lang.reflect.Field;
 
@@ -37,6 +34,7 @@ import java.text.SimpleDateFormat;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -104,7 +102,7 @@ public class Utils {
 
     public static String beautifyDate(Date date) {
         SimpleDateFormat formatter = null;
-        formatter = new SimpleDateFormat("MM/dd/yyyy");
+        formatter = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
 
         String res = formatter.format(date);
 
@@ -112,7 +110,7 @@ public class Utils {
     }
 
     public static Date stringToDate(String dt) {
-        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
         try {
             Date date = format.parse(dt);
             return date;

@@ -41,7 +41,6 @@ package de.welthungerhilfe.cgm.scanner.utils;
  */
 
 
-import android.util.Log;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;

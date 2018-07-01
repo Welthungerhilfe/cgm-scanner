@@ -725,7 +725,7 @@ public class RecorderActivity extends Activity {
                             updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
                             progressBar.setProgress(mProgress);
                             mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mScanningWorkflowStep +
-                                    "_" + String.format("%03d", mNumberOfFilesWritten);
+                                    "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
                             Uri pcUri = TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
                             // Direct Upload to Firebase Storage
                             startService(new Intent(RecorderActivity.this, FirebaseUploadService.class)

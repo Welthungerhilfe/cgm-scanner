@@ -11,18 +11,15 @@ import android.content.SyncResult;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.perf.metrics.AddTrace;
 
-import java.util.Date;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
@@ -38,9 +35,6 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineTask.OnLoadPerson, OfflineTask.OnLoadMeasure {
-    private final AccountManager mAccountManager;
-    private final Context mContext;
-
     private long prevTimestamp;
     private SessionManager session;
 
@@ -48,9 +42,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
         super(context, autoInitialize);
 
         session = new SessionManager(context);
-
-        mContext = context;
-        mAccountManager = AccountManager.get(context);
     }
 
     @Override
@@ -126,26 +117,26 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
     }
 
     @AddTrace(name = "configurePeriodicSync", enabled = true)
-    private static void configurePeriodicSync(Account account, Context context, long syncInterval, long flexTime) {
+    private static void configurePeriodicSync(Account account, Context context) {
 
         String authority = context.getString(R.string.sync_authority);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             SyncRequest request = new SyncRequest.Builder().
-                    syncPeriodic(syncInterval, flexTime).
+                    syncPeriodic(SYNC_INTERVAL, SYNC_FLEXTIME).
                     setSyncAdapter(account, authority).
                     setExtras(new Bundle()).build();
 
             ContentResolver.requestSync(request);
         } else {
-            ContentResolver.addPeriodicSync(account, authority, new Bundle(), syncInterval);
+            ContentResolver.addPeriodicSync(account, authority, new Bundle(), SYNC_INTERVAL);
         }
     }
 
     @AddTrace(name = "startPeriodicSync", enabled = true)
     public static void startPeriodicSync(Account newAccount, Context context) {
 
-        configurePeriodicSync(newAccount, context, SYNC_INTERVAL, SYNC_FLEXTIME);
+        configurePeriodicSync(newAccount, context);
 
         ContentResolver.setSyncAutomatically(newAccount, context.getString(R.string.sync_authority), true);
 

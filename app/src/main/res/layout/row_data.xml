@@ -86,7 +86,8 @@
                 android:layout_width="18dp"
                 android:layout_height="18dp"
                 android:src="@drawable/right"
-                android:tint="@color/colorGreyDark"/>
+                android:tint="@color/colorGreyDark"
+                android:contentDescription="@string/content_image"/>
 
         </LinearLayout>
 
