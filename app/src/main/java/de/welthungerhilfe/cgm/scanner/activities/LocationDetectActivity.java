@@ -21,6 +21,7 @@ package de.welthungerhilfe.cgm.scanner.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -30,8 +31,12 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -41,6 +46,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -65,12 +71,15 @@ import de.welthungerhilfe.cgm.scanner.helper.tasks.AddressTask;
  * Created by Emerald on 2/20/2018.
  */
 
-public class LocationDetectActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerDragListener {
+public class LocationDetectActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
+    public static final String EXTRA_LOCATION = "extra_location";
+    public static final String KEY_TRANSITION = "key_transition";
+
     private final int PERMISSION_LOCATION = 0x1001;
     private Marker marker = null;
 
-    @BindView(R.id.txtAddress)
-    TextView txtAddress;
+    @BindView(R.id.editAddress)
+    EditText editAddress;
     @BindView(R.id.mapView)
     MapView mapView;
     GoogleMap googleMap;
@@ -78,29 +87,37 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
     @OnClick(R.id.lytConfirm)
     void onConfirm(LinearLayout lytConfirm) {
         EventBus.getDefault().post(new LocationResult(location));
-        setResult(RESULT_OK, LocationDetectActivity.this.getIntent().putExtra(AppConstants.EXTRA_LOCATION, location));
-        finish();
+        onBackPressed();
     }
     @OnClick(R.id.imgClose)
     void onClose(ImageView imgClose) {
-        setResult(Activity.RESULT_CANCELED);
-        finish();
+        onBackPressed();
     }
 
     private Loc location;
 
+    public static void navigate(AppCompatActivity activity, View viewAddress, Loc location) {
+        Intent intent = new Intent(activity, LocationDetectActivity.class);
+        intent.putExtra(EXTRA_LOCATION, location);
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, viewAddress, KEY_TRANSITION);
+        ActivityCompat.startActivity(activity, intent, options.toBundle());
+    }
+
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
         setContentView(R.layout.activity_location_detect);
-
         ButterKnife.bind(this);
+
+        ViewCompat.setTransitionName(findViewById(R.id.editAddress), KEY_TRANSITION);
+        location = (Loc) getIntent().getSerializableExtra(EXTRA_LOCATION);
+
+        if (location != null)
+            editAddress.setText(location.getAddress());
 
         mapView.onCreate(saveBundle);
         mapView.onResume();
         MapsInitializer.initialize(this);
         mapView.getMapAsync(this);
-
-        getCurrentLocation();
     }
 
     @Override
@@ -132,38 +149,23 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
     public void onMapReady(GoogleMap mMap) {
         googleMap = mMap;
 
-        if (location != null) {
-            drawMarker();
-        }
-        googleMap.setOnMarkerDragListener(this);
+        drawMarker();
+        googleMap.setOnCameraIdleListener(this);
     }
 
     private void drawMarker() {
-        marker = googleMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
-        marker.setDraggable(true);
+        LatLng pos = null;
+        if (location != null) {
+            pos = new LatLng(location.getLatitude(), location.getLongitude());
+        } else {
+            pos = new LatLng(0, 0);
+        }
 
-        CameraPosition cameraPosition = new CameraPosition.Builder().target(new LatLng(location.getLatitude(), location.getLongitude())).zoom(12).build();
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(pos).zoom(12).build();
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
-    @Override
-    public void onMarkerDragStart(Marker marker) {
-
-    }
-
-    @Override
-    public void onMarkerDrag(Marker marker) {
-        LatLng latLng = marker.getPosition();
-        location.setLatitude(latLng.latitude);
-        location.setLongitude(latLng.longitude);
-    }
-
-    @Override
-    public void onMarkerDragEnd(Marker marker) {
-        getAddressFromLocation();
-    }
-
-    private void getAddressFromLocation() {
+    private void getAddressFromLocation(LatLng latLng) {
         //new AddressTask(location.getLatitude(), location.getLongitude(), this).execute();
 
         runOnUiThread(new Runnable() {
@@ -172,7 +174,7 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
                 Geocoder geocoder = new Geocoder(LocationDetectActivity.this, Locale.getDefault());
                 String result = null;
                 try {
-                    List <Address> addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                    List <Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
                     if (addressList != null && addressList.size() > 0) {
                         Address address = addressList.get(0);
                         StringBuilder sb = new StringBuilder();
@@ -186,54 +188,19 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
                     Log.e("Location Address Loader", "Unable connect to Geocoder", e);
                 } finally {
                     location.setAddress(result);
-                    txtAddress.setText(result);
+                    editAddress.setText(result);
                 }
             }
         });
     }
 
-    private void getCurrentLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, PERMISSION_LOCATION);
-        } else {
-            LocationManager lm = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
-
-            boolean isGPSEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            boolean isNetworkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-            Location loc = null;
-
-            if (!isGPSEnabled && !isNetworkEnabled) {
-                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-            } else if (isNetworkEnabled || isGPSEnabled) {
-                List<String> providers = lm.getProviders(true);
-                for (String provider : providers) {
-                    Location l = lm.getLastKnownLocation(provider);
-                    if (l == null) {
-                        continue;
-                    }
-                    if (loc == null || l.getAccuracy() < loc.getAccuracy()) {
-                        loc = l;
-                    }
-                }
-                if (loc != null) {
-                    // new AddressTask(loc.getLatitude(), loc.getLongitude(), this).execute();
-                    location = new Loc();
-                    location.setLatitude(loc.getLatitude());
-                    location.setLongitude(loc.getLongitude());
-                    getAddressFromLocation();
-                    if (googleMap != null) {
-                        drawMarker();
-                    }
-                }
-            }
-        }
-    }
-
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == PERMISSION_LOCATION && grantResults[0] >= 0) {
-            getCurrentLocation();
-        }
+    public void onCameraIdle() {
+        LatLng l = googleMap.getCameraPosition().target;
+
+        location.setLatitude(l.latitude);
+        location.setLongitude(l.longitude);
+
+        getAddressFromLocation(l);
     }
 }

@@ -25,6 +25,10 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -56,6 +60,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -85,6 +90,7 @@ import de.welthungerhilfe.cgm.scanner.viewmodels.PersonListViewModel;
 public class CreateDataActivity extends BaseActivity {
     private final String TAG = CreateDataActivity.class.getSimpleName();
     private final int PERMISSION_STORAGE = 0x001;
+    private final int PERMISSION_LOCATION = 0x002;
 
     public Person person;
     public List<Measure> measures;
@@ -109,6 +115,8 @@ public class CreateDataActivity extends BaseActivity {
 
     public PersonListViewModel viewModel;
 
+    public Loc location = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +127,8 @@ public class CreateDataActivity extends BaseActivity {
         EventBus.getDefault().register(this);
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
+
+        getCurrentLocation();
 
         qrCode = getIntent().getStringExtra(AppConstants.EXTRA_QR);
         qrBitmapByteArray = getIntent().getByteArrayExtra(AppConstants.EXTRA_QR_BITMAP);
@@ -325,6 +335,7 @@ public class CreateDataActivity extends BaseActivity {
         measure.setTimestamp(Utils.getUniversalTimestamp());
         measure.setPersonId(person.getId());
         measure.setId(AppController.getInstance().getMeasureId());
+        measure.setLocation(location);
 
         new OfflineTask().saveMeasure(measure);
     }
@@ -353,5 +364,70 @@ public class CreateDataActivity extends BaseActivity {
             finish();
         }
         return super.onOptionsItemSelected(menuItem);
+    }
+
+    private void getCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, PERMISSION_LOCATION);
+        } else {
+            LocationManager lm = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+
+            boolean isGPSEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            boolean isNetworkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+            Location loc = null;
+
+            if (!isGPSEnabled && !isNetworkEnabled) {
+                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            } else if (isNetworkEnabled || isGPSEnabled) {
+                List<String> providers = lm.getProviders(true);
+                for (String provider : providers) {
+                    Location l = lm.getLastKnownLocation(provider);
+                    if (l == null) {
+                        continue;
+                    }
+                    if (loc == null || l.getAccuracy() < loc.getAccuracy()) {
+                        loc = l;
+                    }
+                }
+                if (loc != null) {
+                    // new AddressTask(loc.getLatitude(), loc.getLongitude(), this).execute();
+                    location = new Loc();
+                    location.setLatitude(loc.getLatitude());
+                    location.setLongitude(loc.getLongitude());
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Geocoder geocoder = new Geocoder(CreateDataActivity.this, Locale.getDefault());
+                            String result = null;
+                            try {
+                                List <Address> addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                                if (addressList != null && addressList.size() > 0) {
+                                    Address address = addressList.get(0);
+                                    StringBuilder sb = new StringBuilder();
+
+                                    for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
+                                        sb.append(address.getAddressLine(i));
+
+                                    result = sb.toString();
+                                }
+                            } catch (IOException e) {
+                                Log.e("Location Address Loader", "Unable connect to Geocoder", e);
+                            } finally {
+                                location.setAddress(result);
+                            }
+                        }
+                    }).run();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSION_LOCATION && grantResults[0] >= 0) {
+            getCurrentLocation();
+        }
     }
 }
