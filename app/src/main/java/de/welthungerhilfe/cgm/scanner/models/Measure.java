@@ -53,6 +53,7 @@ public class Measure implements Serializable {
     private double headCircumference;
     private String artifact;
     private boolean visible;
+    private boolean oedema;
     private long timestamp;
     private String createdBy;
 
@@ -170,5 +171,13 @@ public class Measure implements Serializable {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public boolean isOedema() {
+        return oedema;
+    }
+
+    public void setOedema(boolean oedema) {
+        this.oedema = oedema;
     }
 }

@@ -61,6 +61,8 @@ import de.welthungerhilfe.cgm.scanner.views.UnitEditText;
 public class ManualMeasureDialog extends Dialog {
     private final int REQUEST_LOCATION = 0x1000;
 
+    @BindView(R.id.editManualDate)
+    EditText editManualDate;
     @BindView(R.id.editManualHeight)
     UnitEditText editManualHeight;
     @BindView(R.id.editManualWeight)
@@ -69,14 +71,14 @@ public class ManualMeasureDialog extends Dialog {
     UnitEditText editManualMuac;
     @BindView(R.id.editManualHead)
     UnitEditText editManualHead;
-    @BindView(R.id.editManualAddition)
-    EditText editManualAddition;
     @BindView(R.id.editManualLocation)
     EditText editManualLocation;
     @BindView(R.id.btnOK)
     Button btnOK;
 
-    @OnCheckedChanged(R.id.btnAlert)
+    private boolean oedema;
+
+    @OnCheckedChanged(R.id.checkManualOedema)
     void onAlert(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
             buttonView.setBackgroundResource(R.color.colorPink);
@@ -85,6 +87,7 @@ public class ManualMeasureDialog extends Dialog {
             buttonView.setBackgroundResource(R.color.colorWhite);
             buttonView.setTextColor(getContext().getColor(R.color.colorBlack));
         }
+        oedema = isChecked;
     }
     @OnClick(R.id.imgLocation)
     void onLocation(ImageView imgLocation) {
@@ -107,7 +110,8 @@ public class ManualMeasureDialog extends Dialog {
                         Double.parseDouble(editManualWeight.getText().toString()),
                         Double.parseDouble(editManualMuac.getText().toString()),
                         head,
-                        location
+                        location,
+                        oedema
                 );
             }
             dismiss();
@@ -142,6 +146,8 @@ public class ManualMeasureDialog extends Dialog {
         this.setCancelable(false);
 
         ButterKnife.bind(this);
+
+        editManualDate.setText(Utils.beautifyDate(System.currentTimeMillis()));
     }
 
     public void show() {
@@ -216,6 +222,6 @@ public class ManualMeasureDialog extends Dialog {
     }
 
     public interface OnManualMeasureListener {
-        void onManualMeasure(double height, double weight, double muac, double headCircumference, Loc location);
+        void onManualMeasure(double height, double weight, double muac, double headCircumference, Loc location, boolean oedema);
     }
 }

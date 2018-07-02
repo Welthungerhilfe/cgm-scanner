@@ -141,7 +141,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     }
 
     @Override
-    public void onManualMeasure(double height, double weight, double muac, double headCircumference, Loc location) {
-        ((CreateDataActivity)context).setMeasureData(height, weight, muac, headCircumference,"No Additional Info", location);
+    public void onManualMeasure(double height, double weight, double muac, double headCircumference, Loc location, boolean oedema) {
+        ((CreateDataActivity)context).setMeasureData(height, weight, muac, headCircumference,"No Additional Info", location, oedema);
     }
 }

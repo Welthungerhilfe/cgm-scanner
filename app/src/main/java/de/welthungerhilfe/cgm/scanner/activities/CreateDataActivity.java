@@ -210,7 +210,7 @@ public class CreateDataActivity extends BaseActivity {
         viewpager.setCurrentItem(1);
     }
 
-    public void setMeasureData(double height, double weight, double muac, double headCircumference, String additional, Loc location) {
+    public void setMeasureData(double height, double weight, double muac, double headCircumference, String additional, Loc location, boolean oedema) {
         final Measure measure = new Measure();
         measure.setId(AppController.getInstance().getMeasureId());
         measure.setDate(System.currentTimeMillis());
@@ -222,6 +222,7 @@ public class CreateDataActivity extends BaseActivity {
         measure.setHeadCircumference(headCircumference);
         measure.setArtifact(additional);
         measure.setLocation(location);
+        measure.setOedema(oedema);
         measure.setType(AppConstants.VAL_MEASURE_MANUAL);
         measure.setPersonId(person.getId());
         measure.setTimestamp(Utils.getUniversalTimestamp());

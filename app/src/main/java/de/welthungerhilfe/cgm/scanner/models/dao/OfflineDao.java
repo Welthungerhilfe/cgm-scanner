@@ -78,7 +78,7 @@ public interface OfflineDao {
 
     // ---------------------- Measure --------------------------//
 
-    @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE personId=:personId")
+    @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE personId=:personId ORDER BY date DESC")
     LiveData<List<Measure>> findMeasures(String personId);
 
     @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE timestamp>:timestamp")
