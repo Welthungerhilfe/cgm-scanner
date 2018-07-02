@@ -20,6 +20,7 @@
 package de.welthungerhilfe.cgm.scanner.adapters;
 
 import android.content.Context;
+import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,6 +82,9 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         holder.editWeight.setText(Double.toString(measure.getWeight()));
         holder.editMuac.setText(Double.toString(measure.getMuac()));
         holder.editHead.setText(Double.toString(measure.getHeadCircumference()));
+        if (measure.isOedema()) {
+            holder.checkOedema.setChecked(true);
+        }
 
         setAnimation(holder.itemView, position);
     }
@@ -120,6 +124,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         public EditText editWeight;
         public EditText editMuac;
         public EditText editHead;
+        public AppCompatCheckBox checkOedema;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -130,6 +135,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             editWeight = itemView.findViewById(R.id.editWeight);
             editMuac = itemView.findViewById(R.id.editMuac);
             editHead = itemView.findViewById(R.id.editHead);
+            checkOedema = itemView.findViewById(R.id.checkOedema);
         }
     }
 }

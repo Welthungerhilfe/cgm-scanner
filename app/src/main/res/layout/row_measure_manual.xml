@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:editable="false"
-            android:hint="@string/scan_date_01"/>
+            android:hint="@string/measure_date"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -75,7 +75,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:editable="false"
-            android:hint="@string/scan_location_02"/>
+            android:hint="@string/measure_location"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -90,7 +90,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:editable="false"
-            android:hint="@string/height_03"/>
+            android:hint="@string/measure_height"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -105,7 +105,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:editable="false"
-            android:hint="@string/weight_04"/>
+            android:hint="@string/measure_weight"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -120,7 +120,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:editable="false"
-            android:hint="@string/muac_05"/>
+            android:hint="@string/measure_muac"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -135,8 +135,17 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:editable="false"
-            android:hint="@string/head_06"/>
+            android:hint="@string/measure_head"/>
 
     </android.support.design.widget.TextInputLayout>
+
+    <android.support.v7.widget.AppCompatCheckBox
+        android:id="@+id/checkOedema"
+        android:layout_width="match_parent"
+        android:layout_height="38dp"
+        android:background="@color/colorWhite"
+        android:text="@string/measure_oedema"
+        android:textSize="18sp"
+        android:textColor="@color/colorBlack"/>
 
 </LinearLayout>

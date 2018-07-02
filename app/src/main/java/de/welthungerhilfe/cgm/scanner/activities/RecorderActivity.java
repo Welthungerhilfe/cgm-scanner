@@ -287,6 +287,7 @@ public class RecorderActivity extends Activity {
             measure.setHeight(0.0f);
             measure.setHeadCircumference(0.0f);
             measure.setMuac(0.0f);
+            measure.setOedema(false);
             EventBus.getDefault().post(new MeasureResult(measure));
             finish();
         }
