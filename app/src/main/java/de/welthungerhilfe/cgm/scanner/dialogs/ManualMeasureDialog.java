@@ -19,13 +19,20 @@
 
 package de.welthungerhilfe.cgm.scanner.dialogs;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatCheckBox;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
@@ -37,6 +44,8 @@ import android.widget.TextView;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.List;
 
 import butterknife.BindString;
 import butterknife.BindView;
@@ -58,7 +67,7 @@ import de.welthungerhilfe.cgm.scanner.views.UnitEditText;
  * Created by Emerald on 2/23/2018.
  */
 
-public class ManualMeasureDialog extends Dialog {
+public class ManualMeasureDialog extends Dialog implements View.OnClickListener {
     private final int REQUEST_LOCATION = 0x1000;
 
     @BindView(R.id.editManualDate)
@@ -131,12 +140,17 @@ public class ManualMeasureDialog extends Dialog {
     @BindString(R.string.tooltip_height_ex)
     String tooltip_height_ex;
 
+
+    private Context mContext;
     private Loc location = null;
 
     private OnManualMeasureListener measureListener;
 
     public ManualMeasureDialog(@NonNull Context context) {
         super(context);
+
+        mContext = context;
+        location = ((CreateDataActivity)mContext).location;
 
         this.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -148,6 +162,8 @@ public class ManualMeasureDialog extends Dialog {
         ButterKnife.bind(this);
 
         editManualDate.setText(Utils.beautifyDate(System.currentTimeMillis()));
+        editManualLocation.setText(location.getAddress());
+        editManualLocation.setOnClickListener(this);
     }
 
     public void show() {
@@ -219,6 +235,15 @@ public class ManualMeasureDialog extends Dialog {
         }
 
         return valid;
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.editManualLocation:
+                LocationDetectActivity.navigate((AppCompatActivity) mContext, editManualLocation, location);
+                break;
+        }
     }
 
     public interface OnManualMeasureListener {

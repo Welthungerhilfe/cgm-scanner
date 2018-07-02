@@ -78,7 +78,8 @@
                 android:id="@+id/editManualLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
+                android:editable="false"
+                android:focusable="false"
                 android:hint="@string/measure_location"/>
 
         </android.support.design.widget.TextInputLayout>
