@@ -84,6 +84,8 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         holder.editHead.setText(Double.toString(measure.getHeadCircumference()));
         if (measure.isOedema()) {
             holder.checkOedema.setChecked(true);
+        } else {
+            holder.checkOedema.setChecked(false);
         }
 
         setAnimation(holder.itemView, position);
