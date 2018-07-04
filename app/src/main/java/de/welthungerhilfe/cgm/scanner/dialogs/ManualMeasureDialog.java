@@ -85,7 +85,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     @BindView(R.id.btnOK)
     Button btnOK;
 
-    private boolean oedema;
+    private boolean oedema = false;
 
     @OnCheckedChanged(R.id.checkManualOedema)
     void onAlert(CompoundButton buttonView, boolean isChecked) {

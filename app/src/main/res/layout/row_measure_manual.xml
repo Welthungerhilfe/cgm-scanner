@@ -58,7 +58,6 @@
             android:id="@+id/editDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
             android:editable="false"
             android:hint="@string/measure_date"/>
 
