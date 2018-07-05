@@ -54,13 +54,10 @@ public class AppController extends Application {
 
     public OfflineDatabase offlineDb;
 
-    protected final Migration MIGRATION_1_3 = new Migration(1, 3) {
+    protected final Migration MIGRATION_2_3 = new Migration(2, 3) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE measures ADD latitude REAL;");
-            database.execSQL("ALTER TABLE measures ADD longitute REAL;");
-            database.execSQL("ALTER TABLE measures ADD address VARCHAR;");
-            database.execSQL("ALTER TABLE measures ADD oedema INTEGER;");
+
         }
     };
 
@@ -91,7 +88,7 @@ public class AppController extends Application {
 
         //offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).fallbackToDestructiveMigration().build();
 
-        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).addMigrations(MIGRATION_1_3).build();
+        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE)/*.addMigrations(MIGRATION_2_3)*/.build();
 
 
         Log.e("Offline DB", DebugDB.getAddressLog());
