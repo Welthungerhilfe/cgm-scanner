@@ -22,6 +22,7 @@ package de.welthungerhilfe.cgm.scanner.fragments;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import android.support.v4.content.ContextCompat;
@@ -31,16 +32,30 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.ScatterChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.ScatterData;
 import com.github.mikephil.charting.data.ScatterDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.IScatterDataSet;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.activities.CreateDataActivity;
@@ -51,6 +66,7 @@ public class GrowthDataFragment extends Fragment {
     private Context context;
 
     private ScatterChart chartGrowth;
+    private LineChart mChart;
     private MaterialSpinner dropChart;
 
     private VerticalTextView txtYAxis;
@@ -86,6 +102,7 @@ public class GrowthDataFragment extends Fragment {
         txtXAxis = view.findViewById(R.id.txtXAxis);
 
         chartGrowth = view.findViewById(R.id.chartGrowth);
+        mChart = view.findViewById(R.id.chart1);
         dropChart = view.findViewById(R.id.dropChart);
 
         @SuppressLint("ResourceType") String[] filters = getResources().getStringArray(R.array.filters);
@@ -98,7 +115,7 @@ public class GrowthDataFragment extends Fragment {
         });
 
         initChart();
-        setChartData();
+        //setChartData();
 
         return view;
     }
@@ -155,26 +172,108 @@ public class GrowthDataFragment extends Fragment {
     }
 
     private void initChart() {
-        chartGrowth.getLegend().setEnabled(false);
-        chartGrowth.getDescription().setEnabled(false);
+        // no description text
+        mChart.getDescription().setEnabled(false);
 
-        //chartGrowth.setBackgroundResource(R.drawable.back_chart);
+        // enable touch gestures
+        mChart.setTouchEnabled(true);
 
-        YAxis yAxis = chartGrowth.getAxisLeft();
-        yAxis.setDrawGridLines(true);
-        yAxis.enableGridDashedLine(5f, 5f, 0f);
-        yAxis.setAxisMinimum(0f);
-        yAxis.setGranularity(1f);
+        mChart.setDragDecelerationFrictionCoef(0.9f);
 
-        chartGrowth.getAxisRight().setEnabled(false);
+        // enable scaling and dragging
+        mChart.setDragEnabled(false);
+        mChart.setScaleEnabled(false);
+        mChart.setDrawGridBackground(false);
+        mChart.setHighlightPerDragEnabled(true);
 
-        XAxis xAxis = chartGrowth.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setDrawGridLines(true);
-        xAxis.enableGridDashedLine(5f, 5f, 0f);
-        xAxis.setAxisMinimum(0f);
-        xAxis.setGranularity(1f);
+        // set an alternative background color
+        mChart.setBackgroundColor(Color.WHITE);
 
-        chartGrowth.invalidate();
+        // get the legend (only possible after setting data)
+        mChart.getLegend().setEnabled(true);
+
+        mChart.getAxisLeft().setEnabled(true);
+        mChart.getAxisLeft().setDrawGridLines(true);
+        mChart.getAxisLeft().setGranularity(1.0f);
+        mChart.getAxisLeft().setGranularityEnabled(true);
+        mChart.getXAxis().setDrawAxisLine(true);
+        mChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        mChart.getXAxis().setDrawGridLines(true);
+        mChart.getXAxis().setGranularity(1.0f);
+        mChart.getXAxis().setGranularityEnabled(true);
+
+        setData();
+    }
+
+    private void setData() {
+        if (chartType == 0 || context == null) {
+            return;
+        }
+
+        long birthday = ((CreateDataActivity)context).person.getBirthday();
+
+        long days = (System.currentTimeMillis() - birthday) / 1000 / 60 / 60 / 24;
+
+        BufferedReader reader = null;
+        int curDay = 0;
+        try {
+            if (((CreateDataActivity)context).person.getSex().equals("female"))
+                reader = new BufferedReader(new InputStreamReader(context.getAssets().open("lhfa_girls_p_exp.txt"), "UTF-8"));
+            else
+                reader = new BufferedReader(new InputStreamReader(context.getAssets().open("lhfa_boys_p_exp.txt"), "UTF-8"));
+
+            ArrayList<Entry> p3 = new ArrayList<Entry>();
+            ArrayList<Entry> p15 = new ArrayList<Entry>();
+            ArrayList<Entry> p50 = new ArrayList<Entry>();
+            ArrayList<Entry> p85 = new ArrayList<Entry>();
+            ArrayList<Entry> p97 = new ArrayList<Entry>();
+
+            String mLine;
+            while ((mLine = reader.readLine()) != null && curDay <= days) {
+                String[] arr = mLine.split("\t");
+                try {
+                    if (Integer.parseInt(arr[0]) == curDay) {
+                        p3.add(new Entry(curDay, Float.parseFloat(arr[6])));
+                        p15.add(new Entry(curDay, Float.parseFloat(arr[9])));
+                        p50.add(new Entry(curDay, Float.parseFloat(arr[11])));
+                        p85.add(new Entry(curDay, Float.parseFloat(arr[13])));
+                        p97.add(new Entry(curDay, Float.parseFloat(arr[16])));
+                    }
+                    curDay ++;
+                } catch (Exception e) {
+                    continue;
+                }
+            }
+            reader.close();
+
+            ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
+            dataSets.add(createDataSet(p3, "3rd", Color.rgb(212, 53, 62)));
+            dataSets.add(createDataSet(p15, "15th", Color.rgb(230, 122, 58)));
+            dataSets.add(createDataSet(p50, "50th", Color.rgb(55, 129, 69)));
+            dataSets.add(createDataSet(p85, "85th", Color.rgb(230, 122, 58)));
+            dataSets.add(createDataSet(p97, "97th", Color.rgb(212, 53, 62)));
+
+            mChart.setData(new LineData(dataSets));
+            //mChart.invalidate();
+            mChart.animateX(3000);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected LineDataSet createDataSet(ArrayList<Entry> values, String label, int color) {
+        LineDataSet dataSet = new LineDataSet(values, label);
+        dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+        dataSet.setColor(color);
+        dataSet.setValueTextColor(ColorTemplate.getHoloBlue());
+        dataSet.setLineWidth(1.5f);
+        dataSet.setDrawCircles(false);
+        dataSet.setDrawValues(false);
+        dataSet.setFillAlpha(65);
+        dataSet.setFillColor(ColorTemplate.getHoloBlue());
+        dataSet.setHighLightColor(Color.rgb(244, 117, 117));
+        dataSet.setDrawCircleHole(false);
+
+        return dataSet;
     }
 }
