@@ -246,12 +246,22 @@ public class GrowthDataFragment extends Fragment {
             }
             reader.close();
 
+            ArrayList<Entry> measures = new ArrayList<Entry>();
+
+            for (Measure measure : ((CreateDataActivity)context).measures) {
+                long day = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
+
+                measures.add(new Entry(day, Float.parseFloat(Double.toString(measure.getHeight()))));
+            }
+
             ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
             dataSets.add(createDataSet(p3, "3rd", Color.rgb(212, 53, 62)));
             dataSets.add(createDataSet(p15, "15th", Color.rgb(230, 122, 58)));
             dataSets.add(createDataSet(p50, "50th", Color.rgb(55, 129, 69)));
             dataSets.add(createDataSet(p85, "85th", Color.rgb(230, 122, 58)));
             dataSets.add(createDataSet(p97, "97th", Color.rgb(212, 53, 62)));
+
+            dataSets.add(createDataSet(measures, "measure", Color.rgb(0, 0, 0), 3f));
 
             mChart.setData(new LineData(dataSets));
             //mChart.invalidate();
@@ -267,6 +277,22 @@ public class GrowthDataFragment extends Fragment {
         dataSet.setColor(color);
         dataSet.setValueTextColor(ColorTemplate.getHoloBlue());
         dataSet.setLineWidth(1.5f);
+        dataSet.setDrawCircles(false);
+        dataSet.setDrawValues(false);
+        dataSet.setFillAlpha(65);
+        dataSet.setFillColor(ColorTemplate.getHoloBlue());
+        dataSet.setHighLightColor(Color.rgb(244, 117, 117));
+        dataSet.setDrawCircleHole(false);
+
+        return dataSet;
+    }
+
+    protected LineDataSet createDataSet(ArrayList<Entry> values, String label, int color, float width) {
+        LineDataSet dataSet = new LineDataSet(values, label);
+        dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+        dataSet.setColor(color);
+        dataSet.setValueTextColor(ColorTemplate.getHoloBlue());
+        dataSet.setLineWidth(width);
         dataSet.setDrawCircles(false);
         dataSet.setDrawValues(false);
         dataSet.setFillAlpha(65);
