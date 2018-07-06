@@ -144,6 +144,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
 
     }
 
+    @AddTrace(name = "startImmediateSync", enabled = true)
+    public static void startImmediateSync(Account newAccount, Context context) {
+
+        ContentResolver.setSyncAutomatically(newAccount, context.getString(R.string.sync_authority), true);
+
+        syncImmediately(newAccount, context);
+    }
+
     @Override
     @AddTrace(name = "onPersonLoaded", enabled = true)
     public void onPersonLoaded(List<Person> personList) {
