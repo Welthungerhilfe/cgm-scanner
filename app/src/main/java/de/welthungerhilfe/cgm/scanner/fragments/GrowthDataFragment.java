@@ -54,6 +54,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -74,7 +76,7 @@ public class GrowthDataFragment extends Fragment {
 
     private TextView txtLabel;
 
-    private int chartType = 1;
+    private int chartType = 0;
 
     public static GrowthDataFragment newInstance(Context context) {
         GrowthDataFragment fragment = new GrowthDataFragment();
@@ -109,8 +111,8 @@ public class GrowthDataFragment extends Fragment {
         dropChart.setItems(filters);
         dropChart.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
             @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
-                chartType = position + 1;
-                setChartData();
+                chartType = position;
+                setData();
             }
         });
 
@@ -121,7 +123,7 @@ public class GrowthDataFragment extends Fragment {
     }
 
     public void setChartData() {
-        if (chartType == 0 || context == null) {
+        if (context == null) {
             return;
         }
         if (((CreateDataActivity)context).measures == null || ((CreateDataActivity)context).measures.size() == 0) {
@@ -194,106 +196,116 @@ public class GrowthDataFragment extends Fragment {
 
         mChart.getAxisLeft().setEnabled(true);
         mChart.getAxisLeft().setDrawGridLines(true);
-        mChart.getAxisLeft().setGranularity(1.0f);
-        mChart.getAxisLeft().setGranularityEnabled(true);
+
         mChart.getXAxis().setDrawAxisLine(true);
         mChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         mChart.getXAxis().setDrawGridLines(true);
+        /*
         mChart.getXAxis().setGranularity(1.0f);
         mChart.getXAxis().setGranularityEnabled(true);
+        */
 
         setData();
     }
 
     private void setData() {
-        if (chartType == 0 || context == null) {
+        if (context == null) {
+            return;
+        }
+        if (((CreateDataActivity)context).measures == null || ((CreateDataActivity)context).measures.size() == 0) {
             return;
         }
 
         long birthday = ((CreateDataActivity)context).person.getBirthday();
 
-        long days = (System.currentTimeMillis() - birthday) / 1000 / 60 / 60 / 24;
+        ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
 
-        BufferedReader reader = null;
-        int curDay = 0;
-        try {
-            if (((CreateDataActivity)context).person.getSex().equals("female"))
-                reader = new BufferedReader(new InputStreamReader(context.getAssets().open("lhfa_girls_p_exp.txt"), "UTF-8"));
-            else
-                reader = new BufferedReader(new InputStreamReader(context.getAssets().open("lhfa_boys_p_exp.txt"), "UTF-8"));
+        if (chartType < 2) {
+            long days = (System.currentTimeMillis() - birthday) / 1000 / 60 / 60 / 24 + 100;
 
-            ArrayList<Entry> p3 = new ArrayList<Entry>();
-            ArrayList<Entry> p15 = new ArrayList<Entry>();
-            ArrayList<Entry> p50 = new ArrayList<Entry>();
-            ArrayList<Entry> p85 = new ArrayList<Entry>();
-            ArrayList<Entry> p97 = new ArrayList<Entry>();
+            BufferedReader reader = null;
+            int curDay = 0;
 
-            String mLine;
-            while ((mLine = reader.readLine()) != null && curDay <= days) {
-                String[] arr = mLine.split("\t");
-                try {
-                    if (Integer.parseInt(arr[0]) == curDay) {
-                        p3.add(new Entry(curDay, Float.parseFloat(arr[6])));
-                        p15.add(new Entry(curDay, Float.parseFloat(arr[9])));
-                        p50.add(new Entry(curDay, Float.parseFloat(arr[11])));
-                        p85.add(new Entry(curDay, Float.parseFloat(arr[13])));
-                        p97.add(new Entry(curDay, Float.parseFloat(arr[16])));
+            try {
+                if (((CreateDataActivity)context).person.getSex().equals("female"))
+                    reader = new BufferedReader(new InputStreamReader(context.getAssets().open("lhfa_girls_p_exp.txt"), "UTF-8"));
+                else
+                    reader = new BufferedReader(new InputStreamReader(context.getAssets().open("lhfa_boys_p_exp.txt"), "UTF-8"));
+
+                ArrayList<Entry> p3 = new ArrayList<Entry>();
+                ArrayList<Entry> p15 = new ArrayList<Entry>();
+                ArrayList<Entry> p50 = new ArrayList<Entry>();
+                ArrayList<Entry> p85 = new ArrayList<Entry>();
+                ArrayList<Entry> p97 = new ArrayList<Entry>();
+
+                String mLine;
+                while ((mLine = reader.readLine()) != null && curDay <= days) {
+                    String[] arr = mLine.split("\t");
+                    try {
+                        if (Integer.parseInt(arr[0]) == curDay) {
+                            p3.add(new Entry(curDay, Float.parseFloat(arr[6])));
+                            p15.add(new Entry(curDay, Float.parseFloat(arr[9])));
+                            p50.add(new Entry(curDay, Float.parseFloat(arr[11])));
+                            p85.add(new Entry(curDay, Float.parseFloat(arr[13])));
+                            p97.add(new Entry(curDay, Float.parseFloat(arr[16])));
+                        }
+                        curDay ++;
+                    } catch (Exception e) {
+                        continue;
                     }
-                    curDay ++;
-                } catch (Exception e) {
-                    continue;
                 }
+                reader.close();
+
+                dataSets.add(createDataSet(p3, "3rd", Color.rgb(212, 53, 62), 1.5f, false));
+                dataSets.add(createDataSet(p15, "15th", Color.rgb(230, 122, 58), 1.5f, false));
+                dataSets.add(createDataSet(p50, "50th", Color.rgb(55, 129, 69), 1.5f, false));
+                dataSets.add(createDataSet(p85, "85th", Color.rgb(230, 122, 58), 1.5f, false));
+                dataSets.add(createDataSet(p97, "97th", Color.rgb(212, 53, 62), 1.5f, false));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            reader.close();
-
-            ArrayList<Entry> measures = new ArrayList<Entry>();
-
-            for (Measure measure : ((CreateDataActivity)context).measures) {
-                long day = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
-
-                measures.add(new Entry(day, Float.parseFloat(Double.toString(measure.getHeight()))));
-            }
-
-            ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
-            dataSets.add(createDataSet(p3, "3rd", Color.rgb(212, 53, 62)));
-            dataSets.add(createDataSet(p15, "15th", Color.rgb(230, 122, 58)));
-            dataSets.add(createDataSet(p50, "50th", Color.rgb(55, 129, 69)));
-            dataSets.add(createDataSet(p85, "85th", Color.rgb(230, 122, 58)));
-            dataSets.add(createDataSet(p97, "97th", Color.rgb(212, 53, 62)));
-
-            dataSets.add(createDataSet(measures, "measure", Color.rgb(0, 0, 0), 3f));
-
-            mChart.setData(new LineData(dataSets));
-            //mChart.invalidate();
-            mChart.animateX(3000);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+
+        ArrayList<Entry> measures = new ArrayList<Entry>();
+
+        for (Measure measure : ((CreateDataActivity)context).measures) {
+            long day = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
+
+            if (chartType == 0)
+                measures.add(new Entry(day, (float) measure.getHeight()));
+            else if (chartType == 1)
+                measures.add(new Entry(day, (float) measure.getWeight()));
+            else if (chartType == 2) {
+                measures.add(new Entry((float) measure.getHeight(), (float) measure.getWeight()));
+                Collections.sort(measures, new Comparator<Entry>() {
+                    @Override
+                    public int compare(Entry o1, Entry o2) {
+                        return Float.compare(o1.getX(), o2.getX());
+                    }
+                });
+            }
+        }
+
+        if (measures.size() > 1)
+            dataSets.add(createDataSet(measures, "measure", Color.rgb(0, 0, 0), 3f, false));
+        else {
+            dataSets.add(createDataSet(measures, "measure", Color.rgb(0, 0, 0), 3f, true));
+        }
+
+        mChart.setData(new LineData(dataSets));
+        //mChart.invalidate();
+        mChart.animateX(3000);
     }
 
-    protected LineDataSet createDataSet(ArrayList<Entry> values, String label, int color) {
-        LineDataSet dataSet = new LineDataSet(values, label);
-        dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
-        dataSet.setColor(color);
-        dataSet.setValueTextColor(ColorTemplate.getHoloBlue());
-        dataSet.setLineWidth(1.5f);
-        dataSet.setDrawCircles(false);
-        dataSet.setDrawValues(false);
-        dataSet.setFillAlpha(65);
-        dataSet.setFillColor(ColorTemplate.getHoloBlue());
-        dataSet.setHighLightColor(Color.rgb(244, 117, 117));
-        dataSet.setDrawCircleHole(false);
-
-        return dataSet;
-    }
-
-    protected LineDataSet createDataSet(ArrayList<Entry> values, String label, int color, float width) {
+    protected LineDataSet createDataSet(ArrayList<Entry> values, String label, int color, float width, boolean circle) {
         LineDataSet dataSet = new LineDataSet(values, label);
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
         dataSet.setColor(color);
         dataSet.setValueTextColor(ColorTemplate.getHoloBlue());
         dataSet.setLineWidth(width);
-        dataSet.setDrawCircles(false);
+        dataSet.setDrawCircles(circle);
+        dataSet.setCircleColor(color);
+        dataSet.setCircleRadius(3f);
         dataSet.setDrawValues(false);
         dataSet.setFillAlpha(65);
         dataSet.setFillColor(ColorTemplate.getHoloBlue());
