@@ -19,10 +19,14 @@
 package de.welthungerhilfe.cgm.scanner;
 
 import android.app.Application;
+import android.arch.persistence.db.SupportSQLiteDatabase;
 import android.arch.persistence.room.Room;
+import android.arch.persistence.room.migration.Migration;
 import android.os.StrictMode;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
-//import com.amitshekhar.DebugDB;
+import com.amitshekhar.DebugDB;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -49,6 +53,22 @@ public class AppController extends Application {
 
     public OfflineDatabase offlineDb;
 
+    protected final Migration MIGRATION_1_2 = new Migration(1, 2) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE measures ADD COLUMN createdBy VARCHAR;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN latitude REAL;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN longitude REAL;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN address VARCHAR;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN oedema INTEGER;");
+
+            database.execSQL("ALTER TABLE persons ADD COLUMN createdBy VARCHAR;");
+            database.execSQL("ALTER TABLE persons ADD COLUMN latitude REAL;");
+            database.execSQL("ALTER TABLE persons ADD COLUMN longitude REAL;");
+            database.execSQL("ALTER TABLE persons ADD COLUMN address VARCHAR;");
+        }
+    };
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -74,11 +94,10 @@ public class AppController extends Application {
                 .build();
         firebaseFirestore.setFirestoreSettings(settings);
 
-        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).fallbackToDestructiveMigration().build();
+        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).addMigrations(MIGRATION_1_2).build();
 
-        //SyncAdapter.initializeSyncAdapter(getApplicationContext());
 
-        //Log.e("Offline DB", DebugDB.getAddressLog());
+        Log.e("Offline DB", DebugDB.getAddressLog());
 
         mInstance = this;
     }
