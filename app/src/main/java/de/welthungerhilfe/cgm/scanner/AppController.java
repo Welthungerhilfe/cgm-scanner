@@ -18,15 +18,18 @@
 
 package de.welthungerhilfe.cgm.scanner;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Application;
 import android.arch.persistence.db.SupportSQLiteDatabase;
 import android.arch.persistence.room.Room;
+import android.arch.persistence.room.RoomDatabase;
 import android.arch.persistence.room.migration.Migration;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
-import android.util.Log;
+//import android.util.Log;
 
-import com.amitshekhar.DebugDB;
+//import com.amitshekhar.DebugDB;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -36,6 +39,9 @@ import com.google.firebase.storage.StorageReference;
 
 import de.welthungerhilfe.cgm.scanner.helper.DbConstants;
 import de.welthungerhilfe.cgm.scanner.helper.OfflineDatabase;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.repositories.OfflineRepository;
+import de.welthungerhilfe.cgm.scanner.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AppController extends Application {
@@ -52,6 +58,7 @@ public class AppController extends Application {
     public FirebaseFirestore firebaseFirestore;
 
     public OfflineDatabase offlineDb;
+    public OfflineRepository offlineRepository;
 
     protected final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
@@ -94,10 +101,25 @@ public class AppController extends Application {
                 .build();
         firebaseFirestore.setFirestoreSettings(settings);
 
-        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).addMigrations(MIGRATION_1_2).build();
+        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE)/*.addMigrations(MIGRATION_1_2)*/.fallbackToDestructiveMigration().addCallback(new RoomDatabase.Callback() {
+            @Override
+            public void onOpen(@NonNull SupportSQLiteDatabase db) {
+                super.onCreate(db);
+
+                SessionManager session = new SessionManager(getApplicationContext());
+                session.setSyncTimestamp(0);
+
+                AccountManager accountManager = AccountManager.get(getApplicationContext());
+                Account[] accounts = accountManager.getAccounts();
+
+                if (accounts.length > 0) {
+                    SyncAdapter.startImmediateSync(accounts[0], getApplicationContext());
+                }
+            }
+        }).build();
 
 
-        Log.e("Offline DB", DebugDB.getAddressLog());
+        //Log.e("Offline DB", DebugDB.getAddressLog());
 
         mInstance = this;
     }
