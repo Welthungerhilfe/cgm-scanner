@@ -257,26 +257,23 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         setupSidemenu();
         setupActionBar();
 
-        initUI();
-
         showProgressDialog();
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         viewModel.getObservablePersonList().observe(this, personList->{
-            adapterData = new RecyclerDataAdapter(this, personList);
-            adapterData.setPersonDetailListener(this);
-            recyclerData.setAdapter(adapterData);
-            recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+            if (personList.size() == 0) {
+                txtNoPerson.setVisibility(View.VISIBLE);
+                recyclerData.setVisibility(View.GONE);
+            } else {
+                txtNoPerson.setVisibility(View.GONE);
+                recyclerData.setVisibility(View.VISIBLE);
+
+                adapterData = new RecyclerDataAdapter(this, personList);
+                adapterData.setPersonDetailListener(this);
+                recyclerData.setAdapter(adapterData);
+                recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+            }
         });
-    }
-
-    private void initUI() {
-        adapterData = new RecyclerDataAdapter(this, new ArrayList<Person>());
-        adapterData.setPersonDetailListener(this);
-        recyclerData.setAdapter(adapterData);
-        recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-
-        txtSortCase.setText(getResources().getString(R.string.last_scans, 0));
     }
 
     private void setupSidemenu() {
