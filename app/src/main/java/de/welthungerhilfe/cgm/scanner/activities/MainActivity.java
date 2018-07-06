@@ -257,6 +257,8 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         setupSidemenu();
         setupActionBar();
 
+        txtSortCase.setText(getResources().getString(R.string.last_scans, 0));
+
         showProgressDialog();
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
