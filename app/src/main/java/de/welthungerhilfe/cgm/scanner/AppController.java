@@ -56,16 +56,16 @@ public class AppController extends Application {
     protected final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE measures ADD COLUMN createdBy VARCHAR;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN createdBy TEXT;");
             database.execSQL("ALTER TABLE measures ADD COLUMN latitude REAL;");
             database.execSQL("ALTER TABLE measures ADD COLUMN longitude REAL;");
-            database.execSQL("ALTER TABLE measures ADD COLUMN address VARCHAR;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN address TEXT;");
             database.execSQL("ALTER TABLE measures ADD COLUMN oedema INTEGER;");
 
-            database.execSQL("ALTER TABLE persons ADD COLUMN createdBy VARCHAR;");
+            database.execSQL("ALTER TABLE persons ADD COLUMN createdBy TEXT;");
             database.execSQL("ALTER TABLE persons ADD COLUMN latitude REAL;");
             database.execSQL("ALTER TABLE persons ADD COLUMN longitude REAL;");
-            database.execSQL("ALTER TABLE persons ADD COLUMN address VARCHAR;");
+            database.execSQL("ALTER TABLE persons ADD COLUMN address TEXT;");
         }
     };
 
