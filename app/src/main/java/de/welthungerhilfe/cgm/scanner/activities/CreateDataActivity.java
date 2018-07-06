@@ -241,6 +241,8 @@ public class CreateDataActivity extends BaseActivity {
 
         person.setLastLocation(location);
         new OfflineTask().updatePerson(person);
+
+        viewpager.setCurrentItem(2);
     }
 
     private void createPerson() {
