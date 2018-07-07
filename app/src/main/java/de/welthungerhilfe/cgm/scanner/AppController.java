@@ -67,7 +67,7 @@ public class AppController extends Application {
             database.execSQL("ALTER TABLE measures ADD COLUMN latitude REAL;");
             database.execSQL("ALTER TABLE measures ADD COLUMN longitude REAL;");
             database.execSQL("ALTER TABLE measures ADD COLUMN address TEXT;");
-            database.execSQL("ALTER TABLE measures ADD COLUMN oedema INTEGER;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN oedema INTEGER DEFAULT '0' NOT NULL;");
 
             database.execSQL("ALTER TABLE persons ADD COLUMN createdBy TEXT;");
             database.execSQL("ALTER TABLE persons ADD COLUMN latitude REAL;");
@@ -101,7 +101,9 @@ public class AppController extends Application {
                 .build();
         firebaseFirestore.setFirestoreSettings(settings);
 
-        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE)/*.addMigrations(MIGRATION_1_2)*/.fallbackToDestructiveMigration().addCallback(new RoomDatabase.Callback() {
+        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).addMigrations(MIGRATION_1_2).build();
+        /*
+        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).fallbackToDestructiveMigration().addCallback(new RoomDatabase.Callback() {
             @Override
             public void onOpen(@NonNull SupportSQLiteDatabase db) {
                 super.onCreate(db);
@@ -117,6 +119,7 @@ public class AppController extends Application {
                 }
             }
         }).build();
+        */
 
 
         //Log.e("Offline DB", DebugDB.getAddressLog());
