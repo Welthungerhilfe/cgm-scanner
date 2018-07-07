@@ -132,9 +132,9 @@
     <string name="axis_height">Height</string>
     <string name="axis_weight">Weight</string>
 
-    <string name="filter_age_height">Age / Height</string>
-    <string name="filter_age_weight">Age / Weight</string>
-    <string name="filter_height_weight">Height / Weight</string>
+    <string name="filter_age_height">Height-for-age</string>
+    <string name="filter_age_weight">Weight-for-age</string>
+    <string name="filter_height_weight">Weight-for-height</string>
 
     <string-array name="filters">
         <item>@string/filter_age_height</item>
