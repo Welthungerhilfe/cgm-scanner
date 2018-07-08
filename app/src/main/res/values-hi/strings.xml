@@ -22,7 +22,7 @@
     <string name="sex_male">पुरुष / लडका</string>
     <string name="sex_female">महिला / लडकी</string>
 
-    <string name="forgot"><u> पासवर्ड भूल गए? </ u></string>
+    <string name="forgot"><u>पासवर्ड भूल गए?</u></string>
     <string name="ok">ठीक है</string>
     <string name="confirm">पुष्टि करें</string>
     <string name="cancel">रद्द करें</string>
