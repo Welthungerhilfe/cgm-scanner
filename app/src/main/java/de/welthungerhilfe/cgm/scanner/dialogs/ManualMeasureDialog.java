@@ -162,7 +162,8 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         ButterKnife.bind(this);
 
         editManualDate.setText(Utils.beautifyDate(System.currentTimeMillis()));
-        editManualLocation.setText(location.getAddress());
+        if (location != null)
+            editManualLocation.setText(location.getAddress());
         editManualLocation.setOnClickListener(this);
     }
 

@@ -113,6 +113,8 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
 
         if (location != null)
             editAddress.setText(location.getAddress());
+        else
+            location = new Loc();
 
         mapView.onCreate(saveBundle);
         mapView.onResume();
