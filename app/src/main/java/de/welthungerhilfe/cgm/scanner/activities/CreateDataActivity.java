@@ -204,7 +204,8 @@ public class CreateDataActivity extends BaseActivity {
         person.setName(name);
         person.setSurname(surName);
         person.setLastLocation(loc);
-        person.setBirthday(birthday);
+        if (birthday != 0)
+            person.setBirthday(birthday);
         person.setGuardian(guardian);
         person.setSex(sex);
         person.setAgeEstimated(age);
