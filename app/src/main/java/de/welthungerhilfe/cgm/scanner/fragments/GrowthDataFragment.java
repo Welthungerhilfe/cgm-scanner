@@ -269,6 +269,9 @@ public class GrowthDataFragment extends Fragment {
         ArrayList<Entry> measures = new ArrayList<Entry>();
 
         for (Measure measure : ((CreateDataActivity)context).measures) {
+            if (!measure.getType().equals("manual"))
+                continue;
+
             long day = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
 
             if (chartType == 0)
