@@ -43,39 +43,36 @@
         android:textStyle="bold"
         android:textSize="18sp"/>
 
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/chart1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="10dp" />
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
+        android:visibility="visible"
         android:layout_marginTop="10dp">
 
         <de.welthungerhilfe.cgm.scanner.views.VerticalTextView
             android:id="@+id/txtYAxis"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
             android:text="@string/axis_y"
+            android:textColor="@color/colorGreyDark"
             android:rotation="180"/>
 
-        <com.github.mikephil.charting.charts.ScatterChart
-            android:id="@+id/chartGrowth"
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/chart1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_toRightOf="@+id/txtYAxis"
-            android:layout_above="@+id/txtXAxis"/>
+            android:layout_above="@+id/txtXAxis" />
 
         <TextView
             android:id="@+id/txtXAxis"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/axis_x"
+            android:textColor="@color/colorGreyDark"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"/>
+            android:layout_centerHorizontal="true"/>
 
     </RelativeLayout>
 
