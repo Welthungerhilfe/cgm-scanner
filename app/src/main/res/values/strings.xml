@@ -135,11 +135,15 @@
     <string name="filter_age_height">Height-for-age</string>
     <string name="filter_age_weight">Weight-for-age</string>
     <string name="filter_height_weight">Weight-for-height</string>
+    <string name="filter_age_head">Head circumference-for-age</string>
+    <string name="filter_age_arm">Arm circumference-for-age</string>
 
     <string-array name="filters">
-        <item>@string/filter_age_height</item>
         <item>@string/filter_age_weight</item>
+        <item>@string/filter_age_height</item>
         <item>@string/filter_height_weight</item>
+        <item>@string/filter_age_head</item>
+        <item>@string/filter_age_arm</item>
     </string-array>
 
     <string name="selector_manual">Add Manual Measure</string>
