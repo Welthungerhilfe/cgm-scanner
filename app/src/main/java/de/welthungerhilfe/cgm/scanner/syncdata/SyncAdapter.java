@@ -11,6 +11,7 @@ import android.content.SyncResult;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -70,6 +71,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                                     if (!isSyncing) {
                                         isSyncing = !isSyncing;
                                         Crashlytics.setString("sync_data", "app is syncing now");
+                                        Log.e("sync_data", "app is syncing now");
                                     }
 
                                     String[] arr = person.getId().split("_");
@@ -91,6 +93,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                                                         if (!isSyncing) {
                                                             isSyncing = !isSyncing;
                                                             Crashlytics.setString("sync_data", "app is syncing now");
+                                                            Log.e("sync_data", "app is syncing now");
                                                         }
 
                                                         Measure measure = snapshot.toObject(Measure.class);
@@ -187,6 +190,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
+                            if (!isSyncing) {
+                                isSyncing = !isSyncing;
+                                Crashlytics.setString("sync_data", "app is syncing now");
+                                Log.e("sync_data", "app is syncing now");
+                            }
+
                             OfflineRepository.getInstance().updatePerson(personList.get(finalI));
 
                             session.setSyncTimestamp(Utils.getUniversalTimestamp());
@@ -218,6 +227,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
+                            if (!isSyncing) {
+                                isSyncing = !isSyncing;
+                                Crashlytics.setString("sync_data", "app is syncing now");
+                                Log.e("sync_data", "app is syncing now");
+                            }
+
                             OfflineRepository.getInstance().updateMeasure(measureList.get(finalI));
 
                             session.setSyncTimestamp(Utils.getUniversalTimestamp());

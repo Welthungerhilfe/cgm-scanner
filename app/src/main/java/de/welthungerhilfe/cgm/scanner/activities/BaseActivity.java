@@ -20,20 +20,40 @@
 package de.welthungerhilfe.cgm.scanner.activities;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
-import de.welthungerhilfe.cgm.scanner.R;
+import com.crashlytics.android.Crashlytics;
+import com.novoda.merlin.Merlin;
+import com.novoda.merlin.registerable.connection.Connectable;
+import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
-public class BaseActivity extends AppCompatActivity {
+import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+
+public class BaseActivity extends AppCompatActivity implements Connectable, Disconnectable {
     private boolean running = false;
+    private Merlin merlin;
+    private SessionManager session;
+
+    protected void onCreate(Bundle saveBundle) {
+        super.onCreate(saveBundle);
+    }
 
     @Override
     public void onStart() {
         super.onStart();
         running = true;
+
+        session = new SessionManager(this);
+
+        merlin = new Merlin.Builder().withConnectableCallbacks().withDisconnectableCallbacks().build(this);
+        merlin.registerConnectable(this);
+        merlin.registerDisconnectable(this);
     }
 
     @Override
@@ -42,6 +62,18 @@ public class BaseActivity extends AppCompatActivity {
         running = false;
 
         hideProgressDialog();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        merlin.bind();
+    }
+
+    @Override
+    protected void onPause() {
+        merlin.unbind();
+        super.onPause();
     }
 
     @VisibleForTesting
@@ -73,5 +105,33 @@ public class BaseActivity extends AppCompatActivity {
     public void closeKeyboard(EditText editText) {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+    }
+
+    @Override
+    public void onConnect() {
+        Log.e("Network State", "Connected");
+        Crashlytics.setString("Network State", "Connected");
+
+        long timestamp = session.getConnectionTimestamp();
+        if (timestamp != 0) {
+            long seconds = (System.currentTimeMillis() - timestamp) / 1000;
+            Log.e("Network Last Duration", String.valueOf(seconds));
+            Crashlytics.setLong("Network Last Duration", seconds);
+        }
+        session.setConnectionTimestamp(System.currentTimeMillis());
+    }
+
+    @Override
+    public void onDisconnect() {
+        Log.e("Network State", "Disconnected");
+        Crashlytics.setString("Network State", "Disconnected");
+
+        long timestamp = session.getConnectionTimestamp();
+        if (timestamp != 0) {
+            long seconds = (System.currentTimeMillis() - timestamp) / 1000;
+            Log.e("Network Last Duration", String.valueOf(seconds));
+            Crashlytics.setLong("Network Last Duration", seconds);
+        }
+        session.setConnectionTimestamp(System.currentTimeMillis());
     }
 }

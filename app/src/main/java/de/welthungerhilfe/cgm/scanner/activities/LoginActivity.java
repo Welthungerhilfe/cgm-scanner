@@ -187,6 +187,8 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                                 setAccountAuthenticatorResult(intent.getExtras());
                                 setResult(RESULT_OK, intent);
 
+                                Crashlytics.setUserIdentifier(email);
+                                Crashlytics.setString("Login", email);
 
                                 session.setSigned(true);
                                 AppController.getInstance().prepareFirebaseUser();
