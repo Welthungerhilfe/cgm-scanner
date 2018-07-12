@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -67,7 +68,9 @@ import de.welthungerhilfe.cgm.scanner.views.VerticalTextView;
 public class GrowthDataFragment extends Fragment {
     private Context context;
 
-    private ScatterChart chartGrowth;
+    private final String[] boys = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "hcfa_boys_p_exp.txt", "acfa_boys_p_exp.txt"};
+    private final String[] girls = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girsl_p_exp.txt", "hcfa_girls_p_exp.txt", "acfa_girls_p_exp.txt"};
+
     private LineChart mChart;
     private MaterialSpinner dropChart;
 
@@ -103,7 +106,7 @@ public class GrowthDataFragment extends Fragment {
         txtYAxis = view.findViewById(R.id.txtYAxis);
         txtXAxis = view.findViewById(R.id.txtXAxis);
 
-        chartGrowth = view.findViewById(R.id.chartGrowth);
+        //chartGrowth = view.findViewById(R.id.chartGrowth);
         mChart = view.findViewById(R.id.chart1);
         dropChart = view.findViewById(R.id.dropChart);
 
@@ -132,8 +135,8 @@ public class GrowthDataFragment extends Fragment {
         mChart.setDragDecelerationFrictionCoef(0.9f);
 
         // enable scaling and dragging
-        mChart.setDragEnabled(false);
-        mChart.setScaleEnabled(false);
+        mChart.setDragEnabled(true);
+        mChart.setScaleEnabled(true);
         mChart.setDrawGridBackground(false);
         mChart.setHighlightPerDragEnabled(true);
 
@@ -165,65 +168,51 @@ public class GrowthDataFragment extends Fragment {
             return;
         }
 
+        switch (chartType) {
+            case 0:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_weight);
+                break;
+            case 1:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_height);
+                break;
+            case 2:
+                txtXAxis.setText(R.string.axis_height);
+                txtYAxis.setText(R.string.axis_weight);
+                break;
+            case 3:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_head);
+                break;
+            case 4:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_muac);
+                break;
+        }
+
         long birthday = ((CreateDataActivity)context).person.getBirthday();
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
 
-        if (chartType < 2) {
-            long days = (System.currentTimeMillis() - birthday) / 1000 / 60 / 60 / 24 + 100;
-
-            BufferedReader reader = null;
-            int curDay = 0;
-
-            try {
-                if (((CreateDataActivity)context).person.getSex().equals("female"))
-                    reader = new BufferedReader(new InputStreamReader(context.getAssets().open("lhfa_girls_p_exp.txt"), "UTF-8"));
-                else
-                    reader = new BufferedReader(new InputStreamReader(context.getAssets().open("lhfa_boys_p_exp.txt"), "UTF-8"));
-
-                ArrayList<Entry> p3 = new ArrayList<Entry>();
-                ArrayList<Entry> p15 = new ArrayList<Entry>();
-                ArrayList<Entry> p50 = new ArrayList<Entry>();
-                ArrayList<Entry> p85 = new ArrayList<Entry>();
-                ArrayList<Entry> p97 = new ArrayList<Entry>();
-
-                String mLine;
-                while ((mLine = reader.readLine()) != null && curDay <= days) {
-                    String[] arr = mLine.split("\t");
-                    try {
-                        if (Integer.parseInt(arr[0]) == curDay) {
-                            p3.add(new Entry(curDay, Float.parseFloat(arr[6])));
-                            p15.add(new Entry(curDay, Float.parseFloat(arr[9])));
-                            p50.add(new Entry(curDay, Float.parseFloat(arr[11])));
-                            p85.add(new Entry(curDay, Float.parseFloat(arr[13])));
-                            p97.add(new Entry(curDay, Float.parseFloat(arr[16])));
-                        }
-                        curDay ++;
-                    } catch (Exception e) {
-                        continue;
-                    }
-                }
-                reader.close();
-
-                dataSets.add(createDataSet(p3, "3rd", Color.rgb(212, 53, 62), 1.5f, false));
-                dataSets.add(createDataSet(p15, "15th", Color.rgb(230, 122, 58), 1.5f, false));
-                dataSets.add(createDataSet(p50, "50th", Color.rgb(55, 129, 69), 1.5f, false));
-                dataSets.add(createDataSet(p85, "85th", Color.rgb(230, 122, 58), 1.5f, false));
-                dataSets.add(createDataSet(p97, "97th", Color.rgb(212, 53, 62), 1.5f, false));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
+        // ----------------------- Line for manual measures -------------------------- //
         ArrayList<Entry> measures = new ArrayList<Entry>();
 
+        double maxHeight = 0;
+
         for (Measure measure : ((CreateDataActivity)context).measures) {
+            if (!measure.getType().equals("manual"))
+                continue;
+
+            if (measure.getHeight() > maxHeight)
+                maxHeight = measure.getHeight();
+
             long day = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
 
             if (chartType == 0)
-                measures.add(new Entry(day, (float) measure.getHeight()));
-            else if (chartType == 1)
                 measures.add(new Entry(day, (float) measure.getWeight()));
+            else if (chartType == 1)
+                measures.add(new Entry(day, (float) measure.getHeight()));
             else if (chartType == 2) {
                 measures.add(new Entry((float) measure.getHeight(), (float) measure.getWeight()));
                 Collections.sort(measures, new Comparator<Entry>() {
@@ -232,6 +221,10 @@ public class GrowthDataFragment extends Fragment {
                         return Float.compare(o1.getX(), o2.getX());
                     }
                 });
+            } else if (chartType == 3) {
+                measures.add(new Entry(day, (float) measure.getHeadCircumference()));
+            } else if (chartType == 4) {
+                measures.add(new Entry(day, (float) measure.getMuac()));
             }
         }
 
@@ -239,6 +232,59 @@ public class GrowthDataFragment extends Fragment {
             dataSets.add(createDataSet(measures, "measure", Color.rgb(0, 0, 0), 3f, false));
         else {
             dataSets.add(createDataSet(measures, "measure", Color.rgb(0, 0, 0), 3f, true));
+        }
+
+        // ------------------------- Line for ruler values ---------------------------------- //
+        long days = (System.currentTimeMillis() - birthday) / 1000 / 60 / 60 / 24 + 100;
+
+        ArrayList<Entry> p3 = new ArrayList<Entry>();
+        ArrayList<Entry> p15 = new ArrayList<Entry>();
+        ArrayList<Entry> p50 = new ArrayList<Entry>();
+        ArrayList<Entry> p85 = new ArrayList<Entry>();
+        ArrayList<Entry> p97 = new ArrayList<Entry>();
+
+        try {
+            BufferedReader reader = null;
+
+            if (((CreateDataActivity)context).person.getSex().equals("female"))
+                reader = new BufferedReader(new InputStreamReader(context.getAssets().open(girls[chartType]), "UTF-8"));
+            else
+                reader = new BufferedReader(new InputStreamReader(context.getAssets().open(boys[chartType]), "UTF-8"));
+
+            String mLine;
+            while ((mLine = reader.readLine()) != null) {
+                String[] arr = mLine.split("\t");
+                float rule = 0;
+                try {
+                    rule = Float.parseFloat(arr[0]);
+                } catch (Exception e) {
+                    continue;
+                }
+
+                p3.add(new Entry(rule, Float.parseFloat(arr[6])));
+                p15.add(new Entry(rule, Float.parseFloat(arr[9])));
+                p50.add(new Entry(rule, Float.parseFloat(arr[11])));
+                p85.add(new Entry(rule, Float.parseFloat(arr[13])));
+                p97.add(new Entry(rule, Float.parseFloat(arr[16])));
+
+                if ((chartType == 0 || chartType == 1 || chartType == 3 || chartType == 4) && rule > days)
+                    break;
+                /*
+                if (chartType == 1 && rule > maxHeight)
+                    break;
+                */
+                if (chartType == 2 && rule > maxHeight)
+                    break;
+            }
+            reader.close();
+
+            dataSets.add(createDataSet(p3, "3rd", Color.rgb(212, 53, 62), 1.5f, false));
+            dataSets.add(createDataSet(p15, "15th", Color.rgb(230, 122, 58), 1.5f, false));
+            dataSets.add(createDataSet(p50, "50th", Color.rgb(55, 129, 69), 1.5f, false));
+            dataSets.add(createDataSet(p85, "85th", Color.rgb(230, 122, 58), 1.5f, false));
+            dataSets.add(createDataSet(p97, "97th", Color.rgb(212, 53, 62), 1.5f, false));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         mChart.setData(new LineData(dataSets));

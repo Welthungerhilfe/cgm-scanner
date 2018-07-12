@@ -131,15 +131,21 @@
     <string name="axis_age">Alter</string>
     <string name="axis_height">Größe</string>
     <string name="axis_weight">Gewicht</string>
+    <string name="axis_head">Head circumference in cm</string>
+    <string name="axis_muac">MUAC in cm</string>
 
     <string name="filter_age_height">Größe / Alter</string>
     <string name="filter_age_weight">Gewicht / Alter</string>
     <string name="filter_height_weight">Gewicht / Größe</string>
+    <string name="filter_age_head">Head circumference-for-age</string>
+    <string name="filter_age_arm">Arm circumference-for-age</string>
 
     <string-array name="filters">
-        <item>@string/filter_age_height</item>
         <item>@string/filter_age_weight</item>
+        <item>@string/filter_age_height</item>
         <item>@string/filter_height_weight</item>
+        <item>@string/filter_age_head</item>
+        <item>@string/filter_age_arm</item>
     </string-array>
 
     <string name="selector_manual">Manuelle Messung hinzufügen</string>

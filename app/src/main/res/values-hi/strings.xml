@@ -131,16 +131,23 @@
     <string name="axis_age">उम्र</string>
     <string name="axis_height">ऊंचाई</string>
     <string name="axis_weight">वजन</string>
+    <string name="axis_head">Head circumference in cm</string>
+    <string name="axis_muac">MUAC in cm</string>
 
     <string name="filter_age_height">ऊंचाई/उम</string>
     <string name="filter_age_weight">वजन/उम</string>
     <string name="filter_height_weight">वजन/ऊंचाई</string>
+    <string name="filter_age_head">Head circumference-for-age</string>
+    <string name="filter_age_arm">Arm circumference-for-age</string>
 
     <string-array name="filters">
-        <item>@string/filter_age_height</item>
         <item>@string/filter_age_weight</item>
+        <item>@string/filter_age_height</item>
         <item>@string/filter_height_weight</item>
+        <item>@string/filter_age_head</item>
+        <item>@string/filter_age_arm</item>
     </string-array>
+
 
     <string name="selector_manual">मैन्युअल उपाय जोड़ें</string>
     <string name="selector_scan">स्कैन उपाय जोड़ें</string>
