@@ -30,6 +30,7 @@ import android.support.annotation.NonNull;
 //import android.util.Log;
 
 //import com.amitshekhar.DebugDB;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -43,6 +44,7 @@ import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.repositories.OfflineRepository;
 import de.welthungerhilfe.cgm.scanner.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import io.fabric.sdk.android.Fabric;
 
 public class AppController extends Application {
     public static final String TAG = AppController.class.getSimpleName();
@@ -79,6 +81,8 @@ public class AppController extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        Fabric.with(this, new Crashlytics());
 
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
