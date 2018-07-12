@@ -109,6 +109,15 @@ public class Utils {
         return res;
     }
 
+    public static String beautifyDateTime(Date date) {
+        SimpleDateFormat formatter = null;
+        formatter = new SimpleDateFormat("MM/dd/yyyy H:mm:ss", Locale.getDefault());
+
+        String res = formatter.format(date);
+
+        return res;
+    }
+
     public static Date stringToDate(String dt) {
         SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
         try {

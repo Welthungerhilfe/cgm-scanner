@@ -22,6 +22,8 @@ package de.welthungerhilfe.cgm.scanner.helper;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.google.gson.Gson;
+
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 
 /**
@@ -38,6 +40,7 @@ public class SessionManager {
     private final String KEY_USER_LOCATION_ADDRESS = "key_user_location_address";
     private final String KEY_SYNC_TIMESTAMP = "sync_timestamp";
     private final String KEY_LANGUAGE = "key_language";
+    private final String KEY_CONNECTION_TIMESTAMP = "key_connection_timestamp";
 
     SharedPreferences pref;
     SharedPreferences.Editor editor;
@@ -95,5 +98,14 @@ public class SessionManager {
 
     public long getSyncTimestamp() {
         return pref.getLong(KEY_SYNC_TIMESTAMP, 0);
+    }
+
+    public void setConnectionTimestamp(long timestamp) {
+        editor.putLong(KEY_CONNECTION_TIMESTAMP, timestamp);
+        editor.commit();
+    }
+
+    public long getConnectionTimestamp() {
+        return pref.getLong(KEY_CONNECTION_TIMESTAMP, 0);
     }
 }

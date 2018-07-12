@@ -40,6 +40,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 
+import java.util.Date;
+
 import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -187,6 +189,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                                 setAccountAuthenticatorResult(intent.getExtras());
                                 setResult(RESULT_OK, intent);
 
+                                Crashlytics.log(0, "user login: ", String.format("user logged in with email %s at %s", email, Utils.beautifyDateTime(new Date())));
 
                                 session.setSigned(true);
                                 AppController.getInstance().prepareFirebaseUser();
