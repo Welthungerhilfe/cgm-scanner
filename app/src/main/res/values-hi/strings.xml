@@ -131,6 +131,8 @@
     <string name="axis_age">उम्र</string>
     <string name="axis_height">ऊंचाई</string>
     <string name="axis_weight">वजन</string>
+    <string name="axis_head">Head circumference in cm</string>
+    <string name="axis_muac">MUAC in cm</string>
 
     <string name="filter_age_height">ऊंचाई/उम</string>
     <string name="filter_age_weight">वजन/उम</string>
