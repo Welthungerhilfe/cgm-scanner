@@ -144,7 +144,6 @@ public class CreateDataActivity extends BaseActivity {
 
                 if (measures != null)
                     measureFragment.refreshMeasures(measures);
-                growthFragment.setChartData();
             });
         }
 
