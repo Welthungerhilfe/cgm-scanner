@@ -377,10 +377,6 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     }
 
     private void doSortByLocation() {
-        String a = "a_b_c_d";
-        String[] arr = a.split("_");
-        String b = arr[5];
-
         sortType = 2;
 
         Intent intent = new Intent(MainActivity.this, LocationSearchActivity.class);
