@@ -74,4 +74,8 @@ public class PersonListViewModel extends AndroidViewModel {
     public void createPerson(Person person) {
         OfflineRepository.getInstance().createPerson(person);
     }
+
+    public void createMeasure(Measure measure) {
+        OfflineRepository.getInstance().createMeasure(measure);
+    }
 }

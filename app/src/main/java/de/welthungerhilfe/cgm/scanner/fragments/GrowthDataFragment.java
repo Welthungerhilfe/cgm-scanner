@@ -122,57 +122,6 @@ public class GrowthDataFragment extends Fragment {
         return view;
     }
 
-    public void setChartData() {
-        if (context == null) {
-            return;
-        }
-        if (((CreateDataActivity)context).measures == null || ((CreateDataActivity)context).measures.size() == 0) {
-            return;
-        }
-        if (txtLabel == null) {
-            return;
-        }
-
-        if (((CreateDataActivity)context).person != null) {
-            txtLabel.setText(((CreateDataActivity)context).person.getSex());
-        }
-
-        ArrayList<Entry> yVals1 = new ArrayList<Entry>();
-        for (int i = 0; i < ((CreateDataActivity)context).measures.size(); i++) {
-            Measure measure = ((CreateDataActivity)context).measures.get(i);
-
-            if (chartType == 1) {
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_height);
-                yVals1.add(new Entry(measure.getAge(), (float) measure.getHeight()));
-            } else if (chartType == 2) {
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_weight);
-                yVals1.add(new Entry(measure.getAge(), (float)  measure.getWeight()));
-            } else if (chartType == 3) {
-                txtXAxis.setText(R.string.axis_height);
-                txtYAxis.setText(R.string.axis_weight);
-                yVals1.add(new Entry((float) measure.getHeight(), (float) measure.getWeight()));
-            }
-        }
-
-        ScatterDataSet set1 = new ScatterDataSet(yVals1, "");
-        set1.setScatterShapeHoleColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
-        set1.setScatterShapeHoleRadius(5f);
-        set1.setScatterShape(ScatterChart.ScatterShape.CIRCLE);
-        set1.setColor(ContextCompat.getColor(getContext(), R.color.colorWhite));
-        set1.setScatterShapeSize(30f);
-
-        ArrayList<IScatterDataSet> dataSets = new ArrayList<IScatterDataSet>();
-        dataSets.add(set1);
-
-        ScatterData data = new ScatterData(dataSets);
-        chartGrowth.setData(data);
-        chartGrowth.getXAxis().setAxisMinValue(-0.1f);
-        chartGrowth.setVisibleXRangeMinimum(20);
-        chartGrowth.invalidate();
-    }
-
     private void initChart() {
         // no description text
         mChart.getDescription().setEnabled(false);
@@ -208,8 +157,8 @@ public class GrowthDataFragment extends Fragment {
         setData();
     }
 
-    private void setData() {
-        if (context == null) {
+    public void setData() {
+        if (context == null || mChart == null) {
             return;
         }
         if (((CreateDataActivity)context).measures == null || ((CreateDataActivity)context).measures.size() == 0) {

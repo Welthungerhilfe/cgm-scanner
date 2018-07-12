@@ -139,12 +139,20 @@ public class CreateDataActivity extends BaseActivity {
         if (qrCode != null) {
             checkQR();
         } else {
-            viewModel.getObservableMeasureList(person).observe(this, measures->{
-                this.measures = measures;
+            viewModel.getObservablePerson(person.getId()).observe(this, p -> {
+                this.person = p;
 
-                if (measures != null)
-                    measureFragment.refreshMeasures(measures);
-                growthFragment.setChartData();
+                if (personalFragment != null) {
+                    personalFragment.initUI();
+                }
+
+                viewModel.getObservableMeasureList(person).observe(this, measures->{
+                    this.measures = measures;
+                    if (measures != null)
+                        measureFragment.refreshMeasures(measures);
+
+                    growthFragment.setData();
+                });
             });
         }
 
@@ -185,6 +193,7 @@ public class CreateDataActivity extends BaseActivity {
         adapter.addFragment(personalFragment, getResources().getString(R.string.tab_personal));
         adapter.addFragment(measureFragment, getResources().getString(R.string.tab_measures));
         adapter.addFragment(growthFragment, getResources().getString(R.string.tab_growth));
+        viewpager.setOffscreenPageLimit(3);
         viewpager.setAdapter(adapter);
 
         tabs.setupWithViewPager(viewpager);
@@ -238,10 +247,10 @@ public class CreateDataActivity extends BaseActivity {
         measure.setTimestamp(Utils.getUniversalTimestamp());
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
-        new OfflineTask().saveMeasure(measure);
+        OfflineRepository.getInstance().createMeasure(measure);
 
         person.setLastLocation(location);
-        new OfflineTask().updatePerson(person);
+        OfflineRepository.getInstance().updatePerson(person);
 
         viewpager.setCurrentItem(2);
     }
@@ -255,6 +264,16 @@ public class CreateDataActivity extends BaseActivity {
             if (personalFragment != null) {
                 personalFragment.initUI();
             }
+
+            if (person != null) {
+                viewModel.getObservableMeasureList(person).observe(this, measures->{
+                    this.measures = measures;
+                    if (measures != null)
+                        measureFragment.refreshMeasures(measures);
+
+                    growthFragment.setData();
+                });
+            }
         });
     }
 
@@ -266,11 +285,17 @@ public class CreateDataActivity extends BaseActivity {
         viewModel.getObservablePersonByQr(qrCode).observe(this, p->{
             person = p;
 
+            if (personalFragment != null) {
+                personalFragment.initUI();
+            }
+
             if (person != null) {
                 viewModel.getObservableMeasureList(person).observe(this, measures->{
                     this.measures = measures;
                     if (measures != null)
                         measureFragment.refreshMeasures(measures);
+
+                    growthFragment.setData();
                 });
             }
         });
@@ -339,7 +364,10 @@ public class CreateDataActivity extends BaseActivity {
         measure.setId(AppController.getInstance().getMeasureId());
         measure.setLocation(location);
 
-        new OfflineTask().saveMeasure(measure);
+        OfflineRepository.getInstance().createMeasure(measure);
+
+        person.setLastLocation(location);
+        OfflineRepository.getInstance().updatePerson(person);
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
