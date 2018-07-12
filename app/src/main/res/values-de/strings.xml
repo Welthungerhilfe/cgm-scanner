@@ -131,6 +131,8 @@
     <string name="axis_age">Alter</string>
     <string name="axis_height">Größe</string>
     <string name="axis_weight">Gewicht</string>
+    <string name="axis_head">Head circumference in cm</string>
+    <string name="axis_muac">MUAC in cm</string>
 
     <string name="filter_age_height">Größe / Alter</string>
     <string name="filter_age_weight">Gewicht / Alter</string>

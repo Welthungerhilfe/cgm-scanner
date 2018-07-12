@@ -68,10 +68,9 @@ import de.welthungerhilfe.cgm.scanner.views.VerticalTextView;
 public class GrowthDataFragment extends Fragment {
     private Context context;
 
-    private final String[] boys = {"wfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "wfl_boys_p_exp.txt", "hcfa_boys_p_exp.txt", "acfa_boys_p_exp.txt"};
-    private final String[] girls = {"wfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "wfl_girls_p_exp.txt", "hcfa_girls_p_exp.txt", "acfa_girls_p_exp.txt"};
+    private final String[] boys = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "hcfa_boys_p_exp.txt", "acfa_boys_p_exp.txt"};
+    private final String[] girls = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girsl_p_exp.txt", "hcfa_girls_p_exp.txt", "acfa_girls_p_exp.txt"};
 
-    private ScatterChart chartGrowth;
     private LineChart mChart;
     private MaterialSpinner dropChart;
 
@@ -116,8 +115,6 @@ public class GrowthDataFragment extends Fragment {
         dropChart.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
             @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
                 chartType = position;
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_height);
                 setData();
             }
         });
@@ -126,57 +123,6 @@ public class GrowthDataFragment extends Fragment {
         //setChartData();
 
         return view;
-    }
-
-    public void setChartData() {
-        if (context == null) {
-            return;
-        }
-        if (((CreateDataActivity)context).measures == null || ((CreateDataActivity)context).measures.size() == 0) {
-            return;
-        }
-        if (txtLabel == null) {
-            return;
-        }
-
-        if (((CreateDataActivity)context).person != null) {
-            txtLabel.setText(((CreateDataActivity)context).person.getSex());
-        }
-
-        ArrayList<Entry> yVals1 = new ArrayList<Entry>();
-        for (int i = 0; i < ((CreateDataActivity)context).measures.size(); i++) {
-            Measure measure = ((CreateDataActivity)context).measures.get(i);
-
-            if (chartType == 1) {
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_height);
-                yVals1.add(new Entry(measure.getAge(), (float) measure.getHeight()));
-            } else if (chartType == 2) {
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_weight);
-                yVals1.add(new Entry(measure.getAge(), (float)  measure.getWeight()));
-            } else if (chartType == 3) {
-                txtXAxis.setText(R.string.axis_height);
-                txtYAxis.setText(R.string.axis_weight);
-                yVals1.add(new Entry((float) measure.getHeight(), (float) measure.getWeight()));
-            }
-        }
-
-        ScatterDataSet set1 = new ScatterDataSet(yVals1, "");
-        set1.setScatterShapeHoleColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
-        set1.setScatterShapeHoleRadius(5f);
-        set1.setScatterShape(ScatterChart.ScatterShape.CIRCLE);
-        set1.setColor(ContextCompat.getColor(getContext(), R.color.colorWhite));
-        set1.setScatterShapeSize(30f);
-
-        ArrayList<IScatterDataSet> dataSets = new ArrayList<IScatterDataSet>();
-        dataSets.add(set1);
-
-        ScatterData data = new ScatterData(dataSets);
-        chartGrowth.setData(data);
-        chartGrowth.getXAxis().setAxisMinValue(-0.1f);
-        chartGrowth.setVisibleXRangeMinimum(20);
-        chartGrowth.invalidate();
     }
 
     private void initChart() {
@@ -222,6 +168,29 @@ public class GrowthDataFragment extends Fragment {
             return;
         }
 
+        switch (chartType) {
+            case 0:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_weight);
+                break;
+            case 1:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_height);
+                break;
+            case 2:
+                txtXAxis.setText(R.string.axis_height);
+                txtYAxis.setText(R.string.axis_weight);
+                break;
+            case 3:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_head);
+                break;
+            case 4:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_muac);
+                break;
+        }
+
         long birthday = ((CreateDataActivity)context).person.getBirthday();
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
@@ -229,7 +198,7 @@ public class GrowthDataFragment extends Fragment {
         // ----------------------- Line for manual measures -------------------------- //
         ArrayList<Entry> measures = new ArrayList<Entry>();
 
-        double maxHeight = 0, maxLength = 0;
+        double maxHeight = 0;
 
         for (Measure measure : ((CreateDataActivity)context).measures) {
             if (!measure.getType().equals("manual"))
@@ -237,8 +206,6 @@ public class GrowthDataFragment extends Fragment {
 
             if (measure.getHeight() > maxHeight)
                 maxHeight = measure.getHeight();
-            if (measure.getWeight() > maxLength)
-                maxLength = measure.getWeight();
 
             long day = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
 
@@ -300,11 +267,13 @@ public class GrowthDataFragment extends Fragment {
                 p85.add(new Entry(rule, Float.parseFloat(arr[13])));
                 p97.add(new Entry(rule, Float.parseFloat(arr[16])));
 
-                if ((chartType == 0 || chartType == 3 || chartType == 4) && rule > days)
+                if ((chartType == 0 || chartType == 1 || chartType == 3 || chartType == 4) && rule > days)
                     break;
+                /*
                 if (chartType == 1 && rule > maxHeight)
                     break;
-                if (chartType == 2 && rule > maxLength)
+                */
+                if (chartType == 2 && rule > maxHeight)
                     break;
             }
             reader.close();
