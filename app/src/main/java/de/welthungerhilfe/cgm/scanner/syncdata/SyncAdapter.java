@@ -71,8 +71,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                                 if (person.getTimestamp() > prevTimestamp) {
                                     if (!isSyncing) {
                                         isSyncing = !isSyncing;
+
                                         Crashlytics.log(0, "app sync: ", String.format("sync happened at %s", Utils.beautifyDateTime(new Date())));
-                                        Log.e("sync_data", "app is syncing now");
                                     }
 
                                     String[] arr = person.getId().split("_");
@@ -93,8 +93,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                                                     for (DocumentSnapshot snapshot : task.getResult()) {
                                                         if (!isSyncing) {
                                                             isSyncing = !isSyncing;
+                                                          
                                                             Crashlytics.log(0, "app sync: ", String.format("sync happened at %s", Utils.beautifyDateTime(new Date())));
-                                                            Log.e("sync_data", "app is syncing now");
                                                         }
 
                                                         Measure measure = snapshot.toObject(Measure.class);
