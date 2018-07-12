@@ -32,8 +32,12 @@ import com.novoda.merlin.Merlin;
 import com.novoda.merlin.registerable.connection.Connectable;
 import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
+import java.util.Date;
+
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import io.fabric.sdk.android.services.common.Crash;
 
 public class BaseActivity extends AppCompatActivity implements Connectable, Disconnectable {
     private boolean running = false;
@@ -110,13 +114,13 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
     @Override
     public void onConnect() {
         Log.e("Network State", "Connected");
-        Crashlytics.setString("Network State", "Connected");
+        Crashlytics.log(0, "network state: ", "connected at " + Utils.beautifyDateTime(new Date()));
 
         long timestamp = session.getConnectionTimestamp();
         if (timestamp != 0) {
             long seconds = (System.currentTimeMillis() - timestamp) / 1000;
             Log.e("Network Last Duration", String.valueOf(seconds));
-            Crashlytics.setLong("Network Last Duration", seconds);
+            Crashlytics.log(0, "network state duration: ", String.format("last connection lasts for %d seconds", seconds));
         }
         session.setConnectionTimestamp(System.currentTimeMillis());
     }
@@ -124,13 +128,13 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
     @Override
     public void onDisconnect() {
         Log.e("Network State", "Disconnected");
-        Crashlytics.setString("Network State", "Disconnected");
+        Crashlytics.log(0, "network state: ", "disconnected at " + Utils.beautifyDateTime(new Date()));
 
         long timestamp = session.getConnectionTimestamp();
         if (timestamp != 0) {
             long seconds = (System.currentTimeMillis() - timestamp) / 1000;
             Log.e("Network Last Duration", String.valueOf(seconds));
-            Crashlytics.setLong("Network Last Duration", seconds);
+            Crashlytics.log(0, "network state duration: ", String.format("last connection lasts for %d seconds", seconds));
         }
         session.setConnectionTimestamp(System.currentTimeMillis());
     }

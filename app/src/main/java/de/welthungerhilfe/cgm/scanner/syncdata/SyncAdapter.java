@@ -22,6 +22,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.perf.metrics.AddTrace;
 
+import java.util.Date;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
@@ -70,7 +71,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                                 if (person.getTimestamp() > prevTimestamp) {
                                     if (!isSyncing) {
                                         isSyncing = !isSyncing;
-                                        Crashlytics.setString("sync_data", "app is syncing now");
+                                        Crashlytics.log(0, "app sync: ", String.format("sync happened at %s", Utils.beautifyDateTime(new Date())));
                                         Log.e("sync_data", "app is syncing now");
                                     }
 
@@ -92,7 +93,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                                                     for (DocumentSnapshot snapshot : task.getResult()) {
                                                         if (!isSyncing) {
                                                             isSyncing = !isSyncing;
-                                                            Crashlytics.setString("sync_data", "app is syncing now");
+                                                            Crashlytics.log(0, "app sync: ", String.format("sync happened at %s", Utils.beautifyDateTime(new Date())));
                                                             Log.e("sync_data", "app is syncing now");
                                                         }
 
