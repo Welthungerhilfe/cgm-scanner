@@ -155,7 +155,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void initUI() {
-        if (context == null)
+        if (context == null || txtDate == null)
             return;
 
         if (((CreateDataActivity)context).person != null) {

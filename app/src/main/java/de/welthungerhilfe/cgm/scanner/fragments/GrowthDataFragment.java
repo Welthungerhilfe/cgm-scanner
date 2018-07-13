@@ -160,8 +160,8 @@ public class GrowthDataFragment extends Fragment {
         setData();
     }
 
-    private void setData() {
-        if (context == null) {
+    public void setData() {
+        if (context == null || mChart == null) {
             return;
         }
         if (((CreateDataActivity)context).measures == null || ((CreateDataActivity)context).measures.size() == 0) {
