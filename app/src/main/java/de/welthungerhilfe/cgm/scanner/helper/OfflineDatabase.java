@@ -4,6 +4,7 @@ import android.arch.persistence.room.Database;
 import android.arch.persistence.room.RoomDatabase;
 
 import de.welthungerhilfe.cgm.scanner.models.Consent;
+import de.welthungerhilfe.cgm.scanner.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.models.dao.OfflineDao;
@@ -27,7 +28,7 @@ import de.welthungerhilfe.cgm.scanner.models.dao.OfflineDao;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@Database(entities = {Person.class, Consent.class, Measure.class}, version = 2)
+@Database(entities = {Person.class, Consent.class, Measure.class, FileLog.class}, version = 3)
 public abstract class OfflineDatabase extends RoomDatabase {
     public abstract OfflineDao offlineDao();
 }
