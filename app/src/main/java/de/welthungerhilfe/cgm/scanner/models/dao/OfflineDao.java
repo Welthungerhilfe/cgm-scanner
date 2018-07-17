@@ -88,7 +88,7 @@ public interface OfflineDao {
     @Insert(onConflict = REPLACE)
     void saveMeasure(Measure measure);
 
-    @Insert(onConflict = REPLACE)
+    @Update(onConflict = REPLACE)
     void updateMeasure(Measure measure);
 
     @Delete
@@ -102,9 +102,12 @@ public interface OfflineDao {
     @Insert(onConflict = REPLACE)
     void saveFileLog(FileLog log);
 
-    @Insert(onConflict = REPLACE)
+    @Update(onConflict = REPLACE)
     void updateFileLog(FileLog log);
 
     @Delete
     void deleteFileLog(FileLog log);
+
+    @Query("SELECT * FROM " + DbConstants.TABLE_FILE_LOG + " WHERE id=:id")
+    FileLog getFileLog(String id);
 }

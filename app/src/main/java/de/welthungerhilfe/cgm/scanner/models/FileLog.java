@@ -4,10 +4,12 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
+import java.io.Serializable;
+
 import de.welthungerhilfe.cgm.scanner.helper.DbConstants;
 
 @Entity(tableName = DbConstants.TABLE_FILE_LOG)
-public class FileLog {
+public class FileLog implements Serializable {
     @PrimaryKey
     @NonNull
     private String id;

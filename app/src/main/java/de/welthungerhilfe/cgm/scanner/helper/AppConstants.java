@@ -57,6 +57,7 @@ public class AppConstants {
     public static final String EXTRA_PERSON = "extra_person";
     public static final String EXTRA_SCANTIMESTAMP = "extra_scantimestamp";
     public static final String EXTRA_SCANARTEFACT_SUBFOLDER = "extra_scanartefact_subfolder";
+    public static final String EXTRA_ARTEFACT = "extra_artefact";
 
     public static final String PARAM_AUTHTOKEN_TYPE = "authtoken_type";
     public static final String PARAM_AUTH_NAME = "auth_name";

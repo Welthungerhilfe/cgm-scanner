@@ -731,12 +731,13 @@ public class RecorderActivity extends Activity {
                             mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mScanningWorkflowStep +
                                     "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
                             Uri pcUri = TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
+                            File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
                             FileLog log = new FileLog();
                             log.setId(AppController.getInstance().getArtefactId("scan-pcd"));
                             log.setType("pcd");
                             log.setPath(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename + ".pcd");
-                            log.setHashValue(Utils.encryptFile(new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd")));
-                            log.setFileSize(new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd").length());
+                            log.setHashValue(Utils.encryptFile(artefactFile));
+                            log.setFileSize(artefactFile.length());
                             log.setUploadDate(0);
                             log.setDeleted(false);
                             log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
@@ -744,6 +745,7 @@ public class RecorderActivity extends Activity {
                             // Direct Upload to Firebase Storage
                             startService(new Intent(RecorderActivity.this, FirebaseUploadService.class)
                                     .putExtra(FirebaseUploadService.EXTRA_FILE_URI, pcUri)
+                                    .putExtra(AppConstants.EXTRA_ARTEFACT,  log)
                                     .putExtra(AppConstants.EXTRA_QR, mQrCode)
                                     .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, mNowTimeString)
                                     .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_PC_URL)
@@ -825,12 +827,13 @@ public class RecorderActivity extends Activity {
                                 String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
                                         mScanningWorkflowStep + "_" + currentTangoImageBuffer.timestamp + ".jpg";
                                 Uri uri = BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
+                                File artefactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
                                 FileLog log = new FileLog();
                                 log.setId(AppController.getInstance().getArtefactId("scan-rgb"));
                                 log.setType("rgb");
                                 log.setPath(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
-                                log.setHashValue(Utils.encryptFile(new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename)));
-                                log.setFileSize(new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename).length());
+                                log.setHashValue(Utils.encryptFile(artefactFile));
+                                log.setFileSize(artefactFile.length());
                                 log.setUploadDate(0);
                                 log.setDeleted(false);
                                 log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
@@ -840,6 +843,7 @@ public class RecorderActivity extends Activity {
                                 // even if this Activity is killed or put in the background
                                 startService(new Intent(RecorderActivity.this, FirebaseUploadService.class)
                                         .putExtra(FirebaseUploadService.EXTRA_FILE_URI, uri)
+                                        .putExtra(AppConstants.EXTRA_ARTEFACT, log)
                                         .putExtra(AppConstants.EXTRA_QR, mQrCode)
                                         .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, mNowTimeString)
                                         .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_RGB_URL)
