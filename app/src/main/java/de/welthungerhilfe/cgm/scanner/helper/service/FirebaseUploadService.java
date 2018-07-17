@@ -41,6 +41,9 @@ import com.google.firebase.storage.UploadTask;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 
 /**
@@ -68,6 +71,7 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
     private String qrCode;
     private String scanTimestamp;
     private String subfolder;
+    private FileLog artefact;
 
     @Override
     public void onCreate() {
@@ -100,6 +104,7 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
         if (ACTION_UPLOAD.equals(intent.getAction())) {
             Uri fileUri = intent.getParcelableExtra(EXTRA_FILE_URI);
             qrCode = intent.getStringExtra(AppConstants.EXTRA_QR);
+            artefact = (FileLog) intent.getSerializableExtra(AppConstants.EXTRA_ARTEFACT);
             scanTimestamp = intent.getStringExtra(AppConstants.EXTRA_SCANTIMESTAMP);
             subfolder = intent.getStringExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER);
             uploadFromUri(fileUri, subfolder, false);
@@ -191,6 +196,11 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
         boolean success = downloadUrl != null;
 
         String action = success ? UPLOAD_COMPLETED : UPLOAD_ERROR;
+
+        if (success) {
+            artefact.setUploadDate(Utils.getUniversalTimestamp());
+            new OfflineTask().updateFileLog(artefact);
+        }
 
         Intent broadcast = new Intent(action)
                 .putExtra(EXTRA_DOWNLOAD_URL, downloadUrl)
