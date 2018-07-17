@@ -27,8 +27,17 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Field;
 
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -160,5 +169,39 @@ public class Utils {
         int decimalPlaces = number.length() - integerPlaces - 1;
 
         return decimalPlaces;
+    }
+
+    public static String encryptFile(File file) {
+        MessageDigest shaEnc = null;
+        try {
+            shaEnc = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        byte[] bytes = readFile(file);
+
+        shaEnc.update(bytes, 0, bytes.length);
+
+        String sha = new BigInteger(1, shaEnc.digest()).toString(16);
+        while ( sha.length() < 32 ) {
+            sha = "0" + sha;
+        }
+        return sha;
+    }
+
+    public static byte[] readFile(File file) {
+        int size = (int) file.length();
+        byte[] bytes = new byte[size];
+        try {
+            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
+            buf.read(bytes, 0, bytes.length);
+            buf.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return  null;
+        }
+
+        return bytes;
     }
 }
