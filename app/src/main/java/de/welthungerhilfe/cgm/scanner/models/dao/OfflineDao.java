@@ -12,6 +12,7 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.helper.DbConstants;
 import de.welthungerhilfe.cgm.scanner.models.Consent;
+import de.welthungerhilfe.cgm.scanner.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 
@@ -76,7 +77,7 @@ public interface OfflineDao {
     @Delete
     void deleteConsent(Consent consent);
 
-    // ---------------------- Measure --------------------------//
+    // ---------------------- Measure -------------------------- //
 
     @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE personId=:personId ORDER BY date DESC")
     LiveData<List<Measure>> findMeasures(String personId);
@@ -95,4 +96,15 @@ public interface OfflineDao {
 
     @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE personId=:personId ORDER BY timestamp DESC Limit 1")
     Measure getLastMeasure(String personId);
+
+    // ----------------------- File Log ------------------------ //
+
+    @Insert(onConflict = REPLACE)
+    void saveFileLog(FileLog log);
+
+    @Insert(onConflict = REPLACE)
+    void updateFileLog(FileLog log);
+
+    @Delete
+    void deleteFileLog(FileLog log);
 }

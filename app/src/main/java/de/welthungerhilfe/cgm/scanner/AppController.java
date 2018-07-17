@@ -88,7 +88,8 @@ public class AppController extends Application {
                     " hashValue TEXT," +
                     " fileSize INTEGER NOT NULL," +
                     " uploadDate INTEGER NOT NULL," +
-                    " deleted INTEGER NOT NULL" +
+                    " deleted INTEGER NOT NULL," +
+                    " createdBy TEXT" +
                     ");");
         }
     };
@@ -160,5 +161,9 @@ public class AppController extends Application {
 
     public String getMeasureId() {
         return Utils.getAndroidID(getContentResolver()) + "_measure_" + Utils.getUniversalTimestamp() + "_" + Utils.getSaltString(16);
+    }
+
+    public String getArtefactId(String type) {
+        return Utils.getAndroidID(getContentResolver()) + "_" + type + "_" + Utils.getUniversalTimestamp() + "_" + Utils.getSaltString(16);
     }
 }

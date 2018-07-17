@@ -91,9 +91,11 @@ import de.welthungerhilfe.cgm.scanner.fragments.BabyFront0Fragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
+import de.welthungerhilfe.cgm.scanner.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
+import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.tango.CameraSurfaceRenderer;
 import de.welthungerhilfe.cgm.scanner.tango.ModelMatCalculator;
 import de.welthungerhilfe.cgm.scanner.tango.OverlaySurface;
@@ -728,6 +730,16 @@ public class RecorderActivity extends Activity {
                             mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mScanningWorkflowStep +
                                     "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
                             Uri pcUri = TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
+                            FileLog log = new FileLog();
+                            log.setId(AppController.getInstance().getArtefactId("scan-pcd"));
+                            log.setType("pcd");
+                            log.setPath(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename + ".pcd");
+                            log.setHashValue("");
+                            log.setFileSize(new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd").length());
+                            log.setUploadDate(0);
+                            log.setDeleted(false);
+                            log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                            new OfflineTask().saveFileLog(log);
                             // Direct Upload to Firebase Storage
                             startService(new Intent(RecorderActivity.this, FirebaseUploadService.class)
                                     .putExtra(FirebaseUploadService.EXTRA_FILE_URI, pcUri)
@@ -812,6 +824,16 @@ public class RecorderActivity extends Activity {
                                 String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
                                         mScanningWorkflowStep + "_" + currentTangoImageBuffer.timestamp + ".jpg";
                                 Uri uri = BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
+                                FileLog log = new FileLog();
+                                log.setId(AppController.getInstance().getArtefactId("scan-rgb"));
+                                log.setType("rgb");
+                                log.setPath(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
+                                log.setHashValue("");
+                                log.setFileSize(new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename).length());
+                                log.setUploadDate(0);
+                                log.setDeleted(false);
+                                log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                                new OfflineTask().saveFileLog(log);
                                 // Direct Upload to Firebase Storage
                                 // Start MyUploadService to upload the file, so that the file is uploaded
                                 // even if this Activity is killed or put in the background

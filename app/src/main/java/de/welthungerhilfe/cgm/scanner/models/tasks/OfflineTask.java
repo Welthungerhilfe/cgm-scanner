@@ -7,6 +7,7 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.models.Consent;
+import de.welthungerhilfe.cgm.scanner.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -82,6 +83,14 @@ public class OfflineTask {
         new LoadLastMeasureTask(listener).execute(person);
     }
 
+    public void saveFileLog(FileLog log) {
+        new SaveTask().execute(log);
+    }
+
+    public void updateFileLog(FileLog log) {
+        new UpdateTask().execute(log);
+    }
+
     private static class LoadPersonTask extends AsyncTask<Long, Void, List<Person>> {
         OnLoadPerson listener;
 
@@ -128,6 +137,8 @@ public class OfflineTask {
                 AppController.getInstance().offlineDb.offlineDao().saveConsent((Consent) objects[0]);
             } else if (objects[0].getClass() == Measure.class) {
                 AppController.getInstance().offlineDb.offlineDao().saveMeasure((Measure) objects[0]);
+            } else if (objects[0].getClass() == FileLog.class) {
+                AppController.getInstance().offlineDb.offlineDao().saveFileLog((FileLog) objects[0]);
             }
 
             return true;
@@ -144,6 +155,8 @@ public class OfflineTask {
                 //AppController.getInstance().offlineDb.offlineDao().updateConsent((Consent) objects[0]);
             } else if (objects[0].getClass() == Measure.class) {
                 AppController.getInstance().offlineDb.offlineDao().updateMeasure((Measure) objects[0]);
+            } else if (objects[0].getClass() == FileLog.class) {
+                AppController.getInstance().offlineDb.offlineDao().updateFileLog((FileLog) objects[0]);
             }
 
             return true;

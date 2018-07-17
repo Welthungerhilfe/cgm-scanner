@@ -17,6 +17,7 @@ public class FileLog {
     private long fileSize;
     private long uploadDate;
     private boolean deleted;
+    private String createdBy;
 
     @NonNull
     public String getId() {
@@ -73,5 +74,13 @@ public class FileLog {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 }
