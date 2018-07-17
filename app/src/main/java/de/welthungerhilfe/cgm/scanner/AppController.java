@@ -78,6 +78,21 @@ public class AppController extends Application {
         }
     };
 
+    protected final Migration MIGRATION_2_3 = new Migration(2, 3) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE file_logs (" +
+                    " id TEXT NOT NULL PRIMARY KEY," +
+                    " type TEXT," +
+                    " path TEXT," +
+                    " hashValue TEXT," +
+                    " fileSize INTEGER NOT NULL," +
+                    " uploadDate INTEGER NOT NULL," +
+                    " deleted INTEGER NOT NULL" +
+                    ");");
+        }
+    };
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -105,7 +120,7 @@ public class AppController extends Application {
                 .build();
         firebaseFirestore.setFirestoreSettings(settings);
 
-        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).addMigrations(MIGRATION_1_2).build();
+        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build();
         /*
         offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).fallbackToDestructiveMigration().addCallback(new RoomDatabase.Callback() {
             @Override

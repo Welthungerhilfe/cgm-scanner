@@ -25,4 +25,5 @@ public class DbConstants {
     public static final String TABLE_PERSON = "persons";
     public static final String TABLE_CONSENT = "consents";
     public static final String TABLE_MEASURE = "measures";
+    public static final String TABLE_FILE_LOG = "file_logs";
 }
