@@ -69,7 +69,7 @@ public class GrowthDataFragment extends Fragment {
     private Context context;
 
     private final String[] boys = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "hcfa_boys_p_exp.txt", "acfa_boys_p_exp.txt"};
-    private final String[] girls = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girsl_p_exp.txt", "hcfa_girls_p_exp.txt", "acfa_girls_p_exp.txt"};
+    private final String[] girls = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "hcfa_girls_p_exp.txt", "acfa_girls_p_exp.txt"};
 
     private LineChart mChart;
     private MaterialSpinner dropChart;
