@@ -194,7 +194,7 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
 
         String action = success ? UPLOAD_COMPLETED : UPLOAD_ERROR;
 
-        if (success) {
+        if (success && artefact != null) {
             new Runnable() {
                 @Override
                 public void run() {

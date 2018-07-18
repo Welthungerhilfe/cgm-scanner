@@ -74,6 +74,7 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
 import de.welthungerhilfe.cgm.scanner.models.Consent;
+import de.welthungerhilfe.cgm.scanner.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
@@ -329,8 +330,20 @@ public class CreateDataActivity extends BaseActivity {
 
                 // Start MyUploadService to upload the file, so that the file is uploaded
                 // even if this Activity is killed or put in the background
+                FileLog log = new FileLog();
+                log.setId(AppController.getInstance().getArtefactId("consent"));
+                log.setType("consent");
+                log.setPath(consentFile.getPath());
+                log.setHashValue(Utils.encryptFile(consentFile));
+                log.setFileSize(consentFile.length());
+                log.setUploadDate(0);
+                log.setDeleted(false);
+                log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                new OfflineTask().saveFileLog(log);
+
                 startService(new Intent(this, FirebaseUploadService.class)
                         .putExtra(FirebaseUploadService.EXTRA_FILE_URI, Uri.fromFile(consentFile))
+                        .putExtra(AppConstants.EXTRA_ARTEFACT, log)
                         .putExtra(AppConstants.EXTRA_QR, qrCode)
                         .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, "")
                         .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_CONSENT_URL)
