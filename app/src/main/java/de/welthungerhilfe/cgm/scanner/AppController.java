@@ -121,7 +121,7 @@ public class AppController extends Application {
                 .build();
         firebaseFirestore.setFirestoreSettings(settings);
 
-        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build();
+        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).addMigrations(MIGRATION_1_2, MIGRATION_2_3).setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING).build();
         /*
         offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).fallbackToDestructiveMigration().addCallback(new RoomDatabase.Callback() {
             @Override
