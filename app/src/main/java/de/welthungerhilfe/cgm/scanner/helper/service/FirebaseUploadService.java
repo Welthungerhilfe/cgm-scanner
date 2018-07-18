@@ -38,6 +38,8 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
+
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -71,7 +73,6 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
     private String qrCode;
     private String scanTimestamp;
     private String subfolder;
-    private FileLog artefact;
 
     @Override
     public void onCreate() {
@@ -103,18 +104,18 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
         Log.d(TAG, "starting FirebaseUploadService as user: "+mAuth.getCurrentUser().getDisplayName());
         if (ACTION_UPLOAD.equals(intent.getAction())) {
             Uri fileUri = intent.getParcelableExtra(EXTRA_FILE_URI);
+            FileLog artefact = (FileLog) intent.getSerializableExtra(AppConstants.EXTRA_ARTEFACT);
             qrCode = intent.getStringExtra(AppConstants.EXTRA_QR);
-            artefact = (FileLog) intent.getSerializableExtra(AppConstants.EXTRA_ARTEFACT);
             scanTimestamp = intent.getStringExtra(AppConstants.EXTRA_SCANTIMESTAMP);
             subfolder = intent.getStringExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER);
-            uploadFromUri(fileUri, subfolder, false);
+            uploadFromUri(fileUri, subfolder, artefact);
         }
 
         return START_REDELIVER_INTENT;
     }
 
     // [START upload_from_uri]
-    private void uploadFromUri(final Uri fileUri, String storageUrl, boolean deleteAfterUpload ) {
+    private void uploadFromUri(final Uri fileUri, String storageUrl, FileLog artefact) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString() + " qrCode: "+qrCode+
                 " scanTimestamp: "+scanTimestamp);
 
@@ -151,10 +152,6 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
 
                         Log.d(TAG, "uploadFromUri: upload success");
 
-                        // TODO deleteAfterUpload
-                        if (deleteAfterUpload)
-                            Log.w(TAG, "delete after update not yet implemented");
-
                         // Request the public download URL
                         return photoRef.getDownloadUrl();
                     }
@@ -166,7 +163,7 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
                         Log.d(TAG, "uploadFromUri: getDownloadUri success");
 
                         // [START_EXCLUDE]
-                        broadcastUploadFinished(downloadUri, fileUri);
+                        broadcastUploadFinished(downloadUri, fileUri, artefact);
                         showUploadFinishedNotification(downloadUri, fileUri);
                         taskCompleted();
                         // [END_EXCLUDE]
@@ -179,7 +176,7 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
                         Log.w(TAG, "uploadFromUri:onFailure", exception);
 
                         // [START_EXCLUDE]
-                        broadcastUploadFinished(null, fileUri);
+                        broadcastUploadFinished(null, fileUri, artefact);
                         showUploadFinishedNotification(null, fileUri);
                         taskCompleted();
                         // [END_EXCLUDE]
@@ -192,14 +189,25 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
      * Broadcast finished upload (success or failure).
      * @return true if a running receiver received the broadcast.
      */
-    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri) {
+    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri, FileLog artefact) {
         boolean success = downloadUrl != null;
 
         String action = success ? UPLOAD_COMPLETED : UPLOAD_ERROR;
 
         if (success) {
-            artefact.setUploadDate(Utils.getUniversalTimestamp());
-            new OfflineTask().updateFileLog(artefact);
+            new Runnable() {
+                @Override
+                public void run() {
+                    artefact.setUploadDate(Utils.getUniversalTimestamp());
+                    File file = new File(artefact.getPath());
+                    if (file.exists()) {
+                        file.delete();
+                        artefact.setDeleted(true);
+                    }
+                    Log.e("Artefact Id", artefact.getId());
+                    new OfflineTask().updateFileLog(artefact);
+                }
+            }.run();
         }
 
         Intent broadcast = new Intent(action)
