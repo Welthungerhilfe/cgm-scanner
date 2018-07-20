@@ -80,6 +80,7 @@ import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.repositories.OfflineRepository;
+import de.welthungerhilfe.cgm.scanner.utils.MD5;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.viewmodels.PersonListViewModel;
 
@@ -334,7 +335,7 @@ public class CreateDataActivity extends BaseActivity {
                 log.setId(AppController.getInstance().getArtefactId("consent"));
                 log.setType("consent");
                 log.setPath(consentFile.getPath());
-                log.setHashValue(Utils.encryptFile(consentFile));
+                log.setHashValue(MD5.getMD5(consentFile.getPath()));
                 log.setFileSize(consentFile.length());
                 log.setUploadDate(0);
                 log.setDeleted(false);

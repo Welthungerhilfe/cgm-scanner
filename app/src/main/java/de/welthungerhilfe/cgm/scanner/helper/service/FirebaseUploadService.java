@@ -199,13 +199,14 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
                 @Override
                 public void run() {
                     artefact.setUploadDate(Utils.getUniversalTimestamp());
+                    artefact.setDeleted(true);
                     File file = new File(artefact.getPath());
                     if (file.exists()) {
                         file.delete();
                         artefact.setDeleted(true);
                     }
                     Log.e("Artefact Id", artefact.getId());
-                    new OfflineTask().updateFileLog(artefact);
+                    new OfflineTask().saveFileLog(artefact);
                 }
             }.run();
         }

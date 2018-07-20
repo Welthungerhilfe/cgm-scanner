@@ -171,25 +171,6 @@ public class Utils {
         return decimalPlaces;
     }
 
-    public static String encryptFile(File file) {
-        MessageDigest shaEnc = null;
-        try {
-            shaEnc = MessageDigest.getInstance("SHA-1");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-
-        byte[] bytes = readFile(file);
-
-        shaEnc.update(bytes, 0, bytes.length);
-
-        String sha = new BigInteger(1, shaEnc.digest()).toString(16);
-        while ( sha.length() < 32 ) {
-            sha = "0" + sha;
-        }
-        return sha;
-    }
-
     public static byte[] readFile(File file) {
         int size = (int) file.length();
         byte[] bytes = new byte[size];
