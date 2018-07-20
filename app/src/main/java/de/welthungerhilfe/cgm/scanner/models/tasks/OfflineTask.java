@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.os.AsyncTask;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
@@ -47,6 +48,10 @@ public class OfflineTask {
 
     public interface OnLoadFileLog {
         void onLoadFileLog(FileLog log);
+    }
+
+    public interface OnLoadFileLogs {
+        void onLoadFileLogs(List<FileLog> logs);
     }
 
     public void getSyncablePerson(OnLoadPerson l, long timestamp) {
@@ -100,6 +105,10 @@ public class OfflineTask {
 
     }
 
+    public void getSyncableFileLog(OnLoadFileLogs listener) {
+        new LoadFileLogsTask(listener).execute();
+    }
+
     private static class LoadPersonTask extends AsyncTask<Long, Void, List<Person>> {
         OnLoadPerson listener;
 
@@ -133,6 +142,25 @@ public class OfflineTask {
         @Override
         public void onPostExecute(List<Measure> data) {
             listener.onMeasureLoaded(data);
+        }
+    }
+
+    private static class LoadFileLogsTask extends AsyncTask<Void, Void, List<FileLog>> {
+        OnLoadFileLogs listener;
+
+        LoadFileLogsTask(OnLoadFileLogs listener) {
+            this.listener = listener;
+        }
+
+
+        @Override
+        protected List<FileLog> doInBackground(Void... voids) {
+            return AppController.getInstance().offlineDb.offlineDao().getSyncableFileLogs();
+        }
+
+        @Override
+        public void onPostExecute(List<FileLog> data) {
+            listener.onLoadFileLogs(data);
         }
     }
 

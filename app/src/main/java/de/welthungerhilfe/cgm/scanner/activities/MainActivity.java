@@ -83,6 +83,7 @@ import de.welthungerhilfe.cgm.scanner.adapters.RecyclerDataAdapter;
 import de.welthungerhilfe.cgm.scanner.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.helper.service.FileLogMonitorService;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -276,6 +277,8 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                 recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
             }
         });
+
+        startService(new Intent(this, FileLogMonitorService.class));
     }
 
     private void setupSidemenu() {
