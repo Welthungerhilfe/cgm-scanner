@@ -100,6 +100,7 @@ import de.welthungerhilfe.cgm.scanner.tango.CameraSurfaceRenderer;
 import de.welthungerhilfe.cgm.scanner.tango.ModelMatCalculator;
 import de.welthungerhilfe.cgm.scanner.tango.OverlaySurface;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
+import de.welthungerhilfe.cgm.scanner.utils.MD5;
 import de.welthungerhilfe.cgm.scanner.utils.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -736,7 +737,7 @@ public class RecorderActivity extends Activity {
                             log.setId(AppController.getInstance().getArtefactId("scan-pcd"));
                             log.setType("pcd");
                             log.setPath(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename + ".pcd");
-                            log.setHashValue(Utils.encryptFile(artefactFile));
+                            log.setHashValue(MD5.getMD5(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd"));
                             log.setFileSize(artefactFile.length());
                             log.setUploadDate(0);
                             log.setDeleted(false);
@@ -836,7 +837,7 @@ public class RecorderActivity extends Activity {
                                 log.setId(AppController.getInstance().getArtefactId("scan-rgb"));
                                 log.setType("rgb");
                                 log.setPath(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
-                                log.setHashValue(Utils.encryptFile(artefactFile));
+                                log.setHashValue(MD5.getMD5(mRgbSaveFolder.getPath() + File.separator + currentImgFilename));
                                 log.setFileSize(artefactFile.length());
                                 log.setUploadDate(0);
                                 log.setDeleted(false);
