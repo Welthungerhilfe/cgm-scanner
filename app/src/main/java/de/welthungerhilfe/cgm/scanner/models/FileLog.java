@@ -19,6 +19,8 @@ public class FileLog implements Serializable {
     private long fileSize;
     private long uploadDate;
     private boolean deleted;
+    private String qrCode;
+    private long createDate;
     private String createdBy;
 
     @NonNull
@@ -76,6 +78,22 @@ public class FileLog implements Serializable {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
+    }
+
+    public long getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(long createDate) {
+        this.createDate = createDate;
     }
 
     public String getCreatedBy() {

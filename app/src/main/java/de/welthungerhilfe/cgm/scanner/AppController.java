@@ -89,6 +89,8 @@ public class AppController extends Application {
                     " fileSize INTEGER NOT NULL," +
                     " uploadDate INTEGER NOT NULL," +
                     " deleted INTEGER NOT NULL," +
+                    " qrCode TEXT," +
+                    " createDate INTEGER NOT NULL," +
                     " createdBy TEXT" +
                     ");");
         }
