@@ -84,6 +84,7 @@ import de.welthungerhilfe.cgm.scanner.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.service.FileLogMonitorService;
+import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -278,6 +279,8 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             }
         });
 
+        checkLocalFiles();
+
         startService(new Intent(this, FileLogMonitorService.class));
     }
 
@@ -401,6 +404,38 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     private void clearFilters() {
         sortType = 0;
         adapterData.clearFitlers();
+    }
+
+    private void checkLocalFiles() {
+        File root = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
+        File[] qrCodes = root.listFiles();
+        for (File qrCode : qrCodes) {
+
+            if (qrCode.isDirectory()) { //
+                File[] measurements = qrCode.listFiles();
+
+                for (File measure : measurements) {
+                    File[] timestamps = measure.listFiles();
+
+                    for (File timestamp : timestamps) {
+                        File[] types = timestamp.listFiles();
+
+                        for (File type : types) {
+                            File[] datas = type.listFiles();
+
+                            for (File data : datas) {
+                                startService(new Intent(this, FirebaseUploadService.class)
+                                        .putExtra(FirebaseUploadService.EXTRA_FILE_URI, Uri.fromFile(data))
+                                        .putExtra(AppConstants.EXTRA_QR, qrCode.getName())
+                                        .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, timestamp.getName())
+                                        .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_CONSENT_URL)
+                                        .setAction(FirebaseUploadService.ACTION_UPLOAD));
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override

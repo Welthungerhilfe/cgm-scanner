@@ -342,14 +342,6 @@ public class CreateDataActivity extends BaseActivity {
                 log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                 new OfflineTask().saveFileLog(log);
 
-                startService(new Intent(this, FirebaseUploadService.class)
-                        .putExtra(FirebaseUploadService.EXTRA_FILE_URI, Uri.fromFile(consentFile))
-                        .putExtra(AppConstants.EXTRA_ARTEFACT, log)
-                        .putExtra(AppConstants.EXTRA_QR, qrCode)
-                        .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, "")
-                        .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_CONSENT_URL)
-                        .setAction(FirebaseUploadService.ACTION_UPLOAD));
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
