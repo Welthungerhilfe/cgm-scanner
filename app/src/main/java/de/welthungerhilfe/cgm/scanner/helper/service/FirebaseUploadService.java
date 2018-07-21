@@ -104,18 +104,17 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
         Log.d(TAG, "starting FirebaseUploadService as user: "+mAuth.getCurrentUser().getDisplayName());
         if (ACTION_UPLOAD.equals(intent.getAction())) {
             Uri fileUri = intent.getParcelableExtra(EXTRA_FILE_URI);
-            FileLog artefact = (FileLog) intent.getSerializableExtra(AppConstants.EXTRA_ARTEFACT);
             qrCode = intent.getStringExtra(AppConstants.EXTRA_QR);
             scanTimestamp = intent.getStringExtra(AppConstants.EXTRA_SCANTIMESTAMP);
             subfolder = intent.getStringExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER);
-            uploadFromUri(fileUri, subfolder, artefact);
+            uploadFromUri(fileUri, subfolder);
         }
 
         return START_REDELIVER_INTENT;
     }
 
     // [START upload_from_uri]
-    private void uploadFromUri(final Uri fileUri, String storageUrl, FileLog artefact) {
+    private void uploadFromUri(final Uri fileUri, String storageUrl) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString() + " qrCode: "+qrCode+
                 " scanTimestamp: "+scanTimestamp);
 
@@ -163,7 +162,7 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
                         Log.d(TAG, "uploadFromUri: getDownloadUri success");
 
                         // [START_EXCLUDE]
-                        broadcastUploadFinished(downloadUri, fileUri, artefact);
+                        broadcastUploadFinished(downloadUri, fileUri);
                         showUploadFinishedNotification(downloadUri, fileUri);
                         taskCompleted();
                         // [END_EXCLUDE]
@@ -176,7 +175,7 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
                         Log.w(TAG, "uploadFromUri:onFailure", exception);
 
                         // [START_EXCLUDE]
-                        broadcastUploadFinished(null, fileUri, artefact);
+                        broadcastUploadFinished(null, fileUri);
                         showUploadFinishedNotification(null, fileUri);
                         taskCompleted();
                         // [END_EXCLUDE]
@@ -189,26 +188,14 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
      * Broadcast finished upload (success or failure).
      * @return true if a running receiver received the broadcast.
      */
-    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri, FileLog artefact) {
+    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri) {
         boolean success = downloadUrl != null;
 
         String action = success ? UPLOAD_COMPLETED : UPLOAD_ERROR;
 
-        if (success && artefact != null) {
-            new Runnable() {
-                @Override
-                public void run() {
-                    artefact.setUploadDate(Utils.getUniversalTimestamp());
-                    artefact.setDeleted(true);
-                    File file = new File(artefact.getPath());
-                    if (file.exists()) {
-                        file.delete();
-                        artefact.setDeleted(true);
-                    }
-                    Log.e("Artefact Id", artefact.getId());
-                    new OfflineTask().saveFileLog(artefact);
-                }
-            }.run();
+        if (success) {
+            File file = new File(fileUri.getPath());
+            file.delete();
         }
 
         Intent broadcast = new Intent(action)

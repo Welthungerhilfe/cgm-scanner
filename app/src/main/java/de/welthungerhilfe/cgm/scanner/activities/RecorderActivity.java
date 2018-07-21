@@ -746,15 +746,6 @@ public class RecorderActivity extends Activity {
                             log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                             new OfflineTask().saveFileLog(log);
                             // Direct Upload to Firebase Storage
-                            /*
-                            startService(new Intent(RecorderActivity.this, FirebaseUploadService.class)
-                                    .putExtra(FirebaseUploadService.EXTRA_FILE_URI, pcUri)
-                                    .putExtra(AppConstants.EXTRA_ARTEFACT,  log)
-                                    .putExtra(AppConstants.EXTRA_QR, mQrCode)
-                                    .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, mNowTimeString)
-                                    .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_PC_URL)
-                                    .setAction(FirebaseUploadService.ACTION_UPLOAD));
-                            */
                             mNumberOfFilesWritten++;
                             //mTimeToTakeSnap = false;
 
@@ -848,15 +839,6 @@ public class RecorderActivity extends Activity {
                                 // Direct Upload to Firebase Storage
                                 // Start MyUploadService to upload the file, so that the file is uploaded
                                 // even if this Activity is killed or put in the background
-                                /*
-                                startService(new Intent(RecorderActivity.this, FirebaseUploadService.class)
-                                        .putExtra(FirebaseUploadService.EXTRA_FILE_URI, uri)
-                                        .putExtra(AppConstants.EXTRA_ARTEFACT, log)
-                                        .putExtra(AppConstants.EXTRA_QR, mQrCode)
-                                        .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, mNowTimeString)
-                                        .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_RGB_URL)
-                                        .setAction(FirebaseUploadService.ACTION_UPLOAD));
-                                */
                             }
                         };
                         thread.run();
