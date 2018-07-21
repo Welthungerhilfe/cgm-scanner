@@ -85,8 +85,10 @@ import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.service.FileLogMonitorService;
 import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
+import de.welthungerhilfe.cgm.scanner.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.viewmodels.PersonListViewModel;
 
@@ -424,12 +426,19 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                             File[] datas = type.listFiles();
 
                             for (File data : datas) {
-                                startService(new Intent(this, FirebaseUploadService.class)
-                                        .putExtra(FirebaseUploadService.EXTRA_FILE_URI, Uri.fromFile(data))
-                                        .putExtra(AppConstants.EXTRA_QR, qrCode.getName())
-                                        .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, timestamp.getName())
-                                        .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_CONSENT_URL)
-                                        .setAction(FirebaseUploadService.ACTION_UPLOAD));
+                                new OfflineTask().getFileLog(data.getPath(), new OfflineTask.OnLoadFileLog() {
+                                    @Override
+                                    public void onLoadFileLog(FileLog log) {
+                                        if (log == null) {
+                                            startService(new Intent(MainActivity.this, FirebaseUploadService.class)
+                                                    .putExtra(FirebaseUploadService.EXTRA_FILE_URI, Uri.fromFile(data))
+                                                    .putExtra(AppConstants.EXTRA_QR, qrCode.getName())
+                                                    .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, timestamp.getName())
+                                                    .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_CONSENT_URL)
+                                                    .setAction(FirebaseUploadService.ACTION_UPLOAD));
+                                        }
+                                    }
+                                });
                             }
                         }
                     }
