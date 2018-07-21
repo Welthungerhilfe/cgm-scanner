@@ -101,8 +101,8 @@ public class OfflineTask {
         new UpdateTask().execute(log);
     }
 
-    public void getFileLog(String logId, OnLoadFileLog listener) {
-
+    public void getFileLog(String param, OnLoadFileLog listener) {
+        new LoadFileLogTask(listener).execute(param);
     }
 
     public void getSyncableFileLog(OnLoadFileLogs listener) {

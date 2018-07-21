@@ -90,6 +90,7 @@ import de.welthungerhilfe.cgm.scanner.fragments.BabyBack1Fragment;
 import de.welthungerhilfe.cgm.scanner.fragments.BabyFront0Fragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
+import de.welthungerhilfe.cgm.scanner.helper.service.FileLogMonitorService;
 import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
 import de.welthungerhilfe.cgm.scanner.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
@@ -432,6 +433,13 @@ public class RecorderActivity extends Activity {
         setupRenderer();
 
         getCurrentLocation();
+
+        stopService(new Intent(this, FileLogMonitorService.class));
+    }
+
+    public void onDestroy() {
+        startService(new Intent(this, FileLogMonitorService.class));
+        super.onDestroy();
     }
 
     private void setupScanArtefacts() {

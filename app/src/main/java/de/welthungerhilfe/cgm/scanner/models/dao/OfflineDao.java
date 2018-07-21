@@ -108,8 +108,8 @@ public interface OfflineDao {
     @Delete
     void deleteFileLog(FileLog log);
 
-    @Query("SELECT * FROM " + DbConstants.TABLE_FILE_LOG + " WHERE id=:id")
-    FileLog getFileLog(String id);
+    @Query("SELECT * FROM " + DbConstants.TABLE_FILE_LOG + " WHERE id=:param OR path=:param")
+    FileLog getFileLog(String param);
 
     @Query("SELECT * FROM " + DbConstants.TABLE_FILE_LOG + " WHERE deleted=0")
     List<FileLog> getSyncableFileLogs();

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -45,6 +46,7 @@ public class FileLogMonitorService extends Service {
     private List<String> pendingArtefacts;
 
     private Timer timer = new Timer();
+    private ExecutorService executor;
 
     public void onCreate() {
         pendingArtefacts = new ArrayList<>();
@@ -67,7 +69,13 @@ public class FileLogMonitorService extends Service {
 
     @Override
     public void onDestroy() {
+        Log.e("Monitor", "service stopped");
+
         timer.cancel();
+        if (executor != null) {
+            executor.shutdownNow();
+            pendingArtefacts = new ArrayList<>();
+        }
     }
 
     @Nullable
@@ -84,7 +92,7 @@ public class FileLogMonitorService extends Service {
                     if (logs.size() > 0) {
                         Log.e("File Monitor", "Do upload");
 
-                        ExecutorService executor = Executors.newFixedThreadPool(5);
+                        executor = Executors.newFixedThreadPool(5);
 
                         for (FileLog log : logs) {
                             Runnable worker = new UploadThread(log);
@@ -139,12 +147,15 @@ public class FileLogMonitorService extends Service {
                                     Log.e("upload", "succeed");
                                     log.setUploadDate(Utils.getUniversalTimestamp());
                                     File file = new File(log.getPath());
-                                    if (file.exists()) {
+                                    if (file.exists() && !log.getType().equals("consent")) {
                                         file.delete();
                                         log.setDeleted(true);
                                     }
                                     Log.e("Artefact Id", log.getId());
                                     new OfflineTask().saveFileLog(log);
+                                    AppController.getInstance().firebaseFirestore.collection("artefacts")
+                                            .document(log.getId())
+                                            .set(log);
                                 } else {
                                     Log.e("upload", "hash different");
                                     Log.e("server hash", metadata.getMd5Hash());
