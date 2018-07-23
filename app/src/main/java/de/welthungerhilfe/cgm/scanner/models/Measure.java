@@ -56,6 +56,8 @@ public class Measure implements Serializable {
     private boolean oedema;
     private long timestamp;
     private String createdBy;
+    private long deleted;
+    private String deletedBy;
 
     @Embedded
     private Loc location;
@@ -179,5 +181,21 @@ public class Measure implements Serializable {
 
     public void setOedema(boolean oedema) {
         this.oedema = oedema;
+    }
+
+    public long getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(long deleted) {
+        this.deleted = deleted;
+    }
+
+    public String getDeletedBy() {
+        return deletedBy;
+    }
+
+    public void setDeletedBy(String deletedBy) {
+        this.deletedBy = deletedBy;
     }
 }

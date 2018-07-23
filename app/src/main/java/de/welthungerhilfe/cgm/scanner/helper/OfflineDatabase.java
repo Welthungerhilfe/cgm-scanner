@@ -28,7 +28,7 @@ import de.welthungerhilfe.cgm.scanner.models.dao.OfflineDao;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@Database(entities = {Person.class, Consent.class, Measure.class, FileLog.class}, version = 3)
+@Database(entities = {Person.class, Consent.class, Measure.class, FileLog.class}, version = 4)
 public abstract class OfflineDatabase extends RoomDatabase {
     public abstract OfflineDao offlineDao();
 }
