@@ -49,7 +49,7 @@ public class Person implements Serializable {
     private long created;
     private long timestamp;
     private String createdBy;
-    private long deleted;
+    private boolean deleted;
     private String deletedBy;
 
     @Embedded
@@ -162,11 +162,11 @@ public class Person implements Serializable {
         this.createdBy = createdBy;
     }
 
-    public long getDeleted() {
+    public boolean getDeleted() {
         return deleted;
     }
 
-    public void setDeleted(long deleted) {
+    public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
 
