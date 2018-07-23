@@ -96,6 +96,17 @@ public class AppController extends Application {
         }
     };
 
+    protected final Migration MIGRATION_3_4 = new Migration(3, 4) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE measures ADD COLUMN deleted INTEGER DEFAULT '0' NOT NULL;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN deletedBy TEXT;");
+
+            database.execSQL("ALTER TABLE persons ADD COLUMN deleted INTEGER DEFAULT '0' NOT NULL;");
+            database.execSQL("ALTER TABLE persons ADD COLUMN deletedBy TEXT;");
+        }
+    };
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -123,7 +134,7 @@ public class AppController extends Application {
                 .build();
         firebaseFirestore.setFirestoreSettings(settings);
 
-        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).addMigrations(MIGRATION_1_2, MIGRATION_2_3).setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING).build();
+        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING).build();
         /*
         offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).fallbackToDestructiveMigration().addCallback(new RoomDatabase.Callback() {
             @Override

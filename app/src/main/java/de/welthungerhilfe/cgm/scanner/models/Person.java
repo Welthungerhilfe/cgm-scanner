@@ -49,6 +49,8 @@ public class Person implements Serializable {
     private long created;
     private long timestamp;
     private String createdBy;
+    private long deleted;
+    private String deletedBy;
 
     @Embedded
     private Loc lastLocation;
@@ -158,5 +160,21 @@ public class Person implements Serializable {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public long getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(long deleted) {
+        this.deleted = deleted;
+    }
+
+    public String getDeletedBy() {
+        return deletedBy;
+    }
+
+    public void setDeletedBy(String deletedBy) {
+        this.deletedBy = deletedBy;
     }
 }
