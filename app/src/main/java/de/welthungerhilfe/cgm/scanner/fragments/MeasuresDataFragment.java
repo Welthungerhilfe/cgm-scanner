@@ -54,6 +54,7 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.repositories.OfflineRepository;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.OnManualMeasureListener, RecyclerMeasureAdapter.OnMeasureSelectListener {
     private Context context;
@@ -159,6 +160,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                 if (result) {
                     measure.setDeleted(true);
                     measure.setDeletedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                    measure.setTimestamp(Utils.getUniversalTimestamp());
                     OfflineRepository.getInstance().updateMeasure(measure);
                     adapterMeasure.removeMeasure(measure);
                 }
