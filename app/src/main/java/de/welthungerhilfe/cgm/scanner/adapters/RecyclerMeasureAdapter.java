@@ -28,12 +28,14 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
@@ -41,12 +43,21 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasureAdapter.ViewHolder> {
     private Context context;
+    private OnMeasureSelectListener listener;
     private List<Measure> measureList;
     private int lastPosition = -1;
+
+    public interface OnMeasureSelectListener {
+        void onMeasureSelect(Measure measure);
+    }
 
     public RecyclerMeasureAdapter(Context ctx, List<Measure> ml) {
         context = ctx;
         measureList = ml;
+    }
+
+    public void setMeasureSelectListener(OnMeasureSelectListener listener) {
+        this.listener = listener;
     }
 
     @Override
@@ -88,6 +99,10 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.checkOedema.setChecked(false);
         }
 
+        if (listener != null) {
+            holder.bindSelectListener(measureList.get(position));
+        }
+
         setAnimation(holder.itemView, position);
     }
 
@@ -119,7 +134,14 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         notifyDataSetChanged();
     }
 
+    public void removeMeasure(Measure measure) {
+        int index = measureList.indexOf(measure);
+        measureList.remove(measure);
+        notifyItemRemoved(index);
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
+        public LinearLayout overlay;
         public EditText editDate;
         public EditText editLocation;
         public EditText editHeight;
@@ -131,6 +153,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         public ViewHolder(View itemView) {
             super(itemView);
 
+            overlay = itemView.findViewById(R.id.overlay);
             editDate = itemView.findViewById(R.id.editDate);
             editLocation = itemView.findViewById(R.id.editLocation);
             editHeight = itemView.findViewById(R.id.editHeight);
@@ -138,6 +161,16 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             editMuac = itemView.findViewById(R.id.editMuac);
             editHead = itemView.findViewById(R.id.editHead);
             checkOedema = itemView.findViewById(R.id.checkOedema);
+        }
+
+        public void bindSelectListener(Measure measure) {
+            overlay.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    listener.onMeasureSelect(measure);
+                    return false;
+                }
+            });
         }
     }
 }

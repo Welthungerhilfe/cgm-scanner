@@ -82,4 +82,8 @@ public class ConfirmDialog extends Dialog {
     public void setMessage(String message) {
         txtMessage.setText(message);
     }
+
+    public void setMessage(int message) {
+        txtMessage.setText(message);
+    }
 }
