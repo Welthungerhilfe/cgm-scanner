@@ -42,17 +42,20 @@ import com.crashlytics.android.Crashlytics;
 
 import java.util.List;
 
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 
 import de.welthungerhilfe.cgm.scanner.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.activities.RecorderActivity;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerMeasureAdapter;
+import de.welthungerhilfe.cgm.scanner.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
+import de.welthungerhilfe.cgm.scanner.repositories.OfflineRepository;
 
-public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.OnManualMeasureListener {
+public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.OnManualMeasureListener, RecyclerMeasureAdapter.OnMeasureSelectListener {
     private Context context;
 
 
@@ -82,6 +85,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         
         recyclerMeasure = view.findViewById(R.id.recyclerMeasure);
         adapterMeasure = new RecyclerMeasureAdapter(context, ((CreateDataActivity)context).measures);
+        adapterMeasure.setMeasureSelectListener(this);
         recyclerMeasure.setAdapter(adapterMeasure);
         recyclerMeasure.setLayoutManager(new LinearLayoutManager(context));
 
@@ -143,5 +147,23 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     @Override
     public void onManualMeasure(double height, double weight, double muac, double headCircumference, Loc location, boolean oedema) {
         ((CreateDataActivity)context).setMeasureData(height, weight, muac, headCircumference,"No Additional Info", location, oedema);
+    }
+
+    @Override
+    public void onMeasureSelect(Measure measure) {
+        ConfirmDialog dialog = new ConfirmDialog(context);
+        dialog.setMessage(R.string.delete_measure);
+        dialog.setConfirmListener(new ConfirmDialog.OnConfirmListener() {
+            @Override
+            public void onConfirm(boolean result) {
+                if (result) {
+                    measure.setDeleted(true);
+                    measure.setDeletedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                    OfflineRepository.getInstance().updateMeasure(measure);
+                    adapterMeasure.removeMeasure(measure);
+                }
+            }
+        });
+        dialog.show();
     }
 }

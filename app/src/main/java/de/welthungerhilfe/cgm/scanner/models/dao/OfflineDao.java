@@ -42,13 +42,13 @@ public interface OfflineDao {
 
     // ---------------------- Person --------------------------//
 
-    @Query("SELECT * FROM " + DbConstants.TABLE_PERSON)
+    @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE deleted=0")
     LiveData<List<Person>> getPersons();
 
-    @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE id=:id")
+    @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE id=:id AND deleted=0")
     LiveData<Person> getPerson(String id);
 
-    @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE qrcode=:qrCode")
+    @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE qrcode=:qrCode AND deleted=0")
     LiveData<Person> getPersonByQr(String qrCode);
 
     @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE timestamp>:timestamp")
@@ -79,7 +79,7 @@ public interface OfflineDao {
 
     // ---------------------- Measure -------------------------- //
 
-    @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE personId=:personId ORDER BY date DESC")
+    @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE personId=:personId AND deleted=0 ORDER BY date DESC")
     LiveData<List<Measure>> findMeasures(String personId);
 
     @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE timestamp>:timestamp")
@@ -94,7 +94,7 @@ public interface OfflineDao {
     @Delete
     void deleteMeasure(Measure measure);
 
-    @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE personId=:personId ORDER BY timestamp DESC Limit 1")
+    @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE personId=:personId AND deleted=0 ORDER BY timestamp DESC Limit 1")
     Measure getLastMeasure(String personId);
 
     // ----------------------- File Log ------------------------ //
@@ -108,7 +108,7 @@ public interface OfflineDao {
     @Delete
     void deleteFileLog(FileLog log);
 
-    @Query("SELECT * FROM " + DbConstants.TABLE_FILE_LOG + " WHERE id=:param OR path=:param")
+    @Query("SELECT * FROM " + DbConstants.TABLE_FILE_LOG + " WHERE (id=:param OR path=:param) AND deleted=0")
     FileLog getFileLog(String param);
 
     @Query("SELECT * FROM " + DbConstants.TABLE_FILE_LOG + " WHERE deleted=0")

@@ -113,6 +113,8 @@
     <string name="error_login">Login Failed</string>
     <string name="error_person_first">Please register person first</string>
 
+    <string name="delete_measure">Do you really want to delete this measure data?</string>
+
     <!-- Sync Adapter -->
     <string name="account_type">de.welthungerhilfe.cgm.scanner</string>
     <string name="sync_authority">de.welthungerhilfe.cgm.scanner</string>
