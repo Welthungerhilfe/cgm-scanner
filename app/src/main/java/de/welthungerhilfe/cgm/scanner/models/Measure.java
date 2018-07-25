@@ -40,10 +40,8 @@ public class Measure implements Serializable {
     @PrimaryKey
     @NonNull
     private String id;
-
     @ForeignKey(entity = Person.class, parentColumns = "id", childColumns = "personId", onDelete = CASCADE, onUpdate = CASCADE)
     private String personId;
-
     private long date;
     private String type;
     private long age; // age from birthday in days
