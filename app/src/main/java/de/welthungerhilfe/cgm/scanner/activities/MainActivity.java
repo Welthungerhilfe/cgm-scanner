@@ -282,6 +282,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         });
 
         checkLocalFiles();
+        checkDeletedRecords();
 
         startService(new Intent(this, FileLogMonitorService.class));
     }
@@ -445,6 +446,10 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                 }
             }
         }
+    }
+
+    private void checkDeletedRecords() {
+        new OfflineTask().deleteRecords(session.getSyncTimestamp());
     }
 
     @Override

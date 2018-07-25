@@ -57,11 +57,16 @@ public interface OfflineDao {
     @Insert(onConflict = REPLACE)
     void savePerson(Person person);
 
+    /*
     @Update(onConflict = REPLACE)
     void updatePerson(Person person);
+    */
 
     @Delete
     void deletePerson(Person person);
+
+    @Query("DELETE FROM " + DbConstants.TABLE_PERSON + " WHERE deleted=1")
+    void deletePersonGarbage();
 
     // ---------------------- Consent --------------------------//
 
@@ -70,9 +75,6 @@ public interface OfflineDao {
 
     @Insert(onConflict = REPLACE)
     void saveConsent(Consent consent);
-
-    @Insert(onConflict = REPLACE)
-    void updatePerson(Consent consent);
 
     @Delete
     void deleteConsent(Consent consent);
@@ -88,14 +90,19 @@ public interface OfflineDao {
     @Insert(onConflict = REPLACE)
     void saveMeasure(Measure measure);
 
+    /*
     @Update(onConflict = REPLACE)
     void updateMeasure(Measure measure);
+    */
 
     @Delete
     void deleteMeasure(Measure measure);
 
     @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE personId=:personId AND deleted=0 ORDER BY timestamp DESC Limit 1")
     Measure getLastMeasure(String personId);
+
+    @Query("DELETE FROM " + DbConstants.TABLE_MEASURE + " WHERE deleted=1 AND timestamp<=:timestamp")
+    void deleteMeasureGarbage(long timestamp);
 
     // ----------------------- File Log ------------------------ //
 

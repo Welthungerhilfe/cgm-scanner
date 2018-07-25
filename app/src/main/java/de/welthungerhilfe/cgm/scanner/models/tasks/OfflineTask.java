@@ -109,6 +109,10 @@ public class OfflineTask {
         new LoadFileLogsTask(listener).execute();
     }
 
+    public void deleteRecords(long timestamp) {
+        new DeleteRecordsTask().execute(timestamp);
+    }
+
     private static class LoadPersonTask extends AsyncTask<Long, Void, List<Person>> {
         OnLoadPerson listener;
 
@@ -187,11 +191,11 @@ public class OfflineTask {
         @Override
         protected Boolean doInBackground(Object... objects) {
             if (objects[0].getClass() == Person.class) {
-                AppController.getInstance().offlineDb.offlineDao().updatePerson((Person) objects[0]);
+                AppController.getInstance().offlineDb.offlineDao().savePerson((Person) objects[0]);
             } else if (objects[0].getClass() == Consent.class) {
                 //AppController.getInstance().offlineDb.offlineDao().updateConsent((Consent) objects[0]);
             } else if (objects[0].getClass() == Measure.class) {
-                AppController.getInstance().offlineDb.offlineDao().updateMeasure((Measure) objects[0]);
+                AppController.getInstance().offlineDb.offlineDao().saveMeasure((Measure) objects[0]);
             } else if (objects[0].getClass() == FileLog.class) {
                 AppController.getInstance().offlineDb.offlineDao().updateFileLog((FileLog) objects[0]);
             }
@@ -241,6 +245,16 @@ public class OfflineTask {
         @Override
         public void onPostExecute(FileLog data) {
             listener.onLoadFileLog(data);
+        }
+    }
+
+    private static class DeleteRecordsTask extends AsyncTask<Long, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Long... timestamps) {
+            AppController.getInstance().offlineDb.offlineDao().deletePersonGarbage();
+            AppController.getInstance().offlineDb.offlineDao().deleteMeasureGarbage(timestamps[0]);
+            return null;
         }
     }
 }
