@@ -190,14 +190,8 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
     public void removePerson(Person person) {
         int index = filteredList.indexOf(person);
         filteredList.remove(index);
+        personList.remove(person);
         notifyItemRemoved(index);
-
-        for (int i = 0; i < personList.size(); i++) {
-            if (person.getId().equals(personList.get(i).getId())) {
-                personList.remove(i);
-                break;
-            }
-        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

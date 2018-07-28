@@ -350,7 +350,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     }
 
     private void setupRecyclerView() {
-        SwipeView swipeController = new SwipeView(0, ItemTouchHelper.LEFT, this) {
+        SwipeView swipeController = new SwipeView(ItemTouchHelper.LEFT, this) {
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();

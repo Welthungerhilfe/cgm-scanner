@@ -111,6 +111,10 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         return measureList.size();
     }
 
+    public Measure getItem(int position) {
+        return measureList.get(position);
+    }
+
     private void setAnimation(View viewToAnimate, int position) {
         if (position > lastPosition) {
             Animation animation = AnimationUtils.loadAnimation(context, R.anim.slide_in_bottom);
