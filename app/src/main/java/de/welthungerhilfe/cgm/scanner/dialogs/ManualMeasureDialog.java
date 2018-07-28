@@ -60,6 +60,7 @@ import de.welthungerhilfe.cgm.scanner.helper.events.LocationResult;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
+import de.welthungerhilfe.cgm.scanner.repositories.OfflineRepository;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.views.UnitEditText;
 
@@ -84,6 +85,8 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     EditText editManualLocation;
     @BindView(R.id.btnOK)
     Button btnOK;
+    @BindView(R.id.checkManualOedema)
+    AppCompatCheckBox checkManualOedema;
 
     private boolean oedema = false;
 
@@ -109,16 +112,21 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     @OnClick(R.id.btnOK)
     void OnConfirm(Button btnOK) {
         if (validate()) {
-            if (measureListener != null) {
-                double head = 0;
-                if (!editManualHead.getText().toString().isEmpty()) {
-                    head = Double.parseDouble(editManualHead.getText().toString());
-                }
+            if (measure != null) {
+                measure.setHeight(Double.parseDouble(editManualHeight.getText().toString()));
+                measure.setWeight(Double.parseDouble(editManualWeight.getText().toString()));
+                measure.setMuac(Double.parseDouble(editManualMuac.getText().toString()));
+                measure.setHeadCircumference(Double.parseDouble(editManualHead.getText().toString()));
+                measure.setLocation(location);
+                measure.setOedema(oedema);
+
+                new OfflineRepository().updateMeasure(measure);
+            } else if (measureListener != null) {
                 measureListener.onManualMeasure(
                         Double.parseDouble(editManualHeight.getText().toString()),
                         Double.parseDouble(editManualWeight.getText().toString()),
                         Double.parseDouble(editManualMuac.getText().toString()),
-                        head,
+                        Double.parseDouble(editManualHead.getText().toString()),
                         location,
                         oedema
                 );
@@ -142,9 +150,11 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
 
     private Context mContext;
+    private Measure measure;
     private Loc location = null;
 
     private OnManualMeasureListener measureListener;
+    private OnCloseListener closeListener;
 
     public ManualMeasureDialog(@NonNull Context context) {
         super(context);
@@ -170,11 +180,17 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     public void show() {
         super.show();
         EventBus.getDefault().register(this);
+
+        if (closeListener != null)
+            closeListener.onClose(true);
     }
 
     public void dismiss() {
         super.dismiss();
         EventBus.getDefault().unregister(this);
+
+        if (closeListener != null)
+            closeListener.onClose(false);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -183,8 +199,33 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         editManualLocation.setText(location.getAddress());
     }
 
+    public void setMeasure(Measure measure) {
+        this.measure = measure;
+
+        updateUI();
+    }
+
+    private void updateUI() {
+        editManualDate.setText(Utils.beautifyDate(measure.getDate()));
+        if (measure.getLocation() != null)
+            editManualLocation.setText(measure.getLocation().getAddress());
+        editManualHeight.setText(String.valueOf(measure.getHeight()));
+        editManualWeight.setText(String.valueOf(measure.getWeight()));
+        editManualMuac.setText(String.valueOf(measure.getMuac()));
+        editManualHead.setText(String.valueOf(measure.getHeadCircumference()));
+        if (measure.isOedema()) {
+            checkManualOedema.setChecked(measure.isOedema());
+        }
+
+        location = measure.getLocation();
+    }
+
     public void setManualMeasureListener(OnManualMeasureListener listener) {
         measureListener = listener;
+    }
+
+    public void setCloseListener(OnCloseListener listener) {
+        closeListener = listener;
     }
 
     private boolean validate() {
@@ -249,5 +290,9 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
     public interface OnManualMeasureListener {
         void onManualMeasure(double height, double weight, double muac, double headCircumference, Loc location, boolean oedema);
+    }
+
+    public interface OnCloseListener {
+        void onClose(boolean result);
     }
 }

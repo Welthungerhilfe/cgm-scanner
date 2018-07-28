@@ -31,6 +31,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,8 +54,10 @@ import de.welthungerhilfe.cgm.scanner.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
+import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.repositories.OfflineRepository;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.views.SwipeView;
 
 public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.OnManualMeasureListener, RecyclerMeasureAdapter.OnMeasureSelectListener {
     private Context context;
@@ -86,9 +89,66 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         
         recyclerMeasure = view.findViewById(R.id.recyclerMeasure);
         adapterMeasure = new RecyclerMeasureAdapter(context, ((CreateDataActivity)context).measures);
-        adapterMeasure.setMeasureSelectListener(this);
         recyclerMeasure.setAdapter(adapterMeasure);
         recyclerMeasure.setLayoutManager(new LinearLayoutManager(context));
+
+        SwipeView swipeController = new SwipeView(ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT, context) {
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                Measure measure = adapterMeasure.getItem(position);
+
+                if (direction == ItemTouchHelper.LEFT) {
+                    if (!AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("mmatiaschek@gmail.com") && !AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("zhangnemo34@hotmail.com")) {
+                        adapterMeasure.notifyItemChanged(position);
+
+                        Snackbar.make(recyclerMeasure, R.string.permission_delete, Snackbar.LENGTH_LONG).show();
+                    } else {
+                        ConfirmDialog dialog = new ConfirmDialog(context);
+                        dialog.setMessage(R.string.delete_measure);
+                        dialog.setConfirmListener(new ConfirmDialog.OnConfirmListener() {
+                            @Override
+                            public void onConfirm(boolean result) {
+                                if (result) {
+                                    measure.setDeleted(true);
+                                    measure.setDeletedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                                    measure.setTimestamp(Utils.getUniversalTimestamp());
+                                    OfflineRepository.getInstance().updateMeasure(measure);
+
+                                    adapterMeasure.removeMeasure(measure);
+                                } else {
+                                    adapterMeasure.notifyItemChanged(position);
+                                }
+                            }
+                        });
+                        dialog.show();
+                    }
+                } else {
+                    if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
+                        ManualMeasureDialog dialog = new ManualMeasureDialog(context);
+                        dialog.setManualMeasureListener(MeasuresDataFragment.this);
+                        dialog.setCloseListener(new ManualMeasureDialog.OnCloseListener() {
+                            @Override
+                            public void onClose(boolean result) {
+                                adapterMeasure.notifyItemChanged(position);
+                            }
+                        });
+                        dialog.setMeasure(measure);
+                        dialog.show();
+                    } else {
+                        Intent intent = new Intent(getContext(), RecorderActivity.class);
+                        intent.putExtra(AppConstants.EXTRA_PERSON, ((CreateDataActivity)context).person);
+                        intent.putExtra(AppConstants.EXTRA_MEASURE, measure);
+                        startActivity(intent);
+                        adapterMeasure.notifyItemChanged(position);
+                    }
+                }
+            }
+        };
+
+        ItemTouchHelper itemTouchhelper = new ItemTouchHelper(swipeController);
+        itemTouchhelper.attachToRecyclerView(recyclerMeasure);
 
         fabCreate = view.findViewById(R.id.fabCreate);
         fabCreate.setOnClickListener(this);

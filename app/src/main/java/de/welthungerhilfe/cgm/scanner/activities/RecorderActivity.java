@@ -97,6 +97,7 @@ import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
+import de.welthungerhilfe.cgm.scanner.repositories.OfflineRepository;
 import de.welthungerhilfe.cgm.scanner.tango.CameraSurfaceRenderer;
 import de.welthungerhilfe.cgm.scanner.tango.ModelMatCalculator;
 import de.welthungerhilfe.cgm.scanner.tango.OverlaySurface;
@@ -212,7 +213,8 @@ public class RecorderActivity extends Activity {
 
         if (mScanningWorkflowStep ==     AppConstants.BABY_FULL_BODY_FRONT_ONBOARDING)
         {
-            measure = new Measure();
+            if (measure == null)
+                measure = new Measure();
             if (location != null)
                 measure.setLocation(location);
             measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
@@ -293,7 +295,10 @@ public class RecorderActivity extends Activity {
             measure.setHeadCircumference(0.0f);
             measure.setMuac(0.0f);
             measure.setOedema(false);
-            EventBus.getDefault().post(new MeasureResult(measure));
+            if (measure.getId() == null)
+                EventBus.getDefault().post(new MeasureResult(measure));
+            else
+                new OfflineRepository().updateMeasure(measure);
             finish();
         }
         mScanningWorkflowStep++;
@@ -355,6 +360,7 @@ public class RecorderActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
+        measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
         if (person == null) Log.e(TAG,"person was null!");
         setContentView(getContentViewId());
 

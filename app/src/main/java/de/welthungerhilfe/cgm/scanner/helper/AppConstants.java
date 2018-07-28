@@ -56,6 +56,7 @@ public class AppConstants {
     public static final String EXTRA_RADIUS = "extra_radius";
     public static final String EXTRA_PERSON_LIST = "extra_person_list";
     public static final String EXTRA_PERSON = "extra_person";
+    public static final String EXTRA_MEASURE = "extra_measure";
     public static final String EXTRA_SCANTIMESTAMP = "extra_scantimestamp";
     public static final String EXTRA_SCANARTEFACT_SUBFOLDER = "extra_scanartefact_subfolder";
     public static final String EXTRA_ARTEFACT = "extra_artefact";
