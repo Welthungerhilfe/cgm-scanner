@@ -28,19 +28,14 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
@@ -62,6 +57,7 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
     private PersonFilter personFilter = new PersonFilter();
 
     private OnPersonDetail personDetailListener;
+    private OnPersonDelete personDeleteListener;
 
     public RecyclerDataAdapter(Context ctx, List<Person> pl) {
         context = ctx;
@@ -99,6 +95,9 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
         if (personDetailListener != null) {
             holder.bindPersonDetail(person);
         }
+        if (personDeleteListener != null) {
+            holder.bindPersonDelete(person);
+        }
 
         setAnimation(holder.itemView, position);
     }
@@ -106,6 +105,10 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
     @Override
     public int getItemCount() {
         return filteredList.size();
+    }
+
+    public Person getItem(int position) {
+        return filteredList.get(position);
     }
 
     private void setAnimation(View viewToAnimate, int position) {
@@ -118,6 +121,10 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
 
     public void setPersonDetailListener(OnPersonDetail listener) {
         personDetailListener = listener;
+    }
+
+    public void setPersonDeleteListener(OnPersonDelete listener) {
+        personDeleteListener = listener;
     }
 
     public void resetData(ArrayList<Person> personList) {
@@ -180,32 +187,29 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
     }
 
     public void updatePerson(Person person) {
-        int index = -1;
+        int index = filteredList.indexOf(person);
+        notifyItemChanged(index);
+
         for (int i = 0; i < personList.size(); i++) {
             if (person.getId().equals(personList.get(i).getId())) {
-                index = i;
+                personList.remove(i);
+                personList.add(i, person);
                 break;
             }
         }
-        if (index > -1) {
-            personList.remove(index);
-            personList.add(index, person);
-        }
-        getFilter().filter("");
     }
 
     public void removePerson(Person person) {
-        int index = -1;
+        int index = filteredList.indexOf(person);
+        filteredList.remove(index);
+        notifyItemRemoved(index);
+
         for (int i = 0; i < personList.size(); i++) {
             if (person.getId().equals(personList.get(i).getId())) {
-                index = i;
+                personList.remove(i);
                 break;
             }
         }
-        if (index > -1) {
-            personList.remove(index);
-        }
-        getFilter().filter("");
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -233,10 +237,22 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
                 }
             });
         }
+
+        public void bindPersonDelete(final Person person) {
+
+        }
+
+        public void makeInitial() {
+
+        }
     }
 
     public interface OnPersonDetail {
         void onPersonDetail(Person person);
+    }
+
+    public interface OnPersonDelete {
+        void onPersonDelete(Person person);
     }
 
     public class PersonFilter extends Filter {

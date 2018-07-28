@@ -26,6 +26,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -33,7 +34,9 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -41,12 +44,14 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
@@ -80,6 +85,8 @@ import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerDataAdapter;
+import de.welthungerhilfe.cgm.scanner.delegators.SwipeViewActions;
+import de.welthungerhilfe.cgm.scanner.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
@@ -89,10 +96,12 @@ import de.welthungerhilfe.cgm.scanner.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
+import de.welthungerhilfe.cgm.scanner.repositories.OfflineRepository;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.viewmodels.PersonListViewModel;
+import de.welthungerhilfe.cgm.scanner.views.SwipeView;
 
-public class MainActivity extends BaseActivity implements RecyclerDataAdapter.OnPersonDetail, DateRangePickerDialog.Callback, EventListener<QuerySnapshot> {
+public class MainActivity extends BaseActivity implements RecyclerDataAdapter.OnPersonDetail, DateRangePickerDialog.Callback, EventListener<QuerySnapshot>,RecyclerDataAdapter.OnPersonDelete {
     private final String TAG = MainActivity.class.getSimpleName();
     private final int REQUEST_LOCATION = 0x1000;
     private final int REQUEST_CAMERA = 0x1001;
@@ -260,6 +269,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
 
         setupSidemenu();
         setupActionBar();
+        setupRecyclerView();
 
         txtSortCase.setText(getResources().getString(R.string.last_scans, 0));
 
@@ -275,6 +285,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                 recyclerData.setVisibility(View.VISIBLE);
 
                 adapterData = new RecyclerDataAdapter(this, personList);
+                adapterData.setPersonDeleteListener(this);
                 adapterData.setPersonDetailListener(this);
                 recyclerData.setAdapter(adapterData);
                 recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
@@ -339,6 +350,43 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         drawerLayout.addDrawerListener(mDrawerToggle);
     }
 
+    private void setupRecyclerView() {
+        SwipeView swipeController = new SwipeView(0, ItemTouchHelper.LEFT, this) {
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+
+                if (!AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("mmatiaschek@gmail.com") && !AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("zhangnemo34@hotmail.com")) {
+                    adapterData.notifyItemChanged(position);
+
+                    Snackbar.make(recyclerData, R.string.permission_delete, Snackbar.LENGTH_LONG).show();
+                } else {
+                    Person person = adapterData.getItem(position);
+
+                    ConfirmDialog dialog = new ConfirmDialog(MainActivity.this);
+                    dialog.setMessage(R.string.delete_person);
+                    dialog.setConfirmListener(new ConfirmDialog.OnConfirmListener() {
+                        @Override
+                        public void onConfirm(boolean result) {
+                            if (result) {
+                                person.setDeleted(true);
+                                person.setDeletedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                                person.setTimestamp(Utils.getUniversalTimestamp());
+                                OfflineRepository.getInstance().updatePerson(person);
+                                adapterData.removePerson(person);
+                            } else {
+                                adapterData.notifyItemChanged(position);
+                            }
+                        }
+                    });
+                    dialog.show();
+                }
+            }
+        };
+
+        ItemTouchHelper itemTouchhelper = new ItemTouchHelper(swipeController);
+        itemTouchhelper.attachToRecyclerView(recyclerData);
+    }
     private void createTempFile() {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "CGM Scanner");
         if (!mediaStorageDir.exists())
@@ -450,13 +498,6 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
 
     private void checkDeletedRecords() {
         new OfflineTask().deleteRecords(session.getSyncTimestamp());
-    }
-
-    @Override
-    public void onPersonDetail(Person person) {
-        Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
-        intent.putExtra(AppConstants.EXTRA_PERSON, person);
-        startActivity(intent);
     }
 
     @Override
@@ -579,6 +620,36 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    @Override
+    public void onPersonDetail(Person person) {
+        Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
+        intent.putExtra(AppConstants.EXTRA_PERSON, person);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onPersonDelete(Person person) {
+        if (!AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("mmatiaschek@gmail.com") && !AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("zhangnemo34@hotmail.com")) {
+            Snackbar.make(recyclerData, R.string.permission_delete, Snackbar.LENGTH_LONG).show();
+        } else {
+            ConfirmDialog dialog = new ConfirmDialog(this);
+            dialog.setMessage(R.string.delete_person);
+            dialog.setConfirmListener(new ConfirmDialog.OnConfirmListener() {
+                @Override
+                public void onConfirm(boolean result) {
+                    if (result) {
+                        person.setDeleted(true);
+                        person.setDeletedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                        person.setTimestamp(Utils.getUniversalTimestamp());
+                        OfflineRepository.getInstance().updatePerson(person);
+                        adapterData.removePerson(person);
+                    }
+                }
+            });
+            dialog.show();
         }
     }
 }

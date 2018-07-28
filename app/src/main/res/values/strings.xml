@@ -28,6 +28,7 @@
     <string name="cancel">Cancel</string>
     <string name="back">Back</string>
     <string name="next">Save</string>
+    <string name="delete">Delete</string>
 
     <string name="about">About</string>
     <string name="version">Version</string>
@@ -114,6 +115,9 @@
     <string name="error_person_first">Please register person first</string>
 
     <string name="delete_measure">Do you really want to delete this measure data?</string>
+    <string name="delete_person">Do you really want to delete this person data?</string>
+
+    <string name="permission_delete">Sorry, You don\'t have the rights to delete data</string>
 
     <!-- Sync Adapter -->
     <string name="account_type">de.welthungerhilfe.cgm.scanner</string>
