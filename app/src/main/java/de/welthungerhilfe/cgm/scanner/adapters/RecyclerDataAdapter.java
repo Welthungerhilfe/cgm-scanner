@@ -57,7 +57,6 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
     private PersonFilter personFilter = new PersonFilter();
 
     private OnPersonDetail personDetailListener;
-    private OnPersonDelete personDeleteListener;
 
     public RecyclerDataAdapter(Context ctx, List<Person> pl) {
         context = ctx;
@@ -95,9 +94,6 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
         if (personDetailListener != null) {
             holder.bindPersonDetail(person);
         }
-        if (personDeleteListener != null) {
-            holder.bindPersonDelete(person);
-        }
 
         setAnimation(holder.itemView, position);
     }
@@ -121,10 +117,6 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
 
     public void setPersonDetailListener(OnPersonDetail listener) {
         personDetailListener = listener;
-    }
-
-    public void setPersonDeleteListener(OnPersonDelete listener) {
-        personDeleteListener = listener;
     }
 
     public void resetData(ArrayList<Person> personList) {
@@ -182,10 +174,6 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
         return personFilter;
     }
 
-    public void emptyData() {
-        personList = new ArrayList<>();
-    }
-
     public void updatePerson(Person person) {
         int index = filteredList.indexOf(person);
         notifyItemChanged(index);
@@ -237,22 +225,10 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
                 }
             });
         }
-
-        public void bindPersonDelete(final Person person) {
-
-        }
-
-        public void makeInitial() {
-
-        }
     }
 
     public interface OnPersonDetail {
         void onPersonDetail(Person person);
-    }
-
-    public interface OnPersonDelete {
-        void onPersonDelete(Person person);
     }
 
     public class PersonFilter extends Filter {

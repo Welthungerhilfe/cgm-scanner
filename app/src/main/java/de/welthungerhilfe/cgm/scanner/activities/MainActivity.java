@@ -101,7 +101,7 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.viewmodels.PersonListViewModel;
 import de.welthungerhilfe.cgm.scanner.views.SwipeView;
 
-public class MainActivity extends BaseActivity implements RecyclerDataAdapter.OnPersonDetail, DateRangePickerDialog.Callback, EventListener<QuerySnapshot>,RecyclerDataAdapter.OnPersonDelete {
+public class MainActivity extends BaseActivity implements RecyclerDataAdapter.OnPersonDetail, DateRangePickerDialog.Callback, EventListener<QuerySnapshot> {
     private final String TAG = MainActivity.class.getSimpleName();
     private final int REQUEST_LOCATION = 0x1000;
     private final int REQUEST_CAMERA = 0x1001;
@@ -285,7 +285,6 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                 recyclerData.setVisibility(View.VISIBLE);
 
                 adapterData = new RecyclerDataAdapter(this, personList);
-                adapterData.setPersonDeleteListener(this);
                 adapterData.setPersonDetailListener(this);
                 recyclerData.setAdapter(adapterData);
                 recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
@@ -628,28 +627,5 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
         intent.putExtra(AppConstants.EXTRA_PERSON, person);
         startActivity(intent);
-    }
-
-    @Override
-    public void onPersonDelete(Person person) {
-        if (!AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("mmatiaschek@gmail.com") && !AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("zhangnemo34@hotmail.com")) {
-            Snackbar.make(recyclerData, R.string.permission_delete, Snackbar.LENGTH_LONG).show();
-        } else {
-            ConfirmDialog dialog = new ConfirmDialog(this);
-            dialog.setMessage(R.string.delete_person);
-            dialog.setConfirmListener(new ConfirmDialog.OnConfirmListener() {
-                @Override
-                public void onConfirm(boolean result) {
-                    if (result) {
-                        person.setDeleted(true);
-                        person.setDeletedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-                        person.setTimestamp(Utils.getUniversalTimestamp());
-                        OfflineRepository.getInstance().updatePerson(person);
-                        adapterData.removePerson(person);
-                    }
-                }
-            });
-            dialog.show();
-        }
     }
 }
