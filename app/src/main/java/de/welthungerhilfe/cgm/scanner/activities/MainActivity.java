@@ -386,6 +386,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         ItemTouchHelper itemTouchhelper = new ItemTouchHelper(swipeController);
         itemTouchhelper.attachToRecyclerView(recyclerData);
     }
+
     private void createTempFile() {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "CGM Scanner");
         if (!mediaStorageDir.exists())
