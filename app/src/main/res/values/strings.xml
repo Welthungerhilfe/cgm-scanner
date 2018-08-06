@@ -113,6 +113,7 @@
     <string name="error_network">Please check your network status. You are offline now.</string>
     <string name="error_login">Login Failed</string>
     <string name="error_person_first">Please register person first</string>
+    <string name="error_location">Could not find matching location.</string>
 
     <string name="delete_measure">Do you really want to delete this measure data?</string>
     <string name="delete_person">Do you really want to delete this person data?</string>

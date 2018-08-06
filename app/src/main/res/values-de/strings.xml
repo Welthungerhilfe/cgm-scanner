@@ -112,6 +112,7 @@
     <string name="error_network">Offline. Bitte Netzwerkverbindung prüfen.</string>
     <string name="error_login">Login fehlgeschlagen</string>
     <string name="error_person_first">Bitte zuerst Registrierung der Person abschliessen.</string>
+    <string name="error_location">Could not find matching location.</string>
 
     <!-- Sync Adapter -->
     <string name="account_type">de.welthungerhilfe.cgm.scanner</string>

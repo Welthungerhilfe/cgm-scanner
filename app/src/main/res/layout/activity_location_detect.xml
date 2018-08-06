@@ -18,10 +18,10 @@
   ~
   -->
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     
     <LinearLayout
         android:layout_width="match_parent"
@@ -39,6 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/view_no_border"
+            android:inputType="textMultiLine"
             android:text=""
             android:textColor="@color/colorBlack"
             android:textSize="16sp"/>
@@ -105,5 +106,19 @@
         android:layout_height="0.5dp"
         android:layout_centerVertical="true"
         android:background="@color/colorPrimary" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabLocation"
+        android:layout_above="@+id/lytConfirm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_alignParentRight="true"
+        android:scaleType="center"
+        app:backgroundTint="@color/colorWhite"
+        app:fabSize="mini"
+        app:fabCustomSize="@dimen/design_fab_size_mini"
+        app:srcCompat="@drawable/gps" />
+
 
 </RelativeLayout>

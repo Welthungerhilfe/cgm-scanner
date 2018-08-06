@@ -112,6 +112,7 @@
     <string name="error_network">कृपया अपनी नेटवर्क की स्थिति जांचें। अब आप ऑफ़लाइन हैं।</string>
     <string name="error_login">लॉगिन विफल हुआ</string>
     <string name="error_person_first">कृपया पहले व्यक्ति को पंजीकृत करें</string>
+    <string name="error_location">Could not find matching location.</string>
 
     <!-- Sync Adapter -->
     <string name="account_type">de.welthungerhilfe.cgm.scanner</string>
