@@ -164,6 +164,7 @@
         <item>@string/filter_age_arm</item>
     </string-array>
 
+
     <string name="selector_manual">मैन्युअल उपाय जोड़ें</string>
     <string name="selector_scan">स्कैन उपाय जोड़ें</string>
 
