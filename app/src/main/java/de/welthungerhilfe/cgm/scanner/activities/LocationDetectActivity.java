@@ -30,16 +30,23 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -76,6 +83,8 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
     public static final String KEY_TRANSITION = "key_transition";
 
     private final int PERMISSION_LOCATION = 0x1001;
+    private final int REQUEST_LOCATION = 0x1002;
+
     private Marker marker = null;
 
     @BindView(R.id.editAddress)
@@ -89,6 +98,14 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
         EventBus.getDefault().post(new LocationResult(location));
         onBackPressed();
     }
+
+    @OnClick(R.id.fabLocation)
+    void onMyLocation(FloatingActionButton fabLocation) {
+        Location location = googleMap.getMyLocation();
+
+        googleMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+    }
+
     @OnClick(R.id.imgClose)
     void onClose(ImageView imgClose) {
         onBackPressed();
@@ -115,6 +132,22 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
             editAddress.setText(location.getAddress());
         else
             location = new Loc();
+
+        editAddress.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+        editAddress.setRawInputType(InputType.TYPE_CLASS_TEXT);
+        editAddress.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    if (editAddress.getText().toString().isEmpty())
+                        return false;
+
+                    getLocationFromAddress(editAddress.getText().toString());
+                    return true;
+                }
+                return false;
+            }
+        });
 
         mapView.onCreate(saveBundle);
         mapView.onResume();
@@ -153,6 +186,12 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
 
         drawMarker();
         googleMap.setOnCameraIdleListener(this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, REQUEST_LOCATION);
+        } else {
+            googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+            googleMap.setMyLocationEnabled(true);
+        }
     }
 
     private void drawMarker() {
@@ -165,6 +204,33 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
 
         CameraPosition cameraPosition = new CameraPosition.Builder().target(pos).zoom(12).build();
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+    }
+
+    private void getLocationFromAddress(String address) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Geocoder geocoder = new Geocoder(LocationDetectActivity.this, Locale.getDefault());
+
+                List<Address> addressList = null;
+                try {
+                    addressList = geocoder.getFromLocationName(address, 1);
+                    if (addressList != null && addressList.size() > 0) {
+                        Address addr = addressList.get(0);
+                        location.setAddress(address);
+                        location.setLongitude(addr.getLongitude());
+                        location.setLatitude(addr.getLatitude());
+
+                        googleMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(addr.getLatitude(), addr.getLongitude())));
+                    } else {
+                        Snackbar.make(mapView, R.string.error_location, Snackbar.LENGTH_LONG).show();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Snackbar.make(mapView, R.string.error_location, Snackbar.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 
     private void getAddressFromLocation(LatLng latLng) {
@@ -204,5 +270,16 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
         location.setLongitude(l.longitude);
 
         getAddressFromLocation(l);
+    }
+
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == REQUEST_LOCATION) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            } else {
+                googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+                googleMap.setMyLocationEnabled(true);
+            }
+        }
     }
 }

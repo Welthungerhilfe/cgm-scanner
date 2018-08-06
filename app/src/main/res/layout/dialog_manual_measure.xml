@@ -90,6 +90,7 @@
             android:layout_height="22dp"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
+            android:visibility="gone"
             android:src="@drawable/location"
             android:contentDescription="@string/content_image"/>
 
