@@ -313,7 +313,7 @@ public class CreateDataActivity extends BaseActivity {
             final long timestamp = Utils.getUniversalTimestamp();
             final String consentFileString = timestamp + "_" + qrCode + ".png";
             File extFileDir = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
-            File consentFileFolder = new File(extFileDir, AppConstants.LOCAL_CONSENT_URL.replace("{qrcode}",qrCode));
+            File consentFileFolder = new File(extFileDir, AppConstants.LOCAL_CONSENT_URL.replace("{qrcode}", qrCode).replace("{scantimestamp}", String.valueOf(timestamp)));
             File consentFile = new File(consentFileFolder, consentFileString);
             if(!consentFileFolder.exists()) {
                 boolean created = consentFileFolder.mkdirs();
@@ -338,6 +338,7 @@ public class CreateDataActivity extends BaseActivity {
                 log.setHashValue(MD5.getMD5(consentFile.getPath()));
                 log.setFileSize(consentFile.length());
                 log.setUploadDate(0);
+                log.setQrCode(qrCode);
                 log.setDeleted(false);
                 log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                 new OfflineTask().saveFileLog(log);

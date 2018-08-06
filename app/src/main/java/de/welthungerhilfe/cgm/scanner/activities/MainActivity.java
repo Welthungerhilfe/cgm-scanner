@@ -462,7 +462,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         File[] qrCodes = root.listFiles();
         for (File qrCode : qrCodes) {
 
-            if (qrCode.isDirectory()) { //
+            if (qrCode.isDirectory()) {
                 File[] measurements = qrCode.listFiles();
 
                 for (File measure : measurements) {
@@ -478,7 +478,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                                 new OfflineTask().getFileLog(data.getPath(), new OfflineTask.OnLoadFileLog() {
                                     @Override
                                     public void onLoadFileLog(FileLog log) {
-                                        if (log == null) {
+                                        if (log != null) {
                                             startService(new Intent(MainActivity.this, FirebaseUploadService.class)
                                                     .putExtra(FirebaseUploadService.EXTRA_FILE_URI, Uri.fromFile(data))
                                                     .putExtra(AppConstants.EXTRA_QR, qrCode.getName())
