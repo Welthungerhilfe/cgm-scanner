@@ -11,6 +11,11 @@ android {
         versionCode 20
         versionName "1.4.1_SNAPSHOT"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation":"$projectDir/schemas".toString()]
+            }
+        }
     }
     allprojects {
         repositories {
@@ -29,6 +34,9 @@ android {
     }
     dexOptions {
         javaMaxHeapSize "4g"
+    }
+    sourceSets {
+        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
     buildToolsVersion '27.0.3'
 }
