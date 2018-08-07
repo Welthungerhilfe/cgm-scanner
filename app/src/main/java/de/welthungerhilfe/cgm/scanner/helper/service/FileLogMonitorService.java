@@ -54,12 +54,9 @@ public class FileLogMonitorService extends Service {
 
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
-        Log.e("Monitor", "service started");
-
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                Log.e("Monitor", "monitor called");
                 checkFileLogDatabase();
             }
         }, 0, AppConstants.LOG_MONITOR_INTERVAL);
@@ -69,8 +66,6 @@ public class FileLogMonitorService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.e("Monitor", "service stopped");
-
         timer.cancel();
         if (executor != null) {
             executor.shutdownNow();
@@ -90,8 +85,6 @@ public class FileLogMonitorService extends Service {
             public void onLoadFileLogs(List<FileLog> logs) {
                 if (Utils.isNetworkConnectionAvailable(FileLogMonitorService.this)) {
                     if (logs.size() > 0) {
-                        Log.e("File Monitor", "Do upload");
-
                         executor = Executors.newFixedThreadPool(5);
 
                         for (FileLog log : logs) {
@@ -144,22 +137,18 @@ public class FileLogMonitorService extends Service {
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                 StorageMetadata metadata = taskSnapshot.getMetadata();
                                 if (metadata.getMd5Hash().trim().compareTo(log.getHashValue().trim()) == 0) {
-                                    Log.e("upload", "succeed");
                                     log.setUploadDate(Utils.getUniversalTimestamp());
                                     File file = new File(log.getPath());
                                     if (file.exists() && !log.getType().equals("consent")) {
                                         file.delete();
                                         log.setDeleted(true);
                                     }
-                                    Log.e("Artefact Id", log.getId());
                                     new OfflineTask().saveFileLog(log);
                                     AppController.getInstance().firebaseFirestore.collection("artefacts")
                                             .document(log.getId())
                                             .set(log);
                                 } else {
-                                    Log.e("upload", "hash different");
-                                    Log.e("server hash", metadata.getMd5Hash());
-                                    Log.e("local hash", log.getHashValue());
+
                                 }
                                 pendingArtefacts.remove(log.getId());
                             }
@@ -167,7 +156,6 @@ public class FileLogMonitorService extends Service {
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Log.e("upload", "failed");
                                 e.printStackTrace();
                                 pendingArtefacts.remove(log.getId());
                             }
