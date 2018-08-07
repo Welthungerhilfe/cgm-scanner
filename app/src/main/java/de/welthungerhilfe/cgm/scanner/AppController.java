@@ -62,7 +62,7 @@ public class AppController extends Application {
     public OfflineDatabase offlineDb;
     public OfflineRepository offlineRepository;
 
-    protected final Migration MIGRATION_1_2 = new Migration(1, 2) {
+    public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE measures ADD COLUMN createdBy TEXT;");
@@ -78,7 +78,7 @@ public class AppController extends Application {
         }
     };
 
-    protected final Migration MIGRATION_2_3 = new Migration(2, 3) {
+    public static final Migration MIGRATION_2_3 = new Migration(2, 3) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("CREATE TABLE file_logs (" +
@@ -96,7 +96,7 @@ public class AppController extends Application {
         }
     };
 
-    protected final Migration MIGRATION_3_4 = new Migration(3, 4) {
+    public static final Migration MIGRATION_3_4 = new Migration(3, 4) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE measures ADD COLUMN deleted INTEGER DEFAULT '0' NOT NULL;");
