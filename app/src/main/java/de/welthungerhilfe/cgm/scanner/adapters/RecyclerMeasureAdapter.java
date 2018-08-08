@@ -112,6 +112,8 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         if (listener != null) {
             holder.bindSelectListener(measureList.get(position));
         }
+
+        setAnimation(holder.itemView, position);
     }
 
     @Override
