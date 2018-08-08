@@ -153,7 +153,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         fabCreate = view.findViewById(R.id.fabCreate);
         fabCreate.setOnClickListener(this);
 
-        //fetchRemoteConfig();
+        fetchRemoteConfig();
         
         return view;
     }
