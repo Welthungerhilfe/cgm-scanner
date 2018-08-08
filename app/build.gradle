@@ -61,6 +61,7 @@ dependencies {
     implementation 'org.greenrobot:eventbus:3.1.1'
     implementation 'com.jaredrummler:material-spinner:1.2.4'
     implementation 'com.google.firebase:firebase-auth:16.0.1'
+    implementation 'com.google.firebase:firebase-config:16.0.0'
     implementation 'com.google.firebase:firebase-storage:16.0.1'
     implementation 'com.google.firebase:firebase-firestore:17.0.1'
     implementation 'com.google.firebase:firebase-perf:16.0.0'

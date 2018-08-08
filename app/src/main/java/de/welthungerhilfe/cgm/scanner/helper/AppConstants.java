@@ -65,6 +65,7 @@ public class AppConstants {
     public static final String PARAM_AUTH_NAME = "auth_name";
     public static final String PARAM_AUTH_CONFIRM = "auth_confirm";
 
+    public static final String CONFIG_MANUAL_MEASURE_VISIBILITY = "manual_measure_visibility";
 
     public static final String AUTHTOKEN_TYPE = "de.welthungerhilfe.cgm.scanner";
     public static final String ACCOUNT_TYPE = "de.welthungerhilfe.cgm.scanner";

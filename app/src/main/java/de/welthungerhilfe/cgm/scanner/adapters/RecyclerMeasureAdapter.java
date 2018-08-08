@@ -34,6 +34,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -103,7 +104,13 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.bindSelectListener(measureList.get(position));
         }
 
-        setAnimation(holder.itemView, position);
+        if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL) && !AppController.getInstance().firebaseConfig.getBoolean(AppConstants.CONFIG_MANUAL_MEASURE_VISIBILITY)) {
+            holder.itemView.setVisibility(View.GONE);
+            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
+        } else {
+            holder.itemView.setVisibility(View.VISIBLE);
+            setAnimation(holder.itemView, position);
+        }
     }
 
     @Override
@@ -121,6 +128,10 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             viewToAnimate.startAnimation(animation);
             lastPosition = position;
         }
+    }
+
+    public void changeManualVisibility() {
+        notifyDataSetChanged();
     }
 
     public void resetData(List<Measure> measureList) {

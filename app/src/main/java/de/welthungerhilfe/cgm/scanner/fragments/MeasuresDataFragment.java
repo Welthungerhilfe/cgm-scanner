@@ -152,8 +152,26 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
         fabCreate = view.findViewById(R.id.fabCreate);
         fabCreate.setOnClickListener(this);
+
+        //fetchRemoteConfig();
         
         return view;
+    }
+
+    private void fetchRemoteConfig() {
+        long cacheExpiration = 3600 * 3;
+        if (AppController.getInstance().firebaseConfig.getInfo().getConfigSettings().isDeveloperModeEnabled()) {
+            cacheExpiration = 0;
+        }
+
+        AppController.getInstance().firebaseConfig.fetch(cacheExpiration)
+                .addOnSuccessListener(aVoid -> {
+                    AppController.getInstance().firebaseConfig.activateFetched();
+                    adapterMeasure.changeManualVisibility();
+                })
+                .addOnFailureListener(e -> {
+                    e.printStackTrace();
+                });
     }
 
     public void addMeasure(Measure measure) {

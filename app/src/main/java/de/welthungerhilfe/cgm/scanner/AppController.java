@@ -35,6 +35,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -59,8 +61,9 @@ public class AppController extends Application {
 
     public FirebaseFirestore firebaseFirestore;
 
+    public FirebaseRemoteConfig firebaseConfig;
+
     public OfflineDatabase offlineDb;
-    public OfflineRepository offlineRepository;
 
     public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
@@ -133,6 +136,11 @@ public class AppController extends Application {
                 .setPersistenceEnabled(false)
                 .build();
         firebaseFirestore.setFirestoreSettings(settings);
+
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().setDeveloperModeEnabled(true).build();
+        firebaseConfig = FirebaseRemoteConfig.getInstance();
+        firebaseConfig.setConfigSettings(configSettings);
+        firebaseConfig.setDefaults(R.xml.remoteconfig);
 
         offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING).build();
         /*
