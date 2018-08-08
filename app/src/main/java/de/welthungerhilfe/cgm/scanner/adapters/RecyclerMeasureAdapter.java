@@ -90,10 +90,19 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.editLocation.setText("Location not available");
         else
             holder.editLocation.setText(measure.getLocation().getAddress());
-        holder.editHeight.setText(Double.toString(measure.getHeight()));
-        holder.editWeight.setText(Double.toString(measure.getWeight()));
-        holder.editMuac.setText(Double.toString(measure.getMuac()));
-        holder.editHead.setText(Double.toString(measure.getHeadCircumference()));
+
+        if (AppController.getInstance().firebaseConfig.getBoolean(AppConstants.CONFIG_MEASURE_VISIBILITY)) {
+            holder.editHeight.setText(Double.toString(measure.getHeight()));
+            holder.editWeight.setText(Double.toString(measure.getWeight()));
+            holder.editMuac.setText(Double.toString(measure.getMuac()));
+            holder.editHead.setText(Double.toString(measure.getHeadCircumference()));
+        } else {
+            holder.editHeight.setText(R.string.field_concealed);
+            holder.editWeight.setText(R.string.field_concealed);
+            holder.editMuac.setText(R.string.field_concealed);
+            holder.editHead.setText(R.string.field_concealed);
+        }
+
         if (measure.isOedema()) {
             holder.checkOedema.setChecked(true);
         } else {
@@ -102,14 +111,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
         if (listener != null) {
             holder.bindSelectListener(measureList.get(position));
-        }
-
-        if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL) && !AppController.getInstance().firebaseConfig.getBoolean(AppConstants.CONFIG_MANUAL_MEASURE_VISIBILITY)) {
-            holder.itemView.setVisibility(View.GONE);
-            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
-        } else {
-            holder.itemView.setVisibility(View.VISIBLE);
-            setAnimation(holder.itemView, position);
         }
     }
 

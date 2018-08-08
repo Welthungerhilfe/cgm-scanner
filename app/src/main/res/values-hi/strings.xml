@@ -28,6 +28,7 @@
     <string name="cancel">रद्द करें</string>
     <string name="back">वापस जाएं</string>
     <string name="next">सहेजें / सेव</string>
+    <string name="delete">Delete</string>
 
     <string name="about">के बारे में</string>
     <string name="version">संस्करण</string>
@@ -114,6 +115,13 @@
     <string name="error_person_first">कृपया पहले व्यक्ति को पंजीकृत करें</string>
     <string name="error_location">Could not find matching location.</string>
 
+    <string name="delete_measure">Do you really want to delete this measure data?</string>
+    <string name="delete_person">Do you really want to delete this person data?</string>
+
+    <string name="field_concealed">concealed</string>
+
+    <string name="permission_delete">Sorry, You don\'t have the rights to delete data</string>
+
     <!-- Sync Adapter -->
     <string name="account_type">de.welthungerhilfe.cgm.scanner</string>
     <string name="sync_authority">de.welthungerhilfe.cgm.scanner</string>
@@ -148,7 +156,6 @@
         <item>@string/filter_age_head</item>
         <item>@string/filter_age_arm</item>
     </string-array>
-
 
     <string name="selector_manual">मैन्युअल उपाय जोड़ें</string>
     <string name="selector_scan">स्कैन उपाय जोड़ें</string>
