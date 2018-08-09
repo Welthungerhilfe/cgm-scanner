@@ -125,7 +125,12 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
 
         // [START get_child_ref]
         // Get a reference to store file at STORAGE_MEASURE_URL = "/data/person/{qrcode}/measurements/{scantimestamp}/";
-        final String pcPath = storageUrl.replace("{qrcode}",  qrCode).replace("{scantimestamp}", scanTimestamp);
+        final String pcPath = storageUrl;
+        try {
+            pcPath.replace("{qrcode}",  qrCode).replace("{scantimestamp}", scanTimestamp);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
         final StorageReference photoRef = mStorageRef.child(pcPath)
                 .child(fileUri.getLastPathSegment());
         // [END get_child_ref]

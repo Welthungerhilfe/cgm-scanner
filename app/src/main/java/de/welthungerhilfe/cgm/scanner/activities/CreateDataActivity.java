@@ -47,6 +47,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.bumptech.glide.util.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -345,9 +346,9 @@ public class CreateDataActivity extends BaseActivity {
                 log.setUploadDate(0);
                 log.setQrCode(qrCode);
                 log.setDeleted(false);
+                log.setCreateDate(Utils.getUniversalTimestamp());
                 log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                 new OfflineTask().saveFileLog(log);
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
