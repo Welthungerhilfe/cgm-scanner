@@ -291,7 +291,8 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             }
         });
 
-        checkLocalFiles();
+        File root = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
+        iterateLocalFiles(root);
         checkDeletedRecords();
 
         startService(new Intent(this, FileLogMonitorService.class));
@@ -457,6 +458,30 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         adapterData.clearFitlers();
     }
 
+    private void iterateLocalFiles(File target) {
+        if (target.isFile()) {
+            new OfflineTask().getFileLog(target.getPath(), new OfflineTask.OnLoadFileLog() {
+                @Override
+                public void onLoadFileLog(FileLog log) {
+                    if (log != null) {
+                        startService(new Intent(MainActivity.this, FirebaseUploadService.class)
+                                .putExtra(FirebaseUploadService.EXTRA_FILE_URI, Uri.fromFile(target))
+                                .putExtra(AppConstants.EXTRA_QR, log.getQrCode())
+                                .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, String.valueOf(log.getCreateDate()))
+                                .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_CONSENT_URL)
+                                .setAction(FirebaseUploadService.ACTION_UPLOAD));
+                    }
+                }
+            });
+        } else {
+            File[] children = target.listFiles();
+            for (File child : children) {
+                iterateLocalFiles(child);
+            }
+        }
+    }
+
+    /*
     private void checkLocalFiles() {
         File root = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
         File[] qrCodes = root.listFiles();
@@ -495,6 +520,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             }
         }
     }
+    */
 
     private void checkDeletedRecords() {
         new OfflineTask().deleteRecords(session.getSyncTimestamp());
