@@ -464,19 +464,32 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                 @Override
                 public void onLoadFileLog(FileLog log) {
                     if (log != null) {
+                        String logUrl = "";
+                        if (log.getType().equals("consent")) {
+                            logUrl = AppConstants.STORAGE_CONSENT_URL;
+                        } else if (log.getType().equals("pcd")) {
+                            logUrl = AppConstants.STORAGE_PC_URL;
+                        } else if (log.getType().equals("rgb")) {
+                            logUrl = AppConstants.STORAGE_RGB_URL;
+                        }
                         startService(new Intent(MainActivity.this, FirebaseUploadService.class)
                                 .putExtra(FirebaseUploadService.EXTRA_FILE_URI, Uri.fromFile(target))
                                 .putExtra(AppConstants.EXTRA_QR, log.getQrCode())
                                 .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, String.valueOf(log.getCreateDate()))
-                                .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_CONSENT_URL)
+                                .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, logUrl)
                                 .setAction(FirebaseUploadService.ACTION_UPLOAD));
                     }
                 }
             });
         } else {
             File[] children = target.listFiles();
-            for (File child : children) {
-                iterateLocalFiles(child);
+
+            if (children.length == 0) {
+                target.delete();
+            } else {
+                for (File child : children) {
+                    iterateLocalFiles(child);
+                }
             }
         }
     }
