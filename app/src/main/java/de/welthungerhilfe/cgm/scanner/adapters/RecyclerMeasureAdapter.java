@@ -28,9 +28,12 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.bumptech.glide.util.Util;
 
 import java.util.List;
 
@@ -72,41 +75,38 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
     @Override
     public RecyclerMeasureAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == 0) {
-            View view = LayoutInflater.from(context).inflate(R.layout.row_measure_manual, parent, false);
-            return new ViewHolder(view);
-        } else {
-            View view = LayoutInflater.from(context).inflate(R.layout.row_measure_machine, parent, false);
-            return new ViewHolder(view);
-        }
+        View view = LayoutInflater.from(context).inflate(R.layout.row_measure, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(RecyclerMeasureAdapter.ViewHolder holder, int position) {
         Measure measure = measureList.get(position);
 
-        holder.editDate.setText(Utils.beautifyDate(measure.getDate()));
-        if (measure.getLocation() == null)
-            holder.editLocation.setText("Location not available");
+        if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL))
+            holder.imgType.setImageResource(R.drawable.manual);
         else
-            holder.editLocation.setText(measure.getLocation().getAddress());
-
-        if (AppController.getInstance().firebaseConfig.getBoolean(AppConstants.CONFIG_MEASURE_VISIBILITY)) {
-            holder.editHeight.setText(Double.toString(measure.getHeight()));
-            holder.editWeight.setText(Double.toString(measure.getWeight()));
-            holder.editMuac.setText(Double.toString(measure.getMuac()));
-            holder.editHead.setText(Double.toString(measure.getHeadCircumference()));
-        } else {
-            holder.editHeight.setText(R.string.field_concealed);
-            holder.editWeight.setText(R.string.field_concealed);
-            holder.editMuac.setText(R.string.field_concealed);
-            holder.editHead.setText(R.string.field_concealed);
-        }
+            holder.imgType.setImageResource(R.drawable.machine);
 
         if (measure.isOedema()) {
-            holder.checkOedema.setChecked(true);
+            holder.rytItem.setBackgroundResource(R.color.colorPink);
         } else {
-            holder.checkOedema.setChecked(false);
+            holder.rytItem.setBackgroundResource(R.color.colorWhite);
+        }
+
+        holder.txtDate.setText(Utils.beautifyHourMinute(measure.getDate()));
+        holder.txtAuthor.setText(Utils.getNameFromEmail(measure.getCreatedBy()));
+
+        if (AppController.getInstance().firebaseConfig.getBoolean(AppConstants.CONFIG_MEASURE_VISIBILITY)) {
+            holder.txtHeight.setText(Double.toString(measure.getHeight()) + context.getString(R.string.unit_cm));
+            holder.txtWeight.setText(Double.toString(measure.getWeight()) + context.getString(R.string.unit_kg));
+            holder.txtArm.setText(Double.toString(measure.getMuac()) + context.getString(R.string.unit_cm));
+            holder.txtHead.setText(Double.toString(measure.getHeadCircumference()) + context.getString(R.string.unit_cm));
+        } else {
+            holder.txtHeight.setText(R.string.field_concealed);
+            holder.txtWeight.setText(R.string.field_concealed);
+            holder.txtArm.setText(R.string.field_concealed);
+            holder.txtHead.setText(R.string.field_concealed);
         }
 
         if (listener != null) {
@@ -157,34 +157,35 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public LinearLayout overlay;
-        public EditText editDate;
-        public EditText editLocation;
-        public EditText editHeight;
-        public EditText editWeight;
-        public EditText editMuac;
-        public EditText editHead;
-        public AppCompatCheckBox checkOedema;
+        public RelativeLayout rytItem;
+
+        public ImageView imgType;
+
+        public TextView txtDate;
+        public TextView txtAuthor;
+        public TextView txtHeight;
+        public TextView txtWeight;
+        public TextView txtHead;
+        public TextView txtArm;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
-            overlay = itemView.findViewById(R.id.overlay);
-            editDate = itemView.findViewById(R.id.editDate);
-            editLocation = itemView.findViewById(R.id.editLocation);
-            editHeight = itemView.findViewById(R.id.editHeight);
-            editWeight = itemView.findViewById(R.id.editWeight);
-            editMuac = itemView.findViewById(R.id.editMuac);
-            editHead = itemView.findViewById(R.id.editHead);
-            checkOedema = itemView.findViewById(R.id.checkOedema);
+            rytItem = itemView.findViewById(R.id.rytItem);
+            imgType = itemView.findViewById(R.id.imgType);
+            txtDate = itemView.findViewById(R.id.txtDate);
+            txtAuthor = itemView.findViewById(R.id.txtAuthor);
+            txtHeight = itemView.findViewById(R.id.txtHeight);
+            txtWeight = itemView.findViewById(R.id.txtWeight);
+            txtHead = itemView.findViewById(R.id.txtHead);
+            txtArm = itemView.findViewById(R.id.txtArm);
         }
 
         public void bindSelectListener(Measure measure) {
-            overlay.setOnLongClickListener(new View.OnLongClickListener() {
+            rytItem.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public boolean onLongClick(View v) {
+                public void onClick(View v) {
                     listener.onMeasureSelect(measure);
-                    return false;
                 }
             });
         }

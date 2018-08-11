@@ -89,6 +89,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         
         recyclerMeasure = view.findViewById(R.id.recyclerMeasure);
         adapterMeasure = new RecyclerMeasureAdapter(context, ((CreateDataActivity)context).measures);
+        adapterMeasure.setMeasureSelectListener(this);
         recyclerMeasure.setAdapter(adapterMeasure);
         recyclerMeasure.setLayoutManager(new LinearLayoutManager(context));
 
@@ -230,20 +231,10 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onMeasureSelect(Measure measure) {
-        ConfirmDialog dialog = new ConfirmDialog(context);
-        dialog.setMessage(R.string.delete_measure);
-        dialog.setConfirmListener(new ConfirmDialog.OnConfirmListener() {
-            @Override
-            public void onConfirm(boolean result) {
-                if (result) {
-                    measure.setDeleted(true);
-                    measure.setDeletedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-                    measure.setTimestamp(Utils.getUniversalTimestamp());
-                    OfflineRepository.getInstance().updateMeasure(measure);
-                    adapterMeasure.removeMeasure(measure);
-                }
-            }
-        });
+        ManualMeasureDialog dialog = new ManualMeasureDialog(context);
+        dialog.setManualMeasureListener(MeasuresDataFragment.this);
+        dialog.setMeasure(measure);
+        dialog.setEditable(false);
         dialog.show();
     }
 }

@@ -29,6 +29,7 @@
     <string name="back">वापस जाएं</string>
     <string name="next">सहेजें / सेव</string>
     <string name="delete">Delete</string>
+    <string name="by">by</string>
 
     <string name="about">के बारे में</string>
     <string name="version">संस्करण</string>
@@ -82,6 +83,11 @@
     <string name="label_height">ऊंचाई:</string>
     <string name="label_weight">वजन:</string>
     <string name="label_date">तारीख:</string>
+
+    <string name="abbr_height">h:</string>
+    <string name="abbr_weight">w:</string>
+    <string name="abbr_head">h:</string>
+    <string name="abbr_arm">a:</string>
 
     <string name="unit_km">कि.मी.</string>
     <string name="unit_cm">से.मी.</string>

@@ -29,6 +29,7 @@
     <string name="back">Zurück</string>
     <string name="next">Speichern</string>
     <string name="delete">Delete</string>
+    <string name="by">by</string>
 
     <string name="about">Über</string>
     <string name="version">Version</string>
@@ -82,6 +83,11 @@
     <string name="label_height">Größe: </string>
     <string name="label_weight">Gewicht: </string>
     <string name="label_date">Datum: </string>
+
+    <string name="abbr_height">h:</string>
+    <string name="abbr_weight">w:</string>
+    <string name="abbr_head">h:</string>
+    <string name="abbr_arm">a:</string>
 
     <string name="unit_km">km</string>
     <string name="unit_cm">cm</string>

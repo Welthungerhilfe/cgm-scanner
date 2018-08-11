@@ -103,10 +103,25 @@ public class Utils {
         return (res == PackageManager.PERMISSION_GRANTED);
     }
 
+    public static String getNameFromEmail(String email) {
+        if (email == null)
+            return "unknown";
+        else {
+            String[] arr = email.split("@");
+            return arr[0];
+        }
+    }
+
     public static String beautifyDate(long timestamp) {
         Date date = new Date(timestamp);
 
         return beautifyDate(date);
+    }
+
+    public static String beautifyHourMinute(long timestamp) {
+        Date date = new Date(timestamp);
+
+        return beautifyHourMinute(date);
     }
 
     public static String beautifyDate(Date date) {
@@ -121,6 +136,15 @@ public class Utils {
     public static String beautifyDateTime(Date date) {
         SimpleDateFormat formatter = null;
         formatter = new SimpleDateFormat("MM/dd/yyyy H:mm:ss", Locale.getDefault());
+
+        String res = formatter.format(date);
+
+        return res;
+    }
+
+    public static String beautifyHourMinute(Date date) {
+        SimpleDateFormat formatter = null;
+        formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
 
         String res = formatter.format(date);
 
