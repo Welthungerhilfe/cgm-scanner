@@ -4,4 +4,8 @@
         <key>measure_visibility</key>
         <value>false</value>
     </entry>
+    <entry>
+        <key>time_to_allow_editing</key>
+        <value>24</value>
+    </entry>
 </defaultsMap>

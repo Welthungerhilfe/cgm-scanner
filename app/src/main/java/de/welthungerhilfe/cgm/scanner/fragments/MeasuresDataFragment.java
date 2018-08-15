@@ -39,6 +39,7 @@ import android.view.inputmethod.InputMethodManager;
 
 //import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 
+import com.bumptech.glide.util.Util;
 import com.crashlytics.android.Crashlytics;
 
 import java.util.List;
@@ -100,8 +101,10 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                 int position = viewHolder.getAdapterPosition();
                 Measure measure = adapterMeasure.getItem(position);
 
+                boolean notAdmin = !AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("mmatiaschek@gmail.com") && !AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("zhangnemo34@hotmail.com");
+
                 if (direction == ItemTouchHelper.LEFT) {
-                    if (!AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("mmatiaschek@gmail.com") && !AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("zhangnemo34@hotmail.com")) {
+                    if (notAdmin) {
                         adapterMeasure.notifyItemChanged(position);
 
                         Snackbar.make(recyclerMeasure, R.string.permission_delete, Snackbar.LENGTH_LONG).show();
@@ -125,24 +128,29 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                         });
                         dialog.show();
                     }
-                } else {
-                    if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
-                        ManualMeasureDialog dialog = new ManualMeasureDialog(context);
-                        dialog.setManualMeasureListener(MeasuresDataFragment.this);
-                        dialog.setCloseListener(new ManualMeasureDialog.OnCloseListener() {
-                            @Override
-                            public void onClose(boolean result) {
-                                adapterMeasure.notifyItemChanged(position);
-                            }
-                        });
-                        dialog.setMeasure(measure);
-                        dialog.show();
-                    } else {
-                        Intent intent = new Intent(getContext(), RecorderActivity.class);
-                        intent.putExtra(AppConstants.EXTRA_PERSON, ((CreateDataActivity)context).person);
-                        intent.putExtra(AppConstants.EXTRA_MEASURE, measure);
-                        startActivity(intent);
+                } else if (direction == ItemTouchHelper.RIGHT){
+                    if (notAdmin && measure.getDate() < Utils.getUniversalTimestamp() - AppController.getInstance().firebaseConfig.getLong(AppConstants.CONFIG_TIME_TO_ALLOW_EDITING) * 3600 * 1000) {
                         adapterMeasure.notifyItemChanged(position);
+                        Snackbar.make(recyclerMeasure, R.string.permission_expired, Snackbar.LENGTH_LONG).show();
+                    } else {
+                        if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
+                            ManualMeasureDialog dialog = new ManualMeasureDialog(context);
+                            dialog.setManualMeasureListener(MeasuresDataFragment.this);
+                            dialog.setCloseListener(new ManualMeasureDialog.OnCloseListener() {
+                                @Override
+                                public void onClose(boolean result) {
+                                    adapterMeasure.notifyItemChanged(position);
+                                }
+                            });
+                            dialog.setMeasure(measure);
+                            dialog.show();
+                        } else {
+                            Intent intent = new Intent(getContext(), RecorderActivity.class);
+                            intent.putExtra(AppConstants.EXTRA_PERSON, ((CreateDataActivity)context).person);
+                            intent.putExtra(AppConstants.EXTRA_MEASURE, measure);
+                            startActivity(intent);
+                            adapterMeasure.notifyItemChanged(position);
+                        }
                     }
                 }
             }
