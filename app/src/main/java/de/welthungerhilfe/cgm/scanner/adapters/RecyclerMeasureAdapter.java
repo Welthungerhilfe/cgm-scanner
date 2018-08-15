@@ -87,6 +87,20 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.imgType.setImageResource(R.drawable.manual);
         else
             holder.imgType.setImageResource(R.drawable.machine);
+        
+        holder.editLocation.setText(measure.getLocation().getAddress());
+
+        if (AppController.getInstance().firebaseConfig.getBoolean(AppConstants.CONFIG_MEASURE_VISIBILITY)) {
+            holder.editHeight.setText(Double.toString(measure.getHeight()));
+            holder.editWeight.setText(Double.toString(measure.getWeight()));
+            holder.editMuac.setText(Double.toString(measure.getMuac()));
+            holder.editHead.setText(Double.toString(measure.getHeadCircumference()));
+        } else {
+            holder.editHeight.setText(R.string.field_concealed);
+            holder.editWeight.setText(R.string.field_concealed);
+            holder.editMuac.setText(R.string.field_concealed);
+            holder.editHead.setText(R.string.field_concealed);
+        }
 
         if (measure.isOedema()) {
             holder.rytItem.setBackgroundResource(R.color.colorPink);
