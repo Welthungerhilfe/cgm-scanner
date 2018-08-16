@@ -12,4 +12,12 @@
         <key>admins</key>
         <value>zhangnemo34@hotmail.com,mmatiaschek@gmail.com</value>
     </entry>
+    <entry>
+        <key>allow_edit</key>
+        <value>false</value>
+    </entry>
+    <entry>
+        <key>allow_delete</key>
+        <value>false</value>
+    </entry>
 </defaultsMap>
