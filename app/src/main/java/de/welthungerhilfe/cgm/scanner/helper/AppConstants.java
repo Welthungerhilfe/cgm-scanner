@@ -67,6 +67,7 @@ public class AppConstants {
 
     public static final String CONFIG_MEASURE_VISIBILITY = "measure_visibility";
     public static final String CONFIG_TIME_TO_ALLOW_EDITING = "time_to_allow_editing";
+    public static final String CONFIG_ADMINS = "admins";
 
     public static final String AUTHTOKEN_TYPE = "de.welthungerhilfe.cgm.scanner";
     public static final String ACCOUNT_TYPE = "de.welthungerhilfe.cgm.scanner";

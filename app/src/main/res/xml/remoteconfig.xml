@@ -8,4 +8,8 @@
         <key>time_to_allow_editing</key>
         <value>24</value>
     </entry>
+    <entry>
+        <key>admins</key>
+        <value>zhangnemo34@hotmail.com,mmatiaschek@gmail.com</value>
+    </entry>
 </defaultsMap>
