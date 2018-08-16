@@ -101,7 +101,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                 int position = viewHolder.getAdapterPosition();
                 Measure measure = adapterMeasure.getItem(position);
 
-                boolean notAdmin = !AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("mmatiaschek@gmail.com") && !AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("zhangnemo34@hotmail.com");
+                boolean notAdmin = !AppController.getInstance().isAdmin();
 
                 if (direction == ItemTouchHelper.LEFT) {
                     if (notAdmin) {

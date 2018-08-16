@@ -356,7 +356,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
 
-                if (!AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("mmatiaschek@gmail.com") && !AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("zhangnemo34@hotmail.com")) {
+                if (!AppController.getInstance().isAdmin()) {
                     adapterData.notifyItemChanged(position);
 
                     Snackbar.make(recyclerData, R.string.permission_delete, Snackbar.LENGTH_LONG).show();
