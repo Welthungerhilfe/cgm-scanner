@@ -66,7 +66,6 @@ public class AppConstants {
     public static final String PARAM_AUTH_CONFIRM = "auth_confirm";
 
     public static final String CONFIG_MEASURE_VISIBILITY = "measure_visibility";
-
     public static final String CONFIG_TIME_TO_ALLOW_EDITING = "time_to_allow_editing";
     public static final String CONFIG_ADMINS = "admins";
     public static final String CONFIG_ALLOW_EDIT = "allow_edit";
