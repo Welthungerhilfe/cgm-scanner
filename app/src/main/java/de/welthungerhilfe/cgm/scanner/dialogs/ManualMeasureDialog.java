@@ -71,6 +71,10 @@ import de.welthungerhilfe.cgm.scanner.views.UnitEditText;
 public class ManualMeasureDialog extends Dialog implements View.OnClickListener {
     private final int REQUEST_LOCATION = 0x1000;
 
+    @BindView(R.id.imgType)
+    ImageView imgType;
+    @BindView(R.id.txtTitle)
+    TextView txtTitle;
     @BindView(R.id.editManualDate)
     EditText editManualDate;
     @BindView(R.id.editManualHeight)
@@ -199,6 +203,21 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         editManualLocation.setText(location.getAddress());
     }
 
+    public void setEditable(boolean editable) {
+        if (!editable) {
+            editManualLocation.setOnClickListener(null);
+            editManualHeight.setKeyListener(null);
+            editManualWeight.setKeyListener(null);
+            editManualMuac.setKeyListener(null);
+            editManualHead.setKeyListener(null);
+            checkManualOedema.setEnabled(editable);
+
+            btnOK.setVisibility(View.GONE);
+        } else {
+            btnOK.setVisibility(View.VISIBLE);
+        }
+    }
+
     public void setMeasure(Measure measure) {
         this.measure = measure;
 
@@ -206,6 +225,14 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     }
 
     private void updateUI() {
+        if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
+            imgType.setImageResource(R.drawable.manual);
+            txtTitle.setText(R.string.manual_measure);
+        } else {
+            imgType.setImageResource(R.drawable.machine);
+            txtTitle.setText(R.string.machine_measure);
+        }
+
         editManualDate.setText(Utils.beautifyDate(measure.getDate()));
         if (measure.getLocation() != null)
             editManualLocation.setText(measure.getLocation().getAddress());

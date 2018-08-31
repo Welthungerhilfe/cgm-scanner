@@ -1,7 +1,6 @@
 package de.welthungerhilfe.cgm.scanner.syncdata;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -72,11 +71,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                                         Crashlytics.setString("sync_data", "app is syncing now");
                                     }
 
-                                    String[] arr = person.getId().split("_");
-                                    if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
-                                        OfflineRepository.getInstance().createPerson(person);
-                                    } else {    // created before sync, after sync person was updates, so must update in local room
-                                        OfflineRepository.getInstance().updatePerson(person);
+                                    if (prevTimestamp == 0 && person.getDeleted()) {
+
+                                    } else {
+                                        String[] arr = person.getId().split("_");
+                                        if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
+                                            OfflineRepository.getInstance().createPerson(person);
+                                        } else {    // created before sync, after sync person was updates, so must update in local room
+                                            OfflineRepository.getInstance().updatePerson(person);
+                                        }
                                     }
                                 }
 
@@ -95,12 +98,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
 
                                                         Measure measure = snapshot.toObject(Measure.class);
 
-                                                        String[] arr = measure.getId().split("_");
+                                                        if (prevTimestamp == 0 && measure.getDeleted()) {
 
-                                                        if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
-                                                            OfflineRepository.getInstance().createMeasure(measure);
-                                                        } else {    // created before sync, after sync person was updates, so must update in local room
-                                                            OfflineRepository.getInstance().updateMeasure(measure);
+                                                        } else {
+                                                            String[] arr = measure.getId().split("_");
+                                                            if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
+                                                                OfflineRepository.getInstance().createMeasure(measure);
+                                                            } else {    // created before sync, after sync person was updates, so must update in local room
+                                                                OfflineRepository.getInstance().updateMeasure(measure);
+                                                            }
                                                         }
                                                     }
 

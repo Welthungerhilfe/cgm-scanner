@@ -67,7 +67,7 @@ public abstract class SwipeView extends Callback {
 
         //Setting Swipe Background
         if (dX > 0) {
-            ((ColorDrawable) background).setColor(ContextCompat.getColor(context, R.color.colorBlue));
+            ((ColorDrawable) background).setColor(ContextCompat.getColor(context, R.color.colorPrimary));
             background.setBounds(0, itemView.getTop(), (int) dX, itemView.getBottom());
             background.draw(c);
 
@@ -83,7 +83,7 @@ public abstract class SwipeView extends Callback {
             editIcon.setBounds(xMarkLeft, xMarkTop, xMarkRight, xMarkBottom);
             editIcon.draw(c);
         } else {
-            ((ColorDrawable) background).setColor(ContextCompat.getColor(context, R.color.colorPink));
+            ((ColorDrawable) background).setColor(ContextCompat.getColor(context, R.color.colorBlue));
             background.setBounds(itemView.getRight() + (int) dX, itemView.getTop(), itemView.getRight(), itemView.getBottom());
             background.draw(c);
 

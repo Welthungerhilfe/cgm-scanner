@@ -18,16 +18,14 @@
 
 package de.welthungerhilfe.cgm.scanner;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Application;
 import android.arch.persistence.db.SupportSQLiteDatabase;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.arch.persistence.room.migration.Migration;
+import android.content.Context;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
-//import android.util.Log;
 
 //import com.amitshekhar.DebugDB;
 import com.crashlytics.android.Crashlytics;
@@ -41,10 +39,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import de.welthungerhilfe.cgm.scanner.helper.DbConstants;
+import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.helper.OfflineDatabase;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.repositories.OfflineRepository;
-import de.welthungerhilfe.cgm.scanner.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.fabric.sdk.android.Fabric;
 
@@ -166,6 +162,11 @@ public class AppController extends Application {
         //Log.e("Offline DB", DebugDB.getAddressLog());
 
         mInstance = this;
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LanguageHelper.onAttach(base));
     }
 
     public static synchronized AppController getInstance() {
