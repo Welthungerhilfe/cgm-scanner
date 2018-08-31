@@ -127,6 +127,7 @@
     <string name="field_concealed">concealed</string>
 
     <string name="permission_delete">Sorry, You don\'t have the rights to delete data</string>
+    <string name="permission_edit">Sorry, You don\'t have the rights to edit data</string>
     <string name="permission_expired">Sorry, Time to allow editing is expired.</string>
 
     <!-- Sync Adapter -->

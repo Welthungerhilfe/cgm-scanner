@@ -38,6 +38,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.DbConstants;
 import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.helper.OfflineDatabase;
@@ -167,6 +168,22 @@ public class AppController extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(LanguageHelper.onAttach(base));
+    }
+
+    public boolean isAdmin() {
+        boolean isAdmin = false;
+
+        String currentUser = AppController.getInstance().firebaseAuth.getCurrentUser().getEmail();
+        String[] admins = AppController.getInstance().firebaseConfig.getString(AppConstants.CONFIG_ADMINS).split(",");
+
+        for (int i = 0; i < admins.length; i++) {
+            if (admins[i].equals(currentUser)) {
+                isAdmin = true;
+                break;
+            }
+        }
+
+        return isAdmin;
     }
 
     public static synchronized AppController getInstance() {

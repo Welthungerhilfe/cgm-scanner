@@ -101,12 +101,11 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                 int position = viewHolder.getAdapterPosition();
                 Measure measure = adapterMeasure.getItem(position);
 
-                boolean notAdmin = !AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("mmatiaschek@gmail.com") && !AppController.getInstance().firebaseAuth.getCurrentUser().getEmail().equals("zhangnemo34@hotmail.com");
+                boolean notAdmin = !AppController.getInstance().isAdmin();
 
                 if (direction == ItemTouchHelper.LEFT) {
-                    if (notAdmin) {
+                    if (notAdmin && !AppController.getInstance().firebaseConfig.getBoolean(AppConstants.CONFIG_ALLOW_DELETE)) {
                         adapterMeasure.notifyItemChanged(position);
-
                         Snackbar.make(recyclerMeasure, R.string.permission_delete, Snackbar.LENGTH_LONG).show();
                     } else {
                         ConfirmDialog dialog = new ConfirmDialog(context);
@@ -129,7 +128,10 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                         dialog.show();
                     }
                 } else if (direction == ItemTouchHelper.RIGHT){
-                    if (notAdmin && measure.getDate() < Utils.getUniversalTimestamp() - AppController.getInstance().firebaseConfig.getLong(AppConstants.CONFIG_TIME_TO_ALLOW_EDITING) * 3600 * 1000) {
+                    if (notAdmin && !AppController.getInstance().firebaseConfig.getBoolean(AppConstants.CONFIG_ALLOW_EDIT)) {
+                        adapterMeasure.notifyItemChanged(position);
+                        Snackbar.make(recyclerMeasure, R.string.permission_edit, Snackbar.LENGTH_LONG).show();
+                    } else if (notAdmin && measure.getDate() < Utils.getUniversalTimestamp() - AppController.getInstance().firebaseConfig.getLong(AppConstants.CONFIG_TIME_TO_ALLOW_EDITING) * 3600 * 1000) {
                         adapterMeasure.notifyItemChanged(position);
                         Snackbar.make(recyclerMeasure, R.string.permission_expired, Snackbar.LENGTH_LONG).show();
                     } else {
