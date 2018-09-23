@@ -54,6 +54,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoConfig;
@@ -543,8 +544,10 @@ public class RecorderActivity extends Activity {
                     }
                 } catch (TangoErrorException e) {
                     Log.e(TAG, "Tango API call error within the OpenGL thread", e);
+                    Crashlytics.log(Log.ERROR, TAG, "Tango API call error within the OpenGL thread");
                 } catch (Throwable t) {
                     Log.e(TAG, "Exception on the OpenGL thread", t);
+                    Crashlytics.log(Log.ERROR, TAG, "Exception on the OpenGL thread");
                 }
             }
         });
@@ -587,12 +590,15 @@ public class RecorderActivity extends Activity {
                     } catch (TangoOutOfDateException e) {
                         Log.e(TAG, getString(R.string.exception_out_of_date), e);
                         showsToastAndFinishOnUiThread(R.string.exception_out_of_date);
+                        Crashlytics.log(Log.ERROR, TAG, "TangoOutOfDateException");
                     } catch (TangoErrorException e) {
                         Log.e(TAG, getString(R.string.exception_tango_error), e);
                         showsToastAndFinishOnUiThread(R.string.exception_tango_error);
+                        Crashlytics.log(Log.ERROR, TAG, "TangoErrorException");
                     } catch (TangoInvalidException e) {
                         Log.e(TAG, getString(R.string.exception_tango_invalid), e);
                         showsToastAndFinishOnUiThread(R.string.exception_tango_invalid);
+                        Crashlytics.log(Log.ERROR, TAG, "TangoInvalidException");
                     }
                     setUpExtrinsics();
                 }
@@ -622,6 +628,7 @@ public class RecorderActivity extends Activity {
                 mIsConnected = false;
             } catch (TangoErrorException e) {
                 Log.e(TAG, getString(R.string.exception_tango_error), e);
+                Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in synchronized disconnect onPause");
             }
         }
     }
@@ -738,6 +745,7 @@ public class RecorderActivity extends Activity {
                             mutex_on_mIsRecording.acquire();
                         } catch (InterruptedException e) {
                             e.printStackTrace();
+                            Crashlytics.log(Log.WARN, TAG, "InterruptedException aquiring recording mutext");
                         }
                         // Saving the frame or not, depending on the current mode.
                         if ( mIsRecording ) {
@@ -920,6 +928,7 @@ public class RecorderActivity extends Activity {
         } catch (TangoErrorException e) {
             Toast.makeText(getApplicationContext(), R.string.exception_tango_error,
                     Toast.LENGTH_SHORT).show();
+            Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in device setup");
         }
         /*mRenderer.getModelMatCalculator().SetDevice2IMUMatrix(
                 device2IMUPose.getTranslationAsFloats(),
@@ -935,6 +944,7 @@ public class RecorderActivity extends Activity {
         } catch (TangoErrorException e) {
             Toast.makeText(getApplicationContext(), R.string.exception_tango_error,
                     Toast.LENGTH_SHORT).show();
+            Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in camera setup");
         }
         /*
         mRenderer.getModelMatCalculator().SetColorCamera2IMUMatrix(
@@ -976,6 +986,7 @@ public class RecorderActivity extends Activity {
             mutex_on_mIsRecording.acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
+            Crashlytics.log(Log.ERROR, TAG, "InterruptedException starting recording");
         }
         // Start Recording
         Log.v(TAG,"record_SwitchChanged to "+mIsRecording);
@@ -1067,6 +1078,7 @@ public class RecorderActivity extends Activity {
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
+            Crashlytics.log(Log.ERROR, TAG, "IOException writing pose to file");
         }
     }
 
@@ -1120,6 +1132,7 @@ public class RecorderActivity extends Activity {
                     }
                 } catch (IOException e) {
                     Log.e("Location Address Loader", "Unable connect to Geocoder", e);
+                    Crashlytics.log(Log.ERROR, TAG, "IOException Unable connect to Geocoder");
                 } finally {
                     location = new Loc();
 

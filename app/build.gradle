@@ -9,7 +9,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 27
         versionCode 22
-        versionName "1.4.3_SNAPSHOT"
+        versionName "1.4.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
