@@ -8,8 +8,8 @@ android {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 22
-        versionName "1.4.3"
+        versionCode 23
+        versionName "1.4.4_SNAPSHOT"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
