@@ -12,7 +12,7 @@
     <string name="validate_password">Please input password</string>
     
     <string name="label_login">Please log-in:</string>
-    <string name="user">User</string>
+    <string name="user">Username</string>
     <string name="password">Password</string>
     <string name="name">family name</string>
     <string name="guardian">name of guardian</string>
