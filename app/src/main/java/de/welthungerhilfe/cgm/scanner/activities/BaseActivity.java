@@ -18,6 +18,8 @@
  */
 
 package de.welthungerhilfe.cgm.scanner.activities;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
@@ -36,6 +38,7 @@ import java.util.Date;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.fabric.sdk.android.services.common.Crash;
 
@@ -121,6 +124,12 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
             Crashlytics.log(0, "network state duration: ", String.format("last connection lasts for %d seconds", seconds));
         }
         session.setConnectionTimestamp(System.currentTimeMillis());
+
+        AccountManager accountManager = AccountManager.get(this);
+        Account[] accounts = accountManager.getAccounts();
+        if (accounts.length > 0) {
+            SyncAdapter.startImmediateSync(accounts[0], getApplicationContext());
+        }
     }
 
     @Override
