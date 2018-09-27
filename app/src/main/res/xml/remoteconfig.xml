@@ -20,4 +20,12 @@
         <key>allow_delete</key>
         <value>false</value>
     </entry>
+    <entry>
+        <key>sync_period</key>
+        <value>5</value>
+    </entry>
+    <entry>
+        <key>sync_network</key>
+        <value>0</value>
+    </entry>
 </defaultsMap>

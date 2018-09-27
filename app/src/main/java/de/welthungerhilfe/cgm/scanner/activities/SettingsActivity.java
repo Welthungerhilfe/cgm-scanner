@@ -34,6 +34,8 @@ public class SettingsActivity extends BaseActivity {
     TextView txtSettingUuid;
     @BindView(R.id.txtSettingAccount)
     TextView txtSettingAccount;
+    @BindView(R.id.txtSyncInterval)
+    TextView txtSyncInterval;
 
     @BindView(R.id.radioEnglish)
     AppCompatRadioButton radioEnglish;
@@ -41,6 +43,11 @@ public class SettingsActivity extends BaseActivity {
     AppCompatRadioButton radioGerman;
     @BindView(R.id.radioHindi)
     AppCompatRadioButton radioHindi;
+
+    @BindView(R.id.radioSyncNetwork)
+    AppCompatRadioButton radioSyncNetwork;
+    @BindView(R.id.radioSyncWifi)
+    AppCompatRadioButton radioSyncWifi;
 
     @OnClick(R.id.lytLangEnglish)
     void onEnglish(LinearLayout lytLangEnglish) {
@@ -106,6 +113,8 @@ public class SettingsActivity extends BaseActivity {
         } else if (code.equals(AppConstants.LANG_HINDI)) {
             radioHindi.setChecked(true);
         }
+
+        txtSyncInterval.setText(getString(R.string.sync_period, 5));
     }
 
     private void changeLanguage(String code) {

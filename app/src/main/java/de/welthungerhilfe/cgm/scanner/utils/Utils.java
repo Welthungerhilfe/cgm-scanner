@@ -26,6 +26,7 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
+import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -50,7 +51,29 @@ import java.util.UUID;
 
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 
+import static android.content.Context.CONNECTIVITY_SERVICE;
+
 public class Utils {
+    public static final int NETWORK_NONE = 0x0000;
+    public static final int NETWORK_WIFI = 0x0001;
+    public static final int NETWORK_MOBILE = 0x0002;
+
+    public static int checkNetwork(Context context) {
+        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
+
+        boolean isMobile = manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).isConnectedOrConnecting();
+
+        boolean isWifi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnectedOrConnecting();
+
+        if (isWifi) {
+            return NETWORK_WIFI;
+        } else if (isMobile) {
+            return NETWORK_MOBILE;
+        } else {
+            return NETWORK_NONE;
+        }
+    }
+
     public static void overrideFont(Context context, String defaultFontNameToOverride, String customFontFileNameInAssets) {
         try {
             final Typeface customFontTypeface = Typeface.createFromAsset(context.getAssets(), customFontFileNameInAssets);
@@ -64,7 +87,7 @@ public class Utils {
     }
 
     public static boolean isNetworkConnectionAvailable(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo info = cm.getActiveNetworkInfo();
         if (info == null) return false;
         NetworkInfo.State network = info.getState();

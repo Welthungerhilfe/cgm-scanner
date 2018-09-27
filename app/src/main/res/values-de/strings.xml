@@ -36,6 +36,12 @@
     <string name="uuid">UUID</string>
     <string name="account">Account</string>
     <string name="language">Sprache</string>
+    <string name="sync_settings">Sync Settings</string>
+
+    <string name="sync_network">Sync when WiFi or mobile</string>
+    <string name="sync_wifi">Sync when WiFi only</string>
+    <string name="sync_interval">Sync Interval</string>
+    <string name="sync_period">Sync every %1$d minutes</string>
 
     <string name="lang_english">English</string>
     <string name="lang_german">Deutsch</string>

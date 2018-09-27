@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import com.bumptech.glide.util.Util;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -50,6 +51,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
     @Override
     @AddTrace(name = "onPerformSync", enabled = true)
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+        /* Check Network Status && Sync when only wifi on */
+        int netStatus = Utils.checkNetwork(getContext());
+        if (netStatus == Utils.NETWORK_NONE || netStatus == Utils.NETWORK_MOBILE)
+            return;
+
         prevTimestamp = session.getSyncTimestamp();
 
         new OfflineTask().getSyncablePerson(this, prevTimestamp);
@@ -170,6 +176,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
         ContentResolver.setSyncAutomatically(newAccount, context.getString(R.string.sync_authority), true);
 
         syncImmediately(newAccount, context);
+    }
+
+    @AddTrace(name = "changeSyncInterval", enabled = true)
+    public static void changeSyncInterval(Account account, Context context) {
+        String authority = context.getString(R.string.sync_authority);
+
+        ContentResolver.removePeriodicSync(account, authority, null);
+        startPeriodicSync(account, context);
     }
 
     @Override
