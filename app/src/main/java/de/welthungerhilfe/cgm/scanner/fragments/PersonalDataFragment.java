@@ -329,6 +329,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void showConsent() {
+        if (context == null)
+            return;
+
         if (((CreateDataActivity)context).qrCode != null) {
             imgConsent.setImageBitmap(BitmapFactory.decodeByteArray(((CreateDataActivity)context).qrBitmapByteArray, 0, ((CreateDataActivity)context).qrBitmapByteArray.length));
         } else if (((CreateDataActivity)context).consents.size() > 0) {
