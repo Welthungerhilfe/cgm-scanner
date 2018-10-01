@@ -180,4 +180,8 @@
     <string name="exception_tango_invalid">टैंगो अवैध अपवाद! पुनः प्रयास करें!</string>
     <string name="exception_out_of_date">टैंगो कोर ऐप अपडेट करें!</string>
 
+    <string name="mode_standing">Standing up</string>
+    <string name="mode_lying">Lying down</string>
+
+    <string name="capture_inside">Capture the child inside of outline</string>
 </resources>

@@ -118,6 +118,9 @@
         <activity android:name=".activities.SettingsActivity"
             android:screenOrientation="portrait" />
 
+        <activity android:name=".activities.ScanModeActivity"
+            android:screenOrientation="portrait" />
+
         <service
             android:name=".helper.service.FirebaseUploadService"
             android:exported="false"/>

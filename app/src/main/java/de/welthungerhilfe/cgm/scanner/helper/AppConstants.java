@@ -74,6 +74,9 @@ public class AppConstants {
     public static final String AUTHTOKEN_TYPE = "de.welthungerhilfe.cgm.scanner";
     public static final String ACCOUNT_TYPE = "de.welthungerhilfe.cgm.scanner";
 
+    public static final int SCAN_STANDING = 0x00;
+    public static final int SCAN_LYING = 0x01;
+
 
     // Workflow
     public static final int CHOOSE_BABY_OR_INFANT = 0;

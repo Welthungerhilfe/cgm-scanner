@@ -6,6 +6,6 @@
     <dimen name="activity_section_margin">4dp</dimen>
 
 
-    <dimen name="design_fab_size_mini" tools:override="true">80dp</dimen>
-    <dimen name="design_fab_image_size" tools:override="true">80dp</dimen>
+    <dimen name="design_fab_size_mini" tools:override="true">60dp</dimen>
+    <dimen name="design_fab_image_size" tools:override="true">50dp</dimen>
 </resources>
