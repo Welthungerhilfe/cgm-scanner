@@ -180,4 +180,8 @@
     <string name="exception_tango_invalid">"Tango invalid exception! Try again!"</string>
     <string name="exception_out_of_date">"Please update Tango Core App!"</string>
 
+    <string name="mode_standing">Standing up</string>
+    <string name="mode_lying">Lying down</string>
+
+    <string name="capture_inside">Capture the child inside of outline</string>
 </resources>
