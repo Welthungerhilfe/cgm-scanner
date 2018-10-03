@@ -459,6 +459,9 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     }
 
     private void iterateLocalFiles(File target) {
+        if (target == null)
+            return;
+
         if (target.isFile()) {
             new OfflineTask().getFileLog(target.getPath(), new OfflineTask.OnLoadFileLog() {
                 @Override
