@@ -1,12 +1,14 @@
 package de.welthungerhilfe.cgm.scanner.activities;
 
-import android.content.res.Resources;
+
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.util.Log;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -14,7 +16,12 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.fragments.MeasureScanFragment;
+import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.models.Measure;
+import de.welthungerhilfe.cgm.scanner.models.Person;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING;
@@ -71,16 +78,50 @@ public class ScanModeActivity extends AppCompatActivity {
 
         changeMode();
     }
+    @OnClick(R.id.btnScanStep1)
+    void scanStep1(Button btnScanStep1) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        MeasureScanFragment nameFragment = new MeasureScanFragment();
+        fragmentTransaction.add(R.id.scanner, nameFragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
+    @OnClick(R.id.btnScanStep2)
+    void scanStep2(Button btnScanStep2) {
+
+    }
+    @OnClick(R.id.btnScanStep3)
+    void scanStep3(Button btnScanStep3) {
+
+    }
+
+    private static final String TAG = ScanModeActivity.class.getSimpleName();
 
     public int SCAN_MODE = SCAN_STANDING;
+    public int SCAN_STEP = 0;
+
+    public final int SCAN_FRONT = 1;
+    public final int SCAN_SIDE = 2;
+    public final int SCAN_BACK = 3;
+
+    private Person person;
+    private Measure measure;
 
     protected void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
+        person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
+        measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
+        if (person == null) Log.e(TAG,"person was null!");
+        if (measure == null) Log.e(TAG,"measure was null!");
+
         setContentView(R.layout.activity_scan_mode);
 
         ButterKnife.bind(this);
 
         setupToolbar();
+
+
     }
 
     private void setupToolbar() {
@@ -93,49 +134,14 @@ public class ScanModeActivity extends AppCompatActivity {
 
     private void changeMode() {
         if (SCAN_MODE == SCAN_STANDING) {
-            /*
-            changeImage(imgScanStep1, R.drawable.stand_front_active);
-            changeImage(imgScanStep2, R.drawable.stand_side_active);
-            changeImage(imgScanStep3, R.drawable.stand_back_active);
-            */
-
             imgScanStep1.setImageResource(R.drawable.stand_front_active);
             imgScanStep2.setImageResource(R.drawable.stand_side_active);
             imgScanStep3.setImageResource(R.drawable.stand_back_active);
         } else if (SCAN_MODE == SCAN_LYING) {
-            /*
-            changeImage(imgScanStep1, R.drawable.lying_front_active);
-            changeImage(imgScanStep2, R.drawable.lying_side_active);
-            changeImage(imgScanStep3, R.drawable.lying_back_active);
-            */
-
             imgScanStep1.setImageResource(R.drawable.lying_front_active);
             imgScanStep2.setImageResource(R.drawable.lying_side_active);
             imgScanStep3.setImageResource(R.drawable.lying_back_active);
         }
-    }
-
-    public void changeImage(ImageView v, int new_image) {
-        Animation anim_out = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
-        Animation anim_in  = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
-        anim_in.setDuration(100);
-        anim_out.setDuration(100);
-        anim_out.setAnimationListener(new Animation.AnimationListener()
-        {
-            @Override public void onAnimationStart(Animation animation) {}
-            @Override public void onAnimationRepeat(Animation animation) {}
-            @Override public void onAnimationEnd(Animation animation)
-            {
-                v.setImageResource(new_image);
-                anim_in.setAnimationListener(new Animation.AnimationListener() {
-                    @Override public void onAnimationStart(Animation animation) {}
-                    @Override public void onAnimationRepeat(Animation animation) {}
-                    @Override public void onAnimationEnd(Animation animation) {}
-                });
-                v.startAnimation(anim_in);
-            }
-        });
-        v.startAnimation(anim_out);
     }
 
     public void onBackPressed() {

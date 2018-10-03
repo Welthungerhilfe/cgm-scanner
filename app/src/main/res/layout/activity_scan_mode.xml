@@ -17,351 +17,361 @@
   ~     along with this program.  If not, see <http://www.gnu.org/licenses/>.
   ~
   -->
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:paddingRight="5dp"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
-
-    </android.support.design.widget.AppBarLayout>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <com.balysv.materialripple.MaterialRippleLayout
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:layout_weight="1"
-                app:mrl_rippleOverlay="true">
-
-                <LinearLayout
-                    android:id="@+id/lytScanStanding"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:id="@+id/imgScanStanding"
-                        android:layout_width="wrap_content"
-                        android:layout_height="35dp"
-                        android:src="@drawable/standing_active"/>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_section_margin"
-                        android:gravity="center">
-                        <ImageView
-                            android:id="@+id/imgScanStandingCheck"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/radio_active"/>
-                        <TextView
-                            android:id="@+id/txtScanStanding"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="@dimen/activity_group_margin"
-                            android:text="@string/mode_standing"
-                            android:textColor="@color/colorBlack"/>
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </com.balysv.materialripple.MaterialRippleLayout>
-
-            <com.balysv.materialripple.MaterialRippleLayout
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:layout_weight="1"
-                app:mrl_rippleOverlay="true">
-
-                <LinearLayout
-                    android:id="@+id/lytScanLying"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:id="@+id/imgScanLying"
-                        android:layout_width="wrap_content"
-                        android:layout_height="35dp"
-                        android:src="@drawable/lying_inactive"/>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_section_margin"
-                        android:gravity="center">
-                        <ImageView
-                            android:id="@+id/imgScanLyingCheck"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/radio_inactive"/>
-                        <TextView
-                            android:id="@+id/txtScanLying"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="@dimen/activity_group_margin"
-                            android:text="@string/mode_lying"
-                            android:textColor="@color/colorGreyDark"/>
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </com.balysv.materialripple.MaterialRippleLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/lytSelectedMode"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:gravity="center"
-            android:visibility="gone">
-
-            <ImageView
-                android:id="@+id/imgSelectedMode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/lying_active"/>
-
-            <TextView
-                android:id="@+id/txtSelectedMode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/activity_group_margin"
-                android:text="@string/mode_lying"
-                android:textColor="@color/colorBlack"/>
-
-        </LinearLayout>
-
-    </FrameLayout>
-
-    <android.support.v4.widget.NestedScrollView
+    android:layout_height="match_parent">
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorGreenDark">
+        android:orientation="vertical">
 
-        <LinearLayout
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                android:paddingRight="5dp"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+        </android.support.design.widget.AppBarLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
             <LinearLayout
-                android:id="@+id/lytScanStep1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="40dp"
-                android:background="@color/colorGreenLight"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
-                <LinearLayout
+                <com.balysv.materialripple.MaterialRippleLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:layout_height="80dp"
+                    android:layout_weight="1"
+                    app:mrl_rippleOverlay="true">
 
                     <LinearLayout
+                        android:id="@+id/lytScanStanding"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center">
 
-                        <TextView
+                        <ImageView
+                            android:id="@+id/imgScanStanding"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/front_view_01"
-                            android:textColor="@color/colorWhite"
-                            android:textSize="18sp"
-                            android:textStyle="bold"/>
+                            android:layout_height="35dp"
+                            android:src="@drawable/standing_active"/>
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/activity_section_margin"
-                            android:text="@string/help_front_view_2"
-                            android:textColor="@color/colorWhite"
-                            android:textSize="14sp"/>
+                            android:gravity="center">
+                            <ImageView
+                                android:id="@+id/imgScanStandingCheck"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/radio_active"/>
+                            <TextView
+                                android:id="@+id/txtScanStanding"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="@dimen/activity_group_margin"
+                                android:text="@string/mode_standing"
+                                android:textColor="@color/colorBlack"/>
+                        </LinearLayout>
 
                     </LinearLayout>
 
-                    <ImageView
-                        android:id="@+id/imgScanStep1"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:layout_marginLeft="20dp"
-                        android:src="@drawable/stand_front_active"/>
+                </com.balysv.materialripple.MaterialRippleLayout>
 
-                </LinearLayout>
-
-                <Button
+                <com.balysv.materialripple.MaterialRippleLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="30dp"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:background="@drawable/button_white_circular"
-                    android:text="@string/start_scan"
-                    android:textColor="@color/colorPrimary"
-                    android:textStyle="bold"
-                    android:textSize="16sp"/>
+                    android:layout_height="80dp"
+                    android:layout_weight="1"
+                    app:mrl_rippleOverlay="true">
+
+                    <LinearLayout
+                        android:id="@+id/lytScanLying"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:id="@+id/imgScanLying"
+                            android:layout_width="wrap_content"
+                            android:layout_height="35dp"
+                            android:src="@drawable/lying_inactive"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/activity_section_margin"
+                            android:gravity="center">
+                            <ImageView
+                                android:id="@+id/imgScanLyingCheck"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/radio_inactive"/>
+                            <TextView
+                                android:id="@+id/txtScanLying"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="@dimen/activity_group_margin"
+                                android:text="@string/mode_lying"
+                                android:textColor="@color/colorGreyDark"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </com.balysv.materialripple.MaterialRippleLayout>
 
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/lytScanStep2"
+                android:id="@+id/lytSelectedMode"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="40dp"
-                android:background="@color/colorGreenMedium"
-                android:orientation="vertical">
+                android:layout_height="60dp"
+                android:gravity="center"
+                android:visibility="gone">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <ImageView
+                    android:id="@+id/imgSelectedMode"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:src="@drawable/lying_active"/>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/lateral_view_02"
-                            android:textColor="@color/colorWhite"
-                            android:textSize="18sp"
-                            android:textStyle="bold"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/activity_section_margin"
-                            android:text="@string/help_lateral_view"
-                            android:textColor="@color/colorWhite"
-                            android:textSize="14sp"/>
-
-                    </LinearLayout>
-
-                    <ImageView
-                        android:id="@+id/imgScanStep2"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:layout_marginLeft="20dp"
-                        android:src="@drawable/stand_side_active"/>
-
-                </LinearLayout>
-
-                <Button
-                    android:id="@+id/btnScanStep2"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="30dp"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:background="@drawable/button_white_circular"
-                    android:text="@string/start_scan"
-                    android:textColor="@color/colorPrimary"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:visibility="gone"/>
+                <TextView
+                    android:id="@+id/txtSelectedMode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/activity_group_margin"
+                    android:text="@string/mode_lying"
+                    android:textColor="@color/colorBlack"/>
 
             </LinearLayout>
+
+        </FrameLayout>
+
+        <android.support.v4.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorGreenDark">
 
             <LinearLayout
-                android:id="@+id/lytScanStep3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="40dp"
-                android:background="@color/colorGreenDark"
                 android:orientation="vertical">
 
                 <LinearLayout
+                    android:id="@+id/lytScanStep1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:padding="40dp"
+                    android:background="@color/colorGreenLight"
+                    android:orientation="vertical">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/back_view_03"
-                            android:textColor="@color/colorWhite"
-                            android:textSize="18sp"
-                            android:textStyle="bold"/>
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/activity_section_margin"
-                            android:text="@string/help_back_view"
-                            android:textColor="@color/colorWhite"
-                            android:textSize="14sp"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/front_view_01"
+                                android:textColor="@color/colorWhite"
+                                android:textSize="18sp"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/activity_section_margin"
+                                android:text="@string/help_front_view_2"
+                                android:textColor="@color/colorWhite"
+                                android:textSize="14sp"/>
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/imgScanStep1"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:layout_marginLeft="20dp"
+                            android:src="@drawable/stand_front_active"/>
 
                     </LinearLayout>
 
-                    <ImageView
-                        android:id="@+id/imgScanStep3"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:layout_marginLeft="20dp"
-                        android:src="@drawable/stand_back_active"/>
+                    <Button
+                        android:id="@+id/btnScanStep1"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="30dp"
+                        android:layout_marginBottom="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:background="@drawable/button_white_circular"
+                        android:text="@string/start_scan"
+                        android:textColor="@color/colorPrimary"
+                        android:textStyle="bold"
+                        android:textSize="16sp"/>
 
                 </LinearLayout>
 
-                <Button
-                    android:id="@+id/btnScanStep3"
+                <LinearLayout
+                    android:id="@+id/lytScanStep2"
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="30dp"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:background="@drawable/button_white_circular"
-                    android:text="@string/start_scan"
-                    android:textColor="@color/colorPrimary"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:visibility="gone"/>
+                    android:layout_height="wrap_content"
+                    android:padding="40dp"
+                    android:background="@color/colorGreenMedium"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/lateral_view_02"
+                                android:textColor="@color/colorWhite"
+                                android:textSize="18sp"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/activity_section_margin"
+                                android:text="@string/help_lateral_view"
+                                android:textColor="@color/colorWhite"
+                                android:textSize="14sp"/>
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/imgScanStep2"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:layout_marginLeft="20dp"
+                            android:src="@drawable/stand_side_active"/>
+
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btnScanStep2"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="30dp"
+                        android:layout_marginBottom="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:background="@drawable/button_white_circular"
+                        android:text="@string/start_scan"
+                        android:textColor="@color/colorPrimary"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:visibility="gone"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/lytScanStep3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="40dp"
+                    android:background="@color/colorGreenDark"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/back_view_03"
+                                android:textColor="@color/colorWhite"
+                                android:textSize="18sp"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/activity_section_margin"
+                                android:text="@string/help_back_view"
+                                android:textColor="@color/colorWhite"
+                                android:textSize="14sp"/>
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/imgScanStep3"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:layout_marginLeft="20dp"
+                            android:src="@drawable/stand_back_active"/>
+
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btnScanStep3"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="30dp"
+                        android:layout_marginBottom="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:background="@drawable/button_white_circular"
+                        android:text="@string/start_scan"
+                        android:textColor="@color/colorPrimary"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:visibility="gone"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
-        </LinearLayout>
+        </android.support.v4.widget.NestedScrollView>
 
-    </android.support.v4.widget.NestedScrollView>
+    </LinearLayout>
 
-</LinearLayout>
+    <RelativeLayout
+        android:id="@+id/scanner"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</FrameLayout>
