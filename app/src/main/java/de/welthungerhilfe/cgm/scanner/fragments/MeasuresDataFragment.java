@@ -197,7 +197,6 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                     dialog.setManualMeasureListener(MeasuresDataFragment.this);
                     dialog.show();
                 } else if (which == 1) {
-                    //Intent intent = new Intent(getContext(), ScreenRecordActivity.class);
                     //Intent intent = new Intent(getContext(), RecorderActivity.class);
                     Intent intent = new Intent(getContext(), ScanModeActivity.class);
                     intent.putExtra(AppConstants.EXTRA_PERSON, ((CreateDataActivity)context).person);
