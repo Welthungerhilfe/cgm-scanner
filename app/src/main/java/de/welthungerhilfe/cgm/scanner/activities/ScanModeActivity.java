@@ -1,49 +1,27 @@
 package de.welthungerhilfe.cgm.scanner.activities;
 
 
-import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Surface;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.google.atap.tangoservice.Tango;
-import com.google.atap.tangoservice.TangoConfig;
-import com.google.firebase.analytics.FirebaseAnalytics;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.fragments.BabyBack0Fragment;
-import de.welthungerhilfe.cgm.scanner.fragments.BabyBack1Fragment;
-import de.welthungerhilfe.cgm.scanner.fragments.BabyFront0Fragment;
+import de.welthungerhilfe.cgm.scanner.fragments.MeasureScanFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
-import de.welthungerhilfe.cgm.scanner.tango.CameraSurfaceRenderer;
-import de.welthungerhilfe.cgm.scanner.tango.OverlaySurface;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING;
@@ -102,14 +80,12 @@ public class ScanModeActivity extends AppCompatActivity {
     }
     @OnClick(R.id.btnScanStep1)
     void scanStep1(Button btnScanStep1) {
-        /*
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        MeasureScanFragment nameFragment = new MeasureScanFragment();
+        MeasureScanFragment nameFragment = MeasureScanFragment.newInstance(person, measure);
         fragmentTransaction.add(R.id.scanner, nameFragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
-        */
     }
     @OnClick(R.id.btnScanStep2)
     void scanStep2(Button btnScanStep2) {
