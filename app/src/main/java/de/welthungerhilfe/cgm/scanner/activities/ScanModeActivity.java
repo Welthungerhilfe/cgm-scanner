@@ -171,6 +171,10 @@ public class ScanModeActivity extends AppCompatActivity {
         }
     }
 
+    public void goToNextStep() {
+
+    }
+
     public void closeScan() {
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(SCAN_FRAGMENT);
         if (fragment != null)
@@ -251,6 +255,10 @@ public class ScanModeActivity extends AppCompatActivity {
     }
 
     public void onBackPressed() {
-        finish();
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(SCAN_FRAGMENT);
+        if (fragment != null)
+            getSupportFragmentManager().popBackStack();
+        else
+            finish();
     }
 }
