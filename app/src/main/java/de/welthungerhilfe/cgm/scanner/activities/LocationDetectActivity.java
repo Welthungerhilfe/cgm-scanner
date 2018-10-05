@@ -103,7 +103,12 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
     void onMyLocation(FloatingActionButton fabLocation) {
         Location location = googleMap.getMyLocation();
 
-        googleMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+        if (location != null) {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+        } else {
+            Toast.makeText(LocationDetectActivity.this, R.string.error_location, Toast.LENGTH_SHORT).show();
+            googleMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(0, 0)));
+        }
     }
 
     @OnClick(R.id.imgClose)
