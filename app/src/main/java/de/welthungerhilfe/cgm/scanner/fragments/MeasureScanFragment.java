@@ -287,6 +287,9 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
             case R.id.fab_scan_result:
                 if (mIsRecording) {
                     mIsRecording = false;
+                    fab.setImageResource(R.drawable.recorder);
+                } else if (mProgress > 100){
+                    ((ScanModeActivity)getActivity()).goToNextStep();
                 } else {
                     startScan();
                 }
@@ -667,6 +670,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
             return;
 
         mProgress = 0;
+        fab.setImageResource(R.drawable.stop);
 
         if (mode == SCAN_STANDING_FRONT || mode == SCAN_LYING_FRONT) {
             if (((ScanModeActivity)getActivity()).measure == null)
