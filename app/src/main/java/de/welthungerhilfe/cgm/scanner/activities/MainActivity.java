@@ -264,6 +264,9 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
 
         ButterKnife.bind(this);
 
+        Crashlytics.setUserIdentifier(AppController.getInstance().firebaseUser.getEmail());
+        Crashlytics.log(0, "user login: ", String.format("user logged in with email %s at %s", AppController.getInstance().firebaseUser.getEmail(), Utils.beautifyDateTime(new Date())));
+
         session = new SessionManager(MainActivity.this);
         accountManager = AccountManager.get(this);
 
