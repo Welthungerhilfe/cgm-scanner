@@ -239,7 +239,11 @@ public class OfflineTask {
 
         @Override
         protected FileLog doInBackground(String... artefactIds) {
-            return AppController.getInstance().offlineDb.offlineDao().getFileLog(artefactIds[0]);
+            try {
+                return AppController.getInstance().offlineDb.offlineDao().getFileLog(artefactIds[0]);
+            } catch (Exception e) {
+                return null;
+            }
         }
 
         @Override
