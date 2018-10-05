@@ -77,6 +77,13 @@ public class AppConstants {
     public static final int SCAN_STANDING = 0x00;
     public static final int SCAN_LYING = 0x01;
 
+    public static final int SCAN_PREVIEW = 0;
+    public static final int SCAN_STANDING_FRONT = 100;
+    public static final int SCAN_STANDING_SIDE = 101;
+    public static final int SCAN_STANDING_BACK = 102;
+    public static final int SCAN_LYING_FRONT = 200;
+    public static final int SCAN_LYING_SIDE = 201;
+    public static final int SCAN_LYING_BACK = 202;
 
     // Workflow
     public static final int CHOOSE_BABY_OR_INFANT = 0;
