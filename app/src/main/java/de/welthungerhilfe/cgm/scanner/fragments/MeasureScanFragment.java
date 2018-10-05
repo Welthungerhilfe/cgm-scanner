@@ -648,10 +648,18 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
         Log.d(TAG, "numPoints: "+numPoints+" float: "+progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
         if (mProgress+progressToAdd > 100) {
             mProgress = 100;
-            fab.setImageResource(R.drawable.done);
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    fab.setImageResource(R.drawable.done);
+                }
+            });
         } else {
             mProgress = mProgress+progressToAdd;
         }
+
+        Log.d("scan_progress", String.valueOf(mProgress));
+        Log.d("scan_progress_step", String.valueOf(progressToAdd));
     }
 
     private void startScan() {
