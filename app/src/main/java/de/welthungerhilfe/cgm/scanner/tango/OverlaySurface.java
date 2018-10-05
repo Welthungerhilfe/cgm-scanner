@@ -132,8 +132,10 @@ public class OverlaySurface extends SurfaceView
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
 
-        mBabyOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.scan_outline_dots);
-        mInfantOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.infant_outline);
+        //mBabyOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.scan_outline_dots);
+        //mInfantOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.infant_outline);
+        mBabyOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.body_frame_down);
+        mInfantOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.body_frame);
 
         isReadyToDraw = true;
     }
@@ -173,14 +175,15 @@ public class OverlaySurface extends SurfaceView
                 // Source is the whole bitmap
                 Rect srcRect = new Rect(0, 0, mBabyOverlay.getWidth(), mBabyOverlay.getHeight());
 
-                // destination is the where to draw it
-                // will be drawn in the center and scaled by the distance
-                // because distance to take measurements should be around 1 meter
-                float left = ((canvas.getWidth() - mBabyOverlay.getWidth()* mDistance) / 2.0f);
-                float top = ((canvas.getHeight() - mBabyOverlay.getHeight()*mDistance) / 2.0f);
-                float right = (mBabyOverlay.getWidth() * mDistance )+left;
-                float bottom = (mBabyOverlay.getHeight()*mDistance) +top;
-                RectF dstRectF = new RectF(left,top,right,bottom);
+            // destination is the where to draw it
+            // will be drawn in the center and scaled by the distance
+            // because distance to take measurements should be around 1 meter
+            float left = ((canvas.getWidth() - mBabyOverlay.getWidth()* mDistance) / 2.0f);
+            float top = ((canvas.getHeight() - mBabyOverlay.getHeight()*mDistance) / 2.0f);
+            float right = (mBabyOverlay.getWidth() * mDistance )+left;
+            float bottom = (mBabyOverlay.getHeight()*mDistance) +top;
+            //RectF dstRectF = new RectF(left,top,right,bottom);
+            RectF dstRectF = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
 
                 setConfidenceColor();
 
@@ -271,19 +274,20 @@ public class OverlaySurface extends SurfaceView
                 // clear screen before redrawing
                 canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
-                final float infantScaling = 1.5f;
+            final float infantScaling = 1.5f;
 
-                // Source is the whole bitmap
-                Rect srcRect = new Rect(0, 0, mInfantOverlay.getWidth(), mInfantOverlay.getHeight());
+            // Source is the whole bitmap
+            Rect srcRect = new Rect(0, 0, mInfantOverlay.getWidth(), mInfantOverlay.getHeight());
 
-                // destination is the where to draw it
-                // will be drawn in the center and scaled by the distance
-                // because distance to take measurements should be around 1 meter
-                float left = ((canvas.getWidth() - mInfantOverlay.getWidth()* infantScaling) / 2.0f);
-                float top = ((canvas.getHeight() - mInfantOverlay.getHeight()*infantScaling) / 2.0f);
-                float right = (mInfantOverlay.getWidth() * infantScaling )+left;
-                float bottom = (mInfantOverlay.getHeight()*infantScaling) +top;
-                RectF dstRectF = new RectF(left,top,right,bottom);
+            // destination is the where to draw it
+            // will be drawn in the center and scaled by the distance
+            // because distance to take measurements should be around 1 meter
+            float left = ((canvas.getWidth() - mInfantOverlay.getWidth()* infantScaling) / 2.0f);
+            float top = ((canvas.getHeight() - mInfantOverlay.getHeight()*infantScaling) / 2.0f);
+            float right = (mInfantOverlay.getWidth() * infantScaling )+left;
+            float bottom = (mInfantOverlay.getHeight()*infantScaling) +top;
+            //RectF dstRectF = new RectF(left,top,right,bottom);
+            RectF dstRectF = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
 
                 Paint paint = new Paint();
                 canvas.drawBitmap(mInfantOverlay, srcRect, dstRectF, paint);
