@@ -1,8 +1,6 @@
 package de.welthungerhilfe.cgm.scanner.fragments;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
@@ -35,26 +33,26 @@ import com.projecttango.tangosupport.TangoSupport;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.activities.RecorderActivity;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
-import de.welthungerhilfe.cgm.scanner.models.Person;
-import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.tango.CameraSurfaceRenderer;
 import de.welthungerhilfe.cgm.scanner.tango.ModelMatCalculator;
 import de.welthungerhilfe.cgm.scanner.tango.OverlaySurface;
-import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
-import de.welthungerhilfe.cgm.scanner.utils.MD5;
 import de.welthungerhilfe.cgm.scanner.utils.TangoUtils;
 
 import static com.projecttango.tangosupport.TangoSupport.initialize;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_BACK;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_FRONT;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_SIDE;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_PREVIEW;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_BACK;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_FRONT;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_SIDE;
 
 public class MeasureScanFragment extends Fragment implements View.OnClickListener {
     private final String TAG = "ScanningProcess";
@@ -80,9 +78,6 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
     private ProgressBar progressBar;
     private FloatingActionButton fab;
 
-    private static Person person;
-    private static Measure measure;
-
     // variables for Pose and point clouds
     private float mDeltaTime;
     private int mValidPoseCallbackCount;
@@ -101,8 +96,15 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
     private float mPointCloudPreviousTimeStamp;
     private float mCurrentTimeStamp;
 
+    private File mExtFileDir;
+    private File mScanArtefactsOutputFolder;
+    private String mPointCloudSaveFolderPath;
+    private File mPointCloudSaveFolder;
+    private File mRgbSaveFolder;
+
     private boolean mPointCloudAvailable;
     private boolean mIsRecording;
+    private int mProgress;
 
     private long mNowTime;
     private String mNowTimeString;
@@ -110,13 +112,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
     private Semaphore mutex_on_mIsRecording;
 
-    public static MeasureScanFragment newInstance(Person person, Measure measure) {
-        MeasureScanFragment fragment = new MeasureScanFragment();
-        fragment.person = person;
-        fragment.measure = measure;
-
-        return fragment;
-    }
+    private int mode = SCAN_PREVIEW;
 
     @Override
     public void onAttach(Context context) {
@@ -173,7 +169,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
-        mQrCode = person.getQrcode();
+        mQrCode = ((ScanModeActivity)getActivity()).person.getQrcode();
     }
 
     @Override
@@ -187,9 +183,31 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
         progressBar = view.findViewById(R.id.progressBar);
         fab = view.findViewById(R.id.fab_scan_result);
         fab.setOnClickListener(this);
+        view.findViewById(R.id.imgClose).setOnClickListener(this);
 
         mCameraSurfaceView = view.findViewById(R.id.surfaceview);
         mOverlaySurfaceView = view.findViewById(R.id.overlaySurfaceView);
+
+        switch (mode) {
+            case SCAN_STANDING_FRONT:
+                mTitleView.setText(getString(R.string.front_view_01) + " - " + getString(R.string.mode_standing));
+                break;
+            case SCAN_STANDING_SIDE:
+                mTitleView.setText(getString(R.string.lateral_view_02) + " - " + getString(R.string.mode_standing));
+                break;
+            case SCAN_STANDING_BACK:
+                mTitleView.setText(getString(R.string.back_view_03) + " - " + getString(R.string.mode_standing));
+                break;
+            case SCAN_LYING_FRONT:
+                mTitleView.setText(getString(R.string.front_view_01) + " - " + getString(R.string.mode_lying));
+                break;
+            case SCAN_LYING_SIDE:
+                mTitleView.setText(getString(R.string.lateral_view_02) + " - " + getString(R.string.mode_lying));
+                break;
+            case SCAN_LYING_BACK:
+                mTitleView.setText(getString(R.string.back_view_03) + " - " + getString(R.string.mode_lying));
+                break;
+        }
 
         setupScanArtefacts();
         setupRenderer();
@@ -211,11 +229,36 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
         mCameraSurfaceView.onResume();
         mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+
+        if (mode == SCAN_STANDING_FRONT || mode == SCAN_STANDING_SIDE || mode == SCAN_STANDING_BACK)
+            mOverlaySurfaceView.setMode(OverlaySurface.INFANT_OVERLAY);
+        else if (mode == SCAN_LYING_FRONT || mode == SCAN_LYING_SIDE || mode == SCAN_LYING_BACK)
+            mOverlaySurfaceView.setMode(OverlaySurface.BABY_OVERLAY);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+
+        mCameraSurfaceView.onPause();
+        // Synchronize against disconnecting while the service is being used in the OpenGL
+        // thread or in the UI thread.
+        // NOTE: DO NOT lock against this same object in the Tango callback thread.
+        // Tango.disconnect will block here until all Tango callback calls are finished.
+        // If you lock against this object in a Tango callback thread it will cause a deadlock.
+        synchronized (getActivity()) {
+            try {
+                mTango.disconnectCamera(TangoCameraIntrinsics.TANGO_CAMERA_COLOR);
+                // We need to invalidate the connected texture ID so that we cause a
+                // re-connection in the OpenGL thread after resume.
+                mConnectedTextureIdGlThread = INVALID_TEXTURE_ID;
+                mTango.disconnect();
+                mIsConnected = false;
+            } catch (TangoErrorException e) {
+                Log.e(TAG, getString(R.string.exception_tango_error), e);
+                Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in synchronized disconnect onPause");
+            }
+        }
     }
 
     @Override
@@ -244,14 +287,49 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
             case R.id.fab_scan_result:
                 if (mIsRecording) {
                     mIsRecording = false;
-                    fab.setImageResource(R.drawable.done);
+                } else {
+                    startScan();
                 }
+                break;
+            case R.id.imgClose:
+                ((ScanModeActivity)getActivity()).closeScan();
                 break;
         }
     }
 
-    private void setupScanArtefacts() {
+    public void setMode(int mode) {
+        this.mode = mode;
+    }
 
+    private void setupScanArtefacts() {
+        // TODO make part of AppController?
+        mExtFileDir = getContext().getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
+
+        // TODO make part of AppConstants
+        mScanArtefactsOutputFolder  = new File(mExtFileDir,mQrCode+"/measurements/"+mNowTimeString+"/");
+        mPointCloudSaveFolder = new File(mScanArtefactsOutputFolder,"pc");
+        mRgbSaveFolder = new File(mScanArtefactsOutputFolder,"rgb");
+
+        if(!mPointCloudSaveFolder.exists()) {
+            boolean created = mPointCloudSaveFolder.mkdirs();
+            if (created) {
+                Log.i(TAG, "Folder: \"" + mPointCloudSaveFolder + "\" created\n");
+            } else {
+                Log.e(TAG,"Folder: \"" + mPointCloudSaveFolder + "\" could not be created!\n");
+            }
+        }
+
+        if(!mRgbSaveFolder.exists()) {
+            boolean created = mRgbSaveFolder.mkdirs();
+            if (created) {
+                Log.i(TAG, "Folder: \"" + mRgbSaveFolder + "\" created\n");
+            } else {
+                Log.e(TAG,"Folder: \"" + mRgbSaveFolder + "\" could not be created!\n");
+            }
+        }
+
+        Log.v(TAG,"mPointCloudSaveFolder: "+mPointCloudSaveFolder);
+        Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
     }
 
     // TODO: setup own renderer for scanning process (or attribute Apache License 2.0 from Google)
@@ -416,7 +494,8 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                         // Saving the frame or not, depending on the current mode.
                         if ( mIsRecording ) {
                             // TODO save files to local storage
-
+                            updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
+                            progressBar.setProgress(mProgress);
                         }
                         mutex_on_mIsRecording.release();
                     }
@@ -559,5 +638,36 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
         cam2dev_Transform = new float[16];
         Matrix.setIdentityM(cam2dev_Transform, 0);
         Matrix.multiplyMM(cam2dev_Transform, 0, IMU2dev, 0, cam2IMU, 0);
+    }
+
+    private void updateScanningProgress(int numPoints, float distance, float confidence) {
+        float minPointsToCompleteScan = 199500.0f;
+        float progressToAddFloat = numPoints / minPointsToCompleteScan;
+        progressToAddFloat = progressToAddFloat*100;
+        int progressToAdd = (int) progressToAddFloat;
+        Log.d(TAG, "numPoints: "+numPoints+" float: "+progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
+        if (mProgress+progressToAdd > 100) {
+            mProgress = 100;
+            fab.setImageResource(R.drawable.done);
+        } else {
+            mProgress = mProgress+progressToAdd;
+        }
+    }
+
+    private void startScan() {
+        if (mode == SCAN_PREVIEW)
+            return;
+
+        mProgress = 0;
+
+        if (mode == SCAN_STANDING_FRONT || mode == SCAN_LYING_FRONT) {
+            if (((ScanModeActivity)getActivity()).measure == null)
+                ((ScanModeActivity)getActivity()).measure = new Measure();
+
+            ((ScanModeActivity)getActivity()).measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+            ((ScanModeActivity)getActivity()).measure.setDate(mNowTime);
+            ((ScanModeActivity)getActivity()).measure.setType("v1.1.2");
+        }
+        mIsRecording = true;
     }
 }
