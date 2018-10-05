@@ -49,8 +49,8 @@
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="0dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="-10dp"
             android:progress="0"/>
 
         <TextView
@@ -61,18 +61,35 @@
             android:text="@string/capture_inside"
             android:textColor="@color/colorWhite"/>
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_scan_result"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:layout_marginBottom="32dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            app:fabSize="mini"
-            app:fabCustomSize="@dimen/design_fab_size_mini"
-            app:srcCompat="@drawable/recorder"
-            app:backgroundTint="@color/colorWhite" />
+            android:layout_alignParentBottom="true">
+
+            <Button
+                android:id="@+id/btnRetake"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginLeft="32dp"
+                android:layout_centerVertical="true"
+                android:background="@drawable/button_white_circular_bound"
+                android:text="@string/retake"
+                android:textColor="@color/colorWhite"/>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab_scan_result"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                app:fabSize="mini"
+                app:fabCustomSize="@dimen/design_fab_size_mini"
+                app:srcCompat="@drawable/recorder"
+                app:backgroundTint="@color/colorWhite" />
+
+
+
+        </RelativeLayout>
         
     </RelativeLayout>
 
