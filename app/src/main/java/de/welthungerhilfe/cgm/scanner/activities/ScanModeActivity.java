@@ -17,12 +17,15 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,17 +35,26 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.fragments.BabyFront0Fragment;
 import de.welthungerhilfe.cgm.scanner.fragments.MeasureScanFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
 import de.welthungerhilfe.cgm.scanner.models.Person;
+import de.welthungerhilfe.cgm.scanner.repositories.OfflineRepository;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_BACK;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_FRONT;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_SIDE;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_BACK;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_FRONT;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_SIDE;
 
 public class ScanModeActivity extends AppCompatActivity {
     private final String SCAN_FRAGMENT = "scan_fragment";
@@ -70,6 +82,22 @@ public class ScanModeActivity extends AppCompatActivity {
     ImageView imgScanStep2;
     @BindView(R.id.imgScanStep3)
     ImageView imgScanStep3;
+
+    @BindView(R.id.btnScanStep1)
+    Button btnScanStep1;
+    @BindView(R.id.btnScanStep2)
+    Button btnScanStep2;
+    @BindView(R.id.btnScanStep3)
+    Button btnScanStep3;
+
+    @BindView(R.id.lytSelectMode)
+    LinearLayout lytSelectMode;
+    @BindView(R.id.lytSelectedMode)
+    LinearLayout lytSelectedMode;
+    @BindView(R.id.imgSelectedMode)
+    ImageView imgSelectedMode;
+    @BindView(R.id.txtSelectedMode)
+    TextView txtSelectedMode;
 
     @OnClick(R.id.lytScanStanding)
     void scanStanding(LinearLayout lytScanStanding) {
@@ -101,11 +129,25 @@ public class ScanModeActivity extends AppCompatActivity {
     }
     @OnClick(R.id.btnScanStep1)
     void scanStep1(Button btnScanStep1) {
+        lytSelectMode.setVisibility(View.GONE);
+        lytSelectedMode.setVisibility(View.VISIBLE);
+
         MeasureScanFragment scanFragment = new MeasureScanFragment();
-        if (SCAN_MODE == SCAN_STANDING)
+        if (SCAN_MODE == SCAN_STANDING) {
+            imgSelectedMode.setImageResource(R.drawable.standing_active);
+            txtSelectedMode.setText(R.string.mode_standing);
+
+            SCAN_STEP = SCAN_STANDING_FRONT;
+
             scanFragment.setMode(SCAN_STANDING_FRONT);
-        else if (SCAN_MODE == SCAN_LYING)
+        } else if (SCAN_MODE == SCAN_LYING) {
+            imgSelectedMode.setImageResource(R.drawable.lying_active);
+            txtSelectedMode.setText(R.string.mode_lying);
+
+            SCAN_STEP = SCAN_STANDING_FRONT;
+
             scanFragment.setMode(SCAN_LYING_FRONT);
+        }
 
         getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_bottom, R.anim.slide_out_bottom, R.anim.slide_in_bottom, R.anim.slide_out_bottom)
@@ -115,11 +157,45 @@ public class ScanModeActivity extends AppCompatActivity {
     }
     @OnClick(R.id.btnScanStep2)
     void scanStep2(Button btnScanStep2) {
+        MeasureScanFragment scanFragment = new MeasureScanFragment();
+        if (SCAN_MODE == SCAN_STANDING) {
+            imgSelectedMode.setImageResource(R.drawable.standing_active);
+            txtSelectedMode.setText(R.string.mode_standing);
 
+            scanFragment.setMode(SCAN_STANDING_SIDE);
+        } else if (SCAN_MODE == SCAN_LYING) {
+            imgSelectedMode.setImageResource(R.drawable.lying_active);
+            txtSelectedMode.setText(R.string.mode_lying);
+
+            scanFragment.setMode(SCAN_LYING_SIDE);
+        }
+
+        getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(R.anim.slide_in_bottom, R.anim.slide_out_bottom, R.anim.slide_in_bottom, R.anim.slide_out_bottom)
+                .add(R.id.scanner, scanFragment, SCAN_FRAGMENT)
+                .addToBackStack(null)
+                .commit();
     }
     @OnClick(R.id.btnScanStep3)
     void scanStep3(Button btnScanStep3) {
+        MeasureScanFragment scanFragment = new MeasureScanFragment();
+        if (SCAN_MODE == SCAN_STANDING) {
+            imgSelectedMode.setImageResource(R.drawable.standing_active);
+            txtSelectedMode.setText(R.string.mode_standing);
 
+            scanFragment.setMode(SCAN_STANDING_BACK);
+        } else if (SCAN_MODE == SCAN_LYING) {
+            imgSelectedMode.setImageResource(R.drawable.lying_active);
+            txtSelectedMode.setText(R.string.mode_lying);
+
+            scanFragment.setMode(SCAN_LYING_BACK);
+        }
+
+        getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(R.anim.slide_in_bottom, R.anim.slide_out_bottom, R.anim.slide_in_bottom, R.anim.slide_out_bottom)
+                .add(R.id.scanner, scanFragment, SCAN_FRAGMENT)
+                .addToBackStack(null)
+                .commit();
     }
 
     private static final String TAG = ScanModeActivity.class.getSimpleName();
@@ -172,7 +248,44 @@ public class ScanModeActivity extends AppCompatActivity {
     }
 
     public void goToNextStep() {
+        closeScan();
 
+        SCAN_STEP ++;
+        if (SCAN_STEP == SCAN_STANDING_FRONT || SCAN_STEP == SCAN_LYING_FRONT) {
+            btnScanStep1.setVisibility(View.VISIBLE);
+            btnScanStep2.setVisibility(View.GONE);
+            btnScanStep3.setVisibility(View.GONE);
+        } else if (SCAN_STEP == SCAN_STANDING_SIDE || SCAN_STEP == SCAN_LYING_SIDE) {
+            btnScanStep1.setVisibility(View.GONE);
+            btnScanStep2.setVisibility(View.VISIBLE);
+            btnScanStep3.setVisibility(View.GONE);
+        } else if (SCAN_STEP == SCAN_STANDING_BACK || SCAN_STEP == SCAN_LYING_BACK) {
+            btnScanStep1.setVisibility(View.GONE);
+            btnScanStep2.setVisibility(View.GONE);
+            btnScanStep3.setVisibility(View.VISIBLE);
+        } else {
+            if (measure == null)
+                measure = new Measure();
+            if (location != null)
+                measure.setLocation(location);
+            measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+            measure.setDate(Utils.getUniversalTimestamp());
+            measure.setType("v1.1.2");
+            long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
+            measure.setAge(age);
+            measure.setType(AppConstants.VAL_MEASURE_AUTO);
+            measure.setWeight(0.0f);
+            measure.setHeight(0.0f);
+            measure.setHeadCircumference(0.0f);
+            measure.setMuac(0.0f);
+            measure.setOedema(false);
+            if (measure.getId() == null)
+                EventBus.getDefault().post(new MeasureResult(measure));
+            else
+                new OfflineRepository().updateMeasure(measure);
+
+            finish();
+        }
     }
 
     public void closeScan() {
