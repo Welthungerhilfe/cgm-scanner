@@ -48,6 +48,7 @@
             android:layout_height="wrap_content">
 
             <LinearLayout
+                android:id="@+id/lytSelectMode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -141,7 +142,7 @@
             <LinearLayout
                 android:id="@+id/lytSelectedMode"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="80dp"
                 android:gravity="center"
                 android:visibility="gone">
 
@@ -193,13 +194,19 @@
                             android:layout_weight="1"
                             android:orientation="vertical">
 
-                            <TextView
+                            <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/front_view_01"
-                                android:textColor="@color/colorWhite"
-                                android:textSize="18sp"
-                                android:textStyle="bold"/>
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/front_view_01"
+                                    android:textColor="@color/colorWhite"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"/>
+                            </LinearLayout>
 
                             <TextView
                                 android:layout_width="wrap_content"

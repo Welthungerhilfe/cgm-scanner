@@ -1,6 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.fragments;
 
 import android.content.Context;
+import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
@@ -33,16 +34,21 @@ import com.projecttango.tangosupport.TangoSupport;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.activities.ScanModeActivity;
+import de.welthungerhilfe.cgm.scanner.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
+import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.tango.CameraSurfaceRenderer;
 import de.welthungerhilfe.cgm.scanner.tango.ModelMatCalculator;
 import de.welthungerhilfe.cgm.scanner.tango.OverlaySurface;
+import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
+import de.welthungerhilfe.cgm.scanner.utils.MD5;
 import de.welthungerhilfe.cgm.scanner.utils.TangoUtils;
 
 import static com.projecttango.tangosupport.TangoSupport.initialize;
@@ -286,12 +292,17 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
         switch (view.getId()) {
             case R.id.fab_scan_result:
                 if (mIsRecording) {
-                    mIsRecording = false;
-                    fab.setImageResource(R.drawable.recorder);
-                } else if (mProgress > 100){
-                    ((ScanModeActivity)getActivity()).goToNextStep();
+                    if (mProgress >= 100) {
+                        completeScan();
+                    } else {
+                        pauseScan();
+                    }
                 } else {
-                    startScan();
+                    if (mProgress > 0) {
+                        resumeScan();
+                    } else {
+                        startScan();
+                    }
                 }
                 break;
             case R.id.imgClose:
@@ -499,6 +510,27 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             // TODO save files to local storage
                             updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
                             progressBar.setProgress(mProgress);
+
+                            mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mode +
+                                    "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
+                            TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
+
+                            File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
+                            FileLog log = new FileLog();
+                            log.setId(AppController.getInstance().getArtefactId("scan-pcd"));
+                            log.setType("pcd");
+                            log.setPath(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename + ".pcd");
+                            log.setHashValue(MD5.getMD5(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd"));
+                            log.setFileSize(artefactFile.length());
+                            log.setUploadDate(0);
+                            log.setDeleted(false);
+                            log.setQrCode(mQrCode);
+                            log.setCreateDate(mNowTime);
+                            log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                            new OfflineTask().saveFileLog(log);
+                            // Direct Upload to Firebase Storage
+                            mNumberOfFilesWritten++;
+                            //mTimeToTakeSnap = false;
                         }
                         mutex_on_mIsRecording.release();
                     }
@@ -556,6 +588,22 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                                 TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
 
                                 // TODO save files to local storage
+                                String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
+                                        mode + "_" + currentTangoImageBuffer.timestamp + ".jpg";
+                                Uri uri = BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
+                                File artefactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
+                                FileLog log = new FileLog();
+                                log.setId(AppController.getInstance().getArtefactId("scan-rgb"));
+                                log.setType("rgb");
+                                log.setPath(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
+                                log.setHashValue(MD5.getMD5(mRgbSaveFolder.getPath() + File.separator + currentImgFilename));
+                                log.setFileSize(artefactFile.length());
+                                log.setUploadDate(0);
+                                log.setDeleted(false);
+                                log.setQrCode(mQrCode);
+                                log.setCreateDate(mNowTime);
+                                log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                                new OfflineTask().saveFileLog(log);
                             }
                         };
                         thread.run();
@@ -666,20 +714,27 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
     }
 
     private void startScan() {
+        mProgress = 0;
+
+        resumeScan();
+    }
+
+    private void resumeScan() {
         if (mode == SCAN_PREVIEW)
             return;
 
-        mProgress = 0;
-        fab.setImageResource(R.drawable.stop);
-
-        if (mode == SCAN_STANDING_FRONT || mode == SCAN_LYING_FRONT) {
-            if (((ScanModeActivity)getActivity()).measure == null)
-                ((ScanModeActivity)getActivity()).measure = new Measure();
-
-            ((ScanModeActivity)getActivity()).measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-            ((ScanModeActivity)getActivity()).measure.setDate(mNowTime);
-            ((ScanModeActivity)getActivity()).measure.setType("v1.1.2");
-        }
         mIsRecording = true;
+        fab.setImageResource(R.drawable.stop);
+    }
+
+    private void pauseScan() {
+        mIsRecording = false;
+        fab.setImageResource(R.drawable.recorder);
+    }
+
+    private void completeScan() {
+        mIsRecording = false;
+
+        ((ScanModeActivity)getActivity()).goToNextStep();
     }
 }
