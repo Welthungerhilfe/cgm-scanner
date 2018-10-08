@@ -498,6 +498,9 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         } else {
             File[] children = target.listFiles();
 
+            if (children == null)
+                return;
+
             if (children.length == 0) {
                 target.delete();
             } else {
