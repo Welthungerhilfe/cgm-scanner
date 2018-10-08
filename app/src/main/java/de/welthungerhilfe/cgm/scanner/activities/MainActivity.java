@@ -18,6 +18,7 @@
 
 package de.welthungerhilfe.cgm.scanner.activities;
 
+import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
@@ -25,6 +26,7 @@ import android.app.SearchManager;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.net.Uri;
@@ -35,6 +37,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -107,6 +110,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     private final int REQUEST_CAMERA = 0x1001;
 
     private final int PERMISSION_CAMERA = 0x1002;
+    private final int PERMISSION_STORAGE = 0x1003;
 
     private int sortType = 0;
     private int diffDays = 0;
@@ -294,9 +298,13 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             }
         });
 
-        File root = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
-        iterateLocalFiles(root);
-        checkDeletedRecords();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_STORAGE);
+        } else {
+            File root = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
+            iterateLocalFiles(root);
+            checkDeletedRecords();
+        }
 
         startService(new Intent(this, FileLogMonitorService.class));
     }
@@ -622,6 +630,10 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSION_CAMERA && grantResults[0] >= 0 && grantResults[1] >= 0) {
             takePhoto();
+        } else if (requestCode == PERMISSION_STORAGE && grantResults[0] >= 0) {
+            File root = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
+            iterateLocalFiles(root);
+            checkDeletedRecords();
         }
     }
 
