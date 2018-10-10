@@ -132,8 +132,10 @@ public class OverlaySurface extends SurfaceView
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
 
-        mBabyOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.scan_outline_dots);
-        mInfantOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.infant_outline);
+        //mBabyOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.scan_outline_dots);
+        //mInfantOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.infant_outline);
+        mBabyOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.body_frame_down);
+        mInfantOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.body_frame);
 
         isReadyToDraw = true;
     }
@@ -180,7 +182,8 @@ public class OverlaySurface extends SurfaceView
                 float top = ((canvas.getHeight() - mBabyOverlay.getHeight()*mDistance) / 2.0f);
                 float right = (mBabyOverlay.getWidth() * mDistance )+left;
                 float bottom = (mBabyOverlay.getHeight()*mDistance) +top;
-                RectF dstRectF = new RectF(left,top,right,bottom);
+                //RectF dstRectF = new RectF(left,top,right,bottom);
+                RectF dstRectF = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
 
                 setConfidenceColor();
 
@@ -283,7 +286,8 @@ public class OverlaySurface extends SurfaceView
                 float top = ((canvas.getHeight() - mInfantOverlay.getHeight()*infantScaling) / 2.0f);
                 float right = (mInfantOverlay.getWidth() * infantScaling )+left;
                 float bottom = (mInfantOverlay.getHeight()*infantScaling) +top;
-                RectF dstRectF = new RectF(left,top,right,bottom);
+                //RectF dstRectF = new RectF(left,top,right,bottom);
+                RectF dstRectF = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
 
                 Paint paint = new Paint();
                 canvas.drawBitmap(mInfantOverlay, srcRect, dstRectF, paint);
