@@ -42,6 +42,7 @@ import android.view.inputmethod.InputMethodManager;
 import com.bumptech.glide.util.Util;
 import com.crashlytics.android.Crashlytics;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
@@ -148,7 +149,8 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                             dialog.setMeasure(measure);
                             dialog.show();
                         } else {
-                            Intent intent = new Intent(getContext(), RecorderActivity.class);
+                            //Intent intent = new Intent(getContext(), RecorderActivity.class);
+                            Intent intent = new Intent(getContext(), ScanModeActivity.class);
                             intent.putExtra(AppConstants.EXTRA_PERSON, ((CreateDataActivity)context).person);
                             intent.putExtra(AppConstants.EXTRA_MEASURE, measure);
                             startActivity(intent);
