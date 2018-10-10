@@ -86,4 +86,12 @@ public class ConfirmDialog extends Dialog {
     public void setMessage(int message) {
         txtMessage.setText(message);
     }
+
+    public void show() {
+        super.show();
+    }
+
+    public void dismiss() {
+        super.dismiss();
+    }
 }
