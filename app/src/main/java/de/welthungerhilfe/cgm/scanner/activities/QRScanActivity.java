@@ -52,7 +52,7 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
 
         try {
             ConfirmDialog confirmDialog = new ConfirmDialog(this);
-            confirmDialog.setMessage(getString(R.string.message_legal));
+            confirmDialog.setMessage(R.string.message_legal);
             confirmDialog.setConfirmListener(this);
             confirmDialog.show();
         } catch (Exception e) {
