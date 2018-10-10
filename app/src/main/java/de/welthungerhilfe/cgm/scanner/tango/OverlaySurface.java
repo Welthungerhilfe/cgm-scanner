@@ -18,7 +18,12 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.crashlytics.android.Crashlytics;
+
+import java.util.Date;
+
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 /**
  * Child Growth Monitor - quick and accurate data on malnutrition
@@ -157,27 +162,33 @@ public class OverlaySurface extends SurfaceView
     private void drawBabyOverlay() {
 
         Surface surface = holder.getSurface();
-        Canvas canvas = surface.lockCanvas(null);
-        if (canvas != null) {
-            // clear screen before redrawing
-            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
-            // Source is the whole bitmap
-            Rect srcRect = new Rect(0, 0, mBabyOverlay.getWidth(), mBabyOverlay.getHeight());
+        try {
+            Canvas canvas = surface.lockCanvas(null);
 
-            // destination is the where to draw it
-            // will be drawn in the center and scaled by the distance
-            // because distance to take measurements should be around 1 meter
-            float left = ((canvas.getWidth() - mBabyOverlay.getWidth()* mDistance) / 2.0f);
-            float top = ((canvas.getHeight() - mBabyOverlay.getHeight()*mDistance) / 2.0f);
-            float right = (mBabyOverlay.getWidth() * mDistance )+left;
-            float bottom = (mBabyOverlay.getHeight()*mDistance) +top;
-            RectF dstRectF = new RectF(left,top,right,bottom);
+            if (canvas != null) {
+                // clear screen before redrawing
+                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
-            setConfidenceColor();
+                // Source is the whole bitmap
+                Rect srcRect = new Rect(0, 0, mBabyOverlay.getWidth(), mBabyOverlay.getHeight());
 
-            canvas.drawBitmap(mBabyOverlay, srcRect, dstRectF, mPaint);
-            surface.unlockCanvasAndPost(canvas);
+                // destination is the where to draw it
+                // will be drawn in the center and scaled by the distance
+                // because distance to take measurements should be around 1 meter
+                float left = ((canvas.getWidth() - mBabyOverlay.getWidth()* mDistance) / 2.0f);
+                float top = ((canvas.getHeight() - mBabyOverlay.getHeight()*mDistance) / 2.0f);
+                float right = (mBabyOverlay.getWidth() * mDistance )+left;
+                float bottom = (mBabyOverlay.getHeight()*mDistance) +top;
+                RectF dstRectF = new RectF(left,top,right,bottom);
+
+                setConfidenceColor();
+
+                canvas.drawBitmap(mBabyOverlay, srcRect, dstRectF, mPaint);
+                surface.unlockCanvasAndPost(canvas);
+            }
+        } catch (Exception e) {
+            Crashlytics.log(0, "user login: ", String.format("drawBabyOverlay on Surface at %s", Utils.beautifyDateTime(new Date())));
         }
     }
 
@@ -253,28 +264,33 @@ public class OverlaySurface extends SurfaceView
     private void drawInfantOverlay() {
 
         Surface surface = holder.getSurface();
-        Canvas canvas = surface.lockCanvas(null);
-        if (canvas != null) {
-            // clear screen before redrawing
-            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
-            final float infantScaling = 1.5f;
+        try {
+            Canvas canvas = surface.lockCanvas(null);
+            if (canvas != null) {
+                // clear screen before redrawing
+                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
-            // Source is the whole bitmap
-            Rect srcRect = new Rect(0, 0, mInfantOverlay.getWidth(), mInfantOverlay.getHeight());
+                final float infantScaling = 1.5f;
 
-            // destination is the where to draw it
-            // will be drawn in the center and scaled by the distance
-            // because distance to take measurements should be around 1 meter
-            float left = ((canvas.getWidth() - mInfantOverlay.getWidth()* infantScaling) / 2.0f);
-            float top = ((canvas.getHeight() - mInfantOverlay.getHeight()*infantScaling) / 2.0f);
-            float right = (mInfantOverlay.getWidth() * infantScaling )+left;
-            float bottom = (mInfantOverlay.getHeight()*infantScaling) +top;
-            RectF dstRectF = new RectF(left,top,right,bottom);
+                // Source is the whole bitmap
+                Rect srcRect = new Rect(0, 0, mInfantOverlay.getWidth(), mInfantOverlay.getHeight());
 
-            Paint paint = new Paint();
-            canvas.drawBitmap(mInfantOverlay, srcRect, dstRectF, paint);
-            surface.unlockCanvasAndPost(canvas);
+                // destination is the where to draw it
+                // will be drawn in the center and scaled by the distance
+                // because distance to take measurements should be around 1 meter
+                float left = ((canvas.getWidth() - mInfantOverlay.getWidth()* infantScaling) / 2.0f);
+                float top = ((canvas.getHeight() - mInfantOverlay.getHeight()*infantScaling) / 2.0f);
+                float right = (mInfantOverlay.getWidth() * infantScaling )+left;
+                float bottom = (mInfantOverlay.getHeight()*infantScaling) +top;
+                RectF dstRectF = new RectF(left,top,right,bottom);
+
+                Paint paint = new Paint();
+                canvas.drawBitmap(mInfantOverlay, srcRect, dstRectF, paint);
+                surface.unlockCanvasAndPost(canvas);
+            }
+        } catch (Exception e) {
+            Crashlytics.log(0, "user login: ", String.format("drawInfantOverlay on Surface at %s", Utils.beautifyDateTime(new Date())));
         }
     }
 

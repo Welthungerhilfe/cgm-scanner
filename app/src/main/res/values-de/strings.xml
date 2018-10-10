@@ -144,6 +144,7 @@
     <string name="title_add_measure">Messung hinzufügen</string>
 
     <string name="content_image">Einverständniserklärung</string>
+    <string name="message_legal">Please make sure to take a photo of the consent form from the parents to avoid legal issues</string>
 
     <string name="axis_age">Alter</string>
     <string name="axis_height">Größe</string>
