@@ -69,11 +69,13 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
     private FloatingActionButton fabCreate;
 
-    public static MeasuresDataFragment newInstance(Context context) {
-        MeasuresDataFragment fragment = new MeasuresDataFragment();
-        fragment.context = context;
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
-        return fragment;
+        this.context = context;
+        adapterMeasure = new RecyclerMeasureAdapter(context, ((CreateDataActivity)context).measures);
+        adapterMeasure.setMeasureSelectListener(this);
     }
 
     public void onResume() {
@@ -89,8 +91,6 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         View view = inflater.inflate(R.layout.fragment_measure, container, false);
         
         recyclerMeasure = view.findViewById(R.id.recyclerMeasure);
-        adapterMeasure = new RecyclerMeasureAdapter(context, ((CreateDataActivity)context).measures);
-        adapterMeasure.setMeasureSelectListener(this);
         recyclerMeasure.setAdapter(adapterMeasure);
         recyclerMeasure.setLayoutManager(new LinearLayoutManager(context));
 

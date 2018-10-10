@@ -50,10 +50,14 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
         qrScanView = new QRScanView(this);
         setContentView(qrScanView);
 
-        ConfirmDialog confirmDialog = new ConfirmDialog(this);
-        confirmDialog.setMessage("Please make sure to take a photo of the consent form from the parents to avoid legal issues");
-        confirmDialog.setConfirmListener(this);
-        confirmDialog.show();
+        try {
+            ConfirmDialog confirmDialog = new ConfirmDialog(this);
+            confirmDialog.setMessage(R.string.message_legal);
+            confirmDialog.setConfirmListener(this);
+            confirmDialog.show();
+        } catch (Exception e) {
+
+        }
     }
 
     @Override
