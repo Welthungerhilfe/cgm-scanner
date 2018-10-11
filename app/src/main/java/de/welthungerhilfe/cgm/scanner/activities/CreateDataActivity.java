@@ -78,7 +78,6 @@ import de.welthungerhilfe.cgm.scanner.fragments.MeasuresDataFragment;
 import de.welthungerhilfe.cgm.scanner.fragments.PersonalDataFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
-import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
 import de.welthungerhilfe.cgm.scanner.models.Consent;
 import de.welthungerhilfe.cgm.scanner.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
