@@ -468,8 +468,9 @@ public class CreateDataActivity extends BaseActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == PERMISSION_LOCATION && grantResults[0] >= 0) {
-            getCurrentLocation();
+        if (requestCode == PERMISSION_LOCATION) {
+            if (grantResults.length > 0 && grantResults[0] >= 0)
+                getCurrentLocation();
         }
     }
 }
