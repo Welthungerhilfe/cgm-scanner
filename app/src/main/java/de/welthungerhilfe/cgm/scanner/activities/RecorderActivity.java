@@ -92,7 +92,6 @@ import de.welthungerhilfe.cgm.scanner.fragments.BabyFront0Fragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.helper.service.FileLogMonitorService;
-import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
 import de.welthungerhilfe.cgm.scanner.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
@@ -105,7 +104,6 @@ import de.welthungerhilfe.cgm.scanner.tango.OverlaySurface;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.utils.MD5;
 import de.welthungerhilfe.cgm.scanner.utils.TangoUtils;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static com.projecttango.tangosupport.TangoSupport.initialize;
 
@@ -1150,8 +1148,9 @@ public class RecorderActivity extends Activity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == PERMISSION_LOCATION && grantResults[0] >= 0) {
-            getCurrentLocation();
+        if (requestCode == PERMISSION_LOCATION) {
+            if (grantResults.length > 0 && grantResults[0] >= 0)
+                getCurrentLocation();
         }
     }
 }

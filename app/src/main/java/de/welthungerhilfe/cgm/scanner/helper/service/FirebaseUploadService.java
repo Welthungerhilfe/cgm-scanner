@@ -28,6 +28,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -128,64 +129,65 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
         final String pcPath = storageUrl;
         try {
             pcPath.replace("{qrcode}",  qrCode).replace("{scantimestamp}", scanTimestamp);
+
+            final StorageReference photoRef = mStorageRef.child(pcPath)
+                    .child(fileUri.getLastPathSegment());
+            // Upload file to Firebase Storage
+            Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
+            photoRef.putFile(fileUri).
+                    addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            showProgressNotification(getString(R.string.progress_uploading),
+                                    taskSnapshot.getBytesTransferred(),
+                                    taskSnapshot.getTotalByteCount());
+                        }
+                    })
+                    .continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                        @Override
+                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            // Forward any exceptions
+                            if (!task.isSuccessful()) {
+                                throw task.getException();
+                            }
+
+                            Log.d(TAG, "uploadFromUri: upload success");
+
+                            // Request the public download URL
+                            return photoRef.getDownloadUrl();
+                        }
+                    })
+                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(@NonNull Uri downloadUri) {
+                            // Upload succeeded
+                            Log.d(TAG, "uploadFromUri: getDownloadUri success");
+
+                            // [START_EXCLUDE]
+                            broadcastUploadFinished(downloadUri, fileUri);
+                            showUploadFinishedNotification(downloadUri, fileUri);
+                            taskCompleted();
+                            // [END_EXCLUDE]
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Upload failed
+                            Log.w(TAG, "uploadFromUri:onFailure", exception);
+
+                            // [START_EXCLUDE]
+                            broadcastUploadFinished(null, fileUri);
+                            showUploadFinishedNotification(null, fileUri);
+                            taskCompleted();
+                            // [END_EXCLUDE]
+                        }
+                    });
         } catch (NullPointerException e) {
             e.printStackTrace();
+            Crashlytics.log(0, "firebase_upload", String.format("wrong qrCode and timestamp", qrCode, scanTimestamp));
         }
-        final StorageReference photoRef = mStorageRef.child(pcPath)
-                .child(fileUri.getLastPathSegment());
         // [END get_child_ref]
-
-        // Upload file to Firebase Storage
-        Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
-        photoRef.putFile(fileUri).
-                addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                        showProgressNotification(getString(R.string.progress_uploading),
-                                taskSnapshot.getBytesTransferred(),
-                                taskSnapshot.getTotalByteCount());
-                    }
-                })
-                .continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                    @Override
-                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                        // Forward any exceptions
-                        if (!task.isSuccessful()) {
-                            throw task.getException();
-                        }
-
-                        Log.d(TAG, "uploadFromUri: upload success");
-
-                        // Request the public download URL
-                        return photoRef.getDownloadUrl();
-                    }
-                })
-                .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(@NonNull Uri downloadUri) {
-                        // Upload succeeded
-                        Log.d(TAG, "uploadFromUri: getDownloadUri success");
-
-                        // [START_EXCLUDE]
-                        broadcastUploadFinished(downloadUri, fileUri);
-                        showUploadFinishedNotification(downloadUri, fileUri);
-                        taskCompleted();
-                        // [END_EXCLUDE]
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Upload failed
-                        Log.w(TAG, "uploadFromUri:onFailure", exception);
-
-                        // [START_EXCLUDE]
-                        broadcastUploadFinished(null, fileUri);
-                        showUploadFinishedNotification(null, fileUri);
-                        taskCompleted();
-                        // [END_EXCLUDE]
-                    }
-                });
     }
     // [END upload_from_uri]
 
