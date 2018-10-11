@@ -81,11 +81,10 @@ public class GrowthDataFragment extends Fragment {
 
     private int chartType = 0;
 
-    public static GrowthDataFragment newInstance(Context context) {
-        GrowthDataFragment fragment = new GrowthDataFragment();
-        fragment.context = context;
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
-        return fragment;
+        this.context = context;
     }
 
     public void onResume() {
