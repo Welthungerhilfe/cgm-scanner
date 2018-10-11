@@ -260,10 +260,10 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSION_LOCATION) {
-            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(LocationSearchActivity.this, "App can't get device location", Toast.LENGTH_LONG).show();
-            } else {
+            if (grantResults.length > 0 && grantResults[0] >= 0) {
                 getCurrentLocation();
+            } else {
+                Toast.makeText(LocationSearchActivity.this, "App can't get device location", Toast.LENGTH_LONG).show();
             }
         }
     }
