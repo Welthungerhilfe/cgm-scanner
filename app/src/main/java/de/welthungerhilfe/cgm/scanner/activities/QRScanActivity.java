@@ -82,11 +82,11 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSION_LOCATION) {
-            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(QRScanActivity.this, R.string.permission_camera, Toast.LENGTH_LONG).show();
-            } else {
+            if (grantResults.length > 0 && grantResults[0] >= 0) {
                 qrScanView.setResultHandler(this);
                 qrScanView.startCamera();
+            } else {
+                Toast.makeText(QRScanActivity.this, R.string.permission_camera, Toast.LENGTH_LONG).show();
             }
         }
     }
