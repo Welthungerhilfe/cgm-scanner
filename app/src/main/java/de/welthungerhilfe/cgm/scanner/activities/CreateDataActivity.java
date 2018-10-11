@@ -189,11 +189,11 @@ public class CreateDataActivity extends BaseActivity {
 
     private void initFragments() {
         if (personalFragment == null)
-            personalFragment = PersonalDataFragment.newInstance(this);
+            personalFragment = new PersonalDataFragment();
         if (measureFragment == null)
             measureFragment = new MeasuresDataFragment();
         if (growthFragment == null)
-            growthFragment = GrowthDataFragment.newInstance(this);
+            growthFragment = new GrowthDataFragment();
     }
 
     private void initUI() {
