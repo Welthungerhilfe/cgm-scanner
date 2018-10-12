@@ -93,11 +93,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private Loc location = null;
     private long birthday = 0;
     
-    public static PersonalDataFragment newInstance(Context context) {
-        PersonalDataFragment fragment = new PersonalDataFragment();
-        fragment.context = context;
-        
-        return fragment;
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        this.context = context;
     }
 
     @Override

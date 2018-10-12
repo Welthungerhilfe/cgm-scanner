@@ -35,6 +35,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.util.Util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
@@ -57,7 +58,10 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
     public RecyclerMeasureAdapter(Context ctx, List<Measure> ml) {
         context = ctx;
-        measureList = ml;
+        if (ml == null)
+            measureList = new ArrayList<>();
+        else
+            measureList = ml;
     }
 
     public void setMeasureSelectListener(OnMeasureSelectListener listener) {

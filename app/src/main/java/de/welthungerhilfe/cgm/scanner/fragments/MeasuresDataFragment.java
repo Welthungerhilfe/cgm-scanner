@@ -200,7 +200,10 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void createMeasure() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        if (context == null)
+            return;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(R.string.title_add_measure);
         builder.setItems(R.array.selector_measure, new DialogInterface.OnClickListener() {
             @Override
@@ -211,7 +214,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                     dialog.show();
                 } else if (which == 1) {
                     //Intent intent = new Intent(getContext(), ScreenRecordActivity.class);
-                    Intent intent = new Intent(getContext(), RecorderActivity.class);
+                    Intent intent = new Intent(context, RecorderActivity.class);
                     intent.putExtra(AppConstants.EXTRA_PERSON, ((CreateDataActivity)context).person);
                     startActivity(intent);
                 }

@@ -75,10 +75,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
 
                                     } else {
                                         String[] arr = person.getId().split("_");
-                                        if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
-                                            OfflineRepository.getInstance().createPerson(person);
-                                        } else {    // created before sync, after sync person was updates, so must update in local room
-                                            OfflineRepository.getInstance().updatePerson(person);
+                                        try {
+                                            if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
+                                                OfflineRepository.getInstance().createPerson(person);
+                                            } else {    // created before sync, after sync person was updates, so must update in local room
+                                                OfflineRepository.getInstance().updatePerson(person);
+                                            }
+                                        } catch (NumberFormatException e) {
+                                            Crashlytics.log(0, "sync_adapter", String.format("could not get timestamp because of underline in personId: %s", person.getId()));
                                         }
                                     }
                                 }
@@ -101,11 +105,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                                                         if (prevTimestamp == 0 && measure.getDeleted()) {
 
                                                         } else {
-                                                            String[] arr = measure.getId().split("_");
-                                                            if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
-                                                                OfflineRepository.getInstance().createMeasure(measure);
-                                                            } else {    // created before sync, after sync person was updates, so must update in local room
-                                                                OfflineRepository.getInstance().updateMeasure(measure);
+                                                            try {
+                                                                String[] arr = measure.getId().split("_");
+                                                                if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
+                                                                    OfflineRepository.getInstance().createMeasure(measure);
+                                                                } else {    // created before sync, after sync person was updates, so must update in local room
+                                                                    OfflineRepository.getInstance().updateMeasure(measure);
+                                                                }
+                                                            } catch (NumberFormatException e) {
+                                                                Crashlytics.log(0, "sync_adapter", String.format("could not get timestamp because of underline in measureId: %s", measure.getId()));
                                                             }
                                                         }
                                                     }

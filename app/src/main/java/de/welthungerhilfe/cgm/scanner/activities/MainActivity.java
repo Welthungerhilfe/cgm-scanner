@@ -631,9 +631,9 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == PERMISSION_CAMERA && grantResults[0] >= 0 && grantResults[1] >= 0) {
+        if (requestCode == PERMISSION_CAMERA && grantResults.length > 0 && grantResults[0] >= 0 && grantResults[1] >= 0) {
             takePhoto();
-        } else if (requestCode == PERMISSION_STORAGE && grantResults[0] >= 0) {
+        } else if (requestCode == PERMISSION_STORAGE && grantResults.length > 0 && grantResults[0] >= 0) {
             File root = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
             iterateLocalFiles(root);
             checkDeletedRecords();
