@@ -128,6 +128,11 @@ public class FileLogMonitorService extends Service {
                 else if (log.getType().equals("consent"))
                     path = AppConstants.STORAGE_CONSENT_URL.replace("{qrcode}",  log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
 
+
+                if (path.contains("{qrcode}") || path.contains("scantimestamp")) {
+                    Log.e("MonitorService : ", String.format("id: %s, qrcode: %s, scantimestamp: %s", log.getId(), log.getQrCode(), String.valueOf(log.getCreateDate())));
+                }
+
                 StorageReference photoRef = FirebaseStorage.getInstance().getReference().child(path)
                         .child(fileUri.getLastPathSegment());
 
