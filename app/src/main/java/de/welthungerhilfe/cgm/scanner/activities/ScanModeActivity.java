@@ -202,10 +202,6 @@ public class ScanModeActivity extends AppCompatActivity {
     public int SCAN_MODE = SCAN_STANDING;
     public int SCAN_STEP = 0;
 
-    public final int SCAN_FRONT = 1;
-    public final int SCAN_SIDE = 2;
-    public final int SCAN_BACK = 3;
-
     public Person person;
     public Measure measure;
     public Loc location;

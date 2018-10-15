@@ -49,7 +49,6 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 
 import de.welthungerhilfe.cgm.scanner.activities.CreateDataActivity;
-import de.welthungerhilfe.cgm.scanner.activities.RecorderActivity;
 import de.welthungerhilfe.cgm.scanner.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerMeasureAdapter;
 import de.welthungerhilfe.cgm.scanner.dialogs.ConfirmDialog;
