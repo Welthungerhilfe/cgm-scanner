@@ -112,9 +112,6 @@
         <activity android:name=".activities.ImageDetailActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.RecorderActivity"
-            android:screenOrientation="portrait" />
-
         <activity android:name=".activities.SettingsActivity"
             android:screenOrientation="portrait" />
 
