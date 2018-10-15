@@ -237,7 +237,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
         mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
         if (mode == SCAN_STANDING_FRONT || mode == SCAN_STANDING_SIDE || mode == SCAN_STANDING_BACK)
-            mOverlaySurfaceView.setMode(OverlaySurface.INFANT_OVERLAY);
+            mOverlaySurfaceView.setMode(OverlaySurface.INFANT_CLOSE_DOWN_UP_OVERLAY);
         else if (mode == SCAN_LYING_FRONT || mode == SCAN_LYING_SIDE || mode == SCAN_LYING_BACK)
             mOverlaySurfaceView.setMode(OverlaySurface.BABY_OVERLAY);
     }

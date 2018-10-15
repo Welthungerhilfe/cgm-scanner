@@ -254,7 +254,8 @@ public class OverlaySurface extends SurfaceView
             float top = 200;
             float right = ((srcWidth * mDistance )+left)*2;
             float bottom = ((srcHeight*mDistance) +top)*2;
-            RectF dstRectF = new RectF(left,top,right,bottom);
+            //RectF dstRectF = new RectF(left,top,right,bottom);
+            RectF dstRectF = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
 
             setConfidenceColor();
 
@@ -288,6 +289,8 @@ public class OverlaySurface extends SurfaceView
             float bottom = (mInfantOverlay.getHeight()*infantScaling) +top;
             //RectF dstRectF = new RectF(left,top,right,bottom);
             RectF dstRectF = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
+
+                setConfidenceColor();
 
                 Paint paint = new Paint();
                 canvas.drawBitmap(mInfantOverlay, srcRect, dstRectF, paint);
