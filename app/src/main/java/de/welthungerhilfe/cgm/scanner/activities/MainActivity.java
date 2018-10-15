@@ -487,6 +487,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                             logUrl = AppConstants.STORAGE_RGB_URL;
                         }
                         startService(new Intent(MainActivity.this, FirebaseUploadService.class)
+                                .putExtra(FirebaseUploadService.EXTRA_LOG_ID, log.getId())
                                 .putExtra(FirebaseUploadService.EXTRA_FILE_URI, Uri.fromFile(target))
                                 .putExtra(AppConstants.EXTRA_QR, log.getQrCode())
                                 .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, String.valueOf(log.getCreateDate()))
