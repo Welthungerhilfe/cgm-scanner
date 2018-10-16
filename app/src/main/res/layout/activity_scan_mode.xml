@@ -302,8 +302,7 @@
                         android:text="@string/start_scan"
                         android:textColor="@color/colorPrimary"
                         android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:visibility="gone"/>
+                        android:textSize="16sp"/>
 
                 </LinearLayout>
 
@@ -366,8 +365,7 @@
                         android:text="@string/start_scan"
                         android:textColor="@color/colorPrimary"
                         android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:visibility="gone"/>
+                        android:textSize="16sp"/>
 
                 </LinearLayout>
 

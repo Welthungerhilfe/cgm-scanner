@@ -245,20 +245,17 @@ public class ScanModeActivity extends AppCompatActivity {
     public void goToNextStep() {
         closeScan();
 
-        SCAN_STEP ++;
         if (SCAN_STEP == SCAN_STANDING_FRONT || SCAN_STEP == SCAN_LYING_FRONT) {
-            btnScanStep1.setVisibility(View.VISIBLE);
-            btnScanStep2.setVisibility(View.GONE);
-            btnScanStep3.setVisibility(View.GONE);
+            btnScanStep1.setText(R.string.retake_scan);
         } else if (SCAN_STEP == SCAN_STANDING_SIDE || SCAN_STEP == SCAN_LYING_SIDE) {
-            btnScanStep1.setVisibility(View.GONE);
-            btnScanStep2.setVisibility(View.VISIBLE);
-            btnScanStep3.setVisibility(View.GONE);
+            btnScanStep2.setText(R.string.retake_scan);
         } else if (SCAN_STEP == SCAN_STANDING_BACK || SCAN_STEP == SCAN_LYING_BACK) {
-            btnScanStep1.setVisibility(View.GONE);
-            btnScanStep2.setVisibility(View.GONE);
-            btnScanStep3.setVisibility(View.VISIBLE);
-        } else {
+            btnScanStep3.setText(R.string.retake_scan);
+        }
+
+        SCAN_STEP ++;
+
+        if (SCAN_STEP > SCAN_LYING_BACK || (SCAN_STEP > SCAN_STANDING_BACK && SCAN_STEP < 199)) {
             if (measure == null)
                 measure = new Measure();
             if (location != null)
