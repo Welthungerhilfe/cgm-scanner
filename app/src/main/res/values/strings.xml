@@ -68,6 +68,7 @@
     <string name="measure_oedema">Oedema</string>
 
     <string name="start_scan">Start Scan</string>
+    <string name="retake_scan">Retake Scan</string>
     <string name="axis_y">Y Axis</string>
     <string name="axis_x">X Axis</string>
     <string name="username">Username</string>

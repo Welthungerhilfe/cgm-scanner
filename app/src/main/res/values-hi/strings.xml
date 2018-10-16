@@ -68,6 +68,7 @@
     <string name="measure_oedema">07 ओएडीमा</string>
 
     <string name="start_scan">स्कैन शुरू करें</string>
+    <string name="retake_scan">Retake Scan</string>
     <string name="axis_y">वाई अक्ष</string>
     <string name="axis_x">एक्स अक्ष</string>
     <string name="username">यूजरनेम</string>

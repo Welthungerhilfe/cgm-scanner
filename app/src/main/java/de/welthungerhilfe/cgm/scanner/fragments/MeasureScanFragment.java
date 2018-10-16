@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -83,6 +84,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
     private TextView mTitleView;
     private ProgressBar progressBar;
     private FloatingActionButton fab;
+    private Button btnRetake;
 
     // variables for Pose and point clouds
     private float mDeltaTime;
@@ -189,6 +191,8 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
         progressBar = view.findViewById(R.id.progressBar);
         fab = view.findViewById(R.id.fab_scan_result);
         fab.setOnClickListener(this);
+        btnRetake = view.findViewById(R.id.btnRetake);
+        view.findViewById(R.id.btnRetake).setOnClickListener(this);
         view.findViewById(R.id.imgClose).setOnClickListener(this);
 
         mCameraSurfaceView = view.findViewById(R.id.surfaceview);
@@ -307,6 +311,9 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                 break;
             case R.id.imgClose:
                 ((ScanModeActivity)getActivity()).closeScan();
+                break;
+            case R.id.btnRetake:
+                mProgress = 0;
                 break;
         }
     }
