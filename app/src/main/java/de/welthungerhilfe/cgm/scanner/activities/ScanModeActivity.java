@@ -2,6 +2,8 @@ package de.welthungerhilfe.cgm.scanner.activities;
 
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,7 +19,10 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -88,6 +93,8 @@ public class ScanModeActivity extends AppCompatActivity {
     Button btnScanStep2;
     @BindView(R.id.btnScanStep3)
     Button btnScanStep3;
+    @BindView(R.id.btnScanComplete)
+    Button btnScanComplete;
 
     @BindView(R.id.lytScanStep1)
     LinearLayout lytScanStep1;
@@ -206,11 +213,17 @@ public class ScanModeActivity extends AppCompatActivity {
                 .addToBackStack(null)
                 .commit();
     }
+    @OnClick(R.id.btnScanComplete)
+    void completeScan(Button btnScanComplete) {
+        completeScan();
+    }
 
     private static final String TAG = ScanModeActivity.class.getSimpleName();
 
     public int SCAN_MODE = SCAN_STANDING;
     public int SCAN_STEP = 0;
+    private boolean step1 = false, step2 = false, step3 = false;
+    private boolean switcher = false;
 
     public Person person;
     public Measure measure;
@@ -260,16 +273,70 @@ public class ScanModeActivity extends AppCompatActivity {
             btnScanStep1.setText(R.string.retake_scan);
             btnScanStep1.setTextColor(getResources().getColor(R.color.colorWhite));
             btnScanStep1.setBackground(getResources().getDrawable(R.drawable.button_green_circular));
+
+            step1 = true;
         } else if (SCAN_STEP == SCAN_STANDING_SIDE || SCAN_STEP == SCAN_LYING_SIDE) {
             lytScanStep2.setVisibility(View.GONE);
             btnScanStep2.setText(R.string.retake_scan);
             btnScanStep2.setTextColor(getResources().getColor(R.color.colorWhite));
             btnScanStep2.setBackground(getResources().getDrawable(R.drawable.button_green_circular));
+
+            step2 = true;
         } else if (SCAN_STEP == SCAN_STANDING_BACK || SCAN_STEP == SCAN_LYING_BACK) {
             lytScanStep3.setVisibility(View.GONE);
             btnScanStep3.setText(R.string.retake_scan);
             btnScanStep3.setTextColor(getResources().getColor(R.color.colorWhite));
             btnScanStep3.setBackground(getResources().getDrawable(R.drawable.button_green_circular));
+
+            step3 = true;
+        }
+
+        if (step1 && step2 && step3) {
+            showCompleteButton();
+        }
+    }
+
+    private void showCompleteButton() {
+        btnScanComplete.setVisibility(View.VISIBLE);
+        btnScanComplete.requestFocus();
+
+        if (android.os.Build.VERSION.SDK_INT >=  android.os.Build.VERSION_CODES.LOLLIPOP) {
+            int cx = (btnScanComplete.getLeft() + btnScanComplete.getRight()) / 2;
+            int cy = (btnScanComplete.getTop() + btnScanComplete.getBottom()) / 2;
+
+            int dx = Math.max(cx, btnScanComplete.getWidth() - cx);
+            int dy = Math.max(cy, btnScanComplete.getHeight() - cy);
+            float finalRadius = (float) Math.hypot(dx, dy);
+
+            Animator animator = ViewAnimationUtils.createCircularReveal(btnScanComplete, cx, cy, 0, finalRadius);
+            animator.setInterpolator(new AccelerateDecelerateInterpolator());
+            animator.setDuration(300);
+            animator.start();
+        }
+    }
+
+    private void hideCompleteButton() {
+        if (android.os.Build.VERSION.SDK_INT >=  android.os.Build.VERSION_CODES.LOLLIPOP) {
+            int cx = (btnScanComplete.getLeft() + btnScanComplete.getRight()) / 2;
+            int cy = (btnScanComplete.getTop() + btnScanComplete.getBottom()) / 2;
+
+            int dx = Math.max(cx, btnScanComplete.getWidth() - cx);
+            int dy = Math.max(cy, btnScanComplete.getHeight() - cy);
+            float finalRadius = (float) Math.hypot(dx, dy);
+
+            Animator animator = ViewAnimationUtils.createCircularReveal(btnScanComplete, cx, cy, finalRadius, 0);
+            animator.setInterpolator(new AccelerateDecelerateInterpolator());
+            animator.setDuration(300);
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    btnScanComplete.setVisibility(View.GONE);
+                }
+            });
+            animator.start();
+        } else {
+            btnScanComplete.setVisibility(View.GONE);
         }
     }
 
@@ -367,6 +434,20 @@ public class ScanModeActivity extends AppCompatActivity {
             }
         });
         thread.start();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        if (menuItem.getItemId() == android.R.id.home) {
+            //finish();
+            if (switcher)
+                showCompleteButton();
+            else
+                hideCompleteButton();
+
+            switcher = !switcher;
+        }
+        return super.onOptionsItemSelected(menuItem);
     }
 
     @Override
