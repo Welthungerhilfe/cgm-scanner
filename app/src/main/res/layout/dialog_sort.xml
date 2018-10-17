@@ -17,335 +17,419 @@
   ~     along with this program.  If not, see <http://www.gnu.org/licenses/>.
   ~
   -->
-
-<LinearLayout
+<android.support.v4.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@color/colorWhite">
+    android:layout_gravity="bottom">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/activity_horizontal_margin"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:text="@string/sortby"
-        android:textSize="16sp"/>
+        android:orientation="vertical"
+        android:background="@color/colorWhite">
 
-    <com.balysv.materialripple.MaterialRippleLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:text="@string/filter"
+            android:textSize="16sp"/>
 
-        <RelativeLayout
-            android:id="@+id/rytSortDate"
+        <com.balysv.materialripple.MaterialRippleLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            
-            <ImageView
-                android:id="@+id/imgSortDate"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/check"
-                android:visibility="invisible"
-                android:tint="@color/colorPrimary"
-                android:layout_centerVertical="true"
-                android:contentDescription="@string/content_image"/>
+            android:layout_height="80dp"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin">
 
-            <LinearLayout
-                android:layout_toRightOf="@+id/imgSortDate"
+            <RelativeLayout
+                android:id="@+id/rytFilterData"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:text="@string/date"
-                        android:textSize="20sp"
-                        android:textColor="@color/colorBlack"/>
-                    <TextView
-                        android:id="@+id/txtSortDate"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:textSize="16sp"
-                        android:text="@string/last_days"/>
-                </LinearLayout>
+                android:layout_height="match_parent">
 
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/right"
-                    android:tint="@color/colorGreyDark"
+                    android:id="@+id/imgFilterData"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/check"
+                    android:visibility="invisible"
+                    android:tint="@color/colorPrimary"
+                    android:layout_centerVertical="true"
                     android:contentDescription="@string/content_image"/>
 
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_alignParentBottom="true"
-                android:background="@color/colorGreyLight" />
-
-        </RelativeLayout>
-
-    </com.balysv.materialripple.MaterialRippleLayout>
-
-    <com.balysv.materialripple.MaterialRippleLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin">
-
-        <RelativeLayout
-            android:id="@+id/rytSortLocation"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageView
-                android:id="@+id/imgSortLocation"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/check"
-                android:visibility="invisible"
-                android:tint="@color/colorPrimary"
-                android:layout_centerVertical="true"
-                android:contentDescription="@string/content_image"/>
-
-            <LinearLayout
-                android:layout_toRightOf="@+id/imgSortLocation"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
                 <LinearLayout
+                    android:layout_toRightOf="@+id/imgFilterData"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-                    <TextView
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:text="@string/label_location"
-                        android:textSize="20sp"
-                        android:textColor="@color/colorBlack"/>
-                    <TextView
-                        android:id="@+id/txtSortLocation"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:textSize="16sp"
-                        android:text="@string/last_location_error"/>
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:text="@string/own_data"
+                            android:textSize="20sp"
+                            android:textColor="@color/colorBlack"/>
+                        <TextView
+                            android:id="@+id/txtFilterData"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:textSize="16sp"
+                            android:text="@string/created_by_self"/>
+                    </LinearLayout>
+
                 </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/colorGreyLight" />
+
+            </RelativeLayout>
+
+        </com.balysv.materialripple.MaterialRippleLayout>
+
+        <com.balysv.materialripple.MaterialRippleLayout
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin">
+
+            <RelativeLayout
+                android:id="@+id/rytFilterLocation"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/right"
-                    android:tint="@color/colorGreyDark"
+                    android:id="@+id/imgFilterLocation"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/check"
+                    android:visibility="invisible"
+                    android:tint="@color/colorPrimary"
+                    android:layout_centerVertical="true"
                     android:contentDescription="@string/content_image"/>
 
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_alignParentBottom="true"
-                android:background="@color/colorGreyLight" />
-
-        </RelativeLayout>
-
-    </com.balysv.materialripple.MaterialRippleLayout>
-
-    <com.balysv.materialripple.MaterialRippleLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin">
-
-        <RelativeLayout
-            android:id="@+id/rytSortWasting"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageView
-                android:id="@+id/imgSortWasting"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/check"
-                android:visibility="invisible"
-                android:tint="@color/colorPrimary"
-                android:layout_centerVertical="true"
-                android:contentDescription="@string/content_image"/>
-
-            <LinearLayout
-                android:layout_toRightOf="@+id/imgSortWasting"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
                 <LinearLayout
+                    android:layout_toRightOf="@+id/imgFilterLocation"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-                    <TextView
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:text="@string/wasting"
-                        android:textSize="20sp"
-                        android:textColor="@color/colorBlack"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:textSize="16sp"
-                        android:text="@string/wasting_weight_height"/>
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:text="@string/label_location"
+                            android:textSize="20sp"
+                            android:textColor="@color/colorBlack"/>
+                        <TextView
+                            android:id="@+id/txtSortLocation"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:textSize="16sp"
+                            android:text="@string/last_location_error"/>
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/right"
+                        android:tint="@color/colorGreyDark"
+                        android:contentDescription="@string/content_image"/>
+
                 </LinearLayout>
 
-            </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/colorGreyLight" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_alignParentBottom="true"
-                android:background="@color/colorGreyLight" />
+            </RelativeLayout>
 
-        </RelativeLayout>
+        </com.balysv.materialripple.MaterialRippleLayout>
 
-    </com.balysv.materialripple.MaterialRippleLayout>
+    </LinearLayout>
 
-    <com.balysv.materialripple.MaterialRippleLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/colorWhite">
 
-        <RelativeLayout
-            android:id="@+id/rytSortStunting"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:text="@string/sortby"
+            android:textSize="16sp"/>
+
+        <com.balysv.materialripple.MaterialRippleLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="80dp"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin">
 
-            <ImageView
-                android:id="@+id/imgSortStunting"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/check"
-                android:visibility="invisible"
-                android:tint="@color/colorPrimary"
-                android:layout_centerVertical="true"
-                android:contentDescription="@string/content_image"/>
-
-            <LinearLayout
-                android:layout_toRightOf="@+id/imgSortStunting"
+            <RelativeLayout
+                android:id="@+id/rytSortDate"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/imgSortDate"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/check"
+                    android:visibility="invisible"
+                    android:tint="@color/colorPrimary"
+                    android:layout_centerVertical="true"
+                    android:contentDescription="@string/content_image"/>
 
                 <LinearLayout
+                    android:layout_toRightOf="@+id/imgSortDate"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-                    <TextView
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:text="@string/stunting"
-                        android:textSize="20sp"
-                        android:textColor="@color/colorBlack"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:textSize="16sp"
-                        android:text="@string/stunting_height_age"/>
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:text="@string/date"
+                            android:textSize="20sp"
+                            android:textColor="@color/colorBlack"/>
+                        <TextView
+                            android:id="@+id/txtSortDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:textSize="16sp"
+                            android:text="@string/last_days"/>
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/right"
+                        android:tint="@color/colorGreyDark"
+                        android:contentDescription="@string/content_image"/>
+
                 </LinearLayout>
 
-            </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/colorGreyLight" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_alignParentBottom="true"
-                android:background="@color/colorGreyLight" />
+            </RelativeLayout>
 
-        </RelativeLayout>
+        </com.balysv.materialripple.MaterialRippleLayout>
 
-    </com.balysv.materialripple.MaterialRippleLayout>
-
-    <com.balysv.materialripple.MaterialRippleLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin">
-
-        <RelativeLayout
-            android:id="@+id/rytSortClear"
+        <com.balysv.materialripple.MaterialRippleLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="80dp"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin">
 
-            <ImageView
-                android:id="@+id/imgSortClear"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/check"
-                android:visibility="invisible"
-                android:tint="@color/colorPrimary"
-                android:layout_centerVertical="true"
-                android:contentDescription="@string/content_image"/>
-
-            <LinearLayout
-                android:layout_toRightOf="@+id/imgSortClear"
+            <RelativeLayout
+                android:id="@+id/rytSortWasting"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/imgSortWasting"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/check"
+                    android:visibility="invisible"
+                    android:tint="@color/colorPrimary"
+                    android:layout_centerVertical="true"
+                    android:contentDescription="@string/content_image"/>
 
                 <LinearLayout
+                    android:layout_toRightOf="@+id/imgSortWasting"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-                    <TextView
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:text="@string/no_filter"
-                        android:textSize="20sp"
-                        android:textColor="@color/colorBlack"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:textSize="16sp"
-                        android:text="@string/clear_filters"/>
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:text="@string/wasting"
+                            android:textSize="20sp"
+                            android:textColor="@color/colorBlack"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:textSize="16sp"
+                            android:text="@string/wasting_weight_height"/>
+                    </LinearLayout>
+
                 </LinearLayout>
 
-            </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/colorGreyLight" />
 
-        </RelativeLayout>
+            </RelativeLayout>
 
-    </com.balysv.materialripple.MaterialRippleLayout>
+        </com.balysv.materialripple.MaterialRippleLayout>
 
-</LinearLayout>
+        <com.balysv.materialripple.MaterialRippleLayout
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin">
+
+            <RelativeLayout
+                android:id="@+id/rytSortStunting"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/imgSortStunting"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/check"
+                    android:visibility="invisible"
+                    android:tint="@color/colorPrimary"
+                    android:layout_centerVertical="true"
+                    android:contentDescription="@string/content_image"/>
+
+                <LinearLayout
+                    android:layout_toRightOf="@+id/imgSortStunting"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:text="@string/stunting"
+                            android:textSize="20sp"
+                            android:textColor="@color/colorBlack"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:textSize="16sp"
+                            android:text="@string/stunting_height_age"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/colorGreyLight" />
+
+            </RelativeLayout>
+
+        </com.balysv.materialripple.MaterialRippleLayout>
+
+        <com.balysv.materialripple.MaterialRippleLayout
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin">
+
+            <RelativeLayout
+                android:id="@+id/rytSortClear"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/imgSortClear"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/check"
+                    android:visibility="invisible"
+                    android:tint="@color/colorPrimary"
+                    android:layout_centerVertical="true"
+                    android:contentDescription="@string/content_image"/>
+
+                <LinearLayout
+                    android:layout_toRightOf="@+id/imgSortClear"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:text="@string/no_filter"
+                            android:textSize="20sp"
+                            android:textColor="@color/colorBlack"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:textSize="16sp"
+                            android:text="@string/clear_filters"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </com.balysv.materialripple.MaterialRippleLayout>
+
+    </LinearLayout>
+
+</android.support.v4.widget.NestedScrollView>
