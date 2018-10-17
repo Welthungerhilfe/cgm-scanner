@@ -42,6 +42,7 @@
     <string name="lang_german">German</string>
     <string name="lang_hindi">Hindi</string>
 
+    <string name="filter">Filter</string>
     <string name="sortby">Sort by</string>
     <string name="date">Date</string>
     <string name="last_days">last %1$d days</string>
@@ -56,6 +57,8 @@
     <string name="clear_filters">Clear all filters</string>
     <string name="no_persons">NO PERSONS REGISTERED</string>
     <string name="circuit">circumcircle</string>
+    <string name="own_data">Only own data</string>
+    <string name="created_by_self">show only children created by myself</string>
 
     <string name="manual_measure">Manual measure</string>
     <string name="machine_measure">Machine measure</string>

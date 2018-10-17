@@ -42,6 +42,7 @@
     <string name="lang_german">जर्मन</string>
     <string name="lang_hindi">हिंदी</string>
 
+    <string name="filter">Filter</string>
     <string name="sortby">निम्न के अनुसार क्रमबद्ध करें</string>
     <string name="date">तारीख</string>
     <string name="last_days">अंतिम %1$d दिन</string>
@@ -56,6 +57,8 @@
     <string name="clear_filters">सभी फिल्टर हटा दे</string>
     <string name="no_persons">कोई पंजीकृत व्यक्ति नहीं है</string>
     <string name="circuit">आसपास की खोज</string>
+    <string name="own_data">Only own data</string>
+    <string name="created_by_self">show only children created by myself</string>
 
     <string name="manual_measure">मैनुअल नाप</string>
     <string name="machine_measure">मशीन नाप</string>
