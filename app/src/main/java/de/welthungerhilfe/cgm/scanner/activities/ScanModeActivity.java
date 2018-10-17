@@ -89,6 +89,13 @@ public class ScanModeActivity extends AppCompatActivity {
     @BindView(R.id.btnScanStep3)
     Button btnScanStep3;
 
+    @BindView(R.id.lytScanStep1)
+    LinearLayout lytScanStep1;
+    @BindView(R.id.lytScanStep2)
+    LinearLayout lytScanStep2;
+    @BindView(R.id.lytScanStep3)
+    LinearLayout lytScanStep3;
+
     @BindView(R.id.lytSelectMode)
     LinearLayout lytSelectMode;
     @BindView(R.id.lytSelectedMode)
@@ -128,8 +135,10 @@ public class ScanModeActivity extends AppCompatActivity {
     }
     @OnClick(R.id.btnScanStep1)
     void scanStep1(Button btnScanStep1) {
+        /*
         lytSelectMode.setVisibility(View.GONE);
         lytSelectedMode.setVisibility(View.VISIBLE);
+        */
 
         MeasureScanFragment scanFragment = new MeasureScanFragment();
         if (SCAN_MODE == SCAN_STANDING) {
@@ -137,16 +146,14 @@ public class ScanModeActivity extends AppCompatActivity {
             txtSelectedMode.setText(R.string.mode_standing);
 
             SCAN_STEP = SCAN_STANDING_FRONT;
-
-            scanFragment.setMode(SCAN_STANDING_FRONT);
         } else if (SCAN_MODE == SCAN_LYING) {
             imgSelectedMode.setImageResource(R.drawable.lying_active);
             txtSelectedMode.setText(R.string.mode_lying);
 
-            SCAN_STEP = SCAN_STANDING_FRONT;
-
-            scanFragment.setMode(SCAN_LYING_FRONT);
+            SCAN_STEP = SCAN_LYING_FRONT;
         }
+
+        scanFragment.setMode(SCAN_STEP);
 
         getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_bottom, R.anim.slide_out_bottom, R.anim.slide_in_bottom, R.anim.slide_out_bottom)
@@ -161,13 +168,15 @@ public class ScanModeActivity extends AppCompatActivity {
             imgSelectedMode.setImageResource(R.drawable.standing_active);
             txtSelectedMode.setText(R.string.mode_standing);
 
-            scanFragment.setMode(SCAN_STANDING_SIDE);
+            SCAN_STEP = SCAN_STANDING_SIDE;
         } else if (SCAN_MODE == SCAN_LYING) {
             imgSelectedMode.setImageResource(R.drawable.lying_active);
             txtSelectedMode.setText(R.string.mode_lying);
 
-            scanFragment.setMode(SCAN_LYING_SIDE);
+            SCAN_STEP = SCAN_LYING_SIDE;
         }
+
+        scanFragment.setMode(SCAN_STEP);
 
         getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_bottom, R.anim.slide_out_bottom, R.anim.slide_in_bottom, R.anim.slide_out_bottom)
@@ -182,13 +191,14 @@ public class ScanModeActivity extends AppCompatActivity {
             imgSelectedMode.setImageResource(R.drawable.standing_active);
             txtSelectedMode.setText(R.string.mode_standing);
 
-            scanFragment.setMode(SCAN_STANDING_BACK);
+            SCAN_STEP = SCAN_STANDING_BACK;
         } else if (SCAN_MODE == SCAN_LYING) {
             imgSelectedMode.setImageResource(R.drawable.lying_active);
             txtSelectedMode.setText(R.string.mode_lying);
 
-            scanFragment.setMode(SCAN_LYING_BACK);
+            SCAN_STEP = SCAN_LYING_BACK;
         }
+        scanFragment.setMode(SCAN_STEP);
 
         getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_bottom, R.anim.slide_out_bottom, R.anim.slide_in_bottom, R.anim.slide_out_bottom)
@@ -246,37 +256,20 @@ public class ScanModeActivity extends AppCompatActivity {
         closeScan();
 
         if (SCAN_STEP == SCAN_STANDING_FRONT || SCAN_STEP == SCAN_LYING_FRONT) {
+            lytScanStep1.setVisibility(View.GONE);
             btnScanStep1.setText(R.string.retake_scan);
+            btnScanStep1.setTextColor(getResources().getColor(R.color.colorWhite));
+            btnScanStep1.setBackground(getResources().getDrawable(R.drawable.button_green_circular));
         } else if (SCAN_STEP == SCAN_STANDING_SIDE || SCAN_STEP == SCAN_LYING_SIDE) {
+            lytScanStep2.setVisibility(View.GONE);
             btnScanStep2.setText(R.string.retake_scan);
+            btnScanStep2.setTextColor(getResources().getColor(R.color.colorWhite));
+            btnScanStep2.setBackground(getResources().getDrawable(R.drawable.button_green_circular));
         } else if (SCAN_STEP == SCAN_STANDING_BACK || SCAN_STEP == SCAN_LYING_BACK) {
+            lytScanStep3.setVisibility(View.GONE);
             btnScanStep3.setText(R.string.retake_scan);
-        }
-
-        SCAN_STEP ++;
-
-        if (SCAN_STEP > SCAN_LYING_BACK || (SCAN_STEP > SCAN_STANDING_BACK && SCAN_STEP < 199)) {
-            if (measure == null)
-                measure = new Measure();
-            if (location != null)
-                measure.setLocation(location);
-            measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-            measure.setDate(Utils.getUniversalTimestamp());
-            measure.setType("v1.1.2");
-            long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
-            measure.setAge(age);
-            measure.setType(AppConstants.VAL_MEASURE_AUTO);
-            measure.setWeight(0.0f);
-            measure.setHeight(0.0f);
-            measure.setHeadCircumference(0.0f);
-            measure.setMuac(0.0f);
-            measure.setOedema(false);
-            if (measure.getId() == null)
-                EventBus.getDefault().post(new MeasureResult(measure));
-            else
-                new OfflineRepository().updateMeasure(measure);
-
-            finish();
+            btnScanStep3.setTextColor(getResources().getColor(R.color.colorWhite));
+            btnScanStep3.setBackground(getResources().getDrawable(R.drawable.button_green_circular));
         }
     }
 
@@ -284,6 +277,30 @@ public class ScanModeActivity extends AppCompatActivity {
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(SCAN_FRAGMENT);
         if (fragment != null)
             getSupportFragmentManager().popBackStack();
+    }
+
+    public void completeScan() {
+        if (measure == null)
+            measure = new Measure();
+        if (location != null)
+            measure.setLocation(location);
+        measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+        measure.setDate(Utils.getUniversalTimestamp());
+        measure.setType("v1.1.2");
+        long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
+        measure.setAge(age);
+        measure.setType(AppConstants.VAL_MEASURE_AUTO);
+        measure.setWeight(0.0f);
+        measure.setHeight(0.0f);
+        measure.setHeadCircumference(0.0f);
+        measure.setMuac(0.0f);
+        measure.setOedema(false);
+        if (measure.getId() == null)
+            EventBus.getDefault().post(new MeasureResult(measure));
+        else
+            new OfflineRepository().updateMeasure(measure);
+
+        finish();
     }
 
     private void getCurrentLocation() {
