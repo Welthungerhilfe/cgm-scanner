@@ -175,48 +175,35 @@
                 android:orientation="vertical">
 
                 <LinearLayout
-                    android:id="@+id/lytScanStep1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="40dp"
                     android:background="@color/colorGreenLight"
                     android:orientation="vertical">
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/front_view_01"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="18sp"
+                        android:textStyle="bold"/>
+
                     <LinearLayout
+                        android:id="@+id/lytScanStep1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
-                        <LinearLayout
+                        <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/front_view_01"
-                                    android:textColor="@color/colorWhite"
-                                    android:textSize="18sp"
-                                    android:textStyle="bold"/>
-                            </LinearLayout>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/activity_section_margin"
-                                android:text="@string/help_front_view_2"
-                                android:textColor="@color/colorWhite"
-                                android:textSize="14sp"/>
-
-                        </LinearLayout>
+                            android:layout_marginTop="@dimen/activity_section_margin"
+                            android:text="@string/help_front_view_2"
+                            android:textColor="@color/colorWhite"
+                            android:textSize="14sp"/>
 
                         <ImageView
                             android:id="@+id/imgScanStep1"
@@ -244,42 +231,35 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/lytScanStep2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="40dp"
                     android:background="@color/colorGreenMedium"
                     android:orientation="vertical">
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/lateral_view_02"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="18sp"
+                        android:textStyle="bold"/>
+
                     <LinearLayout
+                        android:id="@+id/lytScanStep2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
-                        <LinearLayout
+                        <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/lateral_view_02"
-                                android:textColor="@color/colorWhite"
-                                android:textSize="18sp"
-                                android:textStyle="bold"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/activity_section_margin"
-                                android:text="@string/help_lateral_view"
-                                android:textColor="@color/colorWhite"
-                                android:textSize="14sp"/>
-
-                        </LinearLayout>
+                            android:layout_marginTop="@dimen/activity_section_margin"
+                            android:text="@string/help_lateral_view"
+                            android:textColor="@color/colorWhite"
+                            android:textSize="14sp"/>
 
                         <ImageView
                             android:id="@+id/imgScanStep2"
@@ -307,42 +287,35 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/lytScanStep3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="40dp"
                     android:background="@color/colorGreenDark"
                     android:orientation="vertical">
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/back_view_03"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="18sp"
+                        android:textStyle="bold"/>
+
                     <LinearLayout
+                        android:id="@+id/lytScanStep3"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
-                        <LinearLayout
+                        <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/back_view_03"
-                                android:textColor="@color/colorWhite"
-                                android:textSize="18sp"
-                                android:textStyle="bold"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/activity_section_margin"
-                                android:text="@string/help_back_view"
-                                android:textColor="@color/colorWhite"
-                                android:textSize="14sp"/>
-
-                        </LinearLayout>
+                            android:layout_marginTop="@dimen/activity_section_margin"
+                            android:text="@string/help_back_view"
+                            android:textColor="@color/colorWhite"
+                            android:textSize="14sp"/>
 
                         <ImageView
                             android:id="@+id/imgScanStep3"
