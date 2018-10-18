@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Measure;
@@ -50,9 +51,11 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
     private int lastPosition = -1;
 
     private int sortType = 0; // 0 : All, 1 : date, 2 : location, 3 : wasting, 4 : stunting;
+    private ArrayList<Integer> filters = new ArrayList<>();
     private long startDate, endDate;
     private Loc currentLoc;
     private int radius;
+    private CharSequence query;
 
     private PersonFilter personFilter = new PersonFilter();
 
@@ -132,41 +135,15 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
     public void setDateFilter(long start, long end) {
         startDate = start;
         endDate = end;
-        sortType = 1;
-
-        getFilter().filter("");
     }
 
     public void setLocationFilter(Loc loc, int r) {
         currentLoc = loc;
         radius = r;
-        sortType = 2;
-
-        getFilter().filter("");
     }
 
-    public void setWastingFilter() {
-        sortType = 3;
-
-        getFilter().filter("");
-    }
-
-    public void setStuntingFilter() {
-        sortType = 4;
-
-        getFilter().filter("");
-    }
-
-    public void clearFitlers() {
-        sortType = 0;
-
-        getFilter().filter("");
-    }
-
-    public void search(CharSequence query) {
-        sortType = 5;
-
-        getFilter().filter(query);
+    public void setSearchQuery(CharSequence query) {
+        this.query = query;
     }
 
     @Override
@@ -192,6 +169,16 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
         filteredList.remove(index);
         personList.remove(person);
         notifyItemRemoved(index);
+    }
+
+    public void doSort(int sortType) {
+        this.sortType = sortType;
+        getFilter().filter("");
+    }
+
+    public void doFilter(ArrayList<Integer> filters) {
+        this.filters = filters;
+        getFilter().filter("");
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -233,49 +220,60 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
 
             ArrayList<Person> tempList = new ArrayList<>();
             for (int i = 0; i < personList.size(); i++) {
-                if (sortType == 1) {
-                    if (personList.get(i).getCreated() <= endDate && personList.get(i).getCreated() >= startDate)
-                        tempList.add(personList.get(i));
-                } else if (sortType == 2) {
-                    if (currentLoc == null || personList.get(i).getLastLocation() == null) {
+                boolean passed = true;
 
-                    } else if (Utils.distanceBetweenLocs(currentLoc, personList.get(i).getLastLocation()) < radius)
-                        tempList.add(personList.get(i));
-                } else if (sortType == 5) {
-                    if (personList.get(i).getName().contains(charSequence) || personList.get(i).getSurname().contains(charSequence)) {
-                        tempList.add(personList.get(i));
-                    }
-                } else {
-                    tempList.add(personList.get(i));
-                }
-            }
-
-            if (sortType == 0 || sortType == 5) { // No filter
-
-            } else {
-                Collections.sort(tempList, new Comparator<Person>() {
-                    @Override
-                    public int compare(Person person, Person t1) {
-                        if (sortType == 1) {   // Sort by created date
-                            return person.getCreated() > t1.getCreated() ? 1 : person.getCreated() < t1.getCreated() ? -1 : 0;
-                        } else if (sortType == 2) {   // Sort by distance from me
-                            if (currentLoc == null || person.getLastLocation() == null)
-                                return  0;
-                            return Utils.distanceBetweenLocs(currentLoc, person.getLastLocation()) > Utils.distanceBetweenLocs(currentLoc, t1.getLastLocation()) ? 1 : Utils.distanceBetweenLocs(currentLoc, person.getLastLocation()) < Utils.distanceBetweenLocs(currentLoc, t1.getLastLocation()) ? -1 : 0;
-                        } else if (sortType == 3) {   // Sort by wasting
-                            if (person.getLastMeasure() == null)
-                                return 0;
-                            return person.getLastMeasure().getWeight() / person.getLastMeasure().getHeight() > t1.getLastMeasure().getWeight() / t1.getLastMeasure().getHeight() ? -1 : person.getLastMeasure().getWeight() / person.getLastMeasure().getHeight() < t1.getLastMeasure().getWeight() / t1.getLastMeasure().getHeight() ? 1 : 0;
-                        } else if (sortType == 4) {   // sort by stunting
-                            if (person.getLastMeasure() == null)
-                                return 0;
-
-                            return person.getLastMeasure().getHeight() / person.getLastMeasure().getAge() > t1.getLastMeasure().getHeight() / t1.getLastMeasure().getAge() ? -1 : person.getLastMeasure().getHeight() / person.getLastMeasure().getAge() < t1.getLastMeasure().getHeight() / t1.getLastMeasure().getAge() ? 1 : 0;
+                if (filters.size() > 0) {
+                    for (int j = 0; j < filters.size(); j++) {
+                        if (filters.get(j) == 1) { // own data filter
+                            if (!personList.get(i).getCreatedBy().equals(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail())) {
+                                passed = false;
+                                break;
+                            }
+                        } else if (filters.get(j) == 2) { // date filter
+                            if (!(personList.get(i).getCreated() <= endDate && personList.get(i).getCreated() >= startDate)) {
+                                passed = false;
+                                break;
+                            }
+                        } else if (filters.get(j) == 3) { // location filter
+                            if (!(Utils.distanceBetweenLocs(currentLoc, personList.get(i).getLastLocation()) < radius)) {
+                                passed = false;
+                                break;
+                            }
+                        } else if (filters.get(j) == 4) { // search filter with query
+                            if (!(personList.get(i).getName().contains(query) || personList.get(i).getSurname().contains(query))) {
+                                passed = false;
+                                break;
+                            }
                         }
-                        return 0;
                     }
-                });
+                }
+
+                if (passed)
+                    tempList.add(personList.get(i));
             }
+
+            Collections.sort(tempList, new Comparator<Person>() {
+                @Override
+                public int compare(Person person, Person t1) {
+                    if (sortType == 1) {   // Sort by created date
+                        return person.getCreated() > t1.getCreated() ? 1 : person.getCreated() < t1.getCreated() ? -1 : 0;
+                    } else if (sortType == 2) {   // Sort by distance from me
+                        if (currentLoc == null || person.getLastLocation() == null)
+                            return  0;
+                        return Utils.distanceBetweenLocs(currentLoc, person.getLastLocation()) > Utils.distanceBetweenLocs(currentLoc, t1.getLastLocation()) ? 1 : Utils.distanceBetweenLocs(currentLoc, person.getLastLocation()) < Utils.distanceBetweenLocs(currentLoc, t1.getLastLocation()) ? -1 : 0;
+                    } else if (sortType == 3) {   // Sort by wasting
+                        if (person.getLastMeasure() == null)
+                            return 0;
+                        return person.getLastMeasure().getWeight() / person.getLastMeasure().getHeight() > t1.getLastMeasure().getWeight() / t1.getLastMeasure().getHeight() ? -1 : person.getLastMeasure().getWeight() / person.getLastMeasure().getHeight() < t1.getLastMeasure().getWeight() / t1.getLastMeasure().getHeight() ? 1 : 0;
+                    } else if (sortType == 4) {   // sort by stunting
+                        if (person.getLastMeasure() == null)
+                            return 0;
+
+                        return person.getLastMeasure().getHeight() / person.getLastMeasure().getAge() > t1.getLastMeasure().getHeight() / t1.getLastMeasure().getAge() ? -1 : person.getLastMeasure().getHeight() / person.getLastMeasure().getAge() < t1.getLastMeasure().getHeight() / t1.getLastMeasure().getAge() ? 1 : 0;
+                    }
+                    return 0;
+                }
+            });
 
             results.values = tempList;
             results.count = tempList.size();
