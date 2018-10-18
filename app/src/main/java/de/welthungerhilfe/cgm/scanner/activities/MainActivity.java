@@ -123,8 +123,8 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
         Crashlytics.log("Add person by QR");
-        Crashlytics.getInstance().crash();
-        //startActivity(new Intent(MainActivity.this, QRScanActivity.class));
+        //Crashlytics.getInstance().crash();
+        startActivity(new Intent(MainActivity.this, QRScanActivity.class));
 
         /*
         if (!Utils.checkPermission(MainActivity.this, "android.permission.CAMERA") || !Utils.checkPermission(MainActivity.this, "android.permission.WRITE_EXTERNAL_STORAGE")) {
