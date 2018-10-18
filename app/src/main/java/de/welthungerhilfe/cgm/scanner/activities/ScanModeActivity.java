@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
@@ -63,6 +64,7 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_S
 public class ScanModeActivity extends AppCompatActivity {
     private final String SCAN_FRAGMENT = "scan_fragment";
     private final int PERMISSION_LOCATION = 0x0001;
+    private final int PERMISSION_CAMERA = 0x0002;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -243,6 +245,10 @@ public class ScanModeActivity extends AppCompatActivity {
         setupToolbar();
 
         getCurrentLocation();
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
+        }
     }
 
     private void setupToolbar() {
@@ -452,8 +458,11 @@ public class ScanModeActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == PERMISSION_LOCATION && grantResults[0] >= 0) {
+        if (requestCode == PERMISSION_LOCATION && grantResults.length > 0 && grantResults[0] >= 0) {
             getCurrentLocation();
+        } else if (requestCode == PERMISSION_CAMERA && (grantResults.length == 0 || grantResults[0] < 0)) {
+            Toast.makeText(ScanModeActivity.this, R.string.permission_camera, Toast.LENGTH_SHORT).show();
+            finish();
         }
     }
 
