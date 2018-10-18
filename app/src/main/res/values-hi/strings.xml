@@ -49,6 +49,8 @@
     <string name="last_scans">अंतिम स्कैन (%1$d दिन)</string>
     <string name="label_location">स्थान</string>
     <string name="last_location_error">अंतिम स्थान उपलब्ध नहीं है</string>
+    <string name="sort_date">old person on top</string>
+    <string name="sort_location">nearest person on top</string>
     <string name="wasting">वेस्टिंग</string>
     <string name="wasting_weight_height">सबसे कम वजन/ऊंचाई शीर्ष पर</string>
     <string name="stunting">स्टंटिंग</string>

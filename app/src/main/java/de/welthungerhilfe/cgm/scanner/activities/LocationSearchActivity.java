@@ -25,6 +25,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -32,6 +34,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatSeekBar;
+import android.util.Log;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,8 +55,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -64,14 +69,12 @@ import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.tasks.AddressTask;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 /**
  * Created by Emerald on 2/20/2018.
  */
 
-public class LocationSearchActivity extends AppCompatActivity implements OnMapReadyCallback, SeekBar.OnSeekBarChangeListener, AddressTask.OnAddressResult {
+public class LocationSearchActivity extends AppCompatActivity implements OnMapReadyCallback, SeekBar.OnSeekBarChangeListener {
     private final int PERMISSION_LOCATION = 0x1001;
 
     private ArrayList<Person> personList;
@@ -149,13 +152,47 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
                 if (location != null) {
                     searchNearbyPersons();
 
-                    new AddressTask(location.getLatitude(), location.getLongitude(), this).execute();
+                    getAddressFromLocation(new LatLng(location.getLatitude(), location.getLongitude()));
 
                     if (googleMap != null)
                         drawCircle();
                 }
             }
         }
+    }
+
+    private void getAddressFromLocation(LatLng latLng) {
+        //new AddressTask(location.getLatitude(), location.getLongitude(), this).execute();
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Geocoder geocoder = new Geocoder(LocationSearchActivity.this, Locale.getDefault());
+                String result = "Could not parse address from location";
+                try {
+                    List <Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+                    if (addressList != null && addressList.size() > 0) {
+                        Address address = addressList.get(0);
+                        StringBuilder sb = new StringBuilder();
+
+                        for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
+                            sb.append(address.getAddressLine(i));
+
+                        result = sb.toString();
+                    }
+                } catch (IOException e) {
+                    Log.e("Location Address Loader", "Unable connect to Geocoder", e);
+                } finally {
+                    txtAddress.setText(result);
+
+                    Loc loc = new Loc();
+                    loc.setLatitude(location.getLatitude());
+                    loc.setLongitude(location.getLongitude());
+                    loc.setAddress(result);
+                    session.setLocation(loc);
+                }
+            }
+        });
     }
 
     private void drawCircle() {
@@ -182,24 +219,7 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
     }
 
     private void searchNearbyPersons() {
-        /*
-        personList = new ArrayList<>();
-        AppController.getInstance().firebaseFirestore.collection("persons")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Person person = document.toObject(Person.class);
-                                if (Utils.distanceBetweenLocs(session.getLocation(), person.getLastLocation()) < radius)
-                                    personList.add(person);
-                            }
-                        }
-                        putMarkers();
-                    }
-                });
-                */
+
     }
 
     @Override
@@ -266,16 +286,5 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
                 Toast.makeText(LocationSearchActivity.this, "App can't get device location", Toast.LENGTH_LONG).show();
             }
         }
-    }
-
-    @Override
-    public void onAddress(String address) {
-        txtAddress.setText(address);
-
-        Loc loc = new Loc();
-        loc.setLatitude(location.getLatitude());
-        loc.setLongitude(location.getLongitude());
-        loc.setAddress(address);
-        session.setLocation(loc);
     }
 }

@@ -49,6 +49,8 @@
     <string name="last_scans">Last scans (%1$d days)</string>
     <string name="label_location">Location</string>
     <string name="last_location_error">last location not available</string>
+    <string name="sort_date">old person on top</string>
+    <string name="sort_location">nearest person on top</string>
     <string name="wasting">Wasting</string>
     <string name="wasting_weight_height">worst weight/height on top</string>
     <string name="stunting">Stunting</string>
