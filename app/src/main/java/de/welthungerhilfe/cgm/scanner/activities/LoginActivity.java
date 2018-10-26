@@ -52,6 +52,7 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import io.fabric.sdk.android.services.common.Crash;
 
 public class LoginActivity extends AccountAuthenticatorActivity {
 

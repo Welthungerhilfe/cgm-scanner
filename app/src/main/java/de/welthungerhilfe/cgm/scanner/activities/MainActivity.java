@@ -299,6 +299,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             }
         });
 
+        /*
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_STORAGE);
         } else {
@@ -306,6 +307,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             iterateLocalFiles(root);
             checkDeletedRecords();
         }
+        */
 
         startService(new Intent(this, FileLogMonitorService.class));
     }

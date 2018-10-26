@@ -18,6 +18,7 @@
 
 package de.welthungerhilfe.cgm.scanner;
 
+import android.app.ActivityManager;
 import android.app.Application;
 import android.arch.persistence.db.SupportSQLiteDatabase;
 import android.arch.persistence.room.Room;
@@ -26,9 +27,13 @@ import android.arch.persistence.room.migration.Migration;
 import android.content.Context;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 //import com.amitshekhar.DebugDB;
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.BuildConfig;
+import com.crashlytics.android.core.CrashlyticsCore;
+import com.crashlytics.android.core.CrashlyticsListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -111,8 +116,29 @@ public class AppController extends Application {
     public void onCreate() {
         super.onCreate();
 
+        CrashlyticsCore core = new CrashlyticsCore
+                .Builder()
+                .listener(new CrashlyticsListener() {
+                    @Override
+                    public void crashlyticsDidDetectCrashDuringPreviousExecution() {
+                        /*
+                        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+                        ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+                        activityManager.getMemoryInfo(mi);
+                        double availableMegs = mi.availMem / 0x100000L;
+                        double percentAvail = mi.availMem / (double)mi.totalMem * 100.0;
+                        Crashlytics.log(0, "memory usage", String.format("Available = %f, Percentage = %f", availableMegs, percentAvail));
+                        Log.e("memory state:", String.format("Available = %f, Percentage = %f", availableMegs, percentAvail));
+
+                        Crashlytics.log(0, "cpu usage", String.format("cpu usage %f", Utils.readUsage()));
+                        Log.e("cpu state:", String.format("cpu usage %f", Utils.readUsage()));
+                        */
+                    }
+                })
+                .build();
+
         final Fabric fabric = new Fabric.Builder(this)
-                .kits(new Crashlytics())
+                .kits(new Crashlytics.Builder().core(core).build())
                 .debuggable(true)
                 .build();
         Fabric.with(fabric);
