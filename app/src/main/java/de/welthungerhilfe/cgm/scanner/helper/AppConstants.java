@@ -29,6 +29,7 @@ public class AppConstants {
     public static final long SYNC_INTERVAL = 60 * 5;
     public static final long SYNC_FLEXTIME = SYNC_INTERVAL / 3;
     public static final long LOG_MONITOR_INTERVAL = 10 * 1000; // 10 seconds
+    public static final long MEMORY_MONITOR_INTERVAL = 60 * 1000; // 60 seconds
 
     public static final String GOOGLE_GEO_URL = "https://maps.googleapis.com/maps/api/geocode/json";
     //public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor.appspot.com";
@@ -70,6 +71,7 @@ public class AppConstants {
     public static final String CONFIG_ADMINS = "admins";
     public static final String CONFIG_ALLOW_EDIT = "allow_edit";
     public static final String CONFIG_ALLOW_DELETE = "allow_delete";
+    public static final String CONFIG_DEBUG = "debug";
 
     public static final String AUTHTOKEN_TYPE = "de.welthungerhilfe.cgm.scanner";
     public static final String ACCOUNT_TYPE = "de.welthungerhilfe.cgm.scanner";
