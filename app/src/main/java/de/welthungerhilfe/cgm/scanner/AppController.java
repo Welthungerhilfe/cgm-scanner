@@ -121,18 +121,7 @@ public class AppController extends Application {
                 .listener(new CrashlyticsListener() {
                     @Override
                     public void crashlyticsDidDetectCrashDuringPreviousExecution() {
-                        /*
-                        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
-                        ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-                        activityManager.getMemoryInfo(mi);
-                        double availableMegs = mi.availMem / 0x100000L;
-                        double percentAvail = mi.availMem / (double)mi.totalMem * 100.0;
-                        Crashlytics.log(0, "memory usage", String.format("Available = %f, Percentage = %f", availableMegs, percentAvail));
-                        Log.e("memory state:", String.format("Available = %f, Percentage = %f", availableMegs, percentAvail));
-
-                        Crashlytics.log(0, "cpu usage", String.format("cpu usage %f", Utils.readUsage()));
-                        Log.e("cpu state:", String.format("cpu usage %f", Utils.readUsage()));
-                        */
+                        // TODO: do something when crash occurs
                     }
                 })
                 .build();

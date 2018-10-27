@@ -125,6 +125,9 @@
         <service android:name=".helper.service.FileLogMonitorService"
             android:exported="false" />
 
+        <service android:name=".helper.service.MemoryMonitorService"
+            android:exported="false" />
+
         <service android:name=".authenticator.AuthenticatorService"
             android:exported="true">
             <intent-filter>
