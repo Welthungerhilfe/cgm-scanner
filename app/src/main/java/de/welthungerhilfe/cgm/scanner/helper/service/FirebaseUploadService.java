@@ -68,7 +68,6 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
 
     // [START declare_ref]
     private StorageReference mStorageRef;
-    private FirebaseAuth mAuth;
     // [END declare_ref]
 
     private String logId;
@@ -83,9 +82,6 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
         // [START get_storage_ref]
         mStorageRef = FirebaseStorage.getInstance().getReference();
         // [END get_storage_ref]
-
-        mAuth = FirebaseAuth.getInstance();
-
     }
 
     @Nullable
@@ -96,14 +92,6 @@ public class FirebaseUploadService extends FirebaseBaseTaskService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand:" + intent + ":" + startId);
-        Log.d(TAG, "starting FirebaseUploadService as user: "+mAuth.getCurrentUser().getDisplayName());
-        /*
-        if (mAuth.getCurrentUser() == null) {
-            return START_FLAG_RETRY;
-        }
-        */
-        Log.d(TAG, "starting FirebaseUploadService as user: "+mAuth.getCurrentUser().getDisplayName());
         if (ACTION_UPLOAD.equals(intent.getAction())) {
             logId = intent.getStringExtra(EXTRA_LOG_ID);
             Uri fileUri = intent.getParcelableExtra(EXTRA_FILE_URI);
