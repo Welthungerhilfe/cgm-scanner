@@ -22,6 +22,6 @@
     </entry>
     <entry>
         <key>debug</key>
-        <value>true</value>
+        <value>false</value>
     </entry>
 </defaultsMap>
