@@ -36,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 //import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 
@@ -202,7 +203,12 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                 }
             }
         });
-        builder.show();
+        try {
+            builder.show();
+        } catch (RuntimeException e) {
+            Toast.makeText(context, "Sorry, something wrong", Toast.LENGTH_SHORT).show();
+            Crashlytics.log(0, "measure fragment", e.getMessage());
+        }
     }
 
     @Override
