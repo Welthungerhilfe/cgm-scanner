@@ -357,7 +357,9 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.menuHome:
+                    case R.id.menuTutorial:
+                        startActivity(new Intent(MainActivity.this, TutorialActivity.class));
+                        finish();
                         break;
                     case R.id.menuSettings:
                         startActivity(new Intent(MainActivity.this, SettingsActivity.class));

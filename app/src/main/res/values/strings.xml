@@ -211,4 +211,9 @@
     <string name="congratulation">Congratulations!!</string>
     <string name="finish_tutorial">You finished CGM Scanner Tutorial</string>
     <string name="get_start">Get Started</string>
+    <string name="menuScans">Scans</string>
+    <string name="menuTutorial">Tutorial</string>
+    <string name="menuHelp">Help</string>
+    <string name="menuSettings">Settings</string>
+    <string name="menuLogout">Logout</string>
 </resources>
