@@ -1,12 +1,20 @@
 package de.welthungerhilfe.cgm.scanner.activities;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AnimationUtils;
+import android.widget.LinearLayout;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.fragments.Tutorial1Fragment;
@@ -18,6 +26,15 @@ import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 public class TutorialActivity extends AppCompatActivity {
     @BindView(R.id.viewPager)
     ViewPager viewPager;
+    @BindView(R.id.lytStart)
+    LinearLayout lytStart;
+
+    @OnClick(R.id.btnStart)
+    void startWork() {
+        session.setTutorial(true);
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
+    }
 
     FragmentAdapter adapter;
     SessionManager session;
@@ -46,11 +63,16 @@ public class TutorialActivity extends AppCompatActivity {
     public void gotoNext() {
         int curpos = viewPager.getCurrentItem();
         if (curpos + 1 >= viewPager.getOffscreenPageLimit()) {
-            session.setTutorial(true);
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
+            showCompleteView();
         } else {
             viewPager.setCurrentItem(curpos + 1);
         }
+    }
+
+    private void showCompleteView() {
+        lytStart.setVisibility(View.VISIBLE);
+        lytStart.animate()
+                .translationY(0)
+                .setDuration(500);
     }
 }

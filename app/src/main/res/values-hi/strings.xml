@@ -207,4 +207,8 @@
     <string name="tutorial42">4-2. Quickly and easily identify whether the child is likely to be malnourished</string>
     <string name="standup">Try to keep the child against a clear background and keep the whole child within the camera view</string>
     <string name="lyedown">Try to keep the child against a clear background and keep the whole child within the camera view</string>
+    <string name="done">Done</string>
+    <string name="congratulation">Congratulations!!</string>
+    <string name="finish_tutorial">You finished CGM Scanner Tutorial</string>
+    <string name="get_start">Get Started</string>
 </resources>
