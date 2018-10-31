@@ -196,7 +196,7 @@ public class CreateDataActivity extends BaseActivity {
     }
 
     private void initUI() {
-        FragmentAdapter adapter = new FragmentAdapter(getFragmentManager());
+        FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
         adapter.addFragment(personalFragment, getResources().getString(R.string.tab_personal));
         adapter.addFragment(measureFragment, getResources().getString(R.string.tab_measures));
         adapter.addFragment(growthFragment, getResources().getString(R.string.tab_growth));

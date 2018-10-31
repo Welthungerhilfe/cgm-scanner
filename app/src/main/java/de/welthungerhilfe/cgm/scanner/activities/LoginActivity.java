@@ -118,7 +118,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         super.onStart();
 
         if (AppController.getInstance().firebaseUser != null && session.isSigned()) {
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            if (session.getTutorial())
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            else
+                startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
             finish();
         }
     }
@@ -154,9 +157,11 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             session.setSigned(true);
-                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                        } else {
-
+                            if (session.getTutorial())
+                                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                            else
+                                startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
+                            finish();
                         }
                     }
                 });
@@ -195,7 +200,11 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
                                 session.setSigned(true);
                                 AppController.getInstance().prepareFirebaseUser();
-                                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                if (session.getTutorial())
+                                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                                else
+                                    startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
+                                finish();
                             } else {
                                 Toast.makeText(LoginActivity.this, R.string.error_login, Toast.LENGTH_LONG).show();
                             }

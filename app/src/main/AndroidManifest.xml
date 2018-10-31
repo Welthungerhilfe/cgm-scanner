@@ -93,6 +93,9 @@
             android:name=".activities.MainActivity"
             android:screenOrientation="portrait"/>
 
+        <activity android:name=".activities.TutorialActivity"
+            android:screenOrientation="portrait" />
+
         <activity android:name=".activities.QRScanActivity"
             android:screenOrientation="portrait"/>
 

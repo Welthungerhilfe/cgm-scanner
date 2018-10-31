@@ -39,6 +39,7 @@ public class SessionManager {
     private final String KEY_SYNC_TIMESTAMP = "sync_timestamp";
     private final String KEY_LANGUAGE = "key_language";
     private final String KEY_CONNECTION_TIMESTAMP = "key_connection_timestamp";
+    private final String KEY_TUTORIAL = "key_tutorial";
 
     SharedPreferences pref;
     SharedPreferences.Editor editor;
@@ -105,5 +106,15 @@ public class SessionManager {
 
     public long getConnectionTimestamp() {
         return pref.getLong(KEY_CONNECTION_TIMESTAMP, 0);
+    }
+
+    public void setTutorial(boolean tutorial) {
+        editor.putBoolean(KEY_TUTORIAL, tutorial);
+
+        editor.commit();
+    }
+
+    public boolean getTutorial() {
+        return pref.getBoolean(KEY_TUTORIAL, false);
     }
 }

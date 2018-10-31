@@ -323,11 +323,9 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_STORAGE);
         } else {
-            /*
             File root = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
             iterateLocalFiles(root);
             checkDeletedRecords();
-            */
         }
         */
 

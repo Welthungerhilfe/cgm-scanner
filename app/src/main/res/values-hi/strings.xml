@@ -192,4 +192,19 @@
     <string name="mode_lying">Lying down</string>
 
     <string name="capture_inside">Capture the child inside of outline</string>
+    <string name="tutorial11">1-1. Scan the QR code to create or find the child\'s profile</string>
+    <string name="tutorial12">1-2. Fill in their personal details if the child has not been scanned before</string>
+    <string name="next_tutorial">next</string>
+    <string name="tutorial1">How do I create a new profile for the child?</string>
+    <string name="tutorial2">How do I scan a child that is standing up?</string>
+    <string name="tutorial21">2-1. Chose \"Standing up\" mode before starting to scan child</string>
+    <string name="tutorial22">2-2. Take three 5 second scans, from a front view, a back view and a 360\' view</string>
+    <string name="tutorial3">How do I scan a child that is lying down?</string>
+    <string name="tutorial31">3-1. Choose \"Lying down\" mode before starting to scan the child</string>
+    <string name="tutorial32">3-2. Take three 5 second scans, from a front view, a back view and from left side to right side</string>
+    <string name="tutorial4">How do I view the results of a scan?</string>
+    <string name="tutorial41">4-1. Visualise the results of the scan measurements on different graphs</string>
+    <string name="tutorial42">4-2. Quickly and easily identify whether the child is likely to be malnourished</string>
+    <string name="standup">Try to keep the child against a clear background and keep the whole child within the camera view</string>
+    <string name="lyedown">Try to keep the child against a clear background and keep the whole child within the camera view</string>
 </resources>

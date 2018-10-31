@@ -1,5 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/fragTutorial"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:attrs="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
+    android:layout_height="match_parent">
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <com.rd.PageIndicatorView
+        android:id="@+id/indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        app:piv_animationType="color"
+        app:piv_dynamicCount="false"
+        app:piv_count="4"
+        app:piv_interactiveAnimation="true"
+        app:piv_selectedColor="@color/colorGreyDark"
+        app:piv_unselectedColor="@color/colorGreyLight"
+        app:piv_viewPager="@id/viewPager"
+        attrs:piv_padding="12dp"
+        attrs:piv_radius="8dp" />
+
+</RelativeLayout>
