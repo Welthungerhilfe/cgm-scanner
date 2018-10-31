@@ -146,7 +146,7 @@
     <string name="tab_measures">नाप</string>
     <string name="tab_growth">विकास</string>
 
-    <string name="title_scans">सभी स्कैन</string>
+    <string name="title_scans">Scans-Scheduled</string>
     <string name="title_image_view">इमेज व्यू</string>
     <string name="title_settings">सेटिंग्स</string>
     <string name="title_add_measure">नाप जोड़ें</string>
@@ -216,4 +216,11 @@
     <string name="menuHelp">Help</string>
     <string name="menuSettings">Settings</string>
     <string name="menuLogout">Logout</string>
+    <string name="remote_config">Remote Config</string>
+    <string name="remote_debug">Debug</string>
+    <string name="remote_sync_period">Sync Period</string>
+    <string name="remote_allow_delete">Allow Delete</string>
+    <string name="remote_allow_edit">Allow Edit</string>
+    <string name="remote_edit_time">Time To Allow Editing</string>
+    <string name="remote_measure_visibility">Measure Visibility</string>
 </resources>

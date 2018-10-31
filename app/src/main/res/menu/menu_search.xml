@@ -20,10 +20,24 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/actionQr"
+        android:title="QR Search"
+        android:icon="@drawable/action_qr"
+        android:iconTint="@color/colorWhite"
+        android:orderInCategory="100"
+        app:showAsAction="ifRoom"/>
+
     <item
         android:id="@+id/actionSearch"
         android:icon="@drawable/search"
         app:showAsAction="always|collapseActionView"
         app:actionViewClass="android.support.v7.widget.SearchView"
         android:title="Search"/>
+
+    <item android:id="@+id/actionFilter"
+        android:title="Sort and Filter"
+        android:icon="@drawable/action_filter"
+        android:iconTint="@color/colorWhite"
+        android:orderInCategory="100"
+        app:showAsAction="always|collapseActionView"/>
 </menu>

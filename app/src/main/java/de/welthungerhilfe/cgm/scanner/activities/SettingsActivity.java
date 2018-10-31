@@ -19,6 +19,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import butterknife.OnClick;
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
@@ -41,6 +42,19 @@ public class SettingsActivity extends BaseActivity {
     AppCompatRadioButton radioGerman;
     @BindView(R.id.radioHindi)
     AppCompatRadioButton radioHindi;
+
+    @BindView(R.id.txtSettingDebug)
+    TextView txtSettingDebug;
+    @BindView(R.id.txtSettingSyncPeriod)
+    TextView txtSettingSyncPeriod;
+    @BindView(R.id.txtSettingAllowDelete)
+    TextView txtSettingAllowDelete;
+    @BindView(R.id.txtSettingAllowEdit)
+    TextView txtSettingAllowEdit;
+    @BindView(R.id.txtSettingEditTime)
+    TextView txtSettingEditTime;
+    @BindView(R.id.txtSettingMeasureVisibility)
+    TextView txtSettingMeasureVisibility;
 
     @OnClick(R.id.lytLangEnglish)
     void onEnglish(LinearLayout lytLangEnglish) {
@@ -106,6 +120,13 @@ public class SettingsActivity extends BaseActivity {
         } else if (code.equals(AppConstants.LANG_HINDI)) {
             radioHindi.setChecked(true);
         }
+
+        txtSettingDebug.setText(AppController.getInstance().firebaseConfig.getString("debug"));
+        txtSettingSyncPeriod.setText(AppController.getInstance().firebaseConfig.getString("sync_period"));
+        txtSettingAllowDelete.setText(AppController.getInstance().firebaseConfig.getString("allow_delete"));
+        txtSettingAllowEdit.setText(AppController.getInstance().firebaseConfig.getString("allow_edit"));
+        txtSettingEditTime.setText(AppController.getInstance().firebaseConfig.getString("time_to_allow_editing"));
+        txtSettingMeasureVisibility.setText(AppController.getInstance().firebaseConfig.getString("measure_visibility"));
     }
 
     private void changeLanguage(String code) {

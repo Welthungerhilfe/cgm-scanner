@@ -146,7 +146,7 @@
     <string name="tab_measures">MEASURES</string>
     <string name="tab_growth">GROWTH</string>
 
-    <string name="title_scans">All Scans</string>
+    <string name="title_scans">Scans-Scheduled</string>
     <string name="title_image_view">Image View</string>
     <string name="title_settings">Settings</string>
     <string name="title_add_measure">Add Measure</string>
@@ -216,4 +216,11 @@
     <string name="menuHelp">Help</string>
     <string name="menuSettings">Settings</string>
     <string name="menuLogout">Logout</string>
+    <string name="remote_config">Remote Config</string>
+    <string name="remote_debug">Debug</string>
+    <string name="remote_sync_period">Sync Period</string>
+    <string name="remote_allow_delete">Allow Delete</string>
+    <string name="remote_allow_edit">Allow Edit</string>
+    <string name="remote_edit_time">Time To Allow Editing</string>
+    <string name="remote_measure_visibility">Measure Visibility</string>
 </resources>
