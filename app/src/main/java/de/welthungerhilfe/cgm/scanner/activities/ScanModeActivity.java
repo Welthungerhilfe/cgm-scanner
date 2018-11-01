@@ -225,7 +225,6 @@ public class ScanModeActivity extends AppCompatActivity {
     public int SCAN_MODE = SCAN_STANDING;
     public int SCAN_STEP = 0;
     private boolean step1 = false, step2 = false, step3 = false;
-    private boolean switcher = false;
 
     public Person person;
     public Measure measure;
@@ -445,13 +444,7 @@ public class ScanModeActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         if (menuItem.getItemId() == android.R.id.home) {
-            //finish();
-            if (switcher)
-                showCompleteButton();
-            else
-                hideCompleteButton();
-
-            switcher = !switcher;
+            finish();
         }
         return super.onOptionsItemSelected(menuItem);
     }
