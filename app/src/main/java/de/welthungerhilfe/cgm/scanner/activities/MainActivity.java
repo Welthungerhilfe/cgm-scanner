@@ -18,17 +18,16 @@
 
 package de.welthungerhilfe.cgm.scanner.activities;
 
-import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -37,9 +36,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -52,29 +49,23 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 import com.crashlytics.android.Crashlytics;
-import com.google.android.gms.common.util.ArrayUtils;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
-import com.orhanobut.dialogplus.DialogPlus;
-import com.orhanobut.dialogplus.OnClickListener;
-import com.orhanobut.dialogplus.ViewHolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -90,7 +81,6 @@ import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerDataAdapter;
-import de.welthungerhilfe.cgm.scanner.delegators.SwipeViewActions;
 import de.welthungerhilfe.cgm.scanner.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
@@ -139,6 +129,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         */
     }
 
+    /*
     @OnClick(R.id.txtSort)
     void openSort(TextView txtSort) {
         ViewHolder viewHolder = new ViewHolder(R.layout.dialog_sort);
@@ -262,20 +253,23 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
 
         sortDialog.show();
     }
+    */
 
     @BindView(R.id.recyclerData)
     RecyclerView recyclerData;
     RecyclerDataAdapter adapterData;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+    @BindView(R.id.searchbar)
+    Toolbar searchbar;
     @BindView(R.id.drawer)
     DrawerLayout drawerLayout;
     @BindView(R.id.navMenu)
     NavigationView navMenu;
-    @BindView(R.id.txtSortCase)
-    TextView txtSortCase;
     @BindView(R.id.txtNoPerson)
     TextView txtNoPerson;
+    @BindView(R.id.searchview)
+    SearchView searchView;
 
     private ActionBarDrawerToggle mDrawerToggle;
 
@@ -299,7 +293,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         setupActionBar();
         setupRecyclerView();
 
-        txtSortCase.setText(getResources().getString(R.string.last_scans, 0));
+        //txtSortCase.setText(getResources().getString(R.string.last_scans, 0));
 
         //showProgressDialog();
 
@@ -387,6 +381,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     }
 
     private void setupActionBar() {
+        searchbar.setVisibility(View.GONE);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -404,6 +399,27 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         };
 
         drawerLayout.addDrawerListener(mDrawerToggle);
+    }
+
+    private void openSearchBar() {
+        searchbar.setVisibility(View.VISIBLE);
+        searchbar.animate().alpha(1.0f).setDuration(400)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        searchbar.setVisibility(View.VISIBLE);
+                    }
+                });
+
+        setSupportActionBar(searchbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+        invalidateOptionsMenu();
+
+        ImageView magImage = searchView.findViewById(R.id.search_mag_icon);
+        magImage.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
     }
 
     private void setupRecyclerView() {
@@ -564,7 +580,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             endDate = startDate + (3600 * 24 - 1) * 1000;
         }
 
-        txtSortCase.setText(getResources().getString(R.string.last_scans, diffDays));
+        //txtSortCase.setText(getResources().getString(R.string.last_scans, diffDays));
         adapterData.setDateFilter(startDate, endDate);
         doFilter();
     }
@@ -572,8 +588,14 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.menu_search, menu);
 
+        if (searchbar.getVisibility() == View.VISIBLE) {
+            menuInflater.inflate(R.menu.menu_search, menu);
+        } else {
+            menuInflater.inflate(R.menu.menu_tool, menu);
+        }
+
+        /*
         MenuItem searchItem = menu.findItem(R.id.actionSearch);
         SearchManager searchManager = (SearchManager) MainActivity.this.getSystemService(Context.SEARCH_SERVICE);
 
@@ -609,8 +631,20 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                 }
             });
         }
+        */
+        //return super.onCreateOptionsMenu(menu);
+        return true;
+    }
 
-        return super.onCreateOptionsMenu(menu);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        if (menuItem.getItemId() == R.id.actionSearch) {
+            openSearchBar();
+        } else if (menuItem.getItemId() == R.id.actionQr) {
+            startActivity(new Intent(MainActivity.this, QRScanActivity.class));
+        }
+
+        return super.onOptionsItemSelected(menuItem);
     }
 
     @Override

@@ -27,6 +27,7 @@ import android.arch.persistence.room.migration.Migration;
 import android.content.Context;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
+import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 //import com.amitshekhar.DebugDB;
@@ -115,6 +116,8 @@ public class AppController extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
 
         CrashlyticsCore core = new CrashlyticsCore
                 .Builder()

@@ -12,57 +12,50 @@
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:layout_height="?attr/actionBarSize">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/searchbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/colorWhite"
+                android:visibility="gone"
+                android:animateLayoutChanges="true"
+                android:contentInsetStart="0dp"
+                android:contentInsetLeft="0dp"
+                app:contentInsetStartWithNavigation="0dp"
+                app:contentInsetStart="0dp"
+                app:contentInsetLeft="0dp"
+                app:theme="@style/SearchBar">
+
+                <android.support.v7.widget.SearchView
+                    android:id="@+id/searchview"
+                    android:gravity="start"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:actionBarWidgetTheme="@style/SearchBar"
+                    app:iconifiedByDefault="false" />
+
+            </android.support.v7.widget.Toolbar>
+
+        </FrameLayout>
 
     </android.support.design.widget.AppBarLayout>
-
-    <LinearLayout
-        android:id="@+id/lytSorter"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_below="@+id/appBar"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:background="@color/colorGreyLight">
-        <TextView
-            android:id="@+id/txtSortCase"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/last_scans"
-            android:textSize="16sp"/>
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@drawable/down"
-            android:tint="@color/colorGreyDark"
-            android:contentDescription="@string/content_image"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="right">
-            <TextView
-                android:id="@+id/txtSort"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/sortby"
-                android:textAllCaps="true"
-                android:textColor="@color/colorGreen"
-                android:textSize="18sp"/>
-        </LinearLayout>
-    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorWhite"
-        android:layout_below="@+id/lytSorter">
+        android:layout_below="@+id/appBar">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerData"

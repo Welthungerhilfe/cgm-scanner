@@ -223,4 +223,7 @@
     <string name="remote_allow_edit">Allow Edit</string>
     <string name="remote_edit_time">Time To Allow Editing</string>
     <string name="remote_measure_visibility">Measure Visibility</string>
+    <string name="menu_qr">QR Search</string>
+    <string name="menu_search">Search</string>
+    <string name="menu_filter">Sort and Filter</string>
 </resources>
