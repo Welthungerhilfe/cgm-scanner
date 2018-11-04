@@ -64,8 +64,6 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
     public void onStop() {
         super.onStop();
         running = false;
-
-        hideProgressDialog();
     }
 
     @Override
@@ -78,6 +76,11 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
     protected void onPause() {
         merlin.unbind();
         super.onPause();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
     }
 
     @VisibleForTesting
