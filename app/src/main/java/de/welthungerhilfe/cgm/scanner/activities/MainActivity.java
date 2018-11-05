@@ -20,12 +20,8 @@ package de.welthungerhilfe.cgm.scanner.activities;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
-import android.app.SearchManager;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -49,8 +45,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewAnimationUtils;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -101,7 +95,6 @@ import de.welthungerhilfe.cgm.scanner.viewmodels.PersonListViewModel;
 import de.welthungerhilfe.cgm.scanner.views.SwipeView;
 
 public class MainActivity extends BaseActivity implements RecyclerDataAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
-    private final String TAG = MainActivity.class.getSimpleName();
     private final int REQUEST_LOCATION = 0x1000;
     private final int REQUEST_CAMERA = 0x1001;
 
@@ -173,7 +166,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
 
         //showProgressDialog();
 
-        adapterData = new RecyclerDataAdapter(this, new ArrayList<>());
+        adapterData = new RecyclerDataAdapter(this);
         adapterData.setPersonDetailListener(this);
         recyclerData.setAdapter(adapterData);
         recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));

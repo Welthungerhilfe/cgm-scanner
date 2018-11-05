@@ -46,8 +46,8 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapter.ViewHolder> implements Filterable {
     private Context context;
-    private List<Person> personList;
-    private List<Person> filteredList;
+    private List<Person> personList = new ArrayList<>();
+    private List<Person> filteredList = new ArrayList<>();
     private int lastPosition = -1;
 
     private int sortType = 0; // 0 : All, 1 : date, 2 : location, 3 : wasting, 4 : stunting;
@@ -61,10 +61,8 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
 
     private OnPersonDetail personDetailListener;
 
-    public RecyclerDataAdapter(Context ctx, List<Person> pl) {
+    public RecyclerDataAdapter(Context ctx) {
         context = ctx;
-        personList = pl;
-        filteredList = pl;
     }
 
     @Override
@@ -267,20 +265,21 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
                 @Override
                 public int compare(Person person, Person t1) {
                     if (sortType == 1) {   // Sort by created date
-                        return person.getCreated() > t1.getCreated() ? 1 : person.getCreated() < t1.getCreated() ? -1 : 0;
+                        return Long.compare(person.getCreated(), t1.getCreated());
                     } else if (sortType == 2) {   // Sort by distance from me
                         if (currentLoc == null || person.getLastLocation() == null)
                             return  0;
-                        return Utils.distanceBetweenLocs(currentLoc, person.getLastLocation()) > Utils.distanceBetweenLocs(currentLoc, t1.getLastLocation()) ? 1 : Utils.distanceBetweenLocs(currentLoc, person.getLastLocation()) < Utils.distanceBetweenLocs(currentLoc, t1.getLastLocation()) ? -1 : 0;
+
+                        return Double.compare(Utils.distanceBetweenLocs(currentLoc, person.getLastLocation()), Utils.distanceBetweenLocs(currentLoc, t1.getLastLocation()));
                     } else if (sortType == 3) {   // Sort by wasting
                         if (person.getLastMeasure() == null)
                             return 0;
-                        return person.getLastMeasure().getWeight() / person.getLastMeasure().getHeight() > t1.getLastMeasure().getWeight() / t1.getLastMeasure().getHeight() ? -1 : person.getLastMeasure().getWeight() / person.getLastMeasure().getHeight() < t1.getLastMeasure().getWeight() / t1.getLastMeasure().getHeight() ? 1 : 0;
+                        return Double.compare(t1.getLastMeasure().getWeight() / t1.getLastMeasure().getHeight(), person.getLastMeasure().getWeight() / person.getLastMeasure().getHeight());
                     } else if (sortType == 4) {   // sort by stunting
                         if (person.getLastMeasure() == null)
                             return 0;
 
-                        return person.getLastMeasure().getHeight() / person.getLastMeasure().getAge() > t1.getLastMeasure().getHeight() / t1.getLastMeasure().getAge() ? -1 : person.getLastMeasure().getHeight() / person.getLastMeasure().getAge() < t1.getLastMeasure().getHeight() / t1.getLastMeasure().getAge() ? 1 : 0;
+                        return Double.compare(t1.getLastMeasure().getHeight() / t1.getLastMeasure().getAge(), person.getLastMeasure().getHeight() / person.getLastMeasure().getAge());
                     }
                     return 0;
                 }
