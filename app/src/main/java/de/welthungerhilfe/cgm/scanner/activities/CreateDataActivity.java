@@ -34,13 +34,12 @@ import android.os.Environment;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NavUtils;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import org.greenrobot.eventbus.EventBus;
@@ -372,6 +371,8 @@ public class CreateDataActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         if (menuItem.getItemId() == android.R.id.home) {
             finish();
+
+            return true;
         }
         return super.onOptionsItemSelected(menuItem);
     }
@@ -440,5 +441,9 @@ public class CreateDataActivity extends BaseActivity {
             if (grantResults.length > 0 && grantResults[0] >= 0)
                 getCurrentLocation();
         }
+    }
+
+    public void onBackPressed() {
+        finish();
     }
 }

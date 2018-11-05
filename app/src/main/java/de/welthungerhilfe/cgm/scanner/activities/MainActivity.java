@@ -111,7 +111,6 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     private int sortType = 0;
     private ArrayList<Integer> filters = new ArrayList<>();
     private int diffDays = 0;
-    private ArrayList<Person> personList = new ArrayList<>();
 
     private File mFileTemp;
 
@@ -143,8 +142,8 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     DrawerLayout drawerLayout;
     @BindView(R.id.navMenu)
     NavigationView navMenu;
-    @BindView(R.id.txtNoPerson)
-    TextView txtNoPerson;
+    @BindView(R.id.lytNoPerson)
+    LinearLayout lytNoPerson;
     @BindView(R.id.searchview)
     SearchView searchView;
 
@@ -174,19 +173,19 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
 
         //showProgressDialog();
 
+        adapterData = new RecyclerDataAdapter(this, new ArrayList<>());
+        adapterData.setPersonDetailListener(this);
+        recyclerData.setAdapter(adapterData);
+        recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         viewModel.getObservablePersonList().observe(this, personList->{
             if (personList.size() == 0) {
-                txtNoPerson.setVisibility(View.VISIBLE);
-                recyclerData.setVisibility(View.GONE);
+                lytNoPerson.setVisibility(View.VISIBLE);
             } else {
-                txtNoPerson.setVisibility(View.GONE);
-                recyclerData.setVisibility(View.VISIBLE);
+                lytNoPerson.setVisibility(View.GONE);
 
-                adapterData = new RecyclerDataAdapter(this, personList);
-                adapterData.setPersonDetailListener(this);
-                recyclerData.setAdapter(adapterData);
-                recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                adapterData.resetData(personList);
             }
         });
 
@@ -229,8 +228,9 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             public boolean onNavigationItemSelected(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.menuTutorial:
-                        startActivity(new Intent(MainActivity.this, TutorialActivity.class));
-                        finish();
+                        Intent intent = new Intent(MainActivity.this, TutorialActivity.class);
+                        intent.putExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, true);
+                        startActivity(intent);
                         break;
                     case R.id.menuSettings:
                         startActivity(new Intent(MainActivity.this, SettingsActivity.class));

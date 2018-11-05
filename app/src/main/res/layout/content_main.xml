@@ -62,15 +62,39 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <TextView
-            android:id="@+id/txtNoPerson"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
+        <LinearLayout
+            android:id="@+id/lytNoPerson"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorGreyLight"
             android:layout_centerInParent="true"
-            android:text="@string/no_persons"
-            android:textSize="18sp"/>
+            android:gravity="center"
+            android:orientation="vertical">
 
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:tint="@color/colorGreyDark"
+                android:src="@drawable/alert"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/no_scans"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorGreyDark"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/add_scans"
+                android:textSize="18sp"
+                android:textColor="@color/colorGreyDark"/>
+
+        </LinearLayout>
     </RelativeLayout>
 
     <android.support.design.widget.FloatingActionButton

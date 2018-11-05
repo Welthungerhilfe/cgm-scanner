@@ -112,11 +112,15 @@ public class FileLogMonitorService extends Service {
             }
             pendingArtefacts.add(log.getId());
 
+            Log.e("pending uploads", pendingArtefacts.toString());
+
             File file = new File(log.getPath());
             if (!file.exists()) {
                 log.setUploadDate(Utils.getUniversalTimestamp());
                 log.setDeleted(true);
                 new OfflineTask().saveFileLog(log);
+
+                pendingArtefacts.remove(log.getId());
             } else {
                 Uri fileUri = Uri.fromFile(file);
 
@@ -148,10 +152,13 @@ public class FileLogMonitorService extends Service {
                                         file.delete();
                                         log.setDeleted(true);
                                     }
+                                    log.setPath(photoRef.getDownloadUrl().toString());
                                     new OfflineTask().saveFileLog(log);
                                     AppController.getInstance().firebaseFirestore.collection("artefacts")
                                             .document(log.getId())
                                             .set(log);
+
+                                    pendingArtefacts.remove(log.getId());
                                 } else {
 
                                 }

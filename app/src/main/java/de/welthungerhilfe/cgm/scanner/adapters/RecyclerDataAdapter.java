@@ -127,6 +127,11 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
         getFilter().filter("");
     }
 
+    public void resetData(List<Person> personList) {
+        this.personList = personList;
+        getFilter().filter("");
+    }
+
     public void addPerson(Person person) {
         personList.add(person);
         getFilter().filter("");
@@ -179,6 +184,12 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
     public void doFilter(ArrayList<Integer> filters) {
         this.filters = filters;
         getFilter().filter("");
+    }
+
+    public void addPersons(List<Person> pList) {
+        int oIndex = personList.size();
+        personList.addAll(pList);
+        notifyItemRangeInserted(oIndex, pList.size());
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

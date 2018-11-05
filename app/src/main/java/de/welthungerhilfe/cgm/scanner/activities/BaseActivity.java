@@ -26,12 +26,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.novoda.merlin.Merlin;
 import com.novoda.merlin.registerable.connection.Connectable;
 import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
+import java.io.IOException;
 import java.util.Date;
 
 import de.welthungerhilfe.cgm.scanner.R;
@@ -40,12 +42,27 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.fabric.sdk.android.services.common.Crash;
 
 public class BaseActivity extends AppCompatActivity implements Connectable, Disconnectable {
+    public static class MemoryOutHander implements Thread.UncaughtExceptionHandler {
+        @Override
+        public void uncaughtException(Thread thread, Throwable ex) {
+            if(ex.getClass().equals(OutOfMemoryError.class))
+            {
+                Crashlytics.log(0, "memory out", "Memory Out happened in Activity");
+            } else {
+                ex.printStackTrace();
+                Crashlytics.log(0, "exception", ex.getMessage());
+            }
+        }
+    }
+
     private boolean running = false;
     private Merlin merlin;
     private SessionManager session;
 
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
+
+        Thread.currentThread().setDefaultUncaughtExceptionHandler(new MemoryOutHander());
     }
 
     @Override

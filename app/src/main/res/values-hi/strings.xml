@@ -226,4 +226,7 @@
     <string name="menu_qr">QR Search</string>
     <string name="menu_search">Search</string>
     <string name="menu_filter">Sort and Filter</string>
+    <string name="login">Login</string>
+    <string name="no_scans">No Scans :/</string>
+    <string name="add_scans">To start scanning, tap [+] button</string>
 </resources>

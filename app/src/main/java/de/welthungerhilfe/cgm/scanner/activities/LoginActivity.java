@@ -73,6 +73,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         doSignInAction();
     }
 
+    /*
     @OnClick(R.id.txtCancel)
     void doSignOut(TextView txtCancel) {
         AppController.getInstance().firebaseAuth.signOut();
@@ -80,6 +81,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         //createUser("zhangnemo34@hotmail.com", "Crystal");
     }
+    */
 
     @OnClick(R.id.txtForgot)
     void doForgot(TextView txtForgot) {

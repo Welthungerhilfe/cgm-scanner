@@ -21,6 +21,7 @@ import de.welthungerhilfe.cgm.scanner.fragments.Tutorial1Fragment;
 import de.welthungerhilfe.cgm.scanner.fragments.Tutorial2Fragment;
 import de.welthungerhilfe.cgm.scanner.fragments.Tutorial3Fragment;
 import de.welthungerhilfe.cgm.scanner.fragments.Tutorial4Fragment;
+import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 
 public class TutorialActivity extends AppCompatActivity {
@@ -32,17 +33,21 @@ public class TutorialActivity extends AppCompatActivity {
     @OnClick(R.id.btnStart)
     void startWork() {
         session.setTutorial(true);
-        startActivity(new Intent(this, MainActivity.class));
+        if (!again)
+            startActivity(new Intent(this, MainActivity.class));
         finish();
     }
 
-    FragmentAdapter adapter;
-    SessionManager session;
+    private FragmentAdapter adapter;
+    private SessionManager session;
+    private boolean again;
 
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
         setContentView(R.layout.activity_tutorial);
         ButterKnife.bind(this);
+
+        again = getIntent().getBooleanExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, false);
 
         session = new SessionManager(this);
 
