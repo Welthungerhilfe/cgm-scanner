@@ -439,11 +439,11 @@ public class RecorderActivity extends Activity {
 
         getCurrentLocation();
 
-        stopService(new Intent(this, FileLogMonitorService.class));
+        //stopService(new Intent(this, FileLogMonitorService.class));
     }
 
     public void onDestroy() {
-        startService(new Intent(this, FileLogMonitorService.class));
+        //startService(new Intent(this, FileLogMonitorService.class));
         super.onDestroy();
     }
 
