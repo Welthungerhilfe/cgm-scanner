@@ -14,6 +14,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -128,89 +129,88 @@ public class FileLogMonitorService extends Service {
                 }
             }
 
-            File file = new File(log.getPath());
-            if (!file.exists()) {
-                log.setUploadDate(Utils.getUniversalTimestamp());
-                log.setDeleted(true);
-                new OfflineTask().saveFileLog(log);
-            } else {
+            try {
+                FileInputStream fis = new FileInputStream(log.getPath());
+
                 pendingArtefacts.add(log.getId());
                 Log.e("pending added", log.getId());
 
-                try {
-                    FileInputStream fis = new FileInputStream(file);
+                String path = "";
+                switch (log.getType()) {
+                    case "pcd":
+                        path = AppConstants.STORAGE_PC_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                        break;
+                    case "rgb":
+                        path = AppConstants.STORAGE_RGB_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                        break;
+                    case "consent":
+                        path = AppConstants.STORAGE_CONSENT_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                        break;
+                }
 
-                    String path = "";
-                    switch (log.getType()) {
-                        case "pcd":
-                            path = AppConstants.STORAGE_PC_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
-                            break;
-                        case "rgb":
-                            path = AppConstants.STORAGE_RGB_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
-                            break;
-                        case "consent":
-                            path = AppConstants.STORAGE_CONSENT_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
-                            break;
-                    }
+                if (path.contains("{qrcode}") || path.contains("scantimestamp")) {
+                    Log.e("MonitorService : ", String.format("id: %s, qrcode: %s, scantimestamp: %s", log.getId(), log.getQrCode(), String.valueOf(log.getCreateDate())));
+                }
 
-                    if (path.contains("{qrcode}") || path.contains("scantimestamp")) {
-                        Log.e("MonitorService : ", String.format("id: %s, qrcode: %s, scantimestamp: %s", log.getId(), log.getQrCode(), String.valueOf(log.getCreateDate())));
-                    }
-
-                    StorageReference photoRef = FirebaseStorage.getInstance().getReference().child(path).child(file.getName());
-                    photoRef.putStream(fis)
-                            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                @Override
-                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                    try {
-                                        fis.close();
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                    StorageMetadata metadata = taskSnapshot.getMetadata();
-                                    if (metadata.getMd5Hash().trim().compareTo(log.getHashValue().trim()) == 0) {
-                                        log.setUploadDate(Utils.getUniversalTimestamp());
-                                        File file = new File(log.getPath());
-                                        if (file.exists() && !log.getType().equals("consent")) {
-                                            file.delete();
-                                            log.setDeleted(true);
-                                        }
-                                        new OfflineTask().saveFileLog(log);
-                                        AppController.getInstance().firebaseFirestore.collection("artefacts")
-                                                .document(log.getId())
-                                                .set(log);
-                                    }
-
-                                    synchronized (lock) {
-                                        Log.e("pending removed", log.getId());
-                                        pendingArtefacts.remove(log.getId());
-                                        lock.notify();
-                                    }
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    try {
-                                        fis.close();
-                                    } catch (IOException ex) {
-                                        ex.printStackTrace();
-                                    }
-
+                String[] arr = log.getPath().split("/");
+                StorageReference photoRef = FirebaseStorage.getInstance().getReference().child(path).child(arr[arr.length - 1]);
+                photoRef.putStream(fis)
+                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                try {
+                                    fis.close();
+                                } catch (IOException e) {
                                     e.printStackTrace();
-                                    synchronized (lock) {
-                                        Log.e("pending removed", log.getId());
-                                        pendingArtefacts.remove(log.getId());
-                                        lock.notify();
-                                    }
                                 }
-                            });
-                } catch (FileNotFoundException e) {
-                    synchronized (lock) {
-                        Log.e("pending removed", log.getId());
-                        pendingArtefacts.remove(log.getId());
-                        lock.notify();
-                    }
+                                StorageMetadata metadata = taskSnapshot.getMetadata();
+                                if (metadata.getMd5Hash().trim().compareTo(log.getHashValue().trim()) == 0) {
+                                    log.setUploadDate(Utils.getUniversalTimestamp());
+                                    File file = new File(log.getPath());
+                                    if (file.exists() && !log.getType().equals("consent")) {
+                                        file.delete();
+                                        log.setDeleted(true);
+                                    }
+                                    log.setPath(photoRef.getPath());
+                                    new OfflineTask().saveFileLog(log);
+                                    AppController.getInstance().firebaseFirestore.collection("artefacts")
+                                            .document(log.getId())
+                                            .set(log);
+                                }
+
+                                synchronized (lock) {
+                                    Log.e("pending removed", log.getId());
+                                    pendingArtefacts.remove(log.getId());
+                                    lock.notify();
+                                }
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                try {
+                                    fis.close();
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                }
+
+                                e.printStackTrace();
+                                synchronized (lock) {
+                                    Log.e("pending removed", log.getId());
+                                    pendingArtefacts.remove(log.getId());
+                                    lock.notify();
+                                }
+                            }
+                        });
+            } catch (FileNotFoundException e) {
+                log.setUploadDate(Utils.getUniversalTimestamp());
+                log.setDeleted(true);
+                new OfflineTask().saveFileLog(log);
+
+                synchronized (lock) {
+                    Log.e("pending removed", log.getId());
+                    pendingArtefacts.remove(log.getId());
+                    lock.notify();
                 }
             }
         }
