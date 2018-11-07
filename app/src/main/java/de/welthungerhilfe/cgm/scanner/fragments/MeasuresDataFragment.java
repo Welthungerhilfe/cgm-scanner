@@ -52,6 +52,7 @@ import de.welthungerhilfe.cgm.scanner.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.activities.RecorderActivity;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerMeasureAdapter;
 import de.welthungerhilfe.cgm.scanner.dialogs.ConfirmDialog;
+import de.welthungerhilfe.cgm.scanner.dialogs.ManualDetailDialog;
 import de.welthungerhilfe.cgm.scanner.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
@@ -232,10 +233,8 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onMeasureSelect(Measure measure) {
-        ManualMeasureDialog dialog = new ManualMeasureDialog(context);
-        dialog.setManualMeasureListener(MeasuresDataFragment.this);
+        ManualDetailDialog dialog = new ManualDetailDialog(context);
         dialog.setMeasure(measure);
-        dialog.setEditable(false);
         dialog.show();
     }
 }
