@@ -71,6 +71,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
     private FloatingActionButton fabCreate;
 
+    private ManualMeasureDialog measureDialog;
+    private ManualDetailDialog detailDialog;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -138,16 +141,17 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                         Snackbar.make(recyclerMeasure, R.string.permission_expired, Snackbar.LENGTH_LONG).show();
                     } else {
                         if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
-                            ManualMeasureDialog dialog = new ManualMeasureDialog(context);
-                            dialog.setManualMeasureListener(MeasuresDataFragment.this);
-                            dialog.setCloseListener(new ManualMeasureDialog.OnCloseListener() {
+                            if (measureDialog == null)
+                                measureDialog = new ManualMeasureDialog(context);
+                            measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
+                            measureDialog.setCloseListener(new ManualMeasureDialog.OnCloseListener() {
                                 @Override
                                 public void onClose(boolean result) {
                                     adapterMeasure.notifyItemChanged(position);
                                 }
                             });
-                            dialog.setMeasure(measure);
-                            dialog.show();
+                            measureDialog.setMeasure(measure);
+                            measureDialog.show();
                         } else {
                             Intent intent = new Intent(getContext(), RecorderActivity.class);
                             intent.putExtra(AppConstants.EXTRA_PERSON, ((CreateDataActivity)context).person);
@@ -193,9 +197,10 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             @Override
             public void onClick(DialogInterface d, int which) {
                 if (which == 0) {
-                    ManualMeasureDialog dialog = new ManualMeasureDialog(context);
-                    dialog.setManualMeasureListener(MeasuresDataFragment.this);
-                    dialog.show();
+                    if (measureDialog == null)
+                        measureDialog = new ManualMeasureDialog(context);
+                    measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
+                    measureDialog.show();
                 } else if (which == 1) {
                     //Intent intent = new Intent(getContext(), ScreenRecordActivity.class);
                     Intent intent = new Intent(context, RecorderActivity.class);
@@ -233,8 +238,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onMeasureSelect(Measure measure) {
-        ManualDetailDialog dialog = new ManualDetailDialog(context);
-        dialog.setMeasure(measure);
-        dialog.show();
+        if (detailDialog == null)
+            detailDialog = new ManualDetailDialog(context);
+        detailDialog.setMeasure(measure);
+        detailDialog.show();
     }
 }
