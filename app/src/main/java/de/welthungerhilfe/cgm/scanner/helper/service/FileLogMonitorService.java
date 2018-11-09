@@ -14,6 +14,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -27,6 +28,9 @@ import com.novoda.merlin.registerable.connection.Connectable;
 import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -42,8 +46,11 @@ import de.welthungerhilfe.cgm.scanner.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.MULTI_UPLOAD_BUNCH;
+
 public class FileLogMonitorService extends Service {
     private List<String> pendingArtefacts;
+    private Object lock = new Object();
 
     private Timer timer = new Timer();
     private ExecutorService executor;
@@ -80,18 +87,22 @@ public class FileLogMonitorService extends Service {
     }
 
     private void checkFileLogDatabase() {
+
         new OfflineTask().getSyncableFileLog(new OfflineTask.OnLoadFileLogs() {
             @Override
             public void onLoadFileLogs(List<FileLog> logs) {
                 if (Utils.isNetworkConnectionAvailable(FileLogMonitorService.this)) {
                     if (logs.size() > 0) {
-                        executor = Executors.newFixedThreadPool(5);
+                        executor = Executors.newFixedThreadPool(MULTI_UPLOAD_BUNCH);
+                        //executor = Executors.newSingleThreadExecutor();
 
                         for (FileLog log : logs) {
                             Runnable worker = new UploadThread(log);
                             executor.execute(worker);
                         }
-                        executor.shutdown();
+                        //executor.shutdown();
+                    } else {
+                        pendingArtefacts.clear();
                     }
                 }
             }
@@ -107,43 +118,51 @@ public class FileLogMonitorService extends Service {
 
         @Override
         public void run() {
-            if (pendingArtefacts.contains(log.getId())) {
-                return;
+            synchronized (lock) {
+                if (pendingArtefacts.size() > MULTI_UPLOAD_BUNCH) {
+                    try {
+                        lock.wait();
+                        Log.e("pending", "waiting now");
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-            pendingArtefacts.add(log.getId());
 
-            Log.e("pending uploads", pendingArtefacts.toString());
+            try {
+                FileInputStream fis = new FileInputStream(log.getPath());
 
-            File file = new File(log.getPath());
-            if (!file.exists()) {
-                log.setUploadDate(Utils.getUniversalTimestamp());
-                log.setDeleted(true);
-                new OfflineTask().saveFileLog(log);
-
-                pendingArtefacts.remove(log.getId());
-            } else {
-                Uri fileUri = Uri.fromFile(file);
+                pendingArtefacts.add(log.getId());
+                Log.e("pending added", log.getId());
 
                 String path = "";
-                if (log.getType().equals("pcd"))
-                    path = AppConstants.STORAGE_PC_URL.replace("{qrcode}",  log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
-                else if (log.getType().equals("rgb"))
-                    path = AppConstants.STORAGE_RGB_URL.replace("{qrcode}",  log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
-                else if (log.getType().equals("consent"))
-                    path = AppConstants.STORAGE_CONSENT_URL.replace("{qrcode}",  log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
-
+                switch (log.getType()) {
+                    case "pcd":
+                        path = AppConstants.STORAGE_PC_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                        break;
+                    case "rgb":
+                        path = AppConstants.STORAGE_RGB_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                        break;
+                    case "consent":
+                        path = AppConstants.STORAGE_CONSENT_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                        break;
+                }
 
                 if (path.contains("{qrcode}") || path.contains("scantimestamp")) {
                     Log.e("MonitorService : ", String.format("id: %s, qrcode: %s, scantimestamp: %s", log.getId(), log.getQrCode(), String.valueOf(log.getCreateDate())));
                 }
 
-                StorageReference photoRef = FirebaseStorage.getInstance().getReference().child(path)
-                        .child(fileUri.getLastPathSegment());
-
-                photoRef.putFile(fileUri)
+                String[] arr = log.getPath().split("/");
+                StorageReference photoRef = FirebaseStorage.getInstance().getReference().child(path).child(arr[arr.length - 1]);
+                photoRef.putStream(fis)
                         .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                             @Override
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                try {
+                                    fis.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                                 StorageMetadata metadata = taskSnapshot.getMetadata();
                                 if (metadata.getMd5Hash().trim().compareTo(log.getHashValue().trim()) == 0) {
                                     log.setUploadDate(Utils.getUniversalTimestamp());
@@ -152,26 +171,47 @@ public class FileLogMonitorService extends Service {
                                         file.delete();
                                         log.setDeleted(true);
                                     }
-                                    log.setPath(photoRef.getDownloadUrl().toString());
+                                    log.setPath(photoRef.getPath());
                                     new OfflineTask().saveFileLog(log);
                                     AppController.getInstance().firebaseFirestore.collection("artefacts")
                                             .document(log.getId())
                                             .set(log);
-
-                                    pendingArtefacts.remove(log.getId());
-                                } else {
-
                                 }
-                                pendingArtefacts.remove(log.getId());
+
+                                synchronized (lock) {
+                                    Log.e("pending removed", log.getId());
+                                    pendingArtefacts.remove(log.getId());
+                                    lock.notify();
+                                }
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
+                                try {
+                                    fis.close();
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                }
+
                                 e.printStackTrace();
-                                pendingArtefacts.remove(log.getId());
+                                synchronized (lock) {
+                                    Log.e("pending removed", log.getId());
+                                    pendingArtefacts.remove(log.getId());
+                                    lock.notify();
+                                }
                             }
                         });
+            } catch (FileNotFoundException e) {
+                log.setUploadDate(Utils.getUniversalTimestamp());
+                log.setDeleted(true);
+                new OfflineTask().saveFileLog(log);
+
+                synchronized (lock) {
+                    Log.e("pending removed", log.getId());
+                    pendingArtefacts.remove(log.getId());
+                    lock.notify();
+                }
             }
         }
     }

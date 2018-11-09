@@ -43,7 +43,6 @@ import android.widget.Toast;
 import com.bumptech.glide.util.Util;
 import com.crashlytics.android.Crashlytics;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
@@ -53,6 +52,7 @@ import de.welthungerhilfe.cgm.scanner.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerMeasureAdapter;
 import de.welthungerhilfe.cgm.scanner.dialogs.ConfirmDialog;
+import de.welthungerhilfe.cgm.scanner.dialogs.ManualDetailDialog;
 import de.welthungerhilfe.cgm.scanner.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
@@ -70,6 +70,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     private RecyclerMeasureAdapter adapterMeasure;
 
     private FloatingActionButton fabCreate;
+
+    private ManualMeasureDialog measureDialog;
+    private ManualDetailDialog detailDialog;
 
     @Override
     public void onAttach(Context context) {
@@ -138,16 +141,17 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                         Snackbar.make(recyclerMeasure, R.string.permission_expired, Snackbar.LENGTH_LONG).show();
                     } else {
                         if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
-                            ManualMeasureDialog dialog = new ManualMeasureDialog(context);
-                            dialog.setManualMeasureListener(MeasuresDataFragment.this);
-                            dialog.setCloseListener(new ManualMeasureDialog.OnCloseListener() {
+                            if (measureDialog == null)
+                                measureDialog = new ManualMeasureDialog(context);
+                            measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
+                            measureDialog.setCloseListener(new ManualMeasureDialog.OnCloseListener() {
                                 @Override
                                 public void onClose(boolean result) {
                                     adapterMeasure.notifyItemChanged(position);
                                 }
                             });
-                            dialog.setMeasure(measure);
-                            dialog.show();
+                            measureDialog.setMeasure(measure);
+                            measureDialog.show();
                         } else {
                             //Intent intent = new Intent(getContext(), RecorderActivity.class);
                             Intent intent = new Intent(getContext(), ScanModeActivity.class);
@@ -187,6 +191,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     public void createMeasure() {
         if (context == null)
             return;
+
         try {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setTitle(R.string.title_add_measure);
@@ -194,9 +199,10 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                 @Override
                 public void onClick(DialogInterface d, int which) {
                     if (which == 0) {
-                        ManualMeasureDialog dialog = new ManualMeasureDialog(context);
-                        dialog.setManualMeasureListener(MeasuresDataFragment.this);
-                        dialog.show();
+                        if (measureDialog == null)
+                            measureDialog = new ManualMeasureDialog(context);
+                        measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
+                        measureDialog.show();
                     } else if (which == 1) {
                         Intent intent = new Intent(getContext(), ScanModeActivity.class);
                         intent.putExtra(AppConstants.EXTRA_PERSON, ((CreateDataActivity)context).person);
@@ -231,14 +237,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onMeasureSelect(Measure measure) {
-        try {
-            ManualMeasureDialog dialog = new ManualMeasureDialog(context);
-            dialog.setManualMeasureListener(MeasuresDataFragment.this);
-            dialog.setMeasure(measure);
-            dialog.setEditable(false);
-            dialog.show();
-        } catch (RuntimeException e) {
-            Crashlytics.log(0, "measure fragment", e.getMessage());
-        }
+        if (detailDialog == null)
+            detailDialog = new ManualDetailDialog(context);
+        detailDialog.setMeasure(measure);
+        detailDialog.show();
     }
 }

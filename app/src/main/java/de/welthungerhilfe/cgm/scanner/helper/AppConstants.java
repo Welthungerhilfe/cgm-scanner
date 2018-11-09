@@ -31,6 +31,8 @@ public class AppConstants {
     public static final long LOG_MONITOR_INTERVAL = 10 * 1000; // 10 seconds
     public static final long MEMORY_MONITOR_INTERVAL = 60 * 1000; // 60 seconds
 
+    public static final int MULTI_UPLOAD_BUNCH = 5;
+
     public static final String GOOGLE_GEO_URL = "https://maps.googleapis.com/maps/api/geocode/json";
     //public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor.appspot.com";
     //public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor-dev.appspot.com";
