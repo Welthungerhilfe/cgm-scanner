@@ -58,7 +58,7 @@ dependencies {
     implementation 'com.romandanylyk:pageindicatorview:1.0.2'
     implementation 'com.appeaser.sublimepickerlibrary:sublimepickerlibrary:2.1.1'
     implementation 'com.github.bumptech.glide:glide:3.7.0'
-    implementation 'me.dm7.barcodescanner:zxing:1.9'
+    implementation 'me.dm7.barcodescanner:zxing:1.9.8'
     implementation 'org.greenrobot:eventbus:3.1.1'
     implementation 'com.jaredrummler:material-spinner:1.2.4'
     implementation 'com.google.firebase:firebase-auth:16.0.1'
