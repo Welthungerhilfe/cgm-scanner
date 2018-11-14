@@ -524,7 +524,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
                             File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
                             FileLog log = new FileLog();
-                            log.setId(AppController.getInstance().getArtefactId("scan-pcd"));
+                            log.setId(AppController.getInstance().getArtefactId("scan-pcd", mNowTime));
                             log.setType("pcd");
                             log.setPath(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename + ".pcd");
                             log.setHashValue(MD5.getMD5(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd"));
@@ -597,10 +597,9 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                                 // TODO save files to local storage
                                 String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
                                         mode + "_" + currentTangoImageBuffer.timestamp + ".jpg";
-                                Uri uri = BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
                                 File artefactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
                                 FileLog log = new FileLog();
-                                log.setId(AppController.getInstance().getArtefactId("scan-rgb"));
+                                log.setId(AppController.getInstance().getArtefactId("scan-rgb", mNowTime));
                                 log.setType("rgb");
                                 log.setPath(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
                                 log.setHashValue(MD5.getMD5(mRgbSaveFolder.getPath() + File.separator + currentImgFilename));

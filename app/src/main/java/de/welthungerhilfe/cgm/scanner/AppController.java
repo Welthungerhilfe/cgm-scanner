@@ -227,4 +227,8 @@ public class AppController extends Application {
     public String getArtefactId(String type) {
         return Utils.getAndroidID(getContentResolver()) + "_" + type + "_" + Utils.getUniversalTimestamp() + "_" + Utils.getSaltString(16);
     }
+
+    public String getArtefactId(String type, long timestamp) {
+        return Utils.getAndroidID(getContentResolver()) + "_" + type + "_" + String.valueOf(timestamp) + "_" + Utils.getSaltString(16);
+    }
 }
