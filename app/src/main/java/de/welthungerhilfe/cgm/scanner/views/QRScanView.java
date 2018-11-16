@@ -31,6 +31,7 @@ import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
@@ -144,30 +145,34 @@ public class QRScanView extends BarcodeScannerView {
                     final Result finalRawResult = rawResult;
                     handler.post(new Runnable() {
                         public void run() {
-                            QRScanView.QRScanHandler tmpResultHandler = QRScanView.this.mResultHandler;
-                            QRScanView.this.mResultHandler = null;
-                            QRScanView.this.stopCameraPreview();
-                            if(tmpResultHandler != null) {
-                                Camera.Parameters parameters = camera.getParameters();
-                                int format = parameters.getPreviewFormat();
+                            try {
+                                QRScanView.QRScanHandler tmpResultHandler = QRScanView.this.mResultHandler;
+                                QRScanView.this.mResultHandler = null;
+                                QRScanView.this.stopCameraPreview();
+                                if(tmpResultHandler != null) {
+                                    Camera.Parameters parameters = camera.getParameters();
+                                    int format = parameters.getPreviewFormat();
 
-                                if (format == ImageFormat.NV21 || format == ImageFormat.YUY2 || format == ImageFormat.NV16) {
-                                    int w = parameters.getPreviewSize().width;
-                                    int h = parameters.getPreviewSize().height;
-                                    YuvImage yuv_image = new YuvImage(finalData, format, w, h, null);
+                                    if (format == ImageFormat.NV21 || format == ImageFormat.YUY2 || format == ImageFormat.NV16) {
+                                        int w = parameters.getPreviewSize().width;
+                                        int h = parameters.getPreviewSize().height;
+                                        YuvImage yuv_image = new YuvImage(finalData, format, w, h, null);
 
-                                    Rect rect = new Rect(0, 0, w, h);
-                                    ByteArrayOutputStream output_stream = new ByteArrayOutputStream();
-                                    yuv_image.compressToJpeg(rect, 100, output_stream);
-                                    byte[] byt = output_stream.toByteArray();
-                                    Bitmap bmp = BitmapUtils.getAcceptableBitmap(BitmapFactory.decodeByteArray(byt, 0, byt.length));
-                                    byte[] data = BitmapUtils.getByteData(bmp);
-                                    tmpResultHandler.handleQRResult(finalRawResult.getText(), data);
-                                } else {
-                                    Bitmap bmp = BitmapUtils.getAcceptableBitmap(BitmapFactory.decodeByteArray(finalData, 0, finalData.length));
-                                    byte[] data = BitmapUtils.getByteData(bmp);
-                                    tmpResultHandler.handleQRResult(finalRawResult.getText(), data);
+                                        Rect rect = new Rect(0, 0, w, h);
+                                        ByteArrayOutputStream output_stream = new ByteArrayOutputStream();
+                                        yuv_image.compressToJpeg(rect, 100, output_stream);
+                                        byte[] byt = output_stream.toByteArray();
+                                        Bitmap bmp = BitmapUtils.getAcceptableBitmap(BitmapFactory.decodeByteArray(byt, 0, byt.length));
+                                        byte[] data = BitmapUtils.getByteData(bmp);
+                                        tmpResultHandler.handleQRResult(finalRawResult.getText(), data);
+                                    } else {
+                                        Bitmap bmp = BitmapUtils.getAcceptableBitmap(BitmapFactory.decodeByteArray(finalData, 0, finalData.length));
+                                        byte[] data = BitmapUtils.getByteData(bmp);
+                                        tmpResultHandler.handleQRResult(finalRawResult.getText(), data);
+                                    }
                                 }
+                            } catch (RuntimeException e) {
+                                Crashlytics.log(0, "qr scan", e.getMessage());
                             }
                         }
                     });

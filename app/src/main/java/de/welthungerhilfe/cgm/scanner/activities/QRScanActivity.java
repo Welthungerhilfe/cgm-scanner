@@ -97,6 +97,10 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
         intent.putExtra(AppConstants.EXTRA_QR, qrCode);
         intent.putExtra(AppConstants.EXTRA_QR_BITMAP, BitmapUtils.getRotatedByte(bitmap, 90));
         startActivity(intent);
+
+        qrScanView.stopCameraPreview();
+        qrScanView.stopCamera();
+
         finish();
     }
 }
