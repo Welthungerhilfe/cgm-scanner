@@ -3,6 +3,8 @@ package de.welthungerhilfe.cgm.scanner.models.tasks;
 import android.arch.lifecycle.LiveData;
 import android.os.AsyncTask;
 
+import com.bumptech.glide.util.Util;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +84,10 @@ public class OfflineTask {
 
     public void saveMeasure(Measure measure) {
         new SaveTask().execute(measure);
+    }
+
+    public void updateScanResult(String id, double height, double weight, double muac, double headCircumferance) {
+        new UpdateScanResultTask(id, height, weight, muac, headCircumferance).execute();
     }
 
     public void updateMeasure(Measure measure) {
@@ -200,6 +206,36 @@ public class OfflineTask {
                 AppController.getInstance().offlineDb.offlineDao().updateFileLog((FileLog) objects[0]);
             }
 
+            return true;
+        }
+    }
+
+    private static class UpdateScanResultTask extends AsyncTask<Void, Void, Boolean> {
+        String id;
+        double height, weight, muac, head;
+
+        UpdateScanResultTask(String id, double height, double weight, double muac, double head) {
+            this.id = id;
+            this.height = height;
+            this.weight = weight;
+            this.muac = muac;
+            this.head = head;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            /*
+            Measure measure = AppController.getInstance().offlineDb.offlineDao().findMeasure(id);
+            measure.setHeight(height);
+            measure.setWeight(weight);
+            measure.setMuac(muac);
+            measure.setHeadCircumference(head);
+            measure.setTimestamp(Utils.getUniversalTimestamp());
+
+            AppController.getInstance().offlineDb.offlineDao().updateMeasure(measure);
+            */
+
+            AppController.getInstance().offlineDb.offlineDao().updateScanResult(id, height, weight, muac, head, Utils.getUniversalTimestamp());
             return true;
         }
     }

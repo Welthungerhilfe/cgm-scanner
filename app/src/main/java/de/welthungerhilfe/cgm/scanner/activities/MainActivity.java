@@ -197,6 +197,11 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         fetchRemoteConfig();
     }
 
+    public void onNewIntent(Intent intent) {
+        if (adapterData != null)
+            adapterData.notifyDataSetChanged();
+    }
+
     private void fetchRemoteConfig() {
         long cacheExpiration = 3600 * 3;
         if (AppController.getInstance().firebaseConfig.getInfo().getConfigSettings().isDeveloperModeEnabled()) {
