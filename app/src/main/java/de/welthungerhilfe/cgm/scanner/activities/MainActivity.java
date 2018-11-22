@@ -70,7 +70,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -195,11 +197,34 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         startService(new Intent(this, FileLogMonitorService.class));
 
         fetchRemoteConfig();
+
+        saveFcmToken();
     }
 
     public void onNewIntent(Intent intent) {
         if (adapterData != null)
             adapterData.notifyDataSetChanged();
+    }
+
+    private void saveFcmToken() {
+        String token = session.getFcmToken();
+        String device = Utils.getAndroidID(getContentResolver());
+        if (token != null && !session.isFcmSaved()) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("user", AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+            data.put("device", device);
+            data.put("token", token);
+
+            AppController.getInstance().firebaseFirestore.collection("fcm_tokens")
+                    .document(device)
+                    .set(data)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            session.setFcmSaved(true);
+                        }
+                    });
+        }
     }
 
     private void fetchRemoteConfig() {

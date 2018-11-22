@@ -18,9 +18,13 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -111,11 +115,7 @@ public class PushNotificationService extends FirebaseMessagingService {
 
     @Override
     public void onNewToken(String token) {
-        AppController.getInstance().firebaseFirestore.collection("notification_token")
-                .document(Utils.getAndroidID(getContentResolver()))
-                .set(token);
-
-        Log.e(TAG, "Notification Token: " + token);
+        new SessionManager(this).setFcmToken(token);
     }
 
     private void createNotificationChannel() {
