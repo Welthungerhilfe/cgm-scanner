@@ -182,16 +182,16 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     }
 
     public void show() {
-        super.show();
         EventBus.getDefault().register(this);
+        super.show();
 
         if (closeListener != null)
             closeListener.onClose(true);
     }
 
     public void dismiss() {
-        super.dismiss();
         EventBus.getDefault().unregister(this);
+        super.dismiss();
 
         if (closeListener != null)
             closeListener.onClose(false);
@@ -201,21 +201,6 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     public void onEvent(LocationResult event) {
         location = event.getLocationResult();
         editManualLocation.setText(location.getAddress());
-    }
-
-    public void setEditable(boolean editable) {
-        if (!editable) {
-            editManualLocation.setOnClickListener(null);
-            editManualHeight.setKeyListener(null);
-            editManualWeight.setKeyListener(null);
-            editManualMuac.setKeyListener(null);
-            editManualHead.setKeyListener(null);
-            checkManualOedema.setEnabled(editable);
-
-            btnOK.setVisibility(View.GONE);
-        } else {
-            btnOK.setVisibility(View.VISIBLE);
-        }
     }
 
     public void setMeasure(Measure measure) {

@@ -95,6 +95,7 @@ import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.service.FileLogMonitorService;
 import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
+import de.welthungerhilfe.cgm.scanner.helper.service.MemoryMonitorService;
 import de.welthungerhilfe.cgm.scanner.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -123,6 +124,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
         Crashlytics.log("Add person by QR");
+        //Crashlytics.getInstance().crash();
         startActivity(new Intent(MainActivity.this, QRScanActivity.class));
 
         /*
@@ -298,6 +300,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             }
         });
 
+        /*
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_STORAGE);
         } else {
@@ -305,8 +308,29 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             iterateLocalFiles(root);
             checkDeletedRecords();
         }
+        */
 
         startService(new Intent(this, FileLogMonitorService.class));
+
+        fetchRemoteConfig();
+    }
+
+    private void fetchRemoteConfig() {
+        long cacheExpiration = 3600 * 3;
+        if (AppController.getInstance().firebaseConfig.getInfo().getConfigSettings().isDeveloperModeEnabled()) {
+            cacheExpiration = 0;
+        }
+
+        AppController.getInstance().firebaseConfig.fetch(cacheExpiration)
+                .addOnSuccessListener(aVoid -> {
+                    AppController.getInstance().firebaseConfig.activateFetched();
+                    if (AppController.getInstance().firebaseConfig.getBoolean(AppConstants.CONFIG_DEBUG)) {
+                        startService(new Intent(this, MemoryMonitorService.class));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    e.printStackTrace();
+                });
     }
 
     private void setupSidemenu() {

@@ -20,4 +20,8 @@
         <key>allow_delete</key>
         <value>false</value>
     </entry>
+    <entry>
+        <key>debug</key>
+        <value>false</value>
+    </entry>
 </defaultsMap>

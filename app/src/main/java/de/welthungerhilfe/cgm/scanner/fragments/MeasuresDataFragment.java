@@ -36,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 //import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 
@@ -52,6 +53,7 @@ import de.welthungerhilfe.cgm.scanner.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerMeasureAdapter;
 import de.welthungerhilfe.cgm.scanner.dialogs.ConfirmDialog;
+import de.welthungerhilfe.cgm.scanner.dialogs.ManualDetailDialog;
 import de.welthungerhilfe.cgm.scanner.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
@@ -69,6 +71,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     private RecyclerMeasureAdapter adapterMeasure;
 
     private FloatingActionButton fabCreate;
+
+    private ManualMeasureDialog measureDialog;
+    private ManualDetailDialog detailDialog;
 
     @Override
     public void onAttach(Context context) {
@@ -137,16 +142,17 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                         Snackbar.make(recyclerMeasure, R.string.permission_expired, Snackbar.LENGTH_LONG).show();
                     } else {
                         if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
-                            ManualMeasureDialog dialog = new ManualMeasureDialog(context);
-                            dialog.setManualMeasureListener(MeasuresDataFragment.this);
-                            dialog.setCloseListener(new ManualMeasureDialog.OnCloseListener() {
+                            if (measureDialog == null)
+                                measureDialog = new ManualMeasureDialog(context);
+                            measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
+                            measureDialog.setCloseListener(new ManualMeasureDialog.OnCloseListener() {
                                 @Override
                                 public void onClose(boolean result) {
                                     adapterMeasure.notifyItemChanged(position);
                                 }
                             });
-                            dialog.setMeasure(measure);
-                            dialog.show();
+                            measureDialog.setMeasure(measure);
+                            measureDialog.show();
                         } else {
                             //Intent intent = new Intent(getContext(), RecorderActivity.class);
                             Intent intent = new Intent(getContext(), ScanModeActivity.class);
@@ -166,25 +172,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         fabCreate = view.findViewById(R.id.fabCreate);
         fabCreate.setOnClickListener(this);
 
-        fetchRemoteConfig();
-
         return view;
-    }
-
-    private void fetchRemoteConfig() {
-        long cacheExpiration = 3600 * 3;
-        if (AppController.getInstance().firebaseConfig.getInfo().getConfigSettings().isDeveloperModeEnabled()) {
-            cacheExpiration = 0;
-        }
-
-        AppController.getInstance().firebaseConfig.fetch(cacheExpiration)
-                .addOnSuccessListener(aVoid -> {
-                    AppController.getInstance().firebaseConfig.activateFetched();
-                    adapterMeasure.changeManualVisibility();
-                })
-                .addOnFailureListener(e -> {
-                    e.printStackTrace();
-                });
     }
 
     public void addMeasure(Measure measure) {
@@ -211,9 +199,10 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             @Override
             public void onClick(DialogInterface d, int which) {
                 if (which == 0) {
-                    ManualMeasureDialog dialog = new ManualMeasureDialog(context);
-                    dialog.setManualMeasureListener(MeasuresDataFragment.this);
-                    dialog.show();
+                    if (measureDialog == null)
+                        measureDialog = new ManualMeasureDialog(context);
+                    measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
+                    measureDialog.show();
                 } else if (which == 1) {
                     //Intent intent = new Intent(getContext(), RecorderActivity.class);
                     Intent intent = new Intent(getContext(), ScanModeActivity.class);
@@ -222,7 +211,12 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                 }
             }
         });
-        builder.show();
+        try {
+            builder.show();
+        } catch (RuntimeException e) {
+            Toast.makeText(context, "Sorry, something wrong", Toast.LENGTH_SHORT).show();
+            Crashlytics.log(0, "measure fragment", e.getMessage());
+        }
     }
 
     @Override
@@ -246,10 +240,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onMeasureSelect(Measure measure) {
-        ManualMeasureDialog dialog = new ManualMeasureDialog(context);
-        dialog.setManualMeasureListener(MeasuresDataFragment.this);
-        dialog.setMeasure(measure);
-        dialog.setEditable(false);
-        dialog.show();
+        if (detailDialog == null)
+            detailDialog = new ManualDetailDialog(context);
+        detailDialog.setMeasure(measure);
+        detailDialog.show();
     }
 }
