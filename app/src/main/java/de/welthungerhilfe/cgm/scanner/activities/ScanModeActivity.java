@@ -215,6 +215,7 @@ public class ScanModeActivity extends AppCompatActivity {
                 .addToBackStack(null)
                 .commit();
     }
+  
     @OnClick(R.id.btnScanComplete)
     void completeScan(Button btnScanComplete) {
         completeScan();

@@ -43,6 +43,7 @@ import android.widget.Toast;
 import com.bumptech.glide.util.Util;
 import com.crashlytics.android.Crashlytics;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;

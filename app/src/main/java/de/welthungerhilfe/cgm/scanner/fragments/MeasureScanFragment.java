@@ -597,6 +597,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                                 // TODO save files to local storage
                                 String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
                                         mode + "_" + currentTangoImageBuffer.timestamp + ".jpg";
+
                                 File artefactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
                                 FileLog log = new FileLog();
                                 log.setId(AppController.getInstance().getArtefactId("scan-rgb", mNowTime));
