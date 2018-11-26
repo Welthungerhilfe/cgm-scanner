@@ -18,17 +18,12 @@
 
 package de.welthungerhilfe.cgm.scanner.activities;
 
-import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
-import android.app.SearchManager;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -37,9 +32,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -53,8 +46,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
@@ -62,10 +55,6 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
@@ -78,9 +67,12 @@ import com.orhanobut.dialogplus.ViewHolder;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -88,7 +80,6 @@ import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerDataAdapter;
-import de.welthungerhilfe.cgm.scanner.delegators.SwipeViewActions;
 import de.welthungerhilfe.cgm.scanner.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
@@ -105,8 +96,7 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.viewmodels.PersonListViewModel;
 import de.welthungerhilfe.cgm.scanner.views.SwipeView;
 
-public class MainActivity extends BaseActivity implements RecyclerDataAdapter.OnPersonDetail, DateRangePickerDialog.Callback, EventListener<QuerySnapshot> {
-    private final String TAG = MainActivity.class.getSimpleName();
+public class MainActivity extends BaseActivity implements RecyclerDataAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
     private final int REQUEST_LOCATION = 0x1000;
     private final int REQUEST_CAMERA = 0x1001;
 
@@ -114,8 +104,8 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     private final int PERMISSION_STORAGE = 0x1003;
 
     private int sortType = 0;
+    private ArrayList<Integer> filters = new ArrayList<>();
     private int diffDays = 0;
-    private ArrayList<Person> personList = new ArrayList<>();
 
     private File mFileTemp;
 
@@ -136,127 +126,21 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         */
     }
 
-    @OnClick(R.id.txtSort)
-    void doSort(TextView txtSort) {
-        ViewHolder viewHolder = new ViewHolder(R.layout.dialog_sort);
-        DialogPlus sortDialog = DialogPlus.newDialog(MainActivity.this)
-                .setContentHolder(viewHolder)
-                .setCancelable(true)
-                .setInAnimation(R.anim.abc_fade_in)
-                .setOutAnimation(R.anim.abc_fade_out)
-                .setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(DialogPlus dialog, View view) {
-                        switch (view.getId()) {
-                            case R.id.rytSortDate:
-                                dialog.getHolderView().findViewById(R.id.imgSortDate).setVisibility(View.VISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortLocation).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortWasting).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortStunting).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortClear).setVisibility(View.INVISIBLE);
-                                dialog.dismiss();
-
-                                doSortByDate();
-                                break;
-                            case R.id.rytSortLocation:
-                                dialog.getHolderView().findViewById(R.id.imgSortDate).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortLocation).setVisibility(View.VISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortWasting).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortStunting).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortClear).setVisibility(View.INVISIBLE);
-                                dialog.dismiss();
-
-                                doSortByLocation();
-                                break;
-                            case R.id.rytSortWasting:
-                                dialog.getHolderView().findViewById(R.id.imgSortDate).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortLocation).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortWasting).setVisibility(View.VISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortStunting).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortClear).setVisibility(View.INVISIBLE);
-
-                                txtSortCase.setText(R.string.wasting_weight_height);
-                                dialog.dismiss();
-
-                                doSortByWasting();
-                                break;
-                            case R.id.rytSortStunting:
-                                dialog.getHolderView().findViewById(R.id.imgSortDate).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortLocation).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortWasting).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortStunting).setVisibility(View.VISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortClear).setVisibility(View.INVISIBLE);
-
-                                txtSortCase.setText(R.string.stunting_height_age);
-                                dialog.dismiss();
-
-                                doSortByStunting();
-                                break;
-                            case R.id.rytSortClear:
-                                dialog.getHolderView().findViewById(R.id.imgSortDate).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortLocation).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortWasting).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortStunting).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgSortClear).setVisibility(View.VISIBLE);
-
-                                txtSortCase.setText(R.string.no_filter);
-                                dialog.dismiss();
-
-                                clearFilters();
-                                break;
-                        }
-                    }
-                })
-                .create();
-        TextView txtSortDate = sortDialog.getHolderView().findViewById(R.id.txtSortDate);
-        txtSortDate.setText(getResources().getString(R.string.last_days, diffDays));
-
-        TextView txtSortLocation = sortDialog.getHolderView().findViewById(R.id.txtSortLocation);
-        if (session.getLocation().getAddress().equals("")) {
-            txtSortLocation.setText(R.string.last_location_error);
-        } else {
-            txtSortLocation.setText(session.getLocation().getAddress());
-        }
-
-        ImageView imgSortDate = sortDialog.getHolderView().findViewById(R.id.imgSortDate);
-        ImageView imgSortLocation = sortDialog.getHolderView().findViewById(R.id.imgSortLocation);
-        ImageView imgSortWasting = sortDialog.getHolderView().findViewById(R.id.imgSortWasting);
-        ImageView imgSortStunting = sortDialog.getHolderView().findViewById(R.id.imgSortStunting);
-        ImageView imgSortClear = sortDialog.getHolderView().findViewById(R.id.imgSortClear);
-        switch (sortType) {
-            case 0:
-                imgSortClear.setVisibility(View.VISIBLE);
-                break;
-            case 1:
-                imgSortDate.setVisibility(View.VISIBLE);
-                break;
-            case 2:
-                imgSortLocation.setVisibility(View.VISIBLE);
-                break;
-            case 3:
-                imgSortWasting.setVisibility(View.VISIBLE);
-                break;
-            case 4:
-                imgSortStunting.setVisibility(View.VISIBLE);
-                break;
-        }
-
-        sortDialog.show();
-    }
-
     @BindView(R.id.recyclerData)
     RecyclerView recyclerData;
     RecyclerDataAdapter adapterData;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+    @BindView(R.id.searchbar)
+    Toolbar searchbar;
     @BindView(R.id.drawer)
     DrawerLayout drawerLayout;
     @BindView(R.id.navMenu)
     NavigationView navMenu;
-    @BindView(R.id.txtSortCase)
-    TextView txtSortCase;
-    @BindView(R.id.txtNoPerson)
-    TextView txtNoPerson;
+    @BindView(R.id.lytNoPerson)
+    LinearLayout lytNoPerson;
+    @BindView(R.id.searchview)
+    SearchView searchView;
 
     private ActionBarDrawerToggle mDrawerToggle;
 
@@ -280,23 +164,23 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         setupActionBar();
         setupRecyclerView();
 
-        txtSortCase.setText(getResources().getString(R.string.last_scans, 0));
+        //txtSortCase.setText(getResources().getString(R.string.last_scans, 0));
 
-        showProgressDialog();
+        //showProgressDialog();
+
+        adapterData = new RecyclerDataAdapter(this);
+        adapterData.setPersonDetailListener(this);
+        recyclerData.setAdapter(adapterData);
+        recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         viewModel.getObservablePersonList().observe(this, personList->{
             if (personList.size() == 0) {
-                txtNoPerson.setVisibility(View.VISIBLE);
-                recyclerData.setVisibility(View.GONE);
+                lytNoPerson.setVisibility(View.VISIBLE);
             } else {
-                txtNoPerson.setVisibility(View.GONE);
-                recyclerData.setVisibility(View.VISIBLE);
+                lytNoPerson.setVisibility(View.GONE);
 
-                adapterData = new RecyclerDataAdapter(this, personList);
-                adapterData.setPersonDetailListener(this);
-                recyclerData.setAdapter(adapterData);
-                recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                adapterData.resetData(personList);
             }
         });
 
@@ -313,6 +197,34 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         startService(new Intent(this, FileLogMonitorService.class));
 
         fetchRemoteConfig();
+
+        saveFcmToken();
+    }
+
+    public void onNewIntent(Intent intent) {
+        if (adapterData != null)
+            adapterData.notifyDataSetChanged();
+    }
+
+    private void saveFcmToken() {
+        String token = session.getFcmToken();
+        String device = Utils.getAndroidID(getContentResolver());
+        if (token != null && !session.isFcmSaved()) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("user", AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+            data.put("device", device);
+            data.put("token", token);
+
+            AppController.getInstance().firebaseFirestore.collection("fcm_tokens")
+                    .document(device)
+                    .set(data)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            session.setFcmSaved(true);
+                        }
+                    });
+        }
     }
 
     private void fetchRemoteConfig() {
@@ -338,7 +250,10 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.menuHome:
+                    case R.id.menuTutorial:
+                        Intent intent = new Intent(MainActivity.this, TutorialActivity.class);
+                        intent.putExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, true);
+                        startActivity(intent);
                         break;
                     case R.id.menuSettings:
                         startActivity(new Intent(MainActivity.this, SettingsActivity.class));
@@ -366,11 +281,13 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     }
 
     private void setupActionBar() {
+        searchbar.setVisibility(View.GONE);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
         actionBar.setTitle(R.string.title_scans);
+        invalidateOptionsMenu();
 
         mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close) {
             public void onDrawerClosed(View view) {
@@ -383,6 +300,45 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         };
 
         drawerLayout.addDrawerListener(mDrawerToggle);
+    }
+
+    private void openSearchBar() {
+        searchbar.setVisibility(View.VISIBLE);
+        setSupportActionBar(searchbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+        invalidateOptionsMenu();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                filters.add(4);
+                adapterData.setSearchQuery(query);
+                doFilter();
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
+        ImageView closeButton = searchView.findViewById(R.id.search_close_btn);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchView.setQuery("", false);
+                if (filters.contains(4))
+                    filters.removeAll(Arrays.asList(4));
+                adapterData.setSearchQuery("");
+                doFilter();
+            }
+        });
+
+        ImageView magImage = searchView.findViewById(R.id.search_mag_icon);
+        magImage.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
     }
 
     private void setupRecyclerView() {
@@ -460,37 +416,24 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    private void doSortByDate() {
-        sortType = 1;
+    private void doFilter() {
+        adapterData.doFilter(filters);
+    }
 
+    private void doSort() {
+        adapterData.doSort(sortType);
+    }
+
+    private void doFilterByDate() {
         DateRangePickerDialog dateRangePicker = new DateRangePickerDialog();
         dateRangePicker.setCallback(this);
         dateRangePicker.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
         dateRangePicker.show(getFragmentManager(), "DATE_RANGE_PICKER");
     }
 
-    private void doSortByLocation() {
-        sortType = 2;
-
+    private void doFilterByLocation() {
         Intent intent = new Intent(MainActivity.this, LocationSearchActivity.class);
         startActivityForResult(intent, REQUEST_LOCATION);
-    }
-
-    private void doSortByWasting() {
-        sortType = 3;
-
-        adapterData.setWastingFilter();
-    }
-
-    private void doSortByStunting() {
-        sortType = 4;
-
-        adapterData.setStuntingFilter();
-    }
-
-    private void clearFilters() {
-        sortType = 0;
-        adapterData.clearFitlers();
     }
 
     private void iterateLocalFiles(File target) {
@@ -536,49 +479,127 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         }
     }
 
-    /*
-    private void checkLocalFiles() {
-        File root = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
-        File[] qrCodes = root.listFiles();
-        for (File qrCode : qrCodes) {
+    private void checkDeletedRecords() {
+        new OfflineTask().deleteRecords(session.getSyncTimestamp());
+    }
 
-            if (qrCode.isDirectory()) {
-                File[] measurements = qrCode.listFiles();
+    private void openSort() {
+        ViewHolder viewHolder = new ViewHolder(R.layout.dialog_sort);
+        DialogPlus sortDialog = DialogPlus.newDialog(MainActivity.this)
+                .setContentHolder(viewHolder)
+                .setCancelable(true)
+                .setInAnimation(R.anim.abc_fade_in)
+                .setOutAnimation(R.anim.abc_fade_out)
+                .setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(DialogPlus dialog, View view) {
+                        dialog.dismiss();
 
-                for (File measure : measurements) {
-                    File[] timestamps = measure.listFiles();
+                        switch (view.getId()) {
+                            case R.id.rytFilterData: // own data filter = 1;
+                                if (!filters.contains(1)) {
+                                    filters.add(1);
+                                }
 
-                    for (File timestamp : timestamps) {
-                        File[] types = timestamp.listFiles();
+                                doFilter();
+                                break;
+                            case R.id.rytFilterDate: // date filter = 2;
+                                if (!filters.contains(2)) {
+                                    filters.add(2);
+                                }
 
-                        for (File type : types) {
-                            File[] datas = type.listFiles();
+                                doFilterByDate();
+                                break;
+                            case R.id.rytFilterLocation: // location filter = 3;
+                                if (!filters.contains(3)) {
+                                    filters.add(3);
+                                }
 
-                            for (File data : datas) {
-                                new OfflineTask().getFileLog(data.getPath(), new OfflineTask.OnLoadFileLog() {
-                                    @Override
-                                    public void onLoadFileLog(FileLog log) {
-                                        if (log != null) {
-                                            startService(new Intent(MainActivity.this, FirebaseUploadService.class)
-                                                    .putExtra(FirebaseUploadService.EXTRA_FILE_URI, Uri.fromFile(data))
-                                                    .putExtra(AppConstants.EXTRA_QR, qrCode.getName())
-                                                    .putExtra(AppConstants.EXTRA_SCANTIMESTAMP, timestamp.getName())
-                                                    .putExtra(AppConstants.EXTRA_SCANARTEFACT_SUBFOLDER, AppConstants.STORAGE_CONSENT_URL)
-                                                    .setAction(FirebaseUploadService.ACTION_UPLOAD));
-                                        }
-                                    }
-                                });
-                            }
+                                doFilterByLocation();
+
+                                break;
+                            case R.id.rytFilterClear:
+                                filters.clear();
+
+                                doFilter();
+                                break;
+                            case R.id.rytSortDate: // date sort = 1;
+                                sortType = 1;
+
+                                doSort();
+                                break;
+                            case R.id.rytSortLocation: // date sort = 2;
+                                sortType = 2;
+
+                                doSort();
+                                break;
+                            case R.id.rytSortWasting: // wasting sort = 3;
+                                sortType = 3;
+
+                                doSort();
+                                break;
+                            case R.id.rytSortStunting: // stunting sort = 4;
+                                sortType = 4;
+
+                                doSort();
+                                break;
                         }
                     }
+                })
+                .create();
+        TextView txtFilterDate = sortDialog.getHolderView().findViewById(R.id.txtFilterDate);
+        txtFilterDate.setText(getResources().getString(R.string.last_days, diffDays));
+
+        TextView txtFilterLocation = sortDialog.getHolderView().findViewById(R.id.txtFilterLocation);
+        if (session.getLocation().getAddress().equals("")) {
+            txtFilterLocation.setText(R.string.last_location_error);
+        } else {
+            txtFilterLocation.setText(session.getLocation().getAddress());
+        }
+
+        ImageView imgFilterData = sortDialog.getHolderView().findViewById(R.id.imgFilterData);
+        ImageView imgFilterDate = sortDialog.getHolderView().findViewById(R.id.imgFilterDate);
+        ImageView imgFilterLocation = sortDialog.getHolderView().findViewById(R.id.imgFilterLocation);
+        ImageView imgFilterClear = sortDialog.getHolderView().findViewById(R.id.imgFilterClear);
+        ImageView imgSortDate = sortDialog.getHolderView().findViewById(R.id.imgSortDate);
+        ImageView imgSortLocation = sortDialog.getHolderView().findViewById(R.id.imgSortLocation);
+        ImageView imgSortWasting = sortDialog.getHolderView().findViewById(R.id.imgSortWasting);
+        ImageView imgSortStunting = sortDialog.getHolderView().findViewById(R.id.imgSortStunting);
+
+        if (filters.size() == 0) {
+            imgFilterData.setVisibility(View.INVISIBLE);
+            imgFilterDate.setVisibility(View.INVISIBLE);
+            imgFilterLocation.setVisibility(View.INVISIBLE);
+            imgFilterClear.setVisibility(View.VISIBLE);
+        } else {
+            imgFilterClear.setVisibility(View.INVISIBLE);
+            for (int i = 0; i < filters.size(); i++) {
+                if (filters.get(i) == 1) {
+                    imgFilterData.setVisibility(View.VISIBLE);
+                } else if (filters.get(i) == 2) {
+                    imgFilterDate.setVisibility(View.VISIBLE);
+                } else if (filters.get(i) == 3) {
+                    imgFilterLocation.setVisibility(View.VISIBLE);
                 }
             }
         }
-    }
-    */
 
-    private void checkDeletedRecords() {
-        new OfflineTask().deleteRecords(session.getSyncTimestamp());
+        switch (sortType) {
+            case 1:
+                imgSortDate.setVisibility(View.VISIBLE);
+                break;
+            case 2:
+                imgSortLocation.setVisibility(View.VISIBLE);
+                break;
+            case 3:
+                imgSortWasting.setVisibility(View.VISIBLE);
+                break;
+            case 4:
+                imgSortStunting.setVisibility(View.VISIBLE);
+                break;
+        }
+
+        sortDialog.show();
     }
 
     @Override
@@ -597,61 +618,40 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             endDate = startDate + (3600 * 24 - 1) * 1000;
         }
 
-        txtSortCase.setText(getResources().getString(R.string.last_scans, diffDays));
         adapterData.setDateFilter(startDate, endDate);
-    }
-
-    @Override
-    public void onEvent(QuerySnapshot snapshot, FirebaseFirestoreException e) {
-        List<DocumentChange> documents = snapshot.getDocumentChanges();
-        for (DocumentChange change: documents) {
-            Person person = change.getDocument().toObject(Person.class);
-            if (change.getType().equals(DocumentChange.Type.ADDED)) {
-                adapterData.addPerson(person);
-            } else if (change.getType().equals(DocumentChange.Type.MODIFIED)) {
-                adapterData.updatePerson(person);
-            } else if (change.getType().equals(DocumentChange.Type.REMOVED)) {
-                adapterData.removePerson(person);
-            }
-            if (adapterData.getItemCount() == 0) {
-                recyclerData.setVisibility(View.GONE);
-                txtNoPerson.setVisibility(View.VISIBLE);
-            } else {
-                recyclerData.setVisibility(View.VISIBLE);
-                txtNoPerson.setVisibility(View.GONE);
-            }
-        }
+        doFilter();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.menu_search, menu);
 
-        MenuItem searchItem = menu.findItem(R.id.actionSearch);
-        SearchManager searchManager = (SearchManager) MainActivity.this.getSystemService(Context.SEARCH_SERVICE);
-
-        SearchView searchView = null;
-        if (searchItem != null) {
-            searchView = (SearchView) searchItem.getActionView();
-        }
-        if (searchView != null) {
-            searchView.setSearchableInfo(searchManager.getSearchableInfo(MainActivity.this.getComponentName()));
-            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    adapterData.search(query);
-                    return false;
-                }
-
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    return false;
-                }
-            });
+        if (searchbar.getVisibility() == View.VISIBLE) {
+            menuInflater.inflate(R.menu.menu_search, menu);
+        } else {
+            menuInflater.inflate(R.menu.menu_tool, menu);
         }
 
-        return super.onCreateOptionsMenu(menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        if (menuItem.getItemId() == R.id.actionSearch) {
+            openSearchBar();
+        } else if (menuItem.getItemId() == R.id.actionQr) {
+            startActivity(new Intent(MainActivity.this, QRScanActivity.class));
+        } else if (menuItem.getItemId() == R.id.actionFilter) {
+            openSort();
+        } else if (menuItem.getItemId() == android.R.id.home) {
+            if (searchbar.getVisibility() == View.VISIBLE) {
+                setupActionBar();
+            } else {
+                finish();
+            }
+        }
+
+        return super.onOptionsItemSelected(menuItem);
     }
 
     @Override
@@ -659,9 +659,11 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         if (requestCode == PERMISSION_CAMERA && grantResults.length > 0 && grantResults[0] >= 0 && grantResults[1] >= 0) {
             takePhoto();
         } else if (requestCode == PERMISSION_STORAGE && grantResults.length > 0 && grantResults[0] >= 0) {
+            /*
             File root = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
             iterateLocalFiles(root);
             checkDeletedRecords();
+            */
         }
     }
 
@@ -671,6 +673,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             int radius = result.getIntExtra(AppConstants.EXTRA_RADIUS, 0);
 
             adapterData.setLocationFilter(session.getLocation(), radius);
+            doFilter();
         } else if (reqCode == REQUEST_CAMERA) {
             if (resCode == RESULT_OK) {
                 Uri mImageUri = Uri.fromFile(mFileTemp);

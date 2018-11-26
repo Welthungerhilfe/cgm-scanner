@@ -42,12 +42,15 @@
     <string name="lang_german">जर्मन</string>
     <string name="lang_hindi">हिंदी</string>
 
+    <string name="filter">Filter</string>
     <string name="sortby">निम्न के अनुसार क्रमबद्ध करें</string>
     <string name="date">तारीख</string>
     <string name="last_days">अंतिम %1$d दिन</string>
     <string name="last_scans">अंतिम स्कैन (%1$d दिन)</string>
     <string name="label_location">स्थान</string>
     <string name="last_location_error">अंतिम स्थान उपलब्ध नहीं है</string>
+    <string name="sort_date">old person on top</string>
+    <string name="sort_location">nearest person on top</string>
     <string name="wasting">वेस्टिंग</string>
     <string name="wasting_weight_height">सबसे कम वजन/ऊंचाई शीर्ष पर</string>
     <string name="stunting">स्टंटिंग</string>
@@ -56,6 +59,8 @@
     <string name="clear_filters">सभी फिल्टर हटा दे</string>
     <string name="no_persons">कोई पंजीकृत व्यक्ति नहीं है</string>
     <string name="circuit">आसपास की खोज</string>
+    <string name="own_data">Only own data</string>
+    <string name="created_by_self">show only children created by myself</string>
 
     <string name="manual_measure">मैनुअल नाप</string>
     <string name="machine_measure">मशीन नाप</string>
@@ -68,6 +73,8 @@
     <string name="measure_oedema">07 ओएडीमा</string>
 
     <string name="start_scan">स्कैन शुरू करें</string>
+    <string name="retake_scan">Retake Scan</string>
+    <string name="complete_scan">Complete Scan</string>
     <string name="axis_y">वाई अक्ष</string>
     <string name="axis_x">एक्स अक्ष</string>
     <string name="username">यूजरनेम</string>
@@ -139,7 +146,7 @@
     <string name="tab_measures">नाप</string>
     <string name="tab_growth">विकास</string>
 
-    <string name="title_scans">सभी स्कैन</string>
+    <string name="title_scans">Scans-Scheduled</string>
     <string name="title_image_view">इमेज व्यू</string>
     <string name="title_settings">सेटिंग्स</string>
     <string name="title_add_measure">नाप जोड़ें</string>
@@ -185,4 +192,41 @@
     <string name="mode_lying">Lying down</string>
 
     <string name="capture_inside">Capture the child inside of outline</string>
+    <string name="tutorial11">1-1. Scan the QR code to create or find the child\'s profile</string>
+    <string name="tutorial12">1-2. Fill in their personal details if the child has not been scanned before</string>
+    <string name="next_tutorial">next</string>
+    <string name="tutorial1">How do I create a new profile for the child?</string>
+    <string name="tutorial2">How do I scan a child that is standing up?</string>
+    <string name="tutorial21">2-1. Chose \"Standing up\" mode before starting to scan child</string>
+    <string name="tutorial22">2-2. Take three 5 second scans, from a front view, a back view and a 360\' view</string>
+    <string name="tutorial3">How do I scan a child that is lying down?</string>
+    <string name="tutorial31">3-1. Choose \"Lying down\" mode before starting to scan the child</string>
+    <string name="tutorial32">3-2. Take three 5 second scans, from a front view, a back view and from left side to right side</string>
+    <string name="tutorial4">How do I view the results of a scan?</string>
+    <string name="tutorial41">4-1. Visualise the results of the scan measurements on different graphs</string>
+    <string name="tutorial42">4-2. Quickly and easily identify whether the child is likely to be malnourished</string>
+    <string name="standup">Try to keep the child against a clear background and keep the whole child within the camera view</string>
+    <string name="lyedown">Try to keep the child against a clear background and keep the whole child within the camera view</string>
+    <string name="done">Done</string>
+    <string name="congratulation">Congratulations!!</string>
+    <string name="finish_tutorial">You finished CGM Scanner Tutorial</string>
+    <string name="get_start">Get Started</string>
+    <string name="menuScans">Scans</string>
+    <string name="menuTutorial">Tutorial</string>
+    <string name="menuHelp">Help</string>
+    <string name="menuSettings">Settings</string>
+    <string name="menuLogout">Logout</string>
+    <string name="remote_config">Remote Config</string>
+    <string name="remote_debug">Debug</string>
+    <string name="remote_sync_period">Sync Period</string>
+    <string name="remote_allow_delete">Allow Delete</string>
+    <string name="remote_allow_edit">Allow Edit</string>
+    <string name="remote_edit_time">Time To Allow Editing</string>
+    <string name="remote_measure_visibility">Measure Visibility</string>
+    <string name="menu_qr">QR Search</string>
+    <string name="menu_search">Search</string>
+    <string name="menu_filter">Sort and Filter</string>
+    <string name="login">Login</string>
+    <string name="no_scans">No Scans :/</string>
+    <string name="add_scans">To start scanning, tap [+] button</string>
 </resources>

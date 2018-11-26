@@ -21,18 +21,26 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="160dp"
-    android:background="@drawable/ic_launcher_background">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#339934">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:src="@drawable/logo"
+        android:scaleType="fitStart"/>
 
     <TextView
         android:id="@+id/txtUsername"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginBottom="10dp"
         android:layout_gravity="bottom"
         android:text="@string/username"
         android:textColor="@color/colorWhite"
-        android:textSize="24sp"/>
+        android:textSize="20sp"/>
 
 </LinearLayout>

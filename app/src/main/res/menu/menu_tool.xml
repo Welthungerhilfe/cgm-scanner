@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Child Growth Monitor - quick and accurate data on malnutrition
   ~ Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com> for Welthungerhilfe
@@ -17,16 +18,21 @@
   ~
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="de.welthungerhilfe.cgm.scanner.fragments.ConsentScanFragment">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/actionQr"
+        android:title="@string/menu_qr"
+        android:icon="@drawable/qr"
+        app:showAsAction="always"/>
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+    <item
+        android:id="@+id/actionSearch"
+        android:title="@string/menu_search"
+        android:icon="@drawable/search"
+        app:showAsAction="always" />
 
-</FrameLayout>
+    <item android:id="@+id/actionFilter"
+        android:title="@string/menu_filter"
+        android:icon="@drawable/filter"
+        app:showAsAction="always"/>
+</menu>

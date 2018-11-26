@@ -71,6 +71,7 @@ public class OverlaySurface extends SurfaceView
     private int mMode = NO_OVERLAY;
 
     Paint mPaint = new Paint();
+    Paint greyPaint = new Paint();
 
     public OverlaySurface(Context context) {
         super(context);
@@ -78,15 +79,18 @@ public class OverlaySurface extends SurfaceView
         holder = getHolder();
         holder.addCallback(this);
         holder.setFormat(PixelFormat.TRANSLUCENT);
+
+        greyPaint.setARGB(102, 0, 0, 0);
     }
 
     public OverlaySurface(Context context, AttributeSet attrs) {
-
         super(context, attrs);
         this.mContext = context;
         holder = getHolder();
         holder.addCallback(this);
         holder.setFormat(PixelFormat.TRANSLUCENT);
+
+        greyPaint.setARGB(102, 0, 0, 0);
     }
 
     public OverlaySurface(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -95,6 +99,8 @@ public class OverlaySurface extends SurfaceView
         holder = getHolder();
         holder.addCallback(this);
         holder.setFormat(PixelFormat.TRANSLUCENT);
+
+        greyPaint.setARGB(102, 0, 0, 0);
     }
 
     public OverlaySurface(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -103,6 +109,8 @@ public class OverlaySurface extends SurfaceView
         holder = getHolder();
         holder.addCallback(this);
         holder.setFormat(PixelFormat.TRANSLUCENT);
+
+        greyPaint.setARGB(102, 0, 0, 0);
     }
 
     public void setMode (int mode)
@@ -134,8 +142,8 @@ public class OverlaySurface extends SurfaceView
 
         //mBabyOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.scan_outline_dots);
         //mInfantOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.infant_outline);
-        mBabyOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.body_frame_down);
-        mInfantOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.body_frame);
+        mBabyOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.body_frame_down_new);
+        mInfantOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.body_frame_new);
 
         isReadyToDraw = true;
     }
@@ -185,9 +193,58 @@ public class OverlaySurface extends SurfaceView
                 //RectF dstRectF = new RectF(left,top,right,bottom);
                 RectF dstRectF = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
 
+                //RectF dstRectF = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
+
                 setConfidenceColor();
 
                 canvas.drawBitmap(mBabyOverlay, srcRect, dstRectF, mPaint);
+
+                canvas.drawRect(new RectF(0, 0, canvas.getWidth(), top), greyPaint);
+                canvas.drawRect(new RectF(0, bottom, canvas.getWidth(), canvas.getHeight()), greyPaint);
+                canvas.drawRect(new RectF(0, top, left, bottom), greyPaint);
+                canvas.drawRect(new RectF(right, top, canvas.getWidth(), bottom), greyPaint);
+
+                surface.unlockCanvasAndPost(canvas);
+            }
+        } catch (Exception e) {
+            Crashlytics.log(0, "user login: ", String.format("drawBabyOverlay on Surface at %s", Utils.beautifyDateTime(new Date())));
+        }
+    }
+
+    private void drawBabyDownOverlay() {
+
+        Surface surface = holder.getSurface();
+
+        try {
+            Canvas canvas = surface.lockCanvas(null);
+
+            if (canvas != null) {
+                // clear screen before redrawing
+                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+
+                // Source is the whole bitmap
+                Rect srcRect = new Rect(0, 0, mBabyOverlay.getWidth(), mInfantOverlay.getHeight());
+
+                // destination is the where to draw it
+                // will be drawn in the center and scaled by the distance
+                // because distance to take measurements should be around 1 meter
+                float left = ((canvas.getWidth() - mInfantOverlay.getWidth() * mDistance) / 2.0f);
+                float top = ((canvas.getHeight() - mInfantOverlay.getHeight() * mDistance) / 2.0f);
+                float right = (mInfantOverlay.getWidth() * mDistance )+left;
+                float bottom = (mInfantOverlay.getHeight() * mDistance) +top;
+                RectF dstRectF = new RectF(left,top,right,bottom);
+
+                //RectF dstRectF = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
+
+                setConfidenceColor();
+
+                canvas.drawBitmap(mInfantOverlay, srcRect, dstRectF, mPaint);
+
+                canvas.drawRect(new RectF(0, 0, canvas.getWidth(), top), greyPaint);
+                canvas.drawRect(new RectF(0, bottom, canvas.getWidth(), canvas.getHeight()), greyPaint);
+                canvas.drawRect(new RectF(0, top, left, bottom), greyPaint);
+                canvas.drawRect(new RectF(right, top, canvas.getWidth(), bottom), greyPaint);
+
                 surface.unlockCanvasAndPost(canvas);
             }
         } catch (Exception e) {
@@ -254,8 +311,9 @@ public class OverlaySurface extends SurfaceView
             float top = 200;
             float right = ((srcWidth * mDistance )+left)*2;
             float bottom = ((srcHeight*mDistance) +top)*2;
-            //RectF dstRectF = new RectF(left,top,right,bottom);
-            RectF dstRectF = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
+
+            RectF dstRectF = new RectF(left,top,right,bottom);
+            //RectF dstRectF = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
 
             setConfidenceColor();
 
@@ -289,6 +347,10 @@ public class OverlaySurface extends SurfaceView
                 float bottom = (mInfantOverlay.getHeight()*infantScaling) +top;
                 //RectF dstRectF = new RectF(left,top,right,bottom);
                 RectF dstRectF = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
+
+                setConfidenceColor();
+
+                //RectF dstRectF = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
 
                 setConfidenceColor();
 
@@ -340,7 +402,8 @@ public class OverlaySurface extends SurfaceView
                     drawInfantOverlay();
                 }
                 else if (mMode== INFANT_CLOSE_DOWN_UP_OVERLAY) {
-                    drawInfantCloseDownUpOverlay();
+                    //drawInfantCloseDownUpOverlay();
+                    drawBabyDownOverlay();
                 } else {
                     drawNoOverlay();
                 }

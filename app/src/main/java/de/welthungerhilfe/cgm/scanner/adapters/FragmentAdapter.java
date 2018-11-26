@@ -20,15 +20,16 @@
 package de.welthungerhilfe.cgm.scanner.adapters;
 
 
-
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.support.v13.app.FragmentPagerAdapter;
+import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FragmentAdapter extends FragmentPagerAdapter {
+public class FragmentAdapter extends FragmentStatePagerAdapter {
     private final List<Fragment> mFragments = new ArrayList<>();
     private final List<String> mFragmentTitles = new ArrayList<>();
 
@@ -42,14 +43,13 @@ public class FragmentAdapter extends FragmentPagerAdapter {
     }
 
     @Override
-    public Fragment getItem(int position) {
-        return mFragments.get(position);
-    }
-
-
-    @Override
     public int getCount() {
         return mFragments.size();
+    }
+
+    @Override
+    public Fragment getItem(int position) {
+        return mFragments.get(position);
     }
 
     @Override

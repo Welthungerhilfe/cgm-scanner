@@ -63,6 +63,12 @@ public class AppConstants {
     public static final String EXTRA_SCANTIMESTAMP = "extra_scantimestamp";
     public static final String EXTRA_SCANARTEFACT_SUBFOLDER = "extra_scanartefact_subfolder";
     public static final String EXTRA_ARTEFACT = "extra_artefact";
+    public static final String EXTRA_TUTORIAL_AGAIN = "extra_tutorial_again";
+    public static final String EXTRA_RESULT_ID = "extra_result_id";
+    public static final String EXTRA_RESULT_HEIGHT = "extra_result_height";
+    public static final String EXTRA_RESULT_WEIGHT = "extra_result_weight";
+    public static final String EXTRA_RESULT_MUAC = "extra_result_muac";
+    public static final String EXTRA_RESULT_HEAD = "extra_result_head";
 
     public static final String PARAM_AUTHTOKEN_TYPE = "authtoken_type";
     public static final String PARAM_AUTH_NAME = "auth_name";
@@ -102,5 +108,4 @@ public class AppConstants {
     public static final int BABY_FULL_BODY_BACK_SCAN = 108;
     public static final int BABY_FULL_BODY_BACK_RECORDING = 109;
     public static final int STANDING_INFANT_SCAN = 200;
-
 }

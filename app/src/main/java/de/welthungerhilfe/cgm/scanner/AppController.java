@@ -27,6 +27,7 @@ import android.arch.persistence.room.migration.Migration;
 import android.content.Context;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
+import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 //import com.amitshekhar.DebugDB;
@@ -115,6 +116,8 @@ public class AppController extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
 
         CrashlyticsCore core = new CrashlyticsCore
                 .Builder()
@@ -223,5 +226,9 @@ public class AppController extends Application {
 
     public String getArtefactId(String type) {
         return Utils.getAndroidID(getContentResolver()) + "_" + type + "_" + Utils.getUniversalTimestamp() + "_" + Utils.getSaltString(16);
+    }
+
+    public String getArtefactId(String type, long timestamp) {
+        return Utils.getAndroidID(getContentResolver()) + "_" + type + "_" + String.valueOf(timestamp) + "_" + Utils.getSaltString(16);
     }
 }

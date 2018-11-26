@@ -39,6 +39,9 @@ public class SessionManager {
     private final String KEY_SYNC_TIMESTAMP = "sync_timestamp";
     private final String KEY_LANGUAGE = "key_language";
     private final String KEY_CONNECTION_TIMESTAMP = "key_connection_timestamp";
+    private final String KEY_TUTORIAL = "key_tutorial";
+    private final String KEY_FCM_TOKEN = "key_fcm_token";
+    private final String KEY_FCM_TOKEN_SAVED = "key_fcm_token_saved";
 
     SharedPreferences pref;
     SharedPreferences.Editor editor;
@@ -105,5 +108,35 @@ public class SessionManager {
 
     public long getConnectionTimestamp() {
         return pref.getLong(KEY_CONNECTION_TIMESTAMP, 0);
+    }
+
+    public void setTutorial(boolean tutorial) {
+        editor.putBoolean(KEY_TUTORIAL, tutorial);
+
+        editor.commit();
+    }
+
+    public boolean getTutorial() {
+        return pref.getBoolean(KEY_TUTORIAL, false);
+    }
+
+    public void setFcmToken(String token) {
+        editor.putString(KEY_FCM_TOKEN, token);
+
+        editor.commit();
+    }
+
+    public String getFcmToken() {
+        return pref.getString(KEY_FCM_TOKEN, null);
+    }
+
+    public void setFcmSaved(boolean saved) {
+        editor.putBoolean(KEY_FCM_TOKEN_SAVED, saved);
+
+        editor.commit();
+    }
+
+    public boolean isFcmSaved() {
+        return pref.getBoolean(KEY_FCM_TOKEN_SAVED, false);
     }
 }

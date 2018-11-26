@@ -21,20 +21,32 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group>
         <item
-            android:id="@+id/menuHome"
-            android:icon="@drawable/menu_home"
-            android:title="Home" />
+            android:id="@+id/menuScans"
+            android:icon="@drawable/menu_scans"
+            android:title="@string/menuScans" />
+    </group>
+    <group>
+        <item
+            android:id="@+id/menuTutorial"
+            android:icon="@drawable/menu_tutorial"
+            android:title="@string/menuTutorial" />
+    </group>
+    <group>
+        <item
+            android:id="@+id/menuHelp"
+            android:icon="@drawable/menu_help"
+            android:title="@string/menuHelp" />
     </group>
     <group>
         <item
             android:id="@+id/menuSettings"
             android:icon="@drawable/menu_settings"
-            android:title="Settings" />
+            android:title="@string/menuSettings" />
     </group>
     <group>
         <item
             android:id="@+id/menuLogout"
             android:icon="@drawable/menu_logout"
-            android:title="Logout"/>
+            android:title="@string/menuLogout"/>
     </group>
 </menu>

@@ -71,8 +71,6 @@ import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.helper.events.LocationResult;
 import de.welthungerhilfe.cgm.scanner.models.Loc;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.tasks.AddressTask;
 
 /**
  * Created by Emerald on 2/20/2018.
