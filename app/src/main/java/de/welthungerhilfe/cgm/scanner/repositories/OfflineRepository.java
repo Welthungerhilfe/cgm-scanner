@@ -59,6 +59,10 @@ public class OfflineRepository {
         return AppController.getInstance().offlineDb.offlineDao().getPersonByQr(qrCode);
     }
 
+    public LiveData<List<Person>> getOwnPersonList(String email) {
+        return AppController.getInstance().offlineDb.offlineDao().getOwnPersons(email);
+    }
+
     public LiveData<List<Person>> getPersonList() {
         return AppController.getInstance().offlineDb.offlineDao().getPersons();
     }

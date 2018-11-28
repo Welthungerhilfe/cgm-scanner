@@ -174,7 +174,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
-        viewModel.getObservablePersonList().observe(this, personList->{
+        viewModel.getObservablePersonList(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail()).observe(this, personList->{
             if (personList.size() == 0) {
                 lytNoPerson.setVisibility(View.VISIBLE);
             } else {

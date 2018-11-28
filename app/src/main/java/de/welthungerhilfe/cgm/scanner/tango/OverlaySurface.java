@@ -43,8 +43,7 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class OverlaySurface extends SurfaceView
-        implements SurfaceHolder.Callback, Runnable {
+public class OverlaySurface extends SurfaceView implements SurfaceHolder.Callback, Runnable {
 
 
     public static final int NO_OVERLAY = 0;
@@ -67,6 +66,7 @@ public class OverlaySurface extends SurfaceView
 
     private float mConfidence = 1.0f;
     private float mDistance = 1.0f;
+    private int mNumPoints = 0;
 
     private int mMode = NO_OVERLAY;
 
@@ -143,7 +143,7 @@ public class OverlaySurface extends SurfaceView
         //mBabyOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.scan_outline_dots);
         //mInfantOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.infant_outline);
         mBabyOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.body_frame_down_new);
-        mInfantOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.body_frame_new);
+        mInfantOverlay = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.infant_frame);
 
         isReadyToDraw = true;
     }
@@ -275,6 +275,7 @@ public class OverlaySurface extends SurfaceView
         ColorMatrix colorMatrix = new ColorMatrix();
         colorMatrix.setSaturation(0f); //Remove Colour
 
+        /*
         if (mConfidence < 0.8 || mDistance <0.6f || mDistance > 1.5f) {
             colorMatrix.set(redColorTransform); //Apply the Red
         }
@@ -285,6 +286,14 @@ public class OverlaySurface extends SurfaceView
         else
         {
             colorMatrix.set(greenColorTransform);
+        }
+        */
+        if (mNumPoints > 36000) {
+            colorMatrix.set(greenColorTransform);
+        } else if (mNumPoints > 30000) {
+            colorMatrix.set(yellowColorTransform);
+        } else {
+            colorMatrix.set(redColorTransform);
         }
 
         ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(colorMatrix);
@@ -386,6 +395,10 @@ public class OverlaySurface extends SurfaceView
             distance = 2.0f;
 
         this.mDistance = distance;
+    }
+
+    public void setNumPoints(int points) {
+        this.mNumPoints = points;
     }
 
     @Override

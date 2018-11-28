@@ -57,7 +57,12 @@ public class PersonListViewModel extends AndroidViewModel {
         return observablePerson;
     }
 
-    public LiveData<List<Person>> getObservablePersonList() {
+    public LiveData<List<Person>> getObservablePersonList(String email) {
+        observablePersonList = OfflineRepository.getInstance().getOwnPersonList(email);
+        return observablePersonList;
+    }
+
+    public LiveData<List<Person>> getObservableOwnPersonList() {
         return observablePersonList;
     }
 

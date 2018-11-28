@@ -45,6 +45,9 @@ public interface OfflineDao {
     @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE deleted=0")
     LiveData<List<Person>> getPersons();
 
+    @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE deleted=0 AND createdBy=:email")
+    LiveData<List<Person>> getOwnPersons(String email);
+
     @Query("SELECT * FROM " + DbConstants.TABLE_PERSON + " WHERE id=:id AND deleted=0")
     LiveData<Person> getPerson(String id);
 

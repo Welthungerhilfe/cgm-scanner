@@ -477,6 +477,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
                 float[] average = TangoUtils.calculateAveragedDepth(pointCloudData.points, pointCloudData.numPoints);
 
+                mOverlaySurfaceView.setNumPoints(pointCloudData.numPoints);
                 mOverlaySurfaceView.setDistance(average[0]);
                 mOverlaySurfaceView.setConfidence(average[1]);
 
