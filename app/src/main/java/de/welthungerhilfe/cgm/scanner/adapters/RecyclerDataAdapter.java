@@ -265,7 +265,7 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
                 @Override
                 public int compare(Person person, Person t1) {
                     if (sortType == 1) {   // Sort by created date
-                        return Long.compare(person.getCreated(), t1.getCreated());
+                        return Long.compare(t1.getCreated(), person.getCreated());
                     } else if (sortType == 2) {   // Sort by distance from me
                         if (currentLoc == null || person.getLastLocation() == null)
                             return  0;

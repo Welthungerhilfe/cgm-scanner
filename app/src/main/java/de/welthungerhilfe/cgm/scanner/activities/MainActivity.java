@@ -174,12 +174,14 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
-        viewModel.getObservablePersonList(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail()).observe(this, personList->{
+        viewModel.getObservablePersonList().observe(this, personList->{
             if (personList.size() == 0) {
                 lytNoPerson.setVisibility(View.VISIBLE);
             } else {
                 lytNoPerson.setVisibility(View.GONE);
 
+                filters.add(1);
+                doFilter();
                 adapterData.resetData(personList);
             }
         });
@@ -493,13 +495,15 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                 .setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(DialogPlus dialog, View view) {
-                        dialog.dismiss();
 
                         switch (view.getId()) {
                             case R.id.rytFilterData: // own data filter = 1;
                                 if (!filters.contains(1)) {
                                     filters.add(1);
                                 }
+
+                                dialog.getHolderView().findViewById(R.id.imgFilterData).setVisibility(View.VISIBLE);
+                                dialog.getHolderView().findViewById(R.id.imgFilterClear).setVisibility(View.INVISIBLE);
 
                                 doFilter();
                                 break;
@@ -508,6 +512,9 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                                     filters.add(2);
                                 }
 
+                                dialog.getHolderView().findViewById(R.id.imgFilterDate).setVisibility(View.VISIBLE);
+                                dialog.getHolderView().findViewById(R.id.imgFilterClear).setVisibility(View.INVISIBLE);
+
                                 doFilterByDate();
                                 break;
                             case R.id.rytFilterLocation: // location filter = 3;
@@ -515,30 +522,41 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                                     filters.add(3);
                                 }
 
-                                doFilterByLocation();
+                                dialog.getHolderView().findViewById(R.id.imgFilterLocation).setVisibility(View.VISIBLE);
+                                dialog.getHolderView().findViewById(R.id.imgFilterClear).setVisibility(View.INVISIBLE);
 
+                                doFilterByLocation();
                                 break;
                             case R.id.rytFilterClear:
                                 filters.clear();
 
+                                dialog.getHolderView().findViewById(R.id.imgFilterData).setVisibility(View.INVISIBLE);
+                                dialog.getHolderView().findViewById(R.id.imgFilterDate).setVisibility(View.INVISIBLE);
+                                dialog.getHolderView().findViewById(R.id.imgFilterLocation).setVisibility(View.INVISIBLE);
+                                dialog.getHolderView().findViewById(R.id.imgFilterClear).setVisibility(View.VISIBLE);
+
                                 doFilter();
                                 break;
                             case R.id.rytSortDate: // date sort = 1;
+                                dialog.dismiss();
                                 sortType = 1;
 
                                 doSort();
                                 break;
                             case R.id.rytSortLocation: // date sort = 2;
+                                dialog.dismiss();
                                 sortType = 2;
 
                                 doSort();
                                 break;
                             case R.id.rytSortWasting: // wasting sort = 3;
+                                dialog.dismiss();
                                 sortType = 3;
 
                                 doSort();
                                 break;
                             case R.id.rytSortStunting: // stunting sort = 4;
+                                dialog.dismiss();
                                 sortType = 4;
 
                                 doSort();
