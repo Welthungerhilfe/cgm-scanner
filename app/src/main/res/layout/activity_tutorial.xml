@@ -177,35 +177,12 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginRight="30dp"
                     android:gravity="center"
-                    android:text="You can refer to the tutorial"
+                    android:text="@string/tutorial5"
                     android:textSize="22sp"
                     android:textColor="@color/colorBlack"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="from"
-                        android:textSize="22sp"
-                        android:textColor="@color/colorBlack"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=" Menu "
-                        android:textSize="22sp"
-                        android:textColor="@color/colorPrimary"
-                        android:textStyle="bold"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="anytime!"
-                        android:textSize="22sp"
-                        android:textColor="@color/colorBlack"/>
-                </LinearLayout>
 
             </LinearLayout>
 
