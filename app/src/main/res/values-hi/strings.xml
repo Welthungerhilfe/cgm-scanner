@@ -6,7 +6,7 @@
     <string name="loading">लोडिंग…</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_blank_fragment">हैलो रिक्त खंड</string>
 
     <string name="validate_user">कृपया उपयोगकर्ता का नाम दर्ज करें</string>
     <string name="validate_password">कृपया पासवर्ड दर्ज करें</string>
@@ -28,9 +28,9 @@
     <string name="cancel">रद्द करें</string>
     <string name="back">वापस जाएं</string>
     <string name="next">सहेजें / सेव</string>
-    <string name="delete">Delete</string>
-    <string name="by">by</string>
-    <string name="retake">Retake</string>
+    <string name="delete">मिटाये</string>
+    <string name="by">द्वारा</string>
+    <string name="retake">फिर से लेना</string>
 
     <string name="about">के बारे में</string>
     <string name="version">संस्करण</string>
@@ -42,15 +42,15 @@
     <string name="lang_german">जर्मन</string>
     <string name="lang_hindi">हिंदी</string>
 
-    <string name="filter">Filter</string>
+    <string name="filter">फ़िल्टर</string>
     <string name="sortby">निम्न के अनुसार क्रमबद्ध करें</string>
     <string name="date">तारीख</string>
     <string name="last_days">अंतिम %1$d दिन</string>
     <string name="last_scans">अंतिम स्कैन (%1$d दिन)</string>
     <string name="label_location">स्थान</string>
     <string name="last_location_error">अंतिम स्थान उपलब्ध नहीं है</string>
-    <string name="sort_date">old person on top</string>
-    <string name="sort_location">nearest person on top</string>
+    <string name="sort_date">सबसे अधिक उम्र का व्यक्ति शीर्ष पर</string>
+    <string name="sort_location">सबसे निकटतम व्यक्ति शीर्ष पर</string>
     <string name="wasting">वेस्टिंग</string>
     <string name="wasting_weight_height">सबसे कम वजन/ऊंचाई शीर्ष पर</string>
     <string name="stunting">स्टंटिंग</string>
@@ -59,8 +59,8 @@
     <string name="clear_filters">सभी फिल्टर हटा दे</string>
     <string name="no_persons">कोई पंजीकृत व्यक्ति नहीं है</string>
     <string name="circuit">आसपास की खोज</string>
-    <string name="own_data">Only own data</string>
-    <string name="created_by_self">show only children created by myself</string>
+    <string name="own_data">केवल स्वमं का डेटा</string>
+    <string name="created_by_self">केवल मेरे द्वारा जोड़े गए बच्चों को दिखाएं</string>
 
     <string name="manual_measure">मैनुअल नाप</string>
     <string name="machine_measure">मशीन नाप</string>
@@ -73,8 +73,8 @@
     <string name="measure_oedema">07 ओएडीमा</string>
 
     <string name="start_scan">स्कैन शुरू करें</string>
-    <string name="retake_scan">Retake Scan</string>
-    <string name="complete_scan">Complete Scan</string>
+    <string name="retake_scan">फिर से स्कैन करे</string>
+    <string name="complete_scan">पूरा स्कैन</string>
     <string name="axis_y">वाई अक्ष</string>
     <string name="axis_x">एक्स अक्ष</string>
     <string name="username">यूजरनेम</string>
@@ -92,10 +92,10 @@
     <string name="label_weight">वजन:</string>
     <string name="label_date">तारीख:</string>
 
-    <string name="abbr_height">h:</string>
-    <string name="abbr_weight">w:</string>
-    <string name="abbr_head">h:</string>
-    <string name="abbr_arm">a:</string>
+    <string name="abbr_height">एच:</string>
+    <string name="abbr_weight">डब्ल्यू :</string>
+    <string name="abbr_head">एच:</string>
+    <string name="abbr_arm">ए :</string>
 
     <string name="unit_km">कि.मी.</string>
     <string name="unit_cm">से.मी.</string>
@@ -113,9 +113,9 @@
     <string name="tooltip_guardian">कृपया अभिभावक का इनपुट दें</string>
     <string name="tooltipe_sex">कृपया लिंग का चयन करें</string>
 
-    <string name="baby_full_body_front_scan_text">1/3. Front</string>
-    <string name="baby_left_right_scan_text">2/3. Left-Right</string>
-    <string name="baby_full_body_back_scan_text">3/3. Back</string>
+    <string name="baby_full_body_front_scan_text">1/3. सामने</string>
+    <string name="baby_left_right_scan_text">2/3. बाएँ दांए</string>
+    <string name="baby_full_body_back_scan_text">3/3। पीछे</string>
     <string name="empty_string"/>
     <!-- drawer -->
     <string name="drawer_open">खोलें</string>
@@ -127,16 +127,16 @@
     <string name="error_network">कृपया अपनी नेटवर्क की स्थिति जांचें। अब आप ऑफ़लाइन हैं।</string>
     <string name="error_login">लॉगिन विफल हुआ</string>
     <string name="error_person_first">कृपया पहले व्यक्ति को पंजीकृत करें</string>
-    <string name="error_location">Could not find matching location.</string>
+    <string name="error_location">मिलान स्थान नहीं मिला।</string>
 
-    <string name="delete_measure">Do you really want to delete this measure data?</string>
-    <string name="delete_person">Do you really want to delete this person data?</string>
+    <string name="delete_measure">क्या आप वास्तव में इस माप डेटा को मिटाना चाहते हैं?</string>
+    <string name="delete_person">क्या आप वास्तव में इस व्यक्ति के डेटा को मिटाना चाहते हैं?</string>
 
-    <string name="field_concealed">concealed</string>
+    <string name="field_concealed">गुप्त</string>
 
-    <string name="permission_delete">Sorry, You don\'t have the rights to delete data</string>
-    <string name="permission_edit">Sorry, You don\'t have the rights to edit data</string>
-    <string name="permission_expired">Sorry, Time to allow editing is expired.</string>
+    <string name="permission_delete">क्षमा करें, आपके पास डेटा हटाने का अधिकार नहीं है</string>
+    <string name="permission_edit">क्षमा करें, आपके पास डेटा संपादित करने का अधिकार नहीं है</string>
+    <string name="permission_expired">क्षमा करें, संपादन की अनुमति देने का समय समाप्त हो गया है।</string>
 
     <!-- Sync Adapter -->
     <string name="account_type">de.welthungerhilfe.cgm.scanner</string>
@@ -146,19 +146,19 @@
     <string name="tab_measures">नाप</string>
     <string name="tab_growth">विकास</string>
 
-    <string name="title_scans">Scans-Scheduled</string>
+    <string name="title_scans">स्कैन का समय</string>
     <string name="title_image_view">इमेज व्यू</string>
     <string name="title_settings">सेटिंग्स</string>
     <string name="title_add_measure">नाप जोड़ें</string>
 
-    <string name="content_image">Content Image</string>
-    <string name="message_legal">Please make sure to take a photo of the consent form from the parents to avoid legal issues</string>
+    <string name="content_image">सामग्री फोटो </string>
+    <string name="message_legal">कानूनी मुद्दों से बचने के लिए कृपया माता-पिता से सहमति फॉर्म की एक फोटो लेना सुनिश्चित करें</string>
 
     <string name="axis_age">उम्र</string>
     <string name="axis_height">ऊंचाई</string>
     <string name="axis_weight">वजन</string>
-    <string name="axis_head">Head circumference in cm</string>
-    <string name="axis_muac">MUAC in cm</string>
+    <string name="axis_head">सिर परिधि सेमी में</string>
+    <string name="axis_muac">मुआक सेमी में </string>
 
     <string name="filter_age_height">1 ऊंचाई / उम</string>
     <string name="filter_age_weight">2 वजन / उम</string>
@@ -188,45 +188,46 @@
     <string name="exception_tango_invalid">टैंगो अवैध अपवाद! पुनः प्रयास करें!</string>
     <string name="exception_out_of_date">टैंगो कोर ऐप अपडेट करें!</string>
 
-    <string name="mode_standing">Standing up</string>
-    <string name="mode_lying">Lying down</string>
+    <string name="mode_standing">खड़े होना</string>
+    <string name="mode_lying">लेटना</string>
 
-    <string name="capture_inside">Capture the child inside of outline</string>
-    <string name="tutorial11">1-1. Scan the QR code to create or find the child\'s profile</string>
-    <string name="tutorial12">1-2. Fill in their personal details if the child has not been scanned before</string>
-    <string name="next_tutorial">next</string>
-    <string name="tutorial1">How do I create a new profile for the child?</string>
-    <string name="tutorial2">How do I scan a child that is standing up?</string>
-    <string name="tutorial21">2-1. Chose \"Standing up\" mode before starting to scan child</string>
-    <string name="tutorial22">2-2. Take three 5 second scans, from a front view, a back view and a 360\' view</string>
-    <string name="tutorial3">How do I scan a child that is lying down?</string>
-    <string name="tutorial31">3-1. Choose \"Lying down\" mode before starting to scan the child</string>
-    <string name="tutorial32">3-2. Take three 5 second scans, from a front view, a back view and from left side to right side</string>
-    <string name="tutorial4">How do I view the results of a scan?</string>
-    <string name="tutorial41">4-1. Visualise the results of the scan measurements on different graphs</string>
-    <string name="tutorial42">4-2. Quickly and easily identify whether the child is likely to be malnourished</string>
-    <string name="standup">Try to keep the child against a clear background and keep the whole child within the camera view</string>
-    <string name="lyedown">Try to keep the child against a clear background and keep the whole child within the camera view</string>
-    <string name="done">Done</string>
-    <string name="congratulation">Congratulations!!</string>
-    <string name="finish_tutorial">You finished CGM Scanner Tutorial</string>
-    <string name="get_start">Get Started</string>
-    <string name="menuScans">Scans</string>
-    <string name="menuTutorial">Tutorial</string>
-    <string name="menuHelp">Help</string>
-    <string name="menuSettings">Settings</string>
-    <string name="menuLogout">Logout</string>
-    <string name="remote_config">Remote Config</string>
-    <string name="remote_debug">Debug</string>
-    <string name="remote_sync_period">Sync Period</string>
-    <string name="remote_allow_delete">Allow Delete</string>
-    <string name="remote_allow_edit">Allow Edit</string>
-    <string name="remote_edit_time">Time To Allow Editing</string>
-    <string name="remote_measure_visibility">Measure Visibility</string>
-    <string name="menu_qr">QR Search</string>
-    <string name="menu_search">Search</string>
-    <string name="menu_filter">Sort and Filter</string>
-    <string name="login">Login</string>
-    <string name="no_scans">No Scans :/</string>
-    <string name="add_scans">To start scanning, tap [+] button</string>
+    <string name="capture_inside">बच्चे को रूपरेखा के अंदर कैप्चर करें</string>
+    <string name="tutorial11">1-1. बच्चे की प्रोफाइल बनाने या खोजने के लिए क्यूआर कोड स्कैन करें</string>
+    <string name="tutorial12">1-2. अगर बच्चे को स्कैन नहीं किया गया है तो उनका व्यक्तिगत विवरण भरें</string>
+    <string name="next_tutorial">अगला</string>
+    <string name="tutorial1">मैं बच्चे की एक नई प्रोफ़ाइल कैसे बना सकता हूं?</string>
+    <string name="tutorial2">मैं खड़े होने वाले बच्चे को कैसे स्कैन करूं?</string>
+    <string name="tutorial21">2-1.  बच्चे को स्कैन करने से पहले  \"खड़े हो जाओ \" मोड चुनें</string>
+    <string name="tutorial22">2-2. बच्चे को सामने से, पीछे से  और 360 डिग्री घुमा कर के 3 से 5 सेकंड तक स्कैन करे</string>
+    <string name="tutorial3">मैं लेटेने वाले बच्चे को कैसे स्कैन करूं?</string>
+    <string name="tutorial31">3-1. बच्चे को स्कैन करने से पहले \ "लेटना \" मोड चुनें</string>
+    <string name="tutorial32">3-2. बच्चे को सामने से, पीछे  से और बाईं तरफ से दाएं तरफ से 3 से 5 सेकंड स्कैन लें</string>
+    <string name="tutorial4">मैं स्कैन के परिणामों को कैसे देखूं?</string>
+    <string name="tutorial41">4-1. विभिन्न ग्राफों पर स्कैन माप के परिणामों को दिखाये </string>
+    <string name="tutorial42">4-2. जल्दी और आसानी से पहचानें कि बच्चे को कुपोषित होने की संभावना है या नहीं </string>
+    <string name="tutorial5">आप किसी भी समय <b> मेनू </b> से ट्यूटोरियल का संदर्भ ले सकते हैं!</string>
+    <string name="standup">बच्चे को एक स्पष्ट पृष्ठभूमि के खिलाफ रखने की कोशिश करें और पूरे बच्चे को कैमरे के दृश्य में रखें</string>
+    <string name="lyedown">बच्चे को एक स्पष्ट पृष्ठभूमि के खिलाफ रखने की कोशिश करें और पूरे बच्चे को कैमरे के दृश्य में रखें</string>
+    <string name="done">संपन्न</string>
+    <string name="congratulation">बधाई हो!!</string>
+    <string name="finish_tutorial">आपने सीजीएम स्कैनर के ट्यूटोरियल समाप्त किया</string>
+    <string name="get_start">शुरू हो जाओ</string>
+    <string name="menuScans">स्कैन</string>
+    <string name="menuTutorial">ट्यूटोरियल</string>
+    <string name="menuHelp">सहायता</string>
+    <string name="menuSettings">सेटिंग्स</string>
+    <string name="menuLogout">लोग आउट</string>
+    <string name="remote_config">रिमोट कॉन्फिगर</string>
+    <string name="remote_debug">डिबग</string>
+    <string name="remote_sync_period">अवधि सिंक करे </string>
+    <string name="remote_allow_delete">हटाएं की अनुमति दें</string>
+    <string name="remote_allow_edit">संपादित करने की अनुमति दें</string>
+    <string name="remote_edit_time">संपादन की अनुमति देने का समय दे </string>
+    <string name="remote_measure_visibility">दृश्यता मापें</string>
+    <string name="menu_qr">क्यूआर खोजे </string>
+    <string name="menu_search">खोजे </string>
+    <string name="menu_filter">सॉर्ट करें और फ़िल्टर करें</string>
+    <string name="login">लॉग इन करें</string>
+    <string name="no_scans">कोई स्कैन नहीं :/</string>
+    <string name="add_scans">स्कैनिंग शुरू करने के लिए, [+] बटन टैप करें</string>
 </resources>

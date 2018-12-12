@@ -205,6 +205,7 @@
     <string name="tutorial4">How do I view the results of a scan?</string>
     <string name="tutorial41">4-1. Visualise the results of the scan measurements on different graphs</string>
     <string name="tutorial42">4-2. Quickly and easily identify whether the child is likely to be malnourished</string>
+    <string name="tutorial5">You can refer to the tutorial from <u color="#FF0000">Menu</u> any time!</string>
     <string name="standup">Try to keep the child against a clear background and keep the whole child within the camera view</string>
     <string name="lyedown">Try to keep the child against a clear background and keep the whole child within the camera view</string>
     <string name="done">Done</string>
