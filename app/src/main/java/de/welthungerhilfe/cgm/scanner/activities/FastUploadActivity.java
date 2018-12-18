@@ -1,31 +1,27 @@
-package de.welthungerhilfe.cgm.scanner.helper.service;
+package de.welthungerhilfe.cgm.scanner.activities;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.Service;
-import android.content.Context;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
-import android.os.IBinder;
+import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.novoda.merlin.Merlin;
-import com.novoda.merlin.registerable.connection.Connectable;
-import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,80 +29,138 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.helper.service.FileLogMonitorService;
+import de.welthungerhilfe.cgm.scanner.helper.service.FirebaseUploadService;
 import de.welthungerhilfe.cgm.scanner.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.MULTI_UPLOAD_BUNCH;
 
-public class FileLogMonitorService extends Service {
-    private List<String> pendingArtefacts;
-    private Object lock = new Object();
+public class FastUploadActivity extends AppCompatActivity {
+    @BindView(R.id.rytLoading)
+    RelativeLayout rytLoading;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.txtStatus)
+    TextView txtStatus;
 
-    private Timer timer = new Timer();
-    private ExecutorService executor;
+    @OnClick(R.id.btnStart)
+    void onStartClicked(Button btnStart) {
+        rytLoading.setVisibility(View.VISIBLE);
 
-    public void onCreate() {
-        pendingArtefacts = new ArrayList<>();
-
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                checkFileLogDatabase();
-            }
-        }, 0, AppConstants.LOG_MONITOR_INTERVAL);
-    }
-
-    @Override
-    public int onStartCommand(final Intent intent, int flags, int startId) {
-        return START_STICKY;
-    }
-
-    @Override
-    public void onDestroy() {
-        timer.cancel();
-        if (executor != null) {
-            executor.shutdownNow();
-            pendingArtefacts = new ArrayList<>();
+        for (int i = 0; i < MULTI_UPLOAD_BUNCH + 5; i++) {
+            uploadArtefacts();
         }
     }
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+    @OnClick(R.id.btnStop)
+    void onStopClicked(Button btnStop) {
+        rytLoading.setVisibility(View.GONE);
     }
 
-    private void checkFileLogDatabase() {
+    private ExecutorService executor;
+    private List<String> pendingArtefacts;
+    private List<String> filePaths = new ArrayList<>();
+    private double totalFileSize = 0;
+    private double uploadedFileSize = 0;
+    private int index = 0;
+    private long succeed = 0;
+    private long failed = 0;
 
-        new OfflineTask().getSyncableFileLog(new OfflineTask.OnLoadFileLogs() {
+    private Object lock = new Object();
+
+
+    protected void onCreate(Bundle savedBundle) {
+        super.onCreate(savedBundle);
+        setContentView(R.layout.activity_fast_upload);
+        ButterKnife.bind(this);
+
+        setupToolbar();
+        stopRunningUploadService();
+
+        prepareFastUpload();
+
+        runOnUiThread(new Runnable() {
             @Override
-            public void onLoadFileLogs(List<FileLog> logs) {
-                if (Utils.isNetworkConnectionAvailable(FileLogMonitorService.this)) {
-                    if (logs.size() > 0) {
-                        executor = Executors.newFixedThreadPool(MULTI_UPLOAD_BUNCH);
-                        //executor = Executors.newSingleThreadExecutor();
+            public void run() {
+                File root = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
+                loadFiles(root);
 
-                        for (FileLog log : logs) {
-                            Runnable worker = new UploadThread(log);
-                            executor.execute(worker);
-                        }
-                        //executor.shutdown();
-                    } else {
-                        pendingArtefacts.clear();
-                    }
-                }
+                txtStatus.setText(String.valueOf(filePaths.size()) + "files are remaining." + String.valueOf(totalFileSize / 1024 / 1024) + "MB remaining");
             }
         });
+    }
+
+    public void onDestroy() {
+        if (executor != null) {
+            executor.shutdownNow();
+        }
+
+        startService(new Intent(getApplicationContext(), FileLogMonitorService.class));
+
+        super.onDestroy();
+    }
+
+    private void setupToolbar() {
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setTitle(R.string.title_fast_uploading);
+    }
+
+    private void stopRunningUploadService() {
+        getApplicationContext().stopService(new Intent(getApplicationContext(), FileLogMonitorService.class));
+    }
+
+    private void loadFiles(File target) throws NullPointerException, OutOfMemoryError {
+        if (target.isDirectory()) {
+            File[] children = target.listFiles();
+
+            if (children.length == 0) {
+                target.delete();
+            } else {
+                for (int i = 0; i < children.length; i++) {
+                    loadFiles(children[i]);
+                }
+            }
+        } else {
+            filePaths.add(target.getPath());
+            totalFileSize += target.length();
+        }
+    }
+
+    private void prepareFastUpload() {
+        pendingArtefacts = new ArrayList<>();
+
+        executor = Executors.newFixedThreadPool(MULTI_UPLOAD_BUNCH);
+    }
+
+    private void uploadArtefacts() {
+        if (index >= filePaths.size()) {
+            rytLoading.setVisibility(View.GONE);
+        } else {
+            index ++;
+
+            new OfflineTask().getFileLog(filePaths.get(index - 1), new OfflineTask.OnLoadFileLog() {
+                @Override
+                public void onLoadFileLog(FileLog log) {
+                    if (log != null)
+                        executor.execute(new UploadThread(log));
+                }
+            });
+        }
     }
 
     private class UploadThread implements Runnable {
@@ -149,7 +203,7 @@ public class FileLogMonitorService extends Service {
                 }
 
                 if (path.contains("{qrcode}") || path.contains("scantimestamp")) {
-                    Log.e("MonitorService : ", String.format("id: %s, qrcode: %s, scantimestamp: %s", log.getId(), log.getQrCode(), String.valueOf(log.getCreateDate())));
+                    Log.e("FastUpload : ", String.format("id: %s, qrcode: %s, scantimestamp: %s", log.getId(), log.getQrCode(), String.valueOf(log.getCreateDate())));
                 }
 
                 String[] arr = log.getPath().split("/");
@@ -176,12 +230,18 @@ public class FileLogMonitorService extends Service {
                                     AppController.getInstance().firebaseFirestore.collection("artefacts")
                                             .document(log.getId())
                                             .set(log);
+                                } else {
+
                                 }
 
+                                succeed ++;
+
                                 synchronized (lock) {
-                                    Log.e("pending removed", log.getId());
+                                    Log.e("finished", log.getId());
                                     pendingArtefacts.remove(log.getId());
                                     lock.notify();
+
+                                    uploadArtefacts();
                                 }
                             }
                         })
@@ -194,11 +254,15 @@ public class FileLogMonitorService extends Service {
                                     ex.printStackTrace();
                                 }
 
+                                failed ++;
+
                                 e.printStackTrace();
                                 synchronized (lock) {
-                                    Log.e("pending removed", log.getId());
+                                    Log.e("failed", log.getId());
                                     pendingArtefacts.remove(log.getId());
                                     lock.notify();
+
+                                    uploadArtefacts();
                                 }
                             }
                         });
@@ -207,12 +271,24 @@ public class FileLogMonitorService extends Service {
                 log.setDeleted(true);
                 new OfflineTask().saveFileLog(log);
 
+                failed ++;
+
                 synchronized (lock) {
-                    Log.e("pending removed", log.getId());
+                    Log.e("file not found", log.getId());
                     pendingArtefacts.remove(log.getId());
                     lock.notify();
+
+                    uploadArtefacts();
                 }
             }
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        if (menuItem.getItemId() == android.R.id.home) {
+            onBackPressed();
+        }
+        return super.onOptionsItemSelected(menuItem);
     }
 }

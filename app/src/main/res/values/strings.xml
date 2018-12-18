@@ -148,6 +148,7 @@
 
     <string name="title_scans">Scans-Scheduled</string>
     <string name="title_image_view">Image View</string>
+    <string name="title_fast_uploading">Fast Uploading</string>
     <string name="title_settings">Settings</string>
     <string name="title_add_measure">Add Measure</string>
 
@@ -216,6 +217,7 @@
     <string name="menuTutorial">Tutorial</string>
     <string name="menuHelp">Help</string>
     <string name="menuSettings">Settings</string>
+    <string name="menuFastUpload">Fast Upload</string>
     <string name="menuLogout">Logout</string>
     <string name="remote_config">Remote Config</string>
     <string name="remote_debug">Debug</string>

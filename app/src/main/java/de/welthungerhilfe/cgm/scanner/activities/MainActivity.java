@@ -196,7 +196,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         }
         */
 
-        startService(new Intent(this, FileLogMonitorService.class));
+        startService(new Intent(getApplicationContext(), FileLogMonitorService.class));
 
         fetchRemoteConfig();
 
@@ -259,6 +259,9 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                         break;
                     case R.id.menuSettings:
                         startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                        break;
+                    case R.id.menuFastUpload:
+                        startActivity(new Intent(MainActivity.this, FastUploadActivity.class));
                         break;
                     case R.id.menuLogout:
                         AppController.getInstance().firebaseAuth.signOut();

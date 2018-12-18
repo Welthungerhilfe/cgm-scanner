@@ -45,6 +45,12 @@
     </group>
     <group>
         <item
+            android:id="@+id/menuFastUpload"
+            android:icon="@drawable/menu_settings"
+            android:title="@string/menuFastUpload" />
+    </group>
+    <group>
+        <item
             android:id="@+id/menuLogout"
             android:icon="@drawable/menu_logout"
             android:title="@string/menuLogout"/>
