@@ -4,9 +4,9 @@
     package="de.welthungerhilfe.cgm.scanner">
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <!--uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" /-->
 
     <!-- for Tango Scanner Functionality -->
     <uses-permission android:name="android.permission.CAMERA" />
