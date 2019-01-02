@@ -41,6 +41,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -82,6 +83,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerDataAdapter;
 import de.welthungerhilfe.cgm.scanner.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.helper.DbConstants;
 import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.service.FileLogMonitorService;
@@ -201,6 +203,8 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         fetchRemoteConfig();
 
         saveFcmToken();
+
+        Log.e("dbPath", getDatabasePath(DbConstants.DATABASE).getAbsolutePath());
     }
 
     public void onNewIntent(Intent intent) {
