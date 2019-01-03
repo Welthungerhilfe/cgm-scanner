@@ -149,6 +149,7 @@
     <string name="title_scans">स्कैन का समय</string>
     <string name="title_image_view">इमेज व्यू</string>
     <string name="title_settings">सेटिंग्स</string>
+    <string name="title_fast_uploading">Fast Uploading</string>
     <string name="title_add_measure">नाप जोड़ें</string>
 
     <string name="content_image">सामग्री फोटो </string>
@@ -216,6 +217,7 @@
     <string name="menuTutorial">ट्यूटोरियल</string>
     <string name="menuHelp">सहायता</string>
     <string name="menuSettings">सेटिंग्स</string>
+    <string name="menuFastUpload">Fast Upload</string>
     <string name="menuLogout">लोग आउट</string>
     <string name="remote_config">रिमोट कॉन्फिगर</string>
     <string name="remote_debug">डिबग</string>

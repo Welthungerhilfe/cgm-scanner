@@ -41,6 +41,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -82,6 +83,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.adapters.RecyclerDataAdapter;
 import de.welthungerhilfe.cgm.scanner.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.helper.DbConstants;
 import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.service.FileLogMonitorService;
@@ -196,11 +198,13 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         }
         */
 
-        startService(new Intent(this, FileLogMonitorService.class));
+        startService(new Intent(getApplicationContext(), FileLogMonitorService.class));
 
         fetchRemoteConfig();
 
         saveFcmToken();
+
+        Log.e("dbPath", getDatabasePath(DbConstants.DATABASE).getAbsolutePath());
     }
 
     public void onNewIntent(Intent intent) {
@@ -259,6 +263,9 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                         break;
                     case R.id.menuSettings:
                         startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                        break;
+                    case R.id.menuFastUpload:
+                        startActivity(new Intent(MainActivity.this, FastUploadActivity.class));
                         break;
                     case R.id.menuLogout:
                         AppController.getInstance().firebaseAuth.signOut();

@@ -190,8 +190,7 @@ public class OverlaySurface extends SurfaceView implements SurfaceHolder.Callbac
                 float top = ((canvas.getHeight() - mBabyOverlay.getHeight()*mDistance) / 2.0f);
                 float right = (mBabyOverlay.getWidth() * mDistance )+left;
                 float bottom = (mBabyOverlay.getHeight()*mDistance) +top;
-                //RectF dstRectF = new RectF(left,top,right,bottom);
-                RectF dstRectF = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
+                RectF dstRectF = new RectF(left,top,right,bottom);
 
                 //RectF dstRectF = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
 
@@ -223,7 +222,7 @@ public class OverlaySurface extends SurfaceView implements SurfaceHolder.Callbac
                 canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
                 // Source is the whole bitmap
-                Rect srcRect = new Rect(0, 0, mBabyOverlay.getWidth(), mInfantOverlay.getHeight());
+                Rect srcRect = new Rect(0, 0, mInfantOverlay.getWidth(), mInfantOverlay.getHeight());
 
                 // destination is the where to draw it
                 // will be drawn in the center and scaled by the distance

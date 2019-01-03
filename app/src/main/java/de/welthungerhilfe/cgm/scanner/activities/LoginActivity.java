@@ -50,6 +50,7 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.syncdata.StubProvider;
 import de.welthungerhilfe.cgm.scanner.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.fabric.sdk.android.services.common.Crash;
@@ -120,6 +121,30 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         super.onStart();
 
         if (AppController.getInstance().firebaseUser != null && session.isSigned()) {
+            Account[] accounts = accountManager.getAccountsByType(AppConstants.ACCOUNT_TYPE);
+            if (accounts.length > 0) {
+                if(!ContentResolver.isSyncActive(accounts[0], getString(R.string.sync_authority))) {
+                    session.setSyncTimestamp(0);
+                    SyncAdapter.startPeriodicSync(accounts[0], getApplicationContext());
+                }
+            } else {
+                session.setSyncTimestamp(0);
+
+                final Account account = new Account(AppController.getInstance().firebaseUser.getEmail(), AppConstants.ACCOUNT_TYPE);
+
+                accountManager.addAccountExplicitly(account, "welthungerhilfe", null);
+
+                SyncAdapter.startPeriodicSync(account, getApplicationContext());
+
+                final Intent intent = new Intent();
+                intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, AppController.getInstance().firebaseUser.getEmail());
+                intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
+                intent.putExtra(AccountManager.KEY_AUTHTOKEN, "welthungerhilfe");
+
+                setAccountAuthenticatorResult(intent.getExtras());
+                setResult(RESULT_OK, intent);
+            }
+
             if (session.getTutorial())
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
             else
