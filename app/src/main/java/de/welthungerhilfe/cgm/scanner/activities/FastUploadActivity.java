@@ -94,7 +94,14 @@ public class FastUploadActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                File root = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
+                File root;
+                String state = Environment.getExternalStorageState();
+                if (Environment.MEDIA_MOUNTED.equals(state)) {
+                    root = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name_long));
+                } else {
+                    root = getFilesDir();
+                }
+
                 loadFiles(root);
 
                 txtStatus.setText(String.valueOf(filePaths.size()) + "files are remaining." + String.valueOf(totalFileSize / 1024 / 1024) + "MB remaining");

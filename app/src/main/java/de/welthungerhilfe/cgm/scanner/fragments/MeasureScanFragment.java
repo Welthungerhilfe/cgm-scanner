@@ -324,9 +324,17 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
     private void setupScanArtefacts() {
         // TODO make part of AppController?
-        mExtFileDir = getContext().getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
+        File mExtFileDir;
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            mExtFileDir = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name_long));
+        } else {
+            mExtFileDir = getContext().getFilesDir();
+        }
+        // mExtFileDir = getContext().getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
 
         // TODO make part of AppConstants
+        Log.e("Root Directory", mExtFileDir.getParent());
         mScanArtefactsOutputFolder  = new File(mExtFileDir,mQrCode+"/measurements/"+mNowTimeString+"/");
         mPointCloudSaveFolder = new File(mScanArtefactsOutputFolder,"pc");
         mRgbSaveFolder = new File(mScanArtefactsOutputFolder,"rgb");

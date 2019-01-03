@@ -303,7 +303,14 @@ public class CreateDataActivity extends BaseActivity {
 
         final long timestamp = Utils.getUniversalTimestamp();
         final String consentFileString = timestamp + "_" + qrCode + ".png";
-        File extFileDir = getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
+
+        File extFileDir;
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            extFileDir = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name_long));
+        } else {
+            extFileDir = getFilesDir();
+        }
         File consentFileFolder = new File(extFileDir, AppConstants.LOCAL_CONSENT_URL.replace("{qrcode}", qrCode).replace("{scantimestamp}", String.valueOf(timestamp)));
         File consentFile = new File(consentFileFolder, consentFileString);
         if(!consentFileFolder.exists()) {
