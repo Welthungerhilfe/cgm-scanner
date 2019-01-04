@@ -181,9 +181,10 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                 lytNoPerson.setVisibility(View.VISIBLE);
             } else {
                 lytNoPerson.setVisibility(View.GONE);
-
+                /*
                 filters.add(1);
                 doFilter();
+                */
                 adapterData.resetData(personList);
             }
         });
