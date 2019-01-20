@@ -33,6 +33,8 @@ public class AppConstants {
 
     public static final int MULTI_UPLOAD_BUNCH = 5;
 
+    public static final int PAGE_SIZE = 30;
+
     public static final String GOOGLE_GEO_URL = "https://maps.googleapis.com/maps/api/geocode/json";
     //public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor.appspot.com";
     //public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor-dev.appspot.com";

@@ -19,7 +19,7 @@
 
 package de.welthungerhilfe.cgm.scanner.helper.events;
 
-import de.welthungerhilfe.cgm.scanner.models.Loc;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 
 /**
  * Created by Emerald on 2/24/2018.

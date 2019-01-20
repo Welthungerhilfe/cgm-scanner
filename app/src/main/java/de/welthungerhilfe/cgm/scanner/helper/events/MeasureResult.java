@@ -19,7 +19,7 @@
 
 package de.welthungerhilfe.cgm.scanner.helper.events;
 
-import de.welthungerhilfe.cgm.scanner.models.Measure;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 
 public class MeasureResult {
     private Measure measure;

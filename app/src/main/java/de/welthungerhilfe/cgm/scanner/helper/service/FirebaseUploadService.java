@@ -33,7 +33,6 @@ import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -42,11 +41,8 @@ import com.google.firebase.storage.UploadTask;
 import java.io.File;
 
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.activities.BaseActivity;
+import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.models.FileLog;
-import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 
 /**

@@ -103,7 +103,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-        <de.welthungerhilfe.cgm.scanner.views.UnitEditText
+        <de.welthungerhilfe.cgm.scanner.ui.views.UnitEditText
             android:id="@+id/editManualHeight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -121,7 +121,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-        <de.welthungerhilfe.cgm.scanner.views.UnitEditText
+        <de.welthungerhilfe.cgm.scanner.ui.views.UnitEditText
             android:id="@+id/editManualWeight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -139,7 +139,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-        <de.welthungerhilfe.cgm.scanner.views.UnitEditText
+        <de.welthungerhilfe.cgm.scanner.ui.views.UnitEditText
             android:id="@+id/editManualMuac"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -157,7 +157,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-        <de.welthungerhilfe.cgm.scanner.views.UnitEditText
+        <de.welthungerhilfe.cgm.scanner.ui.views.UnitEditText
             android:id="@+id/editManualHead"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
