@@ -9,37 +9,37 @@ import android.arch.persistence.room.Update;
 
 import java.util.List;
 
-import de.welthungerhilfe.cgm.scanner.helper.DbConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 
 import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
+import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_MEASURE;
 
 @Dao
 public interface MeasureDao {
-    @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE personId=:personId AND deleted=0 ORDER BY date DESC")
+    @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE personId=:personId AND deleted=0 ORDER BY date DESC")
     LiveData<List<Measure>> findMeasures(String personId);
 
-    @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE timestamp>:timestamp")
+    @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE timestamp>:timestamp")
     List<Measure> getSyncableMeasure(long timestamp);
 
-    @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE id=:id")
+    @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE id=:id")
     Measure findMeasure(String id);
 
     @Insert(onConflict = REPLACE)
-    void saveMeasure(Measure measure);
-
-    @Query("UPDATE " + DbConstants.TABLE_MEASURE + " SET height=:height, muac=:muac, weight=:weight, headCircumference=:head, timestamp=:timestamp WHERE id=:id")
-    void updateScanResult(String id, double height, double weight, double muac, double head, long timestamp);
+    void insertMeasure(Measure measure);
 
     @Update(onConflict = REPLACE)
     void updateMeasure(Measure measure);
 
+    @Query("UPDATE " + TABLE_MEASURE + " SET height=:height, muac=:muac, weight=:weight, headCircumference=:head, timestamp=:timestamp WHERE id=:id")
+    void updateScanResult(String id, double height, double weight, double muac, double head, long timestamp);
+
     @Delete
     void deleteMeasure(Measure measure);
 
-    @Query("SELECT * FROM " + DbConstants.TABLE_MEASURE + " WHERE personId=:personId AND deleted=0 ORDER BY timestamp DESC Limit 1")
+    @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE personId=:personId AND deleted=0 ORDER BY timestamp DESC Limit 1")
     Measure getLastMeasure(String personId);
 
-    @Query("DELETE FROM " + DbConstants.TABLE_MEASURE + " WHERE deleted=1 AND timestamp<=:timestamp")
+    @Query("DELETE FROM " + TABLE_MEASURE + " WHERE deleted=1 AND timestamp<=:timestamp")
     void deleteMeasureGarbage(long timestamp);
 }

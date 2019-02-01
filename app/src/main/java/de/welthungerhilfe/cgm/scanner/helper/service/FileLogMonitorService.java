@@ -28,7 +28,6 @@ import java.util.concurrent.Executors;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
-import de.welthungerhilfe.cgm.scanner.datasource.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.MULTI_UPLOAD_BUNCH;
@@ -73,6 +72,8 @@ public class FileLogMonitorService extends Service {
 
     private void checkFileLogDatabase() {
 
+        // Todo;
+        /*
         new OfflineTask().getSyncableFileLog(new OfflineTask.OnLoadFileLogs() {
             @Override
             public void onLoadFileLogs(List<FileLog> logs) {
@@ -92,6 +93,7 @@ public class FileLogMonitorService extends Service {
                 }
             }
         });
+        */
     }
 
     private class UploadThread implements Runnable {
@@ -157,7 +159,8 @@ public class FileLogMonitorService extends Service {
                                         log.setDeleted(true);
                                     }
                                     log.setPath(photoRef.getPath());
-                                    new OfflineTask().saveFileLog(log);
+                                    // Todo;
+                                    //new OfflineTask().saveFileLog(log);
                                     AppController.getInstance().firebaseFirestore.collection("artefacts")
                                             .document(log.getId())
                                             .set(log);
@@ -190,7 +193,8 @@ public class FileLogMonitorService extends Service {
             } catch (FileNotFoundException e) {
                 log.setUploadDate(Utils.getUniversalTimestamp());
                 log.setDeleted(true);
-                new OfflineTask().saveFileLog(log);
+                // Todo;
+                //new OfflineTask().saveFileLog(log);
 
                 synchronized (lock) {
                     Log.e("pending removed", log.getId());

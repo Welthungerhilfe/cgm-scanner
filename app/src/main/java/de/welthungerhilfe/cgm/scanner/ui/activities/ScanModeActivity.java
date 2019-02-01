@@ -4,14 +4,17 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -42,6 +45,7 @@ import butterknife.OnClick;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasureScanFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
@@ -298,6 +302,8 @@ public class ScanModeActivity extends AppCompatActivity {
         if (step1 && step2 && step3) {
             showCompleteButton();
         }
+
+        AppController.getInstance().notifyUpload();
     }
 
     private void showCompleteButton() {

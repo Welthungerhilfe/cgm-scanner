@@ -40,9 +40,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
-import de.welthungerhilfe.cgm.scanner.datasource.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.helper.tango.CameraSurfaceRenderer;
 import de.welthungerhilfe.cgm.scanner.helper.tango.ModelMatCalculator;
 import de.welthungerhilfe.cgm.scanner.helper.tango.OverlaySurface;
@@ -120,9 +120,13 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
     private int mode = SCAN_PREVIEW;
 
+    private FileLogRepository repository;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
+        repository = FileLogRepository.getInstance(context);
 
         mTango = new Tango(context, new Runnable() {
             // Pass in a Runnable to be called from UI thread when Tango is ready; this Runnable
@@ -175,7 +179,8 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
-        mQrCode = ((ScanModeActivity)getActivity()).person.getQrcode();
+        //mQrCode = ((ScanModeActivity)getActivity()).person.getQrcode();
+        mQrCode = "person301";
     }
 
     @Override
@@ -541,7 +546,10 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setQrCode(mQrCode);
                             log.setCreateDate(mNowTime);
                             log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-                            new OfflineTask().saveFileLog(log);
+
+                            repository.insertFileLog(log);
+                            // Todo;
+                            //new OfflineTask().saveFileLog(log);
                             // Direct Upload to Firebase Storage
                             mNumberOfFilesWritten++;
                             //mTimeToTakeSnap = false;
@@ -619,7 +627,9 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                                 log.setQrCode(mQrCode);
                                 log.setCreateDate(mNowTime);
                                 log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-                                new OfflineTask().saveFileLog(log);
+                                // Todo;
+                                //new OfflineTask().saveFileLog(log);
+                                repository.insertFileLog(log);
                             }
                         };
                         thread.run();

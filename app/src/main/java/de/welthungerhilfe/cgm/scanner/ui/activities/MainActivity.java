@@ -21,6 +21,8 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -29,6 +31,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -41,7 +44,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -80,15 +82,15 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
+import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerDataAdapter;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
-import de.welthungerhilfe.cgm.scanner.helper.DbConstants;
 import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.helper.service.FileLogMonitorService;
 import de.welthungerhilfe.cgm.scanner.helper.service.MemoryMonitorService;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -106,6 +108,25 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     private File mFileTemp;
 
     private PersonViewModel viewModel;
+    private PersonRepository personRepository;
+    private Observer<List<Person>> observer = new Observer<List<Person>>() {
+        @Override
+        public void onChanged(@Nullable List<Person> people) {
+            if (people.size() > 0) {
+                if (listener.getTotalItems() == 0)
+
+
+                adapterData.addPersons(people);
+            }
+        }
+    };
+
+    private EndlessScrollListener listener = new EndlessScrollListener() {
+        @Override
+        public void onLoadMore() {
+            viewModel.loadMore().observe(MainActivity.this, observer);
+        }
+    };
 
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
@@ -155,26 +176,25 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         adapterData = new RecyclerDataAdapter(this);
         adapterData.setPersonDetailListener(this);
         recyclerData.setAdapter(adapterData);
-        recyclerData.addOnScrollListener(new EndlessScrollListener() {
-            @Override
-            public void onLoadMore() {
-                viewModel.loadMorePersons();
-            }
-        });
         recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
         viewModel = ViewModelProviders.of(this).get(PersonViewModel.class);
         viewModel.getPersons().observe(this, personList->{
-            adapterData.addPersons(personList);
+            if (personList.size() == 0) {
+                lytNoPerson.setVisibility(View.VISIBLE);
+            } else {
+                lytNoPerson.setVisibility(View.GONE);
+                adapterData.resetData(personList);
+            }
         });
 
-        startService(new Intent(getApplicationContext(), FileLogMonitorService.class));
+        personRepository = PersonRepository.getInstance(this);
+
+        //startService(new Intent(getApplicationContext(), FileLogMonitorService.class));
 
         fetchRemoteConfig();
 
         saveFcmToken();
-
-        Log.e("dbPath", getDatabasePath(DbConstants.DATABASE).getAbsolutePath());
     }
 
     public void onNewIntent(Intent intent) {
@@ -342,8 +362,8 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
                                 person.setDeleted(true);
                                 person.setDeletedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                                 person.setTimestamp(Utils.getUniversalTimestamp());
-                                // Todo: Write code to update person
-                                //OfflineRepository.getInstance(MainActivity.this).updatePerson(person);
+                                personRepository.updatePerson(person);
+
                                 adapterData.removePerson(person);
                             } else {
                                 adapterData.notifyItemChanged(position);

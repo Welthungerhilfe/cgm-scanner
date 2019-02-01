@@ -20,19 +20,19 @@ package de.welthungerhilfe.cgm.scanner;
 
 import android.app.ActivityManager;
 import android.app.Application;
+import android.app.PendingIntent;
 import android.arch.persistence.db.SupportSQLiteDatabase;
-import android.arch.persistence.room.Room;
-import android.arch.persistence.room.RoomDatabase;
 import android.arch.persistence.room.migration.Migration;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
-import android.support.multidex.MultiDexApplication;
-import android.util.Log;
 
 //import com.amitshekhar.DebugDB;
 import com.crashlytics.android.Crashlytics;
-import com.crashlytics.android.core.BuildConfig;
 import com.crashlytics.android.core.CrashlyticsCore;
 import com.crashlytics.android.core.CrashlyticsListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,9 +45,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.DbConstants;
 import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
-import de.welthungerhilfe.cgm.scanner.helper.OfflineDatabase;
+import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.fabric.sdk.android.Fabric;
 
@@ -65,53 +64,6 @@ public class AppController extends Application {
     public FirebaseFirestore firebaseFirestore;
 
     public FirebaseRemoteConfig firebaseConfig;
-
-    public OfflineDatabase offlineDb;
-
-    public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
-        @Override
-        public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE measures ADD COLUMN createdBy TEXT;");
-            database.execSQL("ALTER TABLE measures ADD COLUMN latitude REAL;");
-            database.execSQL("ALTER TABLE measures ADD COLUMN longitude REAL;");
-            database.execSQL("ALTER TABLE measures ADD COLUMN address TEXT;");
-            database.execSQL("ALTER TABLE measures ADD COLUMN oedema INTEGER DEFAULT '0' NOT NULL;");
-
-            database.execSQL("ALTER TABLE persons ADD COLUMN createdBy TEXT;");
-            database.execSQL("ALTER TABLE persons ADD COLUMN latitude REAL;");
-            database.execSQL("ALTER TABLE persons ADD COLUMN longitude REAL;");
-            database.execSQL("ALTER TABLE persons ADD COLUMN address TEXT;");
-        }
-    };
-
-    public static final Migration MIGRATION_2_3 = new Migration(2, 3) {
-        @Override
-        public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("CREATE TABLE file_logs (" +
-                    " id TEXT NOT NULL PRIMARY KEY," +
-                    " type TEXT," +
-                    " path TEXT," +
-                    " hashValue TEXT," +
-                    " fileSize INTEGER NOT NULL," +
-                    " uploadDate INTEGER NOT NULL," +
-                    " deleted INTEGER NOT NULL," +
-                    " qrCode TEXT," +
-                    " createDate INTEGER NOT NULL," +
-                    " createdBy TEXT" +
-                    ");");
-        }
-    };
-
-    public static final Migration MIGRATION_3_4 = new Migration(3, 4) {
-        @Override
-        public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE measures ADD COLUMN deleted INTEGER DEFAULT '0' NOT NULL;");
-            database.execSQL("ALTER TABLE measures ADD COLUMN deletedBy TEXT;");
-
-            database.execSQL("ALTER TABLE persons ADD COLUMN deleted INTEGER DEFAULT '0' NOT NULL;");
-            database.execSQL("ALTER TABLE persons ADD COLUMN deletedBy TEXT;");
-        }
-    };
 
     @Override
     public void onCreate() {
@@ -161,27 +113,6 @@ public class AppController extends Application {
         firebaseConfig.setConfigSettings(configSettings);
         firebaseConfig.setDefaults(R.xml.remoteconfig);
 
-        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING).build();
-        /*
-        offlineDb = Room.databaseBuilder(getApplicationContext(), OfflineDatabase.class, DbConstants.DATABASE).fallbackToDestructiveMigration().addCallback(new RoomDatabase.Callback() {
-            @Override
-            public void onOpen(@NonNull SupportSQLiteDatabase db) {
-                super.onCreate(db);
-
-                SessionManager session = new SessionManager(getApplicationContext());
-                session.setSyncTimestamp(0);
-
-                AccountManager accountManager = AccountManager.get(getApplicationContext());
-                Account[] accounts = accountManager.getAccounts();
-
-                if (accounts.length > 0) {
-                    SyncAdapter.startImmediateSync(accounts[0], getApplicationContext());
-                }
-            }
-        }).build();
-        */
-
-
         //Log.e("Offline DB", DebugDB.getAddressLog());
 
         mInstance = this;
@@ -230,5 +161,23 @@ public class AppController extends Application {
 
     public String getArtefactId(String type, long timestamp) {
         return Utils.getAndroidID(getContentResolver()) + "_" + type + "_" + String.valueOf(timestamp) + "_" + Utils.getSaltString(16);
+    }
+
+    public void notifyUpload() {
+        /*
+        Intent service = new Intent(getApplicationContext(), UploadService.class);
+        bindService(service, new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+
+            }
+        }, Context.BIND_AUTO_CREATE);
+        */
+        startService(new Intent(getApplicationContext(), UploadService.class));
     }
 }

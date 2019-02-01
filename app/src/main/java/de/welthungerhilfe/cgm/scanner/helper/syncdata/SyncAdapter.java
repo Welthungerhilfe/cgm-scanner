@@ -1,6 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.helper.syncdata;
 
 import android.accounts.Account;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -24,18 +25,30 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.MeasureViewModel;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.datasource.models.tasks.OfflineTask;
+import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogLoad;
+import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasureLoad;
+import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
-public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineTask.OnLoadPerson, OfflineTask.OnLoadMeasure {
+public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPersonLoad, OnMeasureLoad, OnFileLogLoad {
     private long prevTimestamp;
     private SessionManager session;
+
+    private PersonRepository personRepository;
+    private MeasureRepository measureRepository;
+    private FileLogRepository fileLogRepository;
 
     private boolean isSyncing;
 
@@ -44,6 +57,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
 
         session = new SessionManager(context);
         isSyncing = false;
+
+        personRepository = PersonRepository.getInstance(context);
+        measureRepository = MeasureRepository.getInstance(context);
+        fileLogRepository = FileLogRepository.getInstance(context);
     }
 
     @Override
@@ -51,11 +68,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         prevTimestamp = session.getSyncTimestamp();
 
-        new OfflineTask().getSyncablePerson(this, prevTimestamp);
-        new OfflineTask().getSyncableMeasure(this, prevTimestamp);
+        // Todo;
+        personRepository.getSyncablePerson(this, prevTimestamp);
+        measureRepository.getSyncableMeasure(this, prevTimestamp);
+        fileLogRepository.getSyncableLog(this, prevTimestamp);
 
         AppController.getInstance().firebaseFirestore.collection("persons")
-                //.whereGreaterThan("timestamp", prevTimestamp)
+                .whereGreaterThan("timestamp", prevTimestamp)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -76,11 +95,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                                         String[] arr = person.getId().split("_");
                                         try {
                                             if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
-                                                // ToDo: Write code to create person
-                                                //OfflineRepository.getInstance(getContext()).createPerson(person);
+                                                personRepository.insertPerson(person);
                                             } else {    // created before sync, after sync person was updates, so must update in local room
-                                                //Todo: Write code to update person
-                                                //OfflineRepository.getInstance(getContext()).updatePerson(person);
+                                                personRepository.updatePerson(person);
                                             }
                                         } catch (NumberFormatException e) {
                                             Crashlytics.log(0, "sync_adapter", String.format("could not get timestamp because of underline in personId: %s", person.getId()));
@@ -109,11 +126,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                                                             try {
                                                                 String[] arr = measure.getId().split("_");
                                                                 if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
-                                                                    // Todo: write code to create measure
-                                                                    //OfflineRepository.getInstance(getContext()).createMeasure(measure);
+                                                                    measureRepository.insertMeasure(measure);
                                                                 } else {    // created before sync, after sync person was updates, so must update in local room
-                                                                    // Todo: write code to update measure
-                                                                    //OfflineRepository.getInstance(getContext()).updateMeasure(measure);
+                                                                    measureRepository.updateMeasure(measure);
                                                                 }
                                                             } catch (NumberFormatException e) {
                                                                 Crashlytics.log(0, "sync_adapter", String.format("could not get timestamp because of underline in measureId: %s", measure.getId()));
@@ -204,8 +219,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            // Todo: write code to update person
-                            //OfflineRepository.getInstance(getContext()).updatePerson(personList.get(finalI));
+                            personRepository.updatePerson(personList.get(finalI));
 
                             session.setSyncTimestamp(Utils.getUniversalTimestamp());
                         }
@@ -236,9 +250,29 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OfflineT
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            // Todo: write code to update measure
-                            //OfflineRepository.getInstance(getContext()).updateMeasure(measureList.get(finalI));
+                            measureRepository.updateMeasure(measureList.get(finalI));
 
+                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
+                        }
+                    });
+        }
+    }
+
+    @Override
+    public void onFileLogLoaded(List<FileLog> list) {
+        for (int i = 0; i < list.size(); i++) {
+            AppController.getInstance().firebaseFirestore.collection("artefacts")
+                    .document(list.get(i).getId())
+                    .set(list.get(i))
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            session.setSyncTimestamp(prevTimestamp);
+                        }
+                    })
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
                             session.setSyncTimestamp(Utils.getUniversalTimestamp());
                         }
                     });

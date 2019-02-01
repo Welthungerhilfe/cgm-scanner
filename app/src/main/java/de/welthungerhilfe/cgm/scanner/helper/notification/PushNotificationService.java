@@ -15,7 +15,6 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.datasource.models.tasks.OfflineTask;
 
 import de.welthungerhilfe.cgm.scanner.R;
 
@@ -24,6 +23,8 @@ public class PushNotificationService extends FirebaseMessagingService {
     private final String CHANNEL_ID = "notification_channel";
 
     private static int notificationId = 0;
+
+
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -83,7 +84,8 @@ public class PushNotificationService extends FirebaseMessagingService {
                 }
             }
 
-            new OfflineTask().updateScanResult(id, height, weight, muac, head);
+            // Todo;
+            //new OfflineTask().updateScanResult(id, height, weight, muac, head);
 
             mBuilder.setContentText("New scan result generated");
 

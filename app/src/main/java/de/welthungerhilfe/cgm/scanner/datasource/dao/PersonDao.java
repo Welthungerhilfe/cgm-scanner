@@ -12,12 +12,13 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 
 import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
-import static de.welthungerhilfe.cgm.scanner.helper.DbConstants.TABLE_PERSON;
+import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_PERSON;
 
 @Dao
 public interface PersonDao {
-    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 ORDER BY created DESC LIMIT :pageSize OFFSET :index")
-    LiveData<List<Person>> getPersons(int index, int pageSize);
+    //@Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 ORDER BY created DESC LIMIT :pageSize OFFSET :index")
+    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 ORDER BY created DESC")
+    List<Person> getPersons();
 
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 AND createdBy=:email")
     LiveData<List<Person>> getOwnPersons(String email);
@@ -45,4 +46,10 @@ public interface PersonDao {
 
     @Query("DELETE FROM " + TABLE_PERSON + " WHERE deleted=1")
     void deletePersonGarbage();
+
+    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 ORDER BY created DESC LIMIT :pageSize OFFSET :index")
+    LiveData<List<Person>> loadMore(int index, int pageSize);
+
+    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 ORDER BY created DESC")
+    LiveData<List<Person>> getAll();
 }

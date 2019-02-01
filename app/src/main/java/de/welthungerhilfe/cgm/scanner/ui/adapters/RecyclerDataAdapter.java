@@ -41,7 +41,6 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.datasource.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapter.ViewHolder> implements Filterable {
@@ -78,6 +77,8 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
 
         holder.txtName.setText(person.getName() + " " + person.getSurname());
 
+        // Todo;
+        /*
         new OfflineTask().getLastMeasure(person, new OfflineTask.OnLoadLastMeasure() {
 
             @Override
@@ -91,6 +92,7 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
                 }
             }
         });
+        */
 
         if (personDetailListener != null) {
             holder.bindPersonDetail(person);

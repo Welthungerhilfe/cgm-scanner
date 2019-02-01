@@ -110,4 +110,11 @@ public class AppConstants {
     public static final int BABY_FULL_BODY_BACK_SCAN = 108;
     public static final int BABY_FULL_BODY_BACK_RECORDING = 109;
     public static final int STANDING_INFANT_SCAN = 200;
+
+    public static final int UPLOADED = 201;
+    public static final int UPLOADED_NOT_DELETED = 202;
+    public static final int NO_NETWORK = 301;
+    public static final int DIFF_HASH = 302;
+    public static final int UPLOAD_ERROR = 400;
+    public static final int FILE_NOT_FOUND = 404;
 }

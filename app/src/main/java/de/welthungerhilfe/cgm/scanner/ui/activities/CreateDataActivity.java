@@ -54,6 +54,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.GrowthDataFragment;
@@ -66,7 +68,6 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.datasource.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.utils.MD5;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -101,6 +102,9 @@ public class CreateDataActivity extends BaseActivity {
     private GrowthDataFragment growthFragment;
 
     private PersonViewModel viewModel;
+    private PersonRepository personRepository;
+
+    private MeasureRepository measureRepository;
 
     public Loc location = null;
 
@@ -112,6 +116,9 @@ public class CreateDataActivity extends BaseActivity {
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
         viewModel = ViewModelProviders.of(this).get(PersonViewModel.class);
+
+        personRepository = PersonRepository.getInstance(this);
+        measureRepository = MeasureRepository.getInstance(this);
 
         getCurrentLocation();
 
@@ -196,7 +203,7 @@ public class CreateDataActivity extends BaseActivity {
         person.setTimestamp(Utils.getUniversalTimestamp());
         person.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
-        viewModel.insertPerson(person);
+        personRepository.insertPerson(person);
 
         viewpager.setCurrentItem(1);
     }
@@ -272,7 +279,8 @@ public class CreateDataActivity extends BaseActivity {
             log.setDeleted(false);
             log.setCreateDate(Utils.getUniversalTimestamp());
             log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-            new OfflineTask().saveFileLog(log);
+            // Todo;
+            //new OfflineTask().saveFileLog(log);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -300,12 +308,10 @@ public class CreateDataActivity extends BaseActivity {
         measure.setId(AppController.getInstance().getMeasureId());
         measure.setLocation(location);
 
-        // Todo: Write code to create measure
-        //OfflineRepository.getInstance(this).createMeasure(measure);
+        measureRepository.insertMeasure(measure);
 
         person.setLastLocation(location);
-        // Todo: Write code to update person
-        //OfflineRepository.getInstance(this).updatePerson(person);
+        personRepository.updatePerson(person);
     }
 
     @Override

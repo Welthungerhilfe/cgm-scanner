@@ -38,7 +38,6 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.service.FileLogMonitorService;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
-import de.welthungerhilfe.cgm.scanner.datasource.models.tasks.OfflineTask;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.MULTI_UPLOAD_BUNCH;
@@ -156,6 +155,8 @@ public class FastUploadActivity extends AppCompatActivity {
         } else {
             index ++;
 
+            // Todo;
+            /*
             new OfflineTask().getFileLog(filePaths.get(index - 1), new OfflineTask.OnLoadFileLog() {
                 @Override
                 public void onLoadFileLog(FileLog log) {
@@ -163,6 +164,7 @@ public class FastUploadActivity extends AppCompatActivity {
                         executor.execute(new UploadThread(log));
                 }
             });
+            */
         }
     }
 
@@ -229,7 +231,8 @@ public class FastUploadActivity extends AppCompatActivity {
                                         log.setDeleted(true);
                                     }
                                     log.setPath(photoRef.getPath());
-                                    new OfflineTask().saveFileLog(log);
+                                    // Todo;
+                                    // new OfflineTask().saveFileLog(log);
                                     AppController.getInstance().firebaseFirestore.collection("artefacts")
                                             .document(log.getId())
                                             .set(log);
@@ -272,7 +275,8 @@ public class FastUploadActivity extends AppCompatActivity {
             } catch (FileNotFoundException e) {
                 log.setUploadDate(Utils.getUniversalTimestamp());
                 log.setDeleted(true);
-                new OfflineTask().saveFileLog(log);
+                // Todo;
+                //new OfflineTask().saveFileLog(log);
 
                 failed ++;
 

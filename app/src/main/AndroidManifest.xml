@@ -26,6 +26,7 @@
     <!-- push notification -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <supports-screens
         android:anyDensity="true"
@@ -134,12 +135,24 @@
         <activity android:name=".ui.activities.FastUploadActivity"
             android:screenOrientation="portrait" />
 
+        <receiver
+            android:name=".helper.receiver.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".helper.service.FirebaseUploadService"
             android:exported="false"/>
 
         <service android:name=".helper.service.FileLogMonitorService"
             android:exported="false" />
+
+        <service android:name=".helper.service.UploadService"
+            android:exported="true" />
 
         <service android:name=".helper.service.MemoryMonitorService"
             android:exported="false" />
