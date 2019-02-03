@@ -376,6 +376,7 @@ public class ScanModeActivity extends AppCompatActivity {
         measure.setHeadCircumference(0.0f);
         measure.setMuac(0.0f);
         measure.setOedema(false);
+        measure.setPersonId(person.getId());
 
         if (measure.getId() == null) {
             measure.setId(AppController.getInstance().getMeasureId());

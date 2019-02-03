@@ -21,8 +21,6 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -31,7 +29,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -84,10 +81,7 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
-import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
-import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerDataAdapter;
-import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
+import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
@@ -98,7 +92,7 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.ui.views.SwipeView;
 
-public class MainActivity extends BaseActivity implements RecyclerDataAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
+public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
     private final int REQUEST_LOCATION = 0x1000;
     private final int REQUEST_CAMERA = 0x1001;
 
@@ -120,7 +114,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
 
     @BindView(R.id.recyclerData)
     RecyclerView recyclerData;
-    RecyclerDataAdapter adapterData;
+    RecyclerPersonAdapter adapterData;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.searchbar)
@@ -156,10 +150,8 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         setupActionBar();
         setupRecyclerView();
 
-        adapterData = new RecyclerDataAdapter(this);
+        adapterData = new RecyclerPersonAdapter(this);
         adapterData.setPersonDetailListener(this);
-        recyclerData.setAdapter(adapterData);
-        recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         viewModel.getAll().observe(this, personList->{
@@ -171,7 +163,10 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
             }
         });
 
-        personRepository = PersonRepository.getInstance(this);
+        recyclerData.setAdapter(adapterData);
+        recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
+        //personRepository = PersonRepository.getInstance(this);
 
         //startService(new Intent(getApplicationContext(), FileLogMonitorService.class));
 

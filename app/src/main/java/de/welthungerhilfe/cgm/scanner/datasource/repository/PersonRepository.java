@@ -7,6 +7,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -19,15 +21,12 @@ public class PersonRepository {
 
     private CgmDatabase database;
 
-    private MediatorLiveData liveDataMerger;
-    private LiveData<PagedList<Person>> personListLiveData;
-
-    private int curPage = -1;
+    private ExecutorService executor;
 
     private PersonRepository(Context context) {
         database = CgmDatabase.getInstance(context);
 
-        liveDataMerger = new MediatorLiveData<>();
+        executor = Executors.newSingleThreadExecutor();
     }
 
     public static PersonRepository getInstance(Context context) {
@@ -35,15 +34,6 @@ public class PersonRepository {
             instance = new PersonRepository(context);
         }
         return instance;
-    }
-
-    public LiveData<PagedList<Person>> getPersons() {
-        personListLiveData = database.getPersons();
-        liveDataMerger.addSource(personListLiveData, value -> {
-            liveDataMerger.setValue(value);
-        });
-
-        return liveDataMerger;
     }
 
     public LiveData<List<Person>> getAll() {
@@ -54,44 +44,22 @@ public class PersonRepository {
         return database.personDao().getPersonByQr(key);
     }
 
-    public LiveData<List<Person>> loadMore() {
-        curPage ++;
-
-        return database.personDao().loadMore(curPage * PAGE_SIZE, PAGE_SIZE);
-    }
-
     public void insertPerson(Person person) {
-        new AsyncTask<Void, Void, Boolean>() {
-
-            @Override
-            protected Boolean doInBackground(Void... voids) {
-                database.personDao().insertPerson(person);
-                return true;
-            }
-        }.execute();
+        executor.execute(() -> {
+            database.personDao().insertPerson(person);
+        });
     }
 
     public void updatePerson(Person person) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                database.personDao().updatePerson(person);
-                return null;
-            }
-        }.execute();
+        executor.execute(() -> {
+            database.personDao().updatePerson(person);
+        });
     }
 
     public void getSyncablePerson(OnPersonsLoad listener, long timestamp) {
-        new AsyncTask<Long, Void, List<Person>>() {
-            @Override
-            protected List<Person> doInBackground(Long... timestamp) {
-                return database.personDao().getSyncablePersons(timestamp[0]);
-            }
-
-            @Override
-            public void onPostExecute(List<Person> data) {
-                listener.onPersonsLoaded(data);
-            }
-        }.execute(timestamp);
+        executor.execute(() -> {
+            List<Person> data = database.personDao().getSyncablePersons(timestamp);
+            listener.onPersonsLoaded(data);
+        });
     }
 }

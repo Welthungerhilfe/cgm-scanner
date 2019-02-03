@@ -48,8 +48,6 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.MeasureViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
