@@ -9,8 +9,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
@@ -28,7 +26,7 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogLoad;
+import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.DIFF_HASH;
@@ -38,7 +36,7 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOADED;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOADED_NOT_DELETED;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOAD_ERROR;
 
-public class UploadService extends Service implements OnFileLogLoad {
+public class UploadService extends Service implements OnFileLogsLoad {
     private List<String> pendingArtefacts;
     private static int remainingCount = 0;
 
@@ -94,7 +92,7 @@ public class UploadService extends Service implements OnFileLogLoad {
     }
 
     @Override
-    public void onFileLogLoaded(List<FileLog> list) {
+    public void onFileLogsLoaded(List<FileLog> list) {
         remainingCount = list.size();
         Log.e("UploadService", String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
 

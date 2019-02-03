@@ -49,12 +49,10 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         void onMeasureSelect(Measure measure);
     }
 
-    public RecyclerMeasureAdapter(Context ctx, List<Measure> ml) {
+    public RecyclerMeasureAdapter(Context ctx) {
         context = ctx;
-        if (ml == null)
-            measureList = new ArrayList<>();
-        else
-            measureList = ml;
+
+        measureList = new ArrayList<>();
     }
 
     public void setMeasureSelectListener(OnMeasureSelectListener listener) {

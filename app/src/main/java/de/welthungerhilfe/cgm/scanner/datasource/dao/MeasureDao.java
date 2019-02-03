@@ -40,6 +40,9 @@ public interface MeasureDao {
     @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE personId=:personId AND deleted=0 ORDER BY timestamp DESC Limit 1")
     Measure getLastMeasure(String personId);
 
+    @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE personId=:personId AND deleted=0")
+    LiveData<List<Measure>> getPersonMeasures(String personId);
+
     @Query("DELETE FROM " + TABLE_MEASURE + " WHERE deleted=1 AND timestamp<=:timestamp")
     void deleteMeasureGarbage(long timestamp);
 }

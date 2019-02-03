@@ -1,6 +1,6 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
-import android.arch.lifecycle.MediatorLiveData;
+import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.os.AsyncTask;
 
@@ -8,8 +8,8 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasureLoad;
+import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasuresLoad;
 
 public class MeasureRepository {
     private static MeasureRepository instance;
@@ -47,7 +47,7 @@ public class MeasureRepository {
         }.execute();
     }
 
-    public void getSyncableMeasure(OnMeasureLoad listener, long timestamp) {
+    public void getSyncableMeasure(OnMeasuresLoad listener, long timestamp) {
         new AsyncTask<Long, Void, List<Measure>>() {
             @Override
             protected List<Measure> doInBackground(Long... timestamp) {
@@ -56,8 +56,26 @@ public class MeasureRepository {
 
             @Override
             public void onPostExecute(List<Measure> data) {
-                listener.onMeasureLoaded(data);
+                listener.onMeasuresLoaded(data);
             }
         }.execute(timestamp);
+    }
+
+    public void getPersonLastMeasure(OnMeasureLoad listener, String personId) {
+        new AsyncTask<String, Void, Measure>() {
+            @Override
+            protected Measure doInBackground(String... strings) {
+                return database.measureDao().getLastMeasure(strings[0]);
+            }
+
+            @Override
+            public void onPostExecute(Measure data) {
+                listener.onMeasureLoad(data);
+            }
+        }.execute(personId);
+    }
+
+    public LiveData<List<Measure>> getPersonMeasures(String personId) {
+        return database.measureDao().getPersonMeasures(personId);
     }
 }

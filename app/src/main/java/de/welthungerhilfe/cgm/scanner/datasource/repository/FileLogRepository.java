@@ -7,9 +7,7 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogLoad;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonLoad;
+import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 
 public class FileLogRepository {
     private static FileLogRepository instance;
@@ -27,7 +25,7 @@ public class FileLogRepository {
         return instance;
     }
 
-    public void loadQueuedData(OnFileLogLoad listener) {
+    public void loadQueuedData(OnFileLogsLoad listener) {
         new AsyncTask<Void, Void, List<FileLog>>() {
             @Override
             protected List<FileLog> doInBackground(Void... voids) {
@@ -36,7 +34,7 @@ public class FileLogRepository {
 
             @Override
             public void onPostExecute(List<FileLog> data) {
-                listener.onFileLogLoaded(data);
+                listener.onFileLogsLoaded(data);
             }
         }.execute();
     }
@@ -62,7 +60,7 @@ public class FileLogRepository {
         }.execute();
     }
 
-    public void getSyncableLog(OnFileLogLoad listener, long timestamp) {
+    public void getSyncableLog(OnFileLogsLoad listener, long timestamp) {
         new AsyncTask<Long, Void, List<FileLog>>() {
             @Override
             protected List<FileLog> doInBackground(Long... timestamp) {
@@ -71,7 +69,7 @@ public class FileLogRepository {
 
             @Override
             public void onPostExecute(List<FileLog> data) {
-                listener.onFileLogLoaded(data);
+                listener.onFileLogsLoaded(data);
             }
         }.execute(timestamp);
     }

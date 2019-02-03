@@ -4,6 +4,6 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 
-public interface OnFileLogLoad {
-    void onFileLogLoaded(List<FileLog> list);
+public interface OnFileLogsLoad {
+    void onFileLogsLoaded(List<FileLog> list);
 }

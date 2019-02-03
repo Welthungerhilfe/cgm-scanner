@@ -101,10 +101,10 @@ public class CreateDataActivity extends BaseActivity {
     private MeasuresDataFragment measureFragment;
     private GrowthDataFragment growthFragment;
 
-    private PersonViewModel viewModel;
     private PersonRepository personRepository;
-
     private MeasureRepository measureRepository;
+
+    private PersonViewModel viewModel;
 
     public Loc location = null;
 
@@ -115,7 +115,6 @@ public class CreateDataActivity extends BaseActivity {
 
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
-        viewModel = ViewModelProviders.of(this).get(PersonViewModel.class);
 
         personRepository = PersonRepository.getInstance(this);
         measureRepository = MeasureRepository.getInstance(this);
@@ -124,7 +123,6 @@ public class CreateDataActivity extends BaseActivity {
 
         qrCode = getIntent().getStringExtra(AppConstants.EXTRA_QR);
         qrBitmapByteArray = getIntent().getByteArrayExtra(AppConstants.EXTRA_QR_BITMAP);
-        person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
 
         measures = new ArrayList<>();
         consents = new ArrayList<>();
@@ -132,27 +130,14 @@ public class CreateDataActivity extends BaseActivity {
         setupActionBar();
         initFragments();
 
-        if (qrCode != null) {
-            findPerson(qrCode);
-        } else {
-            findPerson(person.getId());
-        }
+        viewModel = ViewModelProviders.of(this).get(PersonViewModel.class);
+        viewModel.registerPersonQR(qrCode);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_STORAGE);
         } else {
             uploadQR();
         }
-    }
-
-    private void findPerson(String key) {
-        viewModel.getPerson(key).observe(this, p->{
-            if (p != null) {
-                personalFragment.initUI();
-
-                getSupportActionBar().setTitle("ID: " + p.getQrcode());
-            }
-        });
     }
 
     public void onDestroy() {
@@ -208,31 +193,7 @@ public class CreateDataActivity extends BaseActivity {
         viewpager.setCurrentItem(1);
     }
 
-    public void setMeasureData(double height, double weight, double muac, double headCircumference, String additional, Loc location, boolean oedema) {
-        final Measure measure = new Measure();
-        measure.setId(AppController.getInstance().getMeasureId());
-        measure.setDate(System.currentTimeMillis());
-        long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
-        measure.setAge(age);
-        measure.setHeight(height);
-        measure.setWeight(weight);
-        measure.setMuac(muac);
-        measure.setHeadCircumference(headCircumference);
-        measure.setArtifact(additional);
-        measure.setLocation(location);
-        measure.setOedema(oedema);
-        measure.setType(AppConstants.VAL_MEASURE_MANUAL);
-        measure.setPersonId(person.getId());
-        measure.setTimestamp(Utils.getUniversalTimestamp());
-        measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-
-        // Todo: Write code to create measure
-        //OfflineRepository.getInstance(this).createMeasure(measure);
-
-        person.setLastLocation(location);
-        // Todo: Wirte code to update person
-        //OfflineRepository.getInstance(this).updatePerson(person);
-
+    public void setMeasureData() {
         viewpager.setCurrentItem(2);
     }
 

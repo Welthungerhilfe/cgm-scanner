@@ -21,12 +21,14 @@ package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatCheckBox;
@@ -55,6 +57,8 @@ import java.util.Date;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ImageDetailActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
@@ -90,11 +94,25 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     private Loc location = null;
     private long birthday = 0;
+
+    private Person person;
+    private PersonViewModel viewModel;
     
     public void onAttach(Context context) {
         super.onAttach(context);
 
         this.context = context;
+    }
+
+    public void onActivityCreated(Bundle instance) {
+        super.onActivityCreated(instance);
+
+        viewModel = ViewModelProviders.of(getActivity()).get(PersonViewModel.class);
+        viewModel.getPerson().observe(this, p -> {
+            person = p;
+            if (person != null)
+                initUI();
+        });
     }
 
     @Override
@@ -121,6 +139,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         checkAge = view.findViewById(R.id.checkAge);
 
         txtDate = view.findViewById(R.id.txtDate);
+        txtDate.setText(Utils.beautifyDate(new Date()));
 
         editName = view.findViewById(R.id.editName);
         editName.addTextChangedListener(this);
@@ -145,46 +164,30 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         radioMale.setOnCheckedChangeListener(this);
         //radioFluid = view.findViewById(R.id.radioFluid);
 
-        initUI();
-        showConsent();
+        //showConsent();
 
         return view;
     }
 
     public void initUI() {
-        if (context == null || txtDate == null)
-            return;
+        txtDate.setText(Utils.beautifyDate(person.getCreated()));
 
-        if (((CreateDataActivity)context).person != null) {
-            txtDate.setText(Utils.beautifyDate(((CreateDataActivity)context).person.getCreated()));
+        editName.setText(person.getName());
+        editPrename.setText(person.getSurname());
+        editBirth.setText(Utils.beautifyDate(person.getBirthday()));
+        editGuardian.setText(person.getGuardian());
 
-            editName.setText(((CreateDataActivity)context).person.getName());
-            editPrename.setText(((CreateDataActivity)context).person.getSurname());
-            editBirth.setText(Utils.beautifyDate(((CreateDataActivity)context).person.getBirthday()));
-            editGuardian.setText(((CreateDataActivity)context).person.getGuardian());
-
-            if (((CreateDataActivity)context).person.getLastLocation() != null) {
-                editLocation.setText(((CreateDataActivity)context).person.getLastLocation().getAddress());
-                //imgLocation.setVisibility(View.VISIBLE);
-            }
-
-            if (((CreateDataActivity)context).person.getSex().equals(AppConstants.VAL_SEX_FEMALE)) {
-                radioFemale.setChecked(true);
-            } else if (((CreateDataActivity)context).person.getSex().equals(AppConstants.VAL_SEX_MALE)) {
-                radioMale.setChecked(true);
-            } /*else if (((CreateDataActivity)context).person.getSex().equals(AppConstants.VAL_SEX_OTHER)) {
-                radioFluid.setChecked(true);
-            }*/
-
-            checkAge.setChecked(((CreateDataActivity)context).person.isAgeEstimated());
-        } else {
-            txtDate.setText(Utils.beautifyDate(new Date()));
-
-            byte[] data = ((CreateDataActivity)context).qrBitmapByteArray;
-            if (data != null) {
-                imgConsent.setImageBitmap(BitmapFactory.decodeByteArray(data, 0, data.length));
-            }
+        if (person.getLastLocation() != null) {
+            editLocation.setText(person.getLastLocation().getAddress());
         }
+
+        if (person.getSex().equals(AppConstants.VAL_SEX_FEMALE)) {
+            radioFemale.setChecked(true);
+        } else if (person.getSex().equals(AppConstants.VAL_SEX_MALE)) {
+            radioMale.setChecked(true);
+        }
+
+        checkAge.setChecked(person.isAgeEstimated());
     }
 
     public boolean validate() {
@@ -287,12 +290,24 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         sex = radioFluid.getText().toString();
                     */
 
-                    ((CreateDataActivity)context).setPersonalData(
-                            editName.getText().toString(),
-                            editPrename.getText().toString(),
-                            birthday,
-                            checkAge.isChecked(),
-                            sex, location, editGuardian.getText().toString());
+                    if (person == null) {
+                        person = new Person();
+                        person.setId(AppController.getInstance().getPersonId(editName.getText().toString()));
+                        person.setQrcode(viewModel.getPersonQR());
+                        person.setCreated(System.currentTimeMillis());
+                    }
+
+                    person.setName(editName.getText().toString());
+                    person.setSurname(editPrename.getText().toString());
+                    if (birthday != 0)
+                        person.setBirthday(birthday);
+                    person.setGuardian(editGuardian.getText().toString());
+                    person.setSex(sex);
+                    person.setAgeEstimated(checkAge.isChecked());
+                    person.setTimestamp(Utils.getUniversalTimestamp());
+                    person.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+
+                    viewModel.savePerson(person);
                 }
 
                 break;

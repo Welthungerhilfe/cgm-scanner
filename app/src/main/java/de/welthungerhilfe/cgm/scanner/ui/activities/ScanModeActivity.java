@@ -4,17 +4,15 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.content.ComponentName;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -45,7 +43,9 @@ import butterknife.OnClick;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasureScanFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
@@ -233,12 +233,16 @@ public class ScanModeActivity extends AppCompatActivity {
     public Measure measure;
     public Loc location;
 
+    private PersonViewModel viewModel;
+
     protected void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
         measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
         if (person == null) Log.e(TAG,"person was null!");
         if (measure == null) Log.e(TAG,"measure was null!");
+
+        viewModel = ViewModelProviders.of(this).get(PersonViewModel.class);
 
         setContentView(R.layout.activity_scan_mode);
 
@@ -372,13 +376,12 @@ public class ScanModeActivity extends AppCompatActivity {
         measure.setHeadCircumference(0.0f);
         measure.setMuac(0.0f);
         measure.setOedema(false);
-        if (measure.getId() == null)
-            EventBus.getDefault().post(new MeasureResult(measure));
-        else {
-            // Todo: write code to update measure
-            //OfflineRepository.getInstance(this).updateMeasure(measure);
+
+        if (measure.getId() == null) {
+            measure.setId(AppController.getInstance().getMeasureId());
         }
 
+        viewModel.saveMeasure(person, measure);
         finish();
     }
 

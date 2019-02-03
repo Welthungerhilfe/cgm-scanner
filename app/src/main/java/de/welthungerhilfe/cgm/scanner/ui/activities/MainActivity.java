@@ -83,6 +83,7 @@ import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerDataAdapter;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
@@ -107,26 +108,8 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
 
     private File mFileTemp;
 
-    private PersonViewModel viewModel;
+    private PersonListViewModel viewModel;
     private PersonRepository personRepository;
-    private Observer<List<Person>> observer = new Observer<List<Person>>() {
-        @Override
-        public void onChanged(@Nullable List<Person> people) {
-            if (people.size() > 0) {
-                if (listener.getTotalItems() == 0)
-
-
-                adapterData.addPersons(people);
-            }
-        }
-    };
-
-    private EndlessScrollListener listener = new EndlessScrollListener() {
-        @Override
-        public void onLoadMore() {
-            viewModel.loadMore().observe(MainActivity.this, observer);
-        }
-    };
 
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
@@ -178,8 +161,8 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
         recyclerData.setAdapter(adapterData);
         recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
-        viewModel = ViewModelProviders.of(this).get(PersonViewModel.class);
-        viewModel.getPersons().observe(this, personList->{
+        viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
+        viewModel.getAll().observe(this, personList->{
             if (personList.size() == 0) {
                 lytNoPerson.setVisibility(View.VISIBLE);
             } else {
@@ -670,7 +653,7 @@ public class MainActivity extends BaseActivity implements RecyclerDataAdapter.On
     @Override
     public void onPersonDetail(Person person) {
         Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
-        intent.putExtra(AppConstants.EXTRA_PERSON, person);
+        intent.putExtra(AppConstants.EXTRA_QR, person.getQrcode());
         startActivity(intent);
     }
 }

@@ -19,6 +19,7 @@
 
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -46,6 +47,10 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 
+import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.MeasureViewModel;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerMeasureAdapter;
@@ -70,13 +75,29 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     private ManualMeasureDialog measureDialog;
     private ManualDetailDialog detailDialog;
 
+    private Person person;
+    private PersonViewModel viewModel;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
         this.context = context;
-        adapterMeasure = new RecyclerMeasureAdapter(context, ((CreateDataActivity)context).measures);
-        adapterMeasure.setMeasureSelectListener(this);
+    }
+
+    public void onActivityCreated(Bundle instance) {
+        super.onActivityCreated(instance);
+
+        viewModel = ViewModelProviders.of(getActivity()).get(PersonViewModel.class);
+        viewModel.getPerson().observe(this, p -> {
+            person = p;
+
+            if (p != null) {
+                viewModel.getMeasures(person.getId()).observe(this, measures -> {
+                    adapterMeasure.resetData(measures);
+                });
+            }
+        });
     }
 
     public void onResume() {
@@ -90,7 +111,10 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // TODO: when coming from automatic scan show ManualMeasureDialog before displaying auto
         View view = inflater.inflate(R.layout.fragment_measure, container, false);
-        
+
+        adapterMeasure = new RecyclerMeasureAdapter(context);
+        adapterMeasure.setMeasureSelectListener(this);
+
         recyclerMeasure = view.findViewById(R.id.recyclerMeasure);
         recyclerMeasure.setAdapter(adapterMeasure);
         recyclerMeasure.setLayoutManager(new LinearLayoutManager(context));
@@ -150,7 +174,6 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                             measureDialog.setMeasure(measure);
                             measureDialog.show();
                         } else {
-                            //Intent intent = new Intent(getContext(), RecorderActivity.class);
                             Intent intent = new Intent(getContext(), ScanModeActivity.class);
                             intent.putExtra(AppConstants.EXTRA_PERSON, ((CreateDataActivity)context).person);
                             intent.putExtra(AppConstants.EXTRA_MEASURE, measure);
@@ -186,9 +209,6 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void createMeasure() {
-        if (context == null)
-            return;
-
         try {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setTitle(R.string.title_add_measure);
@@ -202,7 +222,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                         measureDialog.show();
                     } else if (which == 1) {
                         Intent intent = new Intent(getContext(), ScanModeActivity.class);
-                        intent.putExtra(AppConstants.EXTRA_PERSON, ((CreateDataActivity)context).person);
+                        intent.putExtra(AppConstants.EXTRA_PERSON, person);
                         startActivity(intent);
                     }
                 }
@@ -218,7 +238,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         switch (view.getId()) {
             case R.id.fabCreate:
                 Crashlytics.log("Add Measure to person");
-                if (((CreateDataActivity)context).person == null) {
+                if (person == null) {
                     Snackbar.make(fabCreate, R.string.error_person_first, Snackbar.LENGTH_LONG).show();
                 } else {
                     createMeasure();
@@ -229,7 +249,24 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onManualMeasure(double height, double weight, double muac, double headCircumference, Loc location, boolean oedema) {
-        ((CreateDataActivity)context).setMeasureData(height, weight, muac, headCircumference,"No Additional Info", location, oedema);
+        Measure measure = new Measure();
+        measure.setId(AppController.getInstance().getMeasureId());
+        measure.setDate(System.currentTimeMillis());
+        long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
+        measure.setAge(age);
+        measure.setHeight(height);
+        measure.setWeight(weight);
+        measure.setMuac(muac);
+        measure.setHeadCircumference(headCircumference);
+        measure.setArtifact("");
+        measure.setLocation(location);
+        measure.setOedema(oedema);
+        measure.setType(AppConstants.VAL_MEASURE_MANUAL);
+        measure.setPersonId(person.getId());
+        measure.setTimestamp(Utils.getUniversalTimestamp());
+        measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+
+        viewModel.saveMeasure(person, measure);
     }
 
     @Override

@@ -4,6 +4,6 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 
-public interface OnPersonLoad {
-    void onPersonLoaded(List<Person> list);
+public interface OnPersonsLoad {
+    void onPersonsLoaded(List<Person> list);
 }

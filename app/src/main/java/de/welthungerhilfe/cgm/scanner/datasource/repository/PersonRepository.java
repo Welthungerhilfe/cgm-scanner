@@ -10,7 +10,7 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonLoad;
+import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonsLoad;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.PAGE_SIZE;
 
@@ -51,7 +51,7 @@ public class PersonRepository {
     }
 
     public LiveData<Person> getPerson(String key) {
-        return database.personDao().getPerson(key);
+        return database.personDao().getPersonByQr(key);
     }
 
     public LiveData<List<Person>> loadMore() {
@@ -81,7 +81,7 @@ public class PersonRepository {
         }.execute();
     }
 
-    public void getSyncablePerson(OnPersonLoad listener, long timestamp) {
+    public void getSyncablePerson(OnPersonsLoad listener, long timestamp) {
         new AsyncTask<Long, Void, List<Person>>() {
             @Override
             protected List<Person> doInBackground(Long... timestamp) {
@@ -90,7 +90,7 @@ public class PersonRepository {
 
             @Override
             public void onPostExecute(List<Person> data) {
-                listener.onPersonLoaded(data);
+                listener.onPersonsLoaded(data);
             }
         }.execute(timestamp);
     }

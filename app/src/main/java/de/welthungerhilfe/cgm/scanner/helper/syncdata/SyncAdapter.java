@@ -1,7 +1,6 @@
 package de.welthungerhilfe.cgm.scanner.helper.syncdata;
 
 import android.accounts.Account;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -29,20 +28,18 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.MeasureViewModel;
-import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogLoad;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasureLoad;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonLoad;
+import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
+import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasuresLoad;
+import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
-public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPersonLoad, OnMeasureLoad, OnFileLogLoad {
+public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPersonsLoad, OnMeasuresLoad, OnFileLogsLoad {
     private long prevTimestamp;
     private SessionManager session;
 
@@ -200,7 +197,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
     @Override
     @AddTrace(name = "onPersonLoaded", enabled = true)
-    public void onPersonLoaded(List<Person> personList) {
+    public void onPersonsLoaded(List<Person> personList) {
         for (int i = 0; i < personList.size(); i++) {
             personList.get(i).setTimestamp(Utils.getUniversalTimestamp());
 
@@ -229,7 +226,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
     @Override
     @AddTrace(name = "onMeasureLoaded", enabled = true)
-    public void onMeasureLoaded(List<Measure> measureList) {
+    public void onMeasuresLoaded(List<Measure> measureList) {
         for (int i = 0; i < measureList.size(); i++) {
             measureList.get(i).setTimestamp(Utils.getUniversalTimestamp());
 
@@ -259,7 +256,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     }
 
     @Override
-    public void onFileLogLoaded(List<FileLog> list) {
+    public void onFileLogsLoaded(List<FileLog> list) {
         for (int i = 0; i < list.size(); i++) {
             AppController.getInstance().firebaseFirestore.collection("artefacts")
                     .document(list.get(i).getId())

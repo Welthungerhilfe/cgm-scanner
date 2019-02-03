@@ -19,6 +19,8 @@
 
 package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -41,6 +43,11 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
+import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
+import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasureLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapter.ViewHolder> implements Filterable {
@@ -60,8 +67,12 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
 
     private OnPersonDetail personDetailListener;
 
+    private MeasureRepository repository;
+
     public RecyclerDataAdapter(Context ctx) {
         context = ctx;
+
+        repository = MeasureRepository.getInstance(context);
     }
 
     @Override
@@ -77,12 +88,9 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
 
         holder.txtName.setText(person.getName() + " " + person.getSurname());
 
-        // Todo;
-        /*
-        new OfflineTask().getLastMeasure(person, new OfflineTask.OnLoadLastMeasure() {
-
+        repository.getPersonLastMeasure(new OnMeasureLoad() {
             @Override
-            public void onLastMeasureLoaded(Measure measure) {
+            public void onMeasureLoad(Measure measure) {
                 if (measure != null) {
                     holder.txtWeight.setText(Double.toString(measure.getWeight()));
                     holder.txtHeight.setText(Double.toString(measure.getHeight()));
@@ -91,8 +99,7 @@ public class RecyclerDataAdapter extends RecyclerView.Adapter<RecyclerDataAdapte
                     holder.txtHeight.setText("0.0");
                 }
             }
-        });
-        */
+        }, person.getId());
 
         if (personDetailListener != null) {
             holder.bindPersonDetail(person);
