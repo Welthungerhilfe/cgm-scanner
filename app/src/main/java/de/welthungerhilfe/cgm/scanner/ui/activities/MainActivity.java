@@ -36,15 +36,18 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -81,7 +84,9 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
+import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPagingAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
+import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.helper.InternalStorageContentProvider;
@@ -140,6 +145,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         ButterKnife.bind(this);
 
+
         Crashlytics.setUserIdentifier(AppController.getInstance().firebaseUser.getEmail());
         Crashlytics.log(0, "user login: ", String.format("user logged in with email %s at %s", AppController.getInstance().firebaseUser.getEmail(), Utils.beautifyDateTime(new Date())));
 
@@ -153,8 +159,15 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         adapterData = new RecyclerPersonAdapter(this);
         adapterData.setPersonDetailListener(this);
 
+        recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        recyclerData.setItemAnimator(new DefaultItemAnimator());
+        recyclerData.setHasFixedSize(true);
+        recyclerData.setAdapter(adapterData);
+
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         viewModel.getAll().observe(this, personList->{
+            Log.e("PersonRecycler", "Observer called");
+
             if (personList.size() == 0) {
                 lytNoPerson.setVisibility(View.VISIBLE);
             } else {
@@ -163,12 +176,24 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         });
 
-        recyclerData.setAdapter(adapterData);
+        /*
+        lytNoPerson.setVisibility(View.GONE);
+
+        RecyclerPagingAdapter adapter = new RecyclerPagingAdapter();
         recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        recyclerData.setItemAnimator(new DefaultItemAnimator());
+        recyclerData.setHasFixedSize(true);
+        recyclerData.setAdapter(adapter);
+        recyclerData.addOnScrollListener(new EndlessScrollListener() {
+            @Override
+            public void onLoadMore() {
+                Log.e("RecyclerView", "Load More");
+            }
+        });
 
-        //personRepository = PersonRepository.getInstance(this);
-
-        //startService(new Intent(getApplicationContext(), FileLogMonitorService.class));
+        viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
+        viewModel.getPagedPerson().observe(this, adapter::submitList);
+        */
 
         fetchRemoteConfig();
 
