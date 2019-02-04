@@ -156,6 +156,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         setupActionBar();
         setupRecyclerView();
 
+        /*
         adapterData = new RecyclerPersonAdapter(this);
         adapterData.setPersonDetailListener(this);
 
@@ -175,8 +176,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 adapterData.resetData(personList);
             }
         });
+        */
 
-        /*
         lytNoPerson.setVisibility(View.GONE);
 
         RecyclerPagingAdapter adapter = new RecyclerPagingAdapter();
@@ -193,7 +194,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         viewModel.getPagedPerson().observe(this, adapter::submitList);
-        */
 
         fetchRemoteConfig();
 
