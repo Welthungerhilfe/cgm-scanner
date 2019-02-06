@@ -33,7 +33,7 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.DIFF_HASH;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.FILE_NOT_FOUND;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.MULTI_UPLOAD_BUNCH;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOADED;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOADED_NOT_DELETED;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOADED_DELETED;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOAD_ERROR;
 
 public class UploadService extends Service implements OnFileLogsLoad {
@@ -159,7 +159,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                                     try {
                                         new File(log.getPath()).delete();
                                         log.setDeleted(true);
-                                        log.setStatus(UPLOADED_NOT_DELETED);
+                                        log.setStatus(UPLOADED_DELETED);
                                     } catch (Exception e) {
                                         log.setStatus(FILE_NOT_FOUND);
                                     }

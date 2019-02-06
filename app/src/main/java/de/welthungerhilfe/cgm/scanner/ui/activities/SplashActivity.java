@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -20,6 +21,7 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class SplashActivity extends AppCompatActivity {
     private SessionManager session;
+    private int a = 0;
 
     public void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
@@ -28,7 +30,7 @@ public class SplashActivity extends AppCompatActivity {
         session = new SessionManager(this);
 
         /*
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 10000; i++) {
             createThoundPersons(String.format(Locale.US, "person%d", i + 1));
         }
         */
@@ -66,13 +68,15 @@ public class SplashActivity extends AppCompatActivity {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        int a = 0;
+                        a ++;
+                        Log.e("PersonCount", String.valueOf(a));
                     }
                 })
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        int a = 0;
+                        a ++;
+                        Log.e("PersonCount", String.valueOf(a));
                     }
                 });
     }

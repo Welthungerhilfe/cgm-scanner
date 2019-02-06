@@ -112,7 +112,7 @@ public class AppConstants {
     public static final int STANDING_INFANT_SCAN = 200;
 
     public static final int UPLOADED = 201;
-    public static final int UPLOADED_NOT_DELETED = 202;
+    public static final int UPLOADED_DELETED = 202;
     public static final int NO_NETWORK = 301;
     public static final int DIFF_HASH = 302;
     public static final int UPLOAD_ERROR = 400;
