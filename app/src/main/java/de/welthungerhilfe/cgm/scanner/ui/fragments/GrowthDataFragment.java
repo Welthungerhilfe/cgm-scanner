@@ -20,6 +20,7 @@
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -47,9 +48,11 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
 
@@ -69,10 +72,30 @@ public class GrowthDataFragment extends Fragment {
 
     private int chartType = 0;
 
+    private PersonViewModel viewModel;
+    private Person person;
+    private List<Measure> measures;
+
     public void onAttach(Context context) {
         super.onAttach(context);
 
         this.context = context;
+    }
+
+    public void onActivityCreated(Bundle instance) {
+        super.onActivityCreated(instance);
+
+        viewModel = ViewModelProviders.of(getActivity()).get(PersonViewModel.class);
+        viewModel.getPerson().observe(this, p -> {
+            if (p != null) {
+                person = p;
+
+                viewModel.getMeasures(p.getId()).observe(this, mList -> {
+                    measures = mList;
+                    setData();
+                });
+            }
+        });
     }
 
     public void onResume() {
@@ -86,10 +109,6 @@ public class GrowthDataFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_growth, container, false);
 
         txtLabel = view.findViewById(R.id.txtLabel);
-        if (((CreateDataActivity)context).person != null) {
-            txtLabel.setText(((CreateDataActivity)context).person.getSex());
-        }
-
         txtYAxis = view.findViewById(R.id.txtYAxis);
         txtXAxis = view.findViewById(R.id.txtXAxis);
 
@@ -144,16 +163,11 @@ public class GrowthDataFragment extends Fragment {
         mChart.getXAxis().setGranularityEnabled(true);
         */
 
-        setData();
+        //setData();
     }
 
     public void setData() {
-        if (context == null || mChart == null) {
-            return;
-        }
-        if (((CreateDataActivity)context).measures == null || ((CreateDataActivity)context).measures.size() == 0) {
-            return;
-        }
+        txtLabel.setText(person.getSex());
 
         switch (chartType) {
             case 0:
@@ -178,16 +192,16 @@ public class GrowthDataFragment extends Fragment {
                 break;
         }
 
-        long birthday = ((CreateDataActivity)context).person.getBirthday();
+        long birthday = person.getBirthday();
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
 
         // ----------------------- Line for manual measures -------------------------- //
-        ArrayList<Entry> measures = new ArrayList<Entry>();
+        ArrayList<Entry> entries = new ArrayList<>();
 
         double maxHeight = 0;
 
-        for (Measure measure : ((CreateDataActivity)context).measures) {
+        for (Measure measure : measures) {
             if (!measure.getType().equals("manual"))
                 continue;
 
@@ -197,28 +211,28 @@ public class GrowthDataFragment extends Fragment {
             long day = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
 
             if (chartType == 0)
-                measures.add(new Entry(day, (float) measure.getWeight()));
+                entries.add(new Entry(day, (float) measure.getWeight()));
             else if (chartType == 1)
-                measures.add(new Entry(day, (float) measure.getHeight()));
+                entries.add(new Entry(day, (float) measure.getHeight()));
             else if (chartType == 2) {
-                measures.add(new Entry((float) measure.getHeight(), (float) measure.getWeight()));
-                Collections.sort(measures, new Comparator<Entry>() {
+                entries.add(new Entry((float) measure.getHeight(), (float) measure.getWeight()));
+                Collections.sort(entries, new Comparator<Entry>() {
                     @Override
                     public int compare(Entry o1, Entry o2) {
                         return Float.compare(o1.getX(), o2.getX());
                     }
                 });
             } else if (chartType == 3) {
-                measures.add(new Entry(day, (float) measure.getHeadCircumference()));
+                entries.add(new Entry(day, (float) measure.getHeadCircumference()));
             } else if (chartType == 4) {
-                measures.add(new Entry(day, (float) measure.getMuac()));
+                entries.add(new Entry(day, (float) measure.getMuac()));
             }
         }
 
         if (measures.size() > 1)
-            dataSets.add(createDataSet(measures, "measure", Color.rgb(0, 0, 0), 3f, false));
+            dataSets.add(createDataSet(entries, "measure", Color.rgb(0, 0, 0), 3f, false));
         else {
-            dataSets.add(createDataSet(measures, "measure", Color.rgb(0, 0, 0), 3f, true));
+            dataSets.add(createDataSet(entries, "measure", Color.rgb(0, 0, 0), 3f, true));
         }
 
         // ------------------------- Line for ruler values ---------------------------------- //
@@ -233,7 +247,7 @@ public class GrowthDataFragment extends Fragment {
         try {
             BufferedReader reader = null;
 
-            if (((CreateDataActivity)context).person.getSex().equals("female"))
+            if (person.getSex().equals("female"))
                 reader = new BufferedReader(new InputStreamReader(context.getAssets().open(girls[chartType]), "UTF-8"));
             else
                 reader = new BufferedReader(new InputStreamReader(context.getAssets().open(boys[chartType]), "UTF-8"));
