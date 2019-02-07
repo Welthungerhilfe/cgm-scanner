@@ -165,6 +165,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         recyclerData.setItemAnimator(new DefaultItemAnimator());
         recyclerData.setHasFixedSize(true);
         recyclerData.setAdapter(adapterData);
+        /*
         recyclerData.addOnScrollListener(new EndlessScrollListener(lytManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
@@ -173,6 +174,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 viewModel.loadMore(page);
             }
         });
+        */
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         /*

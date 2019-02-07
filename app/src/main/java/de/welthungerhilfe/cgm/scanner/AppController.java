@@ -27,6 +27,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
@@ -43,6 +44,8 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
 
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
@@ -163,21 +166,19 @@ public class AppController extends Application {
         return Utils.getAndroidID(getContentResolver()) + "_" + type + "_" + String.valueOf(timestamp) + "_" + Utils.getSaltString(16);
     }
 
+    public File getRootDirectory() {
+        File mExtFileDir;
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            mExtFileDir = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name_long));
+        } else {
+            mExtFileDir = getApplicationContext().getFilesDir();
+        }
+
+        return mExtFileDir;
+    }
+
     public void notifyUpload() {
-        /*
-        Intent service = new Intent(getApplicationContext(), UploadService.class);
-        bindService(service, new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-
-            }
-        }, Context.BIND_AUTO_CREATE);
-        */
         startService(new Intent(getApplicationContext(), UploadService.class));
     }
 }

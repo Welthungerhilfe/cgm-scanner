@@ -179,8 +179,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
-        //mQrCode = ((ScanModeActivity)getActivity()).person.getQrcode();
-        mQrCode = "person301";
+        mQrCode = ((ScanModeActivity)getActivity()).person.getQrcode();
     }
 
     @Override
@@ -327,6 +326,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
     private void setupScanArtefacts() {
         // TODO make part of AppController?
+        /*
         File mExtFileDir;
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
@@ -334,7 +334,8 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
         } else {
             mExtFileDir = getContext().getFilesDir();
         }
-        // mExtFileDir = getContext().getExternalFilesDir(Environment.getDataDirectory().getAbsolutePath());
+        */
+        mExtFileDir = AppController.getInstance().getRootDirectory();
 
         // TODO make part of AppConstants
         Log.e("Root Directory", mExtFileDir.getParent());

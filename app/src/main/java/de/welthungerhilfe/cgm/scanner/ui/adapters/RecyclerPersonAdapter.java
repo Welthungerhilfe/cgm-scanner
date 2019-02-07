@@ -85,6 +85,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
         holder.txtName.setText(person.getName() + " " + person.getSurname());
 
+        /*
         repository.getPersonLastMeasure(new OnMeasureLoad() {
             @Override
             public void onMeasureLoad(Measure measure) {
@@ -97,6 +98,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
                 }
             }
         }, person.getId());
+        */
 
         if (personDetailListener != null) {
             holder.bindPersonDetail(person);

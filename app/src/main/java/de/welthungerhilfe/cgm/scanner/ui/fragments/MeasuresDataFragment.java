@@ -173,7 +173,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                             measureDialog.show();
                         } else {
                             Intent intent = new Intent(getContext(), ScanModeActivity.class);
-                            intent.putExtra(AppConstants.EXTRA_PERSON, ((CreateDataActivity)context).person);
+                            intent.putExtra(AppConstants.EXTRA_PERSON, person);
                             intent.putExtra(AppConstants.EXTRA_MEASURE, measure);
                             startActivity(intent);
                             adapterMeasure.notifyItemChanged(position);
