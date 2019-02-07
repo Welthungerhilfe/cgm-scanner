@@ -197,6 +197,10 @@ public class CreateDataActivity extends BaseActivity {
         viewpager.setCurrentItem(2);
     }
 
+    public void gotoNextStep() {
+        viewpager.setCurrentItem(viewpager.getCurrentItem() + 1);
+    }
+
     private void uploadQR() {
         if (qrBitmapByteArray == null)
             return;

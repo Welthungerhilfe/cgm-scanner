@@ -41,8 +41,10 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasureLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAdapter.ViewHolder> implements Filterable {
@@ -83,7 +85,6 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
         holder.txtName.setText(person.getName() + " " + person.getSurname());
 
-        /*
         repository.getPersonLastMeasure(new OnMeasureLoad() {
             @Override
             public void onMeasureLoad(Measure measure) {
@@ -96,7 +97,6 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
                 }
             }
         }, person.getId());
-        */
 
         if (personDetailListener != null) {
             holder.bindPersonDetail(person);

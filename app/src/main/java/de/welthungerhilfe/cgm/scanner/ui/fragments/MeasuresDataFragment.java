@@ -265,6 +265,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
         viewModel.saveMeasure(person, measure);
+        ((CreateDataActivity)getActivity()).gotoNextStep();
     }
 
     @Override
