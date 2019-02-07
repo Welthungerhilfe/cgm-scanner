@@ -75,6 +75,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -156,16 +157,30 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         setupActionBar();
         setupRecyclerView();
 
-        /*
         adapterData = new RecyclerPersonAdapter(this);
         adapterData.setPersonDetailListener(this);
 
-        recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        LinearLayoutManager lytManager = new LinearLayoutManager(MainActivity.this);
+        recyclerData.setLayoutManager(lytManager);
         recyclerData.setItemAnimator(new DefaultItemAnimator());
         recyclerData.setHasFixedSize(true);
         recyclerData.setAdapter(adapterData);
+        recyclerData.addOnScrollListener(new EndlessScrollListener(lytManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                Log.e("EndlessScroll", String.format(Locale.US, "current page - %d, total item - %d", page, totalItemsCount));
+
+                viewModel.loadMore(page);
+            }
+        });
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
+        /*
+        viewModel.loadMore(0).observe(this, list -> {
+            adapterData.addPersons(list);
+        });
+        lytNoPerson.setVisibility(View.GONE);
+        */
         viewModel.getAll().observe(this, personList->{
             Log.e("PersonRecycler", "Observer called");
 
@@ -176,8 +191,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 adapterData.resetData(personList);
             }
         });
-        */
 
+        /*
         lytNoPerson.setVisibility(View.GONE);
 
         RecyclerPagingAdapter adapter = new RecyclerPagingAdapter();
@@ -185,15 +200,10 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         recyclerData.setItemAnimator(new DefaultItemAnimator());
         recyclerData.setHasFixedSize(true);
         recyclerData.setAdapter(adapter);
-        recyclerData.addOnScrollListener(new EndlessScrollListener() {
-            @Override
-            public void onLoadMore() {
-                Log.e("RecyclerView", "Load More");
-            }
-        });
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         viewModel.getPagedPerson().observe(this, adapter::submitList);
+        */
 
         fetchRemoteConfig();
 

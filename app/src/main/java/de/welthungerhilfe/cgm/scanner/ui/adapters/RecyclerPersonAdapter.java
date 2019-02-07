@@ -21,6 +21,7 @@ package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
 import android.content.Context;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.util.ListUpdateCallback;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -78,7 +79,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
     @Override
     public void onBindViewHolder(RecyclerPersonAdapter.ViewHolder holder, int position) {
-        Person person = personList.get(position);
+        Person person = filteredList.get(position);
 
         holder.txtName.setText(person.getName() + " " + person.getSurname());
 
@@ -106,11 +107,11 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
     @Override
     public int getItemCount() {
-        return personList.size();
+        return filteredList.size();
     }
 
     public Person getItem(int position) {
-        return personList.get(position);
+        return filteredList.get(position);
     }
 
     private void setAnimation(View viewToAnimate, int position) {
@@ -137,7 +138,8 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
             personList.clear();
             personList.addAll(list);
-            diffResult.dispatchUpdatesTo(this);
+            //diffResult.dispatchUpdatesTo(this);
+            getFilter().filter("");
         } else {
             personList = list;
         }
@@ -203,9 +205,48 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
     }
 
     public void addPersons(List<Person> pList) {
+        /*
         int oIndex = personList.size();
         personList.addAll(pList);
         notifyItemRangeInserted(oIndex, pList.size());
+        */
+        if (personList.size() != 0) {
+            PersonDiffCallback diffCallback = new PersonDiffCallback(personList, pList);
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+            diffResult.dispatchUpdatesTo(new ListUpdateCallback() {
+                @Override
+                public void onInserted(int position, int count) {
+                    if (pList.get(position).getCreated() > personList.get(position).getCreated()) {
+                        personList.addAll(0, pList);
+
+                        notifyItemChanged(position);
+                    } else {
+                        personList.addAll(pList);
+
+                        notifyItemChanged(personList.size() - position);
+                    }
+                }
+
+                @Override
+                public void onRemoved(int position, int count) {
+                    int a = 0;
+                }
+
+                @Override
+                public void onMoved(int fromPosition, int toPosition) {
+                    int a = 0;
+                }
+
+                @Override
+                public void onChanged(int position, int count, Object payload) {
+                    int a = 0;
+                }
+            });
+        } else {
+            personList = pList;
+            notifyDataSetChanged();
+        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

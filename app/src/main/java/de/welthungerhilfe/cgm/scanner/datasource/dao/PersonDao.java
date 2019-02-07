@@ -50,6 +50,9 @@ public interface PersonDao {
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 ORDER BY created DESC LIMIT :pageSize OFFSET :index")
     LiveData<List<Person>> loadMore(int index, int pageSize);
 
-    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 ORDER BY created DESC")
-    LiveData<List<Person>> getAll();
+    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 AND created>=STRFTIME('%s',DATE('now', 'start of day')) AND createdBy=:createdBy ORDER BY created DESC")
+    LiveData<List<Person>> getAll(String createdBy);
+
+    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 ORDER BY created DESC LIMIT 50 OFFSET :offset")
+    LiveData<List<Person>> getPersonByPage(int offset);
 }

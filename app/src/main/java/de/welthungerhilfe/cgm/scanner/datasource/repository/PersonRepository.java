@@ -7,6 +7,7 @@ import android.arch.paging.PagedList;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -60,8 +61,10 @@ public class PersonRepository {
         return instance;
     }
 
-    public LiveData<List<Person>> getAll() {
-        return database.personDao().getAll();
+    public LiveData<List<Person>> getAll(String createdBy) {
+        Date now = new Date();
+
+        return database.personDao().getAll(createdBy);
     }
 
     public LiveData<Person> getPerson(String key) {
@@ -89,5 +92,9 @@ public class PersonRepository {
 
     public LiveData<PagedList<Person>> getPagedPerson() {
         return pagedListLiveData;
+    }
+
+    public LiveData<List<Person>> getPersonByPage(int page) {
+        return database.personDao().getPersonByPage(page * 50);
     }
 }
