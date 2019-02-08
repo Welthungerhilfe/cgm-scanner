@@ -229,7 +229,7 @@ public class GrowthDataFragment extends Fragment {
             }
         }
 
-        if (measures.size() > 1)
+        if (entries.size() > 1)
             dataSets.add(createDataSet(entries, "measure", Color.rgb(0, 0, 0), 3f, false));
         else {
             dataSets.add(createDataSet(entries, "measure", Color.rgb(0, 0, 0), 3f, true));

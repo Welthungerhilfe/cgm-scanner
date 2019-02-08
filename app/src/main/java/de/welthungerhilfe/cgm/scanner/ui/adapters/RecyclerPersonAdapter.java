@@ -81,7 +81,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
     @Override
     public void onBindViewHolder(RecyclerPersonAdapter.ViewHolder holder, int position) {
-        Person person = filteredList.get(position);
+        Person person = getItem(position);
 
         holder.txtName.setText(person.getName() + " " + person.getSurname());
 
@@ -132,6 +132,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
     }
 
     public void resetData(List<Person> list) {
+        /*
         if (personList != null) {
             PersonDiffCallback diffCallback = new PersonDiffCallback(personList, list);
             DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
@@ -143,11 +144,10 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
         } else {
             personList = list;
         }
-
-        /*
-        this.personList = personList;
-        getFilter().filter("");
         */
+
+        this.personList = list;
+        getFilter().filter("");
     }
 
     public void addPerson(Person person) {

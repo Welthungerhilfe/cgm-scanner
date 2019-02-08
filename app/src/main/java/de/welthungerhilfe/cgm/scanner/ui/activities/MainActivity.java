@@ -174,15 +174,16 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 viewModel.loadMore(page);
             }
         });
-        */
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
-        /*
         viewModel.loadMore(0).observe(this, list -> {
             adapterData.addPersons(list);
         });
         lytNoPerson.setVisibility(View.GONE);
         */
+
+
+        viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         viewModel.getAll().observe(this, personList->{
             Log.e("PersonRecycler", "Observer called");
 
