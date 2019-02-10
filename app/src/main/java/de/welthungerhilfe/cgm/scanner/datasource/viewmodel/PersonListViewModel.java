@@ -26,7 +26,7 @@ public class PersonListViewModel extends AndroidViewModel {
     public PersonListViewModel(@NonNull Application application) {
         super(application);
 
-        repository = PersonRepository.getInstance(application.getApplicationContext());
+        repository = PersonRepository.getInstance(application);
 
         personList = new MutableLiveData<>();
         liveDataMerger = new MediatorLiveData<>();
@@ -42,18 +42,15 @@ public class PersonListViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<Person>> loadMore(int page) {
+        /*
         LiveData<List<Person>> pList = repository.getPersonByPage(page);
         liveDataMerger.addSource(pList, list->{
-            /*
-            List<Person> current = personList.getValue();
-            current.addAll(list);
-
-            personList.setValue(current);
-            */
             liveDataMerger.setValue(list);
         });
 
         return liveDataMerger;
+        */
+        return repository.getPersonByPage(page);
     }
 
     public MutableLiveData<List<Person>> getPersonList() {

@@ -116,8 +116,8 @@ public class CreateDataActivity extends BaseActivity {
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
 
-        personRepository = PersonRepository.getInstance(this);
-        measureRepository = MeasureRepository.getInstance(this);
+        personRepository = PersonRepository.getInstance(getApplication());
+        measureRepository = MeasureRepository.getInstance(getApplication());
 
         getCurrentLocation();
 

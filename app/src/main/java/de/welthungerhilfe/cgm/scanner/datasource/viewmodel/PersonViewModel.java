@@ -25,8 +25,8 @@ public class PersonViewModel extends AndroidViewModel {
     public PersonViewModel(@NonNull Application application) {
         super(application);
 
-        personRepository = PersonRepository.getInstance(application.getApplicationContext());
-        measureRepository = MeasureRepository.getInstance(application.getApplicationContext());
+        personRepository = PersonRepository.getInstance(application);
+        measureRepository = MeasureRepository.getInstance(application);
     }
 
     public LiveData<Person> getPerson() {

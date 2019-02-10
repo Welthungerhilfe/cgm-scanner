@@ -69,7 +69,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
     public RecyclerPersonAdapter(Context ctx) {
         context = ctx;
 
-        repository = MeasureRepository.getInstance(context);
+        repository = MeasureRepository.getInstance(ctx);
     }
 
     @Override
@@ -85,6 +85,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
         holder.txtName.setText(person.getName() + " " + person.getSurname());
 
+        /*
         repository.getPersonLastMeasure(new OnMeasureLoad() {
             @Override
             public void onMeasureLoad(Measure measure) {
@@ -97,6 +98,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
                 }
             }
         }, person.getId());
+        */
 
         if (personDetailListener != null) {
             holder.bindPersonDetail(person);
@@ -107,11 +109,11 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
     @Override
     public int getItemCount() {
-        return filteredList.size();
+        return personList.size();
     }
 
     public Person getItem(int position) {
-        return filteredList.get(position);
+        return personList.get(position);
     }
 
     private void setAnimation(View viewToAnimate, int position) {
@@ -146,8 +148,19 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
         }
         */
 
+        /*
         this.personList = list;
         getFilter().filter("");
+        */
+        if (personList.size() > 0) {
+            if (list.get(0).getCreated() > personList.get(0).getCreated()) {
+                personList.add(0, list.get(0));
+                notifyItemInserted(0);
+            }
+        } else {
+            this.personList = list;
+            notifyDataSetChanged();
+        }
     }
 
     public void addPerson(Person person) {
@@ -211,38 +224,22 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
         notifyItemRangeInserted(oIndex, pList.size());
         */
         if (personList.size() != 0) {
-            PersonDiffCallback diffCallback = new PersonDiffCallback(personList, pList);
+            /*
+            PersonDiffCallback diffCallback = new PersonDiffCallback(pList, personList);
             DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
 
-            diffResult.dispatchUpdatesTo(new ListUpdateCallback() {
-                @Override
-                public void onInserted(int position, int count) {
-                    if (pList.get(position).getCreated() > personList.get(position).getCreated()) {
-                        personList.addAll(0, pList);
-
-                        notifyItemChanged(position);
-                    } else {
-                        personList.addAll(pList);
-
-                        notifyItemChanged(personList.size() - position);
-                    }
-                }
-
-                @Override
-                public void onRemoved(int position, int count) {
-                    int a = 0;
-                }
-
-                @Override
-                public void onMoved(int fromPosition, int toPosition) {
-                    int a = 0;
-                }
-
-                @Override
-                public void onChanged(int position, int count, Object payload) {
-                    int a = 0;
-                }
-            });
+            int oldPos = personList.size();
+            personList.addAll(pList);
+            notifyItemRangeInserted(oldPos, pList.size());
+            */
+            if (pList.get(0).getCreated() > personList.get(0).getCreated()) {
+                personList.add(0, pList.get(0));
+                notifyItemInserted(0);
+            } else if (pList.get(0).getCreated() < personList.get(personList.size() - 1).getCreated()) {
+                int oldPos = personList.size();
+                personList.addAll(pList);
+                notifyItemRangeInserted(oldPos, pList.size());
+            }
         } else {
             personList = pList;
             notifyDataSetChanged();
