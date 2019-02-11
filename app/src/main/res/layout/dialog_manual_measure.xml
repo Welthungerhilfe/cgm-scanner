@@ -57,7 +57,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-        <EditText
+        <android.support.design.widget.TextInputEditText
             android:id="@+id/editManualDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -76,7 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp">
 
-            <EditText
+            <android.support.design.widget.TextInputEditText
                 android:id="@+id/editManualLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
