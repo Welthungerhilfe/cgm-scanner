@@ -167,29 +167,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         recyclerData.setItemAnimator(new DefaultItemAnimator());
         recyclerData.setHasFixedSize(true);
         recyclerData.setAdapter(adapterData);
-        recyclerData.addOnScrollListener(new EndlessScrollListener(lytManager) {
-            @Override
-            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                Log.e("EndlessScroll", String.format(Locale.US, "current page - %d, total item - %d", page, totalItemsCount));
 
-                viewModel.loadMore(page).observe(MainActivity.this, pList->{
-                    adapterData.addPersons(pList);
-                });
-            }
-        });
-
-        viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
-        viewModel.loadMore(0).observe(this, pList->{
-            if (pList.size() > 0) {
-                lytNoPerson.setVisibility(View.GONE);
-
-                adapterData.addPersons(pList);
-            } else {
-                lytNoPerson.setVisibility(View.VISIBLE);
-            }
-        });
-
-        /*
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         viewModel.getAll().observe(this, personList->{
             Log.e("PersonRecycler", "Observer called");
@@ -201,20 +179,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 adapterData.resetData(personList);
             }
         });
-        */
-
-        /*
-        lytNoPerson.setVisibility(View.GONE);
-
-        RecyclerPagingAdapter adapter = new RecyclerPagingAdapter();
-        recyclerData.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-        recyclerData.setItemAnimator(new DefaultItemAnimator());
-        recyclerData.setHasFixedSize(true);
-        recyclerData.setAdapter(adapter);
-
-        viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
-        viewModel.getPagedPerson().observe(this, adapter::submitList);
-        */
 
         fetchRemoteConfig();
 

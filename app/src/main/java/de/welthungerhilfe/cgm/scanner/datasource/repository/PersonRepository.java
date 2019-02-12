@@ -63,8 +63,6 @@ public class PersonRepository {
     }
 
     public LiveData<List<Person>> getAll(String createdBy) {
-        Date now = new Date();
-
         return database.personDao().getAll(createdBy);
     }
 

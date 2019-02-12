@@ -85,7 +85,6 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
         holder.txtName.setText(person.getName() + " " + person.getSurname());
 
-        /*
         repository.getPersonLastMeasure(new OnMeasureLoad() {
             @Override
             public void onMeasureLoad(Measure measure) {
@@ -98,7 +97,6 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
                 }
             }
         }, person.getId());
-        */
 
         if (personDetailListener != null) {
             holder.bindPersonDetail(person);
@@ -109,11 +107,11 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
     @Override
     public int getItemCount() {
-        return personList.size();
+        return filteredList.size();
     }
 
     public Person getItem(int position) {
-        return personList.get(position);
+        return filteredList.get(position);
     }
 
     private void setAnimation(View viewToAnimate, int position) {
@@ -135,23 +133,6 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
     public void resetData(List<Person> list) {
         /*
-        if (personList != null) {
-            PersonDiffCallback diffCallback = new PersonDiffCallback(personList, list);
-            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-
-            personList.clear();
-            personList.addAll(list);
-            //diffResult.dispatchUpdatesTo(this);
-            getFilter().filter("");
-        } else {
-            personList = list;
-        }
-        */
-
-        /*
-        this.personList = list;
-        getFilter().filter("");
-        */
         if (personList.size() > 0) {
             if (list.get(0).getCreated() > personList.get(0).getCreated()) {
                 personList.add(0, list.get(0));
@@ -161,6 +142,11 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
             this.personList = list;
             notifyDataSetChanged();
         }
+        */
+
+        this.personList = list;
+        getFilter().filter("");
+
     }
 
     public void addPerson(Person person) {
