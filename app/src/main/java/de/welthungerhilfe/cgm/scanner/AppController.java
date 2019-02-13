@@ -118,6 +118,8 @@ public class AppController extends Application {
 
         //Log.e("Offline DB", DebugDB.getAddressLog());
 
+        notifyUpload();
+
         mInstance = this;
     }
 

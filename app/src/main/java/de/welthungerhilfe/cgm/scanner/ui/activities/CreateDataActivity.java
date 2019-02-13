@@ -54,6 +54,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
@@ -103,6 +104,7 @@ public class CreateDataActivity extends BaseActivity {
 
     private PersonRepository personRepository;
     private MeasureRepository measureRepository;
+    private FileLogRepository fileLogRepository;
 
     private PersonViewModel viewModel;
 
@@ -118,6 +120,7 @@ public class CreateDataActivity extends BaseActivity {
 
         personRepository = PersonRepository.getInstance(getApplication());
         measureRepository = MeasureRepository.getInstance(getApplication());
+        fileLogRepository = FileLogRepository.getInstance(getApplication());
 
         getCurrentLocation();
 
@@ -238,8 +241,8 @@ public class CreateDataActivity extends BaseActivity {
             log.setDeleted(false);
             log.setCreateDate(Utils.getUniversalTimestamp());
             log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-            // Todo;
-            //new OfflineTask().saveFileLog(log);
+
+            fileLogRepository.insertFileLog(log);
         } catch (Exception e) {
             e.printStackTrace();
         }
