@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="de.welthungerhilfe.cgm.scanner.activities.MainActivity">
+    tools:context="de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appBar"
@@ -67,6 +67,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/colorGreyLight"
+            android:visibility="visible"
             android:layout_centerInParent="true"
             android:gravity="center"
             android:orientation="vertical">

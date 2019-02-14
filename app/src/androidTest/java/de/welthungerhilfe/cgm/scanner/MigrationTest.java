@@ -12,8 +12,6 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 
-import de.welthungerhilfe.cgm.scanner.helper.OfflineDatabase;
-
 @RunWith(AndroidJUnit4.class)
 public class MigrationTest {
     private static final String TEST_DB = "migration-test";

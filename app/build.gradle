@@ -8,8 +8,8 @@ android {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 37
-        versionName "1.5.2"
+        versionCode 41
+        versionName "1.5.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
@@ -34,6 +34,9 @@ android {
     }
     dexOptions {
         javaMaxHeapSize "4g"
+    }
+    dataBinding {
+        enabled = true;
     }
     sourceSets {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
@@ -84,6 +87,8 @@ dependencies {
     annotationProcessor "android.arch.persistence.room:compiler:$rootProject.roomVersion"
     androidTestImplementation "android.arch.persistence.room:testing:$rootProject.roomVersion"
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.3'
+    // Paging Library
+    implementation 'android.arch.paging:runtime:1.0.1'
     // Lifecycle components
     implementation "android.arch.lifecycle:runtime:$rootProject.archLifecycleVersion"
     implementation "android.arch.lifecycle:extensions:$rootProject.archLifecycleVersion"

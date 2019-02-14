@@ -132,7 +132,7 @@
     <string name="delete_measure">Do you really want to delete this measure data?</string>
     <string name="delete_person">Do you really want to delete this person data?</string>
 
-    <string name="field_concealed">concealed</string>
+    <string name="field_concealed">conceal</string>
 
     <string name="permission_delete">Sorry, You don\'t have the rights to delete data</string>
     <string name="permission_edit">Sorry, You don\'t have the rights to edit data</string>

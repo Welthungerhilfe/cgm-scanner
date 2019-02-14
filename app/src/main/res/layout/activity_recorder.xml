@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"-->
 
-        <de.welthungerhilfe.cgm.scanner.tango.OverlaySurface
+        <de.welthungerhilfe.cgm.scanner.helper.tango.OverlaySurface
             android:id="@+id/overlaySurfaceView"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"

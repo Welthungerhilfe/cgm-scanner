@@ -30,15 +30,9 @@ import android.provider.Settings;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
 
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -49,7 +43,7 @@ import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import de.welthungerhilfe.cgm.scanner.models.Loc;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 
 public class Utils {
     public static void overrideFont(Context context, String defaultFontNameToOverride, String customFontFileNameInAssets) {

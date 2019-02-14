@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "871268328496-cbhvt88h537c2hbp680nbqoig42pfbom.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "de.welthungerhilfe.cgm.scanner",
+            "certificate_hash": "1637921c2d0b0d73091498f8df59775ffbaa2177"
+          }
+        },
+        {
           "client_id": "871268328496-cq4i119d4mmu3pnd8n7uudqq1fmdti6o.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "871268328496-cq4i119d4mmu3pnd8n7uudqq1fmdti6o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

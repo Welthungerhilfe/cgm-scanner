@@ -26,6 +26,7 @@
     <!-- push notification -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <supports-screens
         android:anyDensity="true"
@@ -84,9 +85,9 @@
             android:value="false" />
 
         <activity
-            android:name=".activities.BaseActivity" />
+            android:name=".ui.activities.BaseActivity" />
 
-        <activity android:name=".activities.SplashActivity"
+        <activity android:name=".ui.activities.SplashActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -95,44 +96,53 @@
         </activity>
 
         <activity
-            android:name=".activities.LoginActivity"
+            android:name=".ui.activities.LoginActivity"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".activities.MainActivity"
+            android:name=".ui.activities.MainActivity"
             android:screenOrientation="portrait"/>
 
-        <activity android:name=".activities.TutorialActivity"
+        <activity android:name=".ui.activities.TutorialActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.QRScanActivity"
+        <activity android:name=".ui.activities.QRScanActivity"
             android:screenOrientation="portrait"/>
 
-        <activity android:name=".activities.CreateDataActivity"
+        <activity android:name=".ui.activities.CreateDataActivity"
             android:windowSoftInputMode="stateAlwaysHidden"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.MainActivity"/>
+                android:value=".ui.activities.MainActivity"/>
         </activity>
 
-        <activity android:name=".activities.LocationSearchActivity"
+        <activity android:name=".ui.activities.LocationSearchActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.LocationDetectActivity"
+        <activity android:name=".ui.activities.LocationDetectActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.ImageDetailActivity"
+        <activity android:name=".ui.activities.ImageDetailActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.SettingsActivity"
+        <activity android:name=".ui.activities.SettingsActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.ScanModeActivity"
+        <activity android:name=".ui.activities.ScanModeActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.FastUploadActivity"
+        <activity android:name=".ui.activities.FastUploadActivity"
             android:screenOrientation="portrait" />
+
+        <receiver
+            android:name=".helper.receiver.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
         <service
             android:name=".helper.service.FirebaseUploadService"
@@ -141,10 +151,13 @@
         <service android:name=".helper.service.FileLogMonitorService"
             android:exported="false" />
 
+        <service android:name=".helper.service.UploadService"
+            android:exported="true" />
+
         <service android:name=".helper.service.MemoryMonitorService"
             android:exported="false" />
 
-        <service android:name=".authenticator.AuthenticatorService"
+        <service android:name=".helper.authenticator.AuthenticatorService"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
@@ -154,7 +167,7 @@
                 android:resource="@xml/authenticator" />
         </service>
 
-        <service android:name=".syncdata.SyncService"
+        <service android:name=".helper.syncdata.SyncService"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
@@ -168,14 +181,14 @@
             android:exported="false"
             android:name="com.novoda.merlin.service.MerlinService" />
 
-        <service android:name=".notification.PushNotificationService">
+        <service android:name=".helper.notification.PushNotificationService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
         <provider
-            android:name=".syncdata.StubProvider"
+            android:name=".helper.syncdata.StubProvider"
             android:authorities="de.welthungerhilfe.cgm.scanner"
             android:exported="false"
             android:syncable="true" />

@@ -1,31 +1,18 @@
 package de.welthungerhilfe.cgm.scanner.helper.service;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.novoda.merlin.Merlin;
-import com.novoda.merlin.registerable.connection.Connectable;
-import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,15 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
-import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.models.FileLog;
-import de.welthungerhilfe.cgm.scanner.models.tasks.OfflineTask;
+import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.MULTI_UPLOAD_BUNCH;
@@ -88,6 +72,8 @@ public class FileLogMonitorService extends Service {
 
     private void checkFileLogDatabase() {
 
+        // Todo;
+        /*
         new OfflineTask().getSyncableFileLog(new OfflineTask.OnLoadFileLogs() {
             @Override
             public void onLoadFileLogs(List<FileLog> logs) {
@@ -107,6 +93,7 @@ public class FileLogMonitorService extends Service {
                 }
             }
         });
+        */
     }
 
     private class UploadThread implements Runnable {
@@ -172,7 +159,8 @@ public class FileLogMonitorService extends Service {
                                         log.setDeleted(true);
                                     }
                                     log.setPath(photoRef.getPath());
-                                    new OfflineTask().saveFileLog(log);
+                                    // Todo;
+                                    //new OfflineTask().saveFileLog(log);
                                     AppController.getInstance().firebaseFirestore.collection("artefacts")
                                             .document(log.getId())
                                             .set(log);
@@ -205,7 +193,8 @@ public class FileLogMonitorService extends Service {
             } catch (FileNotFoundException e) {
                 log.setUploadDate(Utils.getUniversalTimestamp());
                 log.setDeleted(true);
-                new OfflineTask().saveFileLog(log);
+                // Todo;
+                //new OfflineTask().saveFileLog(log);
 
                 synchronized (lock) {
                     Log.e("pending removed", log.getId());
