@@ -1,10 +1,12 @@
 package de.welthungerhilfe.cgm.scanner.datasource.dao;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.persistence.db.SupportSQLiteQuery;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.RawQuery;
 import android.arch.persistence.room.Update;
 
 import java.util.List;
@@ -55,4 +57,7 @@ public interface PersonDao {
 
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 ORDER BY created DESC LIMIT 50 OFFSET :offset")
     LiveData<List<Person>> getPersonByPage(int offset);
+
+    @RawQuery(observedEntities = Person.class)
+    LiveData<List<Person>> getResultPerson(SupportSQLiteQuery query);
 }

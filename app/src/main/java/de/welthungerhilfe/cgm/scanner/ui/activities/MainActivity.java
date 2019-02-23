@@ -169,6 +169,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         recyclerData.setAdapter(adapterData);
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
+        /*
         viewModel.getAll().observe(this, personList->{
             Log.e("PersonRecycler", "Observer called");
 
@@ -178,6 +179,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 lytNoPerson.setVisibility(View.GONE);
                 adapterData.resetData(personList);
             }
+        });
+        */
+        viewModel.getAvailablePersons().observe(this, personList -> {
+            Log.e("PersonRecycler", "Observer called");
+
+            lytNoPerson.setVisibility(View.GONE);
+            adapterData.resetData(personList);
         });
 
         fetchRemoteConfig();
@@ -300,9 +308,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                /*
                 filters.add(4);
                 adapterData.setSearchQuery(query);
                 doFilter();
+                */
+                viewModel.getPersonFilter().setFilterQuery(query);
+                viewModel.getAvailablePersons();
                 return false;
             }
 

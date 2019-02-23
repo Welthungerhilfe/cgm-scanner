@@ -117,4 +117,9 @@ public class AppConstants {
     public static final int DIFF_HASH = 302;
     public static final int UPLOAD_ERROR = 400;
     public static final int FILE_NOT_FOUND = 404;
+
+    public static final int SORT_DATE = 0;
+    public static final int SORT_LOCATION = 1;
+    public static final int SORT_WASTING = 2;
+    public static final int SORT_STUNTING = 3;
 }
