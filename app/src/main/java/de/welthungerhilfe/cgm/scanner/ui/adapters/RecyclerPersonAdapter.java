@@ -107,11 +107,11 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
     @Override
     public int getItemCount() {
-        return filteredList.size();
+        return personList.size();
     }
 
     public Person getItem(int position) {
-        return filteredList.get(position);
+        return personList.get(position);
     }
 
     private void setAnimation(View viewToAnimate, int position) {
@@ -129,6 +129,11 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
     public void resetData(ArrayList<Person> personList) {
         this.personList = personList;
         getFilter().filter("");
+    }
+
+    public void clear() {
+        personList.clear();
+        notifyDataSetChanged();
     }
 
     public void resetData(List<Person> list) {
@@ -204,32 +209,9 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
     }
 
     public void addPersons(List<Person> pList) {
-        /*
         int oIndex = personList.size();
         personList.addAll(pList);
         notifyItemRangeInserted(oIndex, pList.size());
-        */
-        if (personList.size() != 0) {
-            /*
-            PersonDiffCallback diffCallback = new PersonDiffCallback(pList, personList);
-            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-
-            int oldPos = personList.size();
-            personList.addAll(pList);
-            notifyItemRangeInserted(oldPos, pList.size());
-            */
-            if (pList.get(0).getCreated() > personList.get(0).getCreated()) {
-                personList.add(0, pList.get(0));
-                notifyItemInserted(0);
-            } else if (pList.get(0).getCreated() < personList.get(personList.size() - 1).getCreated()) {
-                int oldPos = personList.size();
-                personList.addAll(pList);
-                notifyItemRangeInserted(oldPos, pList.size());
-            }
-        } else {
-            personList = pList;
-            notifyDataSetChanged();
-        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

@@ -99,10 +99,11 @@ public class PersonRepository {
         return database.personDao().getPersonByPage(page * 50);
     }
 
-    public LiveData<List<Person>> getAvailablePersons(PersonFilter filter, int page) {
+    public LiveData<List<Person>> getAvailablePersons(PersonFilter filter) {
         String selectClause = "*";
         String whereClause = "deleted=0";
         String orderByClause = "created DESC";
+        String limitClause = String.format("LIMIT %d OFFSET %d", PAGE_SIZE, filter.getPage() * PAGE_SIZE);
 
         if (filter.isDate()) {
             whereClause += String.format(" AND created<=%d AND created>=%d ", filter.getToDate(), filter.getFromDate());
@@ -128,7 +129,7 @@ public class PersonRepository {
                 break;
         }
 
-        String query = String.format("SELECT %s FROM %s WHERE %s ORDER BY %s LIMIT 100", selectClause, TABLE_PERSON, whereClause, orderByClause);
+        String query = String.format("SELECT %s FROM %s WHERE %s ORDER BY %s %s", selectClause, TABLE_PERSON, whereClause, orderByClause, limitClause);
         return database.personDao().getResultPerson(new SimpleSQLiteQuery(query));
     }
 }

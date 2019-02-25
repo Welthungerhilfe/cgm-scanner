@@ -5,9 +5,12 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MediatorLiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Transformations;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.support.annotation.NonNull;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Collection;
 import java.util.Date;
@@ -18,6 +21,7 @@ import java.util.Set;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.datasource.person.PersonDataSource;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.utils.PersonFilter;
@@ -25,30 +29,28 @@ import de.welthungerhilfe.cgm.scanner.utils.PersonFilter;
 public class PersonListViewModel extends AndroidViewModel {
     private PersonRepository repository;
 
-    private MutableLiveData<List<Person>> personList;
-    private MediatorLiveData<List<Person>> liveDataMerger;
-
-    private LiveData<List<Person>> liveData;
-
-    MutableLiveData<PersonFilter> filterLiveData;
     private PersonFilter filter;
-    private int page;
+    private MutableLiveData<PersonFilter> filterLiveData;
+
+    private LiveData<List<Person>> personListLiveData;
 
     public PersonListViewModel(@NonNull Application application) {
         super(application);
 
         repository = PersonRepository.getInstance(application);
 
-        personList = new MutableLiveData<>();
-        liveDataMerger = new MediatorLiveData<>();
-
         filter = new PersonFilter();
+
         filterLiveData = new MutableLiveData<>();
-        filterLiveData.setValue(filter);
-        filterLiveData.observe(getApplication(), filter->{
-            getAvailablePersons();
-        });
-        page = 0;
+        filterLiveData.postValue(filter);
+
+        personListLiveData = Transformations.switchMap(filterLiveData, filter ->
+            repository.getAvailablePersons(filter)
+        );
+    }
+
+    public LiveData<PersonFilter> getPersonFilterLiveData() {
+        return filterLiveData;
     }
 
     public LiveData<List<Person>> getAll() {
@@ -56,31 +58,71 @@ public class PersonListViewModel extends AndroidViewModel {
         return repository.getAll(createdBy);
     }
 
-    public LiveData<PagedList<Person>> getPagedPerson() {
-        return repository.getPagedPerson();
+    public LiveData<List<Person>> getPersonListLiveData() {
+        return personListLiveData;
     }
 
-    public LiveData<List<Person>> loadMore(int page) {
-        /*
-        LiveData<List<Person>> pList = repository.getPersonByPage(page);
-        liveDataMerger.addSource(pList, list->{
-            liveDataMerger.setValue(list);
-        });
-
-        return liveDataMerger;
-        */
-        return repository.getPersonByPage(page);
+    public void setCurrentPage(int currentPage) {
+        filter.setPage(currentPage);
+        filterLiveData.setValue(filter);
     }
 
-    public PersonFilter getPersonFilter() {
-        return filter;
+    public void setSortType(int sortType) {
+        filter.setSortType(sortType);
+        filterLiveData.setValue(filter);
     }
 
-    public LiveData<List<Person>> getAvailablePersons() {
-        return repository.getAvailablePersons(filter, page);
+    public void setFilterOwn() {
+        filter.setPage(0);
+        filter.setFilterOwn();
+        filterLiveData.setValue(filter);
     }
 
-    public MutableLiveData<List<Person>> getPersonList() {
-        return personList;
+    public void setFilterLocation(Loc fromLOC, int radius) {
+        filter.setPage(0);
+        filter.setFilterLocation(fromLOC, radius);
+        filterLiveData.setValue(filter);
+    }
+
+    public void setFilterDate(long fromDate, long toDate) {
+        filter.setPage(0);
+        filter.setFilterDate(fromDate, toDate);
+        filterLiveData.setValue(filter);
+    }
+
+    public void setFilterNo() {
+        filter.setPage(0);
+        filter.setFilterNo();
+        filterLiveData.setValue(filter);
+    }
+
+    public void setFilterQuery(String query) {
+        filter.setPage(0);
+        filter.setFilterQuery(query);
+        filterLiveData.setValue(filter);
+    }
+
+    public void clearFilterOwn() {
+        filter.setPage(0);
+        filter.clearFilterOwn();
+        filterLiveData.setValue(filter);
+    }
+
+    public void clearFilterQuery() {
+        filter.setPage(0);
+        filter.clearFilterQuery();
+        filterLiveData.setValue(filter);
+    }
+
+    public void clearFilterDate() {
+        filter.setPage(0);
+        filter.clearFilterDate();
+        filterLiveData.setValue(filter);
+    }
+
+    public void clearFilterLocation() {
+        filter.setPage(0);
+        filter.clearFilterLocation();
+        filterLiveData.setValue(filter);
     }
 }
