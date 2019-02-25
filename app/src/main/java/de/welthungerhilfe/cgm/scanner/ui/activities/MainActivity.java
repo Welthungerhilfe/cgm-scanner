@@ -100,18 +100,19 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.ui.views.SwipeView;
 
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.PAGE_SIZE;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_DATE;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_LOCATION;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_STUNTING;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_WASTING;
+
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
     private final int REQUEST_LOCATION = 0x1000;
     private final int REQUEST_CAMERA = 0x1001;
 
-    private int sortType = 0;
-    private ArrayList<Integer> filters = new ArrayList<>();
-    private int diffDays = 0;
-
     private File mFileTemp;
 
     private PersonListViewModel viewModel;
-    private PersonRepository personRepository;
 
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
@@ -138,6 +139,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     private ActionBarDrawerToggle mDrawerToggle;
 
+    private DialogPlus sortDialog;
+
     private SessionManager session;
     private AccountManager accountManager;
 
@@ -148,16 +151,28 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         ButterKnife.bind(this);
 
-
         Crashlytics.setUserIdentifier(AppController.getInstance().firebaseUser.getEmail());
         Crashlytics.log(0, "user login: ", String.format("user logged in with email %s at %s", AppController.getInstance().firebaseUser.getEmail(), Utils.beautifyDateTime(new Date())));
 
         session = new SessionManager(MainActivity.this);
         accountManager = AccountManager.get(this);
 
+        viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
+        final Observer<List<Person>> observer = new Observer<List<Person>>() {
+            @Override
+            public void onChanged(@Nullable List<Person> list) {
+                Log.e("PersonRecycler", "Observer called");
+
+                lytNoPerson.setVisibility(View.GONE);
+                adapterData.addPersons(list);
+            }
+        };
+        viewModel.getPersonListLiveData().observe(this, observer);
+
         setupSidemenu();
         setupActionBar();
         setupRecyclerView();
+        setupSortDialog();
 
         adapterData = new RecyclerPersonAdapter(this);
         adapterData.setPersonDetailListener(this);
@@ -167,25 +182,11 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         recyclerData.setItemAnimator(new DefaultItemAnimator());
         recyclerData.setHasFixedSize(true);
         recyclerData.setAdapter(adapterData);
-
-        viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
-        /*
-        viewModel.getAll().observe(this, personList->{
-            Log.e("PersonRecycler", "Observer called");
-
-            if (personList.size() == 0) {
-                lytNoPerson.setVisibility(View.VISIBLE);
-            } else {
-                lytNoPerson.setVisibility(View.GONE);
-                adapterData.resetData(personList);
+        recyclerData.addOnScrollListener(new EndlessScrollListener(lytManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                viewModel.setCurrentPage(page);
             }
-        });
-        */
-        viewModel.getAvailablePersons().observe(this, personList -> {
-            Log.e("PersonRecycler", "Observer called");
-
-            lytNoPerson.setVisibility(View.GONE);
-            adapterData.resetData(personList);
         });
 
         fetchRemoteConfig();
@@ -308,13 +309,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                /*
-                filters.add(4);
-                adapterData.setSearchQuery(query);
-                doFilter();
-                */
-                viewModel.getPersonFilter().setFilterQuery(query);
-                viewModel.getAvailablePersons();
+                adapterData.clear();
+                viewModel.setFilterQuery(query);
                 return false;
             }
 
@@ -329,10 +325,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             @Override
             public void onClick(View v) {
                 searchView.setQuery("", false);
-                if (filters.contains(4))
-                    filters.removeAll(Arrays.asList(4));
-                adapterData.setSearchQuery("");
-                doFilter();
+
+                viewModel.clearFilterOwn();
             }
         });
 
@@ -358,6 +352,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     dialog.setConfirmListener(new ConfirmDialog.OnConfirmListener() {
                         @Override
                         public void onConfirm(boolean result) {
+                            // ToDo: Remove person when swipe
+                            /*
                             if (result) {
                                 person.setDeleted(true);
                                 person.setDeletedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
@@ -368,6 +364,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                             } else {
                                 adapterData.notifyItemChanged(position);
                             }
+                            */
                         }
                     });
                     dialog.show();
@@ -377,6 +374,110 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         ItemTouchHelper itemTouchhelper = new ItemTouchHelper(swipeController);
         itemTouchhelper.attachToRecyclerView(recyclerData);
+    }
+
+    private void setupSortDialog() {
+        sortDialog = DialogPlus.newDialog(MainActivity.this)
+                .setContentHolder(new ViewHolder(R.layout.dialog_sort))
+                .setCancelable(true)
+                .setInAnimation(R.anim.abc_fade_in)
+                .setOutAnimation(R.anim.abc_fade_out)
+                .setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(DialogPlus dialog, View view) {
+
+                        switch (view.getId()) {
+                            case R.id.rytFilterData:
+                                viewModel.setFilterOwn();
+                                break;
+                            case R.id.rytFilterDate:
+                                doFilterByDate();
+                                break;
+                            case R.id.rytFilterLocation:
+                                doFilterByLocation();
+                                break;
+                            case R.id.rytFilterClear:
+                                viewModel.setFilterNo();
+                                break;
+                            case R.id.rytSortDate:
+                                viewModel.setSortType(SORT_DATE);
+                                break;
+                            case R.id.rytSortLocation:
+                                viewModel.setSortType(SORT_LOCATION);
+                                break;
+                            case R.id.rytSortWasting:
+                                viewModel.setSortType(SORT_WASTING);
+                                break;
+                            case R.id.rytSortStunting:
+                                viewModel.setSortType(SORT_STUNTING);
+                                break;
+                        }
+
+                        dialog.dismiss();
+                    }
+                })
+                .create();
+
+        viewModel.getPersonFilterLiveData().observe(this, filter -> {
+            if (filter.isOwn()) {
+                sortDialog.getHolderView().findViewById(R.id.imgFilterData).setVisibility(View.VISIBLE);
+            } else {
+                sortDialog.getHolderView().findViewById(R.id.imgFilterData).setVisibility(View.INVISIBLE);
+            }
+
+            if (filter.isDate()) {
+                sortDialog.getHolderView().findViewById(R.id.imgFilterDate).setVisibility(View.VISIBLE);
+
+                int diff = (int) Math.ceil((double) (filter.getToDate() - filter.getFromDate()) / 1000 / 3600 / 24);
+                TextView txtView = sortDialog.getHolderView().findViewById(R.id.txtFilterDate);
+                txtView.setText(getResources().getString(R.string.last_days, diff));
+            } else {
+                sortDialog.getHolderView().findViewById(R.id.imgFilterDate).setVisibility(View.INVISIBLE);
+            }
+
+            if (filter.isLocation()) {
+                sortDialog.getHolderView().findViewById(R.id.imgFilterLocation).setVisibility(View.VISIBLE);
+                TextView txtView = sortDialog.getHolderView().findViewById(R.id.txtFilterLocation);
+
+                if (filter.getFromLOC() != null) {
+                    txtView.setText(filter.getFromLOC().getAddress());
+                } else {
+                    txtView.setText(R.string.last_location_error);
+                }
+            } else {
+                sortDialog.getHolderView().findViewById(R.id.imgFilterLocation).setVisibility(View.INVISIBLE);
+            }
+
+            if (filter.isOwn() || filter.isDate() || filter.isLocation()) {
+                sortDialog.getHolderView().findViewById(R.id.imgFilterClear).setVisibility(View.INVISIBLE);
+            } else {
+                sortDialog.getHolderView().findViewById(R.id.imgFilterClear).setVisibility(View.VISIBLE);
+            }
+
+            if (filter.getSortType() == SORT_DATE) {
+                sortDialog.getHolderView().findViewById(R.id.imgSortDate).setVisibility(View.VISIBLE);
+            } else {
+                sortDialog.getHolderView().findViewById(R.id.imgSortDate).setVisibility(View.INVISIBLE);
+            }
+
+            if (filter.getSortType() == SORT_LOCATION) {
+                sortDialog.getHolderView().findViewById(R.id.imgSortLocation).setVisibility(View.VISIBLE);
+            } else {
+                sortDialog.getHolderView().findViewById(R.id.imgSortLocation).setVisibility(View.INVISIBLE);
+            }
+
+            if (filter.getSortType() == SORT_WASTING) {
+                sortDialog.getHolderView().findViewById(R.id.imgSortWasting).setVisibility(View.VISIBLE);
+            } else {
+                sortDialog.getHolderView().findViewById(R.id.imgSortWasting).setVisibility(View.INVISIBLE);
+            }
+
+            if (filter.getSortType() == SORT_STUNTING) {
+                sortDialog.getHolderView().findViewById(R.id.imgSortStunting).setVisibility(View.VISIBLE);
+            } else {
+                sortDialog.getHolderView().findViewById(R.id.imgSortStunting).setVisibility(View.INVISIBLE);
+            }
+        });
     }
 
     private void createTempFile() {
@@ -416,14 +517,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    private void doFilter() {
-        adapterData.doFilter(filters);
-    }
-
-    private void doSort() {
-        adapterData.doSort(sortType);
-    }
-
     private void doFilterByDate() {
         DateRangePickerDialog dateRangePicker = new DateRangePickerDialog();
         dateRangePicker.setCallback(this);
@@ -437,158 +530,27 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     }
 
     private void openSort() {
-        ViewHolder viewHolder = new ViewHolder(R.layout.dialog_sort);
-        DialogPlus sortDialog = DialogPlus.newDialog(MainActivity.this)
-                .setContentHolder(viewHolder)
-                .setCancelable(true)
-                .setInAnimation(R.anim.abc_fade_in)
-                .setOutAnimation(R.anim.abc_fade_out)
-                .setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(DialogPlus dialog, View view) {
-
-                        switch (view.getId()) {
-                            case R.id.rytFilterData: // own data filter = 1;
-                                if (!filters.contains(1)) {
-                                    filters.add(1);
-                                }
-
-                                dialog.getHolderView().findViewById(R.id.imgFilterData).setVisibility(View.VISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgFilterClear).setVisibility(View.INVISIBLE);
-
-                                doFilter();
-                                break;
-                            case R.id.rytFilterDate: // date filter = 2;
-                                if (!filters.contains(2)) {
-                                    filters.add(2);
-                                }
-
-                                dialog.getHolderView().findViewById(R.id.imgFilterDate).setVisibility(View.VISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgFilterClear).setVisibility(View.INVISIBLE);
-
-                                doFilterByDate();
-                                break;
-                            case R.id.rytFilterLocation: // location filter = 3;
-                                if (!filters.contains(3)) {
-                                    filters.add(3);
-                                }
-
-                                dialog.getHolderView().findViewById(R.id.imgFilterLocation).setVisibility(View.VISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgFilterClear).setVisibility(View.INVISIBLE);
-
-                                doFilterByLocation();
-                                break;
-                            case R.id.rytFilterClear:
-                                filters.clear();
-
-                                dialog.getHolderView().findViewById(R.id.imgFilterData).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgFilterDate).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgFilterLocation).setVisibility(View.INVISIBLE);
-                                dialog.getHolderView().findViewById(R.id.imgFilterClear).setVisibility(View.VISIBLE);
-
-                                doFilter();
-                                break;
-                            case R.id.rytSortDate: // date sort = 1;
-                                dialog.dismiss();
-                                sortType = 1;
-
-                                doSort();
-                                break;
-                            case R.id.rytSortLocation: // date sort = 2;
-                                dialog.dismiss();
-                                sortType = 2;
-
-                                doSort();
-                                break;
-                            case R.id.rytSortWasting: // wasting sort = 3;
-                                dialog.dismiss();
-                                sortType = 3;
-
-                                doSort();
-                                break;
-                            case R.id.rytSortStunting: // stunting sort = 4;
-                                dialog.dismiss();
-                                sortType = 4;
-
-                                doSort();
-                                break;
-                        }
-                    }
-                })
-                .create();
-        TextView txtFilterDate = sortDialog.getHolderView().findViewById(R.id.txtFilterDate);
-        txtFilterDate.setText(getResources().getString(R.string.last_days, diffDays));
-
-        TextView txtFilterLocation = sortDialog.getHolderView().findViewById(R.id.txtFilterLocation);
-        if (session.getLocation().getAddress().equals("")) {
-            txtFilterLocation.setText(R.string.last_location_error);
-        } else {
-            txtFilterLocation.setText(session.getLocation().getAddress());
-        }
-
-        ImageView imgFilterData = sortDialog.getHolderView().findViewById(R.id.imgFilterData);
-        ImageView imgFilterDate = sortDialog.getHolderView().findViewById(R.id.imgFilterDate);
-        ImageView imgFilterLocation = sortDialog.getHolderView().findViewById(R.id.imgFilterLocation);
-        ImageView imgFilterClear = sortDialog.getHolderView().findViewById(R.id.imgFilterClear);
-        ImageView imgSortDate = sortDialog.getHolderView().findViewById(R.id.imgSortDate);
-        ImageView imgSortLocation = sortDialog.getHolderView().findViewById(R.id.imgSortLocation);
-        ImageView imgSortWasting = sortDialog.getHolderView().findViewById(R.id.imgSortWasting);
-        ImageView imgSortStunting = sortDialog.getHolderView().findViewById(R.id.imgSortStunting);
-
-        if (filters.size() == 0) {
-            imgFilterData.setVisibility(View.INVISIBLE);
-            imgFilterDate.setVisibility(View.INVISIBLE);
-            imgFilterLocation.setVisibility(View.INVISIBLE);
-            imgFilterClear.setVisibility(View.VISIBLE);
-        } else {
-            imgFilterClear.setVisibility(View.INVISIBLE);
-            for (int i = 0; i < filters.size(); i++) {
-                if (filters.get(i) == 1) {
-                    imgFilterData.setVisibility(View.VISIBLE);
-                } else if (filters.get(i) == 2) {
-                    imgFilterDate.setVisibility(View.VISIBLE);
-                } else if (filters.get(i) == 3) {
-                    imgFilterLocation.setVisibility(View.VISIBLE);
-                }
-            }
-        }
-
-        switch (sortType) {
-            case 1:
-                imgSortDate.setVisibility(View.VISIBLE);
-                break;
-            case 2:
-                imgSortLocation.setVisibility(View.VISIBLE);
-                break;
-            case 3:
-                imgSortWasting.setVisibility(View.VISIBLE);
-                break;
-            case 4:
-                imgSortStunting.setVisibility(View.VISIBLE);
-                break;
-        }
-
         sortDialog.show();
     }
 
     @Override
     public void onDateTimeRecurrenceSet(SelectedDate selectedDate, int hourOfDay, int minute, SublimeRecurrencePicker.RecurrenceOption recurrenceOption, String recurrenceRule) {
         Calendar start = selectedDate.getStartDate();
-        Calendar end = selectedDate.getEndDate();
-
-        diffDays = (int) (end.getTimeInMillis() - start.getTimeInMillis()) / 1000 / 60 / 60 / 24;
+        start.set(Calendar.HOUR_OF_DAY, 0);
+        start.set(Calendar.MINUTE, 0);
+        start.set(Calendar.SECOND, 0);
+        start.set(Calendar.MILLISECOND, 0);
         long startDate = start.getTimeInMillis();
+
+        Calendar end = selectedDate.getEndDate();
+        end.set(Calendar.HOUR_OF_DAY, 23);
+        end.set(Calendar.MINUTE, 59);
+        end.set(Calendar.SECOND, 59);
+        end.set(Calendar.MILLISECOND, 999);
         long endDate = end.getTimeInMillis();
-        if (start.getTimeInMillis() == end.getTimeInMillis()) {
-            diffDays = 1;
-            Date date = new Date(start.get(Calendar.YEAR) - 1900, start.get(Calendar.MONTH), start.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
 
-            startDate = date.getTime();
-            endDate = startDate + (3600 * 24 - 1) * 1000;
-        }
-
-        adapterData.setDateFilter(startDate, endDate);
-        doFilter();
+        adapterData.clear();
+        viewModel.setFilterDate(startDate, endDate);
     }
 
     @Override
@@ -628,8 +590,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         if (reqCode == REQUEST_LOCATION && resCode == Activity.RESULT_OK) {
             int radius = result.getIntExtra(AppConstants.EXTRA_RADIUS, 0);
 
-            adapterData.setLocationFilter(session.getLocation(), radius);
-            doFilter();
+            viewModel.setFilterLocation(session.getLocation(), radius);
         } else if (reqCode == REQUEST_CAMERA) {
             if (resCode == RESULT_OK) {
                 Uri mImageUri = Uri.fromFile(mFileTemp);
