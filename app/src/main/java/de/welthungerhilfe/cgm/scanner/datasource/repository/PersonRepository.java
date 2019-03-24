@@ -107,12 +107,20 @@ public class PersonRepository {
 
         if (filter.isDate()) {
             whereClause += String.format(" AND created<=%d AND created>=%d ", filter.getToDate(), filter.getFromDate());
-        } else if (filter.isOwn()) {
+        }
+
+        if (filter.isOwn()) {
             whereClause += String.format(" AND createdBy=%s ", AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-        } else if (filter.isLocation()) {
-            selectClause += String.format(", ((((acos(sin((%.8f*pi()/180)) * sin((latitude*pi()/180))+cos((%.8f*pi()/180)) * cos((latitude*pi()/180)) * cos(((%.8f-longitude)*pi()/180))))*180/pi())*60*1.1515) * 1.609344) as distance");
+        }
+
+        if (filter.isLocation()) {
+            /*
+            selectClause += String.format(", (6371*acos(cos(radians(%.8f))*cos(radians(lat))* cos(radians(lng)-radians(%.8f))+sin(radians(%.8f))*sin(radians(lat)))) AS distance", filter.getFromLOC().getLatitude(), filter.getFromLOC().getLongitude(), filter.getFromLOC().getLatitude());
             whereClause += String.format(" AND distance<=%d", filter.getRadius());
-        } else if (filter.isQuery()) {
+            */
+        }
+
+        if (filter.isQuery()) {
             whereClause += String.format(" AND (name LIKE \"%%%s%%\" OR surname LIKE \"%%%s%%\")", filter.getQuery(), filter.getQuery());
         } else {
             whereClause += " AND STRFTIME('%Y-%m-%d', DATETIME(created/1000, 'unixepoch'))=DATE('now')";
@@ -120,6 +128,7 @@ public class PersonRepository {
 
         switch (filter.getSortType()) {
             case SORT_DATE:
+                orderByClause = "created DESC";
                 break;
             case SORT_LOCATION:
                 break;
