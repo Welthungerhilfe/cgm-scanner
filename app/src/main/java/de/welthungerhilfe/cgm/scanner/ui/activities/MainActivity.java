@@ -124,6 +124,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     @BindView(R.id.recyclerData)
     RecyclerView recyclerData;
     RecyclerPersonAdapter adapterData;
+    LinearLayoutManager lytManager;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.searchbar)
@@ -162,9 +163,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             @Override
             public void onChanged(@Nullable List<Person> list) {
                 Log.e("PersonRecycler", "Observer called");
-
-                lytNoPerson.setVisibility(View.GONE);
-                adapterData.addPersons(list);
+                if (lytManager.getItemCount() == 0 && list.size() == 0) {
+                    lytNoPerson.setVisibility(View.VISIBLE);
+                } else {
+                    lytNoPerson.setVisibility(View.GONE);
+                    adapterData.addPersons(list);
+                }
             }
         };
         viewModel.getPersonListLiveData().observe(this, observer);
@@ -177,7 +181,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         adapterData = new RecyclerPersonAdapter(this);
         adapterData.setPersonDetailListener(this);
 
-        LinearLayoutManager lytManager = new LinearLayoutManager(MainActivity.this);
+        lytManager = new LinearLayoutManager(MainActivity.this);
         recyclerData.setLayoutManager(lytManager);
         recyclerData.setItemAnimator(new DefaultItemAnimator());
         recyclerData.setHasFixedSize(true);
