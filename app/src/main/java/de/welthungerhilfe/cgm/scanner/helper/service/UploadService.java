@@ -149,9 +149,6 @@ public class UploadService extends Service implements OnFileLogsLoad {
                         @Override
                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                             if (task.isSuccessful()) {
-                                log.setPath(photoRef.getPath());
-                                log.setUploadDate(Utils.getUniversalTimestamp());
-
                                 StorageMetadata metadata = task.getResult().getMetadata();
                                 if (metadata.getMd5Hash().trim().equals(log.getHashValue().trim())) {
                                     log.setStatus(UPLOADED);
@@ -166,6 +163,9 @@ public class UploadService extends Service implements OnFileLogsLoad {
                                 } else {
                                     log.setStatus(DIFF_HASH);
                                 }
+
+                                log.setPath(photoRef.getPath());
+                                log.setUploadDate(Utils.getUniversalTimestamp());
 
                                 AppController.getInstance().firebaseFirestore.collection("artefacts")
                                         .document(log.getId())

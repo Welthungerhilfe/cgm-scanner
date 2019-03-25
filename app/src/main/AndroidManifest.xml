@@ -132,9 +132,6 @@
         <activity android:name=".ui.activities.ScanModeActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.activities.FastUploadActivity"
-            android:screenOrientation="portrait" />
-
         <receiver
             android:name=".helper.receiver.BootReceiver"
             android:enabled="true"
@@ -143,13 +140,6 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
-        <service
-            android:name=".helper.service.FirebaseUploadService"
-            android:exported="false"/>
-
-        <service android:name=".helper.service.FileLogMonitorService"
-            android:exported="false" />
 
         <service android:name=".helper.service.UploadService"
             android:exported="true" />
