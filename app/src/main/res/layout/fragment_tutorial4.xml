@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -50,7 +51,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:src="@drawable/check"
-                        android:tint="@color/colorPrimary"/>
+                        android:tint="@color/colorPrimary"
+                        tools:ignore="ContentDescription" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -63,7 +65,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:src="@drawable/check"
-                        android:tint="@color/colorPrimary"/>
+                        android:tint="@color/colorPrimary"
+                        tools:ignore="ContentDescription" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -76,7 +79,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:src="@drawable/check"
-                        android:tint="@color/colorPrimary"/>
+                        android:tint="@color/colorPrimary"
+                        tools:ignore="ContentDescription" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -115,7 +119,8 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="220dp"
-                android:src="@drawable/tutorial4"/>
+                android:src="@drawable/tutorial4"
+                tools:ignore="ContentDescription" />
 
         </LinearLayout>
 

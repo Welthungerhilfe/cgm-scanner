@@ -20,6 +20,7 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <LinearLayout
@@ -70,7 +71,8 @@
                             android:id="@+id/imgScanStanding"
                             android:layout_width="wrap_content"
                             android:layout_height="35dp"
-                            android:src="@drawable/standing_active"/>
+                            android:src="@drawable/standing_active"
+                            tools:ignore="ContentDescription" />
 
                         <LinearLayout
                             android:layout_width="wrap_content"
@@ -81,7 +83,8 @@
                                 android:id="@+id/imgScanStandingCheck"
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
-                                android:src="@drawable/radio_active"/>
+                                android:src="@drawable/radio_active"
+                                tools:ignore="ContentDescription" />
                             <TextView
                                 android:id="@+id/txtScanStanding"
                                 android:layout_width="wrap_content"
@@ -112,7 +115,8 @@
                             android:id="@+id/imgScanLying"
                             android:layout_width="wrap_content"
                             android:layout_height="35dp"
-                            android:src="@drawable/lying_inactive"/>
+                            android:src="@drawable/lying_inactive"
+                            tools:ignore="ContentDescription" />
 
                         <LinearLayout
                             android:layout_width="wrap_content"
@@ -123,7 +127,8 @@
                                 android:id="@+id/imgScanLyingCheck"
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
-                                android:src="@drawable/radio_inactive"/>
+                                android:src="@drawable/radio_inactive"
+                                tools:ignore="ContentDescription" />
                             <TextView
                                 android:id="@+id/txtScanLying"
                                 android:layout_width="wrap_content"
@@ -150,7 +155,8 @@
                     android:id="@+id/imgSelectedMode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/lying_active"/>
+                    android:src="@drawable/lying_active"
+                    tools:ignore="ContentDescription" />
 
                 <TextView
                     android:id="@+id/txtSelectedMode"
@@ -211,7 +217,8 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:layout_marginLeft="20dp"
-                            android:src="@drawable/stand_front_active"/>
+                            android:src="@drawable/stand_front_active"
+                            tools:ignore="ContentDescription" />
 
                     </LinearLayout>
 
@@ -267,7 +274,8 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:layout_marginLeft="20dp"
-                            android:src="@drawable/stand_side_active"/>
+                            android:src="@drawable/stand_side_active"
+                            tools:ignore="ContentDescription" />
 
                     </LinearLayout>
 
@@ -323,7 +331,8 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:layout_marginLeft="20dp"
-                            android:src="@drawable/stand_back_active"/>
+                            android:src="@drawable/stand_back_active"
+                            tools:ignore="ContentDescription" />
 
                     </LinearLayout>
 

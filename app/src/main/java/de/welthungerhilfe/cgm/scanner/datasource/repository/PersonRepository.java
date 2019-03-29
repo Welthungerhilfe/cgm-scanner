@@ -7,6 +7,7 @@ import android.arch.persistence.db.SimpleSQLiteQuery;
 import android.content.Context;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -103,10 +104,10 @@ public class PersonRepository {
         String selectClause = "*";
         String whereClause = "deleted=0";
         String orderByClause = "created DESC";
-        String limitClause = String.format("LIMIT %d OFFSET %d", PAGE_SIZE, filter.getPage() * PAGE_SIZE);
+        String limitClause = String.format(Locale.US, "LIMIT %d OFFSET %d", PAGE_SIZE, filter.getPage() * PAGE_SIZE);
 
         if (filter.isDate()) {
-            whereClause += String.format(" AND created<=%d AND created>=%d ", filter.getToDate(), filter.getFromDate());
+            whereClause += String.format(Locale.US, " AND created<=%d AND created>=%d ", filter.getToDate(), filter.getFromDate());
         }
 
         if (filter.isOwn()) {
