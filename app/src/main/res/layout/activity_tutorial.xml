@@ -81,7 +81,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:src="@drawable/check"
-                            android:tint="@color/colorPrimary"/>
+                            android:tint="@color/colorPrimary"
+                            attrs:ignore="ContentDescription" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -94,7 +95,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:src="@drawable/check"
-                            android:tint="@color/colorPrimary"/>
+                            android:tint="@color/colorPrimary"
+                            attrs:ignore="ContentDescription" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -107,7 +109,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:src="@drawable/check"
-                            android:tint="@color/colorPrimary"/>
+                            android:tint="@color/colorPrimary"
+                            attrs:ignore="ContentDescription" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -120,7 +123,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:src="@drawable/check"
-                            android:tint="@color/colorPrimary"/>
+                            android:tint="@color/colorPrimary"
+                            attrs:ignore="ContentDescription" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -155,7 +159,8 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="220dp"
-                    android:src="@drawable/finish"/>
+                    android:src="@drawable/finish"
+                    attrs:ignore="ContentDescription" />
 
             </LinearLayout>
 

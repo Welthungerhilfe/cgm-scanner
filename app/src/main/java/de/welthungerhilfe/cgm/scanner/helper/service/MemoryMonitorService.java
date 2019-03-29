@@ -13,6 +13,7 @@ import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -43,21 +44,24 @@ public class MemoryMonitorService extends Service {
                 // Get memory state
                 ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
                 ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-                activityManager.getMemoryInfo(mi);
-                //double availableMegs = mi.availMem / 0x100000L;
-                //double percentAvail = mi.availMem / (double)mi.totalMem * 100.0;
-                memory = ((double)(mi.totalMem - mi.availMem) / mi.totalMem) * 100;
-                Crashlytics.log(0, "memory usage", String.format("%f%% of memory is in usage", memory));
-                Log.e("memory usage:", String.format("%f%% of memory is in usage", memory));
-                Log.e("memory usage:", String.format("available: %d, total: %d", mi.availMem, mi.totalMem));
+                if (activityManager != null) {
+                    activityManager.getMemoryInfo(mi);
 
-                // Get CPU state
-                cpu = Utils.readUsage();
-                Crashlytics.log(0, "cpu usage", String.format("%f%% of cpu is in usage", cpu));
-                Log.e("cpu state:", String.format("cpu usage %f%%", cpu));
+                    //double availableMegs = mi.availMem / 0x100000L;
+                    //double percentAvail = mi.availMem / (double)mi.totalMem * 100.0;
+                    memory = ((double)(mi.totalMem - mi.availMem) / mi.totalMem) * 100;
+                    Crashlytics.log(0, "memory usage", String.format(Locale.US, "%f%% of memory is in usage", memory));
+                    Log.e("memory usage:", String.format("%f%% of memory is in usage", memory));
+                    Log.e("memory usage:", String.format("available: %d, total: %d", mi.availMem, mi.totalMem));
 
-                Crashlytics.log(0, "battery usage", String.format("%d%% of battery is left", battery));
-                Log.e("battery usage:", String.format("%d%% of battery is left", battery));
+                    // Get CPU state
+                    cpu = Utils.readUsage();
+                    Crashlytics.log(0, "cpu usage", String.format(Locale.US, "%f%% of cpu is in usage", cpu));
+                    Log.e("cpu state:", String.format("cpu usage %f%%", cpu));
+
+                    Crashlytics.log(0, "battery usage", String.format(Locale.US, "%d%% of battery is left", battery));
+                    Log.e("battery usage:", String.format("%d%% of battery is left", battery));
+                }
             }
         }, 0, AppConstants.MEMORY_MONITOR_INTERVAL);
 

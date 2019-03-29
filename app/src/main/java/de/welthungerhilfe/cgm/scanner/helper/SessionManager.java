@@ -43,14 +43,11 @@ public class SessionManager {
     private final String KEY_FCM_TOKEN = "key_fcm_token";
     private final String KEY_FCM_TOKEN_SAVED = "key_fcm_token_saved";
 
-    SharedPreferences pref;
-    SharedPreferences.Editor editor;
-
-    private Context context;
+    private SharedPreferences pref;
+    private SharedPreferences.Editor editor;
 
     public SessionManager(Context ctx) {
-        this.context = ctx;
-        pref = context.getSharedPreferences(PREF_KEY_USER, Context.MODE_PRIVATE);
+        pref = ctx.getSharedPreferences(PREF_KEY_USER, Context.MODE_PRIVATE);
         editor = pref.edit();
     }
 

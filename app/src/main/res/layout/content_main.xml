@@ -76,7 +76,8 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:tint="@color/colorGreyDark"
-                android:src="@drawable/alert"/>
+                android:src="@drawable/alert"
+                tools:ignore="ContentDescription" />
 
             <TextView
                 android:layout_width="wrap_content"

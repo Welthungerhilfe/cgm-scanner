@@ -2,6 +2,7 @@
 <com.balysv.materialripple.MaterialRippleLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="80dp"
     app:mrl_rippleOverlay="true">
@@ -35,7 +36,8 @@
                     <ImageView
                         android:id="@+id/imgType"
                         android:layout_width="25dp"
-                        android:layout_height="25dp"/>
+                        android:layout_height="25dp"
+                        tools:ignore="ContentDescription" />
 
                     <TextView
                         android:id="@+id/txtDate"
