@@ -18,13 +18,8 @@
  */
 
 package de.welthungerhilfe.cgm.scanner.ui.activities;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.VisibleForTesting;
 import android.support.v7.app.AppCompatActivity;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 
 import com.crashlytics.android.Crashlytics;
 import com.novoda.merlin.Merlin;
@@ -33,7 +28,6 @@ import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
 import java.util.Date;
 
-import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 

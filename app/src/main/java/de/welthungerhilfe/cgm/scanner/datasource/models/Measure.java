@@ -27,8 +27,6 @@ import android.support.annotation.NonNull;
 
 import java.io.Serializable;
 
-import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
-
 import static android.arch.persistence.room.ForeignKey.CASCADE;
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_MEASURE;
 

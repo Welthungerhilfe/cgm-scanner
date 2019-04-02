@@ -1,6 +1,5 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
-import android.app.Application;
 import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.os.AsyncTask;

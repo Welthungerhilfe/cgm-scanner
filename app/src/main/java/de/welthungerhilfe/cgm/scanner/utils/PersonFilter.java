@@ -1,7 +1,5 @@
 package de.welthungerhilfe.cgm.scanner.utils;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_DATE;

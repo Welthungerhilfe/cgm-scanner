@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -43,7 +44,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
     private FileLogRepository repository;
 
 
-    private Object lock = new Object();
+    private final Object lock = new Object();
     private ExecutorService executor;
 
     public void onCreate() {
@@ -145,12 +146,11 @@ public class UploadService extends Service implements OnFileLogsLoad {
             String[] arr = log.getPath().split("/");
             StorageReference photoRef = FirebaseStorage.getInstance().getReference().child(path).child(arr[arr.length - 1]);
             photoRef.putFile(Uri.fromFile(new File(log.getPath())))
-                    .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                            if (task.isSuccessful()) {
-                                StorageMetadata metadata = task.getResult().getMetadata();
-                                if (metadata.getMd5Hash().trim().equals(log.getHashValue().trim())) {
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            StorageMetadata metadata = Objects.requireNonNull(task.getResult()).getMetadata();
+                            if (metadata != null) {
+                                if (Objects.requireNonNull(metadata.getMd5Hash()).trim().equals(log.getHashValue().trim())) {
                                     log.setStatus(UPLOADED);
 
                                     try {
@@ -163,33 +163,33 @@ public class UploadService extends Service implements OnFileLogsLoad {
                                 } else {
                                     log.setStatus(DIFF_HASH);
                                 }
-
-                                log.setPath(photoRef.getPath());
-                                log.setUploadDate(Utils.getUniversalTimestamp());
-
-                                AppController.getInstance().firebaseFirestore.collection("artefacts")
-                                        .document(log.getId())
-                                        .set(log);
-                            } else {
-                                log.setStatus(UPLOAD_ERROR);
                             }
 
-                            repository.updateFileLog(log);
+                            log.setPath(photoRef.getPath());
+                            log.setUploadDate(Utils.getUniversalTimestamp());
 
-                            synchronized (lock) {
-                                Log.e("UploadService", String.format("Upload Completed : %s", log.getId()));
+                            AppController.getInstance().firebaseFirestore.collection("artefacts")
+                                    .document(log.getId())
+                                    .set(log);
+                        } else {
+                            log.setStatus(UPLOAD_ERROR);
+                        }
 
-                                pendingArtefacts.remove(log.getId());
-                                remainingCount --;
+                        repository.updateFileLog(log);
 
-                                Log.e("UploadService", String.format("Remaining Count : %d", remainingCount));
+                        synchronized (lock) {
+                            Log.e("UploadService", String.format("Upload Completed : %s", log.getId()));
 
-                                if (remainingCount <= 0) {
-                                    loadQueueFileLogs();
-                                }
+                            pendingArtefacts.remove(log.getId());
+                            remainingCount --;
 
-                                lock.notify();
+                            Log.e("UploadService", String.format("Remaining Count : %d", remainingCount));
+
+                            if (remainingCount <= 0) {
+                                loadQueueFileLogs();
                             }
+
+                            lock.notify();
                         }
                     });
         }

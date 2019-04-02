@@ -29,7 +29,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -49,7 +48,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -57,27 +55,16 @@ import android.widget.TextView;
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 import com.crashlytics.android.Crashlytics;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.ml.vision.FirebaseVision;
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions;
-import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.OnClickListener;
 import com.orhanobut.dialogplus.ViewHolder;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -85,9 +72,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
-import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPagingAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
@@ -100,7 +85,6 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.ui.views.SwipeView;
 
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.PAGE_SIZE;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_DATE;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_LOCATION;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_STUNTING;
@@ -159,16 +143,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         accountManager = AccountManager.get(this);
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
-        final Observer<List<Person>> observer = new Observer<List<Person>>() {
-            @Override
-            public void onChanged(@Nullable List<Person> list) {
-                Log.e("PersonRecycler", "Observer called");
-                if (lytManager.getItemCount() == 0 && list.size() == 0) {
-                    lytNoPerson.setVisibility(View.VISIBLE);
-                } else {
-                    lytNoPerson.setVisibility(View.GONE);
-                    adapterData.addPersons(list);
-                }
+        final Observer<List<Person>> observer = list -> {
+            Log.e("PersonRecycler", "Observer called");
+            if (lytManager.getItemCount() == 0 && list != null && list.size() == 0) {
+                lytNoPerson.setVisibility(View.VISIBLE);
+            } else {
+                lytNoPerson.setVisibility(View.GONE);
+                adapterData.addPersons(list);
             }
         };
         viewModel.getPersonListLiveData().observe(this, observer);
@@ -237,9 +218,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                         startService(new Intent(this, MemoryMonitorService.class));
                     }
                 })
-                .addOnFailureListener(e -> {
-                    e.printStackTrace();
-                });
+                .addOnFailureListener(e -> e.printStackTrace());
     }
 
     private void setupSidemenu() {
@@ -481,31 +460,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         });
     }
 
-    private void createTempFile() {
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "CGM Scanner");
-        if (!mediaStorageDir.exists())
-            mediaStorageDir.mkdir();
-
-        String tmp = "IMG_" + Long.toString(Utils.getUniversalTimestamp()) + ".png";
-
-        mFileTemp = new File(mediaStorageDir.getPath() + File.separator + tmp);
-    }
-
-    public void takePhoto() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        createTempFile();
-        Uri mImageCaptureUri = null;
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            mImageCaptureUri = Uri.fromFile(mFileTemp);
-        } else {
-            mImageCaptureUri = InternalStorageContentProvider.CONTENT_URI;
-        }
-        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
-        takePictureIntent.putExtra("return-data", true);
-        startActivityForResult(takePictureIntent, REQUEST_CAMERA);
-    }
-
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -569,18 +523,23 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
-        if (menuItem.getItemId() == R.id.actionSearch) {
-            openSearchBar();
-        } else if (menuItem.getItemId() == R.id.actionQr) {
-            startActivity(new Intent(MainActivity.this, QRScanActivity.class));
-        } else if (menuItem.getItemId() == R.id.actionFilter) {
-            openSort();
-        } else if (menuItem.getItemId() == android.R.id.home) {
-            if (searchbar.getVisibility() == View.VISIBLE) {
-                setupActionBar();
-            } else {
-                finish();
-            }
+        switch (menuItem.getItemId()) {
+            case R.id.actionSearch:
+                openSearchBar();
+                break;
+            case R.id.actionQr:
+                startActivity(new Intent(MainActivity.this, QRScanActivity.class));
+                break;
+            case R.id.actionFilter:
+                openSort();
+                break;
+            case android.R.id.home:
+                if (searchbar.getVisibility() == View.VISIBLE) {
+                    setupActionBar();
+                } else {
+                    finish();
+                }
+                break;
         }
 
         return super.onOptionsItemSelected(menuItem);
@@ -592,40 +551,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             int radius = result.getIntExtra(AppConstants.EXTRA_RADIUS, 0);
 
             viewModel.setFilterLocation(session.getLocation(), radius);
-        } else if (reqCode == REQUEST_CAMERA) {
-            if (resCode == RESULT_OK) {
-                Uri mImageUri = Uri.fromFile(mFileTemp);
-
-                try {
-                    FirebaseVisionImage image = FirebaseVisionImage.fromFilePath(MainActivity.this, mImageUri);
-
-                    FirebaseVisionBarcodeDetectorOptions options = new FirebaseVisionBarcodeDetectorOptions.Builder()
-                            .setBarcodeFormats(FirebaseVisionBarcode.FORMAT_QR_CODE, FirebaseVisionBarcode.FORMAT_AZTEC)
-                            .build();
-
-
-                    FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
-                            .getVisionBarcodeDetector();
-
-                    Task<List<FirebaseVisionBarcode>> scanResult = detector.detectInImage(image)
-                            .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
-                                @Override
-                                public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
-                                    // Task completed successfully
-                                    // ...
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    // Task failed with an exception
-                                    // ...
-                                }
-                            });
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 

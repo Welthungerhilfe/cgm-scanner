@@ -21,6 +21,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.perf.metrics.AddTrace;
 
 import java.util.List;
+import java.util.Objects;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -73,80 +74,65 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
         AppController.getInstance().firebaseFirestore.collection("persons")
                 .whereGreaterThan("timestamp", prevTimestamp)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Person person = document.toObject(Person.class);
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                            Person person = document.toObject(Person.class);
 
-                                if (person.getTimestamp() > prevTimestamp) {
-                                    if (!isSyncing) {
-                                        isSyncing = !isSyncing;
-                                        Crashlytics.setString("sync_data", "app is syncing now");
-                                    }
-
-                                    if (prevTimestamp == 0 && person.getDeleted()) {
-
-                                    } else {
-                                        String[] arr = person.getId().split("_");
-                                        try {
-                                            if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
-                                                personRepository.insertPerson(person);
-                                            } else {    // created before sync, after sync person was updates, so must update in local room
-                                                personRepository.updatePerson(person);
-                                            }
-                                        } catch (NumberFormatException e) {
-                                            Crashlytics.log(0, "sync_adapter", String.format("could not get timestamp because of underline in personId: %s", person.getId()));
-                                        }
-                                    }
+                            if (person != null && person.getTimestamp() > prevTimestamp) {
+                                if (!isSyncing) {
+                                    isSyncing = !isSyncing;
+                                    Crashlytics.setString("sync_data", "app is syncing now");
                                 }
 
-                                document.getReference().collection("measures")
-                                        .whereGreaterThan("timestamp", prevTimestamp)
-                                        .get()
-                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                if (task.isSuccessful()) {
-                                                    for (DocumentSnapshot snapshot : task.getResult()) {
-                                                        if (!isSyncing) {
-                                                            isSyncing = !isSyncing;
-                                                            Crashlytics.setString("sync_data", "app is syncing now");
-                                                        }
-
-                                                        Measure measure = snapshot.toObject(Measure.class);
-
-                                                        if (prevTimestamp == 0 && measure.getDeleted()) {
-
-                                                        } else {
-                                                            try {
-                                                                String[] arr = measure.getId().split("_");
-                                                                if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
-                                                                    measureRepository.insertMeasure(measure);
-                                                                } else {    // created before sync, after sync person was updates, so must update in local room
-                                                                    measureRepository.updateMeasure(measure);
-                                                                }
-                                                            } catch (NumberFormatException e) {
-                                                                Crashlytics.log(0, "sync_adapter", String.format("could not get timestamp because of underline in measureId: %s", measure.getId()));
-                                                            }
-                                                        }
-                                                    }
-
-                                                    session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                                                }
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                session.setSyncTimestamp(prevTimestamp);
-                                            }
-                                        });
+                                if (prevTimestamp > 0 && !person.getDeleted()) {
+                                    String[] arr = person.getId().split("_");
+                                    try {
+                                        if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
+                                            personRepository.insertPerson(person);
+                                        } else {    // created before sync, after sync person was updates, so must update in local room
+                                            personRepository.updatePerson(person);
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        Crashlytics.log(0, "sync_adapter", String.format("could not get timestamp because of underline in personId: %s", person.getId()));
+                                    }
+                                }
                             }
 
-                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
+                            document.getReference().collection("measures")
+                                    .whereGreaterThan("timestamp", prevTimestamp)
+                                    .get()
+                                    .addOnCompleteListener(task1 -> {
+                                        if (task1.isSuccessful()) {
+                                            for (DocumentSnapshot snapshot : Objects.requireNonNull(task1.getResult())) {
+                                                if (!isSyncing) {
+                                                    isSyncing = !isSyncing;
+                                                    Crashlytics.setString("sync_data", "app is syncing now");
+                                                }
+
+                                                Measure measure = snapshot.toObject(Measure.class);
+
+                                                if (measure != null && prevTimestamp > 0 && !measure.getDeleted()) {
+                                                    try {
+                                                        String[] arr = measure.getId().split("_");
+                                                        if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
+                                                            measureRepository.insertMeasure(measure);
+                                                        } else {    // created before sync, after sync person was updates, so must update in local room
+                                                            measureRepository.updateMeasure(measure);
+                                                        }
+                                                    } catch (NumberFormatException e) {
+                                                        Crashlytics.log(0, "sync_adapter", String.format("could not get timestamp because of underline in measureId: %s", measure.getId()));
+                                                    }
+                                                }
+                                            }
+
+                                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> session.setSyncTimestamp(prevTimestamp));
                         }
+
+                        session.setSyncTimestamp(Utils.getUniversalTimestamp());
                     }
                 });
     }

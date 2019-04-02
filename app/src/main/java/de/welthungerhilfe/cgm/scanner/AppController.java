@@ -18,19 +18,11 @@
 
 package de.welthungerhilfe.cgm.scanner;
 
-import android.app.ActivityManager;
 import android.app.Application;
-import android.app.PendingIntent;
-import android.arch.persistence.db.SupportSQLiteDatabase;
-import android.arch.persistence.room.migration.Migration;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Environment;
-import android.os.IBinder;
 import android.os.StrictMode;
-import android.support.annotation.NonNull;
 
 //import com.amitshekhar.DebugDB;
 import com.crashlytics.android.Crashlytics;

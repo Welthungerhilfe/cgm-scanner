@@ -3,11 +3,7 @@ package de.welthungerhilfe.cgm.scanner.datasource.viewmodel;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MediatorLiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.paging.PagedList;
 import android.support.annotation.NonNull;
-import android.support.v7.util.DiffUtil;
 
 import java.util.List;
 

@@ -91,9 +91,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             person = p;
 
             if (p != null) {
-                viewModel.getMeasures(person.getId()).observe(this, measures -> {
-                    adapterMeasure.resetData(measures);
-                });
+                viewModel.getMeasures(person.getId()).observe(this, measures -> adapterMeasure.resetData(measures));
             }
         });
     }

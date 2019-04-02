@@ -112,9 +112,8 @@ public class Utils {
             int index = (int) (rnd.nextFloat() * SALTCHARS.length());
             salt.append(SALTCHARS.charAt(index));
         }
-        String saltStr = salt.toString();
 
-        return saltStr;
+        return salt.toString();
     }
 
     public static long getUniversalTimestamp() {

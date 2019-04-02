@@ -210,22 +210,28 @@ public class GrowthDataFragment extends Fragment {
 
             long day = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
 
-            if (chartType == 0)
-                entries.add(new Entry(day, (float) measure.getWeight()));
-            else if (chartType == 1)
-                entries.add(new Entry(day, (float) measure.getHeight()));
-            else if (chartType == 2) {
-                entries.add(new Entry((float) measure.getHeight(), (float) measure.getWeight()));
-                Collections.sort(entries, new Comparator<Entry>() {
-                    @Override
-                    public int compare(Entry o1, Entry o2) {
-                        return Float.compare(o1.getX(), o2.getX());
-                    }
-                });
-            } else if (chartType == 3) {
-                entries.add(new Entry(day, (float) measure.getHeadCircumference()));
-            } else if (chartType == 4) {
-                entries.add(new Entry(day, (float) measure.getMuac()));
+            switch (chartType) {
+                case 0:
+                    entries.add(new Entry(day, (float) measure.getWeight()));
+                    break;
+                case 1:
+                    entries.add(new Entry(day, (float) measure.getHeight()));
+                    break;
+                case 2:
+                    entries.add(new Entry((float) measure.getHeight(), (float) measure.getWeight()));
+                    Collections.sort(entries, new Comparator<Entry>() {
+                        @Override
+                        public int compare(Entry o1, Entry o2) {
+                            return Float.compare(o1.getX(), o2.getX());
+                        }
+                    });
+                    break;
+                case 3:
+                    entries.add(new Entry(day, (float) measure.getHeadCircumference()));
+                    break;
+                case 4:
+                    entries.add(new Entry(day, (float) measure.getMuac()));
+                    break;
             }
         }
 

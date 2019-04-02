@@ -3,24 +3,13 @@ package de.welthungerhilfe.cgm.scanner.datasource.viewmodel;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MediatorLiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Transformations;
-import android.arch.paging.LivePagedListBuilder;
-import android.arch.paging.PagedList;
 import android.support.annotation.NonNull;
 
-import com.google.android.gms.maps.model.LatLng;
-
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
-import de.welthungerhilfe.cgm.scanner.datasource.datasource.person.PersonDataSource;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;

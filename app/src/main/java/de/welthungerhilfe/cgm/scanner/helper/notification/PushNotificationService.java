@@ -117,7 +117,9 @@ public class PushNotificationService extends FirebaseMessagingService {
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Notification Channel", importance);
             channel.setDescription("Get scan result from Firebase");
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
         }
     }
 }

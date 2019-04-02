@@ -404,20 +404,22 @@ public class OverlaySurface extends SurfaceView implements SurfaceHolder.Callbac
     public void run() {
         while (running ) {
             if(isReadyToDraw) {
-                if(mMode == BABY_OVERLAY) {
-                    drawBabyOverlay();
-                }
-                else if (mMode == NO_OVERLAY ) {
-                    drawNoOverlay();
-                }
-                else if (mMode == INFANT_OVERLAY) {
-                    drawInfantOverlay();
-                }
-                else if (mMode== INFANT_CLOSE_DOWN_UP_OVERLAY) {
-                    //drawInfantCloseDownUpOverlay();
-                    drawBabyDownOverlay();
-                } else {
-                    drawNoOverlay();
+                switch (mMode) {
+                    case BABY_OVERLAY:
+                        drawBabyOverlay();
+                        break;
+                    case NO_OVERLAY:
+                        drawNoOverlay();
+                        break;
+                    case INFANT_OVERLAY:
+                        drawInfantOverlay();
+                        break;
+                    case INFANT_CLOSE_DOWN_UP_OVERLAY:
+                        drawBabyDownOverlay();
+                        break;
+                    default:
+                        drawNoOverlay();
+                        break;
                 }
             }
         }
