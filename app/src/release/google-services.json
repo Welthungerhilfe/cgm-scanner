@@ -1,47 +1,35 @@
 {
   "project_info": {
-    "project_number": "PROJECT_NUMBER",
-    "firebase_url": "https://PROJECT_ID.firebaseio.com",
-    "project_id": "PROJECT_ID",
-    "storage_bucket": "PROJECT_ID.appspot.com"
+    "project_number": "871268328496",
+    "firebase_url": "https://child-growth-monitor-dev.firebaseio.com",
+    "project_id": "child-growth-monitor-dev",
+    "storage_bucket": "child-growth-monitor-dev.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "MOBILESDK_APP_ID",
+        "mobilesdk_app_id": "1:871268328496:android:739dcaee1e669c8b",
         "android_client_info": {
           "package_name": "de.welthungerhilfe.cgm.scanner"
         }
       },
       "oauth_client": [
         {
-          "client_id": "798468686123-t3v1mlik2stscmad56k59ke31c18rbba.apps.googleusercontent.com",
+          "client_id": "871268328496-cbhvt88h537c2hbp680nbqoig42pfbom.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "de.welthungerhilfe.cgm.scanner",
-            "certificate_hash": "a2794a38b8feaa8e8984ac12c5790bdbd42828ed"
+            "certificate_hash": "1637921c2d0b0d73091498f8df59775ffbaa2177"
           }
         },
         {
-          "client_id": "798468686123-kk96sqo7g8dijtfqtb3i39niogg30kdp.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "de.welthungerhilfe.cgm.scanner",
-            "certificate_hash": "9bd7c24f2c50d9f327e7562e75504b4a9bfd93fe"
-          }
-        },
-        {
-          "client_id": "798468686123-vlmgvnkp9f2tbvbfq2pgito689a70ghv.apps.googleusercontent.com",
-          "client_type": 3
-        },
-        {
-          "client_id": "798468686123-vlmgvnkp9f2tbvbfq2pgito689a70ghv.apps.googleusercontent.com",
+          "client_id": "871268328496-cq4i119d4mmu3pnd8n7uudqq1fmdti6o.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "API_KEY"
+          "current_key": "AIzaSyBZxawsd8CydxF3_2NoddVCde_zkGmGozI"
         }
       ],
       "services": {
@@ -52,7 +40,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "798468686123-vlmgvnkp9f2tbvbfq2pgito689a70ghv.apps.googleusercontent.com",
+              "client_id": "871268328496-cq4i119d4mmu3pnd8n7uudqq1fmdti6o.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
