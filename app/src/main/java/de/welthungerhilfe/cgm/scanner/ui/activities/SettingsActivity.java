@@ -89,9 +89,11 @@ public class SettingsActivity extends BaseActivity {
     private void setupActionBar() {
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
-        actionBar.setTitle(R.string.title_settings);
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setTitle(R.string.title_settings);
+        }
     }
 
     private void initUI() {
@@ -113,12 +115,16 @@ public class SettingsActivity extends BaseActivity {
         }
 
         String code = session.getLanguage();
-        if (code.equals(AppConstants.LANG_ENGLISH)) {
-            radioEnglish.setChecked(true);
-        } else if (code.equals(AppConstants.LANG_GERMAN)) {
-            radioGerman.setChecked(true);
-        } else if (code.equals(AppConstants.LANG_HINDI)) {
-            radioHindi.setChecked(true);
+        switch (code) {
+            case AppConstants.LANG_ENGLISH:
+                radioEnglish.setChecked(true);
+                break;
+            case AppConstants.LANG_GERMAN:
+                radioGerman.setChecked(true);
+                break;
+            case AppConstants.LANG_HINDI:
+                radioHindi.setChecked(true);
+                break;
         }
 
         txtSettingDebug.setText(AppController.getInstance().firebaseConfig.getString("debug"));

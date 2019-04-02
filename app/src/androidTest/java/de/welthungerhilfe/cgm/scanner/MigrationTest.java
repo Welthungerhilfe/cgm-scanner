@@ -12,6 +12,8 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 
+import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
+
 @RunWith(AndroidJUnit4.class)
 public class MigrationTest {
     private static final String TEST_DB = "migration-test";
@@ -20,7 +22,7 @@ public class MigrationTest {
     public MigrationTestHelper helper;
 
     public MigrationTest() {
-        helper = new MigrationTestHelper(InstrumentationRegistry.getInstrumentation(), OfflineDatabase.class.getCanonicalName(), new FrameworkSQLiteOpenHelperFactory());
+        helper = new MigrationTestHelper(InstrumentationRegistry.getInstrumentation(), CgmDatabase.class.getCanonicalName(), new FrameworkSQLiteOpenHelperFactory());
     }
 
     @Test
@@ -37,7 +39,7 @@ public class MigrationTest {
 
         // Re-open the database with version 2 and provide
         // MIGRATION_1_2 as the migration process.
-        database = helper.runMigrationsAndValidate(TEST_DB, 2, true, AppController.MIGRATION_1_2);
+        database = helper.runMigrationsAndValidate(TEST_DB, 2, true, CgmDatabase.MIGRATION_1_2);
 
         // MigrationTestHelper automatically verifies the schema changes,
         // but you need to validate that the data was migrated properly.
@@ -56,7 +58,7 @@ public class MigrationTest {
 
         // Re-open the database with version 2 and provide
         // MIGRATION_1_2 as the migration process.
-        database = helper.runMigrationsAndValidate(TEST_DB, 3, true, AppController.MIGRATION_1_2, AppController.MIGRATION_2_3);
+        database = helper.runMigrationsAndValidate(TEST_DB, 3, true, CgmDatabase.MIGRATION_1_2, CgmDatabase.MIGRATION_2_3);
 
         // MigrationTestHelper automatically verifies the schema changes,
         // but you need to validate that the data was migrated properly.
@@ -75,7 +77,7 @@ public class MigrationTest {
 
         // Re-open the database with version 2 and provide
         // MIGRATION_1_2 as the migration process.
-        database = helper.runMigrationsAndValidate(TEST_DB, 4, true, AppController.MIGRATION_1_2, AppController.MIGRATION_2_3, AppController.MIGRATION_3_4);
+        database = helper.runMigrationsAndValidate(TEST_DB, 4, true, CgmDatabase.MIGRATION_1_2, CgmDatabase.MIGRATION_2_3, CgmDatabase.MIGRATION_3_4);
 
         // MigrationTestHelper automatically verifies the schema changes,
         // but you need to validate that the data was migrated properly.

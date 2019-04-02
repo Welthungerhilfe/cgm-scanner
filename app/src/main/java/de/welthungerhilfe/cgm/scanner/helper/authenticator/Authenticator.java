@@ -70,15 +70,12 @@ public class Authenticator extends AbstractAccountAuthenticator {
         final AccountManager am = AccountManager.get(mContext);
         final String password = am.getPassword(account);
         if (password != null) {
-            final boolean verified = true;
-            if (verified) {
-                final Bundle result = new Bundle();
-                result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
-                result.putString(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
-                result.putString(AccountManager.KEY_AUTHTOKEN, password);
+            final Bundle result = new Bundle();
+            result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
+            result.putString(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
+            result.putString(AccountManager.KEY_AUTHTOKEN, password);
 
-                return result;
-            }
+            return result;
         }
 
         final Intent intent = new Intent(mContext, LoginActivity.class);

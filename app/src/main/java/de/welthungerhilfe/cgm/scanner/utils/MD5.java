@@ -1,20 +1,12 @@
 package de.welthungerhilfe.cgm.scanner.utils;
 
-import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 public class MD5 {
-    private static final String TAG = "MD5";
 
     public static String getMD5(String filePath) {
         String base64Digest = "";

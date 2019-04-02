@@ -52,7 +52,6 @@ dependencies {
     implementation "com.android.support:support-compat:27.1.1"
     implementation 'com.android.support:support-v13:27.1.1'
     implementation 'com.android.support:support-annotations:27.1.1'
-    implementation 'com.android.support:animated-vector-drawable:27.1.1'
     implementation 'com.android.support:exifinterface:27.1.1'
     implementation 'com.android.support:gridlayout-v7:27.1.1'
 
@@ -85,12 +84,11 @@ dependencies {
     implementation 'com.google.tango:sdk-base:1.55'
     implementation 'com.google.tango:support-base:1.54'
     implementation 'com.google.firebase:firebase-config:16.1.0'
-    implementation 'com.google.firebase:firebase-ml-vision:18.0.1'
     // Room components
     implementation "android.arch.persistence.room:runtime:$rootProject.roomVersion"
     annotationProcessor "android.arch.persistence.room:compiler:$rootProject.roomVersion"
     androidTestImplementation "android.arch.persistence.room:testing:$rootProject.roomVersion"
-    debugImplementation 'com.amitshekhar.android:debug-db:1.0.3'
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.4'
     // Paging Library
     implementation 'android.arch.paging:runtime:1.0.1'
     // Lifecycle components

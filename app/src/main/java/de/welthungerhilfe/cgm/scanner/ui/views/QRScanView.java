@@ -129,11 +129,7 @@ public class QRScanView extends BarcodeScannerView {
                     BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
                     try {
                         rawResult = this.mMultiFormatReader.decodeWithState(bitmap);
-                    } catch (ReaderException var17) {
-                        ;
-                    } catch (NullPointerException var18) {
-                        ;
-                    } catch (ArrayIndexOutOfBoundsException var19) {
+                    } catch (ReaderException | ArrayIndexOutOfBoundsException | NullPointerException ignored) {
                         ;
                     } finally {
                         this.mMultiFormatReader.reset();

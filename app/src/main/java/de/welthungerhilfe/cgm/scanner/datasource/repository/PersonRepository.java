@@ -8,6 +8,7 @@ import android.content.Context;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -74,15 +75,11 @@ public class PersonRepository {
     }
 
     public void insertPerson(Person person) {
-        executor.execute(() -> {
-            database.personDao().insertPerson(person);
-        });
+        executor.execute(() -> database.personDao().insertPerson(person));
     }
 
     public void updatePerson(Person person) {
-        executor.execute(() -> {
-            database.personDao().updatePerson(person);
-        });
+        executor.execute(() -> database.personDao().updatePerson(person));
     }
 
     public void getSyncablePerson(OnPersonsLoad listener, long timestamp) {
@@ -111,7 +108,7 @@ public class PersonRepository {
         }
 
         if (filter.isOwn()) {
-            whereClause += String.format(" AND createdBy=%s ", AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+            whereClause += String.format(" AND createdBy=%s ", Objects.requireNonNull(AppController.getInstance().firebaseAuth.getCurrentUser()).getEmail());
         }
 
         if (filter.isLocation()) {

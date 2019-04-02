@@ -12,7 +12,6 @@ import android.arch.persistence.room.migration.Migration;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -42,7 +41,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final String TABLE_MEASURE = "measures";
     public static final String TABLE_FILE_LOG = "file_logs";
 
-    private static final Migration MIGRATION_1_2 = new Migration(1, 2) {
+    public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE measures ADD COLUMN createdBy TEXT;");
@@ -58,7 +57,7 @@ public abstract class CgmDatabase extends RoomDatabase {
         }
     };
 
-    private static final Migration MIGRATION_2_3 = new Migration(2, 3) {
+    public static final Migration MIGRATION_2_3 = new Migration(2, 3) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("CREATE TABLE file_logs (" +
@@ -76,7 +75,7 @@ public abstract class CgmDatabase extends RoomDatabase {
         }
     };
 
-    private static final Migration MIGRATION_3_4 = new Migration(3, 4) {
+    public static final Migration MIGRATION_3_4 = new Migration(3, 4) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE measures ADD COLUMN deleted INTEGER DEFAULT '0' NOT NULL;");
@@ -87,7 +86,7 @@ public abstract class CgmDatabase extends RoomDatabase {
         }
     };
 
-    private static final Migration MIGRATION_4_5 = new Migration(4, 5) {
+    public static final Migration MIGRATION_4_5 = new Migration(4, 5) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE file_logs ADD COLUMN status INTEGER DEFAULT '0' NOT NULL;");

@@ -54,8 +54,6 @@ public class BitmapUtils {
             FileOutputStream fos = new FileOutputStream(pictureFile);
             fos.write(imgData);
             fos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -71,8 +69,6 @@ public class BitmapUtils {
             FileOutputStream fos = new FileOutputStream(pictureFile);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -81,9 +77,8 @@ public class BitmapUtils {
     public static Bitmap getRotatedBitmap(Bitmap bmp, float degree) {
         Matrix matrix = new Matrix();
         matrix.postRotate(degree);
-        Bitmap result = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
 
-        return result;
+        return Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
     }
 
     public static Bitmap getRotatedBitmap(byte[] data, float degree) {

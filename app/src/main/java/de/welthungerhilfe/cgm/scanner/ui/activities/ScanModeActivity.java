@@ -31,8 +31,6 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
@@ -43,12 +41,9 @@ import butterknife.OnClick;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasureScanFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -280,27 +275,34 @@ public class ScanModeActivity extends AppCompatActivity {
     public void goToNextStep() {
         closeScan();
 
-        if (SCAN_STEP == SCAN_STANDING_FRONT || SCAN_STEP == SCAN_LYING_FRONT) {
-            lytScanStep1.setVisibility(View.GONE);
-            btnScanStep1.setText(R.string.retake_scan);
-            btnScanStep1.setTextColor(getResources().getColor(R.color.colorWhite));
-            btnScanStep1.setBackground(getResources().getDrawable(R.drawable.button_green_circular));
+        switch (SCAN_STEP) {
+            case SCAN_STANDING_FRONT:
+            case SCAN_LYING_FRONT:
+                lytScanStep1.setVisibility(View.GONE);
+                btnScanStep1.setText(R.string.retake_scan);
+                btnScanStep1.setTextColor(getResources().getColor(R.color.colorWhite));
+                btnScanStep1.setBackground(getResources().getDrawable(R.drawable.button_green_circular));
 
-            step1 = true;
-        } else if (SCAN_STEP == SCAN_STANDING_SIDE || SCAN_STEP == SCAN_LYING_SIDE) {
-            lytScanStep2.setVisibility(View.GONE);
-            btnScanStep2.setText(R.string.retake_scan);
-            btnScanStep2.setTextColor(getResources().getColor(R.color.colorWhite));
-            btnScanStep2.setBackground(getResources().getDrawable(R.drawable.button_green_circular));
+                step1 = true;
+                break;
+            case SCAN_STANDING_SIDE:
+            case SCAN_LYING_SIDE:
+                lytScanStep2.setVisibility(View.GONE);
+                btnScanStep2.setText(R.string.retake_scan);
+                btnScanStep2.setTextColor(getResources().getColor(R.color.colorWhite));
+                btnScanStep2.setBackground(getResources().getDrawable(R.drawable.button_green_circular));
 
-            step2 = true;
-        } else if (SCAN_STEP == SCAN_STANDING_BACK || SCAN_STEP == SCAN_LYING_BACK) {
-            lytScanStep3.setVisibility(View.GONE);
-            btnScanStep3.setText(R.string.retake_scan);
-            btnScanStep3.setTextColor(getResources().getColor(R.color.colorWhite));
-            btnScanStep3.setBackground(getResources().getDrawable(R.drawable.button_green_circular));
+                step2 = true;
+                break;
+            case SCAN_STANDING_BACK:
+            case SCAN_LYING_BACK:
+                lytScanStep3.setVisibility(View.GONE);
+                btnScanStep3.setText(R.string.retake_scan);
+                btnScanStep3.setTextColor(getResources().getColor(R.color.colorWhite));
+                btnScanStep3.setBackground(getResources().getDrawable(R.drawable.button_green_circular));
 
-            step3 = true;
+                step3 = true;
+                break;
         }
 
         if (step1 && step2 && step3) {

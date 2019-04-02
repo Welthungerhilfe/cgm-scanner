@@ -21,7 +21,6 @@ package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
 import android.content.Context;
 import android.support.v7.util.DiffUtil;
-import android.support.v7.util.ListUpdateCallback;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -256,27 +255,33 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
                 boolean passed = true;
 
                 if (filters.size() > 0) {
+                    label:
                     for (int j = 0; j < filters.size(); j++) {
-                        if (filters.get(j) == 1) { // own data filter
-                            if (!personList.get(i).getCreatedBy().equals(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail())) {
-                                passed = false;
+                        switch (filters.get(j)) {
+                            case 1:  // own data filter
+                                if (!personList.get(i).getCreatedBy().equals(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail())) {
+                                    passed = false;
+                                    break label;
+                                }
                                 break;
-                            }
-                        } else if (filters.get(j) == 2) { // date filter
-                            if (!(personList.get(i).getCreated() <= endDate && personList.get(i).getCreated() >= startDate)) {
-                                passed = false;
+                            case 2:  // date filter
+                                if (!(personList.get(i).getCreated() <= endDate && personList.get(i).getCreated() >= startDate)) {
+                                    passed = false;
+                                    break label;
+                                }
                                 break;
-                            }
-                        } else if (filters.get(j) == 3) { // location filter
-                            if (!(Utils.distanceBetweenLocs(currentLoc, personList.get(i).getLastLocation()) < radius)) {
-                                passed = false;
+                            case 3:  // location filter
+                                if (!(Utils.distanceBetweenLocs(currentLoc, personList.get(i).getLastLocation()) < radius)) {
+                                    passed = false;
+                                    break label;
+                                }
                                 break;
-                            }
-                        } else if (filters.get(j) == 4) { // search filter with query
-                            if (!(personList.get(i).getName().contains(query) || personList.get(i).getSurname().contains(query))) {
-                                passed = false;
+                            case 4:  // search filter with query
+                                if (!(personList.get(i).getName().contains(query) || personList.get(i).getSurname().contains(query))) {
+                                    passed = false;
+                                    break label;
+                                }
                                 break;
-                            }
                         }
                     }
                 }
@@ -288,22 +293,23 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
             Collections.sort(tempList, new Comparator<Person>() {
                 @Override
                 public int compare(Person person, Person t1) {
-                    if (sortType == 1) {   // Sort by created date
-                        return Long.compare(t1.getCreated(), person.getCreated());
-                    } else if (sortType == 2) {   // Sort by distance from me
-                        if (currentLoc == null || person.getLastLocation() == null)
-                            return  0;
+                    switch (sortType) {
+                        case 1:    // Sort by created date
+                            return Long.compare(t1.getCreated(), person.getCreated());
+                        case 2:    // Sort by distance from me
+                            if (currentLoc == null || person.getLastLocation() == null)
+                                return 0;
 
-                        return Double.compare(Utils.distanceBetweenLocs(currentLoc, person.getLastLocation()), Utils.distanceBetweenLocs(currentLoc, t1.getLastLocation()));
-                    } else if (sortType == 3) {   // Sort by wasting
-                        if (person.getLastMeasure() == null)
-                            return 0;
-                        return Double.compare(t1.getLastMeasure().getWeight() / t1.getLastMeasure().getHeight(), person.getLastMeasure().getWeight() / person.getLastMeasure().getHeight());
-                    } else if (sortType == 4) {   // sort by stunting
-                        if (person.getLastMeasure() == null)
-                            return 0;
+                            return Double.compare(Utils.distanceBetweenLocs(currentLoc, person.getLastLocation()), Utils.distanceBetweenLocs(currentLoc, t1.getLastLocation()));
+                        case 3:    // Sort by wasting
+                            if (person.getLastMeasure() == null)
+                                return 0;
+                            return Double.compare(t1.getLastMeasure().getWeight() / t1.getLastMeasure().getHeight(), person.getLastMeasure().getWeight() / person.getLastMeasure().getHeight());
+                        case 4:    // sort by stunting
+                            if (person.getLastMeasure() == null)
+                                return 0;
 
-                        return Double.compare(t1.getLastMeasure().getHeight() / t1.getLastMeasure().getAge(), person.getLastMeasure().getHeight() / person.getLastMeasure().getAge());
+                            return Double.compare(t1.getLastMeasure().getHeight() / t1.getLastMeasure().getAge(), person.getLastMeasure().getHeight() / person.getLastMeasure().getAge());
                     }
                     return 0;
                 }

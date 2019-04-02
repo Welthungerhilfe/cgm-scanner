@@ -172,25 +172,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         return valid;
     }
 
-    public void createUser(String email, String password) {
-        if (true) { // Validation check
-            AppController.getInstance().firebaseAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            session.setSigned(true);
-                            if (session.getTutorial())
-                                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                            else
-                                startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
-                            finish();
-                        }
-                    }
-                });
-        }
-    }
-
     private void doSignInAction() {
         if (!Utils.isNetworkConnectionAvailable(LoginActivity.this)) {
             Toast.makeText(LoginActivity.this, R.string.error_network, Toast.LENGTH_LONG).show();
