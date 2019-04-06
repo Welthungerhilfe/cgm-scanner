@@ -157,33 +157,30 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
     private void getAddressFromLocation(LatLng latLng) {
         //new AddressTask(location.getLatitude(), location.getLongitude(), this).execute();
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Geocoder geocoder = new Geocoder(LocationSearchActivity.this, Locale.getDefault());
-                String result = "Could not parse address from location";
-                try {
-                    List <Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-                    if (addressList != null && addressList.size() > 0) {
-                        Address address = addressList.get(0);
-                        StringBuilder sb = new StringBuilder();
+        runOnUiThread(() -> {
+            Geocoder geocoder = new Geocoder(LocationSearchActivity.this, Locale.getDefault());
+            String result = "Could not parse address from location";
+            try {
+                List <Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+                if (addressList != null && addressList.size() > 0) {
+                    Address address = addressList.get(0);
+                    StringBuilder sb = new StringBuilder();
 
-                        for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
-                            sb.append(address.getAddressLine(i));
+                    for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
+                        sb.append(address.getAddressLine(i));
 
-                        result = sb.toString();
-                    }
-                } catch (IOException e) {
-                    Log.e("Location Address Loader", "Unable connect to Geocoder", e);
-                } finally {
-                    txtAddress.setText(result);
-
-                    Loc loc = new Loc();
-                    loc.setLatitude(location.getLatitude());
-                    loc.setLongitude(location.getLongitude());
-                    loc.setAddress(result);
-                    session.setLocation(loc);
+                    result = sb.toString();
                 }
+            } catch (IOException e) {
+                Log.e("Location Address Loader", "Unable connect to Geocoder", e);
+            } finally {
+                txtAddress.setText(result);
+
+                Loc loc = new Loc();
+                loc.setLatitude(location.getLatitude());
+                loc.setLongitude(location.getLongitude());
+                loc.setAddress(result);
+                session.setLocation(loc);
             }
         });
     }

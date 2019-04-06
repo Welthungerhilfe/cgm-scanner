@@ -196,12 +196,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             AppController.getInstance().firebaseFirestore.collection("fcm_tokens")
                     .document(device)
                     .set(data)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            session.setFcmSaved(true);
-                        }
-                    });
+                    .addOnSuccessListener(aVoid -> session.setFcmSaved(true));
         }
     }
 
@@ -222,34 +217,31 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     }
 
     private void setupSidemenu() {
-        navMenu.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case R.id.menuTutorial:
-                        Intent intent = new Intent(MainActivity.this, TutorialActivity.class);
-                        intent.putExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, true);
-                        startActivity(intent);
-                        break;
-                    case R.id.menuSettings:
-                        startActivity(new Intent(MainActivity.this, SettingsActivity.class));
-                        break;
-                    case R.id.menuLogout:
-                        AppController.getInstance().firebaseAuth.signOut();
-                        session.setSigned(false);
+        navMenu.setNavigationItemSelectedListener(menuItem -> {
+            switch (menuItem.getItemId()) {
+                case R.id.menuTutorial:
+                    Intent intent = new Intent(MainActivity.this, TutorialActivity.class);
+                    intent.putExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, true);
+                    startActivity(intent);
+                    break;
+                case R.id.menuSettings:
+                    startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                    break;
+                case R.id.menuLogout:
+                    AppController.getInstance().firebaseAuth.signOut();
+                    session.setSigned(false);
 
-                        Account[] accounts = accountManager.getAccounts();
-                        for (int i = 0; i < accounts.length; i++) {
-                            accountManager.removeAccount(accounts[i], null, null);
-                        }
+                    Account[] accounts = accountManager.getAccounts();
+                    for (Account account : accounts) {
+                        accountManager.removeAccount(account, null, null);
+                    }
 
-                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                        finish();
-                        break;
-                }
-                drawerLayout.closeDrawers();
-                return true;
+                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                    finish();
+                    break;
             }
+            drawerLayout.closeDrawers();
+            return true;
         });
         View headerView = navMenu.getHeaderView(0);
         TextView txtUsername = headerView.findViewById(R.id.txtUsername);
@@ -301,13 +293,10 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         });
 
         ImageView closeButton = searchView.findViewById(R.id.search_close_btn);
-        closeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                searchView.setQuery("", false);
+        closeButton.setOnClickListener(v -> {
+            searchView.setQuery("", false);
 
-                viewModel.clearFilterOwn();
-            }
+            viewModel.clearFilterOwn();
         });
 
         ImageView magImage = searchView.findViewById(R.id.search_mag_icon);
@@ -329,23 +318,20 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
                     ConfirmDialog dialog = new ConfirmDialog(MainActivity.this);
                     dialog.setMessage(R.string.delete_person);
-                    dialog.setConfirmListener(new ConfirmDialog.OnConfirmListener() {
-                        @Override
-                        public void onConfirm(boolean result) {
-                            // ToDo: Remove person when swipe
-                            /*
-                            if (result) {
-                                person.setDeleted(true);
-                                person.setDeletedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-                                person.setTimestamp(Utils.getUniversalTimestamp());
-                                personRepository.updatePerson(person);
+                    dialog.setConfirmListener(result -> {
+                        // ToDo: Remove person when swipe
+                        /*
+                        if (result) {
+                            person.setDeleted(true);
+                            person.setDeletedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                            person.setTimestamp(Utils.getUniversalTimestamp());
+                            personRepository.updatePerson(person);
 
-                                adapterData.removePerson(person);
-                            } else {
-                                adapterData.notifyItemChanged(position);
-                            }
-                            */
+                            adapterData.removePerson(person);
+                        } else {
+                            adapterData.notifyItemChanged(position);
                         }
+                        */
                     });
                     dialog.show();
                 }
@@ -362,39 +348,36 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 .setCancelable(true)
                 .setInAnimation(R.anim.abc_fade_in)
                 .setOutAnimation(R.anim.abc_fade_out)
-                .setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(DialogPlus dialog, View view) {
+                .setOnClickListener((dialog, view) -> {
 
-                        switch (view.getId()) {
-                            case R.id.rytFilterData:
-                                viewModel.setFilterOwn();
-                                break;
-                            case R.id.rytFilterDate:
-                                doFilterByDate();
-                                break;
-                            case R.id.rytFilterLocation:
-                                doFilterByLocation();
-                                break;
-                            case R.id.rytFilterClear:
-                                viewModel.setFilterNo();
-                                break;
-                            case R.id.rytSortDate:
-                                viewModel.setSortType(SORT_DATE);
-                                break;
-                            case R.id.rytSortLocation:
-                                viewModel.setSortType(SORT_LOCATION);
-                                break;
-                            case R.id.rytSortWasting:
-                                viewModel.setSortType(SORT_WASTING);
-                                break;
-                            case R.id.rytSortStunting:
-                                viewModel.setSortType(SORT_STUNTING);
-                                break;
-                        }
-
-                        dialog.dismiss();
+                    switch (view.getId()) {
+                        case R.id.rytFilterData:
+                            viewModel.setFilterOwn();
+                            break;
+                        case R.id.rytFilterDate:
+                            doFilterByDate();
+                            break;
+                        case R.id.rytFilterLocation:
+                            doFilterByLocation();
+                            break;
+                        case R.id.rytFilterClear:
+                            viewModel.setFilterNo();
+                            break;
+                        case R.id.rytSortDate:
+                            viewModel.setSortType(SORT_DATE);
+                            break;
+                        case R.id.rytSortLocation:
+                            viewModel.setSortType(SORT_LOCATION);
+                            break;
+                        case R.id.rytSortWasting:
+                            viewModel.setSortType(SORT_WASTING);
+                            break;
+                        case R.id.rytSortStunting:
+                            viewModel.setSortType(SORT_STUNTING);
+                            break;
                     }
+
+                    dialog.dismiss();
                 })
                 .create();
 

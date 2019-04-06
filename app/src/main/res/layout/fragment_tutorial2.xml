@@ -51,7 +51,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:src="@drawable/check"
-                        android:tint="@color/colorPrimary" />
+                        android:tint="@color/colorPrimary"
+                        tools:ignore="ContentDescription" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -105,7 +106,7 @@
             android:gravity="center"
             android:text="@string/tutorial2"
             android:textColor="@color/colorWhite"
-            android:textSize="26dp"
+            android:textSize="26sp"
             android:textStyle="bold"/>
 
         <LinearLayout
@@ -149,7 +150,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/tutorial21"
@@ -173,7 +174,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/tutorial22"

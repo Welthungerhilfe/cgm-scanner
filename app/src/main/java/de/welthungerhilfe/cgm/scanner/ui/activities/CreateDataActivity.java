@@ -316,27 +316,24 @@ public class CreateDataActivity extends BaseActivity {
                     location.setLatitude(loc.getLatitude());
                     location.setLongitude(loc.getLongitude());
 
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Geocoder geocoder = new Geocoder(CreateDataActivity.this, Locale.getDefault());
-                            String result = null;
-                            try {
-                                List <Address> addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                                if (addressList != null && addressList.size() > 0) {
-                                    Address address = addressList.get(0);
-                                    StringBuilder sb = new StringBuilder();
+                    new Thread(() -> {
+                        Geocoder geocoder = new Geocoder(CreateDataActivity.this, Locale.getDefault());
+                        String result = null;
+                        try {
+                            List <Address> addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                            if (addressList != null && addressList.size() > 0) {
+                                Address address = addressList.get(0);
+                                StringBuilder sb = new StringBuilder();
 
-                                    for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
-                                        sb.append(address.getAddressLine(i));
+                                for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
+                                    sb.append(address.getAddressLine(i));
 
-                                    result = sb.toString();
-                                }
-                            } catch (IOException e) {
-                                Log.e("Location Address Loader", "Unable connect to Geocoder", e);
-                            } finally {
-                                location.setAddress(result);
+                                result = sb.toString();
                             }
+                        } catch (IOException e) {
+                            Log.e("Location Address Loader", "Unable connect to Geocoder", e);
+                        } finally {
+                            location.setAddress(result);
                         }
                     }).run();
                 }

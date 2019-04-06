@@ -131,20 +131,17 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                     } else {
                         ConfirmDialog dialog = new ConfirmDialog(context);
                         dialog.setMessage(R.string.delete_measure);
-                        dialog.setConfirmListener(new ConfirmDialog.OnConfirmListener() {
-                            @Override
-                            public void onConfirm(boolean result) {
-                                if (result) {
-                                    measure.setDeleted(true);
-                                    measure.setDeletedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-                                    measure.setTimestamp(Utils.getUniversalTimestamp());
-                                    // ToDo: Write new code to update measure
-                                    //OfflineRepository.getInstance(getContext()).updateMeasure(measure);
+                        dialog.setConfirmListener(result -> {
+                            if (result) {
+                                measure.setDeleted(true);
+                                measure.setDeletedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                                measure.setTimestamp(Utils.getUniversalTimestamp());
+                                // ToDo: Write new code to update measure
+                                //OfflineRepository.getInstance(getContext()).updateMeasure(measure);
 
-                                    adapterMeasure.removeMeasure(measure);
-                                } else {
-                                    adapterMeasure.notifyItemChanged(position);
-                                }
+                                adapterMeasure.removeMeasure(measure);
+                            } else {
+                                adapterMeasure.notifyItemChanged(position);
                             }
                         });
                         dialog.show();
@@ -161,12 +158,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                             if (measureDialog == null)
                                 measureDialog = new ManualMeasureDialog(context);
                             measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
-                            measureDialog.setCloseListener(new ManualMeasureDialog.OnCloseListener() {
-                                @Override
-                                public void onClose(boolean result) {
-                                    adapterMeasure.notifyItemChanged(position);
-                                }
-                            });
+                            measureDialog.setCloseListener(result -> adapterMeasure.notifyItemChanged(position));
                             measureDialog.setMeasure(measure);
                             measureDialog.show();
                         } else {
@@ -208,19 +200,16 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         try {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setTitle(R.string.title_add_measure);
-            builder.setItems(R.array.selector_measure, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface d, int which) {
-                    if (which == 0) {
-                        if (measureDialog == null)
-                            measureDialog = new ManualMeasureDialog(context);
-                        measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
-                        measureDialog.show();
-                    } else if (which == 1) {
-                        Intent intent = new Intent(getContext(), ScanModeActivity.class);
-                        intent.putExtra(AppConstants.EXTRA_PERSON, person);
-                        startActivity(intent);
-                    }
+            builder.setItems(R.array.selector_measure, (d, which) -> {
+                if (which == 0) {
+                    if (measureDialog == null)
+                        measureDialog = new ManualMeasureDialog(context);
+                    measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
+                    measureDialog.show();
+                } else if (which == 1) {
+                    Intent intent = new Intent(getContext(), ScanModeActivity.class);
+                    intent.putExtra(AppConstants.EXTRA_PERSON, person);
+                    startActivity(intent);
                 }
             });
             builder.show();

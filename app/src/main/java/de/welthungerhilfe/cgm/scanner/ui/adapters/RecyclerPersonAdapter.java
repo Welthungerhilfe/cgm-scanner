@@ -84,16 +84,13 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
         holder.txtName.setText(person.getName() + " " + person.getSurname());
 
-        repository.getPersonLastMeasure(new OnMeasureLoad() {
-            @Override
-            public void onMeasureLoad(Measure measure) {
-                if (measure != null) {
-                    holder.txtWeight.setText(Double.toString(measure.getWeight()));
-                    holder.txtHeight.setText(Double.toString(measure.getHeight()));
-                } else {
-                    holder.txtWeight.setText("0.0");
-                    holder.txtHeight.setText("0.0");
-                }
+        repository.getPersonLastMeasure(measure -> {
+            if (measure != null) {
+                holder.txtWeight.setText(Double.toString(measure.getWeight()));
+                holder.txtHeight.setText(Double.toString(measure.getHeight()));
+            } else {
+                holder.txtWeight.setText("0.0");
+                holder.txtHeight.setText("0.0");
             }
         }, person.getId());
 
@@ -220,7 +217,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
         public TextView txtWeight;
         public TextView txtHeight;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
 
             rytItem = itemView.findViewById(R.id.rytItem);
@@ -230,13 +227,8 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
             txtHeight = itemView.findViewById(R.id.txtHeight);
         }
 
-        public void bindPersonDetail(final Person person) {
-            rytItem.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    personDetailListener.onPersonDetail(person);
-                }
-            });
+        void bindPersonDetail(final Person person) {
+            rytItem.setOnClickListener(view -> personDetailListener.onPersonDetail(person));
         }
     }
 
@@ -290,29 +282,26 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
                     tempList.add(personList.get(i));
             }
 
-            Collections.sort(tempList, new Comparator<Person>() {
-                @Override
-                public int compare(Person person, Person t1) {
-                    switch (sortType) {
-                        case 1:    // Sort by created date
-                            return Long.compare(t1.getCreated(), person.getCreated());
-                        case 2:    // Sort by distance from me
-                            if (currentLoc == null || person.getLastLocation() == null)
-                                return 0;
+            Collections.sort(tempList, (person, t1) -> {
+                switch (sortType) {
+                    case 1:    // Sort by created date
+                        return Long.compare(t1.getCreated(), person.getCreated());
+                    case 2:    // Sort by distance from me
+                        if (currentLoc == null || person.getLastLocation() == null)
+                            return 0;
 
-                            return Double.compare(Utils.distanceBetweenLocs(currentLoc, person.getLastLocation()), Utils.distanceBetweenLocs(currentLoc, t1.getLastLocation()));
-                        case 3:    // Sort by wasting
-                            if (person.getLastMeasure() == null)
-                                return 0;
-                            return Double.compare(t1.getLastMeasure().getWeight() / t1.getLastMeasure().getHeight(), person.getLastMeasure().getWeight() / person.getLastMeasure().getHeight());
-                        case 4:    // sort by stunting
-                            if (person.getLastMeasure() == null)
-                                return 0;
+                        return Double.compare(Utils.distanceBetweenLocs(currentLoc, person.getLastLocation()), Utils.distanceBetweenLocs(currentLoc, t1.getLastLocation()));
+                    case 3:    // Sort by wasting
+                        if (person.getLastMeasure() == null)
+                            return 0;
+                        return Double.compare(t1.getLastMeasure().getWeight() / t1.getLastMeasure().getHeight(), person.getLastMeasure().getWeight() / person.getLastMeasure().getHeight());
+                    case 4:    // sort by stunting
+                        if (person.getLastMeasure() == null)
+                            return 0;
 
-                            return Double.compare(t1.getLastMeasure().getHeight() / t1.getLastMeasure().getAge(), person.getLastMeasure().getHeight() / person.getLastMeasure().getAge());
-                    }
-                    return 0;
+                        return Double.compare(t1.getLastMeasure().getHeight() / t1.getLastMeasure().getAge(), person.getLastMeasure().getHeight() / person.getLastMeasure().getAge());
                 }
+                return 0;
             });
 
             results.values = tempList;

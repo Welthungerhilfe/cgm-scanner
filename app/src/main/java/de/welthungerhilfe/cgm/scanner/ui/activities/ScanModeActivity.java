@@ -316,44 +316,38 @@ public class ScanModeActivity extends AppCompatActivity {
         btnScanComplete.setVisibility(View.VISIBLE);
         btnScanComplete.requestFocus();
 
-        if (android.os.Build.VERSION.SDK_INT >=  android.os.Build.VERSION_CODES.LOLLIPOP) {
-            int cx = (btnScanComplete.getLeft() + btnScanComplete.getRight()) / 2;
-            int cy = (btnScanComplete.getTop() + btnScanComplete.getBottom()) / 2;
+        int cx = (btnScanComplete.getLeft() + btnScanComplete.getRight()) / 2;
+        int cy = (btnScanComplete.getTop() + btnScanComplete.getBottom()) / 2;
 
-            int dx = Math.max(cx, btnScanComplete.getWidth() - cx);
-            int dy = Math.max(cy, btnScanComplete.getHeight() - cy);
-            float finalRadius = (float) Math.hypot(dx, dy);
+        int dx = Math.max(cx, btnScanComplete.getWidth() - cx);
+        int dy = Math.max(cy, btnScanComplete.getHeight() - cy);
+        float finalRadius = (float) Math.hypot(dx, dy);
 
-            Animator animator = ViewAnimationUtils.createCircularReveal(btnScanComplete, cx, cy, 0, finalRadius);
-            animator.setInterpolator(new AccelerateDecelerateInterpolator());
-            animator.setDuration(300);
-            animator.start();
-        }
+        Animator animator = ViewAnimationUtils.createCircularReveal(btnScanComplete, cx, cy, 0, finalRadius);
+        animator.setInterpolator(new AccelerateDecelerateInterpolator());
+        animator.setDuration(300);
+        animator.start();
     }
 
     private void hideCompleteButton() {
-        if (android.os.Build.VERSION.SDK_INT >=  android.os.Build.VERSION_CODES.LOLLIPOP) {
-            int cx = (btnScanComplete.getLeft() + btnScanComplete.getRight()) / 2;
-            int cy = (btnScanComplete.getTop() + btnScanComplete.getBottom()) / 2;
+        int cx = (btnScanComplete.getLeft() + btnScanComplete.getRight()) / 2;
+        int cy = (btnScanComplete.getTop() + btnScanComplete.getBottom()) / 2;
 
-            int dx = Math.max(cx, btnScanComplete.getWidth() - cx);
-            int dy = Math.max(cy, btnScanComplete.getHeight() - cy);
-            float finalRadius = (float) Math.hypot(dx, dy);
+        int dx = Math.max(cx, btnScanComplete.getWidth() - cx);
+        int dy = Math.max(cy, btnScanComplete.getHeight() - cy);
+        float finalRadius = (float) Math.hypot(dx, dy);
 
-            Animator animator = ViewAnimationUtils.createCircularReveal(btnScanComplete, cx, cy, finalRadius, 0);
-            animator.setInterpolator(new AccelerateDecelerateInterpolator());
-            animator.setDuration(300);
-            animator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-                    btnScanComplete.setVisibility(View.GONE);
-                }
-            });
-            animator.start();
-        } else {
-            btnScanComplete.setVisibility(View.GONE);
-        }
+        Animator animator = ViewAnimationUtils.createCircularReveal(btnScanComplete, cx, cy, finalRadius, 0);
+        animator.setInterpolator(new AccelerateDecelerateInterpolator());
+        animator.setDuration(300);
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                btnScanComplete.setVisibility(View.GONE);
+            }
+        });
+        animator.start();
     }
 
     public void closeScan() {
@@ -420,35 +414,32 @@ public class ScanModeActivity extends AppCompatActivity {
     }
 
     private void getAddressFromLocation(double latitude, double longitude) {
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Geocoder geocoder = new Geocoder(ScanModeActivity.this, Locale.getDefault());
-                String result = null;
-                try {
-                    List <Address> addressList = geocoder.getFromLocation(latitude, longitude, 1);
-                    if (addressList != null && addressList.size() > 0) {
-                        Address address = addressList.get(0);
-                        StringBuilder sb = new StringBuilder();
+        Thread thread = new Thread(() -> {
+            Geocoder geocoder = new Geocoder(ScanModeActivity.this, Locale.getDefault());
+            String result = null;
+            try {
+                List <Address> addressList = geocoder.getFromLocation(latitude, longitude, 1);
+                if (addressList != null && addressList.size() > 0) {
+                    Address address = addressList.get(0);
+                    StringBuilder sb = new StringBuilder();
 
-                        for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
-                            sb.append(address.getAddressLine(i));
+                    for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
+                        sb.append(address.getAddressLine(i));
 
-                        result = sb.toString();
-                    }
-                } catch (IOException e) {
-                    Log.e("Location Address Loader", "Unable connect to Geocoder", e);
-                    Crashlytics.log(Log.ERROR, TAG, "IOException Unable connect to Geocoder");
-                } finally {
-                    location = new Loc();
-
-                    location.setLatitude(latitude);
-                    location.setLongitude(longitude);
-                    location.setAddress(result);
-
-                    if (measure != null)
-                        measure.setLocation(location);
+                    result = sb.toString();
                 }
+            } catch (IOException e) {
+                Log.e("Location Address Loader", "Unable connect to Geocoder", e);
+                Crashlytics.log(Log.ERROR, TAG, "IOException Unable connect to Geocoder");
+            } finally {
+                location = new Loc();
+
+                location.setLatitude(latitude);
+                location.setLongitude(longitude);
+                location.setAddress(result);
+
+                if (measure != null)
+                    measure.setLocation(location);
             }
         });
         thread.start();

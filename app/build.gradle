@@ -36,7 +36,7 @@ android {
         javaMaxHeapSize "4g"
     }
     dataBinding {
-        enabled = true;
+        enabled = true
     }
     sourceSets {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())

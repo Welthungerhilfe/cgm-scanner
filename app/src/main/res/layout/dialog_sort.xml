@@ -68,29 +68,24 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                        android:orientation="horizontal"
+                        android:orientation="vertical"
                         android:gravity="center_vertical">
 
-                        <LinearLayout
+                        <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:singleLine="true"
-                                android:text="@string/own_data"
-                                android:textSize="20sp"
-                                android:textColor="@color/colorBlack"/>
-                            <TextView
-                                android:id="@+id/txtFilterData"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:singleLine="true"
-                                android:textSize="16sp"
-                                android:text="@string/created_by_self"/>
-                        </LinearLayout>
+                            android:singleLine="true"
+                            android:text="@string/own_data"
+                            android:textSize="20sp"
+                            android:textColor="@color/colorBlack"/>
+
+                        <TextView
+                            android:id="@+id/txtFilterData"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:textSize="16sp"
+                            android:text="@string/created_by_self"/>
 
                     </LinearLayout>
 
@@ -134,7 +129,7 @@
                         android:gravity="center_vertical">
 
                         <LinearLayout
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
@@ -203,7 +198,7 @@
                         android:gravity="center_vertical">
 
                         <LinearLayout
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
@@ -268,28 +263,22 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                        android:orientation="horizontal"
+                        android:orientation="vertical"
                         android:gravity="center_vertical">
 
-                        <LinearLayout
+                        <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:singleLine="true"
-                                android:text="@string/no_filter"
-                                android:textSize="20sp"
-                                android:textColor="@color/colorBlack"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:singleLine="true"
-                                android:textSize="16sp"
-                                android:text="@string/clear_filters"/>
-                        </LinearLayout>
+                            android:singleLine="true"
+                            android:text="@string/no_filter"
+                            android:textSize="20sp"
+                            android:textColor="@color/colorBlack"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:textSize="16sp"
+                            android:text="@string/clear_filters"/>
 
                     </LinearLayout>
 
@@ -339,27 +328,22 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                        android:orientation="horizontal"
+                        android:orientation="vertical"
                         android:gravity="center_vertical">
 
-                        <LinearLayout
+                        <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:singleLine="true"
-                                android:text="@string/date"
-                                android:textSize="20sp"
-                                android:textColor="@color/colorBlack"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:singleLine="true"
-                                android:textSize="16sp"
-                                android:text="@string/sort_date"/>
-                        </LinearLayout>
+                            android:singleLine="true"
+                            android:text="@string/date"
+                            android:textSize="20sp"
+                            android:textColor="@color/colorBlack"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:textSize="16sp"
+                            android:text="@string/sort_date"/>
 
                     </LinearLayout>
 
@@ -399,27 +383,22 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                        android:orientation="horizontal"
+                        android:orientation="vertical"
                         android:gravity="center_vertical">
 
-                        <LinearLayout
+                        <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:singleLine="true"
-                                android:text="@string/label_location"
-                                android:textSize="20sp"
-                                android:textColor="@color/colorBlack"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:singleLine="true"
-                                android:textSize="16sp"
-                                android:text="@string/sort_location"/>
-                        </LinearLayout>
+                            android:singleLine="true"
+                            android:text="@string/label_location"
+                            android:textSize="20sp"
+                            android:textColor="@color/colorBlack"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:textSize="16sp"
+                            android:text="@string/sort_location"/>
 
                     </LinearLayout>
 
@@ -459,28 +438,22 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                        android:orientation="horizontal"
+                        android:orientation="vertical"
                         android:gravity="center_vertical">
 
-                        <LinearLayout
+                        <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:singleLine="true"
-                                android:text="@string/wasting"
-                                android:textSize="20sp"
-                                android:textColor="@color/colorBlack"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:singleLine="true"
-                                android:textSize="16sp"
-                                android:text="@string/wasting_weight_height"/>
-                        </LinearLayout>
+                            android:singleLine="true"
+                            android:text="@string/wasting"
+                            android:textSize="20sp"
+                            android:textColor="@color/colorBlack"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:textSize="16sp"
+                            android:text="@string/wasting_weight_height"/>
 
                     </LinearLayout>
 
@@ -523,25 +496,19 @@
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
-                        <LinearLayout
+                        <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:singleLine="true"
-                                android:text="@string/stunting"
-                                android:textSize="20sp"
-                                android:textColor="@color/colorBlack"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:singleLine="true"
-                                android:textSize="16sp"
-                                android:text="@string/stunting_height_age"/>
-                        </LinearLayout>
+                            android:singleLine="true"
+                            android:text="@string/stunting"
+                            android:textSize="20sp"
+                            android:textColor="@color/colorBlack"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:textSize="16sp"
+                            android:text="@string/stunting_height_age"/>
 
                     </LinearLayout>
 

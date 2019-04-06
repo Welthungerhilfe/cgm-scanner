@@ -101,7 +101,7 @@ public class VideoEncoderCore {
         // mmatiaschek 20.02.2018 we need to set GLSurface to InputSurface instead of creating one
         // TODO: do dependency injection?
         //mInputSurface = mEncoder.createInputSurface();
-        mInputSurface = mEncoder.createPersistentInputSurface();
+        mInputSurface = MediaCodec.createPersistentInputSurface();
         mEncoder.setInputSurface(mInputSurface);
 
         //mInputSurface = surface;

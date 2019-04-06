@@ -27,52 +27,29 @@ public class MeasureRepository {
     }
 
     public void insertMeasure(Measure measure) {
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                database.measureDao().insertMeasure(measure);
-                return null;
-            }
-        }.execute();
+        ((Runnable) () -> {
+            database.measureDao().insertMeasure(measure);
+        }).run();
     }
 
     public void updateMeasure(Measure measure) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                database.measureDao().updateMeasure(measure);
-                return null;
-            }
-        }.execute();
+        ((Runnable) () -> {
+            database.measureDao().updateMeasure(measure);
+        }).run();
     }
 
     public void getSyncableMeasure(OnMeasuresLoad listener, long timestamp) {
-        new AsyncTask<Long, Void, List<Measure>>() {
-            @Override
-            protected List<Measure> doInBackground(Long... timestamp) {
-                return database.measureDao().getSyncableMeasure(timestamp[0]);
-            }
-
-            @Override
-            public void onPostExecute(List<Measure> data) {
-                listener.onMeasuresLoaded(data);
-            }
-        }.execute(timestamp);
+        ((Runnable) () -> {
+            List<Measure> data = database.measureDao().getSyncableMeasure(timestamp);
+            listener.onMeasuresLoaded(data);
+        }).run();
     }
 
     public void getPersonLastMeasure(OnMeasureLoad listener, String personId) {
-        new AsyncTask<String, Void, Measure>() {
-            @Override
-            protected Measure doInBackground(String... strings) {
-                return database.measureDao().getLastMeasure(strings[0]);
-            }
-
-            @Override
-            public void onPostExecute(Measure data) {
-                listener.onMeasureLoad(data);
-            }
-        }.execute(personId);
+        ((Runnable) () -> {
+            Measure data = database.measureDao().getLastMeasure(personId);
+            listener.onMeasureLoad(data);
+        }).run();
     }
 
     public LiveData<List<Measure>> getPersonMeasures(String personId) {

@@ -1,7 +1,6 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
 import android.content.Context;
-import android.os.AsyncTask;
 
 import java.util.List;
 
@@ -14,7 +13,7 @@ public class FileLogRepository {
 
     private CgmDatabase database;
 
-    public FileLogRepository(Context context) {
+    private FileLogRepository(Context context) {
         database = CgmDatabase.getInstance(context);
     }
 
@@ -26,51 +25,28 @@ public class FileLogRepository {
     }
 
     public void loadQueuedData(OnFileLogsLoad listener) {
-        new AsyncTask<Void, Void, List<FileLog>>() {
-            @Override
-            protected List<FileLog> doInBackground(Void... voids) {
-                return database.fileLogDao().loadQueuedData();
-            }
-
-            @Override
-            public void onPostExecute(List<FileLog> data) {
-                listener.onFileLogsLoaded(data);
-            }
-        }.execute();
+        ((Runnable) () -> {
+            List<FileLog> data = database.fileLogDao().loadQueuedData();
+            listener.onFileLogsLoaded(data);
+        }).run();
     }
 
     public void insertFileLog(FileLog log) {
-        new AsyncTask<Void, Void, Boolean>() {
-
-            @Override
-            protected Boolean doInBackground(Void... voids) {
-                database.fileLogDao().saveFileLog(log);
-                return true;
-            }
-        }.execute();
+        ((Runnable) () -> {
+            database.fileLogDao().saveFileLog(log);
+        }).run();
     }
 
     public void updateFileLog(FileLog log) {
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... voids) {
-                database.fileLogDao().updateFileLog(log);
-                return true;
-            }
-        }.execute();
+        ((Runnable) () -> {
+            database.fileLogDao().updateFileLog(log);
+        }).run();
     }
 
     public void getSyncableLog(OnFileLogsLoad listener, long timestamp) {
-        new AsyncTask<Long, Void, List<FileLog>>() {
-            @Override
-            protected List<FileLog> doInBackground(Long... timestamp) {
-                return database.fileLogDao().getSyncableData(timestamp[0]);
-            }
-
-            @Override
-            public void onPostExecute(List<FileLog> data) {
-                listener.onFileLogsLoaded(data);
-            }
-        }.execute(timestamp);
+        ((Runnable) () -> {
+            List<FileLog> data = database.fileLogDao().getSyncableData(timestamp);
+            listener.onFileLogsLoaded(data);
+        }).run();
     }
 }
