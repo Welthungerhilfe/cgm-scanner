@@ -77,7 +77,7 @@ public class MigrationTest {
 
         // Re-open the database with version 2 and provide
         // MIGRATION_1_2 as the migration process.
-        database = helper.runMigrationsAndValidate(TEST_DB, 4, true, CgmDatabase.MIGRATION_1_2, CgmDatabase.MIGRATION_2_3, CgmDatabase.MIGRATION_3_4);
+        database = helper.runMigrationsAndValidate(TEST_DB, 4, true, CgmDatabase.MIGRATION_1_2, CgmDatabase.MIGRATION_2_3, CgmDatabase.MIGRATION_3_4, CgmDatabase.MIGRATION_4_5);
 
         // MigrationTestHelper automatically verifies the schema changes,
         // but you need to validate that the data was migrated properly.

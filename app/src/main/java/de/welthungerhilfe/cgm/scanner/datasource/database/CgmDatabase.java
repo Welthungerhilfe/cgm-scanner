@@ -104,17 +104,4 @@ public abstract class CgmDatabase extends RoomDatabase {
             return instance;
         }
     }
-
-    public LiveData<PagedList<Person>> getPersons() {
-        PagedList.Config pagedListConfig = (new PagedList.Config.Builder()).setEnablePlaceholders(false)
-                .setInitialLoadSizeHint(1000)
-                .setPageSize(1000)
-                .build();
-
-        Executor executor = Executors.newFixedThreadPool(10);
-        PersonDataFactory dataFactory = new PersonDataFactory(personDao());
-        LivePagedListBuilder livePagedListBuilder = new LivePagedListBuilder(dataFactory, pagedListConfig).setFetchExecutor(executor);
-
-        return livePagedListBuilder.build();
-    }
 }

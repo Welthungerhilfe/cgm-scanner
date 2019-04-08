@@ -63,7 +63,6 @@ public class GrowthDataFragment extends Fragment {
     private final String[] girls = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "hcfa_girls_p_exp.txt", "acfa_girls_p_exp.txt"};
 
     private LineChart mChart;
-    private MaterialSpinner dropChart;
 
     private VerticalTextView txtYAxis;
     private TextView txtXAxis;
@@ -114,7 +113,7 @@ public class GrowthDataFragment extends Fragment {
 
         //chartGrowth = view.findViewById(R.id.chartGrowth);
         mChart = view.findViewById(R.id.chart1);
-        dropChart = view.findViewById(R.id.dropChart);
+        MaterialSpinner dropChart = view.findViewById(R.id.dropChart);
 
         @SuppressLint("ResourceType") String[] filters = getResources().getStringArray(R.array.filters);
         dropChart.setItems(filters);

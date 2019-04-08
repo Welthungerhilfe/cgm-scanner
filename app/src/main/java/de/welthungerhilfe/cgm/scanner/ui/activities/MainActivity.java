@@ -252,10 +252,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         searchbar.setVisibility(View.GONE);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
-        actionBar.setTitle(R.string.title_scans);
-        invalidateOptionsMenu();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setTitle(R.string.title_scans);
+            invalidateOptionsMenu();
+        }
 
         mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close) {
             public void onDrawerClosed(View view) {

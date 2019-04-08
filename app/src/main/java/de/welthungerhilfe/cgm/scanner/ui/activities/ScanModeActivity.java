@@ -117,11 +117,11 @@ public class ScanModeActivity extends AppCompatActivity {
 
         imgScanStanding.setImageResource(R.drawable.standing_active);
         imgScanStandingCheck.setImageResource(R.drawable.radio_active);
-        txtScanStanding.setTextColor(getResources().getColor(R.color.colorBlack));
+        txtScanStanding.setTextColor(getResources().getColor(R.color.colorBlack, getTheme()));
 
         imgScanLying.setImageResource(R.drawable.lying_inactive);
         imgScanLyingCheck.setImageResource(R.drawable.radio_inactive);
-        txtScanLying.setTextColor(getResources().getColor(R.color.colorGreyDark));
+        txtScanLying.setTextColor(getResources().getColor(R.color.colorGreyDark, getTheme()));
 
         changeMode();
     }
@@ -131,11 +131,11 @@ public class ScanModeActivity extends AppCompatActivity {
 
         imgScanLying.setImageResource(R.drawable.lying_active);
         imgScanLyingCheck.setImageResource(R.drawable.radio_active);
-        txtScanLying.setTextColor(getResources().getColor(R.color.colorBlack));
+        txtScanLying.setTextColor(getResources().getColor(R.color.colorBlack, getTheme()));
 
         imgScanStanding.setImageResource(R.drawable.standing_inactive);
         imgScanStandingCheck.setImageResource(R.drawable.radio_inactive);
-        txtScanStanding.setTextColor(getResources().getColor(R.color.colorGreyDark));
+        txtScanStanding.setTextColor(getResources().getColor(R.color.colorGreyDark, getTheme()));
 
         changeMode();
     }
@@ -280,8 +280,8 @@ public class ScanModeActivity extends AppCompatActivity {
             case SCAN_LYING_FRONT:
                 lytScanStep1.setVisibility(View.GONE);
                 btnScanStep1.setText(R.string.retake_scan);
-                btnScanStep1.setTextColor(getResources().getColor(R.color.colorWhite));
-                btnScanStep1.setBackground(getResources().getDrawable(R.drawable.button_green_circular));
+                btnScanStep1.setTextColor(getResources().getColor(R.color.colorWhite, getTheme()));
+                btnScanStep1.setBackground(getResources().getDrawable(R.drawable.button_green_circular, getTheme()));
 
                 step1 = true;
                 break;
@@ -289,8 +289,8 @@ public class ScanModeActivity extends AppCompatActivity {
             case SCAN_LYING_SIDE:
                 lytScanStep2.setVisibility(View.GONE);
                 btnScanStep2.setText(R.string.retake_scan);
-                btnScanStep2.setTextColor(getResources().getColor(R.color.colorWhite));
-                btnScanStep2.setBackground(getResources().getDrawable(R.drawable.button_green_circular));
+                btnScanStep2.setTextColor(getResources().getColor(R.color.colorWhite, getTheme()));
+                btnScanStep2.setBackground(getResources().getDrawable(R.drawable.button_green_circular, getTheme()));
 
                 step2 = true;
                 break;
@@ -298,8 +298,8 @@ public class ScanModeActivity extends AppCompatActivity {
             case SCAN_LYING_BACK:
                 lytScanStep3.setVisibility(View.GONE);
                 btnScanStep3.setText(R.string.retake_scan);
-                btnScanStep3.setTextColor(getResources().getColor(R.color.colorWhite));
-                btnScanStep3.setBackground(getResources().getDrawable(R.drawable.button_green_circular));
+                btnScanStep3.setTextColor(getResources().getColor(R.color.colorWhite, getTheme()));
+                btnScanStep3.setBackground(getResources().getDrawable(R.drawable.button_green_circular, getTheme()));
 
                 step3 = true;
                 break;

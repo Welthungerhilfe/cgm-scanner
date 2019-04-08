@@ -197,8 +197,7 @@ public class VideoEncoderCore {
             } else {
                 ByteBuffer encodedData = encoderOutputBuffers[encoderStatus];
                 if (encodedData == null) {
-                    throw new RuntimeException("encoderOutputBuffer " + encoderStatus +
-                            " was null");
+                    throw new RuntimeException("encoderOutputBuffer " + encoderStatus + " was null");
                 }
 
                 if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {

@@ -191,7 +191,7 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
                 .radius(radius * 1000)
                 .strokeColor(Color.WHITE)
                 .strokeWidth(4.0f)
-                .fillColor(getResources().getColor(R.color.colorGreenTransparent)));
+                .fillColor(getResources().getColor(R.color.colorGreenTransparent, getTheme())));
         circleRange.setVisible(true);
 
         googleMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));

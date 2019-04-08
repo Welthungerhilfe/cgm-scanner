@@ -52,9 +52,9 @@
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_alignParentBottom="true"
-                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
                     android:layout_marginBottom="5dp"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginEnd="5dp"
                     android:src="@drawable/search_grey"
                     android:contentDescription="@string/content_image"/>
 
@@ -63,7 +63,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
+                android:layout_marginStart="20dp"
                 android:text="@string/label_date"
                 android:textColor="@color/colorGreyDark"
                 android:textSize="20sp"
@@ -73,7 +73,7 @@
                 android:id="@+id/txtDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="01/24/2018"
+                android:text=""
                 android:textColor="@color/colorGreyDark"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -135,7 +135,7 @@
                     android:id="@+id/editLocation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:editable="false"
+                    android:inputType="none"
                     android:hint="@string/label_location"
                     android:singleLine="false" />
             </android.support.design.widget.TextInputLayout>
@@ -144,7 +144,7 @@
                 android:id="@+id/imgLocation"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:src="@drawable/location"
                 android:visibility="invisible"
@@ -176,7 +176,7 @@
                 android:id="@+id/imgBirth"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:src="@drawable/right"
                 android:tint="@color/colorGreyDark"
@@ -237,7 +237,7 @@
                 android:id="@+id/txtBack"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="30dp"
+                android:layout_marginEnd="30dp"
                 android:text="@string/back"
                 android:textAllCaps="true"
                 android:textColor="@color/colorPrimary"

@@ -52,7 +52,8 @@
                 android:id="@+id/lytSelectMode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:baselineAligned="false">
 
                 <com.balysv.materialripple.MaterialRippleLayout
                     android:layout_width="match_parent"
@@ -89,7 +90,7 @@
                                 android:id="@+id/txtScanStanding"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginLeft="@dimen/activity_group_margin"
+                                android:layout_marginStart="@dimen/activity_group_margin"
                                 android:text="@string/mode_standing"
                                 android:textColor="@color/colorBlack"/>
                         </LinearLayout>
@@ -133,7 +134,7 @@
                                 android:id="@+id/txtScanLying"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginLeft="@dimen/activity_group_margin"
+                                android:layout_marginStart="@dimen/activity_group_margin"
                                 android:text="@string/mode_lying"
                                 android:textColor="@color/colorGreyDark"/>
                         </LinearLayout>
@@ -162,7 +163,7 @@
                     android:id="@+id/txtSelectedMode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/activity_group_margin"
+                    android:layout_marginStart="@dimen/activity_group_margin"
                     android:text="@string/mode_lying"
                     android:textColor="@color/colorBlack"/>
 
@@ -216,7 +217,7 @@
                             android:id="@+id/imgScanStep1"
                             android:layout_width="100dp"
                             android:layout_height="100dp"
-                            android:layout_marginLeft="20dp"
+                            android:layout_marginStart="20dp"
                             android:src="@drawable/stand_front_active"
                             tools:ignore="ContentDescription" />
 
@@ -273,7 +274,7 @@
                             android:id="@+id/imgScanStep2"
                             android:layout_width="100dp"
                             android:layout_height="100dp"
-                            android:layout_marginLeft="20dp"
+                            android:layout_marginStart="20dp"
                             android:src="@drawable/stand_side_active"
                             tools:ignore="ContentDescription" />
 
@@ -330,7 +331,7 @@
                             android:id="@+id/imgScanStep3"
                             android:layout_width="100dp"
                             android:layout_height="100dp"
-                            android:layout_marginLeft="20dp"
+                            android:layout_marginStart="20dp"
                             android:src="@drawable/stand_back_active"
                             tools:ignore="ContentDescription" />
 
