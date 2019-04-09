@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.StrictMode;
-import android.telephony.TelephonyManager;
 
 //import com.amitshekhar.DebugDB;
 import com.crashlytics.android.Crashlytics;
@@ -39,6 +38,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
@@ -69,8 +69,11 @@ public class AppController extends Application {
 
         CrashlyticsCore core = new CrashlyticsCore
                 .Builder()
-                .listener(() -> {
-                    // TODO: do something when crash occurs
+                .listener(new CrashlyticsListener() {
+                    @Override
+                    public void crashlyticsDidDetectCrashDuringPreviousExecution() {
+                        // TODO: do something when crash occurs
+                    }
                 })
                 .build();
 
@@ -142,29 +145,21 @@ public class AppController extends Application {
         firebaseUser = firebaseAuth.getCurrentUser();
     }
 
-    public String getPersonId(String name) {
-        return Utils.getAndroidID(getContentResolver()) + "_" + name + "_" + Utils.getUniversalTimestamp() + "_" + Utils.getSaltString(16);
+    public String getPersonId() {
+        return String.format("%s_person_%s_%s", Utils.getAndroidID(getContentResolver()), Utils.getUniversalTimestamp(), Utils.getSaltString(16));
     }
 
     public String getMeasureId() {
-        return Utils.getAndroidID(getContentResolver()) + "_measure_" + Utils.getUniversalTimestamp() + "_" + Utils.getSaltString(16);
+        return String.format("%s_measure_%s_%s", Utils.getAndroidID(getContentResolver()), Utils.getUniversalTimestamp(), Utils.getSaltString(16));
     }
 
-    public String getArtefactId(String type) {
-        return Utils.getAndroidID(getContentResolver()) + "_" + type + "_" + Utils.getUniversalTimestamp() + "_" + Utils.getSaltString(16);
+    public String getArtifactId(String type) {
+        return String.format("%s_artifact-%s_%s_%s", Utils.getAndroidID(getContentResolver()), type, Utils.getUniversalTimestamp(), Utils.getSaltString(16));
     }
 
-    public String getArtefactId(String type, long timestamp) {
-        return Utils.getAndroidID(getContentResolver()) + "_" + type + "_" + String.valueOf(timestamp) + "_" + Utils.getSaltString(16);
+    public String getArtifactId(String type, long timestamp) {
+        return String.format("%s_artifact-%s_%s_%s", Utils.getAndroidID(getContentResolver()), type, timestamp, Utils.getSaltString(16));
     }
-
-    /*
-    public String getIMEI() {
-        TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-
-        return manager.getDeviceId();
-    }
-    */
 
     public File getRootDirectory() {
         File mExtFileDir;

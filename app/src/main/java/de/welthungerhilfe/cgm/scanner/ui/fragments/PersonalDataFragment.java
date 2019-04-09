@@ -291,7 +291,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
                     if (person == null) {
                         person = new Person();
-                        person.setId(AppController.getInstance().getPersonId(editName.getText().toString()));
+                        person.setId(AppController.getInstance().getPersonId());
                         person.setQrcode(viewModel.getPersonQR());
                         person.setCreated(System.currentTimeMillis());
                     }
