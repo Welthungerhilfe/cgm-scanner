@@ -166,34 +166,6 @@ public class CreateDataActivity extends BaseActivity {
         tabs.setupWithViewPager(viewpager);
     }
 
-    public void setPersonalData(String name, String surName, long birthday, boolean age, String sex, Loc loc, String guardian) {
-        if (person == null) {
-            person = new Person();
-            person.setId(AppController.getInstance().getPersonId(name));
-            person.setQrcode(qrCode);
-            person.setCreated(System.currentTimeMillis());
-        }
-
-        person.setName(name);
-        person.setSurname(surName);
-        person.setLastLocation(loc);
-        if (birthday != 0)
-            person.setBirthday(birthday);
-        person.setGuardian(guardian);
-        person.setSex(sex);
-        person.setAgeEstimated(age);
-        person.setTimestamp(Utils.getUniversalTimestamp());
-        person.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-
-        personRepository.insertPerson(person);
-
-        viewpager.setCurrentItem(1);
-    }
-
-    public void setMeasureData() {
-        viewpager.setCurrentItem(2);
-    }
-
     public void gotoNextStep() {
         viewpager.setCurrentItem(viewpager.getCurrentItem() + 1);
     }
@@ -225,7 +197,7 @@ public class CreateDataActivity extends BaseActivity {
             // Start MyUploadService to upload the file, so that the file is uploaded
             // even if this Activity is killed or put in the background
             FileLog log = new FileLog();
-            log.setId(AppController.getInstance().getArtefactId("consent"));
+            log.setId(AppController.getInstance().getArtifactId("consent"));
             log.setType("consent");
             log.setPath(consentFile.getPath());
             log.setHashValue(MD5.getMD5(consentFile.getPath()));
