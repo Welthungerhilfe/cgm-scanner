@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -38,12 +39,41 @@ public class ExampleInstrumentedTest {
     @Test
     public void testPersonIds() {
         String validId = AppController.getInstance().getPersonId();
-        String invalidId = "2e4358e040b59f2e_consent_1550288920148_eKtxZ4ZRBdXXIbQL";
+        String invalidId = "9e58cfb935e72628_Mandloi_1545035711986_cyd2vEf3TUTPBzyq";
 
         String[] array = invalidId.split("_");
 
         Assert.assertEquals("Person ID schema is not correct, expect 3 underscores", 4, array.length);
         Assert.assertEquals("wrong UUID", Utils.getAndroidID(InstrumentationRegistry.getTargetContext().getContentResolver()), array[0]);
         Assert.assertEquals("Wrong object name, expected : person", "person", array[1]);
+    }
+
+    @Test
+    public void testMeasureIds() {
+        String validId = AppController.getInstance().getMeasureId();
+        String invalidId = "9e58cfb935e72628_measure1_1545035746888_CetMsJLZJvUsTboi";
+
+        String[] array = invalidId.split("_");
+
+        Assert.assertEquals("Measure ID schema is not correct, expect 3 underscores", 4, array.length);
+        Assert.assertEquals("wrong UUID", Utils.getAndroidID(InstrumentationRegistry.getTargetContext().getContentResolver()), array[0]);
+        Assert.assertEquals("Wrong object name, expected : measure", "measure", array[1]);
+    }
+
+    @Test
+    public void testArtifactIds() {
+        String validId = AppController.getInstance().getArtifactId("pcd");
+        String invalidId = "9e58cfb935e72628_artifact-pcd2_1550288920148_eKtxZ4ZRBdXXIbQL";
+
+        String[] array = invalidId.split("_");
+        ArrayList<String> types = new ArrayList<>();
+        types.add("pcd");
+        types.add("rgb");
+
+        Assert.assertEquals("Artifact ID schema is not correct, expect 3 underscores", 4, array.length);
+        Assert.assertEquals("wrong UUID", Utils.getAndroidID(InstrumentationRegistry.getTargetContext().getContentResolver()), array[0]);
+        Assert.assertEquals("Artifact type is missing", 2, array[1].split("-").length);
+        Assert.assertEquals("Wrong object name, expected : artifact", "artifact", array[1].split("-")[0]);
+        Assert.assertEquals("Wrong artifact type, expected : pcd or rgb", true, types.contains(array[1].split("-")[1]));
     }
 }
