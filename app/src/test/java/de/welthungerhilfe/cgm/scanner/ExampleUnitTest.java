@@ -1,6 +1,13 @@
 package de.welthungerhilfe.cgm.scanner;
 
+import android.arch.core.executor.testing.InstantTaskExecutorRule;
+import android.content.Context;
+
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
+
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 
 import static org.junit.Assert.*;
 
@@ -14,6 +21,4 @@ public class ExampleUnitTest {
     public void addition_isCorrect() {
         assertEquals(4, 2 + 2);
     }
-
-
 }
