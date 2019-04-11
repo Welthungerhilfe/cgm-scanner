@@ -5,6 +5,8 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import junit.framework.Assert;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -14,6 +16,7 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static org.junit.Assert.*;
 
@@ -34,6 +37,13 @@ public class ExampleInstrumentedTest {
 
     @Test
     public void testPersonIds() {
+        String validId = AppController.getInstance().getPersonId();
+        String invalidId = "2e4358e040b59f2e_consent_1550288920148_eKtxZ4ZRBdXXIbQL";
 
+        String[] array = invalidId.split("_");
+
+        Assert.assertEquals("Person ID schema is not correct, expect 3 underscores", 4, array.length);
+        Assert.assertEquals("wrong UUID", Utils.getAndroidID(InstrumentationRegistry.getTargetContext().getContentResolver()), array[0]);
+        Assert.assertEquals("Wrong object name, expected : person", "person", array[1]);
     }
 }
