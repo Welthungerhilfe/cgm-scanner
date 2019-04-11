@@ -18,114 +18,106 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:gravity="center_vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <ImageView
+                    android:id="@+id/imgType"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:id="@+id/txtDate"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:layout_marginLeft="@dimen/activity_group_margin"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="20sp"/>
 
-                    <ImageView
-                        android:id="@+id/imgType"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        tools:ignore="ContentDescription" />
-
-                    <TextView
-                        android:id="@+id/txtDate"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/activity_group_margin"
-                        android:textColor="@color/colorBlack"
-                        android:textSize="20sp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/activity_group_margin"
-                        android:layout_marginRight="@dimen/activity_group_margin"
-                        android:text="@string/by"
-                        android:textSize="20sp"
-                        android:textColor="@color/colorBlack"/>
-
-                    <TextView
-                        android:id="@+id/txtAuthor"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/colorBlack"
-                        android:textSize="20sp"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_marginLeft="@dimen/activity_group_margin"
+                    android:layout_marginRight="@dimen/activity_group_margin"
+                    android:text="@string/by"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorBlack"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="@dimen/activity_section_margin"
-                        android:text="@string/abbr_height"
-                        android:textSize="20sp"/>
+                <TextView
+                    android:id="@+id/txtAuthor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="20sp"/>
 
-                    <TextView
-                        android:id="@+id/txtHeight"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="@dimen/activity_group_margin"
-                        android:textSize="20sp" />
+            </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="@dimen/activity_section_margin"
-                        android:text="@string/abbr_weight"
-                        android:textSize="20sp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/txtWeight"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="@dimen/activity_group_margin"
-                        android:textSize="20sp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/activity_section_margin"
+                    android:text="@string/abbr_height"
+                    android:textSize="20sp"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="@dimen/activity_section_margin"
-                        android:text="@string/abbr_head"
-                        android:textSize="20sp"/>
+                <TextView
+                    android:id="@+id/txtHeight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/activity_group_margin"
+                    android:textSize="20sp" />
 
-                    <TextView
-                        android:id="@+id/txtHead"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="@dimen/activity_group_margin"
-                        android:textSize="20sp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/activity_section_margin"
+                    android:text="@string/abbr_weight"
+                    android:textSize="20sp"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="@dimen/activity_section_margin"
-                        android:text="@string/abbr_arm"
-                        android:textSize="20sp"/>
+                <TextView
+                    android:id="@+id/txtWeight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/activity_group_margin"
+                    android:textSize="20sp"/>
 
-                    <TextView
-                        android:id="@+id/txtArm"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="20sp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/activity_section_margin"
+                    android:text="@string/abbr_head"
+                    android:textSize="20sp"/>
 
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/txtHead"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/activity_group_margin"
+                    android:textSize="20sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/activity_section_margin"
+                    android:text="@string/abbr_arm"
+                    android:textSize="20sp"/>
+
+                <TextView
+                    android:id="@+id/txtArm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"/>
 
             </LinearLayout>
 

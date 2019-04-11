@@ -33,7 +33,6 @@ public class TutorialActivity extends AppCompatActivity {
         finish();
     }
 
-    private FragmentAdapter adapter;
     private SessionManager session;
     private boolean again;
 
@@ -51,7 +50,7 @@ public class TutorialActivity extends AppCompatActivity {
         Tutorial3Fragment tur3 = new Tutorial3Fragment();
         Tutorial4Fragment tur4 = new Tutorial4Fragment();
 
-        adapter = new FragmentAdapter(getSupportFragmentManager());
+        FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
         adapter.addFragment(tur1, "tutorial1");
         adapter.addFragment(tur2, "tutorial2");
         adapter.addFragment(tur3, "tutorial3");

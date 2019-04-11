@@ -1,21 +1,17 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.paging.LivePagedListBuilder;
-import android.arch.paging.PagedList;
 import android.arch.persistence.db.SimpleSQLiteQuery;
 import android.content.Context;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
-import de.welthungerhilfe.cgm.scanner.datasource.datasource.person.PersonDataFactory;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.PersonFilter;
@@ -32,31 +28,13 @@ public class PersonRepository {
     private CgmDatabase database;
 
     private ExecutorService executor;
-    private Executor bundleExecutor;
 
-    private final int INITIAL_LOAD_KEY = 0;
-    private final int INITIAL_LOAD_SIZE = 30;
     private final int PAGE_SIZE = 30;
-
-    private LiveData<PagedList<Person>> pagedListLiveData;
 
     private PersonRepository(Context context) {
         database = CgmDatabase.getInstance(context);
 
         executor = Executors.newSingleThreadExecutor();
-        bundleExecutor = Executors.newFixedThreadPool(5);
-
-        PagedList.Config pagingConfig = new PagedList.Config.Builder()
-                .setInitialLoadSizeHint(INITIAL_LOAD_SIZE)
-                .setPageSize(PAGE_SIZE)
-                .setEnablePlaceholders(false)
-                .build();
-
-        pagedListLiveData = new LivePagedListBuilder(new PersonDataFactory(database.personDao()), pagingConfig)
-                .setFetchExecutor(bundleExecutor)
-                .setInitialLoadKey(INITIAL_LOAD_KEY)
-                .build();
-
     }
 
     public static PersonRepository getInstance(Context context) {
@@ -89,14 +67,6 @@ public class PersonRepository {
         });
     }
 
-    public LiveData<PagedList<Person>> getPagedPerson() {
-        return pagedListLiveData;
-    }
-
-    public LiveData<List<Person>> getPersonByPage(int page) {
-        return database.personDao().getPersonByPage(page * 50);
-    }
-
     public LiveData<List<Person>> getAvailablePersons(PersonFilter filter) {
         String selectClause = "*";
         String whereClause = "deleted=0";
@@ -111,12 +81,12 @@ public class PersonRepository {
             whereClause += String.format(" AND createdBy=%s ", Objects.requireNonNull(AppController.getInstance().firebaseAuth.getCurrentUser()).getEmail());
         }
 
+        /*
         if (filter.isLocation()) {
-            /*
             selectClause += String.format(", (6371*acos(cos(radians(%.8f))*cos(radians(lat))* cos(radians(lng)-radians(%.8f))+sin(radians(%.8f))*sin(radians(lat)))) AS distance", filter.getFromLOC().getLatitude(), filter.getFromLOC().getLongitude(), filter.getFromLOC().getLatitude());
             whereClause += String.format(" AND distance<=%d", filter.getRadius());
-            */
         }
+        */
 
         if (filter.isQuery()) {
             whereClause += String.format(" AND (name LIKE \"%%%s%%\" OR surname LIKE \"%%%s%%\")", filter.getQuery(), filter.getQuery());

@@ -14,7 +14,7 @@ public class FileLogRepository {
 
     private CgmDatabase database;
 
-    public FileLogRepository(Context context) {
+    private FileLogRepository(Context context) {
         database = CgmDatabase.getInstance(context);
     }
 

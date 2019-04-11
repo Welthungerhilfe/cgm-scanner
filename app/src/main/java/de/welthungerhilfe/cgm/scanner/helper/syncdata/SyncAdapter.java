@@ -150,16 +150,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
         String authority = context.getString(R.string.sync_authority);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            SyncRequest request = new SyncRequest.Builder().
-                    syncPeriodic(SYNC_INTERVAL, SYNC_FLEXTIME).
-                    setSyncAdapter(account, authority).
-                    setExtras(new Bundle()).build();
+        SyncRequest request = new SyncRequest.Builder().
+                syncPeriodic(SYNC_INTERVAL, SYNC_FLEXTIME).
+                setSyncAdapter(account, authority).
+                setExtras(new Bundle()).build();
 
-            ContentResolver.requestSync(request);
-        } else {
-            ContentResolver.addPeriodicSync(account, authority, new Bundle(), SYNC_INTERVAL);
-        }
+        ContentResolver.requestSync(request);
     }
 
     @AddTrace(name = "startPeriodicSync", enabled = true)
@@ -191,21 +187,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
             AppController.getInstance().firebaseFirestore.collection("persons")
                     .document(personList.get(i).getId())
                     .set(personList.get(i))
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            personList.get(finalI).setTimestamp(prevTimestamp);
+                    .addOnFailureListener(e -> {
+                        personList.get(finalI).setTimestamp(prevTimestamp);
 
-                            session.setSyncTimestamp(prevTimestamp);
-                        }
+                        session.setSyncTimestamp(prevTimestamp);
                     })
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            personRepository.updatePerson(personList.get(finalI));
+                    .addOnSuccessListener(aVoid -> {
+                        personRepository.updatePerson(personList.get(finalI));
 
-                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                        }
+                        session.setSyncTimestamp(Utils.getUniversalTimestamp());
                     });
         }
     }
@@ -222,21 +212,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
                     .collection("measures")
                     .document(measureList.get(i).getId())
                     .set(measureList.get(i))
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            measureList.get(finalI).setTimestamp(prevTimestamp);
+                    .addOnFailureListener(e -> {
+                        measureList.get(finalI).setTimestamp(prevTimestamp);
 
-                            session.setSyncTimestamp(prevTimestamp);
-                        }
+                        session.setSyncTimestamp(prevTimestamp);
                     })
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            measureRepository.updateMeasure(measureList.get(finalI));
+                    .addOnSuccessListener(aVoid -> {
+                        measureRepository.updateMeasure(measureList.get(finalI));
 
-                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                        }
+                        session.setSyncTimestamp(Utils.getUniversalTimestamp());
                     });
         }
     }
@@ -247,18 +231,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
             AppController.getInstance().firebaseFirestore.collection("artefacts")
                     .document(list.get(i).getId())
                     .set(list.get(i))
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            session.setSyncTimestamp(prevTimestamp);
-                        }
-                    })
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                        }
-                    });
+                    .addOnFailureListener(e -> session.setSyncTimestamp(prevTimestamp))
+                    .addOnSuccessListener(aVoid -> session.setSyncTimestamp(Utils.getUniversalTimestamp()));
         }
     }
 }

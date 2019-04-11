@@ -131,18 +131,15 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
 
         editAddress.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
         editAddress.setRawInputType(InputType.TYPE_CLASS_TEXT);
-        editAddress.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    if (editAddress.getText().toString().isEmpty())
-                        return false;
+        editAddress.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                if (editAddress.getText().toString().isEmpty())
+                    return false;
 
-                    getLocationFromAddress(editAddress.getText().toString());
-                    return true;
-                }
-                return false;
+                getLocationFromAddress(editAddress.getText().toString());
+                return true;
             }
+            return false;
         });
 
         mapView.onCreate(saveBundle);
@@ -203,28 +200,25 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
     }
 
     private void getLocationFromAddress(String address) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Geocoder geocoder = new Geocoder(LocationDetectActivity.this, Locale.getDefault());
+        runOnUiThread(() -> {
+            Geocoder geocoder = new Geocoder(LocationDetectActivity.this, Locale.getDefault());
 
-                List<Address> addressList = null;
-                try {
-                    addressList = geocoder.getFromLocationName(address, 1);
-                    if (addressList != null && addressList.size() > 0) {
-                        Address addr = addressList.get(0);
-                        location.setAddress(address);
-                        location.setLongitude(addr.getLongitude());
-                        location.setLatitude(addr.getLatitude());
+            List<Address> addressList = null;
+            try {
+                addressList = geocoder.getFromLocationName(address, 1);
+                if (addressList != null && addressList.size() > 0) {
+                    Address addr = addressList.get(0);
+                    location.setAddress(address);
+                    location.setLongitude(addr.getLongitude());
+                    location.setLatitude(addr.getLatitude());
 
-                        googleMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(addr.getLatitude(), addr.getLongitude())));
-                    } else {
-                        Snackbar.make(mapView, R.string.error_location, Snackbar.LENGTH_LONG).show();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(addr.getLatitude(), addr.getLongitude())));
+                } else {
                     Snackbar.make(mapView, R.string.error_location, Snackbar.LENGTH_LONG).show();
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Snackbar.make(mapView, R.string.error_location, Snackbar.LENGTH_LONG).show();
             }
         });
     }
@@ -232,28 +226,25 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
     private void getAddressFromLocation(LatLng latLng) {
         //new AddressTask(location.getLatitude(), location.getLongitude(), this).execute();
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Geocoder geocoder = new Geocoder(LocationDetectActivity.this, Locale.getDefault());
-                String result = null;
-                try {
-                    List <Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-                    if (addressList != null && addressList.size() > 0) {
-                        Address address = addressList.get(0);
-                        StringBuilder sb = new StringBuilder();
+        runOnUiThread(() -> {
+            Geocoder geocoder = new Geocoder(LocationDetectActivity.this, Locale.getDefault());
+            String result = null;
+            try {
+                List <Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+                if (addressList != null && addressList.size() > 0) {
+                    Address address = addressList.get(0);
+                    StringBuilder sb = new StringBuilder();
 
-                        for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
-                            sb.append(address.getAddressLine(i));
+                    for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
+                        sb.append(address.getAddressLine(i));
 
-                        result = sb.toString();
-                    }
-                } catch (IOException e) {
-                    Log.e("Location Address Loader", "Unable connect to Geocoder", e);
-                } finally {
-                    location.setAddress(result);
-                    editAddress.setText(result);
+                    result = sb.toString();
                 }
+            } catch (IOException e) {
+                Log.e("Location Address Loader", "Unable connect to Geocoder", e);
+            } finally {
+                location.setAddress(result);
+                editAddress.setText(result);
             }
         });
     }

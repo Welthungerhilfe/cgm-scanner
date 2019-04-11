@@ -63,7 +63,6 @@ public class GrowthDataFragment extends Fragment {
     private final String[] girls = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "hcfa_girls_p_exp.txt", "acfa_girls_p_exp.txt"};
 
     private LineChart mChart;
-    private MaterialSpinner dropChart;
 
     private VerticalTextView txtYAxis;
     private TextView txtXAxis;
@@ -114,15 +113,13 @@ public class GrowthDataFragment extends Fragment {
 
         //chartGrowth = view.findViewById(R.id.chartGrowth);
         mChart = view.findViewById(R.id.chart1);
-        dropChart = view.findViewById(R.id.dropChart);
+        MaterialSpinner dropChart = view.findViewById(R.id.dropChart);
 
         @SuppressLint("ResourceType") String[] filters = getResources().getStringArray(R.array.filters);
         dropChart.setItems(filters);
-        dropChart.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
-            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
-                chartType = position;
-                setData();
-            }
+        dropChart.setOnItemSelectedListener((MaterialSpinner.OnItemSelectedListener<String>) (view1, position, id, item) -> {
+            chartType = position;
+            setData();
         });
 
         initChart();
@@ -194,7 +191,7 @@ public class GrowthDataFragment extends Fragment {
 
         long birthday = person.getBirthday();
 
-        ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
+        ArrayList<ILineDataSet> dataSets = new ArrayList<>();
 
         // ----------------------- Line for manual measures -------------------------- //
         ArrayList<Entry> entries = new ArrayList<>();
@@ -219,12 +216,7 @@ public class GrowthDataFragment extends Fragment {
                     break;
                 case 2:
                     entries.add(new Entry((float) measure.getHeight(), (float) measure.getWeight()));
-                    Collections.sort(entries, new Comparator<Entry>() {
-                        @Override
-                        public int compare(Entry o1, Entry o2) {
-                            return Float.compare(o1.getX(), o2.getX());
-                        }
-                    });
+                    Collections.sort(entries, (o1, o2) -> Float.compare(o1.getX(), o2.getX()));
                     break;
                 case 3:
                     entries.add(new Entry(day, (float) measure.getHeadCircumference()));
@@ -244,11 +236,11 @@ public class GrowthDataFragment extends Fragment {
         // ------------------------- Line for ruler values ---------------------------------- //
         long days = (System.currentTimeMillis() - birthday) / 1000 / 60 / 60 / 24 + 100;
 
-        ArrayList<Entry> p3 = new ArrayList<Entry>();
-        ArrayList<Entry> p15 = new ArrayList<Entry>();
-        ArrayList<Entry> p50 = new ArrayList<Entry>();
-        ArrayList<Entry> p85 = new ArrayList<Entry>();
-        ArrayList<Entry> p97 = new ArrayList<Entry>();
+        ArrayList<Entry> p3 = new ArrayList<>();
+        ArrayList<Entry> p15 = new ArrayList<>();
+        ArrayList<Entry> p50 = new ArrayList<>();
+        ArrayList<Entry> p85 = new ArrayList<>();
+        ArrayList<Entry> p97 = new ArrayList<>();
 
         try {
             BufferedReader reader = null;

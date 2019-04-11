@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.StrictMode;
+import android.telephony.TelephonyManager;
 
 //import com.amitshekhar.DebugDB;
 import com.crashlytics.android.Crashlytics;
@@ -68,11 +69,8 @@ public class AppController extends Application {
 
         CrashlyticsCore core = new CrashlyticsCore
                 .Builder()
-                .listener(new CrashlyticsListener() {
-                    @Override
-                    public void crashlyticsDidDetectCrashDuringPreviousExecution() {
-                        // TODO: do something when crash occurs
-                    }
+                .listener(() -> {
+                    // TODO: do something when crash occurs
                 })
                 .build();
 
@@ -159,6 +157,14 @@ public class AppController extends Application {
     public String getArtefactId(String type, long timestamp) {
         return Utils.getAndroidID(getContentResolver()) + "_" + type + "_" + String.valueOf(timestamp) + "_" + Utils.getSaltString(16);
     }
+
+    /*
+    public String getIMEI() {
+        TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+
+        return manager.getDeviceId();
+    }
+    */
 
     public File getRootDirectory() {
         File mExtFileDir;

@@ -355,24 +355,16 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             Log.v(TAG,"thumbUrl: "+thumbUrl);
             StorageReference qrThumbRef = AppController.getInstance().firebaseStorage.getReference(thumbUrl);
 
-            qrThumbRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
-            {
-                @Override
-                public void onSuccess(Uri downloadUrl)
-                {
-                    Log.v(TAG,"found thumbnail at: " + downloadUrl.toString());
-                    if (context != null)
-                        Glide.with(context).load(downloadUrl.toString()).into(imgConsent);
-                    //do something with downloadurl
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.w(TAG,"error getting thumbnail");
-                    e.printStackTrace();
-                    if (context != null)
-                        Glide.with(context).load(qrUrl).into(imgConsent);
-                }
+            qrThumbRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
+                Log.v(TAG,"found thumbnail at: " + downloadUrl.toString());
+                if (context != null)
+                    Glide.with(context).load(downloadUrl.toString()).into(imgConsent);
+                //do something with downloadurl
+            }).addOnFailureListener(e -> {
+                Log.w(TAG,"error getting thumbnail");
+                e.printStackTrace();
+                if (context != null)
+                    Glide.with(context).load(qrUrl).into(imgConsent);
             });
         }
     }

@@ -97,15 +97,9 @@ public class CreateDataActivity extends BaseActivity {
     @BindView(R.id.viewpager)
     ViewPager viewpager;
 
-    private PersonalDataFragment personalFragment;
-    private MeasuresDataFragment measureFragment;
-    private GrowthDataFragment growthFragment;
-
     private PersonRepository personRepository;
     private MeasureRepository measureRepository;
     private FileLogRepository fileLogRepository;
-
-    private PersonViewModel viewModel;
 
     public Loc location = null;
 
@@ -132,7 +126,7 @@ public class CreateDataActivity extends BaseActivity {
         setupActionBar();
         initFragments();
 
-        viewModel = ViewModelProviders.of(this).get(PersonViewModel.class);
+        PersonViewModel viewModel = ViewModelProviders.of(this).get(PersonViewModel.class);
         viewModel.registerPersonQR(qrCode);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -158,9 +152,9 @@ public class CreateDataActivity extends BaseActivity {
     }
 
     private void initFragments() {
-        personalFragment = new PersonalDataFragment();
-        measureFragment = new MeasuresDataFragment();
-        growthFragment = new GrowthDataFragment();
+        PersonalDataFragment personalFragment = new PersonalDataFragment();
+        MeasuresDataFragment measureFragment = new MeasuresDataFragment();
+        GrowthDataFragment growthFragment = new GrowthDataFragment();
 
         FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
         adapter.addFragment(personalFragment, getResources().getString(R.string.tab_personal));
@@ -316,27 +310,24 @@ public class CreateDataActivity extends BaseActivity {
                     location.setLatitude(loc.getLatitude());
                     location.setLongitude(loc.getLongitude());
 
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Geocoder geocoder = new Geocoder(CreateDataActivity.this, Locale.getDefault());
-                            String result = null;
-                            try {
-                                List <Address> addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                                if (addressList != null && addressList.size() > 0) {
-                                    Address address = addressList.get(0);
-                                    StringBuilder sb = new StringBuilder();
+                    new Thread(() -> {
+                        Geocoder geocoder = new Geocoder(CreateDataActivity.this, Locale.getDefault());
+                        String result = null;
+                        try {
+                            List <Address> addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                            if (addressList != null && addressList.size() > 0) {
+                                Address address = addressList.get(0);
+                                StringBuilder sb = new StringBuilder();
 
-                                    for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
-                                        sb.append(address.getAddressLine(i));
+                                for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
+                                    sb.append(address.getAddressLine(i));
 
-                                    result = sb.toString();
-                                }
-                            } catch (IOException e) {
-                                Log.e("Location Address Loader", "Unable connect to Geocoder", e);
-                            } finally {
-                                location.setAddress(result);
+                                result = sb.toString();
                             }
+                        } catch (IOException e) {
+                            Log.e("Location Address Loader", "Unable connect to Geocoder", e);
+                        } finally {
+                            location.setAddress(result);
                         }
                     }).run();
                 }
