@@ -4,6 +4,7 @@ import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -61,8 +62,8 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_S
 public class MeasureScanFragment extends Fragment implements View.OnClickListener {
     private final String TAG = "ScanningProcess";
 
-    private GLSurfaceView mCameraSurfaceView;
-    private OverlaySurface mOverlaySurfaceView;
+    private static GLSurfaceView mCameraSurfaceView;
+    private static OverlaySurface mOverlaySurfaceView;
     private CameraSurfaceRenderer mRenderer;
 
     private Tango mTango;
@@ -127,33 +128,36 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
         repository = FileLogRepository.getInstance(context);
 
-        // Pass in a Runnable to be called from UI thread when Tango is ready; this Runnable
-// will be running on a new thread.
-// When Tango is ready, we can call Tango functions safely here only when there is no UI
-// thread changes involved.
-        mTango = new Tango(context, () -> {
-            // Synchronize against disconnecting while the service is being used in
-            // the OpenGL thread or in the UI thread.
-            synchronized (getActivity()) {
-                try {
-                    mConfig = setupTangoConfig(mTango);
-                    mTango.connect(mConfig);
-                    startupTango();
-                    initialize(mTango);
-                    mIsConnected = true;
+        mTango = new Tango(context, new Runnable() {
+            // Pass in a Runnable to be called from UI thread when Tango is ready; this Runnable
+            // will be running on a new thread.
+            // When Tango is ready, we can call Tango functions safely here only when there is no UI
+            // thread changes involved.
+            @Override
+            public void run() {
+                // Synchronize against disconnecting while the service is being used in
+                // the OpenGL thread or in the UI thread.
+                synchronized (getActivity()) {
+                    try {
+                        mConfig = setupTangoConfig(mTango);
+                        mTango.connect(mConfig);
+                        startupTango();
+                        initialize(mTango);
+                        mIsConnected = true;
 
-                    setDisplayRotation();
-                } catch (TangoOutOfDateException e) {
-                    Log.e(TAG, getString(R.string.exception_out_of_date), e);
-                    Crashlytics.log(Log.ERROR, TAG, "TangoOutOfDateException");
-                } catch (TangoErrorException e) {
-                    Log.e(TAG, getString(R.string.exception_tango_error), e);
-                    Crashlytics.log(Log.ERROR, TAG, "TangoErrorException");
-                } catch (TangoInvalidException e) {
-                    Log.e(TAG, getString(R.string.exception_tango_invalid), e);
-                    Crashlytics.log(Log.ERROR, TAG, "TangoInvalidException");
+                        setDisplayRotation();
+                    } catch (TangoOutOfDateException e) {
+                        Log.e(TAG, getString(R.string.exception_out_of_date), e);
+                        Crashlytics.log(Log.ERROR, TAG, "TangoOutOfDateException");
+                    } catch (TangoErrorException e) {
+                        Log.e(TAG, getString(R.string.exception_tango_error), e);
+                        Crashlytics.log(Log.ERROR, TAG, "TangoErrorException");
+                    } catch (TangoInvalidException e) {
+                        Log.e(TAG, getString(R.string.exception_tango_invalid), e);
+                        Crashlytics.log(Log.ERROR, TAG, "TangoInvalidException");
+                    }
+                    setUpExtrinsics();
                 }
-                setUpExtrinsics();
             }
         });
     }
@@ -164,10 +168,10 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
         mPointCloudFilename = "";
         mNumberOfFilesWritten = 0;
-        mPosePositionBuffer = new ArrayList<>();
-        mPoseOrientationBuffer = new ArrayList<>();
-        mPoseTimestampBuffer = new ArrayList<>();
-        mPointCloudFilenameBuffer = new ArrayList<>();
+        mPosePositionBuffer = new ArrayList<float[]>();
+        mPoseOrientationBuffer = new ArrayList<float[]>();
+        mPoseTimestampBuffer = new ArrayList<Float>();
+        mPointCloudFilenameBuffer = new ArrayList<String>();
         mNumPoseInSequence = 0;
         mutex_on_mIsRecording = new Semaphore(1,true);
         mIsRecording = false;
@@ -364,54 +368,58 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
     // TODO: setup own renderer for scanning process (or attribute Apache License 2.0 from Google)
     private void setupRenderer() {
         mCameraSurfaceView.setEGLContextClientVersion(2);
-        mRenderer = new CameraSurfaceRenderer(() -> {
+        mRenderer = new CameraSurfaceRenderer(new CameraSurfaceRenderer.RenderCallback() {
 
-            // This is the work that you would do on your main OpenGL render thread.
+            @Override
+            public void preRender() {
 
-            // We need to be careful to not run any Tango-dependent code in the OpenGL
-            // thread unless we know the Tango Service to be properly set up and connected.
-            if (!mIsConnected) {
-                return;
-            }
+                // This is the work that you would do on your main OpenGL render thread.
 
-            try {
-                // Synchronize against concurrently disconnecting the service triggered from the
-                // UI thread.
-                synchronized (getActivity()) {
-                    // Connect the Tango SDK to the OpenGL texture ID where we are going to
-                    // render the camera.
-                    // NOTE: This must be done after the texture is generated and the Tango
-                    // service is connected.
-                    if (mConnectedTextureIdGlThread == INVALID_TEXTURE_ID) {
-                        mConnectedTextureIdGlThread = mRenderer.getTextureId();
-                        //sVideoEncoder.setTextureId(mConnectedTextureIdGlThread);
-                        mTango.connectTextureId(TangoCameraIntrinsics.TANGO_CAMERA_COLOR, mConnectedTextureIdGlThread);
-
-                        Log.d(TAG, "connected to texture id: " + mRenderer.getTextureId());
-                    }
-
-                    // If there is a new RGB camera frame available, update the texture and
-                    // scene camera pose.
-                    if (mIsFrameAvailableTangoThread.compareAndSet(true, false)) {
-
-                        double rgbTimestamp = mTango.updateTexture(TangoCameraIntrinsics.TANGO_CAMERA_COLOR);
-
-                        // {@code rgbTimestamp} contains the exact timestamp at which the
-                        // rendered RGB frame was acquired.
-
-                        // In order to see more details on how to use this timestamp to modify
-                        // the scene camera and achieve an augmented reality effect,
-                        // refer to java_augmented_reality_example and/or
-                        // java_augmented_reality_opengl_example projects.
-
-                    }
+                // We need to be careful to not run any Tango-dependent code in the OpenGL
+                // thread unless we know the Tango Service to be properly set up and connected.
+                if (!mIsConnected) {
+                    return;
                 }
-            } catch (TangoErrorException e) {
-                Log.e(TAG, "Tango API call error within the OpenGL thread", e);
-                Crashlytics.log(Log.ERROR, TAG, "Tango API call error within the OpenGL thread");
-            } catch (Throwable t) {
-                Log.e(TAG, "Exception on the OpenGL thread", t);
-                Crashlytics.log(Log.ERROR, TAG, "Exception on the OpenGL thread");
+
+                try {
+                    // Synchronize against concurrently disconnecting the service triggered from the
+                    // UI thread.
+                    synchronized (getActivity()) {
+                        // Connect the Tango SDK to the OpenGL texture ID where we are going to
+                        // render the camera.
+                        // NOTE: This must be done after the texture is generated and the Tango
+                        // service is connected.
+                        if (mConnectedTextureIdGlThread == INVALID_TEXTURE_ID) {
+                            mConnectedTextureIdGlThread = mRenderer.getTextureId();
+                            //sVideoEncoder.setTextureId(mConnectedTextureIdGlThread);
+                            mTango.connectTextureId(TangoCameraIntrinsics.TANGO_CAMERA_COLOR, mConnectedTextureIdGlThread);
+
+                            Log.d(TAG, "connected to texture id: " + mRenderer.getTextureId());
+                        }
+
+                        // If there is a new RGB camera frame available, update the texture and
+                        // scene camera pose.
+                        if (mIsFrameAvailableTangoThread.compareAndSet(true, false)) {
+
+                            double rgbTimestamp = mTango.updateTexture(TangoCameraIntrinsics.TANGO_CAMERA_COLOR);
+
+                            // {@code rgbTimestamp} contains the exact timestamp at which the
+                            // rendered RGB frame was acquired.
+
+                            // In order to see more details on how to use this timestamp to modify
+                            // the scene camera and achieve an augmented reality effect,
+                            // refer to java_augmented_reality_example and/or
+                            // java_augmented_reality_opengl_example projects.
+
+                        }
+                    }
+                } catch (TangoErrorException e) {
+                    Log.e(TAG, "Tango API call error within the OpenGL thread", e);
+                    Crashlytics.log(Log.ERROR, TAG, "Tango API call error within the OpenGL thread");
+                } catch (Throwable t) {
+                    Log.e(TAG, "Exception on the OpenGL thread", t);
+                    Crashlytics.log(Log.ERROR, TAG, "Exception on the OpenGL thread");
+                }
             }
         });
 
@@ -439,7 +447,8 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
     private void startupTango() {
         // Lock configuration and connect to Tango.
         // Select coordinate frame pair.
-        final ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<>();
+        final ArrayList<TangoCoordinateFramePair> framePairs =
+                new ArrayList<TangoCoordinateFramePair>();
         framePairs.add(new TangoCoordinateFramePair(
                 TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE,
                 TangoPoseData.COORDINATE_FRAME_DEVICE));
@@ -506,44 +515,48 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
                 // Background task for writing to file
                 // TODO refactor to top-level class or make static?
-                Runnable thread = () -> {
-                    try {
-                        mutex_on_mIsRecording.acquire();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        Crashlytics.log(Log.WARN, TAG, "InterruptedException aquiring recording mutext");
+                Runnable thread = new Runnable() {
+                    @Override
+                    @AddTrace(name = "pcRunnable", enabled = true)
+                    public void run() {
+                        try {
+                            mutex_on_mIsRecording.acquire();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                            Crashlytics.log(Log.WARN, TAG, "InterruptedException aquiring recording mutext");
+                        }
+                        // Saving the frame or not, depending on the current mode.
+                        if ( mIsRecording ) {
+                            // TODO save files to local storage
+                            updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
+                            progressBar.setProgress(mProgress);
+
+                            mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mode +
+                                    "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
+                            TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
+
+                            File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
+                            FileLog log = new FileLog();
+                            log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
+                            log.setType("pcd");
+                            log.setPath(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename + ".pcd");
+                            log.setHashValue(MD5.getMD5(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd"));
+                            log.setFileSize(artefactFile.length());
+                            log.setUploadDate(0);
+                            log.setDeleted(false);
+                            log.setQrCode(mQrCode);
+                            log.setCreateDate(mNowTime);
+                            log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+
+                            repository.insertFileLog(log);
+                            // Todo;
+                            //new OfflineTask().saveFileLog(log);
+                            // Direct Upload to Firebase Storage
+                            mNumberOfFilesWritten++;
+                            //mTimeToTakeSnap = false;
+                        }
+                        mutex_on_mIsRecording.release();
                     }
-                    // Saving the frame or not, depending on the current mode.
-                    if ( mIsRecording ) {
-                        // TODO save files to local storage
-                        updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
-                        progressBar.setProgress(mProgress);
-
-                        mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mode +
-                                "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
-                        TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
-
-                        File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
-                        FileLog log = new FileLog();
-                        log.setId(AppController.getInstance().getArtefactId("scan-pcd", mNowTime));
-                        log.setType("pcd");
-                        log.setPath(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename + ".pcd");
-                        log.setHashValue(MD5.getMD5(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd"));
-                        log.setFileSize(artefactFile.length());
-                        log.setUploadDate(0);
-                        log.setDeleted(false);
-                        log.setQrCode(mQrCode);
-                        log.setCreateDate(mNowTime);
-                        log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-
-                        repository.insertFileLog(log);
-                        // Todo;
-                        //new OfflineTask().saveFileLog(log);
-                        // Direct Upload to Firebase Storage
-                        mNumberOfFilesWritten++;
-                        //mTimeToTakeSnap = false;
-                    }
-                    mutex_on_mIsRecording.release();
                 };
                 thread.run();
             }
@@ -584,41 +597,44 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
         });
 
         mTango.experimentalConnectOnFrameListener(TangoCameraIntrinsics.TANGO_CAMERA_COLOR,
-                (tangoImageBuffer, i) -> {
-                    if ( ! mIsRecording || ! mPointCloudAvailable) {
-                        return;
-                    }
-
-                    Runnable thread = new Runnable() {
-                        @Override
-                        @AddTrace(name = "onFrameAvailableRunnable", enabled = true)
-                        public void run() {
-                            TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
-
-                            // TODO save files to local storage
-                            String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
-                                    mode + "_" + currentTangoImageBuffer.timestamp + ".jpg";
-
-                            BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
-
-                            File artefactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
-                            FileLog log = new FileLog();
-                            log.setId(AppController.getInstance().getArtefactId("scan-rgb", mNowTime));
-                            log.setType("rgb");
-                            log.setPath(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
-                            log.setHashValue(MD5.getMD5(mRgbSaveFolder.getPath() + File.separator + currentImgFilename));
-                            log.setFileSize(artefactFile.length());
-                            log.setUploadDate(0);
-                            log.setDeleted(false);
-                            log.setQrCode(mQrCode);
-                            log.setCreateDate(mNowTime);
-                            log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-                            // Todo;
-                            //new OfflineTask().saveFileLog(log);
-                            repository.insertFileLog(log);
+                new Tango.OnFrameAvailableListener() {
+                    @Override
+                    public  void onFrameAvailable(TangoImageBuffer tangoImageBuffer, int i) {
+                        if ( ! mIsRecording || ! mPointCloudAvailable) {
+                            return;
                         }
-                    };
-                    thread.run();
+
+                        Runnable thread = new Runnable() {
+                            @Override
+                            @AddTrace(name = "onFrameAvailableRunnable", enabled = true)
+                            public void run() {
+                                TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
+
+                                // TODO save files to local storage
+                                String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
+                                        mode + "_" + currentTangoImageBuffer.timestamp + ".jpg";
+
+                                BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
+
+                                File artefactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
+                                FileLog log = new FileLog();
+                                log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
+                                log.setType("rgb");
+                                log.setPath(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
+                                log.setHashValue(MD5.getMD5(mRgbSaveFolder.getPath() + File.separator + currentImgFilename));
+                                log.setFileSize(artefactFile.length());
+                                log.setUploadDate(0);
+                                log.setDeleted(false);
+                                log.setQrCode(mQrCode);
+                                log.setCreateDate(mNowTime);
+                                log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                                // Todo;
+                                //new OfflineTask().saveFileLog(log);
+                                repository.insertFileLog(log);
+                            }
+                        };
+                        thread.run();
+                    }
                 });
     }
 
@@ -631,9 +647,12 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
         // We also need to update the camera texture UV coordinates. This must be run in the OpenGL
         // thread.
-        mCameraSurfaceView.queueEvent(() -> {
-            if (mIsConnected) {
-                mRenderer.updateColorCameraTextureUv(mDisplayRotation);
+        mCameraSurfaceView.queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                if (mIsConnected) {
+                    mRenderer.updateColorCameraTextureUv(mDisplayRotation);
+                }
             }
         });
     }
@@ -707,7 +726,12 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
         Log.d(TAG, "numPoints: "+numPoints+" float: "+progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
         if (mProgress+progressToAdd > 100) {
             mProgress = 100;
-            getActivity().runOnUiThread(() -> fab.setImageResource(R.drawable.done));
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    fab.setImageResource(R.drawable.done);
+                }
+            });
         } else {
             mProgress = mProgress+progressToAdd;
         }
