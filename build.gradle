@@ -36,6 +36,10 @@ allprojects {
     }
 }
 
+plugins {
+  id "org.sonarqube" version "2.7"
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
