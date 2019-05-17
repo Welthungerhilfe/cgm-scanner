@@ -23,8 +23,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.StrictMode;
+import android.util.Log;
 
 //import com.amitshekhar.DebugDB;
+import com.amitshekhar.DebugDB;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 import com.crashlytics.android.core.CrashlyticsListener;
@@ -109,7 +111,7 @@ public class AppController extends Application {
         firebaseConfig.setConfigSettings(configSettings);
         firebaseConfig.setDefaults(R.xml.remoteconfig);
 
-        //Log.e("Offline DB", DebugDB.getAddressLog());
+        Log.e("Offline DB", DebugDB.getAddressLog());
 
         notifyUpload();
 

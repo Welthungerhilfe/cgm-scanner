@@ -17,6 +17,23 @@ cat $gsFile
 
 echo "Updated id!"
 
+APP_CONSTANT_FILE=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/helper/AppConstants.java
+
+echo "$APP_CONSTANT_FILE"
+
+if [ -e "$APP_CONSTANT_FILE" ]
+then
+    echo "Updating AZURE_ACCOUNT_NAME, AZURE_ACCOUNT_KEY"
+    sed -i '' 's#AZURE_ACCOUNT_NAME = "[a-z:./]*"#AZURE_ACCOUNT_NAME = "'$AZURE_ACCOUNT_NAME'"#' $APP_CONSTANT_FILE
+    sed -i '' 's#AZURE_ACCOUNT_KEY = "[a-z:./]*"#AZURE_ACCOUNT_KEY = "'$AZURE_ACCOUNT_KEY'"#' $APP_CONSTANT_FILE
+
+    echo "File content:"
+    cat $APP_CONSTANT_FILE
+
+else
+    echo "$APP_CONSTANT_FILE is not found"
+fi
+
 # set environment for multiple playstore deployments
 echo "Changes for demo playstore deployment"
 if [ -n "$DEPLOYMENT" ]; then

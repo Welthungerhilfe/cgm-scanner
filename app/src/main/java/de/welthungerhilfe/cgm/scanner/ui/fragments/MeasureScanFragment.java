@@ -325,16 +325,6 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
     }
 
     private void setupScanArtefacts() {
-        // TODO make part of AppController?
-        /*
-        File mExtFileDir;
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            mExtFileDir = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name_long));
-        } else {
-            mExtFileDir = getContext().getFilesDir();
-        }
-        */
         mExtFileDir = AppController.getInstance().getRootDirectory();
 
         // TODO make part of AppConstants
@@ -604,34 +594,30 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             return;
                         }
 
-                        Runnable thread = new Runnable() {
-                            @Override
-                            @AddTrace(name = "onFrameAvailableRunnable", enabled = true)
-                            public void run() {
-                                TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
+                        Runnable thread = () -> {
+                            TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
 
-                                // TODO save files to local storage
-                                String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
-                                        mode + "_" + currentTangoImageBuffer.timestamp + ".jpg";
+                            // TODO save files to local storage
+                            String currentImgFilename = "rgb_" +mQrCode+"_" + mNowTimeString + "_" +
+                                    mode + "_" + currentTangoImageBuffer.timestamp + ".jpg";
 
-                                BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
+                            BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
 
-                                File artefactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
-                                FileLog log = new FileLog();
-                                log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
-                                log.setType("rgb");
-                                log.setPath(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
-                                log.setHashValue(MD5.getMD5(mRgbSaveFolder.getPath() + File.separator + currentImgFilename));
-                                log.setFileSize(artefactFile.length());
-                                log.setUploadDate(0);
-                                log.setDeleted(false);
-                                log.setQrCode(mQrCode);
-                                log.setCreateDate(mNowTime);
-                                log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-                                // Todo;
-                                //new OfflineTask().saveFileLog(log);
-                                repository.insertFileLog(log);
-                            }
+                            File artefactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
+                            FileLog log = new FileLog();
+                            log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
+                            log.setType("rgb");
+                            log.setPath(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
+                            log.setHashValue(MD5.getMD5(mRgbSaveFolder.getPath() + File.separator + currentImgFilename));
+                            log.setFileSize(artefactFile.length());
+                            log.setUploadDate(0);
+                            log.setDeleted(false);
+                            log.setQrCode(mQrCode);
+                            log.setCreateDate(mNowTime);
+                            log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                            // Todo;
+                            //new OfflineTask().saveFileLog(log);
+                            repository.insertFileLog(log);
                         };
                         thread.run();
                     }
