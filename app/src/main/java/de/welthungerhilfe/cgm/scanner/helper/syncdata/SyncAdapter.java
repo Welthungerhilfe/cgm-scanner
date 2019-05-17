@@ -7,19 +7,18 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SyncRequest;
 import android.content.SyncResult;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 
 import com.crashlytics.android.Crashlytics;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.perf.metrics.AddTrace;
 
+import com.google.gson.Gson;
+import com.microsoft.azure.storage.*;
+import com.microsoft.azure.storage.queue.*;
+
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,6 +36,8 @@ import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasuresLoad;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_KEY;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_NAME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
@@ -47,6 +48,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     private PersonRepository personRepository;
     private MeasureRepository measureRepository;
     private FileLogRepository fileLogRepository;
+
+    private CloudQueue personQueue;
+    private CloudQueue measureQueue;
+    private CloudQueue artifactQueue;
 
     private boolean isSyncing;
 
@@ -70,6 +75,23 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
         personRepository.getSyncablePerson(this, prevTimestamp);
         measureRepository.getSyncableMeasure(this, prevTimestamp);
         fileLogRepository.getSyncableLog(this, prevTimestamp);
+
+        try {
+            CloudStorageAccount storageAccount = CloudStorageAccount.parse(getAzureConnection());
+            CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
+
+            personQueue = queueClient.getQueueReference("persons");
+            personQueue.createIfNotExists();
+
+            measureQueue = queueClient.getQueueReference("measures");
+            measureQueue.createIfNotExists();
+
+            artifactQueue = queueClient.getQueueReference("artifacts");
+            artifactQueue.createIfNotExists();
+
+        } catch (URISyntaxException | InvalidKeyException | StorageException e) {
+            e.printStackTrace();
+        }
 
         AppController.getInstance().firebaseFirestore.collection("persons")
                 .whereGreaterThan("timestamp", prevTimestamp)
@@ -180,9 +202,26 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     @Override
     @AddTrace(name = "onPersonLoaded", enabled = true)
     public void onPersonsLoaded(List<Person> personList) {
+        Gson gson = new Gson();
+
         for (int i = 0; i < personList.size(); i++) {
             personList.get(i).setTimestamp(Utils.getUniversalTimestamp());
 
+            try {
+                String content = gson.toJson(personList.get(i));
+                CloudQueueMessage message = new CloudQueueMessage(personList.get(i).getId());
+                message.setMessageContent(content);
+                personQueue.addMessage(message);
+
+                personRepository.updatePerson(personList.get(i));
+                session.setSyncTimestamp(Utils.getUniversalTimestamp());
+            } catch (StorageException e) {
+                personList.get(i).setTimestamp(prevTimestamp);
+
+                session.setSyncTimestamp(prevTimestamp);
+            }
+
+            /*
             int finalI = i;
             AppController.getInstance().firebaseFirestore.collection("persons")
                     .document(personList.get(i).getId())
@@ -197,6 +236,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
                         session.setSyncTimestamp(Utils.getUniversalTimestamp());
                     });
+                    */
         }
     }
 
@@ -205,6 +245,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     public void onMeasuresLoaded(List<Measure> measureList) {
         for (int i = 0; i < measureList.size(); i++) {
             measureList.get(i).setTimestamp(Utils.getUniversalTimestamp());
+
+
 
             int finalI = i;
             AppController.getInstance().firebaseFirestore.collection("persons")
@@ -234,5 +276,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
                     .addOnFailureListener(e -> session.setSyncTimestamp(prevTimestamp))
                     .addOnSuccessListener(aVoid -> session.setSyncTimestamp(Utils.getUniversalTimestamp()));
         }
+    }
+
+    private String getAzureConnection() {
+        return String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", AZURE_ACCOUNT_NAME, AZURE_ACCOUNT_KEY);
     }
 }

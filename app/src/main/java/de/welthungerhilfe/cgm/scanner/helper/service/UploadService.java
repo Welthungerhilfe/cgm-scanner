@@ -4,19 +4,23 @@ import android.app.Service;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+
+import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.blob.CloudBlobClient;
+import com.microsoft.azure.storage.blob.CloudBlobContainer;
+import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -30,6 +34,8 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_KEY;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_NAME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.DIFF_HASH;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.FILE_NOT_FOUND;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.MULTI_UPLOAD_BUNCH;
@@ -75,7 +81,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
             loadQueueFileLogs();
         }
 
-        return START_STICKY;
+        //ToDo: update to START_STICKY;
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -126,8 +133,6 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 }
             }
 
-            Log.e("UploadService", String.format("Upload Started : %s", log.getId()));
-
             pendingArtefacts.add(log.getId());
 
             String path = "";
@@ -144,54 +149,51 @@ public class UploadService extends Service implements OnFileLogsLoad {
             }
 
             String[] arr = log.getPath().split("/");
-            StorageReference photoRef = FirebaseStorage.getInstance().getReference().child(path).child(arr[arr.length - 1]);
-            photoRef.putFile(Uri.fromFile(new File(log.getPath())))
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            StorageMetadata metadata = Objects.requireNonNull(task.getResult()).getMetadata();
-                            if (metadata != null) {
-                                if (Objects.requireNonNull(metadata.getMd5Hash()).trim().equals(log.getHashValue().trim())) {
-                                    log.setStatus(UPLOADED);
 
-                                    try {
-                                        new File(log.getPath()).delete();
-                                        log.setDeleted(true);
-                                        log.setStatus(UPLOADED_DELETED);
-                                    } catch (Exception e) {
-                                        log.setStatus(FILE_NOT_FOUND);
-                                    }
-                                } else {
-                                    log.setStatus(DIFF_HASH);
-                                }
-                            }
+            try {
+                final File file = new File(log.getPath());
+                FileInputStream stream = new FileInputStream(file);
 
-                            log.setPath(photoRef.getPath());
-                            log.setUploadDate(Utils.getUniversalTimestamp());
+                CloudBlobContainer container = getContainer("data");
+                container.createIfNotExists();
 
-                            AppController.getInstance().firebaseFirestore.collection("artefacts")
-                                    .document(log.getId())
-                                    .set(log);
-                        } else {
-                            log.setStatus(UPLOAD_ERROR);
-                        }
+                CloudBlockBlob blob = container.getBlockBlobReference(path + arr[arr.length - 1]);
+                blob.upload(stream, stream.available());
 
-                        repository.updateFileLog(log);
+                if (file.delete()) {
+                    log.setDeleted(true);
+                    log.setStatus(UPLOADED_DELETED);
+                } else {
+                    log.setStatus(UPLOADED);
+                }
+            } catch (FileNotFoundException e) {
+                log.setDeleted(true);
+                log.setStatus(FILE_NOT_FOUND);
+            } catch (Exception e) {
+                log.setStatus(UPLOAD_ERROR);
+            }
 
-                        synchronized (lock) {
-                            Log.e("UploadService", String.format("Upload Completed : %s", log.getId()));
+            repository.updateFileLog(log);
 
-                            pendingArtefacts.remove(log.getId());
-                            remainingCount --;
+            synchronized (lock) {
+                pendingArtefacts.remove(log.getId());
+                remainingCount--;
+                if (remainingCount <= 0) {
+                    loadQueueFileLogs();
+                }
 
-                            Log.e("UploadService", String.format("Remaining Count : %d", remainingCount));
-
-                            if (remainingCount <= 0) {
-                                loadQueueFileLogs();
-                            }
-
-                            lock.notify();
-                        }
-                    });
+                lock.notify();
+            }
         }
+    }
+
+    private CloudBlobContainer getContainer(String path) throws Exception {
+        final String connectionString = String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", AZURE_ACCOUNT_NAME, AZURE_ACCOUNT_KEY);
+
+        CloudStorageAccount storageAccount = CloudStorageAccount.parse(connectionString);
+
+        CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
+
+        return blobClient.getContainerReference(path);
     }
 }

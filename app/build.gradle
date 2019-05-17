@@ -88,7 +88,10 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:16.0.5'
     implementation 'com.google.tango:sdk-base:1.55'
     implementation 'com.google.tango:support-base:1.54'
-    implementation 'com.google.firebase:firebase-config:16.1.0'
+
+    // Azure components
+    implementation 'com.microsoft.azure.android:azure-storage-android:2.0.0@aar'
+
     // Room components
     implementation "android.arch.persistence.room:runtime:$rootProject.roomVersion"
     annotationProcessor "android.arch.persistence.room:compiler:$rootProject.roomVersion"
