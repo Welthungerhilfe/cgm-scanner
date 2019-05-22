@@ -249,6 +249,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setType(AppConstants.VAL_MEASURE_MANUAL);
         measure.setPersonId(person.getId());
         measure.setTimestamp(Utils.getUniversalTimestamp());
+        measure.setDate(Utils.getUniversalTimestamp());
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
         viewModel.saveMeasure(person, measure);
