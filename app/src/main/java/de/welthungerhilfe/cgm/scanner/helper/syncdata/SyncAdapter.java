@@ -54,13 +54,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     private CloudQueue measureQueue;
     private CloudQueue artifactQueue;
 
-    private boolean isSyncing;
-
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
 
         session = new SessionManager(context);
-        isSyncing = false;
 
         personRepository = PersonRepository.getInstance(context);
         measureRepository = MeasureRepository.getInstance(context);
@@ -72,7 +69,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         prevTimestamp = session.getSyncTimestamp();
 
-        // Todo;
         personRepository.getSyncablePerson(this, prevTimestamp);
         measureRepository.getSyncableMeasure(this, prevTimestamp);
         fileLogRepository.getSyncableLog(this, prevTimestamp);
@@ -94,6 +90,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
             e.printStackTrace();
         }
 
+        /*
         AppController.getInstance().firebaseFirestore.collection("persons")
                 .whereGreaterThan("timestamp", prevTimestamp)
                 .get()
@@ -158,6 +155,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
                         session.setSyncTimestamp(Utils.getUniversalTimestamp());
                     }
                 });
+                */
     }
 
     @AddTrace(name = "syncImmediately", enabled = true)
@@ -206,22 +204,25 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
         Gson gson = new Gson();
 
         for (int i = 0; i < personList.size(); i++) {
-            personList.get(i).setTimestamp(Utils.getUniversalTimestamp());
+            new AsyncTask<Person, Void, Void>() {
 
-            try {
-                String content = gson.toJson(personList.get(i));
-                CloudQueueMessage message = new CloudQueueMessage(personList.get(i).getId());
-                message.setMessageContent(content);
-                personQueue.addMessage(message);
+                @Override
+                protected Void doInBackground(Person... person) {
+                    try {
+                        String content = gson.toJson(person[0]);
+                        CloudQueueMessage message = new CloudQueueMessage(person[0].getId());
+                        message.setMessageContent(content);
+                        personQueue.addMessage(message);
 
-                personRepository.updatePerson(personList.get(i));
-                session.setSyncTimestamp(Utils.getUniversalTimestamp());
-            } catch (StorageException e) {
-                personList.get(i).setTimestamp(prevTimestamp);
+                        personRepository.updatePerson(person[0]);
+                        session.setSyncTimestamp(Utils.getUniversalTimestamp());
+                    } catch (StorageException e) {
+                        session.setSyncTimestamp(prevTimestamp);
+                    }
 
-                session.setSyncTimestamp(prevTimestamp);
-            }
-
+                    return null;
+                }
+            }.execute(personList.get(i));
             /*
             int finalI = i;
             AppController.getInstance().firebaseFirestore.collection("persons")
@@ -244,27 +245,29 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     @Override
     @AddTrace(name = "onMeasureLoaded", enabled = true)
     public void onMeasuresLoaded(List<Measure> measureList) {
+        Gson gson = new Gson();
+
         for (int i = 0; i < measureList.size(); i++) {
-            measureList.get(i).setTimestamp(Utils.getUniversalTimestamp());
+            new AsyncTask<Measure, Void, Void>() {
 
+                @Override
+                protected Void doInBackground(Measure... measures) {
+                    try {
+                        String content = gson.toJson(measures[0]);
+                        CloudQueueMessage message = new CloudQueueMessage(measures[0].getId());
+                        message.setMessageContent(content);
+                        measureQueue.addMessage(message);
 
-
-            int finalI = i;
-            AppController.getInstance().firebaseFirestore.collection("persons")
-                    .document(measureList.get(i).getPersonId())
-                    .collection("measures")
-                    .document(measureList.get(i).getId())
-                    .set(measureList.get(i))
-                    .addOnFailureListener(e -> {
-                        measureList.get(finalI).setTimestamp(prevTimestamp);
-
-                        session.setSyncTimestamp(prevTimestamp);
-                    })
-                    .addOnSuccessListener(aVoid -> {
-                        measureRepository.updateMeasure(measureList.get(finalI));
-
+                        measures[0].setTimestamp(Utils.getUniversalTimestamp());
+                        measureRepository.updateMeasure(measures[0]);
                         session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                    });
+                    } catch (StorageException e) {
+                        session.setSyncTimestamp(prevTimestamp);
+                    }
+
+                    return null;
+                }
+            }.execute(measureList.get(i));
         }
     }
 
@@ -272,6 +275,26 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     public void onFileLogsLoaded(List<FileLog> list) {
         Gson gson = new Gson();
         for (int i = 0; i < list.size(); i++) {
+            new AsyncTask<FileLog, Void, Void>(){
+
+                @Override
+                protected Void doInBackground(FileLog... fileLogs) {
+                    try {
+                        String content = gson.toJson(fileLogs[0]);
+                        CloudQueueMessage message = new CloudQueueMessage(fileLogs[0].getId());
+                        message.setMessageContent(content);
+                        artifactQueue.addMessage(message);
+
+                        session.setSyncTimestamp(Utils.getUniversalTimestamp());
+                    } catch (StorageException e) {
+                        session.setSyncTimestamp(prevTimestamp);
+                    }
+
+                    return null;
+                }
+            }.execute(list.get(i));
+
+            /*
             new AsyncTask<FileLog, Void, Void>() {
                 @Override
                 protected Void doInBackground(FileLog... logs) {
@@ -291,6 +314,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
                     return null;
                 }
             }.execute(list.get(i));
+            */
 
             /*
             AppController.getInstance().firebaseFirestore.collection("artefacts")
