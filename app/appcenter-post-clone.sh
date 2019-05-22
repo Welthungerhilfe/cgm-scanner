@@ -26,8 +26,8 @@ then
     echo "Updating AZURE_ACCOUNT_NAME, AZURE_ACCOUNT_KEY"
 
     # Key variable uses slashes /, therefore a different command seperator | is needed for sed
-    sed -i '' "s/{AZURE_ACCOUNT_NAME}/$AZURE_ACCOUNT_NAME/g" $APP_CONSTANT_FILE
-    sed -i '' "s/{AZURE_ACCOUNT_KEY}/$AZURE_ACCOUNT_KEY/g" $APP_CONSTANT_FILE
+    sed -i '' "s|{AZURE_ACCOUNT_NAME}|$AZURE_ACCOUNT_NAME|g" $APP_CONSTANT_FILE
+    sed -i '' "s|{AZURE_ACCOUNT_KEY}|$AZURE_ACCOUNT_KEY|g" $APP_CONSTANT_FILE
 
     echo "File content:"
     cat $APP_CONSTANT_FILE
