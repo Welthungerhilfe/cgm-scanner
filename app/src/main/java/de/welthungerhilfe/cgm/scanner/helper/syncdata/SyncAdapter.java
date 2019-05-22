@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SyncRequest;
 import android.content.SyncResult;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.crashlytics.android.Crashlytics;
@@ -269,12 +270,35 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
     @Override
     public void onFileLogsLoaded(List<FileLog> list) {
+        Gson gson = new Gson();
         for (int i = 0; i < list.size(); i++) {
+            new AsyncTask<FileLog, Void, Void>() {
+                @Override
+                protected Void doInBackground(FileLog... logs) {
+                    try {
+                        String content = gson.toJson(logs[0]);
+                        CloudQueueMessage message = new CloudQueueMessage(logs[0].getId());
+                        message.setMessageContent(content);
+                        artifactQueue.addMessage(message);
+
+                        session.setSyncTimestamp(Utils.getUniversalTimestamp());
+                    } catch (StorageException e) {
+                        logs[0].setUploadDate(prevTimestamp);
+
+                        session.setSyncTimestamp(prevTimestamp);
+                    }
+
+                    return null;
+                }
+            }.execute(list.get(i));
+
+            /*
             AppController.getInstance().firebaseFirestore.collection("artefacts")
                     .document(list.get(i).getId())
                     .set(list.get(i))
                     .addOnFailureListener(e -> session.setSyncTimestamp(prevTimestamp))
                     .addOnSuccessListener(aVoid -> session.setSyncTimestamp(Utils.getUniversalTimestamp()));
+                    */
         }
     }
 
