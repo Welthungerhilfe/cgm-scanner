@@ -47,7 +47,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.R;
@@ -72,7 +71,6 @@ public class GrowthDataFragment extends Fragment {
     private int chartType = 0;
 
     private PersonViewModel viewModel;
-    private Person person;
     private List<Measure> measures;
 
     public void onAttach(Context context) {
@@ -85,15 +83,9 @@ public class GrowthDataFragment extends Fragment {
         super.onActivityCreated(instance);
 
         viewModel = ViewModelProviders.of(getActivity()).get(PersonViewModel.class);
-        viewModel.getPerson().observe(this, p -> {
-            if (p != null) {
-                person = p;
-
-                viewModel.getMeasures(p.getId()).observe(this, mList -> {
-                    measures = mList;
-                    setData();
-                });
-            }
+        viewModel.getMeasuresLiveData().observe(this, measures -> {
+            this.measures = measures;
+            setData();
         });
     }
 
@@ -164,6 +156,11 @@ public class GrowthDataFragment extends Fragment {
     }
 
     public void setData() {
+        Person person = viewModel.getPerson().getValue();
+
+        if (person.getCreated() == 0)
+            return;
+
         txtLabel.setText(person.getSex());
 
         switch (chartType) {

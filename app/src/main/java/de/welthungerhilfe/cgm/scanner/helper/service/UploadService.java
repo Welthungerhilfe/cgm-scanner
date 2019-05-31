@@ -66,9 +66,11 @@ public class UploadService extends Service implements OnFileLogsLoad {
     public IBinder onBind(Intent intent) {
         Log.e("UploadService", "Start new uploads");
 
+        /*
         if (remainingCount == 0) {
             loadQueueFileLogs();
         }
+        */
 
         return null;
     }
@@ -81,8 +83,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
             loadQueueFileLogs();
         }
 
-        //ToDo: update to START_STICKY;
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     @Override
@@ -154,7 +155,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 final File file = new File(log.getPath());
                 FileInputStream stream = new FileInputStream(file);
 
-                CloudBlobContainer container = getContainer("data");
+                CloudBlobContainer container = AppController.getInstance().blobClient.getContainerReference("data");
                 container.createIfNotExists();
 
                 CloudBlockBlob blob = container.getBlockBlobReference(path + arr[arr.length - 1]);
@@ -185,15 +186,5 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 lock.notify();
             }
         }
-    }
-
-    private CloudBlobContainer getContainer(String path) throws Exception {
-        final String connectionString = String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", AZURE_ACCOUNT_NAME, AZURE_ACCOUNT_KEY);
-
-        CloudStorageAccount storageAccount = CloudStorageAccount.parse(connectionString);
-
-        CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
-
-        return blobClient.getContainerReference(path);
     }
 }

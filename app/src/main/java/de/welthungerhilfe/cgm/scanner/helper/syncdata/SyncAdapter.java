@@ -1,6 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.helper.syncdata;
 
 import android.accounts.Account;
+import android.annotation.SuppressLint;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -10,8 +11,6 @@ import android.content.SyncResult;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import com.crashlytics.android.Crashlytics;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.perf.metrics.AddTrace;
 
 import com.google.gson.Gson;
@@ -21,15 +20,10 @@ import com.microsoft.azure.storage.queue.*;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.List;
-import java.util.Objects;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
@@ -44,11 +38,6 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPersonsLoad, OnMeasuresLoad, OnFileLogsLoad {
     private long prevTimestamp;
-    private SessionManager session;
-
-    private PersonRepository personRepository;
-    private MeasureRepository measureRepository;
-    private FileLogRepository fileLogRepository;
 
     private CloudQueue personQueue;
     private CloudQueue measureQueue;
@@ -56,40 +45,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
-
-        session = new SessionManager(context);
-
-        personRepository = PersonRepository.getInstance(context);
-        measureRepository = MeasureRepository.getInstance(context);
-        fileLogRepository = FileLogRepository.getInstance(context);
     }
 
     @Override
     @AddTrace(name = "onPerformSync", enabled = true)
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        prevTimestamp = session.getSyncTimestamp();
-
-        personRepository.getSyncablePerson(this, prevTimestamp);
-        measureRepository.getSyncableMeasure(this, prevTimestamp);
-        fileLogRepository.getSyncableLog(this, prevTimestamp);
-
-        try {
-            CloudStorageAccount storageAccount = CloudStorageAccount.parse(getAzureConnection());
-            CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
-
-            personQueue = queueClient.getQueueReference("persons");
-            personQueue.createIfNotExists();
-
-            measureQueue = queueClient.getQueueReference("measures");
-            measureQueue.createIfNotExists();
-
-            artifactQueue = queueClient.getQueueReference("artifacts");
-            artifactQueue.createIfNotExists();
-
-        } catch (URISyntaxException | InvalidKeyException | StorageException e) {
-            e.printStackTrace();
-        }
-
+        new MessageTask().execute();
         /*
         AppController.getInstance().firebaseFirestore.collection("persons")
                 .whereGreaterThan("timestamp", prevTimestamp)
@@ -158,6 +119,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
                 */
     }
 
+    private void startSyncing() {
+        prevTimestamp = AppController.getInstance().session.getSyncTimestamp();
+
+        AppController.getInstance().personRepository.getSyncablePerson(this, prevTimestamp);
+        AppController.getInstance().measureRepository.getSyncableMeasure(this, prevTimestamp);
+        AppController.getInstance().fileLogRepository.getSyncableLog(this, prevTimestamp);
+    }
+
     @AddTrace(name = "syncImmediately", enabled = true)
     private static void syncImmediately(Account account, Context context) {
         Bundle bundle = new Bundle();
@@ -204,41 +173,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
         Gson gson = new Gson();
 
         for (int i = 0; i < personList.size(); i++) {
-            new AsyncTask<Person, Void, Void>() {
+            String content = gson.toJson(personList.get(i));
+            CloudQueueMessage message = new CloudQueueMessage(personList.get(i).getId());
+            message.setMessageContent(content);
 
-                @Override
-                protected Void doInBackground(Person... person) {
-                    try {
-                        String content = gson.toJson(person[0]);
-                        CloudQueueMessage message = new CloudQueueMessage(person[0].getId());
-                        message.setMessageContent(content);
-                        personQueue.addMessage(message);
-
-                        personRepository.updatePerson(person[0]);
-                        session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                    } catch (StorageException e) {
-                        session.setSyncTimestamp(prevTimestamp);
-                    }
-
-                    return null;
-                }
-            }.execute(personList.get(i));
-            /*
-            int finalI = i;
-            AppController.getInstance().firebaseFirestore.collection("persons")
-                    .document(personList.get(i).getId())
-                    .set(personList.get(i))
-                    .addOnFailureListener(e -> {
-                        personList.get(finalI).setTimestamp(prevTimestamp);
-
-                        session.setSyncTimestamp(prevTimestamp);
-                    })
-                    .addOnSuccessListener(aVoid -> {
-                        personRepository.updatePerson(personList.get(finalI));
-
-                        session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                    });
-                    */
+            new WriteTask(personQueue, message).execute();
         }
     }
 
@@ -248,26 +187,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
         Gson gson = new Gson();
 
         for (int i = 0; i < measureList.size(); i++) {
-            new AsyncTask<Measure, Void, Void>() {
+            String content = gson.toJson(measureList.get(i));
+            CloudQueueMessage message = new CloudQueueMessage(measureList.get(i).getId());
+            message.setMessageContent(content);
 
-                @Override
-                protected Void doInBackground(Measure... measures) {
-                    try {
-                        String content = gson.toJson(measures[0]);
-                        CloudQueueMessage message = new CloudQueueMessage(measures[0].getId());
-                        message.setMessageContent(content);
-                        measureQueue.addMessage(message);
-
-                        measures[0].setTimestamp(Utils.getUniversalTimestamp());
-                        measureRepository.updateMeasure(measures[0]);
-                        session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                    } catch (StorageException e) {
-                        session.setSyncTimestamp(prevTimestamp);
-                    }
-
-                    return null;
-                }
-            }.execute(measureList.get(i));
+            new WriteTask(measureQueue, message).execute();
         }
     }
 
@@ -275,58 +199,61 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     public void onFileLogsLoaded(List<FileLog> list) {
         Gson gson = new Gson();
         for (int i = 0; i < list.size(); i++) {
-            new AsyncTask<FileLog, Void, Void>(){
+            String content = gson.toJson(list.get(i));
+            CloudQueueMessage message = new CloudQueueMessage(list.get(i).getId());
+            message.setMessageContent(content);
 
-                @Override
-                protected Void doInBackground(FileLog... fileLogs) {
-                    try {
-                        String content = gson.toJson(fileLogs[0]);
-                        CloudQueueMessage message = new CloudQueueMessage(fileLogs[0].getId());
-                        message.setMessageContent(content);
-                        artifactQueue.addMessage(message);
-
-                        session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                    } catch (StorageException e) {
-                        session.setSyncTimestamp(prevTimestamp);
-                    }
-
-                    return null;
-                }
-            }.execute(list.get(i));
-
-            /*
-            new AsyncTask<FileLog, Void, Void>() {
-                @Override
-                protected Void doInBackground(FileLog... logs) {
-                    try {
-                        String content = gson.toJson(logs[0]);
-                        CloudQueueMessage message = new CloudQueueMessage(logs[0].getId());
-                        message.setMessageContent(content);
-                        artifactQueue.addMessage(message);
-
-                        session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                    } catch (StorageException e) {
-                        logs[0].setUploadDate(prevTimestamp);
-
-                        session.setSyncTimestamp(prevTimestamp);
-                    }
-
-                    return null;
-                }
-            }.execute(list.get(i));
-            */
-
-            /*
-            AppController.getInstance().firebaseFirestore.collection("artefacts")
-                    .document(list.get(i).getId())
-                    .set(list.get(i))
-                    .addOnFailureListener(e -> session.setSyncTimestamp(prevTimestamp))
-                    .addOnSuccessListener(aVoid -> session.setSyncTimestamp(Utils.getUniversalTimestamp()));
-                    */
+            new WriteTask(artifactQueue, message).execute();
         }
     }
 
-    private String getAzureConnection() {
-        return String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", AZURE_ACCOUNT_NAME, AZURE_ACCOUNT_KEY);
+    @SuppressLint("StaticFieldLeak")
+    class MessageTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                personQueue = AppController.getInstance().queueClient.getQueueReference("persons");
+                personQueue.createIfNotExists();
+
+                measureQueue = AppController.getInstance().queueClient.getQueueReference("measures");
+                measureQueue.createIfNotExists();
+
+                artifactQueue = AppController.getInstance().queueClient.getQueueReference("artifacts");
+                artifactQueue.createIfNotExists();
+            } catch (URISyntaxException | StorageException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        public void onPostExecute(Void result) {
+            startSyncing();
+        }
+    }
+
+    class WriteTask extends AsyncTask<Void, Void, Void> {
+        CloudQueue queue;
+        CloudQueueMessage message;
+
+        WriteTask(CloudQueue queue, CloudQueueMessage message) {
+            this.queue = queue;
+            this.message = message;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                queue.addMessage(message);
+
+                AppController.getInstance().session.setSyncTimestamp(Utils.getUniversalTimestamp());
+            } catch (StorageException e) {
+                e.printStackTrace();
+
+                AppController.getInstance().session.setSyncTimestamp(prevTimestamp);
+            }
+            return null;
+        }
     }
 }

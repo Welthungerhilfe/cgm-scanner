@@ -73,7 +73,6 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     private ManualMeasureDialog measureDialog;
     private ManualDetailDialog detailDialog;
 
-    private Person person;
     private PersonViewModel viewModel;
 
     @Override
@@ -87,13 +86,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         super.onActivityCreated(instance);
 
         viewModel = ViewModelProviders.of(getActivity()).get(PersonViewModel.class);
-        viewModel.getPerson().observe(this, p -> {
-            person = p;
-
-            if (p != null) {
-                viewModel.getMeasures(person.getId()).observe(this, measures -> adapterMeasure.resetData(measures));
-            }
-        });
+        viewModel.getMeasuresLiveData().observe(this, measures -> adapterMeasure.resetData(measures));
     }
 
     public void onResume() {
@@ -163,7 +156,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                             measureDialog.show();
                         } else {
                             Intent intent = new Intent(getContext(), ScanModeActivity.class);
-                            intent.putExtra(AppConstants.EXTRA_PERSON, person);
+                            intent.putExtra(AppConstants.EXTRA_PERSON, viewModel.getPerson().getValue());
                             intent.putExtra(AppConstants.EXTRA_MEASURE, measure);
                             startActivity(intent);
                             adapterMeasure.notifyItemChanged(position);
@@ -208,7 +201,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                     measureDialog.show();
                 } else if (which == 1) {
                     Intent intent = new Intent(getContext(), ScanModeActivity.class);
-                    intent.putExtra(AppConstants.EXTRA_PERSON, person);
+                    intent.putExtra(AppConstants.EXTRA_PERSON, viewModel.getPerson().getValue());
                     startActivity(intent);
                 }
             });
@@ -223,7 +216,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         switch (view.getId()) {
             case R.id.fabCreate:
                 Crashlytics.log("Add Measure to person");
-                if (person == null) {
+                if (viewModel.getPerson().getValue() == null) {
                     Snackbar.make(fabCreate, R.string.error_person_first, Snackbar.LENGTH_LONG).show();
                 } else {
                     createMeasure();
@@ -237,7 +230,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         Measure measure = new Measure();
         measure.setId(AppController.getInstance().getMeasureId());
         measure.setDate(System.currentTimeMillis());
-        long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
+        long age = (System.currentTimeMillis() - viewModel.getPerson().getValue().getBirthday()) / 1000 / 60 / 60 / 24;
         measure.setAge(age);
         measure.setHeight(height);
         measure.setWeight(weight);
@@ -247,12 +240,13 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setLocation(location);
         measure.setOedema(oedema);
         measure.setType(AppConstants.VAL_MEASURE_MANUAL);
-        measure.setPersonId(person.getId());
+        measure.setPersonId(viewModel.getPerson().getValue().getId());
         measure.setTimestamp(Utils.getUniversalTimestamp());
         measure.setDate(Utils.getUniversalTimestamp());
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
-        viewModel.saveMeasure(person, measure);
+        AppController.getInstance().measureRepository.insertMeasure(measure);
+
         ((CreateDataActivity)getActivity()).gotoNextStep();
     }
 

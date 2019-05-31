@@ -65,8 +65,8 @@ public class MemoryMonitorService extends Service {
             }
         }, 0, AppConstants.MEMORY_MONITOR_INTERVAL);
 
-        //ToDo: update to START_STICKY;
-        return START_NOT_STICKY;
+
+        return START_STICKY;
     }
 
     @Nullable

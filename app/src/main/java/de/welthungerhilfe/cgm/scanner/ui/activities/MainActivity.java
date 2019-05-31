@@ -193,10 +193,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             data.put("device", device);
             data.put("token", token);
 
+            /*
             AppController.getInstance().firebaseFirestore.collection("fcm_tokens")
                     .document(device)
                     .set(data)
                     .addOnSuccessListener(aVoid -> session.setFcmSaved(true));
+                    */
         }
     }
 
