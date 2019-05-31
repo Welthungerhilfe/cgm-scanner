@@ -22,6 +22,7 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
@@ -53,8 +54,6 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class LoginActivity extends AccountAuthenticatorActivity {
 
-    private static final String TAG = LoginActivity.class.getSimpleName();
-
     @BindView(R.id.editUser)
     EditText editUser;
     @BindView(R.id.editPassword)
@@ -69,16 +68,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     void doSignIn(TextView btnOK) {
         doSignInAction();
     }
-
-    /*
-    @OnClick(R.id.txtCancel)
-    void doSignOut(TextView txtCancel) {
-        AppController.getInstance().firebaseAuth.signOut();
-        session.setSigned(false);
-
-        //createUser("zhangnemo34@hotmail.com", "Crystal");
-    }
-    */
 
     @OnClick(R.id.txtForgot)
     void doForgot(TextView txtForgot) {

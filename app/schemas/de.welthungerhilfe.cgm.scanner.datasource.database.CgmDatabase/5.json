@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "3b98bbb0f65470d49dc9f715988c0876",
+    "identityHash": "40494a27660d642247ec808a8cf0e93d",
     "entities": [
       {
         "tableName": "persons",
@@ -103,56 +103,6 @@
             "columnName": "address",
             "affinity": "TEXT",
             "notNull": false
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "id"
-          ],
-          "autoGenerate": false
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "consents",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `personId` TEXT, `consent` TEXT, `qrcode` TEXT, `created` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, PRIMARY KEY(`id`))",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personId",
-            "columnName": "personId",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "consent",
-            "columnName": "consent",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "qrcode",
-            "columnName": "qrcode",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "created",
-            "columnName": "created",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "timestamp",
-            "columnName": "timestamp",
-            "affinity": "INTEGER",
-            "notNull": true
           }
         ],
         "primaryKey": {
@@ -375,7 +325,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"3b98bbb0f65470d49dc9f715988c0876\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"40494a27660d642247ec808a8cf0e93d\")"
     ]
   }
 }

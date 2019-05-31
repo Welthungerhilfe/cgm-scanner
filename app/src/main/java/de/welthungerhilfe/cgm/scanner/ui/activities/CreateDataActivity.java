@@ -63,7 +63,6 @@ import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasuresDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
@@ -82,7 +81,6 @@ public class CreateDataActivity extends BaseActivity {
 
     public Person person;
     public List<Measure> measures;
-    public ArrayList<Consent> consents;
 
     public String qrCode;
     public byte[] qrBitmapByteArray;
@@ -97,10 +95,6 @@ public class CreateDataActivity extends BaseActivity {
     @BindView(R.id.viewpager)
     ViewPager viewpager;
 
-    private PersonRepository personRepository;
-    private MeasureRepository measureRepository;
-    private FileLogRepository fileLogRepository;
-
     public Loc location = null;
 
     @Override
@@ -111,23 +105,25 @@ public class CreateDataActivity extends BaseActivity {
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
 
-        personRepository = PersonRepository.getInstance(getApplication());
-        measureRepository = MeasureRepository.getInstance(getApplication());
-        fileLogRepository = FileLogRepository.getInstance(getApplication());
-
         getCurrentLocation();
 
         qrCode = getIntent().getStringExtra(AppConstants.EXTRA_QR);
         qrBitmapByteArray = getIntent().getByteArrayExtra(AppConstants.EXTRA_QR_BITMAP);
 
-        measures = new ArrayList<>();
-        consents = new ArrayList<>();
+        PersonViewModel viewModel = ViewModelProviders.of(this).get(PersonViewModel.class);
+        AppController.getInstance().personRepository.getPerson(qrCode).observe(this, person -> {
+            if (person == null) {
+                person = new Person();
+                person.setId(AppController.getInstance().getPersonId());
+                person.setQrcode(qrCode);
+                person.setCreatedBy(AppController.getInstance().firebaseUser.getEmail());
+            }
+
+            viewModel.setPerson(person);
+        });
 
         setupActionBar();
         initFragments();
-
-        PersonViewModel viewModel = ViewModelProviders.of(this).get(PersonViewModel.class);
-        viewModel.registerPersonQR(qrCode);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_STORAGE);
@@ -208,20 +204,9 @@ public class CreateDataActivity extends BaseActivity {
             log.setCreateDate(Utils.getUniversalTimestamp());
             log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
-            fileLogRepository.insertFileLog(log);
+            AppController.getInstance().fileLogRepository.insertFileLog(log);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-
-
-        if (person != null) {
-            Consent consent = new Consent();
-            consent.setCreated(timestamp);
-            consent.setConsent(consentFile.getAbsolutePath());
-            if (qrCode != null)
-                consent.setConsent(qrPath);
-            else
-                consent.setQrcode(qrCode);
         }
     }
 
@@ -236,10 +221,10 @@ public class CreateDataActivity extends BaseActivity {
         measure.setId(AppController.getInstance().getMeasureId());
         measure.setLocation(location);
 
-        measureRepository.insertMeasure(measure);
+        AppController.getInstance().measureRepository.insertMeasure(measure);
 
         person.setLastLocation(location);
-        personRepository.updatePerson(person);
+        AppController.getInstance().personRepository.updatePerson(person);
     }
 
     @Override

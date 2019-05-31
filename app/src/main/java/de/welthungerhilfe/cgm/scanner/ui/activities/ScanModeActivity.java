@@ -141,11 +141,6 @@ public class ScanModeActivity extends AppCompatActivity {
     }
     @OnClick(R.id.btnScanStep1)
     void scanStep1(Button btnScanStep1) {
-        /*
-        lytSelectMode.setVisibility(View.GONE);
-        lytSelectedMode.setVisibility(View.VISIBLE);
-        */
-
         MeasureScanFragment scanFragment = new MeasureScanFragment();
         if (SCAN_MODE == SCAN_STANDING) {
             imgSelectedMode.setImageResource(R.drawable.standing_active);
@@ -228,16 +223,12 @@ public class ScanModeActivity extends AppCompatActivity {
     public Measure measure;
     public Loc location;
 
-    private PersonViewModel viewModel;
-
     protected void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
         measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
         if (person == null) Log.e(TAG,"person was null!");
         if (measure == null) Log.e(TAG,"measure was null!");
-
-        viewModel = ViewModelProviders.of(this).get(PersonViewModel.class);
 
         setContentView(R.layout.activity_scan_mode);
 
@@ -357,10 +348,16 @@ public class ScanModeActivity extends AppCompatActivity {
     }
 
     public void completeScan() {
-        if (measure == null)
+        if (measure == null) {
             measure = new Measure();
-        if (location != null)
+            measure.setId(AppController.getInstance().getMeasureId());
+        }
+
+        if (location != null) {
             measure.setLocation(location);
+            person.setLastLocation(location);
+        }
+
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
         measure.setDate(Utils.getUniversalTimestamp());
         measure.setType("v1.1.2");
@@ -375,11 +372,11 @@ public class ScanModeActivity extends AppCompatActivity {
         measure.setPersonId(person.getId());
         measure.setTimestamp(Utils.getUniversalTimestamp());
 
-        if (measure.getId() == null) {
-            measure.setId(AppController.getInstance().getMeasureId());
-        }
+        person.setLastMeasure(measure);
 
-        viewModel.saveMeasure(person, measure);
+        AppController.getInstance().measureRepository.insertMeasure(measure);
+        AppController.getInstance().personRepository.insertPerson(person);
+
         finish();
     }
 
