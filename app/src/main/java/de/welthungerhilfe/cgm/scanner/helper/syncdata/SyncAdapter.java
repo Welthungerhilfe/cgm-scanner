@@ -213,13 +213,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                personQueue = AppController.getInstance().queueClient.getQueueReference("persons");
+                personQueue = AppController.getInstance().queueClient.getQueueReference("person");
                 personQueue.createIfNotExists();
 
-                measureQueue = AppController.getInstance().queueClient.getQueueReference("measures");
+                measureQueue = AppController.getInstance().queueClient.getQueueReference("measure");
                 measureQueue.createIfNotExists();
 
-                artifactQueue = AppController.getInstance().queueClient.getQueueReference("artifacts");
+                artifactQueue = AppController.getInstance().queueClient.getQueueReference("artifact");
                 artifactQueue.createIfNotExists();
             } catch (URISyntaxException | StorageException e) {
                 e.printStackTrace();
