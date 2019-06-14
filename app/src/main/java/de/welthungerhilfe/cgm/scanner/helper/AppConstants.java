@@ -24,6 +24,9 @@ package de.welthungerhilfe.cgm.scanner.helper;
  */
 
 public class AppConstants {
+    public static final String AZURE_ACCOUNT_NAME = "{AZURE_ACCOUNT_NAME}";
+    public static final String AZURE_ACCOUNT_KEY = "{AZURE_ACCOUNT_KEY}";
+
     public static final int MAX_IMAGE_SIZE = 800;
 
     public static final long SYNC_INTERVAL = 60 * 5;
@@ -40,9 +43,9 @@ public class AppConstants {
     //public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor-dev.appspot.com";
 
     public static final String LOCAL_CONSENT_URL = "/{qrcode}/consent/{scantimestamp}/consent/";
-    public static final String STORAGE_CONSENT_URL = "/data/person/{qrcode}/consent/{scantimestamp}/";
-    public static final String STORAGE_PC_URL = "/data/person/{qrcode}/measurements/{scantimestamp}/pc/";
-    public static final String STORAGE_RGB_URL = "/data/person/{qrcode}/measurements/{scantimestamp}/rgb/";
+    public static final String STORAGE_CONSENT_URL = "qrcode/{qrcode}/consent/{scantimestamp}/";
+    public static final String STORAGE_PC_URL = "qrcode/{qrcode}/measure/{scantimestamp}/pc/";
+    public static final String STORAGE_RGB_URL = "qrcode/{qrcode}/measure/{scantimestamp}/rgb/";
 
     public static final String VAL_SEX_FEMALE = "female";
     public static final String VAL_SEX_MALE = "male";

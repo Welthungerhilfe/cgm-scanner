@@ -22,6 +22,7 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
@@ -53,8 +54,6 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class LoginActivity extends AccountAuthenticatorActivity {
 
-    private static final String TAG = LoginActivity.class.getSimpleName();
-
     @BindView(R.id.editUser)
     EditText editUser;
     @BindView(R.id.editPassword)
@@ -69,16 +68,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     void doSignIn(TextView btnOK) {
         doSignInAction();
     }
-
-    /*
-    @OnClick(R.id.txtCancel)
-    void doSignOut(TextView txtCancel) {
-        AppController.getInstance().firebaseAuth.signOut();
-        session.setSigned(false);
-
-        //createUser("zhangnemo34@hotmail.com", "Crystal");
-    }
-    */
 
     @OnClick(R.id.txtForgot)
     void doForgot(TextView txtForgot) {
@@ -98,16 +87,13 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         accountManager = AccountManager.get(this);
 
-        editPassword.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    doSignInAction();
+        editPassword.setOnEditorActionListener((textView, actionId, keyEvent) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                doSignInAction();
 
-                    return true;
-                }
-                return false;
+                return true;
             }
+            return false;
         });
 
         session = new SessionManager(this);
@@ -181,37 +167,34 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             Crashlytics.setUserIdentifier(email);
 
             AppController.getInstance().firebaseAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                final Account account = new Account(email, AppConstants.ACCOUNT_TYPE);
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            final Account account = new Account(email, AppConstants.ACCOUNT_TYPE);
 
-                                accountManager.addAccountExplicitly(account, password, null);
+                            accountManager.addAccountExplicitly(account, password, null);
 
-                                SyncAdapter.startPeriodicSync(account, getApplicationContext());
+                            SyncAdapter.startPeriodicSync(account, getApplicationContext());
 
-                                final Intent intent = new Intent();
-                                intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, email);
-                                intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
-                                intent.putExtra(AccountManager.KEY_AUTHTOKEN, password);
+                            final Intent intent = new Intent();
+                            intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, email);
+                            intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
+                            intent.putExtra(AccountManager.KEY_AUTHTOKEN, password);
 
-                                setAccountAuthenticatorResult(intent.getExtras());
-                                setResult(RESULT_OK, intent);
+                            setAccountAuthenticatorResult(intent.getExtras());
+                            setResult(RESULT_OK, intent);
 
-                                Crashlytics.setUserIdentifier(email);
-                                Crashlytics.log(0, "user login: ", String.format("user logged in with email %s at %s", email, Utils.beautifyDateTime(new Date())));
+                            Crashlytics.setUserIdentifier(email);
+                            Crashlytics.log(0, "user login: ", String.format("user logged in with email %s at %s", email, Utils.beautifyDateTime(new Date())));
 
-                                session.setSigned(true);
-                                AppController.getInstance().prepareFirebaseUser();
-                                if (session.getTutorial())
-                                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                                else
-                                    startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
-                                finish();
-                            } else {
-                                Toast.makeText(LoginActivity.this, R.string.error_login, Toast.LENGTH_LONG).show();
-                            }
+                            session.setSigned(true);
+                            AppController.getInstance().prepareFirebaseUser();
+                            if (session.getTutorial())
+                                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                            else
+                                startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
+                            finish();
+                        } else {
+                            Toast.makeText(LoginActivity.this, R.string.error_login, Toast.LENGTH_LONG).show();
                         }
                     });
         }

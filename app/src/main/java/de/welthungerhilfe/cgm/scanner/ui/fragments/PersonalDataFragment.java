@@ -65,21 +65,11 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-/**
- * Created by Emerald on 2/19/2018.
- */
-
 public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, TextWatcher {
-
-    private String TAG = this.getClass().getSimpleName();
 
     private final int REQUEST_LOCATION = 0x1000;
 
     public Context context;
-
-    private LinearLayout lytCreate;
-
-    private ImageView imgConsent, imgBirth, imgLocation;
 
     private TextView txtDate;
 
@@ -87,14 +77,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     private EditText editName, editPrename, editLocation, editBirth, editGuardian;
 
-    private AppCompatRadioButton radioFemale, radioMale/*, radioFluid*/;
+    private AppCompatRadioButton radioFemale, radioMale;
 
     private Button btnNext;
-
-    private Loc location = null;
     private long birthday = 0;
 
-    private Person person;
     private PersonViewModel viewModel;
     
     public void onAttach(Context context) {
@@ -107,10 +94,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         super.onActivityCreated(instance);
 
         viewModel = ViewModelProviders.of(getActivity()).get(PersonViewModel.class);
-        viewModel.getPerson().observe(this, p -> {
-            person = p;
-            if (person != null)
-                initUI();
+        viewModel.getPerson().observe(this, person -> {
+            if (person.getCreated() > 0)
+                initUI(person);
         });
     }
 
@@ -121,19 +107,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         view.findViewById(R.id.rytConsentDetail).setOnClickListener(this);
         view.findViewById(R.id.imgBirth).setOnClickListener(this);
 
-        /*
-        TODO fix
-        imgLocation = view.findViewById(R.id.imgLocation);
-        imgLocation.setOnClickListener(this);
-        */
-
         view.findViewById(R.id.txtBack).setOnClickListener(this);
         btnNext = view.findViewById(R.id.btnNext);
         btnNext.setOnClickListener(this);
-
-        lytCreate = view.findViewById(R.id.lytCreate);
-
-        imgConsent = view.findViewById(R.id.imgConsent);
 
         checkAge = view.findViewById(R.id.checkAge);
 
@@ -147,7 +123,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         editPrename.addTextChangedListener(this);
 
         editLocation = view.findViewById(R.id.editLocation);
-        //editLocation.addTextChangedListener(this);
 
         editBirth = view.findViewById(R.id.editBirth);
         editBirth.addTextChangedListener(this);
@@ -161,14 +136,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         radioMale = view.findViewById(R.id.radioMale);
         radioMale.setOnCheckedChangeListener(this);
-        //radioFluid = view.findViewById(R.id.radioFluid);
-
-        //showConsent();
 
         return view;
     }
 
-    public void initUI() {
+    public void initUI(Person person) {
         txtDate.setText(Utils.beautifyDate(person.getCreated()));
 
         editName.setText(person.getName());
@@ -212,30 +184,12 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             editPrename.setError(null);
         }
 
-        /*
-        if (location.isEmpty()) {
-            editLocation.setError(getResources().getString(R.string.tooltip_location);
-            valid = false;
-        } else {
-            editLocation.setError(null);
-        }
-        */
-
         if (birth.isEmpty()) {
             editBirth.setError(getResources().getString(R.string.tooltip_birthday));
             valid = false;
         } else {
             editBirth.setError(null);
         }
-
-        /*
-        if (age.isEmpty()) {
-            editAge.setError(getResources().getString(R.string.tooltip_age));
-            valid = false;
-        } else {
-            editName.setError(null);
-        }
-        */
 
         if (guardian.isEmpty()) {
             editGuardian.setError(getResources().getString(R.string.tooltip_guardian));
@@ -244,9 +198,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             editGuardian.setError(null);
         }
 
-        if (radioFemale.isChecked() || radioMale.isChecked() /* || radioFluid.isChecked() */) {
-
-        } else {
+        if (!radioFemale.isChecked() && !radioMale.isChecked()) {
             valid = false;
             Snackbar.make(radioFemale, R.string.tooltipe_sex, Snackbar.LENGTH_SHORT).show();
         }
@@ -257,11 +209,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            /* TODO fix
-            case R.id.imgLocation:
-                startActivityForResult(new Intent(context, LocationDetectActivity.class), REQUEST_LOCATION);
-                break;
-                */
             case R.id.editBirth:
                 DateRangePickerDialog pickerDialog = new DateRangePickerDialog();
                 pickerDialog.setCallback(this);
@@ -284,17 +231,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         sex = radioMale.getText().toString();
                     else if (radioFemale.isChecked())
                         sex = radioFemale.getText().toString();
-                    /*
-                    else if (radioFluid.isChecked())
-                        sex = radioFluid.getText().toString();
-                    */
 
-                    if (person == null) {
-                        person = new Person();
-                        person.setId(AppController.getInstance().getPersonId(editName.getText().toString()));
-                        person.setQrcode(viewModel.getPersonQR());
-                        person.setCreated(System.currentTimeMillis());
-                    }
+                    Person person = viewModel.getPerson().getValue();
 
                     person.setName(editName.getText().toString());
                     person.setSurname(editPrename.getText().toString());
@@ -304,6 +242,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setSex(sex);
                     person.setAgeEstimated(checkAge.isChecked());
                     person.setTimestamp(Utils.getUniversalTimestamp());
+                    person.setCreated(System.currentTimeMillis());
                     person.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
                     viewModel.savePerson(person);
@@ -312,14 +251,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
                 break;
             case R.id.rytConsentDetail:
-                Intent intent = new Intent(context, ImageDetailActivity.class);
-                if (((CreateDataActivity)context).qrCode != null) {
-                    intent.putExtra(AppConstants.EXTRA_QR_BITMAP, ((CreateDataActivity)context).qrBitmapByteArray);
-                } else if (((CreateDataActivity)context).consents.size() > 0) {
-                    intent.putExtra(AppConstants.EXTRA_QR_URL, ((CreateDataActivity)context).consents.get(0).getConsent());
-                }
 
-                startActivity(intent);
                 break;
             case R.id.txtBack:
                 getActivity().finish();
@@ -327,54 +259,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         }
     }
 
-    public void onActivityResult(int reqCode, int resCode, Intent data) {
-        if (reqCode == REQUEST_LOCATION && resCode == Activity.RESULT_OK) {
-            location = (Loc)data.getSerializableExtra(AppConstants.EXTRA_LOCATION);
-            // TODO fix editLocation.setText(location.getAddress());
-        }
-    }
-
     @Override
     public void onDateTimeRecurrenceSet(SelectedDate selectedDate, int hourOfDay, int minute, SublimeRecurrencePicker.RecurrenceOption recurrenceOption, String recurrenceRule) {
         birthday = selectedDate.getStartDate().getTimeInMillis();
         editBirth.setText(Utils.beautifyDate(selectedDate.getStartDate().getTimeInMillis()));
-    }
-
-    public void showConsent() {
-        if (context == null)
-            return;
-
-        if (((CreateDataActivity)context).qrCode != null) {
-            imgConsent.setImageBitmap(BitmapFactory.decodeByteArray(((CreateDataActivity)context).qrBitmapByteArray, 0, ((CreateDataActivity)context).qrBitmapByteArray.length));
-        } else if (((CreateDataActivity)context).consents.size() > 0) {
-            final String qrUrl = ((CreateDataActivity)context).consents.get(0).getConsent();
-
-            long created = ((CreateDataActivity)context).consents.get(0).getCreated();
-            String qrcode = ((CreateDataActivity)context).consents.get(0).getQrcode();
-            String thumbUrl = "/data/person/"+qrcode+"/"+created+"_"+qrcode+".png_thumb.png";
-            Log.v(TAG,"thumbUrl: "+thumbUrl);
-            StorageReference qrThumbRef = AppController.getInstance().firebaseStorage.getReference(thumbUrl);
-
-            qrThumbRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
-            {
-                @Override
-                public void onSuccess(Uri downloadUrl)
-                {
-                    Log.v(TAG,"found thumbnail at: " + downloadUrl.toString());
-                    if (context != null)
-                        Glide.with(context).load(downloadUrl.toString()).into(imgConsent);
-                    //do something with downloadurl
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.w(TAG,"error getting thumbnail");
-                    e.printStackTrace();
-                    if (context != null)
-                        Glide.with(context).load(qrUrl).into(imgConsent);
-                }
-            });
-        }
     }
 
     @Override

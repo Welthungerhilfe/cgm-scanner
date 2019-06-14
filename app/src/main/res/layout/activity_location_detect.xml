@@ -19,6 +19,7 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -42,13 +43,14 @@
             android:inputType="textMultiLine"
             android:text=""
             android:textColor="@color/colorBlack"
-            android:textSize="16sp"/>
+            android:textSize="16sp"
+            tools:ignore="LabelFor" />
 
         <ImageView
             android:id="@+id/imgClose"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
             android:src="@drawable/close"
             android:layout_gravity="center_vertical"
             android:contentDescription="@string/content_image"/>
@@ -112,8 +114,8 @@
         android:layout_above="@+id/lytConfirm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_alignParentRight="true"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_alignParentEnd="true"
         android:scaleType="center"
         app:backgroundTint="@color/colorWhite"
         app:fabSize="mini"

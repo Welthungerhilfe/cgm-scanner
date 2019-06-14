@@ -101,7 +101,7 @@ public class VideoEncoderCore {
         // mmatiaschek 20.02.2018 we need to set GLSurface to InputSurface instead of creating one
         // TODO: do dependency injection?
         //mInputSurface = mEncoder.createInputSurface();
-        mInputSurface = mEncoder.createPersistentInputSurface();
+        mInputSurface = MediaCodec.createPersistentInputSurface();
         mEncoder.setInputSurface(mInputSurface);
 
         //mInputSurface = surface;
@@ -197,8 +197,7 @@ public class VideoEncoderCore {
             } else {
                 ByteBuffer encodedData = encoderOutputBuffers[encoderStatus];
                 if (encodedData == null) {
-                    throw new RuntimeException("encoderOutputBuffer " + encoderStatus +
-                            " was null");
+                    throw new RuntimeException("encoderOutputBuffer " + encoderStatus + " was null");
                 }
 
                 if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {

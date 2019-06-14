@@ -65,6 +65,7 @@ public class MemoryMonitorService extends Service {
             }
         }, 0, AppConstants.MEMORY_MONITOR_INTERVAL);
 
+
         return START_STICKY;
     }
 

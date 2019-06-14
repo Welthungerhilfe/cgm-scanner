@@ -177,12 +177,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         }
 
         public void bindSelectListener(Measure measure) {
-            rytItem.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    listener.onMeasureSelect(measure);
-                }
-            });
+            rytItem.setOnClickListener(v -> listener.onMeasureSelect(measure));
         }
     }
 }

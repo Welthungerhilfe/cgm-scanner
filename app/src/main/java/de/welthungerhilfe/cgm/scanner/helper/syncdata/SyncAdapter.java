@@ -1,35 +1,29 @@
 package de.welthungerhilfe.cgm.scanner.helper.syncdata;
 
 import android.accounts.Account;
+import android.annotation.SuppressLint;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SyncRequest;
 import android.content.SyncResult;
-import android.os.Build;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 
-import com.crashlytics.android.Crashlytics;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.perf.metrics.AddTrace;
 
+import com.google.gson.Gson;
+import com.microsoft.azure.storage.*;
+import com.microsoft.azure.storage.queue.*;
+
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 import java.util.List;
-import java.util.Objects;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
@@ -37,40 +31,27 @@ import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasuresLoad;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_KEY;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_NAME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPersonsLoad, OnMeasuresLoad, OnFileLogsLoad {
     private long prevTimestamp;
-    private SessionManager session;
 
-    private PersonRepository personRepository;
-    private MeasureRepository measureRepository;
-    private FileLogRepository fileLogRepository;
-
-    private boolean isSyncing;
+    private CloudQueue personQueue;
+    private CloudQueue measureQueue;
+    private CloudQueue artifactQueue;
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
-
-        session = new SessionManager(context);
-        isSyncing = false;
-
-        personRepository = PersonRepository.getInstance(context);
-        measureRepository = MeasureRepository.getInstance(context);
-        fileLogRepository = FileLogRepository.getInstance(context);
     }
 
     @Override
     @AddTrace(name = "onPerformSync", enabled = true)
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        prevTimestamp = session.getSyncTimestamp();
-
-        // Todo;
-        personRepository.getSyncablePerson(this, prevTimestamp);
-        measureRepository.getSyncableMeasure(this, prevTimestamp);
-        fileLogRepository.getSyncableLog(this, prevTimestamp);
-
+        new MessageTask().execute();
+        /*
         AppController.getInstance().firebaseFirestore.collection("persons")
                 .whereGreaterThan("timestamp", prevTimestamp)
                 .get()
@@ -135,6 +116,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
                         session.setSyncTimestamp(Utils.getUniversalTimestamp());
                     }
                 });
+                */
+    }
+
+    private void startSyncing() {
+        prevTimestamp = AppController.getInstance().session.getSyncTimestamp();
+
+        AppController.getInstance().personRepository.getSyncablePerson(this, prevTimestamp);
+        AppController.getInstance().measureRepository.getSyncableMeasure(this, prevTimestamp);
+        AppController.getInstance().fileLogRepository.getSyncableLog(this, prevTimestamp);
     }
 
     @AddTrace(name = "syncImmediately", enabled = true)
@@ -150,16 +140,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
         String authority = context.getString(R.string.sync_authority);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            SyncRequest request = new SyncRequest.Builder().
-                    syncPeriodic(SYNC_INTERVAL, SYNC_FLEXTIME).
-                    setSyncAdapter(account, authority).
-                    setExtras(new Bundle()).build();
+        SyncRequest request = new SyncRequest.Builder().
+                syncPeriodic(SYNC_INTERVAL, SYNC_FLEXTIME).
+                setSyncAdapter(account, authority).
+                setExtras(new Bundle()).build();
 
-            ContentResolver.requestSync(request);
-        } else {
-            ContentResolver.addPeriodicSync(account, authority, new Bundle(), SYNC_INTERVAL);
-        }
+        ContentResolver.requestSync(request);
     }
 
     @AddTrace(name = "startPeriodicSync", enabled = true)
@@ -184,81 +170,90 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     @Override
     @AddTrace(name = "onPersonLoaded", enabled = true)
     public void onPersonsLoaded(List<Person> personList) {
+        Gson gson = new Gson();
+
         for (int i = 0; i < personList.size(); i++) {
-            personList.get(i).setTimestamp(Utils.getUniversalTimestamp());
+            String content = gson.toJson(personList.get(i));
+            CloudQueueMessage message = new CloudQueueMessage(personList.get(i).getId());
+            message.setMessageContent(content);
 
-            int finalI = i;
-            AppController.getInstance().firebaseFirestore.collection("persons")
-                    .document(personList.get(i).getId())
-                    .set(personList.get(i))
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            personList.get(finalI).setTimestamp(prevTimestamp);
-
-                            session.setSyncTimestamp(prevTimestamp);
-                        }
-                    })
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            personRepository.updatePerson(personList.get(finalI));
-
-                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                        }
-                    });
+            new WriteTask(personQueue, message).execute();
         }
     }
 
     @Override
     @AddTrace(name = "onMeasureLoaded", enabled = true)
     public void onMeasuresLoaded(List<Measure> measureList) {
+        Gson gson = new Gson();
+
         for (int i = 0; i < measureList.size(); i++) {
-            measureList.get(i).setTimestamp(Utils.getUniversalTimestamp());
+            String content = gson.toJson(measureList.get(i));
+            CloudQueueMessage message = new CloudQueueMessage(measureList.get(i).getId());
+            message.setMessageContent(content);
 
-            int finalI = i;
-            AppController.getInstance().firebaseFirestore.collection("persons")
-                    .document(measureList.get(i).getPersonId())
-                    .collection("measures")
-                    .document(measureList.get(i).getId())
-                    .set(measureList.get(i))
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            measureList.get(finalI).setTimestamp(prevTimestamp);
-
-                            session.setSyncTimestamp(prevTimestamp);
-                        }
-                    })
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            measureRepository.updateMeasure(measureList.get(finalI));
-
-                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                        }
-                    });
+            new WriteTask(measureQueue, message).execute();
         }
     }
 
     @Override
     public void onFileLogsLoaded(List<FileLog> list) {
+        Gson gson = new Gson();
         for (int i = 0; i < list.size(); i++) {
-            AppController.getInstance().firebaseFirestore.collection("artefacts")
-                    .document(list.get(i).getId())
-                    .set(list.get(i))
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            session.setSyncTimestamp(prevTimestamp);
-                        }
-                    })
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                        }
-                    });
+            String content = gson.toJson(list.get(i));
+            CloudQueueMessage message = new CloudQueueMessage(list.get(i).getId());
+            message.setMessageContent(content);
+
+            new WriteTask(artifactQueue, message).execute();
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    class MessageTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                personQueue = AppController.getInstance().queueClient.getQueueReference("person");
+                personQueue.createIfNotExists();
+
+                measureQueue = AppController.getInstance().queueClient.getQueueReference("measure");
+                measureQueue.createIfNotExists();
+
+                artifactQueue = AppController.getInstance().queueClient.getQueueReference("artifact");
+                artifactQueue.createIfNotExists();
+            } catch (URISyntaxException | StorageException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        public void onPostExecute(Void result) {
+            startSyncing();
+        }
+    }
+
+    class WriteTask extends AsyncTask<Void, Void, Void> {
+        CloudQueue queue;
+        CloudQueueMessage message;
+
+        WriteTask(CloudQueue queue, CloudQueueMessage message) {
+            this.queue = queue;
+            this.message = message;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                queue.addMessage(message);
+
+                AppController.getInstance().session.setSyncTimestamp(Utils.getUniversalTimestamp());
+            } catch (StorageException e) {
+                e.printStackTrace();
+
+                AppController.getInstance().session.setSyncTimestamp(prevTimestamp);
+            }
+            return null;
         }
     }
 }

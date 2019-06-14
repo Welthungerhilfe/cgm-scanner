@@ -78,57 +78,56 @@ public class ZoomImageView extends ImageView {
 	    setImageMatrix(matrix);
 	    setScaleType(ScaleType.MATRIX);
 	
-	    setOnTouchListener(new OnTouchListener() {
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				// TODO Auto-generated method stub
-				if(zoomEnable) {
-	                mScaleDetector.onTouchEvent(event);
-	                PointF curr = new PointF(event.getX(), event.getY());
-	
-	                switch (event.getAction()) {
-	                case MotionEvent.ACTION_DOWN:
-	                    last.set(curr);
-	                    start.set(last);
-	                    mode = DRAG;
-	                    break;
-	
-	                case MotionEvent.ACTION_MOVE:
-	                    if (mode == DRAG) {
-	                        float deltaX = curr.x - last.x;
-	                        float deltaY = curr.y - last.y;
-	                        float fixTransX = getFixDragTrans(deltaX, viewWidth,
-	                                origWidth * saveScale);
-	                        float fixTransY = getFixDragTrans(deltaY, viewHeight,
-	                                origHeight * saveScale);
-	                        matrix.postTranslate(fixTransX, fixTransY);
-	                        fixTrans();
-	                        last.set(curr.x, curr.y);
-	                    }
-	                    break;
-	
-	                case MotionEvent.ACTION_UP:
-	                    mode = NONE;
-	                    int xDiff = (int) Math.abs(curr.x - start.x);
-	                    int yDiff = (int) Math.abs(curr.y - start.y);
-	                    if (xDiff < CLICK && yDiff < CLICK)
-	                        performClick();
-	                    break;
-	
-	                case MotionEvent.ACTION_POINTER_UP:
-	                    mode = NONE;
-	                    break;
-	                }
-	
-	                setImageMatrix(matrix);
-	                invalidate();
-	                return true; // indicate event was handled
-	
-	            } else{
-	                return false;
-	            }
-			}	
-	    });
+	    setOnTouchListener((v, event) -> {
+            // TODO Auto-generated method stub
+            if(zoomEnable) {
+				mScaleDetector.onTouchEvent(event);
+				PointF curr = new PointF(event.getX(), event.getY());
+
+				switch (event.getAction()) {
+					case MotionEvent.ACTION_DOWN:
+						last.set(curr);
+						start.set(last);
+						mode = DRAG;
+
+						break;
+
+					case MotionEvent.ACTION_MOVE:
+						if (mode == DRAG) {
+							float deltaX = curr.x - last.x;
+							float deltaY = curr.y - last.y;
+							float fixTransX = getFixDragTrans(deltaX, viewWidth,origWidth * saveScale);
+							float fixTransY = getFixDragTrans(deltaY, viewHeight,origHeight * saveScale);
+							matrix.postTranslate(fixTransX, fixTransY);
+							fixTrans();
+							last.set(curr.x, curr.y);
+						}
+
+						break;
+
+					case MotionEvent.ACTION_UP:
+						mode = NONE;
+						int xDiff = (int) Math.abs(curr.x - start.x);
+						int yDiff = (int) Math.abs(curr.y - start.y);
+						if (xDiff < CLICK && yDiff < CLICK)
+						performClick();
+
+						break;
+
+					case MotionEvent.ACTION_POINTER_UP:
+						mode = NONE;
+
+						break;
+				}
+
+				setImageMatrix(matrix);
+				invalidate();
+				return true; // indicate event was handled
+
+			} else {
+				return false;
+			}
+        });
 	}
 	
 	public void setMaxZoom(float x) {

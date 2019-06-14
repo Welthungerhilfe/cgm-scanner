@@ -44,7 +44,7 @@
             android:id="@+id/txtTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
             android:text="@string/manual_measure"
             android:textSize="16sp"
             android:textColor="@color/colorGreyDark"
@@ -61,7 +61,7 @@
             android:id="@+id/editManualDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false"
+            android:inputType="none"
             android:singleLine="true"
             android:hint="@string/measure_date"/>
 
@@ -80,7 +80,7 @@
                 android:id="@+id/editManualLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:editable="false"
+                android:inputType="none"
                 android:focusable="false"
                 android:hint="@string/measure_location"/>
 
@@ -191,13 +191,13 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="10dp"
             android:orientation="horizontal"
-            android:gravity="bottom|right">
+            android:gravity="bottom|end">
 
             <TextView
                 android:id="@+id/txtCancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
+                android:layout_marginEnd="20dp"
                 android:text="@string/cancel"
                 android:textColor="@color/colorGreen"
                 android:textAllCaps="true"
@@ -207,9 +207,7 @@
                 android:id="@+id/btnOK"
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
-                android:layout_marginLeft="10dp"
-                android:layout_centerVertical="true"
-                android:layout_alignParentRight="true"
+                android:layout_marginStart="10dp"
                 android:background="@color/colorPrimary"
                 android:text="@string/ok"
                 android:textColor="@color/colorWhite"

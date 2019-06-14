@@ -63,7 +63,6 @@ import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasuresDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
@@ -82,7 +81,6 @@ public class CreateDataActivity extends BaseActivity {
 
     public Person person;
     public List<Measure> measures;
-    public ArrayList<Consent> consents;
 
     public String qrCode;
     public byte[] qrBitmapByteArray;
@@ -97,16 +95,6 @@ public class CreateDataActivity extends BaseActivity {
     @BindView(R.id.viewpager)
     ViewPager viewpager;
 
-    private PersonalDataFragment personalFragment;
-    private MeasuresDataFragment measureFragment;
-    private GrowthDataFragment growthFragment;
-
-    private PersonRepository personRepository;
-    private MeasureRepository measureRepository;
-    private FileLogRepository fileLogRepository;
-
-    private PersonViewModel viewModel;
-
     public Loc location = null;
 
     @Override
@@ -117,23 +105,25 @@ public class CreateDataActivity extends BaseActivity {
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
 
-        personRepository = PersonRepository.getInstance(getApplication());
-        measureRepository = MeasureRepository.getInstance(getApplication());
-        fileLogRepository = FileLogRepository.getInstance(getApplication());
-
         getCurrentLocation();
 
         qrCode = getIntent().getStringExtra(AppConstants.EXTRA_QR);
         qrBitmapByteArray = getIntent().getByteArrayExtra(AppConstants.EXTRA_QR_BITMAP);
 
-        measures = new ArrayList<>();
-        consents = new ArrayList<>();
+        PersonViewModel viewModel = ViewModelProviders.of(this).get(PersonViewModel.class);
+        AppController.getInstance().personRepository.getPerson(qrCode).observe(this, person -> {
+            if (person == null) {
+                person = new Person();
+                person.setId(AppController.getInstance().getPersonId());
+                person.setQrcode(qrCode);
+                person.setCreatedBy(AppController.getInstance().firebaseUser.getEmail());
+            }
+
+            viewModel.setPerson(person);
+        });
 
         setupActionBar();
         initFragments();
-
-        viewModel = ViewModelProviders.of(this).get(PersonViewModel.class);
-        viewModel.registerPersonQR(qrCode);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_STORAGE);
@@ -158,9 +148,9 @@ public class CreateDataActivity extends BaseActivity {
     }
 
     private void initFragments() {
-        personalFragment = new PersonalDataFragment();
-        measureFragment = new MeasuresDataFragment();
-        growthFragment = new GrowthDataFragment();
+        PersonalDataFragment personalFragment = new PersonalDataFragment();
+        MeasuresDataFragment measureFragment = new MeasuresDataFragment();
+        GrowthDataFragment growthFragment = new GrowthDataFragment();
 
         FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
         adapter.addFragment(personalFragment, getResources().getString(R.string.tab_personal));
@@ -170,34 +160,6 @@ public class CreateDataActivity extends BaseActivity {
         viewpager.setAdapter(adapter);
 
         tabs.setupWithViewPager(viewpager);
-    }
-
-    public void setPersonalData(String name, String surName, long birthday, boolean age, String sex, Loc loc, String guardian) {
-        if (person == null) {
-            person = new Person();
-            person.setId(AppController.getInstance().getPersonId(name));
-            person.setQrcode(qrCode);
-            person.setCreated(System.currentTimeMillis());
-        }
-
-        person.setName(name);
-        person.setSurname(surName);
-        person.setLastLocation(loc);
-        if (birthday != 0)
-            person.setBirthday(birthday);
-        person.setGuardian(guardian);
-        person.setSex(sex);
-        person.setAgeEstimated(age);
-        person.setTimestamp(Utils.getUniversalTimestamp());
-        person.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-
-        personRepository.insertPerson(person);
-
-        viewpager.setCurrentItem(1);
-    }
-
-    public void setMeasureData() {
-        viewpager.setCurrentItem(2);
     }
 
     public void gotoNextStep() {
@@ -231,7 +193,7 @@ public class CreateDataActivity extends BaseActivity {
             // Start MyUploadService to upload the file, so that the file is uploaded
             // even if this Activity is killed or put in the background
             FileLog log = new FileLog();
-            log.setId(AppController.getInstance().getArtefactId("consent"));
+            log.setId(AppController.getInstance().getArtifactId("consent"));
             log.setType("consent");
             log.setPath(consentFile.getPath());
             log.setHashValue(MD5.getMD5(consentFile.getPath()));
@@ -242,20 +204,9 @@ public class CreateDataActivity extends BaseActivity {
             log.setCreateDate(Utils.getUniversalTimestamp());
             log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
-            fileLogRepository.insertFileLog(log);
+            AppController.getInstance().fileLogRepository.insertFileLog(log);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-
-
-        if (person != null) {
-            Consent consent = new Consent();
-            consent.setCreated(timestamp);
-            consent.setConsent(consentFile.getAbsolutePath());
-            if (qrCode != null)
-                consent.setConsent(qrPath);
-            else
-                consent.setQrcode(qrCode);
         }
     }
 
@@ -270,10 +221,10 @@ public class CreateDataActivity extends BaseActivity {
         measure.setId(AppController.getInstance().getMeasureId());
         measure.setLocation(location);
 
-        measureRepository.insertMeasure(measure);
+        AppController.getInstance().measureRepository.insertMeasure(measure);
 
         person.setLastLocation(location);
-        personRepository.updatePerson(person);
+        AppController.getInstance().personRepository.updatePerson(person);
     }
 
     @Override
@@ -316,27 +267,24 @@ public class CreateDataActivity extends BaseActivity {
                     location.setLatitude(loc.getLatitude());
                     location.setLongitude(loc.getLongitude());
 
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Geocoder geocoder = new Geocoder(CreateDataActivity.this, Locale.getDefault());
-                            String result = null;
-                            try {
-                                List <Address> addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                                if (addressList != null && addressList.size() > 0) {
-                                    Address address = addressList.get(0);
-                                    StringBuilder sb = new StringBuilder();
+                    new Thread(() -> {
+                        Geocoder geocoder = new Geocoder(CreateDataActivity.this, Locale.getDefault());
+                        String result = null;
+                        try {
+                            List <Address> addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                            if (addressList != null && addressList.size() > 0) {
+                                Address address = addressList.get(0);
+                                StringBuilder sb = new StringBuilder();
 
-                                    for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
-                                        sb.append(address.getAddressLine(i));
+                                for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
+                                    sb.append(address.getAddressLine(i));
 
-                                    result = sb.toString();
-                                }
-                            } catch (IOException e) {
-                                Log.e("Location Address Loader", "Unable connect to Geocoder", e);
-                            } finally {
-                                location.setAddress(result);
+                                result = sb.toString();
                             }
+                        } catch (IOException e) {
+                            Log.e("Location Address Loader", "Unable connect to Geocoder", e);
+                        } finally {
+                            location.setAddress(result);
                         }
                     }).run();
                 }

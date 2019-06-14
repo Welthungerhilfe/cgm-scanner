@@ -27,6 +27,6 @@ public interface FileLogDao {
     @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE deleted=0 LIMIT 50")
     List<FileLog> loadQueuedData();
 
-    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE deleted=0 AND status<400 AND createDate>:timestamp")
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE createDate>:timestamp")
     List<FileLog> getSyncableData(long timestamp);
 }

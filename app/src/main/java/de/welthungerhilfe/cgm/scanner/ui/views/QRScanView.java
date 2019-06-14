@@ -130,7 +130,6 @@ public class QRScanView extends BarcodeScannerView {
                     try {
                         rawResult = this.mMultiFormatReader.decodeWithState(bitmap);
                     } catch (ReaderException | ArrayIndexOutOfBoundsException | NullPointerException ignored) {
-                        ;
                     } finally {
                         this.mMultiFormatReader.reset();
                     }
@@ -139,37 +138,35 @@ public class QRScanView extends BarcodeScannerView {
                 if(rawResult != null) {
                     Handler handler = new Handler(Looper.getMainLooper());
                     final Result finalRawResult = rawResult;
-                    handler.post(new Runnable() {
-                        public void run() {
-                            try {
-                                QRScanView.QRScanHandler tmpResultHandler = QRScanView.this.mResultHandler;
-                                QRScanView.this.mResultHandler = null;
-                                QRScanView.this.stopCameraPreview();
-                                if(tmpResultHandler != null) {
-                                    Camera.Parameters parameters = camera.getParameters();
-                                    int format = parameters.getPreviewFormat();
+                    handler.post(() -> {
+                        try {
+                            QRScanHandler tmpResultHandler = QRScanView.this.mResultHandler;
+                            QRScanView.this.mResultHandler = null;
+                            QRScanView.this.stopCameraPreview();
+                            if(tmpResultHandler != null) {
+                                Camera.Parameters parameters1 = camera.getParameters();
+                                int format = parameters1.getPreviewFormat();
 
-                                    if (format == ImageFormat.NV21 || format == ImageFormat.YUY2 || format == ImageFormat.NV16) {
-                                        int w = parameters.getPreviewSize().width;
-                                        int h = parameters.getPreviewSize().height;
-                                        YuvImage yuv_image = new YuvImage(finalData, format, w, h, null);
+                                if (format == ImageFormat.NV21 || format == ImageFormat.YUY2 || format == ImageFormat.NV16) {
+                                    int w = parameters1.getPreviewSize().width;
+                                    int h = parameters1.getPreviewSize().height;
+                                    YuvImage yuv_image = new YuvImage(finalData, format, w, h, null);
 
-                                        Rect rect = new Rect(0, 0, w, h);
-                                        ByteArrayOutputStream output_stream = new ByteArrayOutputStream();
-                                        yuv_image.compressToJpeg(rect, 100, output_stream);
-                                        byte[] byt = output_stream.toByteArray();
-                                        Bitmap bmp = BitmapUtils.getAcceptableBitmap(BitmapFactory.decodeByteArray(byt, 0, byt.length));
-                                        byte[] data = BitmapUtils.getByteData(bmp);
-                                        tmpResultHandler.handleQRResult(finalRawResult.getText(), data);
-                                    } else {
-                                        Bitmap bmp = BitmapUtils.getAcceptableBitmap(BitmapFactory.decodeByteArray(finalData, 0, finalData.length));
-                                        byte[] data = BitmapUtils.getByteData(bmp);
-                                        tmpResultHandler.handleQRResult(finalRawResult.getText(), data);
-                                    }
+                                    Rect rect = new Rect(0, 0, w, h);
+                                    ByteArrayOutputStream output_stream = new ByteArrayOutputStream();
+                                    yuv_image.compressToJpeg(rect, 100, output_stream);
+                                    byte[] byt = output_stream.toByteArray();
+                                    Bitmap bmp = BitmapUtils.getAcceptableBitmap(BitmapFactory.decodeByteArray(byt, 0, byt.length));
+                                    byte[] data1 = BitmapUtils.getByteData(bmp);
+                                    tmpResultHandler.handleQRResult(finalRawResult.getText(), data1);
+                                } else {
+                                    Bitmap bmp = BitmapUtils.getAcceptableBitmap(BitmapFactory.decodeByteArray(finalData, 0, finalData.length));
+                                    byte[] data1 = BitmapUtils.getByteData(bmp);
+                                    tmpResultHandler.handleQRResult(finalRawResult.getText(), data1);
                                 }
-                            } catch (RuntimeException e) {
-                                Crashlytics.log(0, "qr scan", e.getMessage());
                             }
+                        } catch (RuntimeException e) {
+                            Crashlytics.log(0, "qr scan", e.getMessage());
                         }
                     });
                 } else {
@@ -197,7 +194,6 @@ public class QRScanView extends BarcodeScannerView {
             try {
                 source = new PlanarYUVLuminanceSource(data, width, height, rect.left, rect.top, rect.width(), rect.height(), false);
             } catch (Exception var7) {
-                ;
             }
 
             return source;

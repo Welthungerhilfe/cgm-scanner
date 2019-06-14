@@ -26,6 +26,8 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
+import android.telecom.TelecomManager;
+import android.telephony.TelephonyManager;
 
 import java.io.BufferedInputStream;
 import java.io.File;

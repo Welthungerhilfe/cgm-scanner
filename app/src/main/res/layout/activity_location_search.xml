@@ -47,15 +47,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:layout_toLeftOf="@+id/imgLocation"
-                android:layout_weight="1"
+                android:layout_toStartOf="@+id/imgLocation"
                 android:text=""
                 android:textSize="16sp"/>
             <ImageView
                 android:id="@+id/imgLocation"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_centerInParent="true"
                 android:src="@drawable/location"
                 android:contentDescription="@string/content_image"/>
@@ -98,7 +97,7 @@
                     android:id="@+id/txtRadius"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toLeftOf="@+id/txtUnit"
+                    android:layout_toStartOf="@+id/txtUnit"
                     android:text="0"
                     android:textSize="16sp" />
 
@@ -106,8 +105,8 @@
                     android:id="@+id/txtUnit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginLeft="5dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="5dp"
                     android:text="@string/unit_km"
                     android:textAllCaps="true"
                     android:textSize="16sp" />
@@ -118,7 +117,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:min="1"
                 android:max="30"
                 android:progress="0"
                 android:maxHeight="35dp"
