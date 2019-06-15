@@ -26,6 +26,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasuresLoad;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonsLoad;
@@ -43,8 +44,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     private CloudQueue measureQueue;
     private CloudQueue artifactQueue;
 
+    private SessionManager session;
+
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
+
+        session = new SessionManager(context);
     }
 
     @Override
@@ -120,7 +125,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     }
 
     private void startSyncing() {
-        prevTimestamp = AppController.getInstance().session.getSyncTimestamp();
+        prevTimestamp = session.getSyncTimestamp();
 
         AppController.getInstance().personRepository.getSyncablePerson(this, prevTimestamp);
         AppController.getInstance().measureRepository.getSyncableMeasure(this, prevTimestamp);
@@ -247,11 +252,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
             try {
                 queue.addMessage(message);
 
-                AppController.getInstance().session.setSyncTimestamp(Utils.getUniversalTimestamp());
+                session.setSyncTimestamp(Utils.getUniversalTimestamp());
             } catch (StorageException e) {
                 e.printStackTrace();
 
-                AppController.getInstance().session.setSyncTimestamp(prevTimestamp);
+                session.setSyncTimestamp(prevTimestamp);
             }
             return null;
         }

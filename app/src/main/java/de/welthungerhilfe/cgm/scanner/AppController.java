@@ -65,8 +65,6 @@ public class AppController extends Application {
     public MeasureRepository measureRepository;
     public FileLogRepository fileLogRepository;
 
-    public SessionManager session;
-
     public FirebaseRemoteConfig firebaseConfig;
 
     public CloudStorageAccount storageAccount;
@@ -89,8 +87,6 @@ public class AppController extends Application {
         personRepository = PersonRepository.getInstance(this);
         measureRepository = MeasureRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
-
-        session = new SessionManager(this);
 
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
