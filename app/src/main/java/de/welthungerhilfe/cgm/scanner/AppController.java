@@ -67,10 +67,6 @@ public class AppController extends Application {
 
     public FirebaseRemoteConfig firebaseConfig;
 
-    public CloudStorageAccount storageAccount;
-    public CloudQueueClient queueClient;
-    public CloudBlobClient blobClient;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -96,14 +92,6 @@ public class AppController extends Application {
         firebaseConfig.setConfigSettings(configSettings);
         firebaseConfig.setDefaults(R.xml.remoteconfig);
 
-        try {
-            storageAccount = CloudStorageAccount.parse(getAzureConnection());
-            queueClient = storageAccount.createCloudQueueClient();
-            blobClient = storageAccount.createCloudBlobClient();
-        } catch (URISyntaxException | InvalidKeyException e) {
-            e.printStackTrace();
-        }
-
         //Log.e("Offline DB", DebugDB.getAddressLog());
 
         mInstance = this;
@@ -114,7 +102,7 @@ public class AppController extends Application {
         super.attachBaseContext(LanguageHelper.onAttach(base));
     }
 
-    private String getAzureConnection() {
+    public String getAzureConnection() {
         return String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", AZURE_ACCOUNT_NAME, AZURE_ACCOUNT_KEY);
     }
 
