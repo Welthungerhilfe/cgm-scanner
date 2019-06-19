@@ -19,6 +19,8 @@ import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +51,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     private FileLogRepository repository;
 
+    public CloudBlobClient blobClient;
 
     private final Object lock = new Object();
     private ExecutorService executor;
@@ -57,6 +60,15 @@ public class UploadService extends Service implements OnFileLogsLoad {
         repository = FileLogRepository.getInstance(getApplicationContext());
 
         pendingArtefacts = new ArrayList<>();
+
+        try {
+            CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+            blobClient = storageAccount.createCloudBlobClient();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        }
 
         executor = Executors.newFixedThreadPool(MULTI_UPLOAD_BUNCH);
     }
@@ -79,9 +91,11 @@ public class UploadService extends Service implements OnFileLogsLoad {
     public int onStartCommand(final Intent intent, int flags, int startId) {
         Log.e("UploadService", "Started");
 
+        /*
         if (remainingCount <= 0) {
             loadQueueFileLogs();
         }
+        */
 
         return START_STICKY;
     }
@@ -155,7 +169,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 final File file = new File(log.getPath());
                 FileInputStream stream = new FileInputStream(file);
 
-                CloudBlobContainer container = AppController.getInstance().blobClient.getContainerReference("data");
+                CloudBlobContainer container = blobClient.getContainerReference("data");
                 container.createIfNotExists();
 
                 CloudBlockBlob blob = container.getBlockBlobReference(path + arr[arr.length - 1]);
@@ -167,6 +181,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 } else {
                     log.setStatus(UPLOADED);
                 }
+                stream.close();
             } catch (FileNotFoundException e) {
                 log.setDeleted(true);
                 log.setStatus(FILE_NOT_FOUND);

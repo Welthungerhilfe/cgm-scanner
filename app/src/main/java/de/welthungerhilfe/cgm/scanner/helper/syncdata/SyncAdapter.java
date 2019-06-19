@@ -15,6 +15,7 @@ import com.google.firebase.perf.metrics.AddTrace;
 
 import com.google.gson.Gson;
 import com.microsoft.azure.storage.*;
+import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.queue.*;
 
 import java.net.URISyntaxException;
@@ -39,6 +40,9 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPersonsLoad, OnMeasuresLoad, OnFileLogsLoad {
     private long prevTimestamp;
+
+    public CloudStorageAccount storageAccount;
+    public CloudQueueClient queueClient;
 
     private CloudQueue personQueue;
     private CloudQueue measureQueue;
@@ -212,29 +216,33 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
         }
     }
 
-    @SuppressLint("StaticFieldLeak")
-    class MessageTask extends AsyncTask<Void, Void, Void> {
-
+    class MessageTask extends AsyncTask<Void, Void, Boolean> {
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected Boolean doInBackground(Void... voids) {
             try {
-                personQueue = AppController.getInstance().queueClient.getQueueReference("person");
+                storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                queueClient = storageAccount.createCloudQueueClient();
+
+                personQueue = queueClient.getQueueReference("person");
                 personQueue.createIfNotExists();
 
-                measureQueue = AppController.getInstance().queueClient.getQueueReference("measure");
+                measureQueue = queueClient.getQueueReference("measure");
                 measureQueue.createIfNotExists();
 
-                artifactQueue = AppController.getInstance().queueClient.getQueueReference("artifact");
+                artifactQueue = queueClient.getQueueReference("artifact");
                 artifactQueue.createIfNotExists();
-            } catch (URISyntaxException | StorageException e) {
-                e.printStackTrace();
-            }
 
-            return null;
+                return true;
+            } catch (StorageException | URISyntaxException | InvalidKeyException e) {
+                e.printStackTrace();
+
+                return false;
+            }
         }
 
-        public void onPostExecute(Void result) {
-            startSyncing();
+        public void onPostExecute(Boolean result) {
+            if (result)
+                startSyncing();
         }
     }
 
