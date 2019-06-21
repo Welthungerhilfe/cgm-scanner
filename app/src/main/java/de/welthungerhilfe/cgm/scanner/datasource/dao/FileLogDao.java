@@ -24,7 +24,7 @@ public interface FileLogDao {
     @Delete
     void deleteFileLog(FileLog log);
 
-    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE deleted=0 LIMIT 50")
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE deleted=0 LIMIT 15")
     List<FileLog> loadQueuedData();
 
     @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE createDate>:timestamp")
