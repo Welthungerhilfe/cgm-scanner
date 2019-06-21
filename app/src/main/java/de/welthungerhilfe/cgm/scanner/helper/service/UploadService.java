@@ -61,41 +61,27 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
         pendingArtefacts = new ArrayList<>();
 
-        try {
-            CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
-            blobClient = storageAccount.createCloudBlobClient();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        }
-
         executor = Executors.newFixedThreadPool(MULTI_UPLOAD_BUNCH);
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.e("UploadService", "Start new uploads");
-
-        /*
-        if (remainingCount == 0) {
-            loadQueueFileLogs();
-        }
-        */
-
         return null;
     }
 
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
-        Log.e("UploadService", "Started");
-
-        /*
         if (remainingCount <= 0) {
-            loadQueueFileLogs();
+            try {
+                CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                blobClient = storageAccount.createCloudBlobClient();
+
+                loadQueueFileLogs();
+            } catch (URISyntaxException | InvalidKeyException e) {
+                e.printStackTrace();
+            }
         }
-        */
 
         return START_STICKY;
     }
@@ -111,6 +97,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
     }
 
     private void loadQueueFileLogs() {
+        Log.e("UploadService", "Started");
         repository.loadQueuedData(this);
     }
 
@@ -139,7 +126,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
         @Override
         public void run() {
             synchronized (lock) {
-                if (pendingArtefacts.size() > MULTI_UPLOAD_BUNCH) {
+                if (pendingArtefacts.size() >= MULTI_UPLOAD_BUNCH) {
                     try {
                         lock.wait();
                     } catch (InterruptedException e) {
@@ -194,6 +181,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
             synchronized (lock) {
                 pendingArtefacts.remove(log.getId());
                 remainingCount--;
+                Log.e("UploadService", String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
                 if (remainingCount <= 0) {
                     loadQueueFileLogs();
                 }
