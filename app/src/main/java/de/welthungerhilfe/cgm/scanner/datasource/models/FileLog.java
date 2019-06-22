@@ -23,6 +23,7 @@ public class FileLog implements Serializable {
     private long createDate;
     private String createdBy;
     private int status;
+    private long age;
 
     @NonNull
     public String getId() {
@@ -111,5 +112,13 @@ public class FileLog implements Serializable {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public long getAge() {
+        return age;
+    }
+
+    public void setAge(long age) {
+        this.age = age;
     }
 }
