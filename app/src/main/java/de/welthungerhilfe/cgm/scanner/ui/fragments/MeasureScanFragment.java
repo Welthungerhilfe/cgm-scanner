@@ -121,12 +121,15 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
     private int mode = SCAN_PREVIEW;
 
     private FileLogRepository repository;
+    private long age = 0;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
         repository = FileLogRepository.getInstance(context);
+
+        age = (System.currentTimeMillis() - ((ScanModeActivity) getActivity()).person.getBirthday()) / 1000 / 60 / 60 / 24;
 
         mTango = new Tango(context, new Runnable() {
             // Pass in a Runnable to be called from UI thread when Tango is ready; this Runnable
@@ -537,6 +540,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setQrCode(mQrCode);
                             log.setCreateDate(mNowTime);
                             log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                            log.setAge(age);
 
                             repository.insertFileLog(log);
                             // Todo;
@@ -615,6 +619,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setQrCode(mQrCode);
                             log.setCreateDate(mNowTime);
                             log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                            log.setAge(age);
                             // Todo;
                             //new OfflineTask().saveFileLog(log);
                             repository.insertFileLog(log);

@@ -29,6 +29,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -56,6 +57,8 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
+import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
+import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.GrowthDataFragment;
@@ -97,6 +100,18 @@ public class CreateDataActivity extends BaseActivity {
 
     public Loc location = null;
 
+    private AddressReceiver receiver = new AddressReceiver(new Handler()) {
+        @Override
+        public void onAddressDetected(String result) {
+            location.setAddress(result);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            super.onReceiveResult(resultCode, resultData);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,7 +120,7 @@ public class CreateDataActivity extends BaseActivity {
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
 
-        getCurrentLocation();
+        //getCurrentLocation();
 
         qrCode = getIntent().getStringExtra(AppConstants.EXTRA_QR);
         qrBitmapByteArray = getIntent().getByteArrayExtra(AppConstants.EXTRA_QR_BITMAP);
@@ -267,26 +282,10 @@ public class CreateDataActivity extends BaseActivity {
                     location.setLatitude(loc.getLatitude());
                     location.setLongitude(loc.getLongitude());
 
-                    new Thread(() -> {
-                        Geocoder geocoder = new Geocoder(CreateDataActivity.this, Locale.getDefault());
-                        String result = null;
-                        try {
-                            List <Address> addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                            if (addressList != null && addressList.size() > 0) {
-                                Address address = addressList.get(0);
-                                StringBuilder sb = new StringBuilder();
-
-                                for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
-                                    sb.append(address.getAddressLine(i));
-
-                                result = sb.toString();
-                            }
-                        } catch (IOException e) {
-                            Log.e("Location Address Loader", "Unable connect to Geocoder", e);
-                        } finally {
-                            location.setAddress(result);
-                        }
-                    }).run();
+                    Intent intent = new Intent(this, AddressService.class);
+                    intent.putExtra("add_receiver", receiver);
+                    intent.putExtra("add_location", loc);
+                    startService(intent);
                 }
             }
         }

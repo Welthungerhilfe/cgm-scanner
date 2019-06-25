@@ -371,6 +371,7 @@ public class ScanModeActivity extends AppCompatActivity {
         measure.setOedema(false);
         measure.setPersonId(person.getId());
         measure.setTimestamp(Utils.getUniversalTimestamp());
+        measure.setQrCode(person.getQrcode());
 
         person.setLastMeasure(measure);
 

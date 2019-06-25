@@ -44,42 +44,4 @@ public class MigrationTest {
         // MigrationTestHelper automatically verifies the schema changes,
         // but you need to validate that the data was migrated properly.
     }
-
-    @Test
-    public void migrate2To3() throws IOException {
-        SupportSQLiteDatabase database = helper.createDatabase(TEST_DB, 2);
-
-        // db has schema version 1. insert some data using SQL queries.
-        // You cannot use DAO classes because they expect the latest schema.
-
-
-        // Prepare for the next version.
-        database.close();
-
-        // Re-open the database with version 2 and provide
-        // MIGRATION_1_2 as the migration process.
-        database = helper.runMigrationsAndValidate(TEST_DB, 3, true, CgmDatabase.MIGRATION_1_2, CgmDatabase.MIGRATION_2_3);
-
-        // MigrationTestHelper automatically verifies the schema changes,
-        // but you need to validate that the data was migrated properly.
-    }
-
-    @Test
-    public void migrate3To4() throws IOException {
-        SupportSQLiteDatabase database = helper.createDatabase(TEST_DB, 3);
-
-        // db has schema version 1. insert some data using SQL queries.
-        // You cannot use DAO classes because they expect the latest schema.
-
-
-        // Prepare for the next version.
-        database.close();
-
-        // Re-open the database with version 2 and provide
-        // MIGRATION_1_2 as the migration process.
-        database = helper.runMigrationsAndValidate(TEST_DB, 4, true, CgmDatabase.MIGRATION_1_2, CgmDatabase.MIGRATION_2_3, CgmDatabase.MIGRATION_3_4);
-
-        // MigrationTestHelper automatically verifies the schema changes,
-        // but you need to validate that the data was migrated properly.
-    }
 }

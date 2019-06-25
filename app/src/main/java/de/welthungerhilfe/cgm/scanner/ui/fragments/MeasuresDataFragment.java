@@ -244,6 +244,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setTimestamp(Utils.getUniversalTimestamp());
         measure.setDate(Utils.getUniversalTimestamp());
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+        measure.setQrCode(viewModel.getPerson().getValue().getQrcode());
 
         AppController.getInstance().measureRepository.insertMeasure(measure);
 
