@@ -1,5 +1,6 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
+import android.arch.persistence.room.Query;
 import android.content.Context;
 import android.os.AsyncTask;
 
@@ -8,6 +9,8 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
+
+import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_FILE_LOG;
 
 public class FileLogRepository {
     private static FileLogRepository instance;
@@ -72,5 +75,25 @@ public class FileLogRepository {
                 listener.onFileLogsLoaded(data);
             }
         }.execute(timestamp);
+    }
+
+    public int getArtifactCount() {
+        return database.fileLogDao().getArtifactCount();
+    }
+
+    public int getDeletedArtifactCount() {
+        return database.fileLogDao().getDeletedArtifactCount();
+    }
+
+    public int getTotalArtifactCount() {
+        return database.fileLogDao().getTotalArtifactCount();
+    }
+
+    public double getArtifactFileSize() {
+        return database.fileLogDao().getArtifactFileSize();
+    }
+
+    public double getTotalArtifactFileSize() {
+        return database.fileLogDao().getTotalArtifactFileSize();
     }
 }

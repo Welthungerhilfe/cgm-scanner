@@ -60,4 +60,10 @@ public interface PersonDao {
 
     @RawQuery(observedEntities = Person.class)
     LiveData<List<Person>> getResultPerson(SupportSQLiteQuery query);
+
+    @Query("SELECT COUNT(id) FROM " + TABLE_PERSON + " WHERE createdBy=:email")
+    int getOwnPersonCount(String email);
+
+    @Query("SELECT COUNT(id) FROM " + TABLE_PERSON)
+    int getTotalPersonCount();
 }

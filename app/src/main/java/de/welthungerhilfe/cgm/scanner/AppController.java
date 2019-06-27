@@ -18,7 +18,9 @@
 
 package de.welthungerhilfe.cgm.scanner;
 
+import android.app.AlarmManager;
 import android.app.Application;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
@@ -40,12 +42,15 @@ import com.microsoft.azure.storage.queue.CloudQueueClient;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
+import java.util.Calendar;
 
+import de.welthungerhilfe.cgm.scanner.datasource.models.health.HealthInfo;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.helper.service.HealthInfoService;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.fabric.sdk.android.Fabric;
@@ -93,6 +98,18 @@ public class AppController extends Application {
         firebaseConfig.setDefaults(R.xml.remoteconfig);
 
         //Log.e("Offline DB", DebugDB.getAddressLog());
+        /*
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+
+        Intent intent = new Intent(this, HealthInfoService.class);
+        PendingIntent alarmIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+
+        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent);
+        */
 
         mInstance = this;
     }

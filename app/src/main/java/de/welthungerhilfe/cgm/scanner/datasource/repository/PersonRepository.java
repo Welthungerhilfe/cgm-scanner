@@ -109,4 +109,12 @@ public class PersonRepository {
         String query = String.format("SELECT %s FROM %s WHERE %s ORDER BY %s %s", selectClause, TABLE_PERSON, whereClause, orderByClause, limitClause);
         return database.personDao().getResultPerson(new SimpleSQLiteQuery(query));
     }
+
+    public int getOwnPersonCount() {
+        return database.personDao().getOwnPersonCount(AppController.getInstance().firebaseUser.getEmail());
+    }
+
+    public int getTotalPersonCount() {
+        return database.personDao().getTotalPersonCount();
+    }
 }
