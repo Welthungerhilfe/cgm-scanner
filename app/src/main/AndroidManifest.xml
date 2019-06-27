@@ -141,10 +141,13 @@
         </receiver>
 
         <service android:name=".helper.service.UploadService"
-            android:exported="true" />
+            android:exported="false" />
 
         <service android:name=".helper.service.MemoryMonitorService"
             android:exported="false" />
+
+        <service android:name=".helper.service.AddressService"
+            android:exported="false"/>
 
         <service android:name=".helper.authenticator.AuthenticatorService"
             android:exported="true">

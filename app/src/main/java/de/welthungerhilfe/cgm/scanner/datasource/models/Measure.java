@@ -55,6 +55,7 @@ public class Measure implements Serializable {
     private String createdBy;
     private boolean deleted;
     private String deletedBy;
+    private String qrCode;
 
     @Embedded
     private Loc location;
@@ -194,5 +195,13 @@ public class Measure implements Serializable {
 
     public void setDeletedBy(String deletedBy) {
         this.deletedBy = deletedBy;
+    }
+
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
     }
 }
