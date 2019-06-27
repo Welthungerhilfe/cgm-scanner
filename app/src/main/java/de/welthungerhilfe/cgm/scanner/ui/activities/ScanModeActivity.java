@@ -13,6 +13,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -42,6 +43,8 @@ import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
+import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
+import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasureScanFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
@@ -212,6 +215,18 @@ public class ScanModeActivity extends AppCompatActivity {
     void completeScan(Button btnScanComplete) {
         completeScan();
     }
+
+    private AddressReceiver receiver = new AddressReceiver(new Handler()) {
+        @Override
+        public void onAddressDetected(String result) {
+            location.setAddress(result);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            super.onReceiveResult(resultCode, resultData);
+        }
+    };
 
     private static final String TAG = ScanModeActivity.class.getSimpleName();
 
@@ -406,42 +421,18 @@ public class ScanModeActivity extends AppCompatActivity {
                     }
                 }
                 if (loc != null) {
-                    getAddressFromLocation(loc.getLatitude(), loc.getLongitude());
+                    location = new Loc();
+
+                    location.setLatitude(loc.getLatitude());
+                    location.setLongitude(loc.getLongitude());
+
+                    Intent intent = new Intent(this, AddressService.class);
+                    intent.putExtra("add_receiver", receiver);
+                    intent.putExtra("add_location", loc);
+                    startService(intent);
                 }
             }
         }
-    }
-
-    private void getAddressFromLocation(double latitude, double longitude) {
-        Thread thread = new Thread(() -> {
-            Geocoder geocoder = new Geocoder(ScanModeActivity.this, Locale.getDefault());
-            String result = null;
-            try {
-                List <Address> addressList = geocoder.getFromLocation(latitude, longitude, 1);
-                if (addressList != null && addressList.size() > 0) {
-                    Address address = addressList.get(0);
-                    StringBuilder sb = new StringBuilder();
-
-                    for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
-                        sb.append(address.getAddressLine(i));
-
-                    result = sb.toString();
-                }
-            } catch (IOException e) {
-                Log.e("Location Address Loader", "Unable connect to Geocoder", e);
-                Crashlytics.log(Log.ERROR, TAG, "IOException Unable connect to Geocoder");
-            } finally {
-                location = new Loc();
-
-                location.setLatitude(latitude);
-                location.setLongitude(longitude);
-                location.setAddress(result);
-
-                if (measure != null)
-                    measure.setLocation(location);
-            }
-        });
-        thread.start();
     }
 
     @Override

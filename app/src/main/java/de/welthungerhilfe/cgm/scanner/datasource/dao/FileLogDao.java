@@ -29,4 +29,19 @@ public interface FileLogDao {
 
     @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE createDate>:timestamp")
     List<FileLog> getSyncableData(long timestamp);
+
+    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE deleted=0")
+    int getArtifactCount();
+
+    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE deleted=1")
+    int getDeletedArtifactCount();
+
+    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG)
+    int getTotalArtifactCount();
+
+    @Query("SELECT SUM(fileSize)/1024/1024 FROM " + TABLE_FILE_LOG + " WHERE deleted=0")
+    double getArtifactFileSize();
+
+    @Query("SELECT SUM(fileSize)/1024/1024 FROM " + TABLE_FILE_LOG)
+    double getTotalArtifactFileSize();
 }

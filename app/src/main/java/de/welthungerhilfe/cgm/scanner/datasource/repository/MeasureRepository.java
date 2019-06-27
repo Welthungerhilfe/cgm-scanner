@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 
 import java.util.List;
 
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasureLoad;
@@ -77,5 +78,13 @@ public class MeasureRepository {
 
     public LiveData<List<Measure>> getPersonMeasures(String personId) {
         return database.measureDao().getPersonMeasures(personId);
+    }
+
+    public int getOwnMeasureCount() {
+        return database.measureDao().getOwnMeasureCount(AppController.getInstance().firebaseUser.getEmail());
+    }
+
+    public int getTotalMeasureCount() {
+        return database.measureDao().getTotalMeasureCount();
     }
 }

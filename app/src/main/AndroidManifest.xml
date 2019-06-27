@@ -149,6 +149,9 @@
         <service android:name=".helper.service.AddressService"
             android:exported="false"/>
 
+        <service android:name=".helper.service.HealthInfoService"
+            android:exported="false"/>
+
         <service android:name=".helper.authenticator.AuthenticatorService"
             android:exported="true">
             <intent-filter>

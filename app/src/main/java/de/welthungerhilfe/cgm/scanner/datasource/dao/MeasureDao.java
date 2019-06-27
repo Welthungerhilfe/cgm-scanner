@@ -13,6 +13,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 
 import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_MEASURE;
+import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_PERSON;
 
 @Dao
 public interface MeasureDao {
@@ -45,4 +46,10 @@ public interface MeasureDao {
 
     @Query("DELETE FROM " + TABLE_MEASURE + " WHERE deleted=1 AND timestamp<=:timestamp")
     void deleteMeasureGarbage(long timestamp);
+
+    @Query("SELECT COUNT(id) FROM " + TABLE_MEASURE + " WHERE createdBy=:email")
+    int getOwnMeasureCount(String email);
+
+    @Query("SELECT COUNT(id) FROM " + TABLE_MEASURE)
+    int getTotalMeasureCount();
 }

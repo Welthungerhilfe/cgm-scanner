@@ -73,6 +73,7 @@ import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
+import de.welthungerhilfe.cgm.scanner.helper.service.HealthInfoService;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
@@ -240,6 +241,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();
+                    break;
+                case R.id.menuHealth:
+                    startService(new Intent(MainActivity.this, HealthInfoService.class));
                     break;
             }
             drawerLayout.closeDrawers();
