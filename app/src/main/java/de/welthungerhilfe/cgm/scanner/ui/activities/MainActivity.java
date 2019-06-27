@@ -175,9 +175,14 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         });
 
+        /*
         fetchRemoteConfig();
 
         saveFcmToken();
+        */
+
+        startService(new Intent(this, HealthInfoService.class));
+        startService(new Intent(this, MemoryMonitorService.class));
     }
 
     public void onNewIntent(Intent intent) {

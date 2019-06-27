@@ -33,6 +33,7 @@ public class AppConstants {
     public static final long SYNC_FLEXTIME = SYNC_INTERVAL / 3;
     public static final long LOG_MONITOR_INTERVAL = 10 * 1000; // 10 seconds
     public static final long MEMORY_MONITOR_INTERVAL = 60 * 1000; // 60 seconds
+    public static final long HEALTH_INTERVAL = 60 * 60 * 1000; // 1 hour
 
     public static final int MULTI_UPLOAD_BUNCH = 5;
 

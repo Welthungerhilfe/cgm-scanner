@@ -16,6 +16,8 @@ import com.microsoft.azure.storage.queue.CloudQueueMessage;
 
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.models.health.HealthInfo;
@@ -26,7 +28,11 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.HEALTH_INTERVAL;
+
 public class HealthInfoService extends Service {
+    private Timer timer = new Timer();
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -36,55 +42,60 @@ public class HealthInfoService extends Service {
     @SuppressLint("StaticFieldLeak")
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
-        PersonRepository personRepo = PersonRepository.getInstance(getBaseContext());
-        MeasureRepository measureRepo = MeasureRepository.getInstance(getBaseContext());
-        FileLogRepository fileLogRepo = FileLogRepository.getInstance(getBaseContext());
-
-        HealthInfo info = new HealthInfo();
-        info.setUuid(Utils.getAndroidID(getContentResolver()));
-        info.setOwner(AppController.getInstance().firebaseUser.getEmail());
-        info.setCreate_timestamp(System.currentTimeMillis());
-
-        OwnData ownData = new OwnData();
-        TotalData totalData = new TotalData();
-
-        new AsyncTask<Void, Void, Void>() {
+        timer.scheduleAtFixedRate(new TimerTask() {
             @Override
-            protected Void doInBackground(Void... voids) {
-                ownData.setOwn_persons(personRepo.getOwnPersonCount());
-                ownData.setOwn_measures(measureRepo.getOwnMeasureCount());
-                ownData.setArtifacts(fileLogRepo.getArtifactCount());
-                ownData.setDeleted_artifacts(fileLogRepo.getDeletedArtifactCount());
-                ownData.setTotal_artifacts(fileLogRepo.getTotalArtifactCount());
-                ownData.setArtifact_file_size_mb(fileLogRepo.getArtifactFileSize());
-                ownData.setTotal_artifact_file_size_mb(fileLogRepo.getTotalArtifactFileSize());
+            public void run() {
+                HealthInfo info = new HealthInfo();
+                info.setUuid(Utils.getAndroidID(getContentResolver()));
+                info.setOwner(AppController.getInstance().firebaseUser.getEmail());
+                info.setCreate_timestamp(System.currentTimeMillis());
 
-                totalData.setTotal_persons(personRepo.getTotalPersonCount());
-                totalData.setTotal_measures(measureRepo.getTotalMeasureCount());
+                OwnData ownData = new OwnData();
+                TotalData totalData = new TotalData();
 
-                info.setOwn_data(ownData);
-                info.setTotal_data(totalData);
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        PersonRepository personRepo = PersonRepository.getInstance(getBaseContext());
+                        MeasureRepository measureRepo = MeasureRepository.getInstance(getBaseContext());
+                        FileLogRepository fileLogRepo = FileLogRepository.getInstance(getBaseContext());
 
-                Gson gson = new Gson();
-                String healthData = gson.toJson(info);
+                        ownData.setOwn_persons(personRepo.getOwnPersonCount());
+                        ownData.setOwn_measures(measureRepo.getOwnMeasureCount());
+                        ownData.setArtifacts(fileLogRepo.getArtifactCount());
+                        ownData.setDeleted_artifacts(fileLogRepo.getDeletedArtifactCount());
+                        ownData.setTotal_artifacts(fileLogRepo.getTotalArtifactCount());
+                        ownData.setArtifact_file_size_mb(fileLogRepo.getArtifactFileSize());
+                        ownData.setTotal_artifact_file_size_mb(fileLogRepo.getTotalArtifactFileSize());
 
-                try {
-                    CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
-                    CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
+                        totalData.setTotal_persons(personRepo.getTotalPersonCount());
+                        totalData.setTotal_measures(measureRepo.getTotalMeasureCount());
 
-                    CloudQueue queue = queueClient.getQueueReference("device");
-                    queue.createIfNotExists();
+                        info.setOwn_data(ownData);
+                        info.setTotal_data(totalData);
 
-                    CloudQueueMessage message = new CloudQueueMessage(healthData);
-                    queue.addMessage(message);
-                } catch (StorageException | InvalidKeyException | URISyntaxException e) {
-                    e.printStackTrace();
-                }
+                        Gson gson = new Gson();
+                        String healthData = gson.toJson(info);
 
-                return null;
+                        try {
+                            CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                            CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
+
+                            CloudQueue queue = queueClient.getQueueReference("device");
+                            queue.createIfNotExists();
+
+                            CloudQueueMessage message = new CloudQueueMessage(healthData);
+                            queue.addMessage(message);
+                        } catch (StorageException | InvalidKeyException | URISyntaxException e) {
+                            e.printStackTrace();
+                        }
+
+                        return null;
+                    }
+                }.execute();
             }
-        }.execute();
+        }, 0, HEALTH_INTERVAL);
 
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 }
