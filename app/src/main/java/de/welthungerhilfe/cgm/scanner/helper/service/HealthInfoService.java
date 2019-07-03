@@ -45,6 +45,9 @@ public class HealthInfoService extends Service {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
+                if (AppController.getInstance().firebaseUser == null)
+                    return;
+
                 HealthInfo info = new HealthInfo();
                 info.setUuid(Utils.getAndroidID(getContentResolver()));
                 info.setOwner(AppController.getInstance().firebaseUser.getEmail());
