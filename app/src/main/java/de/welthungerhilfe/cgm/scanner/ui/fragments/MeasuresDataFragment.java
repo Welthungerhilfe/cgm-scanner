@@ -175,20 +175,6 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         return view;
     }
 
-    public void addMeasure(Measure measure) {
-        adapterMeasure.addMeasure(measure);
-    }
-
-    public void addMeasures(List<Measure> measures) {
-        if (adapterMeasure != null)
-            adapterMeasure.addMeasures(measures);
-    }
-
-    public void refreshMeasures(List<Measure> measures) {
-        if (adapterMeasure != null)
-            adapterMeasure.resetData(measures);
-    }
-
     public void createMeasure() {
         try {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);

@@ -109,18 +109,18 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                 measure.setHeight(Double.parseDouble(editManualHeight.getText().toString()));
                 measure.setWeight(Double.parseDouble(editManualWeight.getText().toString()));
                 measure.setMuac(Double.parseDouble(editManualMuac.getText().toString()));
-                measure.setHeadCircumference(Double.parseDouble(editManualHead.getText().toString()));
+                if (editManualHead.getText().toString().isEmpty())
+                    measure.setHeadCircumference(0.0);
+                else
+                    measure.setHeadCircumference(Double.parseDouble(editManualHead.getText().toString()));
                 measure.setLocation(location);
                 measure.setOedema(oedema);
-
-                // ToDo: Wirte code to update measure
-                //OfflineRepository.getInstance(mContext).updateMeasure(measure);
             } else if (measureListener != null) {
                 measureListener.onManualMeasure(
                         Double.parseDouble(editManualHeight.getText().toString()),
                         Double.parseDouble(editManualWeight.getText().toString()),
                         Double.parseDouble(editManualMuac.getText().toString()),
-                        Double.parseDouble(editManualHead.getText().toString()),
+                        editManualHead.getText().toString().isEmpty() ? 0.0 : Double.parseDouble(editManualHead.getText().toString()),
                         location,
                         oedema
                 );
@@ -236,7 +236,6 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         String height = editManualHeight.getText().toString();
         String weight = editManualWeight.getText().toString();
         String muac = editManualMuac.getText().toString();
-        String head = editManualHead.getText().toString();
 
         if (height.isEmpty()) {
             editManualHeight.setError(tooltip_cm);
@@ -266,16 +265,6 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
             valid = false;
         } else {
             editManualMuac.setError(null);
-        }
-
-        if (head.isEmpty()) {
-            editManualHead.setError(tooltip_cm);
-            valid = false;
-        } else if (Utils.checkDoubleDecimals(head) != 1) {
-            editManualHead.setError(tooltip_precision);
-            valid = false;
-        } else {
-            editManualHead.setError(null);
         }
 
         return valid;
