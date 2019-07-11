@@ -18,8 +18,6 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.crashlytics.android.Crashlytics;
-
 import java.util.Date;
 
 import de.welthungerhilfe.cgm.scanner.R;
@@ -206,7 +204,7 @@ public class OverlaySurface extends SurfaceView implements SurfaceHolder.Callbac
                 surface.unlockCanvasAndPost(canvas);
             }
         } catch (Exception e) {
-            Crashlytics.log(0, "user login: ", String.format("drawBabyOverlay on Surface at %s", Utils.beautifyDateTime(new Date())));
+            // todo: Crashlytics.log(0, "user login: ", String.format("drawBabyOverlay on Surface at %s", Utils.beautifyDateTime(new Date())));
         }
     }
 
@@ -247,7 +245,7 @@ public class OverlaySurface extends SurfaceView implements SurfaceHolder.Callbac
                 surface.unlockCanvasAndPost(canvas);
             }
         } catch (Exception e) {
-            Crashlytics.log(0, "user login: ", String.format("drawBabyOverlay on Surface at %s", Utils.beautifyDateTime(new Date())));
+            // todo: Crashlytics.log(0, "user login: ", String.format("drawBabyOverlay on Surface at %s", Utils.beautifyDateTime(new Date())));
         }
     }
 
@@ -367,7 +365,7 @@ public class OverlaySurface extends SurfaceView implements SurfaceHolder.Callbac
                 surface.unlockCanvasAndPost(canvas);
             }
         } catch (Exception e) {
-            Crashlytics.log(0, "user login: ", String.format("drawInfantOverlay on Surface at %s", Utils.beautifyDateTime(new Date())));
+            // todo: Crashlytics.log(0, "user login: ", String.format("drawInfantOverlay on Surface at %s", Utils.beautifyDateTime(new Date())));
         }
     }
 

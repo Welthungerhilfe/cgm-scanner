@@ -28,32 +28,19 @@ import android.os.StrictMode;
 import android.util.Log;
 
 //import com.amitshekhar.DebugDB;
-import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.queue.CloudQueue;
-import com.microsoft.azure.storage.queue.CloudQueueClient;
 
 import java.io.File;
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
-import java.util.Calendar;
 
-import de.welthungerhilfe.cgm.scanner.datasource.models.health.HealthInfo;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.helper.service.HealthInfoService;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-import io.fabric.sdk.android.Fabric;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_KEY;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_NAME;
@@ -78,12 +65,6 @@ public class AppController extends Application {
 
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
         Utils.overrideFont(getApplicationContext(), "SERIF", "roboto.ttf");
-
-        final Fabric fabric = new Fabric.Builder(this)
-                .kits(new Crashlytics.Builder().build())
-                .debuggable(true)
-                .build();
-        Fabric.with(fabric);
 
         personRepository = PersonRepository.getInstance(this);
         measureRepository = MeasureRepository.getInstance(this);

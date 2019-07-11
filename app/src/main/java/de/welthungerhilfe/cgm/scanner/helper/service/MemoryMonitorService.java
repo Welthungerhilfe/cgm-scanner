@@ -11,8 +11,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.crashlytics.android.Crashlytics;
-
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -50,16 +48,16 @@ public class MemoryMonitorService extends Service {
                     //double availableMegs = mi.availMem / 0x100000L;
                     //double percentAvail = mi.availMem / (double)mi.totalMem * 100.0;
                     memory = ((double)(mi.totalMem - mi.availMem) / mi.totalMem) * 100;
-                    Crashlytics.log(0, "memory usage", String.format(Locale.US, "%f%% of memory is in usage", memory));
+                    // todo: Crashlytics.log(0, "memory usage", String.format(Locale.US, "%f%% of memory is in usage", memory));
                     Log.e("memory usage:", String.format("%f%% of memory is in usage", memory));
                     Log.e("memory usage:", String.format("available: %d, total: %d", mi.availMem, mi.totalMem));
 
                     // Get CPU state
                     cpu = Utils.readUsage();
-                    Crashlytics.log(0, "cpu usage", String.format(Locale.US, "%f%% of cpu is in usage", cpu));
+                    // todo: Crashlytics.log(0, "cpu usage", String.format(Locale.US, "%f%% of cpu is in usage", cpu));
                     Log.e("cpu state:", String.format("cpu usage %f%%", cpu));
 
-                    Crashlytics.log(0, "battery usage", String.format(Locale.US, "%d%% of battery is left", battery));
+                    // todo: Crashlytics.log(0, "battery usage", String.format(Locale.US, "%d%% of battery is left", battery));
                     Log.e("battery usage:", String.format("%d%% of battery is left", battery));
                 }
             }

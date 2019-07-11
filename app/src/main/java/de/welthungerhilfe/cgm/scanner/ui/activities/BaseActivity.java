@@ -21,7 +21,6 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import com.crashlytics.android.Crashlytics;
 import com.novoda.merlin.Merlin;
 import com.novoda.merlin.registerable.connection.Connectable;
 import com.novoda.merlin.registerable.disconnection.Disconnectable;
@@ -37,10 +36,10 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
         public void uncaughtException(Thread thread, Throwable ex) {
             if(ex.getClass().equals(OutOfMemoryError.class))
             {
-                Crashlytics.log(0, "memory out", "Memory Out happened in Activity");
+                // todo: Crashlytics.log(0, "memory out", "Memory Out happened in Activity");
             } else {
                 ex.printStackTrace();
-                Crashlytics.log(0, "exception", ex.getMessage());
+                // todo: Crashlytics.log(0, "exception", ex.getMessage());
             }
         }
     }
@@ -92,24 +91,24 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
 
     @Override
     public void onConnect() {
-        Crashlytics.log(0, "network state: ", "connected at " + Utils.beautifyDateTime(new Date()));
+        // todo: Crashlytics.log(0, "network state: ", "connected at " + Utils.beautifyDateTime(new Date()));
 
         long timestamp = session.getConnectionTimestamp();
         if (timestamp != 0) {
             long seconds = (System.currentTimeMillis() - timestamp) / 1000;
-            Crashlytics.log(0, "network state duration: ", String.format("last connection lasts for %d seconds", seconds));
+            // todo: Crashlytics.log(0, "network state duration: ", String.format("last connection lasts for %d seconds", seconds));
         }
         session.setConnectionTimestamp(System.currentTimeMillis());
     }
 
     @Override
     public void onDisconnect() {
-        Crashlytics.log(0, "network state: ", "disconnected at " + Utils.beautifyDateTime(new Date()));
+        // todo: Crashlytics.log(0, "network state: ", "disconnected at " + Utils.beautifyDateTime(new Date()));
 
         long timestamp = session.getConnectionTimestamp();
         if (timestamp != 0) {
             long seconds = (System.currentTimeMillis() - timestamp) / 1000;
-            Crashlytics.log(0, "network state duration: ", String.format("last connection lasts for %d seconds", seconds));
+            // todo: Crashlytics.log(0, "network state duration: ", String.format("last connection lasts for %d seconds", seconds));
         }
         session.setConnectionTimestamp(System.currentTimeMillis());
     }

@@ -54,10 +54,7 @@ import android.widget.TextView;
 
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
-import com.crashlytics.android.Crashlytics;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.orhanobut.dialogplus.DialogPlus;
-import com.orhanobut.dialogplus.OnClickListener;
 import com.orhanobut.dialogplus.ViewHolder;
 
 import java.io.File;
@@ -101,8 +98,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
-        Crashlytics.log("Add person by QR");
-        //Crashlytics.getInstance().crash();
+        // todo: Crashlytics.log("Add person by QR");
         startActivity(new Intent(MainActivity.this, QRScanActivity.class));
     }
 
@@ -137,8 +133,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         ButterKnife.bind(this);
 
-        Crashlytics.setUserIdentifier(AppController.getInstance().firebaseUser.getEmail());
-        Crashlytics.log(0, "user login: ", String.format("user logged in with email %s at %s", AppController.getInstance().firebaseUser.getEmail(), Utils.beautifyDateTime(new Date())));
+        // todo: Crashlytics.setUserIdentifier(AppController.getInstance().firebaseUser.getEmail());
+        // todo: Crashlytics.log(0, "user login: ", String.format("user logged in with email %s at %s", AppController.getInstance().firebaseUser.getEmail(), Utils.beautifyDateTime(new Date())));
 
         session = new SessionManager(MainActivity.this);
         accountManager = AccountManager.get(this);

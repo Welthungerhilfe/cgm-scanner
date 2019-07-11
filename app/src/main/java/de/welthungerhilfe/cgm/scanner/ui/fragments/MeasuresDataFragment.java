@@ -40,14 +40,9 @@ import android.view.inputmethod.InputMethodManager;
 
 //import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 
-import com.crashlytics.android.Crashlytics;
-
-import java.util.List;
-
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 
-import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
@@ -193,7 +188,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             });
             builder.show();
         } catch (RuntimeException e) {
-            Crashlytics.log(0, "measure fragment", e.getMessage());
+            // todo: Crashlytics.log(0, "measure fragment", e.getMessage());
         }
     }
 
@@ -201,7 +196,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.fabCreate:
-                Crashlytics.log("Add Measure to person");
+                // todo: Crashlytics.log("Add Measure to person");
                 if (viewModel.getPerson().getValue() == null) {
                     Snackbar.make(fabCreate, R.string.error_person_first, Snackbar.LENGTH_LONG).show();
                 } else {
