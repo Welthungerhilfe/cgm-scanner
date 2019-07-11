@@ -18,6 +18,7 @@ cat $gsFile
 echo "Updated id!"
 
 APP_CONSTANT_FILE=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/helper/AppConstants.java
+APP_MANIFEST_FILE=$BUILD_REPOSITORY_LOCALPATH/app/src/main/AndroidManifest.xml
 
 echo "$APP_CONSTANT_FILE"
 
@@ -29,20 +30,11 @@ then
     sed -i '' "s|{AZURE_ACCOUNT_NAME}|$AZURE_ACCOUNT_NAME|g" $APP_CONSTANT_FILE
     sed -i '' "s|{AZURE_ACCOUNT_KEY}|$AZURE_ACCOUNT_KEY|g" $APP_CONSTANT_FILE
 
+    sed -i '' "s|{GOOGLE_MAPS_KEY}|$GOOGLE_MAPS_KEY|g" $APP_MANIFEST_FILE
+
     echo "File content:"
     cat $APP_CONSTANT_FILE
 
 else
     echo "$APP_CONSTANT_FILE is not found"
-fi
-
-# set environment for multiple playstore deployments
-echo "Changes for demo playstore deployment"
-if [ -n "$DEPLOYMENT" ]; then
-  echo "setting deployment to $DEPLOYMENT"
-  find . -type f -exec sed -i '' "s/de.welthungerhilfe.cgm.scanner/de.welthungerhilfe.cgm.$DEPLOYMENT/g" {} \;
-  find . -type f -exec sed -i '' "s/cgm\/scanner/cgm\/$DEPLOYMENT/g" {} \;
-  find . -name scanner -type d -exec mv {} {}/../$DEPLOYMENT \;
-else
-  echo "building for production deployment"
 fi
