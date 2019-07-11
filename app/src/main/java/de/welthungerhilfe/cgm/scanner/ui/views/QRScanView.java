@@ -31,7 +31,6 @@ import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Log;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
@@ -166,7 +165,7 @@ public class QRScanView extends BarcodeScannerView {
                                 }
                             }
                         } catch (RuntimeException e) {
-                            Crashlytics.log(0, "qr scan", e.getMessage());
+                            // todo: Crashlytics.log(0, "qr scan", e.getMessage());
                         }
                     });
                 } else {

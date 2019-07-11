@@ -22,22 +22,14 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
-import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.crashlytics.android.Crashlytics;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 
 import java.util.Date;
 
@@ -164,7 +156,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         } else if (validate()) {
             String email = editUser.getText().toString();
             String password = editPassword.getText().toString();
-            Crashlytics.setUserIdentifier(email);
+            // todo: Crashlytics.setUserIdentifier(email);
 
             AppController.getInstance().firebaseAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
@@ -183,8 +175,8 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                             setAccountAuthenticatorResult(intent.getExtras());
                             setResult(RESULT_OK, intent);
 
-                            Crashlytics.setUserIdentifier(email);
-                            Crashlytics.log(0, "user login: ", String.format("user logged in with email %s at %s", email, Utils.beautifyDateTime(new Date())));
+                            // todo: Crashlytics.setUserIdentifier(email);
+                            // todo: Crashlytics.log(0, "user login: ", String.format("user logged in with email %s at %s", email, Utils.beautifyDateTime(new Date())));
 
                             session.setSigned(true);
                             AppController.getInstance().prepareFirebaseUser();

@@ -18,7 +18,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoConfig;
@@ -151,13 +150,13 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                         setDisplayRotation();
                     } catch (TangoOutOfDateException e) {
                         Log.e(TAG, getString(R.string.exception_out_of_date), e);
-                        Crashlytics.log(Log.ERROR, TAG, "TangoOutOfDateException");
+                        // todo: Crashlytics.log(Log.ERROR, TAG, "TangoOutOfDateException");
                     } catch (TangoErrorException e) {
                         Log.e(TAG, getString(R.string.exception_tango_error), e);
-                        Crashlytics.log(Log.ERROR, TAG, "TangoErrorException");
+                        // todo: Crashlytics.log(Log.ERROR, TAG, "TangoErrorException");
                     } catch (TangoInvalidException e) {
                         Log.e(TAG, getString(R.string.exception_tango_invalid), e);
-                        Crashlytics.log(Log.ERROR, TAG, "TangoInvalidException");
+                        // todo: Crashlytics.log(Log.ERROR, TAG, "TangoInvalidException");
                     }
                     setUpExtrinsics();
                 }
@@ -271,7 +270,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                 mIsConnected = false;
             } catch (TangoErrorException e) {
                 Log.e(TAG, getString(R.string.exception_tango_error), e);
-                Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in synchronized disconnect onPause");
+                // todo: Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in synchronized disconnect onPause");
             }
         }
     }
@@ -408,10 +407,10 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                     }
                 } catch (TangoErrorException e) {
                     Log.e(TAG, "Tango API call error within the OpenGL thread", e);
-                    Crashlytics.log(Log.ERROR, TAG, "Tango API call error within the OpenGL thread");
+                    // todo: Crashlytics.log(Log.ERROR, TAG, "Tango API call error within the OpenGL thread");
                 } catch (Throwable t) {
                     Log.e(TAG, "Exception on the OpenGL thread", t);
-                    Crashlytics.log(Log.ERROR, TAG, "Exception on the OpenGL thread");
+                    // todo: Crashlytics.log(Log.ERROR, TAG, "Exception on the OpenGL thread");
                 }
             }
         });
@@ -516,7 +515,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             mutex_on_mIsRecording.acquire();
                         } catch (InterruptedException e) {
                             e.printStackTrace();
-                            Crashlytics.log(Log.WARN, TAG, "InterruptedException aquiring recording mutext");
+                            // todo: Crashlytics.log(Log.WARN, TAG, "InterruptedException aquiring recording mutext");
                         }
                         // Saving the frame or not, depending on the current mode.
                         if ( mIsRecording ) {
@@ -663,7 +662,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
             device2IMUPose = mTango.getPoseAtTime(0.0, framePair);
         } catch (TangoErrorException e) {
             Toast.makeText(getContext(), R.string.exception_tango_error, Toast.LENGTH_SHORT).show();
-            Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in device setup");
+            // todo: Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in device setup");
         }
         /*mRenderer.getModelMatCalculator().SetDevice2IMUMatrix(device2IMUPose.getTranslationAsFloats(),device2IMUPose.getRotationAsFloats());*/
         // Set color camera to imu matrix in Model Matrix Calculator.
@@ -675,7 +674,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
             color2IMUPose = mTango.getPoseAtTime(0.0, framePair);
         } catch (TangoErrorException e) {
             Toast.makeText(getContext(), R.string.exception_tango_error, Toast.LENGTH_SHORT).show();
-            Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in camera setup");
+            // todo: Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in camera setup");
         }
 
         //mRenderer.getModelMatCalculator().SetColorCamera2IMUMatrix(color2IMUPose.getTranslationAsFloats(), color2IMUPose.getRotationAsFloats());

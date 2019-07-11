@@ -183,8 +183,6 @@
         <item>@string/selector_scan</item>
     </string-array>
 
-    <string name="google_maps_key">AIzaSyA-2ofdxNlBpzHDRVa6NfgAfkx4u0QSg4Q</string>
-
     <string name="exception_tango_error">"There was an error"</string>
     <string name="exception_tango_invalid">"Scanning session invalidated"</string>
     <string name="exception_out_of_date">"Please update Tango Core App!"</string>
