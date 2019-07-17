@@ -8,6 +8,9 @@ import android.support.v7.app.AppCompatActivity;
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
 import com.microsoft.appcenter.crashes.Crashes;
+import com.microsoft.appcenter.crashes.CrashesListener;
+import com.microsoft.appcenter.crashes.ingestion.models.ErrorAttachmentLog;
+import com.microsoft.appcenter.crashes.model.ErrorReport;
 
 import de.welthungerhilfe.cgm.scanner.R;
 
@@ -17,8 +20,6 @@ public class SplashActivity extends AppCompatActivity {
         boolean isEnabled = Crashes.isEnabled().get();
         if (!isEnabled)
             Crashes.setEnabled(true);
-
-
 
         super.onCreate(saveBundle);
         setContentView(R.layout.activity_splash);
