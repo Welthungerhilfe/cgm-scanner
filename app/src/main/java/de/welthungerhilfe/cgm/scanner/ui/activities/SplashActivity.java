@@ -14,6 +14,11 @@ import de.welthungerhilfe.cgm.scanner.R;
 public class SplashActivity extends AppCompatActivity {
     public void onCreate(Bundle saveBundle) {
         AppCenter.start(getApplication(), "{APP_CENTER_KEY}", Analytics.class, Crashes.class);
+        boolean isEnabled = Crashes.isEnabled().get();
+        if (!isEnabled)
+            Crashes.setEnabled(true);
+
+
 
         super.onCreate(saveBundle);
         setContentView(R.layout.activity_splash);
