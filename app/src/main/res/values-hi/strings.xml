@@ -103,6 +103,7 @@
 
     <string name="tooltip_kg">किलोग्राम में मूल्य</string>
     <string name="tooltip_decimal">दशमलव बिंदु के बाद कम से कम एक अंक</string>
+    <string name="tooltip_kg_precision">at least three digit after the decimal point</string>
     <string name="tooltip_weight_ex">जैसे 12.595</string>
     <string name="tooltip_cm">सेंटीमीटर में मूल्य</string>
     <string name="tooltip_precision">मिलीमीटर प्रेसिजन का इस्तेमाल करें</string>

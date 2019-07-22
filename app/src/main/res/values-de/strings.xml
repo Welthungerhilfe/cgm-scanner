@@ -103,6 +103,7 @@
 
     <string name="tooltip_kg">Werte in Kilogramm</string>
     <string name="tooltip_decimal">mindestens eine Nachkommastelle</string>
+    <string name="tooltip_kg_precision">at least three digit after the decimal point</string>
     <string name="tooltip_weight_ex">z.B. 12.595</string>
     <string name="tooltip_cm">value in centimeters</string>
     <string name="tooltip_precision">Millimeter angeben</string>
