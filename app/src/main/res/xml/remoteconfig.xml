@@ -2,7 +2,7 @@
 <defaultsMap>
     <entry>
         <key>measure_visibility</key>
-        <value>false</value>
+        <value>true</value>
     </entry>
     <entry>
         <key>time_to_allow_editing</key>

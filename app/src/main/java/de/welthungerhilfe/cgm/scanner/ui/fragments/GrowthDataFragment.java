@@ -178,10 +178,6 @@ public class GrowthDataFragment extends Fragment {
                 break;
             case 3:
                 txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_head);
-                break;
-            case 4:
-                txtXAxis.setText(R.string.axis_age);
                 txtYAxis.setText(R.string.axis_muac);
                 break;
         }
@@ -216,9 +212,6 @@ public class GrowthDataFragment extends Fragment {
                     Collections.sort(entries, (o1, o2) -> Float.compare(o1.getX(), o2.getX()));
                     break;
                 case 3:
-                    entries.add(new Entry(day, (float) measure.getHeadCircumference()));
-                    break;
-                case 4:
                     entries.add(new Entry(day, (float) measure.getMuac()));
                     break;
             }

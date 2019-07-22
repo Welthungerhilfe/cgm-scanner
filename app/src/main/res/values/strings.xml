@@ -171,7 +171,6 @@
         <item>@string/filter_age_weight</item>
         <item>@string/filter_age_height</item>
         <item>@string/filter_height_weight</item>
-        <item>@string/filter_age_head</item>
         <item>@string/filter_age_arm</item>
     </string-array>
 

@@ -152,24 +152,6 @@
 
     </android.support.design.widget.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp">
-
-        <de.welthungerhilfe.cgm.scanner.ui.views.UnitEditText
-            android:id="@+id/editManualHead"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:inputType="numberDecimal"
-            android:hint="@string/measure_head"
-            app:unit="@string/unit_cm"
-            app:unitMargin="3dp"
-            app:unitPadding="2dp"/>
-
-    </android.support.design.widget.TextInputLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

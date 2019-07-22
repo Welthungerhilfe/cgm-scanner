@@ -56,8 +56,6 @@ public class ManualDetailDialog extends Dialog {
     TextView txtManualWeight;
     @BindView(R.id.txtManualMuac)
     TextView txtManualMuac;
-    @BindView(R.id.txtManualHead)
-    TextView txtManualHead;
     @BindView(R.id.txtManualLocation)
     TextView txtManualLocation;
     @BindView(R.id.checkManualOedema)
@@ -110,7 +108,6 @@ public class ManualDetailDialog extends Dialog {
         txtManualHeight.setText(String.valueOf(measure.getHeight()));
         txtManualWeight.setText(String.valueOf(measure.getWeight()));
         txtManualMuac.setText(String.valueOf(measure.getMuac()));
-        txtManualHead.setText(String.valueOf(measure.getHeadCircumference()));
         if (measure.isOedema()) {
             checkManualOedema.setChecked(measure.isOedema());
         }

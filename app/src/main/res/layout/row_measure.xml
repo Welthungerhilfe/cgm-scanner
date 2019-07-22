@@ -96,20 +96,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="@dimen/activity_section_margin"
-                    android:text="@string/abbr_head"
-                    android:textSize="20sp"/>
-
-                <TextView
-                    android:id="@+id/txtHead"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/activity_group_margin"
-                    android:textSize="20sp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/activity_section_margin"
                     android:text="@string/abbr_arm"
                     android:textSize="20sp"/>
 
