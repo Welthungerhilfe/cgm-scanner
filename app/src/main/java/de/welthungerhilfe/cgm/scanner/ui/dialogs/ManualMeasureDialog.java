@@ -125,6 +125,8 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
     @BindString(R.string.tooltip_kg)
     String tooltip_kg;
+    @BindString(R.string.tooltip_kg_precision)
+    String tooltip_kg_precision;
     @BindString(R.string.tooltip_decimal)
     String tooltip_decimal;
     @BindString(R.string.tooltip_weight_ex)
@@ -243,8 +245,8 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         if (weight.isEmpty()) {
             editManualWeight.setError(tooltip_kg);
             valid = false;
-        } else if (!Utils.checkDouble(weight)) {
-            editManualWeight.setError(tooltip_decimal);
+        } else if (Utils.checkDoubleDecimals(weight) != 3) {
+            editManualWeight.setError(tooltip_kg_precision);
             valid = false;
         } else {
             editManualWeight.setError(null);
