@@ -106,7 +106,7 @@ dependencies {
     // Network Observer
     implementation 'com.novoda:merlin:1.1.7'
     // AppCenter Analytics & Crashlytics
-    implementation "com.microsoft.appcenter:appcenter-analytics:2.1.0"
-    implementation "com.microsoft.appcenter:appcenter-crashes:2.1.0"
+    implementation "com.microsoft.appcenter:appcenter-analytics:2.2.0"
+    implementation "com.microsoft.appcenter:appcenter-crashes:2.2.0"
 }
 apply plugin: 'com.google.gms.google-services'

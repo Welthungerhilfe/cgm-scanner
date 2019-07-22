@@ -140,24 +140,6 @@
         android:textColor="@color/colorBlack"
         android:hint="@string/measure_muac"/>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:singleLine="true"
-        android:textSize="12sp"
-        android:textColor="@color/colorPrimary"
-        android:text="@string/measure_head"/>
-
-    <TextView
-        android:id="@+id/txtManualHead"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:singleLine="true"
-        android:textSize="18sp"
-        android:textColor="@color/colorBlack"
-        android:hint="@string/measure_head"/>
-
     <android.support.v7.widget.AppCompatCheckBox
         android:id="@+id/checkManualOedema"
         android:layout_width="match_parent"

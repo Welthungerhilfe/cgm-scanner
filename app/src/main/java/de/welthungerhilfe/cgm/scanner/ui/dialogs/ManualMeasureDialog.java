@@ -72,8 +72,6 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     UnitEditText editManualWeight;
     @BindView(R.id.editManualMuac)
     UnitEditText editManualMuac;
-    @BindView(R.id.editManualHead)
-    UnitEditText editManualHead;
     @BindView(R.id.editManualLocation)
     EditText editManualLocation;
     @BindView(R.id.btnOK)
@@ -109,10 +107,6 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                 measure.setHeight(Double.parseDouble(editManualHeight.getText().toString()));
                 measure.setWeight(Double.parseDouble(editManualWeight.getText().toString()));
                 measure.setMuac(Double.parseDouble(editManualMuac.getText().toString()));
-                if (editManualHead.getText().toString().isEmpty())
-                    measure.setHeadCircumference(0.0);
-                else
-                    measure.setHeadCircumference(Double.parseDouble(editManualHead.getText().toString()));
                 measure.setLocation(location);
                 measure.setOedema(oedema);
             } else if (measureListener != null) {
@@ -120,7 +114,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                         Double.parseDouble(editManualHeight.getText().toString()),
                         Double.parseDouble(editManualWeight.getText().toString()),
                         Double.parseDouble(editManualMuac.getText().toString()),
-                        editManualHead.getText().toString().isEmpty() ? 0.0 : Double.parseDouble(editManualHead.getText().toString()),
+                        0f,
                         location,
                         oedema
                 );
@@ -131,6 +125,8 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
     @BindString(R.string.tooltip_kg)
     String tooltip_kg;
+    @BindString(R.string.tooltip_kg_precision)
+    String tooltip_kg_precision;
     @BindString(R.string.tooltip_decimal)
     String tooltip_decimal;
     @BindString(R.string.tooltip_weight_ex)
@@ -214,7 +210,6 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         editManualHeight.setText(String.valueOf(measure.getHeight()));
         editManualWeight.setText(String.valueOf(measure.getWeight()));
         editManualMuac.setText(String.valueOf(measure.getMuac()));
-        editManualHead.setText(String.valueOf(measure.getHeadCircumference()));
         if (measure.isOedema()) {
             checkManualOedema.setChecked(measure.isOedema());
         }
@@ -250,8 +245,8 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         if (weight.isEmpty()) {
             editManualWeight.setError(tooltip_kg);
             valid = false;
-        } else if (!Utils.checkDouble(weight)) {
-            editManualWeight.setError(tooltip_decimal);
+        } else if (Utils.checkDoubleDecimals(weight) != 3) {
+            editManualWeight.setError(tooltip_kg_precision);
             valid = false;
         } else {
             editManualWeight.setError(null);

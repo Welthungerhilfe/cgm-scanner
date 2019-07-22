@@ -103,6 +103,7 @@
 
     <string name="tooltip_kg">value in kilograms</string>
     <string name="tooltip_decimal">at least one digit after the decimal point</string>
+    <string name="tooltip_kg_precision">at least three digit after the decimal point</string>
     <string name="tooltip_weight_ex">i.e. 12.595</string>
     <string name="tooltip_cm">value in centimeters</string>
     <string name="tooltip_precision">use millimeter precision</string>
@@ -165,13 +166,12 @@
     <string name="filter_age_weight">2. Weight-for-age</string>
     <string name="filter_height_weight">3. Weight-for-height</string>
     <string name="filter_age_head">4. Head circumference-for-age</string>
-    <string name="filter_age_arm">5. Arm circumference-for-age</string>
+    <string name="filter_age_arm">4. Arm circumference-for-age</string>
 
     <string-array name="filters">
         <item>@string/filter_age_weight</item>
         <item>@string/filter_age_height</item>
         <item>@string/filter_height_weight</item>
-        <item>@string/filter_age_head</item>
         <item>@string/filter_age_arm</item>
     </string-array>
 
