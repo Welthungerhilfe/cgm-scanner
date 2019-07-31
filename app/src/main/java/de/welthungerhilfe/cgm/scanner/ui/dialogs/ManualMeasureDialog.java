@@ -137,6 +137,18 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     String tooltip_precision;
     @BindString(R.string.tooltip_height_ex)
     String tooltip_height_ex;
+    @BindString(R.string.tooltipe_height_min)
+    String tooltipe_height_min;
+    @BindString(R.string.tooltipe_height_max)
+    String tooltipe_height_max;
+    @BindString(R.string.tooltipe_weight_min)
+    String tooltipe_weight_min;
+    @BindString(R.string.tooltipe_weight_max)
+    String tooltipe_weight_max;
+    @BindString(R.string.tooltipe_muac_min)
+    String tooltipe_muac_min;
+    @BindString(R.string.tooltipe_muac_max)
+    String tooltipe_muac_max;
 
 
     private Context mContext;
@@ -238,6 +250,10 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         } else if (Utils.checkDoubleDecimals(height) != 1) {
             editManualHeight.setError(tooltip_precision);
             valid = false;
+        } else if (Double.parseDouble(height) < 45) {
+            editManualHeight.setError(tooltipe_height_min);
+        } else if (Double.parseDouble(height) > 140) {
+            editManualHeight.setError(tooltipe_height_max);
         } else {
             editManualHeight.setError(null);
         }
@@ -248,6 +264,12 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         } else if (Utils.checkDoubleDecimals(weight) != 3) {
             editManualWeight.setError(tooltip_kg_precision);
             valid = false;
+        } else if (Double.parseDouble(weight) < 2) {
+            editManualWeight.setError(tooltipe_weight_min);
+            valid = false;
+        } else if (Double.parseDouble(weight) > 30) {
+            editManualWeight.setError(tooltipe_weight_max);
+            valid = false;
         } else {
             editManualWeight.setError(null);
         }
@@ -257,6 +279,12 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
             valid = false;
         } else if (Utils.checkDoubleDecimals(muac) != 1) {
             editManualMuac.setError(tooltip_precision);
+            valid = false;
+        } else if (Double.parseDouble(muac) < 9) {
+            editManualMuac.setError(tooltipe_muac_min);
+            valid = false;
+        } else if (Double.parseDouble(muac) > 22) {
+            editManualMuac.setError(tooltipe_muac_max);
             valid = false;
         } else {
             editManualMuac.setError(null);

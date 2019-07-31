@@ -103,7 +103,7 @@
 
     <string name="tooltip_kg">किलोग्राम में मूल्य</string>
     <string name="tooltip_decimal">दशमलव बिंदु के बाद कम से कम एक अंक</string>
-    <string name="tooltip_kg_precision">at least three digit after the decimal point</string>
+    <string name="tooltip_kg_precision">दशमलव बिंदु के बाद कम से कम तीन अंक</string>
     <string name="tooltip_weight_ex">जैसे 12.595</string>
     <string name="tooltip_cm">सेंटीमीटर में मूल्य</string>
     <string name="tooltip_precision">मिलीमीटर प्रेसिजन का इस्तेमाल करें</string>
@@ -113,6 +113,12 @@
     <string name="tooltip_birthday">कृपया जन्मदिन का इनपुट दें</string>
     <string name="tooltip_guardian">कृपया अभिभावक का इनपुट दें</string>
     <string name="tooltipe_sex">कृपया लिंग का चयन करें</string>
+    <string name="tooltipe_height_min">लम्बाई 45cm (सेन्टीमीटर्स) से बड़ी होनी चाहिए </string>
+    <string name="tooltipe_height_max">लम्बाई 140cm (सेन्टीमीटर्स) से कम होनी चाहिए </string>
+    <string name="tooltipe_weight_min">वजन 2kg से ज्यादा होना चाहिये </string>
+    <string name="tooltipe_weight_max">वजन 30kg से कम होना चाहिये </string>
+    <string name="tooltipe_muac_min">मध्य ऊपरी बांह की परिधि 9cm (सेन्टीमीटर्स) से बड़ी होनी चाहिए</string>
+    <string name="tooltipe_muac_max">मध्य ऊपरी बांह की परिधि 22cm (सेन्टीमीटर्स) से कम होनी चाहिए</string>
 
     <string name="baby_full_body_front_scan_text">1/3. सामने</string>
     <string name="baby_left_right_scan_text">2/3. बाएँ दांए</string>
