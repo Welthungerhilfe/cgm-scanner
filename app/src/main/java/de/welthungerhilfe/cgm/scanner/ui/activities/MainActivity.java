@@ -243,9 +243,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();
                     break;
-                case R.id.menuHealth:
-                    startService(new Intent(MainActivity.this, HealthInfoService.class));
-                    break;
             }
             drawerLayout.closeDrawers();
             return true;

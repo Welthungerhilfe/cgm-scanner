@@ -35,6 +35,8 @@ public class SettingsActivity extends BaseActivity {
     TextView txtSettingUuid;
     @BindView(R.id.txtSettingAccount)
     TextView txtSettingAccount;
+    @BindView(R.id.txtSettingAzureAccount)
+    TextView txtSettingAzureAccount;
 
     @BindView(R.id.radioEnglish)
     AppCompatRadioButton radioEnglish;
@@ -113,6 +115,8 @@ public class SettingsActivity extends BaseActivity {
         if (accounts.length > 0) {
             txtSettingAccount.setText(accounts[0].name);
         }
+
+        txtSettingAzureAccount.setText(AppConstants.AZURE_ACCOUNT_NAME);
 
         String code = session.getLanguage();
         switch (code) {
