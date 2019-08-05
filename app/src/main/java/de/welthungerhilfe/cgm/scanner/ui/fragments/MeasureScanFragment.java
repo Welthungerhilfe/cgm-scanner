@@ -526,7 +526,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             mPointCloudFilename = "pc_" +mQrCode+"_" + mNowTimeString + "_" + mode +
                                     "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
                             TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
-
+                            Log.d("Prajwal", String.valueOf(pointCloudData.numPoints));
                             File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
                             FileLog log = new FileLog();
                             log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
