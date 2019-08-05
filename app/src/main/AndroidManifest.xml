@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" /-->
 
+
+
     <!-- for Tango Scanner Functionality -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -34,18 +36,7 @@
         android:resizeable="true"
         android:smallScreens="true" />
 
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.camera.autofocus"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.camera.front"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.camera.front.autofocus"
-        android:required="false" />
+    <uses-feature android:name="android.hardware.camera2.full" />
     <uses-feature android:name="android.hardware.location.gps" />
     <!-- Tell the system this app requires OpenGL ES 2.0. -->
     <uses-feature
@@ -107,6 +98,9 @@
 
         <activity android:name=".ui.activities.QRScanActivity"
             android:screenOrientation="portrait"/>
+
+        <activity android:name=".ui.activities.ConsentScanActivity"
+            android:screenOrientation="portrait" />
 
         <activity android:name=".ui.activities.CreateDataActivity"
             android:windowSoftInputMode="stateAlwaysHidden"
