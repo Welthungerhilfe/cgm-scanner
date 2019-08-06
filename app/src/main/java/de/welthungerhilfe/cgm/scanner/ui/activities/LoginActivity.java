@@ -39,6 +39,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
@@ -177,6 +178,8 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
                             // todo: Crashlytics.setUserIdentifier(email);
                             // todo: Crashlytics.log(0, "user login: ", String.format("user logged in with email %s at %s", email, Utils.beautifyDateTime(new Date())));
+
+                            session.saveRemoteConfig(new RemoteConfig());
 
                             session.setSigned(true);
                             AppController.getInstance().prepareFirebaseUser();

@@ -35,8 +35,10 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasureAdapter.ViewHolder> {
@@ -44,6 +46,9 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
     private OnMeasureSelectListener listener;
     private List<Measure> measureList;
     private int lastPosition = -1;
+
+    private SessionManager session;
+    private RemoteConfig config;
 
     public interface OnMeasureSelectListener {
         void onMeasureSelect(Measure measure);
@@ -53,6 +58,9 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         context = ctx;
 
         measureList = new ArrayList<>();
+
+        this.session = new SessionManager(context);
+        config = session.getRemoteConfig();
     }
 
     public void setMeasureSelectListener(OnMeasureSelectListener listener) {
@@ -92,7 +100,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         holder.txtDate.setText(Utils.beautifyHourMinute(measure.getDate()));
         holder.txtAuthor.setText(Utils.getNameFromEmail(measure.getCreatedBy()));
 
-        if (AppController.getInstance().firebaseConfig.getBoolean(AppConstants.CONFIG_MEASURE_VISIBILITY)) {
+        if (config.isMeasure_visibility()) {
             holder.txtHeight.setText(Double.toString(measure.getHeight()) + context.getString(R.string.unit_cm));
             holder.txtWeight.setText(Double.toString(measure.getWeight()) + context.getString(R.string.unit_kg));
             holder.txtArm.setText(Double.toString(measure.getMuac()) + context.getString(R.string.unit_cm));

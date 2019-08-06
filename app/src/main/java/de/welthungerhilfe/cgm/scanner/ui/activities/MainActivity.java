@@ -204,22 +204,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         }
     }
 
-    private void fetchRemoteConfig() {
-        long cacheExpiration = 3600 * 3;
-        if (AppController.getInstance().firebaseConfig.getInfo().getConfigSettings().isDeveloperModeEnabled()) {
-            cacheExpiration = 0;
-        }
-
-        AppController.getInstance().firebaseConfig.fetch(cacheExpiration)
-                .addOnSuccessListener(aVoid -> {
-                    AppController.getInstance().firebaseConfig.activateFetched();
-                    if (AppController.getInstance().firebaseConfig.getBoolean(AppConstants.CONFIG_DEBUG)) {
-                        startService(new Intent(this, MemoryMonitorService.class));
-                    }
-                })
-                .addOnFailureListener(e -> e.printStackTrace());
-    }
-
     private void setupSidemenu() {
         navMenu.setNavigationItemSelectedListener(menuItem -> {
             switch (menuItem.getItemId()) {
