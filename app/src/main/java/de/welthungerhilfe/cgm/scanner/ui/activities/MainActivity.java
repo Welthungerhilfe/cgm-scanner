@@ -69,6 +69,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
 import de.welthungerhilfe.cgm.scanner.helper.service.HealthInfoService;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
@@ -172,13 +173,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         });
 
         /*
-        fetchRemoteConfig();
-
-        saveFcmToken();
+        RemoteConfig config = session.getRemoteConfig();
+        if (config.isDebug()) {
+            startService(new Intent(this, MemoryMonitorService.class));
+            startService(new Intent(this, HealthInfoService.class));
+        }
         */
-
-        startService(new Intent(this, HealthInfoService.class));
-        startService(new Intent(this, MemoryMonitorService.class));
     }
 
     public void onNewIntent(Intent intent) {
@@ -194,30 +194,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             data.put("user", AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
             data.put("device", device);
             data.put("token", token);
-
-            /*
-            AppController.getInstance().firebaseFirestore.collection("fcm_tokens")
-                    .document(device)
-                    .set(data)
-                    .addOnSuccessListener(aVoid -> session.setFcmSaved(true));
-                    */
         }
-    }
-
-    private void fetchRemoteConfig() {
-        long cacheExpiration = 3600 * 3;
-        if (AppController.getInstance().firebaseConfig.getInfo().getConfigSettings().isDeveloperModeEnabled()) {
-            cacheExpiration = 0;
-        }
-
-        AppController.getInstance().firebaseConfig.fetch(cacheExpiration)
-                .addOnSuccessListener(aVoid -> {
-                    AppController.getInstance().firebaseConfig.activateFetched();
-                    if (AppController.getInstance().firebaseConfig.getBoolean(AppConstants.CONFIG_DEBUG)) {
-                        startService(new Intent(this, MemoryMonitorService.class));
-                    }
-                })
-                .addOnFailureListener(e -> e.printStackTrace());
     }
 
     private void setupSidemenu() {
@@ -242,9 +219,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();
-                    break;
-                case R.id.menuHealth:
-                    startService(new Intent(MainActivity.this, HealthInfoService.class));
                     break;
             }
             drawerLayout.closeDrawers();

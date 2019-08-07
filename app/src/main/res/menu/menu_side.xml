@@ -49,10 +49,4 @@
             android:icon="@drawable/menu_logout"
             android:title="@string/menuLogout"/>
     </group>
-    <group>
-        <item
-            android:id="@+id/menuHealth"
-            android:icon="@drawable/menu_logout"
-            android:title="Health Data"/>
-    </group>
 </menu>

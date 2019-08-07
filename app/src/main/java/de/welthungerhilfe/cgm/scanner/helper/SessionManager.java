@@ -22,7 +22,10 @@ package de.welthungerhilfe.cgm.scanner.helper;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.google.gson.Gson;
+
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 
 /**
  * Created by Emerald on 2/21/2018.
@@ -42,6 +45,7 @@ public class SessionManager {
     private final String KEY_TUTORIAL = "key_tutorial";
     private final String KEY_FCM_TOKEN = "key_fcm_token";
     private final String KEY_FCM_TOKEN_SAVED = "key_fcm_token_saved";
+    private final String KEY_REMOTE_CONFIG = "key_remote_config";
 
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
@@ -135,5 +139,23 @@ public class SessionManager {
 
     public boolean isFcmSaved() {
         return pref.getBoolean(KEY_FCM_TOKEN_SAVED, false);
+    }
+
+    public void saveRemoteConfig(RemoteConfig config) {
+        Gson gson = new Gson();
+        editor.putString(KEY_REMOTE_CONFIG, gson.toJson(config));
+
+        editor.commit();
+    }
+
+    public RemoteConfig getRemoteConfig() {
+        String jsonStr = pref.getString(KEY_REMOTE_CONFIG, null);
+
+        if (jsonStr == null) {
+            return null;
+        } else {
+            Gson gson = new Gson();
+            return gson.fromJson(jsonStr, RemoteConfig.class);
+        }
     }
 }

@@ -18,20 +18,15 @@
 
 package de.welthungerhilfe.cgm.scanner;
 
-import android.app.AlarmManager;
 import android.app.Application;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.StrictMode;
-import android.util.Log;
 
 //import com.amitshekhar.DebugDB;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
 import java.io.File;
 
@@ -57,8 +52,6 @@ public class AppController extends Application {
     public MeasureRepository measureRepository;
     public FileLogRepository fileLogRepository;
 
-    public FirebaseRemoteConfig firebaseConfig;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -72,11 +65,6 @@ public class AppController extends Application {
 
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
-
-        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().setDeveloperModeEnabled(true).build();
-        firebaseConfig = FirebaseRemoteConfig.getInstance();
-        firebaseConfig.setConfigSettings(configSettings);
-        firebaseConfig.setDefaults(R.xml.remoteconfig);
 
         //Log.e("Offline DB", DebugDB.getAddressLog());
         /*

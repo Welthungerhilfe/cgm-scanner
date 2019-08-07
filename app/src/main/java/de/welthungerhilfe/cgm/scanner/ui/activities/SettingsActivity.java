@@ -21,6 +21,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -35,6 +36,8 @@ public class SettingsActivity extends BaseActivity {
     TextView txtSettingUuid;
     @BindView(R.id.txtSettingAccount)
     TextView txtSettingAccount;
+    @BindView(R.id.txtSettingAzureAccount)
+    TextView txtSettingAzureAccount;
 
     @BindView(R.id.radioEnglish)
     AppCompatRadioButton radioEnglish;
@@ -72,6 +75,7 @@ public class SettingsActivity extends BaseActivity {
     }
 
     private SessionManager session;
+    private RemoteConfig config;
 
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
@@ -80,6 +84,7 @@ public class SettingsActivity extends BaseActivity {
         ButterKnife.bind(this);
 
         session = new SessionManager(this);
+        config = session.getRemoteConfig();
 
         setupActionBar();
 
@@ -114,6 +119,8 @@ public class SettingsActivity extends BaseActivity {
             txtSettingAccount.setText(accounts[0].name);
         }
 
+        txtSettingAzureAccount.setText(AppConstants.AZURE_ACCOUNT_NAME);
+
         String code = session.getLanguage();
         switch (code) {
             case AppConstants.LANG_ENGLISH:
@@ -127,12 +134,12 @@ public class SettingsActivity extends BaseActivity {
                 break;
         }
 
-        txtSettingDebug.setText(AppController.getInstance().firebaseConfig.getString("debug"));
-        txtSettingSyncPeriod.setText(AppController.getInstance().firebaseConfig.getString("sync_period"));
-        txtSettingAllowDelete.setText(AppController.getInstance().firebaseConfig.getString("allow_delete"));
-        txtSettingAllowEdit.setText(AppController.getInstance().firebaseConfig.getString("allow_edit"));
-        txtSettingEditTime.setText(AppController.getInstance().firebaseConfig.getString("time_to_allow_editing"));
-        txtSettingMeasureVisibility.setText(AppController.getInstance().firebaseConfig.getString("measure_visibility"));
+        txtSettingDebug.setText(String.valueOf(config.isDebug()));
+        txtSettingSyncPeriod.setText(String.valueOf(config.getSync_period()));
+        txtSettingAllowDelete.setText(String.valueOf(config.isAllow_delete()));
+        txtSettingAllowEdit.setText(String.valueOf(config.isAllow_edit()));
+        txtSettingEditTime.setText(String.valueOf(config.getTime_to_allow_editing()));
+        txtSettingMeasureVisibility.setText(String.valueOf(config.isMeasure_visibility()));
     }
 
     private void changeLanguage(String code) {

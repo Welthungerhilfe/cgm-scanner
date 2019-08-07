@@ -102,23 +102,17 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     }
     @OnClick(R.id.btnOK)
     void OnConfirm(Button btnOK) {
-        if (validate()) {
-            if (measure != null) {
-                measure.setHeight(Double.parseDouble(editManualHeight.getText().toString()));
-                measure.setWeight(Double.parseDouble(editManualWeight.getText().toString()));
-                measure.setMuac(Double.parseDouble(editManualMuac.getText().toString()));
-                measure.setLocation(location);
-                measure.setOedema(oedema);
-            } else if (measureListener != null) {
-                measureListener.onManualMeasure(
-                        Double.parseDouble(editManualHeight.getText().toString()),
-                        Double.parseDouble(editManualWeight.getText().toString()),
-                        Double.parseDouble(editManualMuac.getText().toString()),
-                        0f,
-                        location,
-                        oedema
-                );
-            }
+        if (validate() && measureListener != null) {
+            measureListener.onManualMeasure(
+                    measure != null ? measure.getId() : null,
+                    Double.parseDouble(editManualHeight.getText().toString()),
+                    Double.parseDouble(editManualWeight.getText().toString()),
+                    Double.parseDouble(editManualMuac.getText().toString()),
+                    0f,
+                    location,
+                    oedema
+            );
+
             dismiss();
         }
     }
@@ -137,6 +131,18 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     String tooltip_precision;
     @BindString(R.string.tooltip_height_ex)
     String tooltip_height_ex;
+    @BindString(R.string.tooltipe_height_min)
+    String tooltipe_height_min;
+    @BindString(R.string.tooltipe_height_max)
+    String tooltipe_height_max;
+    @BindString(R.string.tooltipe_weight_min)
+    String tooltipe_weight_min;
+    @BindString(R.string.tooltipe_weight_max)
+    String tooltipe_weight_max;
+    @BindString(R.string.tooltipe_muac_min)
+    String tooltipe_muac_min;
+    @BindString(R.string.tooltipe_muac_max)
+    String tooltipe_muac_max;
 
 
     private Context mContext;
@@ -177,6 +183,12 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
     public void dismiss() {
         EventBus.getDefault().unregister(this);
+
+        editManualHeight.setText("");
+        editManualWeight.setText("");
+        editManualMuac.setText("");
+        checkManualOedema.setChecked(false);
+
         super.dismiss();
 
         if (closeListener != null)
@@ -238,6 +250,10 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         } else if (Utils.checkDoubleDecimals(height) != 1) {
             editManualHeight.setError(tooltip_precision);
             valid = false;
+        } else if (Double.parseDouble(height) < 45) {
+            editManualHeight.setError(tooltipe_height_min);
+        } else if (Double.parseDouble(height) > 140) {
+            editManualHeight.setError(tooltipe_height_max);
         } else {
             editManualHeight.setError(null);
         }
@@ -248,6 +264,12 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         } else if (Utils.checkDoubleDecimals(weight) != 3) {
             editManualWeight.setError(tooltip_kg_precision);
             valid = false;
+        } else if (Double.parseDouble(weight) < 2) {
+            editManualWeight.setError(tooltipe_weight_min);
+            valid = false;
+        } else if (Double.parseDouble(weight) > 30) {
+            editManualWeight.setError(tooltipe_weight_max);
+            valid = false;
         } else {
             editManualWeight.setError(null);
         }
@@ -257,6 +279,12 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
             valid = false;
         } else if (Utils.checkDoubleDecimals(muac) != 1) {
             editManualMuac.setError(tooltip_precision);
+            valid = false;
+        } else if (Double.parseDouble(muac) < 9) {
+            editManualMuac.setError(tooltipe_muac_min);
+            valid = false;
+        } else if (Double.parseDouble(muac) > 22) {
+            editManualMuac.setError(tooltipe_muac_max);
             valid = false;
         } else {
             editManualMuac.setError(null);
@@ -275,7 +303,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     }
 
     public interface OnManualMeasureListener {
-        void onManualMeasure(double height, double weight, double muac, double headCircumference, Loc location, boolean oedema);
+        void onManualMeasure(String id, double height, double weight, double muac, double headCircumference, Loc location, boolean oedema);
     }
 
     public interface OnCloseListener {

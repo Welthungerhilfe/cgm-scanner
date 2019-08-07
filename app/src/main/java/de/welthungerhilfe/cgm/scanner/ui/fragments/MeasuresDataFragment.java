@@ -43,7 +43,9 @@ import android.view.inputmethod.InputMethodManager;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 
+import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerMeasureAdapter;
@@ -59,6 +61,8 @@ import de.welthungerhilfe.cgm.scanner.ui.views.SwipeView;
 public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.OnManualMeasureListener, RecyclerMeasureAdapter.OnMeasureSelectListener {
     private Context context;
 
+    private SessionManager session;
+    private RemoteConfig config;
 
     private RecyclerView recyclerMeasure;
     private RecyclerMeasureAdapter adapterMeasure;
@@ -75,6 +79,8 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         super.onAttach(context);
 
         this.context = context;
+        this.session = new SessionManager(context);
+        config = session.getRemoteConfig();
     }
 
     public void onActivityCreated(Bundle instance) {
@@ -110,10 +116,8 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                 int position = viewHolder.getAdapterPosition();
                 Measure measure = adapterMeasure.getItem(position);
 
-                boolean notAdmin = !AppController.getInstance().isAdmin();
-
                 if (direction == ItemTouchHelper.LEFT) {
-                    if (notAdmin && !AppController.getInstance().firebaseConfig.getBoolean(AppConstants.CONFIG_ALLOW_DELETE)) {
+                    if (!config.isAllow_delete()) {
                         adapterMeasure.notifyItemChanged(position);
                         Snackbar.make(recyclerMeasure, R.string.permission_delete, Snackbar.LENGTH_LONG).show();
                     } else {
@@ -135,10 +139,10 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                         dialog.show();
                     }
                 } else if (direction == ItemTouchHelper.RIGHT){
-                    if (notAdmin && !AppController.getInstance().firebaseConfig.getBoolean(AppConstants.CONFIG_ALLOW_EDIT)) {
+                    if (!config.isAllow_edit()) {
                         adapterMeasure.notifyItemChanged(position);
                         Snackbar.make(recyclerMeasure, R.string.permission_edit, Snackbar.LENGTH_LONG).show();
-                    } else if (notAdmin && measure.getDate() < Utils.getUniversalTimestamp() - AppController.getInstance().firebaseConfig.getLong(AppConstants.CONFIG_TIME_TO_ALLOW_EDITING) * 3600 * 1000) {
+                    } else if (measure.getDate() < Utils.getUniversalTimestamp() - config.getTime_to_allow_editing() * 3600 * 1000) {
                         adapterMeasure.notifyItemChanged(position);
                         Snackbar.make(recyclerMeasure, R.string.permission_expired, Snackbar.LENGTH_LONG).show();
                     } else {
@@ -207,9 +211,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     }
 
     @Override
-    public void onManualMeasure(double height, double weight, double muac, double headCircumference, Loc location, boolean oedema) {
+    public void onManualMeasure(String id, double height, double weight, double muac, double headCircumference, Loc location, boolean oedema) {
         Measure measure = new Measure();
-        measure.setId(AppController.getInstance().getMeasureId());
+        measure.setId(id != null ? id : AppController.getInstance().getMeasureId());
         measure.setDate(System.currentTimeMillis());
         long age = (System.currentTimeMillis() - viewModel.getPerson().getValue().getBirthday()) / 1000 / 60 / 60 / 24;
         measure.setAge(age);
