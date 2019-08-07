@@ -69,6 +69,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
 import de.welthungerhilfe.cgm.scanner.helper.service.HealthInfoService;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
@@ -172,13 +173,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         });
 
         /*
-        fetchRemoteConfig();
-
-        saveFcmToken();
+        RemoteConfig config = session.getRemoteConfig();
+        if (config.isDebug()) {
+            startService(new Intent(this, MemoryMonitorService.class));
+            startService(new Intent(this, HealthInfoService.class));
+        }
         */
-
-        startService(new Intent(this, HealthInfoService.class));
-        startService(new Intent(this, MemoryMonitorService.class));
     }
 
     public void onNewIntent(Intent intent) {
@@ -194,13 +194,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             data.put("user", AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
             data.put("device", device);
             data.put("token", token);
-
-            /*
-            AppController.getInstance().firebaseFirestore.collection("fcm_tokens")
-                    .document(device)
-                    .set(data)
-                    .addOnSuccessListener(aVoid -> session.setFcmSaved(true));
-                    */
         }
     }
 

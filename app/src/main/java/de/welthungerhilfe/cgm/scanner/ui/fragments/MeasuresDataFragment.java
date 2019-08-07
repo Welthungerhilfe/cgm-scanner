@@ -211,9 +211,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     }
 
     @Override
-    public void onManualMeasure(double height, double weight, double muac, double headCircumference, Loc location, boolean oedema) {
+    public void onManualMeasure(String id, double height, double weight, double muac, double headCircumference, Loc location, boolean oedema) {
         Measure measure = new Measure();
-        measure.setId(AppController.getInstance().getMeasureId());
+        measure.setId(id != null ? id : AppController.getInstance().getMeasureId());
         measure.setDate(System.currentTimeMillis());
         long age = (System.currentTimeMillis() - viewModel.getPerson().getValue().getBirthday()) / 1000 / 60 / 60 / 24;
         measure.setAge(age);

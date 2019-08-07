@@ -102,23 +102,17 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     }
     @OnClick(R.id.btnOK)
     void OnConfirm(Button btnOK) {
-        if (validate()) {
-            if (measure != null) {
-                measure.setHeight(Double.parseDouble(editManualHeight.getText().toString()));
-                measure.setWeight(Double.parseDouble(editManualWeight.getText().toString()));
-                measure.setMuac(Double.parseDouble(editManualMuac.getText().toString()));
-                measure.setLocation(location);
-                measure.setOedema(oedema);
-            } else if (measureListener != null) {
-                measureListener.onManualMeasure(
-                        Double.parseDouble(editManualHeight.getText().toString()),
-                        Double.parseDouble(editManualWeight.getText().toString()),
-                        Double.parseDouble(editManualMuac.getText().toString()),
-                        0f,
-                        location,
-                        oedema
-                );
-            }
+        if (validate() && measureListener != null) {
+            measureListener.onManualMeasure(
+                    measure != null ? measure.getId() : null,
+                    Double.parseDouble(editManualHeight.getText().toString()),
+                    Double.parseDouble(editManualWeight.getText().toString()),
+                    Double.parseDouble(editManualMuac.getText().toString()),
+                    0f,
+                    location,
+                    oedema
+            );
+
             dismiss();
         }
     }
@@ -189,6 +183,12 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
     public void dismiss() {
         EventBus.getDefault().unregister(this);
+
+        editManualHeight.setText("");
+        editManualWeight.setText("");
+        editManualMuac.setText("");
+        checkManualOedema.setChecked(false);
+
         super.dismiss();
 
         if (closeListener != null)
@@ -303,7 +303,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     }
 
     public interface OnManualMeasureListener {
-        void onManualMeasure(double height, double weight, double muac, double headCircumference, Loc location, boolean oedema);
+        void onManualMeasure(String id, double height, double weight, double muac, double headCircumference, Loc location, boolean oedema);
     }
 
     public interface OnCloseListener {
