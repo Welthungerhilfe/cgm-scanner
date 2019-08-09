@@ -31,6 +31,7 @@ import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 import com.google.firebase.perf.metrics.AddTrace;
 import com.projecttango.tangosupport.TangoSupport;
 
+import de.welthungerhilfe.cgm.scanner.datasource.models.Artifact_quality;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -118,6 +119,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
     private Semaphore mutex_on_mIsRecording;
 
     private int mode = SCAN_PREVIEW;
+    private int noOfPointclouds;
 
     private FileLogRepository repository;
     private long age = 0;
@@ -205,9 +207,23 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
         switch (mode) {
             case SCAN_STANDING_FRONT:
                 mTitleView.setText(getString(R.string.front_view_01) + " - " + getString(R.string.mode_standing));
+                Artifact_quality ar=new Artifact_quality();
+                ar.setConfidence_value("");
+                ar.setArtifact_id("");
+                ar.setKey(String.valueOf(mode));
+                ar.setMisc("");
+                ar.setType("PCD_POINTS_v0.2");
+                ar.setReal(noOfPointclouds);
                 break;
             case SCAN_STANDING_SIDE:
                 mTitleView.setText(getString(R.string.lateral_view_02) + " - " + getString(R.string.mode_standing));
+                Artifact_quality ar1=new Artifact_quality();
+                ar1.setConfidence_value("");
+                ar1.setArtifact_id("");
+                ar1.setKey(String.valueOf(mode));
+                ar1.setMisc("");
+                ar1.setType("PCD_POINTS_v0.2");
+                ar1.setReal(noOfPointclouds);
                 break;
             case SCAN_STANDING_BACK:
                 mTitleView.setText(getString(R.string.back_view_03) + " - " + getString(R.string.mode_standing));
@@ -527,6 +543,15 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                                     "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
                             TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
                             Log.d("Prajwal", String.valueOf(pointCloudData.numPoints));
+                            Artifact_quality ar=new Artifact_quality();
+                            ar.setConfidence_value("");
+                            ar.setArtifact_id("");
+                            ar.setKey(String.valueOf(mode));
+                            ar.setMisc("");
+                            ar.setType("PCD_POINTS_v0.2");
+                            noOfPointclouds=pointCloudData.numPoints;
+                            ar.setReal(noOfPointclouds);
+                            AppController.getInstance().artifact_qualityRepository.insertArtifact_quality(ar);
                             File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
                             FileLog log = new FileLog();
                             log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));

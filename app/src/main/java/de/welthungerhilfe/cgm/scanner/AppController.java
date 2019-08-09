@@ -27,12 +27,13 @@ import android.os.Environment;
 import android.os.StrictMode;
 import android.util.Log;
 
-//import com.amitshekhar.DebugDB;
+import com.amitshekhar.DebugDB;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
+import de.welthungerhilfe.cgm.scanner.datasource.repository.Artifact_qualityRepository;
 import java.io.File;
 
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
@@ -56,6 +57,7 @@ public class AppController extends Application {
     public PersonRepository personRepository;
     public MeasureRepository measureRepository;
     public FileLogRepository fileLogRepository;
+    public Artifact_qualityRepository artifact_qualityRepository;
 
     public FirebaseRemoteConfig firebaseConfig;
 
@@ -68,6 +70,8 @@ public class AppController extends Application {
 
         personRepository = PersonRepository.getInstance(this);
         measureRepository = MeasureRepository.getInstance(this);
+        artifact_qualityRepository = Artifact_qualityRepository.getInstance(this);
+
         fileLogRepository = FileLogRepository.getInstance(this);
 
         firebaseAuth = FirebaseAuth.getInstance();
@@ -78,7 +82,7 @@ public class AppController extends Application {
         firebaseConfig.setConfigSettings(configSettings);
         firebaseConfig.setDefaults(R.xml.remoteconfig);
 
-        //Log.e("Offline DB", DebugDB.getAddressLog());
+        Log.e("Offline DB", DebugDB.getAddressLog());
         /*
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
