@@ -95,6 +95,11 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     public void onStart() {
         super.onStart();
 
+        RemoteConfig config = session.getRemoteConfig();
+        if (config == null) {
+            session.saveRemoteConfig(new RemoteConfig());
+        }
+
         if (AppController.getInstance().firebaseUser != null && session.isSigned()) {
             Account[] accounts = accountManager.getAccountsByType(AppConstants.ACCOUNT_TYPE);
             if (accounts.length > 0) {
