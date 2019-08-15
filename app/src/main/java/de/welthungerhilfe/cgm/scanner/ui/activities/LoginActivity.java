@@ -32,6 +32,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.microsoft.appcenter.auth.Auth;
+import com.microsoft.appcenter.auth.SignInResult;
+import com.microsoft.appcenter.utils.async.AppCenterConsumer;
 
 import java.util.Date;
 
@@ -162,16 +164,22 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         Auth.signIn().thenAccept(signInResult -> {
 
             if (signInResult.getException() == null) {
-                // Sign-in succeeded.
-                String accountId = signInResult.getUserInformation().getAccountId();
-                int a = 0;
+
+                // Sign-in succeeded if exception is null.
+                // SignInResult is never null, getUserInformation() returns not null when there is no exception.
+                // Both getIdToken() / getAccessToken() return non null values.
+                String idToken = signInResult.getUserInformation().getIdToken();
+                String accessToken = signInResult.getUserInformation().getAccessToken();
+
+                // Do work with either token.
             } else {
+
                 // Do something with sign in failure.
                 Exception signInFailureException = signInResult.getException();
-                int a = 0;
             }
         });
 
+        /*
         if (!Utils.isNetworkConnectionAvailable(LoginActivity.this)) {
             Toast.makeText(LoginActivity.this, R.string.error_network, Toast.LENGTH_LONG).show();
         } else if (validate()) {
@@ -213,5 +221,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                         }
                     });
         }
+        */
     }
 }

@@ -23,9 +23,13 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 public class SplashActivity extends AppCompatActivity {
     public void onCreate(Bundle saveBundle) {
         AppCenter.start(getApplication(), "{APP_CENTER_KEY}", Analytics.class, Crashes.class, Auth.class);
-        boolean isEnabled = Crashes.isEnabled().get();
-        if (!isEnabled)
+        boolean isCrashEnabled = Crashes.isEnabled().get();
+        if (!isCrashEnabled)
             Crashes.setEnabled(true);
+
+        boolean isAuthEnabled = Auth.isEnabled().get();
+        if (!isAuthEnabled)
+            Auth.setEnabled(true);
 
         AbstractCrashesListener customListener = new AbstractCrashesListener() {
             @Override
