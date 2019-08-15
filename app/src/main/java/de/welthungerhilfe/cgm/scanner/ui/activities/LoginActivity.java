@@ -31,6 +31,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.microsoft.appcenter.auth.Auth;
+
 import java.util.Date;
 
 import butterknife.BindString;
@@ -157,6 +159,19 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     }
 
     private void doSignInAction() {
+        Auth.signIn().thenAccept(signInResult -> {
+
+            if (signInResult.getException() == null) {
+                // Sign-in succeeded.
+                String accountId = signInResult.getUserInformation().getAccountId();
+                int a = 0;
+            } else {
+                // Do something with sign in failure.
+                Exception signInFailureException = signInResult.getException();
+                int a = 0;
+            }
+        });
+
         if (!Utils.isNetworkConnectionAvailable(LoginActivity.this)) {
             Toast.makeText(LoginActivity.this, R.string.error_network, Toast.LENGTH_LONG).show();
         } else if (validate()) {
