@@ -33,8 +33,8 @@ then
 
     sed -i '' "s|{GOOGLE_MAPS_KEY}|$GOOGLE_MAPS_KEY|g" $APP_MANIFEST_FILE
 
-    sed -i '' "s|{GOOGLE_MAPS_KEY}|$GOOGLE_MAPS_KEY|g" $APP_MANIFEST_FILE
     sed -i '' "s|{APP_CENTER_KEY}|$APP_CENTER_KEY|g" $APP_MANIFEST_FILE
+    sed -i '' "s|{APP_CENTER_KEY}|$APP_CENTER_KEY|g" $APP_SPLASH_ACTIVITY
 
     echo "File content:"
     cat $APP_CONSTANT_FILE
