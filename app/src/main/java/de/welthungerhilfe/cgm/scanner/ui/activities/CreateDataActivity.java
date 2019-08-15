@@ -86,8 +86,6 @@ public class CreateDataActivity extends BaseActivity {
     public List<Measure> measures;
 
     public String qrCode;
-    public byte[] qrBitmapByteArray;
-    public String qrPath;
 
     @BindView(R.id.container)
     CoordinatorLayout container;
@@ -123,7 +121,6 @@ public class CreateDataActivity extends BaseActivity {
         getCurrentLocation();
 
         qrCode = getIntent().getStringExtra(AppConstants.EXTRA_QR);
-        qrBitmapByteArray = getIntent().getByteArrayExtra(AppConstants.EXTRA_QR_BITMAP);
 
         PersonViewModel viewModel = ViewModelProviders.of(this).get(PersonViewModel.class);
         AppController.getInstance().personRepository.getPerson(qrCode).observe(this, person -> {
@@ -139,12 +136,6 @@ public class CreateDataActivity extends BaseActivity {
 
         setupActionBar();
         initFragments();
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_STORAGE);
-        } else {
-            uploadQR();
-        }
     }
 
     public void onDestroy() {
@@ -179,50 +170,6 @@ public class CreateDataActivity extends BaseActivity {
 
     public void gotoNextStep() {
         viewpager.setCurrentItem(viewpager.getCurrentItem() + 1);
-    }
-
-    private void uploadQR() {
-        if (qrBitmapByteArray == null)
-            return;
-
-        final long timestamp = Utils.getUniversalTimestamp();
-        final String consentFileString = timestamp + "_" + qrCode + ".png";
-
-        File extFileDir = AppController.getInstance().getRootDirectory();
-        File consentFileFolder = new File(extFileDir, AppConstants.LOCAL_CONSENT_URL.replace("{qrcode}", qrCode).replace("{scantimestamp}", String.valueOf(timestamp)));
-        File consentFile = new File(consentFileFolder, consentFileString);
-        if(!consentFileFolder.exists()) {
-            boolean created = consentFileFolder.mkdirs();
-            if (created) {
-                Log.i(TAG, "Folder: \"" + consentFileFolder + "\" created\n");
-            } else {
-                Log.e(TAG,"Folder: \"" + consentFileFolder + "\" could not be created!\n");
-            }
-        }
-
-        try (FileOutputStream fos = new FileOutputStream(consentFile)) {
-            fos.write(qrBitmapByteArray);
-            fos.flush();
-            fos.close();
-
-            // Start MyUploadService to upload the file, so that the file is uploaded
-            // even if this Activity is killed or put in the background
-            FileLog log = new FileLog();
-            log.setId(AppController.getInstance().getArtifactId("consent"));
-            log.setType("consent");
-            log.setPath(consentFile.getPath());
-            log.setHashValue(MD5.getMD5(consentFile.getPath()));
-            log.setFileSize(consentFile.length());
-            log.setUploadDate(0);
-            log.setQrCode(qrCode);
-            log.setDeleted(false);
-            log.setCreateDate(Utils.getUniversalTimestamp());
-            log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-
-            AppController.getInstance().fileLogRepository.insertFileLog(log);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -296,10 +243,6 @@ public class CreateDataActivity extends BaseActivity {
         if (requestCode == PERMISSION_LOCATION) {
             if (grantResults.length > 0 && grantResults[0] >= 0)
                 getCurrentLocation();
-        } else if (requestCode == PERMISSION_STORAGE) {
-            if (grantResults.length > 0 && grantResults[0] >= 0) {
-                uploadQR();
-            }
         }
     }
 
