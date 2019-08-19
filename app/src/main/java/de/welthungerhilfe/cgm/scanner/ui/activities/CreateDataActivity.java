@@ -24,8 +24,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -36,42 +34,25 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
 import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
-import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.GrowthDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasuresDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.events.MeasureResult;
-import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.utils.MD5;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 /**
  * Created by Emerald on 2/19/2018.
@@ -82,12 +63,9 @@ public class CreateDataActivity extends BaseActivity {
     private final int PERMISSION_STORAGE = 0x001;
     private final int PERMISSION_LOCATION = 0x002;
 
-    public Person person;
     public List<Measure> measures;
 
     public String qrCode;
-    public byte[] qrBitmapByteArray;
-    public String qrPath;
 
     @BindView(R.id.container)
     CoordinatorLayout container;
@@ -99,6 +77,7 @@ public class CreateDataActivity extends BaseActivity {
     ViewPager viewpager;
 
     public Loc location = null;
+    private CreateDataViewModel viewModel;
 
     private AddressReceiver receiver = new AddressReceiver(new Handler()) {
         @Override
@@ -118,33 +97,20 @@ public class CreateDataActivity extends BaseActivity {
         setContentView(R.layout.activity_create);
 
         ButterKnife.bind(this);
-        EventBus.getDefault().register(this);
 
         getCurrentLocation();
 
         qrCode = getIntent().getStringExtra(AppConstants.EXTRA_QR);
-        qrBitmapByteArray = getIntent().getByteArrayExtra(AppConstants.EXTRA_QR_BITMAP);
 
-        PersonViewModel viewModel = ViewModelProviders.of(this).get(PersonViewModel.class);
-        AppController.getInstance().personRepository.getPerson(qrCode).observe(this, person -> {
-            if (person == null) {
-                person = new Person();
-                person.setId(AppController.getInstance().getPersonId());
-                person.setQrcode(qrCode);
-                person.setCreatedBy(AppController.getInstance().firebaseUser.getEmail());
+        viewModel = ViewModelProviders.of(this).get(CreateDataViewModel.class);
+        viewModel.getCurrentTab().observe(this, tab -> {
+            if (tab != null) {
+                viewpager.setCurrentItem(tab);
             }
-
-            viewModel.setPerson(person);
         });
 
         setupActionBar();
         initFragments();
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_STORAGE);
-        } else {
-            uploadQR();
-        }
     }
 
     public void onDestroy() {
@@ -175,71 +141,6 @@ public class CreateDataActivity extends BaseActivity {
         viewpager.setAdapter(adapter);
 
         tabs.setupWithViewPager(viewpager);
-    }
-
-    public void gotoNextStep() {
-        viewpager.setCurrentItem(viewpager.getCurrentItem() + 1);
-    }
-
-    private void uploadQR() {
-        if (qrBitmapByteArray == null)
-            return;
-
-        final long timestamp = Utils.getUniversalTimestamp();
-        final String consentFileString = timestamp + "_" + qrCode + ".png";
-
-        File extFileDir = AppController.getInstance().getRootDirectory();
-        File consentFileFolder = new File(extFileDir, AppConstants.LOCAL_CONSENT_URL.replace("{qrcode}", qrCode).replace("{scantimestamp}", String.valueOf(timestamp)));
-        File consentFile = new File(consentFileFolder, consentFileString);
-        if(!consentFileFolder.exists()) {
-            boolean created = consentFileFolder.mkdirs();
-            if (created) {
-                Log.i(TAG, "Folder: \"" + consentFileFolder + "\" created\n");
-            } else {
-                Log.e(TAG,"Folder: \"" + consentFileFolder + "\" could not be created!\n");
-            }
-        }
-
-        try (FileOutputStream fos = new FileOutputStream(consentFile)) {
-            fos.write(qrBitmapByteArray);
-            fos.flush();
-            fos.close();
-
-            // Start MyUploadService to upload the file, so that the file is uploaded
-            // even if this Activity is killed or put in the background
-            FileLog log = new FileLog();
-            log.setId(AppController.getInstance().getArtifactId("consent"));
-            log.setType("consent");
-            log.setPath(consentFile.getPath());
-            log.setHashValue(MD5.getMD5(consentFile.getPath()));
-            log.setFileSize(consentFile.length());
-            log.setUploadDate(0);
-            log.setQrCode(qrCode);
-            log.setDeleted(false);
-            log.setCreateDate(Utils.getUniversalTimestamp());
-            log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-
-            AppController.getInstance().fileLogRepository.insertFileLog(log);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(MeasureResult event) {
-        final Measure measure = event.getMeasureResult();
-        long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
-        measure.setAge(age);
-        measure.setType(AppConstants.VAL_MEASURE_AUTO);
-        measure.setTimestamp(Utils.getUniversalTimestamp());
-        measure.setPersonId(person.getId());
-        measure.setId(AppController.getInstance().getMeasureId());
-        measure.setLocation(location);
-
-        AppController.getInstance().measureRepository.insertMeasure(measure);
-
-        person.setLastLocation(location);
-        AppController.getInstance().personRepository.updatePerson(person);
     }
 
     @Override
@@ -296,10 +197,6 @@ public class CreateDataActivity extends BaseActivity {
         if (requestCode == PERMISSION_LOCATION) {
             if (grantResults.length > 0 && grantResults[0] >= 0)
                 getCurrentLocation();
-        } else if (requestCode == PERMISSION_STORAGE) {
-            if (grantResults.length > 0 && grantResults[0] >= 0) {
-                uploadQR();
-            }
         }
     }
 

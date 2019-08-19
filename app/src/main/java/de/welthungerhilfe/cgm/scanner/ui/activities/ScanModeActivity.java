@@ -385,8 +385,11 @@ public class ScanModeActivity extends AppCompatActivity {
 
         person.setLastMeasure(measure);
 
+        // todo: insert measure to room database and update person's last measurement
+        /*
         AppController.getInstance().measureRepository.insertMeasure(measure);
         AppController.getInstance().personRepository.insertPerson(person);
+        */
 
         finish();
     }

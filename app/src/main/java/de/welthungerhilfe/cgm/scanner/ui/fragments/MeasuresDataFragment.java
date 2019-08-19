@@ -21,7 +21,6 @@ package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -44,7 +43,7 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
-import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
@@ -72,7 +71,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     private ManualMeasureDialog measureDialog;
     private ManualDetailDialog detailDialog;
 
-    private PersonViewModel viewModel;
+    private CreateDataViewModel viewModel;
 
     @Override
     public void onAttach(Context context) {
@@ -86,8 +85,11 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     public void onActivityCreated(Bundle instance) {
         super.onActivityCreated(instance);
 
-        viewModel = ViewModelProviders.of(getActivity()).get(PersonViewModel.class);
-        viewModel.getMeasuresLiveData().observe(this, measures -> adapterMeasure.resetData(measures));
+        viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
+        viewModel.getMeasuresLiveData().observe(this, measures -> {
+            if (measures != null)
+                adapterMeasure.resetData(measures);
+        });
     }
 
     public void onResume() {
@@ -231,7 +233,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
         measure.setQrCode(viewModel.getPerson().getValue().getQrcode());
 
-        AppController.getInstance().measureRepository.insertMeasure(measure);
+        viewModel.insertMeasure(measure);
 
         ((CreateDataActivity)getActivity()).gotoNextStep();
     }

@@ -51,7 +51,7 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
 
@@ -70,7 +70,7 @@ public class GrowthDataFragment extends Fragment {
 
     private int chartType = 0;
 
-    private PersonViewModel viewModel;
+    private CreateDataViewModel viewModel;
     private List<Measure> measures;
 
     public void onAttach(Context context) {
@@ -82,10 +82,10 @@ public class GrowthDataFragment extends Fragment {
     public void onActivityCreated(Bundle instance) {
         super.onActivityCreated(instance);
 
-        viewModel = ViewModelProviders.of(getActivity()).get(PersonViewModel.class);
+        viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
         viewModel.getMeasuresLiveData().observe(this, measures -> {
             this.measures = measures;
-            setData();
+            // setData();
         });
     }
 

@@ -23,8 +23,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.StrictMode;
+import android.util.Log;
 
 //import com.amitshekhar.DebugDB;
+import com.amitshekhar.DebugDB;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -48,10 +50,6 @@ public class AppController extends Application {
     public FirebaseAuth firebaseAuth;
     public FirebaseUser firebaseUser;
 
-    public PersonRepository personRepository;
-    public MeasureRepository measureRepository;
-    public FileLogRepository fileLogRepository;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -59,14 +57,10 @@ public class AppController extends Application {
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
         Utils.overrideFont(getApplicationContext(), "SERIF", "roboto.ttf");
 
-        personRepository = PersonRepository.getInstance(this);
-        measureRepository = MeasureRepository.getInstance(this);
-        fileLogRepository = FileLogRepository.getInstance(this);
-
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
 
-        //Log.e("Offline DB", DebugDB.getAddressLog());
+        Log.e("Offline DB", DebugDB.getAddressLog());
         /*
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
