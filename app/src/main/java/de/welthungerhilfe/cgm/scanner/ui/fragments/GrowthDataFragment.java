@@ -94,11 +94,11 @@ public class GrowthDataFragment extends Fragment {
         super.onActivityCreated(instance);
 
         viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
-        viewModel.getPersonLiveData(qrCode).observe(this, person -> {
+        viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
             setData();
         });
-        viewModel.getMeasuresLiveData().observe(this, measures -> {
+        viewModel.getMeasuresLiveData().observe(getViewLifecycleOwner(), measures -> {
             this.measures = measures;
             setData();
         });

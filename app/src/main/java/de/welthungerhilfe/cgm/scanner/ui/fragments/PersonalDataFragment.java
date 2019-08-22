@@ -44,6 +44,7 @@ import java.util.Date;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
@@ -89,9 +90,13 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         super.onActivityCreated(instance);
 
         viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
-        viewModel.getPersonLiveData(qrCode).observe(this, person -> {
+        viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
             initUI();
+        });
+        viewModel.getLastMeasureLiveData().observe(getViewLifecycleOwner(), measure -> {
+            if (measure != null)
+                showLastLocation(measure);
         });
     }
 
@@ -146,10 +151,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         editBirth.setText(Utils.beautifyDate(person.getBirthday()));
         editGuardian.setText(person.getGuardian());
 
-        if (person.getLastLocation() != null) {
-            editLocation.setText(person.getLastLocation().getAddress());
-        }
-
         if (person.getSex().equals(AppConstants.VAL_SEX_FEMALE)) {
             radioFemale.setChecked(true);
         } else if (person.getSex().equals(AppConstants.VAL_SEX_MALE)) {
@@ -157,6 +158,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         }
 
         checkAge.setChecked(person.isAgeEstimated());
+    }
+
+    private void showLastLocation(Measure measure) {
+        if (measure.getLocation() != null)
+            editLocation.setText(measure.getLocation().getAddress());
     }
 
     public boolean validate() {

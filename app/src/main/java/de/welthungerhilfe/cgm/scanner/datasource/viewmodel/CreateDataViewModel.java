@@ -19,6 +19,7 @@ public class CreateDataViewModel extends AndroidViewModel {
 
     private LiveData<Person> personLiveData;
     private LiveData<List<Measure>> measuresLiveData;
+    private LiveData<Measure> lastMeasureLiveData;
 
     private MutableLiveData<Integer> tabLiveData;
 
@@ -59,6 +60,18 @@ public class CreateDataViewModel extends AndroidViewModel {
         });
 
         return measuresLiveData;
+    }
+
+    public LiveData<Measure> getLastMeasureLiveData() {
+        lastMeasureLiveData = Transformations.switchMap(personLiveData, person -> {
+            if (person == null)
+                return null;
+            else {
+                return measureRepository.getPersonLastMeasureLiveData(person.getId());
+            }
+        });
+
+        return lastMeasureLiveData;
     }
 
     public void savePerson(Person person) {

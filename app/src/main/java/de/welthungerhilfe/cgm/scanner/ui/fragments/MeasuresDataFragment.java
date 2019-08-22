@@ -97,10 +97,10 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         super.onActivityCreated(instance);
 
         viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
-        viewModel.getPersonLiveData(qrCode).observe(this, person -> {
+        viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
         });
-        viewModel.getMeasuresLiveData().observe(this, measures -> {
+        viewModel.getMeasuresLiveData().observe(getViewLifecycleOwner(), measures -> {
             if (measures != null)
                 adapterMeasure.resetData(measures);
         });
