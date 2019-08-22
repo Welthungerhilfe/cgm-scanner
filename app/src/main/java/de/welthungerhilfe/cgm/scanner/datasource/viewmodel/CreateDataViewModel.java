@@ -33,7 +33,23 @@ public class CreateDataViewModel extends AndroidViewModel {
 
         tabLiveData = new MutableLiveData<>();
         tabLiveData.setValue(0);
+    }
 
+    public LiveData<Integer> getCurrentTab() {
+        return tabLiveData;
+    }
+
+    private void setActiveTab(int tab) {
+        tabLiveData.setValue(tab);
+    }
+
+    public LiveData<Person> getPersonLiveData(String qrCode) {
+        personLiveData = personRepository.getPerson(qrCode);
+
+        return personLiveData;
+    }
+
+    public LiveData<List<Measure>> getMeasuresLiveData() {
         measuresLiveData = Transformations.switchMap(personLiveData, person -> {
             if (person == null)
                 return null;
@@ -41,50 +57,12 @@ public class CreateDataViewModel extends AndroidViewModel {
                 return measureRepository.getPersonMeasures(person.getId());
             }
         });
-    }
 
-    public LiveData<Person> getPerson() {
-        return personLiveData;
-    }
-
-    public LiveData<Integer> getCurrentTab() {
-        return tabLiveData;
-    }
-
-    public void setActiveTab(int tab) {
-        tabLiveData.setValue(tab);
-    }
-
-    public void setPerson(Person person) {
-        personLiveData.setValue(person);
-    }
-
-    public LiveData<Person> getPersonLiveData(String qrCode) {
-        LiveData<Person> liveData = personRepository.getPerson(qrCode);
-
-        measuresLiveData = Transformations.switchMap(liveData, person -> {
-            if (person == null)
-                return null;
-            else {
-                return measureRepository.getPersonMeasures(person.getId());
-            }
-        });
-
-        return liveData;
-    }
-
-    public LiveData<List<Measure>> getMeasures(String personId) {
-        return measureRepository.getPersonMeasures(personId);
-    }
-
-    public LiveData<List<Measure>> getMeasuresLiveData() {
         return measuresLiveData;
     }
 
     public void savePerson(Person person) {
         personRepository.insertPerson(person);
-
-        personLiveData.setValue(person);
 
         setActiveTab(1);
     }

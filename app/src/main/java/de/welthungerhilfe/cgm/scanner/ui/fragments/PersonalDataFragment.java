@@ -70,6 +70,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     private CreateDataViewModel viewModel;
     private String qrCode;
+    private Person person;
 
     public static PersonalDataFragment getInstance(String qrCode) {
         PersonalDataFragment fragment = new PersonalDataFragment();
@@ -89,8 +90,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(this, person -> {
-            if (person != null)
-                initUI(person);
+            this.person = person;
+            initUI();
         });
     }
 
@@ -134,7 +135,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         return view;
     }
 
-    public void initUI(Person person) {
+    public void initUI() {
+        if (person == null)
+            return;
+
         txtDate.setText(Utils.beautifyDate(person.getCreated()));
 
         editName.setText(person.getName());
@@ -224,8 +228,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         sex = radioMale.getText().toString();
                     else if (radioFemale.isChecked())
                         sex = radioFemale.getText().toString();
-
-                    Person person = viewModel.getPerson().getValue();
 
                     if (person == null) {
                         person = new Person();

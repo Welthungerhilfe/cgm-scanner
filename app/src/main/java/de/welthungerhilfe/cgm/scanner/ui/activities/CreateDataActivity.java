@@ -28,6 +28,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -63,8 +64,6 @@ public class CreateDataActivity extends BaseActivity {
     private final int PERMISSION_STORAGE = 0x001;
     private final int PERMISSION_LOCATION = 0x002;
 
-    public List<Measure> measures;
-
     public String qrCode;
 
     @BindView(R.id.container)
@@ -77,7 +76,6 @@ public class CreateDataActivity extends BaseActivity {
     ViewPager viewpager;
 
     public Loc location = null;
-    private CreateDataViewModel viewModel;
 
     private AddressReceiver receiver = new AddressReceiver(new Handler()) {
         @Override
@@ -95,22 +93,19 @@ public class CreateDataActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create);
-
         ButterKnife.bind(this);
 
         getCurrentLocation();
 
         qrCode = getIntent().getStringExtra(AppConstants.EXTRA_QR);
 
-        viewModel = ViewModelProviders.of(this).get(CreateDataViewModel.class);
-        viewModel.getCurrentTab().observe(this, tab -> {
-            if (tab != null) {
-                viewpager.setCurrentItem(tab);
-            }
-        });
-
         setupActionBar();
         initFragments();
+
+        CreateDataViewModel viewModel = ViewModelProviders.of(this).get(CreateDataViewModel.class);
+        viewModel.getCurrentTab().observe(this, tab -> {
+            viewpager.setCurrentItem(tab);
+        });
     }
 
     public void onDestroy() {
@@ -129,9 +124,9 @@ public class CreateDataActivity extends BaseActivity {
     }
 
     private void initFragments() {
-        PersonalDataFragment personalFragment = new PersonalDataFragment();
-        MeasuresDataFragment measureFragment = new MeasuresDataFragment();
-        GrowthDataFragment growthFragment = new GrowthDataFragment();
+        PersonalDataFragment personalFragment = PersonalDataFragment.getInstance(qrCode);
+        MeasuresDataFragment measureFragment = MeasuresDataFragment.getInstance(qrCode);
+        GrowthDataFragment growthFragment = GrowthDataFragment.getInstance(qrCode);
 
         FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
         adapter.addFragment(personalFragment, getResources().getString(R.string.tab_personal));
@@ -166,7 +161,7 @@ public class CreateDataActivity extends BaseActivity {
 
             if (!isGPSEnabled && !isNetworkEnabled) {
                 startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-            } else if (isNetworkEnabled || isGPSEnabled) {
+            } else {
                 List<String> providers = lm.getProviders(true);
                 for (String provider : providers) {
                     Location l = lm.getLastKnownLocation(provider);
@@ -178,7 +173,6 @@ public class CreateDataActivity extends BaseActivity {
                     }
                 }
                 if (loc != null) {
-                    // new AddressTask(loc.getLatitude(), loc.getLongitude(), this).execute();
                     location = new Loc();
                     location.setLatitude(loc.getLatitude());
                     location.setLongitude(loc.getLongitude());
@@ -193,7 +187,7 @@ public class CreateDataActivity extends BaseActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PERMISSION_LOCATION) {
             if (grantResults.length > 0 && grantResults[0] >= 0)
                 getCurrentLocation();

@@ -70,8 +70,19 @@ public class GrowthDataFragment extends Fragment {
 
     private int chartType = 0;
 
+    public String qrCode;
+
+
     private CreateDataViewModel viewModel;
-    private List<Measure> measures;
+    private Person person;
+    private List<Measure> measures = new ArrayList<>();
+
+    public static GrowthDataFragment getInstance(String qrCode) {
+        GrowthDataFragment fragment = new GrowthDataFragment();
+        fragment.qrCode = qrCode;
+
+        return fragment;
+    }
 
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -83,9 +94,13 @@ public class GrowthDataFragment extends Fragment {
         super.onActivityCreated(instance);
 
         viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
+        viewModel.getPersonLiveData(qrCode).observe(this, person -> {
+            this.person = person;
+            setData();
+        });
         viewModel.getMeasuresLiveData().observe(this, measures -> {
             this.measures = measures;
-            // setData();
+            setData();
         });
     }
 
@@ -156,9 +171,7 @@ public class GrowthDataFragment extends Fragment {
     }
 
     public void setData() {
-        Person person = viewModel.getPerson().getValue();
-
-        if (person.getCreated() == 0)
+        if (person == null || measures == null)
             return;
 
         txtLabel.setText(person.getSex());
