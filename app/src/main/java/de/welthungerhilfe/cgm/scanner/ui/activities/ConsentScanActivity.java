@@ -13,8 +13,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
+import android.graphics.YuvImage;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -56,6 +58,7 @@ import com.google.zxing.qrcode.QRCodeReader;
 
 import org.w3c.dom.Text;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -231,10 +234,7 @@ public class ConsentScanActivity extends AppCompatActivity {
      */
     private ImageReader mImageReader;
 
-    /**
-     * This is the output file for our picture.
-     */
-    private File mFile;
+    private ImageSaver imageSaver;
 
     /**
      * This a callback object for the {@link ImageReader}. "onImageAvailable" will be called when a
@@ -246,19 +246,36 @@ public class ConsentScanActivity extends AppCompatActivity {
         public void onImageAvailable(ImageReader reader) {
             Image image = reader.acquireLatestImage();
 
+            int width = image.getWidth();
+            int height = image.getHeight();
+
+            Image.Plane Y = image.getPlanes()[0];
+            Image.Plane U = image.getPlanes()[1];
+            Image.Plane V = image.getPlanes()[2];
+
+            int Yb = Y.getBuffer().remaining();
+            int Ub = U.getBuffer().remaining();
+            int Vb = V.getBuffer().remaining();
+
+            byte[] tmp = new byte[Yb + Ub + Vb];
+            Y.getBuffer().get(tmp, 0, Yb);
+            byte[] data = tmp.clone();
+            U.getBuffer().get(tmp, Yb, Ub);
+            V.getBuffer().get(tmp, Yb+ Ub, Vb);
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            YuvImage yuv = new YuvImage(tmp, ImageFormat.NV21, width, height, null);
+            yuv.compressToJpeg(new Rect(0, 0, width, height), 100, out);
+
             Result rawResult;
             try {
-                ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-                byte[] data = new byte[buffer.remaining()];
-                buffer.get(data);
-                int width = image.getWidth();
-                int height = image.getHeight();
                 PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(data, width, height, 0, 0, width, height, false);
                 BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 
                 rawResult = mQrCodeReader.decode(bitmap);
 
                 qrCode = rawResult.getText();
+                imageSaver = new ImageSaver(out.toByteArray());
 
                 runOnUiThread(()->{
                     ConfirmDialog confirmDialog = new ConfirmDialog(ConsentScanActivity.this);
@@ -278,7 +295,6 @@ public class ConsentScanActivity extends AppCompatActivity {
                 });
             } finally {
                 mQrCodeReader.reset();
-                // mBackgroundHandler.post(new ImageSaver(image, mFile));
                 image.close();
             }
         }
@@ -484,6 +500,8 @@ public class ConsentScanActivity extends AppCompatActivity {
         Intent intent = new Intent(this, CreateDataActivity.class);
         intent.putExtra(AppConstants.EXTRA_QR, qrCode);
         startActivity(intent);
+
+        mBackgroundHandler.post(imageSaver);
     }
 
     protected void onCreate(Bundle savedBundle) {
@@ -495,7 +513,6 @@ public class ConsentScanActivity extends AppCompatActivity {
     }
 
     private void initVariables() {
-        mFile = new File(getExternalFilesDir(null), "pic.jpg");
         mQrCodeReader = new QRCodeReader();
     }
 
@@ -523,14 +540,7 @@ public class ConsentScanActivity extends AppCompatActivity {
     }
 
     private void requestCameraPermission() {
-        /*
-        if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
-            new ConfirmationDialog().show(getChildFragmentManager(), FRAGMENT_DIALOG);
-        } else {
-            requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
-        }
-        */
-        requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+        requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CAMERA_PERMISSION);
     }
 
     @Override
@@ -930,7 +940,7 @@ public class ConsentScanActivity extends AppCompatActivity {
         private final byte[] data;
 
         ImageSaver(byte[] data) {
-            this.data = data;
+            this.data = data.clone();
         }
 
         @Override
@@ -978,6 +988,8 @@ public class ConsentScanActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
+
+                finish();
             }
         }
 
@@ -993,38 +1005,6 @@ public class ConsentScanActivity extends AppCompatActivity {
             // We cast here to ensure the multiplications won't overflow
             return Long.signum((long) lhs.getWidth() * lhs.getHeight() -
                     (long) rhs.getWidth() * rhs.getHeight());
-        }
-
-    }
-
-    /**
-     * Shows an error message dialog.
-     */
-    public static class ErrorDialog extends DialogFragment {
-
-        private static final String ARG_MESSAGE = "message";
-
-        public static ErrorDialog newInstance(String message) {
-            ErrorDialog dialog = new ErrorDialog();
-            Bundle args = new Bundle();
-            args.putString(ARG_MESSAGE, message);
-            dialog.setArguments(args);
-            return dialog;
-        }
-
-        @NonNull
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            final Activity activity = getActivity();
-            return new AlertDialog.Builder(activity)
-                    .setMessage(getArguments().getString(ARG_MESSAGE))
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            activity.finish();
-                        }
-                    })
-                    .create();
         }
 
     }
