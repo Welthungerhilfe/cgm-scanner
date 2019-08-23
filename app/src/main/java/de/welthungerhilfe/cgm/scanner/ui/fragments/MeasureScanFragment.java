@@ -207,23 +207,9 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
         switch (mode) {
             case SCAN_STANDING_FRONT:
                 mTitleView.setText(getString(R.string.front_view_01) + " - " + getString(R.string.mode_standing));
-                Artifact_quality ar=new Artifact_quality();
-                ar.setConfidence_value("");
-                ar.setArtifact_id("");
-                ar.setKey(String.valueOf(mode));
-                ar.setMisc("");
-                ar.setType("PCD_POINTS_v0.2");
-                ar.setReal(noOfPointclouds);
                 break;
             case SCAN_STANDING_SIDE:
                 mTitleView.setText(getString(R.string.lateral_view_02) + " - " + getString(R.string.mode_standing));
-                Artifact_quality ar1=new Artifact_quality();
-                ar1.setConfidence_value("");
-                ar1.setArtifact_id("");
-                ar1.setKey(String.valueOf(mode));
-                ar1.setMisc("");
-                ar1.setType("PCD_POINTS_v0.2");
-                ar1.setReal(noOfPointclouds);
                 break;
             case SCAN_STANDING_BACK:
                 mTitleView.setText(getString(R.string.back_view_03) + " - " + getString(R.string.mode_standing));
@@ -544,8 +530,8 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
                             Log.d("Prajwal", String.valueOf(pointCloudData.numPoints));
                             Artifact_quality ar=new Artifact_quality();
-                            ar.setConfidence_value("");
-                            ar.setArtifact_id("");
+                            ar.setConfidence_value(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
+                            ar.setArtifact_id(AppController.getInstance().getArtifactId("pcd"));
                             ar.setKey(String.valueOf(mode));
                             ar.setMisc("");
                             ar.setType("PCD_POINTS_v0.2");
