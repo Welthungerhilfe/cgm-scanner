@@ -38,6 +38,7 @@ import butterknife.OnClick;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
 import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasureScanFragment;
@@ -233,6 +234,8 @@ public class ScanModeActivity extends AppCompatActivity {
     public Measure measure;
     public Loc location;
 
+    private MeasureRepository measureRepository;
+
     protected void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
@@ -243,6 +246,8 @@ public class ScanModeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_scan_mode);
 
         ButterKnife.bind(this);
+
+        measureRepository = MeasureRepository.getInstance(this);
 
         setupToolbar();
 
@@ -365,7 +370,6 @@ public class ScanModeActivity extends AppCompatActivity {
 
         if (location != null) {
             measure.setLocation(location);
-            person.setLastLocation(location);
         }
 
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
@@ -383,10 +387,7 @@ public class ScanModeActivity extends AppCompatActivity {
         measure.setTimestamp(Utils.getUniversalTimestamp());
         measure.setQrCode(person.getQrcode());
 
-        person.setLastMeasure(measure);
-
-        AppController.getInstance().measureRepository.insertMeasure(measure);
-        AppController.getInstance().personRepository.insertPerson(person);
+        measureRepository.insertMeasure(measure);
 
         finish();
     }

@@ -51,7 +51,7 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
 
@@ -70,8 +70,19 @@ public class GrowthDataFragment extends Fragment {
 
     private int chartType = 0;
 
-    private PersonViewModel viewModel;
-    private List<Measure> measures;
+    public String qrCode;
+
+
+    private CreateDataViewModel viewModel;
+    private Person person;
+    private List<Measure> measures = new ArrayList<>();
+
+    public static GrowthDataFragment getInstance(String qrCode) {
+        GrowthDataFragment fragment = new GrowthDataFragment();
+        fragment.qrCode = qrCode;
+
+        return fragment;
+    }
 
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -82,8 +93,12 @@ public class GrowthDataFragment extends Fragment {
     public void onActivityCreated(Bundle instance) {
         super.onActivityCreated(instance);
 
-        viewModel = ViewModelProviders.of(getActivity()).get(PersonViewModel.class);
-        viewModel.getMeasuresLiveData().observe(this, measures -> {
+        viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
+        viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
+            this.person = person;
+            setData();
+        });
+        viewModel.getMeasuresLiveData().observe(getViewLifecycleOwner(), measures -> {
             this.measures = measures;
             setData();
         });
@@ -156,9 +171,7 @@ public class GrowthDataFragment extends Fragment {
     }
 
     public void setData() {
-        Person person = viewModel.getPerson().getValue();
-
-        if (person.getCreated() == 0)
+        if (person == null || measures == null)
             return;
 
         txtLabel.setText(person.getSex());

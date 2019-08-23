@@ -19,49 +19,36 @@
 
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
-import android.app.Activity;
 import android.app.DialogFragment;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
-import com.bumptech.glide.Glide;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.StorageReference;
 
 import java.util.Date;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonViewModel;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
-import de.welthungerhilfe.cgm.scanner.ui.activities.ImageDetailActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -82,7 +69,16 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private Button btnNext;
     private long birthday = 0;
 
-    private PersonViewModel viewModel;
+    private CreateDataViewModel viewModel;
+    private String qrCode;
+    private Person person;
+
+    public static PersonalDataFragment getInstance(String qrCode) {
+        PersonalDataFragment fragment = new PersonalDataFragment();
+        fragment.qrCode = qrCode;
+
+        return fragment;
+    }
     
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -93,10 +89,14 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void onActivityCreated(Bundle instance) {
         super.onActivityCreated(instance);
 
-        viewModel = ViewModelProviders.of(getActivity()).get(PersonViewModel.class);
-        viewModel.getPerson().observe(this, person -> {
-            if (person.getCreated() > 0)
-                initUI(person);
+        viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
+        viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
+            this.person = person;
+            initUI();
+        });
+        viewModel.getLastMeasureLiveData().observe(getViewLifecycleOwner(), measure -> {
+            if (measure != null)
+                showLastLocation(measure);
         });
     }
 
@@ -140,17 +140,16 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         return view;
     }
 
-    public void initUI(Person person) {
+    public void initUI() {
+        if (person == null)
+            return;
+
         txtDate.setText(Utils.beautifyDate(person.getCreated()));
 
         editName.setText(person.getName());
         editPrename.setText(person.getSurname());
         editBirth.setText(Utils.beautifyDate(person.getBirthday()));
         editGuardian.setText(person.getGuardian());
-
-        if (person.getLastLocation() != null) {
-            editLocation.setText(person.getLastLocation().getAddress());
-        }
 
         if (person.getSex().equals(AppConstants.VAL_SEX_FEMALE)) {
             radioFemale.setChecked(true);
@@ -161,12 +160,16 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         checkAge.setChecked(person.isAgeEstimated());
     }
 
+    private void showLastLocation(Measure measure) {
+        if (measure.getLocation() != null)
+            editLocation.setText(measure.getLocation().getAddress());
+    }
+
     public boolean validate() {
         boolean valid = true;
 
         String name = editName.getText().toString();
         String prename = editPrename.getText().toString();
-        // TODO fix String location = editLocation.getText().toString();
         String birth = editBirth.getText().toString();
         String guardian = editGuardian.getText().toString();
 
@@ -232,7 +235,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     else if (radioFemale.isChecked())
                         sex = radioFemale.getText().toString();
 
-                    Person person = viewModel.getPerson().getValue();
+                    if (person == null) {
+                        person = new Person();
+                        person.setId(AppController.getInstance().getPersonId());
+                        person.setQrcode(qrCode);
+                    }
 
                     person.setName(editName.getText().toString());
                     person.setSurname(editPrename.getText().toString());
@@ -246,7 +253,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
                     viewModel.savePerson(person);
-                    ((CreateDataActivity)getActivity()).gotoNextStep();
                 }
 
                 break;

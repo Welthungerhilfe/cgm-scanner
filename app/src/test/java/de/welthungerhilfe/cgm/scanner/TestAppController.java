@@ -1,22 +1,17 @@
 package de.welthungerhilfe.cgm.scanner;
 
 import android.content.Context;
-import android.test.mock.MockApplication;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-
-import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TestAppController {
