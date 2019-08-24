@@ -77,6 +77,7 @@ import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.AutoFitTextureView;
@@ -94,6 +95,7 @@ public class ConsentScanActivity extends AppCompatActivity {
     private static final String FRAGMENT_DIALOG = "dialog";
 
     private QRCodeReader mQrCodeReader;
+    private FileLogRepository fileLogRepository;
 
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -514,6 +516,7 @@ public class ConsentScanActivity extends AppCompatActivity {
 
     private void initVariables() {
         mQrCodeReader = new QRCodeReader();
+        fileLogRepository = FileLogRepository.getInstance(this);
     }
 
     @Override
@@ -977,7 +980,7 @@ public class ConsentScanActivity extends AppCompatActivity {
                 log.setCreateDate(Utils.getUniversalTimestamp());
                 log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
-                AppController.getInstance().fileLogRepository.insertFileLog(log);
+                fileLogRepository.insertFileLog(log);
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
