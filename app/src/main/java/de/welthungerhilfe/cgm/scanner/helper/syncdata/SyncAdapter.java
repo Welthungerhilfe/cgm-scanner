@@ -27,6 +27,9 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasuresLoad;
@@ -48,10 +51,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     private CloudQueue measureQueue;
     private CloudQueue artifactQueue;
 
+    private PersonRepository personRepository;
+    private MeasureRepository measureRepository;
+    private FileLogRepository fileLogRepository;
+
     private SessionManager session;
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
+
+        personRepository = PersonRepository.getInstance(context);
+        measureRepository = MeasureRepository.getInstance(context);
+        fileLogRepository = FileLogRepository.getInstance(context);
 
         session = new SessionManager(context);
     }
@@ -131,9 +142,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     private void startSyncing() {
         prevTimestamp = session.getSyncTimestamp();
 
-        AppController.getInstance().personRepository.getSyncablePerson(this, prevTimestamp);
-        AppController.getInstance().measureRepository.getSyncableMeasure(this, prevTimestamp);
-        AppController.getInstance().fileLogRepository.getSyncableLog(this, prevTimestamp);
+        personRepository.getSyncablePerson(this, prevTimestamp);
+        measureRepository.getSyncableMeasure(this, prevTimestamp);
+        fileLogRepository.getSyncableLog(this, prevTimestamp);
     }
 
     @AddTrace(name = "syncImmediately", enabled = true)

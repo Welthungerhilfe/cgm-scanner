@@ -80,6 +80,10 @@ public class MeasureRepository {
         return database.measureDao().getPersonMeasures(personId);
     }
 
+    public LiveData<Measure> getPersonLastMeasureLiveData(String personId) {
+        return database.measureDao().getLastMeasureLiveData(personId);
+    }
+
     public int getOwnMeasureCount() {
         return database.measureDao().getOwnMeasureCount(AppController.getInstance().firebaseUser.getEmail());
     }

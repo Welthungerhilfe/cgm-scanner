@@ -24,15 +24,11 @@ import android.content.Intent;
 import android.os.Environment;
 import android.os.StrictMode;
 
-//import com.amitshekhar.DebugDB;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.io.File;
 
-import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -48,20 +44,12 @@ public class AppController extends Application {
     public FirebaseAuth firebaseAuth;
     public FirebaseUser firebaseUser;
 
-    public PersonRepository personRepository;
-    public MeasureRepository measureRepository;
-    public FileLogRepository fileLogRepository;
-
     @Override
     public void onCreate() {
         super.onCreate();
 
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
         Utils.overrideFont(getApplicationContext(), "SERIF", "roboto.ttf");
-
-        personRepository = PersonRepository.getInstance(this);
-        measureRepository = MeasureRepository.getInstance(this);
-        fileLogRepository = FileLogRepository.getInstance(this);
 
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
