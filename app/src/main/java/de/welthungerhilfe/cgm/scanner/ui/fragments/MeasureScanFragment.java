@@ -119,7 +119,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
     private Semaphore mutex_on_mIsRecording;
 
     private int mode = SCAN_PREVIEW;
-    private int noOfPointclouds;
+    private int noOfPoints;
 
     private FileLogRepository repository;
     private long age = 0;
@@ -535,8 +535,10 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             ar.setKey(String.valueOf(mode));
                             ar.setMisc("");
                             ar.setType("PCD_POINTS_v0.2");
-                            noOfPointclouds=pointCloudData.numPoints;
-                            ar.setReal(noOfPointclouds);
+                            noOfPoints=pointCloudData.numPoints;
+                            ar.setReal(noOfPoints);
+                            double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
+                            double Scan_Duration_Penalty=Math.abs((double)noOfPoints/8-1)*100;
                             AppController.getInstance().artifact_qualityRepository.insertArtifact_quality(ar);
                             File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
                             FileLog log = new FileLog();

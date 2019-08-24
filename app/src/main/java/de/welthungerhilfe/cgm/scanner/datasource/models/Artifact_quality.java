@@ -14,13 +14,12 @@ import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TAB
 @Entity(tableName = TABLE_ARTIFACT_QUALITY)
 public class Artifact_quality implements Serializable {
     private String type;
-    @PrimaryKey
-    @NonNull
     private String key;
     private double real;
     private String confidence_value;
     private String misc;
-
+    @PrimaryKey
+    @NonNull
     @ForeignKey(entity = Measure.class, parentColumns = "id", childColumns = "artifact_id", onDelete = CASCADE, onUpdate = CASCADE)
     private String artifact_id;
 
