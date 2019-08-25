@@ -40,6 +40,9 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
 import java.io.BufferedReader;
@@ -48,6 +51,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -58,8 +63,8 @@ import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
 public class GrowthDataFragment extends Fragment {
     private Context context;
 
-    private final String[] boys = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "hcfa_boys_p_exp.txt", "acfa_boys_p_exp.txt"};
-    private final String[] girls = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "hcfa_girls_p_exp.txt", "acfa_girls_p_exp.txt"};
+    private final String[] boys = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
+    private final String[] girls = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
 
     private LineChart mChart;
 
@@ -199,43 +204,6 @@ public class GrowthDataFragment extends Fragment {
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
 
-        // ----------------------- Line for manual measures -------------------------- //
-        ArrayList<Entry> entries = new ArrayList<>();
-
-        double maxHeight = 0;
-
-        for (Measure measure : measures) {
-            if (!measure.getType().equals("manual"))
-                continue;
-
-            if (measure.getHeight() > maxHeight)
-                maxHeight = measure.getHeight();
-
-            long day = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
-
-            switch (chartType) {
-                case 0:
-                    entries.add(new Entry(day, (float) measure.getWeight()));
-                    break;
-                case 1:
-                    entries.add(new Entry(day, (float) measure.getHeight()));
-                    break;
-                case 2:
-                    entries.add(new Entry((float) measure.getHeight(), (float) measure.getWeight()));
-                    Collections.sort(entries, (o1, o2) -> Float.compare(o1.getX(), o2.getX()));
-                    break;
-                case 3:
-                    entries.add(new Entry(day, (float) measure.getMuac()));
-                    break;
-            }
-        }
-
-        if (entries.size() > 1)
-            dataSets.add(createDataSet(entries, "measure", Color.rgb(0, 0, 0), 3f, false));
-        else {
-            dataSets.add(createDataSet(entries, "measure", Color.rgb(0, 0, 0), 3f, true));
-        }
-
         // ------------------------- Line for ruler values ---------------------------------- //
         long days = (System.currentTimeMillis() - birthday) / 1000 / 60 / 60 / 24 + 100;
 
@@ -269,14 +237,12 @@ public class GrowthDataFragment extends Fragment {
                 p85.add(new Entry(rule, Float.parseFloat(arr[13])));
                 p97.add(new Entry(rule, Float.parseFloat(arr[16])));
 
+                /*
                 if ((chartType == 0 || chartType == 1 || chartType == 3 || chartType == 4) && rule > days)
                     break;
-                /*
-                if (chartType == 1 && rule > maxHeight)
-                    break;
-                */
                 if (chartType == 2 && rule > maxHeight)
                     break;
+                    */
             }
             reader.close();
 
@@ -288,6 +254,85 @@ public class GrowthDataFragment extends Fragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // ----------------------- Line for manual measures -------------------------- //
+        ArrayList<Entry> entries = new ArrayList<>();
+
+        //double maxHeight = 0;
+
+        for (Measure measure : measures) {
+            if (!measure.getType().equals("manual"))
+                continue;
+
+            /*
+            if (measure.getHeight() > maxHeight)
+                maxHeight = measure.getHeight();
+                */
+
+            long day = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
+
+            float x = 0, y = 0;
+            switch (chartType) {
+                case 0:
+                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
+                    y = (float) measure.getWeight();
+                    break;
+                case 1:
+                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
+                    y = (float) measure.getHeight();
+                    break;
+                case 2:
+                    x = (float) measure.getHeight();
+                    y = (float) measure.getWeight();
+                    break;
+                case 3:
+                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
+                    y = (float) measure.getMuac();
+                    break;
+            }
+
+            final float fX = x;
+            Entry v3 = Iterables.tryFind(p3, input -> input.getX() == fX).orNull();
+            try {
+                ArrayList<Entry> entry = new ArrayList<>();
+                entry.add(new Entry(x, y));
+
+                if (y <= v3.getY()) {
+                    dataSets.add(createDataSet(entry, "", Color.rgb(212, 53, 62), 5f, true));
+                } else {
+                    Entry v15 = Iterables.tryFind(p15, input -> input.getX() == fX).orNull();
+                    if (y <= v15.getY()) {
+                        dataSets.add(createDataSet(entry, "", Color.rgb(230, 122, 58), 5f, true));
+                    } else {
+                        Entry v50 = Iterables.tryFind(p50, input -> input.getX() == fX).orNull();
+                        if (y <= v50.getY()) {
+                            dataSets.add(createDataSet(entry, "", Color.rgb(55, 129, 69), 5f, true));
+                        } else {
+                            Entry v85 = Iterables.tryFind(p85, input -> input.getX() == fX).orNull();
+                            if (y <= v85.getY()) {
+                                dataSets.add(createDataSet(entry, "", Color.rgb(230, 122, 58), 5f, true));
+                            } else {
+                                Entry v97 = Iterables.tryFind(p97, input -> input.getX() == fX).orNull();
+                                if (y <= v97.getY()) {
+                                    dataSets.add(createDataSet(entry, "", Color.rgb(212, 53, 62), 5f, true));
+                                } else {
+                                    dataSets.add(createDataSet(entry, "", Color.rgb(0, 0, 0), 5f, true));
+                                }
+                            }
+                        }
+                    }
+                }
+                entries.add(new Entry(x, y));
+            } catch (NullPointerException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        if (entries.size() > 1) {
+            Collections.sort(entries, (o1, o2) -> Float.compare(o1.getX(), o2.getX()));
+            dataSets.add(createDataSet(entries, "measure", Color.rgb(158, 232, 252), 1.5f, false));
+        }
+
 
         mChart.setData(new LineData(dataSets));
         //mChart.invalidate();
