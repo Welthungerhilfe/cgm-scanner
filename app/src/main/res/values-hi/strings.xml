@@ -31,6 +31,7 @@
     <string name="delete">मिटाये</string>
     <string name="by">द्वारा</string>
     <string name="retake">फिर से लेना</string>
+    <string name="label_continue">Continue</string>
 
     <string name="about">के बारे में</string>
     <string name="version">संस्करण</string>
@@ -169,11 +170,11 @@
     <string name="axis_head">सिर परिधि सेमी में</string>
     <string name="axis_muac">मुआक सेमी में </string>
 
-    <string name="filter_age_height">1 ऊंचाई / उम</string>
-    <string name="filter_age_weight">2 वजन / उम</string>
+    <string name="filter_age_weight">1 वजन / उम</string>
+    <string name="filter_age_height">2 ऊंचाई / उम</string>
     <string name="filter_height_weight">3 वजन / ऊंचाई</string>
-    <string name="filter_age_head">4 शीर्ष परिधि / उम</string>
     <string name="filter_age_arm">4 एमयूएसी  / उम</string>
+    <string name="filter_age_head">5 शीर्ष परिधि / उम</string>
 
     <string-array name="filters">
         <item>@string/filter_age_weight</item>

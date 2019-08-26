@@ -31,6 +31,7 @@
     <string name="delete">Delete</string>
     <string name="by">by</string>
     <string name="retake">Retake</string>
+    <string name="label_continue">Continue</string>
 
     <string name="about">Über</string>
     <string name="version">Version</string>
@@ -169,11 +170,11 @@
     <string name="axis_head">Head circumference in cm</string>
     <string name="axis_muac">MUAC in cm</string>
 
-    <string name="filter_age_height">Größe / Alter</string>
     <string name="filter_age_weight">Gewicht / Alter</string>
+    <string name="filter_age_height">Größe / Alter</string>
     <string name="filter_height_weight">Gewicht / Größe</string>
-    <string name="filter_age_head">Head circumference-for-age</string>
     <string name="filter_age_arm">Arm circumference-for-age</string>
+    <string name="filter_age_head">Head circumference-for-age</string>
 
     <string-array name="filters">
         <item>@string/filter_age_weight</item>
