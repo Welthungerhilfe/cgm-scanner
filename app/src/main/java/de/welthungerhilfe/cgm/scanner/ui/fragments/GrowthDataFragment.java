@@ -26,10 +26,12 @@ import android.graphics.Color;
 import android.os.Bundle;
 
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -77,8 +79,10 @@ public class GrowthDataFragment extends Fragment {
 
     public String qrCode;
 
+    LinearLayout lytNotif;
+    TextView txtNotifTitle;
+    TextView txtNotifMessage;
 
-    private CreateDataViewModel viewModel;
     private Person person;
     private List<Measure> measures = new ArrayList<>();
 
@@ -98,7 +102,7 @@ public class GrowthDataFragment extends Fragment {
     public void onActivityCreated(Bundle instance) {
         super.onActivityCreated(instance);
 
-        viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
+        CreateDataViewModel viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
             setData();
@@ -122,6 +126,10 @@ public class GrowthDataFragment extends Fragment {
         txtLabel = view.findViewById(R.id.txtLabel);
         txtYAxis = view.findViewById(R.id.txtYAxis);
         txtXAxis = view.findViewById(R.id.txtXAxis);
+
+        lytNotif = view.findViewById(R.id.lytNotif);
+        txtNotifTitle = view.findViewById(R.id.txtNotifTitle);
+        txtNotifMessage = view.findViewById(R.id.txtNotifMessage);
 
         //chartGrowth = view.findViewById(R.id.chartGrowth);
         mChart = view.findViewById(R.id.chart1);
@@ -179,42 +187,29 @@ public class GrowthDataFragment extends Fragment {
         if (person == null || measures == null)
             return;
 
+        Measure lastMeasure = null;
+        if (measures.size() > 0)
+            lastMeasure = measures.get(measures.size() - 1);
+
         txtLabel.setText(person.getSex());
 
-        switch (chartType) {
-            case 0:
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_weight);
-                break;
-            case 1:
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_height);
-                break;
-            case 2:
-                txtXAxis.setText(R.string.axis_height);
-                txtYAxis.setText(R.string.axis_weight);
-                break;
-            case 3:
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_muac);
-                break;
-        }
+
 
         long birthday = person.getBirthday();
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
 
         // ------------------------- Line for ruler values ---------------------------------- //
-        long days = (System.currentTimeMillis() - birthday) / 1000 / 60 / 60 / 24 + 100;
-
         ArrayList<Entry> p3 = new ArrayList<>();
         ArrayList<Entry> p15 = new ArrayList<>();
         ArrayList<Entry> p50 = new ArrayList<>();
         ArrayList<Entry> p85 = new ArrayList<>();
         ArrayList<Entry> p97 = new ArrayList<>();
 
+        double zScore = 100, median = 100, standard = 100, coefficient = 100;
+
         try {
-            BufferedReader reader = null;
+            BufferedReader reader;
 
             if (person.getSex().equals("female"))
                 reader = new BufferedReader(new InputStreamReader(context.getAssets().open(girls[chartType]), "UTF-8"));
@@ -224,11 +219,29 @@ public class GrowthDataFragment extends Fragment {
             String mLine;
             while ((mLine = reader.readLine()) != null) {
                 String[] arr = mLine.split("\t");
-                float rule = 0;
+                float rule;
                 try {
                     rule = Float.parseFloat(arr[0]);
                 } catch (Exception e) {
                     continue;
+                }
+
+                if ((chartType == 0 || chartType == 1 ) && lastMeasure != null && rule == lastMeasure.getAge()) {
+                    median = Double.parseDouble(arr[2]);
+                    coefficient = Double.parseDouble(arr[3]);
+                    standard = median * coefficient;
+
+                    Log.e("Median", String.valueOf(median));
+                    Log.e("Coefficient", String.valueOf(coefficient));
+                    Log.e("Standard Deviation", String.valueOf(standard));
+                } else if (chartType == 2 && lastMeasure != null && rule == lastMeasure.getHeight()) {
+                    median = Double.parseDouble(arr[2]);
+                    coefficient = Double.parseDouble(arr[3]);
+                    standard = median * coefficient;
+
+                    Log.e("Median", String.valueOf(median));
+                    Log.e("Coefficient", String.valueOf(coefficient));
+                    Log.e("Standard Deviation", String.valueOf(standard));
                 }
 
                 p3.add(new Entry(rule, Float.parseFloat(arr[6])));
@@ -236,13 +249,6 @@ public class GrowthDataFragment extends Fragment {
                 p50.add(new Entry(rule, Float.parseFloat(arr[11])));
                 p85.add(new Entry(rule, Float.parseFloat(arr[13])));
                 p97.add(new Entry(rule, Float.parseFloat(arr[16])));
-
-                /*
-                if ((chartType == 0 || chartType == 1 || chartType == 3 || chartType == 4) && rule > days)
-                    break;
-                if (chartType == 2 && rule > maxHeight)
-                    break;
-                    */
             }
             reader.close();
 
@@ -251,25 +257,110 @@ public class GrowthDataFragment extends Fragment {
             dataSets.add(createDataSet(p50, "50th", Color.rgb(55, 129, 69), 1.5f, false));
             dataSets.add(createDataSet(p85, "85th", Color.rgb(230, 122, 58), 1.5f, false));
             dataSets.add(createDataSet(p97, "97th", Color.rgb(212, 53, 62), 1.5f, false));
+
+
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        switch (chartType) {
+            case 0:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_weight);
+
+                if (lastMeasure != null && median != 0 && standard != 0) {
+                    Log.e("Current Value", String.valueOf(lastMeasure.getWeight()));
+                    zScore = (lastMeasure.getWeight() - median) / standard;
+                }
+                break;
+            case 1:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_height);
+
+                if (lastMeasure != null && median != 0 && standard != 0) {
+                    Log.e("Current Value", String.valueOf(lastMeasure.getHeight()));
+                    zScore = (lastMeasure.getHeight() - median) / standard;
+                }
+                break;
+            case 2:
+                txtXAxis.setText(R.string.axis_height);
+                txtYAxis.setText(R.string.axis_weight);
+
+                if (lastMeasure != null && median != 0 && standard != 0) {
+                    Log.e("Current Value", String.valueOf(lastMeasure.getWeight()));
+                    zScore = (lastMeasure.getWeight() - median) / standard;
+                }
+                break;
+            case 3:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_muac);
+
+                Log.e("Current Value", String.valueOf(lastMeasure.getMuac()));
+
+                if (lastMeasure.getMuac() < 11.5) { // SAM (red)
+                    zScore = -3;
+                } else if (lastMeasure.getMuac() < 12.5) { // MAM (yellow)
+                    zScore = -2;
+                } else {
+                    zScore = 0;
+                }
+                break;
+        }
+
+        Log.e("Z Score", String.valueOf(zScore));
+
+        if (zScore <= -3) { // SAM
+            lytNotif.setBackgroundResource(R.color.colorRed);
+
+            switch (chartType) {
+                case 0: // weight for age
+                    txtNotifTitle.setText(R.string.sam_wfa_title);
+                    txtNotifTitle.setText(R.string.sam_wfa_message);
+                    break;
+                case 1: // height for age
+                    txtNotifTitle.setText(R.string.sam_hfa_title);
+                    txtNotifTitle.setText(R.string.sam_hfa_message);
+                    break;
+                case 2: // weight for height
+                    txtNotifTitle.setText(R.string.sam_wfh_title);
+                    txtNotifTitle.setText(R.string.sam_wfh_message);
+                    break;
+                case 3: // muac for age
+                    txtNotifTitle.setText(R.string.sam_acfa_title);
+                    txtNotifTitle.setText(R.string.sam_acfa_message);
+                    break;
+            }
+        } else if (zScore <= -2) { // MAM
+            lytNotif.setBackgroundResource(R.color.colorYellow);
+
+            switch (chartType) {
+                case 0: // weight for age
+                    txtNotifTitle.setText(R.string.mam_wfa_title);
+                    txtNotifTitle.setText(R.string.mam_wfa_message);
+                    break;
+                case 1: // height for age
+                    txtNotifTitle.setText(R.string.mam_hfa_title);
+                    txtNotifTitle.setText(R.string.mam_hfa_message);
+                    break;
+                case 2: // weight for height
+                    txtNotifTitle.setText(R.string.mam_wfh_title);
+                    txtNotifTitle.setText(R.string.mam_wfh_message);
+                    break;
+                case 3: // muac for age
+                    txtNotifTitle.setText(R.string.mam_acfa_title);
+                    txtNotifTitle.setText(R.string.mam_acfa_message);
+                    break;
+            }
+        } else { // Healthy
+            lytNotif.setVisibility(View.GONE);
         }
 
         // ----------------------- Line for manual measures -------------------------- //
         ArrayList<Entry> entries = new ArrayList<>();
 
-        //double maxHeight = 0;
-
         for (Measure measure : measures) {
             if (!measure.getType().equals("manual"))
                 continue;
-
-            /*
-            if (measure.getHeight() > maxHeight)
-                maxHeight = measure.getHeight();
-                */
-
-            long day = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
 
             float x = 0, y = 0;
             switch (chartType) {
