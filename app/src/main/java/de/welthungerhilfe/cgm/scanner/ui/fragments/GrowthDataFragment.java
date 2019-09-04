@@ -310,47 +310,49 @@ public class GrowthDataFragment extends Fragment {
         Log.e("Z Score", String.valueOf(zScore));
 
         if (zScore <= -3) { // SAM
-            lytNotif.setBackgroundResource(R.color.colorRed);
-
             switch (chartType) {
                 case 0: // weight for age
                     txtNotifTitle.setText(R.string.sam_wfa_title);
-                    txtNotifTitle.setText(R.string.sam_wfa_message);
+                    txtNotifMessage.setText(R.string.sam_wfa_message);
                     break;
                 case 1: // height for age
                     txtNotifTitle.setText(R.string.sam_hfa_title);
-                    txtNotifTitle.setText(R.string.sam_hfa_message);
+                    txtNotifMessage.setText(R.string.sam_hfa_message);
                     break;
                 case 2: // weight for height
                     txtNotifTitle.setText(R.string.sam_wfh_title);
-                    txtNotifTitle.setText(R.string.sam_wfh_message);
+                    txtNotifMessage.setText(R.string.sam_wfh_message);
                     break;
                 case 3: // muac for age
                     txtNotifTitle.setText(R.string.sam_acfa_title);
-                    txtNotifTitle.setText(R.string.sam_acfa_message);
+                    txtNotifMessage.setText(R.string.sam_acfa_message);
                     break;
             }
-        } else if (zScore <= -2) { // MAM
-            lytNotif.setBackgroundResource(R.color.colorYellow);
 
+            lytNotif.setBackgroundResource(R.color.colorRed);
+            lytNotif.setVisibility(View.VISIBLE);
+        } else if (zScore <= -2) { // MAM
             switch (chartType) {
                 case 0: // weight for age
                     txtNotifTitle.setText(R.string.mam_wfa_title);
-                    txtNotifTitle.setText(R.string.mam_wfa_message);
+                    txtNotifMessage.setText(R.string.mam_wfa_message);
                     break;
                 case 1: // height for age
                     txtNotifTitle.setText(R.string.mam_hfa_title);
-                    txtNotifTitle.setText(R.string.mam_hfa_message);
+                    txtNotifMessage.setText(R.string.mam_hfa_message);
                     break;
                 case 2: // weight for height
                     txtNotifTitle.setText(R.string.mam_wfh_title);
-                    txtNotifTitle.setText(R.string.mam_wfh_message);
+                    txtNotifMessage.setText(R.string.mam_wfh_message);
                     break;
                 case 3: // muac for age
                     txtNotifTitle.setText(R.string.mam_acfa_title);
-                    txtNotifTitle.setText(R.string.mam_acfa_message);
+                    txtNotifMessage.setText(R.string.mam_acfa_message);
                     break;
             }
+
+            lytNotif.setBackgroundResource(R.color.colorYellow);
+            lytNotif.setVisibility(View.VISIBLE);
         } else { // Healthy
             lytNotif.setVisibility(View.GONE);
         }
