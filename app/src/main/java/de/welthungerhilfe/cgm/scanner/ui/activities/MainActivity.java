@@ -176,9 +176,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         RemoteConfig config = session.getRemoteConfig();
         if (config.isDebug()) {
             startService(new Intent(this, MemoryMonitorService.class));
-            startService(new Intent(this, HealthInfoService.class));
         }
         */
+        startService(new Intent(this, HealthInfoService.class));
     }
 
     public void onNewIntent(Intent intent) {
