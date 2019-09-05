@@ -51,7 +51,7 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
 
-        Thread.currentThread().setDefaultUncaughtExceptionHandler(new MemoryOutHander());
+        // Thread.currentThread().setDefaultUncaughtExceptionHandler(new MemoryOutHander());
     }
 
     @Override
