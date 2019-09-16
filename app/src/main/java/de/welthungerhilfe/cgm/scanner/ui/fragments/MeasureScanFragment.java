@@ -124,6 +124,8 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
     private FileLogRepository repository;
     private long age = 0;
 
+    private double averageLigtingPenality=0.00;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -503,7 +505,6 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                 final float frameDelta = (mCurrentTimeStamp - mPointCloudPreviousTimeStamp) * SECS_TO_MILLISECS;
                 mPointCloudPreviousTimeStamp = mCurrentTimeStamp;
                 mPointCloudCallbackCount++;
-
                 // My writing to file function
 
 
@@ -529,17 +530,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                                     "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
                             TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
                             Log.d("Prajwal", String.valueOf(pointCloudData.numPoints));
-                            Artifact_quality ar=new Artifact_quality();
-                            ar.setConfidence_value(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
-                            ar.setArtifact_id(AppController.getInstance().getArtifactId("pcd"));
-                            ar.setKey(String.valueOf(mode));
-                            ar.setMisc("");
-                            ar.setType("PCD_POINTS_v0.2");
-                            noOfPoints=pointCloudData.numPoints;
-                            ar.setReal(noOfPoints);
-                            double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
-                            double Scan_Duration_Penalty=Math.abs((double)noOfPoints/8-1)*100;
-                            AppController.getInstance().artifact_qualityRepository.insertArtifact_quality(ar);
+
                             File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
                             FileLog log = new FileLog();
                             log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
@@ -555,10 +546,25 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setAge(age);
 
                             repository.insertFileLog(log);
+
+                            Artifact_quality ar=new Artifact_quality();
+                            double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
+                            ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
+                            ar.setArtifact_id(AppController.getInstance().getPersonId());
+                            ar.setKey(String.valueOf(mode));
+                            ar.setMisc("");
+                            ar.setType("PCD_POINTS_v0.2");
+                            noOfPoints=pointCloudData.numPoints;
+                            ar.setReal(noOfPoints);
+
+                          AppController.getInstance().artifact_qualityRepository.insertArtifact_quality(ar);
                             // Todo;
                             //new OfflineTask().saveFileLog(log);
                             // Direct Upload to Firebase Storage
                             mNumberOfFilesWritten++;
+                            double Scan_Duration_Penalty=Math.abs((double)mNumberOfFilesWritten/8-1)*100;
+
+                            Log.d("Prajwal",String.valueOf(mNumberOfFilesWritten));
                             //mTimeToTakeSnap = false;
                         }
                         mutex_on_mIsRecording.release();

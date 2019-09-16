@@ -69,7 +69,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginRight="@dimen/activity_section_margin"
                     android:text="@string/abbr_height"
-                    android:textSize="20sp"/>
+                    android:textSize="20sp"
+                    />
 
                 <TextView
                     android:id="@+id/txtHeight"
@@ -92,19 +93,6 @@
                     android:layout_marginRight="@dimen/activity_group_margin"
                     android:textSize="20sp"/>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/activity_section_margin"
-                    android:text="@string/abbr_head"
-                    android:textSize="20sp"/>
-
-                <TextView
-                    android:id="@+id/txtHead"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/activity_group_margin"
-                    android:textSize="20sp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -117,6 +105,22 @@
                     android:id="@+id/txtArm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/activity_group_margin"
+
+                    android:textSize="20sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/activity_section_margin"
+                    android:text="@string/score"
+                    android:textSize="20sp"/>
+
+                <TextView
+                    android:id="@+id/score"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/activity_group_margin"
                     android:textSize="20sp"/>
 
             </LinearLayout>

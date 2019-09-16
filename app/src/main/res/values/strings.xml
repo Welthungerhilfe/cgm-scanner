@@ -230,4 +230,5 @@
     <string name="login">Login</string>
     <string name="no_scans">No scans yet today</string>
     <string name="add_scans">To start scanning, tap [+] button</string>
+  <string name="score">s:</string>
 </resources>

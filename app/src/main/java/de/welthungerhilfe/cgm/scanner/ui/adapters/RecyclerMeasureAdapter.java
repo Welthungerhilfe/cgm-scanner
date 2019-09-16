@@ -96,12 +96,12 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.txtHeight.setText(Double.toString(measure.getHeight()) + context.getString(R.string.unit_cm));
             holder.txtWeight.setText(Double.toString(measure.getWeight()) + context.getString(R.string.unit_kg));
             holder.txtArm.setText(Double.toString(measure.getMuac()) + context.getString(R.string.unit_cm));
-            holder.txtHead.setText(Double.toString(measure.getHeadCircumference()) + context.getString(R.string.unit_cm));
+            holder.score.setText(Double.toString(measure.getHeadCircumference()));
         } else {
             holder.txtHeight.setText(R.string.field_concealed);
             holder.txtWeight.setText(R.string.field_concealed);
             holder.txtArm.setText(R.string.field_concealed);
-            holder.txtHead.setText(R.string.field_concealed);
+            holder.score.setText("100");
         }
 
         if (listener != null) {
@@ -160,7 +160,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         public TextView txtAuthor;
         public TextView txtHeight;
         public TextView txtWeight;
-        public TextView txtHead;
+        public TextView score;
         public TextView txtArm;
 
         public ViewHolder(View itemView) {
@@ -172,7 +172,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             txtAuthor = itemView.findViewById(R.id.txtAuthor);
             txtHeight = itemView.findViewById(R.id.txtHeight);
             txtWeight = itemView.findViewById(R.id.txtWeight);
-            txtHead = itemView.findViewById(R.id.txtHead);
+            score = itemView.findViewById(R.id.score);
             txtArm = itemView.findViewById(R.id.txtArm);
         }
 
