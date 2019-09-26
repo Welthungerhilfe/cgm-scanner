@@ -44,12 +44,13 @@ public class Person implements Serializable {
     private String sex;  // female, male, other
     private String guardian;
     private boolean isAgeEstimated;
-    private String qrcode;
+    private String qrCode;
     private long created;
     private long timestamp;
     private String createdBy;
     private boolean deleted;
     private String deletedBy;
+    private String version;
 
     @Embedded
     private Loc lastLocation;
@@ -106,12 +107,12 @@ public class Person implements Serializable {
         this.guardian = guardian;
     }
 
-    public String getQrcode() {
-        return qrcode;
+    public String getQrCode() {
+        return qrCode;
     }
 
-    public void setQrcode(String qrcode) {
-        this.qrcode = qrcode;
+    public void setQrCode(String qrcode) {
+        this.qrCode = qrcode;
     }
 
     public Measure getLastMeasure() {
@@ -176,5 +177,13 @@ public class Person implements Serializable {
 
     public void setDeletedBy(String deletedBy) {
         this.deletedBy = deletedBy;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

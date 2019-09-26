@@ -22,6 +22,7 @@ package de.welthungerhilfe.cgm.scanner.ui.fragments;
 import android.app.DialogFragment;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -238,7 +239,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     if (person == null) {
                         person = new Person();
                         person.setId(AppController.getInstance().getPersonId());
-                        person.setQrcode(qrCode);
+                        person.setQrCode(qrCode);
                     }
 
                     person.setName(editName.getText().toString());
@@ -251,6 +252,12 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setTimestamp(Utils.getUniversalTimestamp());
                     person.setCreated(System.currentTimeMillis());
                     person.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+
+                    try {
+                        person.setVersion(getContext().getPackageManager().getPackageInfo(getContext().getPackageName(), 0).versionName);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        e.printStackTrace();
+                    }
 
                     viewModel.savePerson(person);
                 }

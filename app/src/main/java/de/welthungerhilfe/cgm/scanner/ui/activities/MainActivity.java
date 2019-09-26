@@ -524,7 +524,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     @Override
     public void onPersonDetail(Person person) {
         Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
-        intent.putExtra(AppConstants.EXTRA_QR, person.getQrcode());
+        intent.putExtra(AppConstants.EXTRA_QR, person.getQrCode());
         startActivity(intent);
     }
 }

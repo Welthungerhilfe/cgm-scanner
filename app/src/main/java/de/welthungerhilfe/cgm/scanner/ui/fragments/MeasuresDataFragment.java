@@ -22,6 +22,7 @@ package de.welthungerhilfe.cgm.scanner.ui.fragments;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -245,6 +246,12 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setDate(Utils.getUniversalTimestamp());
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
         measure.setQrCode(qrCode);
+
+        try {
+            measure.setVersion(getContext().getPackageManager().getPackageInfo(getContext().getPackageName(), 0).versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
         viewModel.insertMeasure(measure);
     }

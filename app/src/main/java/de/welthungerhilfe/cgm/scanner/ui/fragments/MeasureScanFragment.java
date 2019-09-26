@@ -1,6 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
@@ -181,7 +182,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
-        mQrCode = ((ScanModeActivity)getActivity()).person.getQrcode();
+        mQrCode = ((ScanModeActivity)getActivity()).person.getQrCode();
     }
 
     @Override
@@ -541,6 +542,12 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                             log.setAge(age);
 
+                            try {
+                                log.setVersion(getContext().getPackageManager().getPackageInfo(getContext().getPackageName(), 0).versionName);
+                            } catch (PackageManager.NameNotFoundException e) {
+                                e.printStackTrace();
+                            }
+
                             repository.insertFileLog(log);
                             // Todo;
                             //new OfflineTask().saveFileLog(log);
@@ -619,6 +626,13 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setCreateDate(mNowTime);
                             log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                             log.setAge(age);
+
+                            try {
+                                log.setVersion(getContext().getPackageManager().getPackageInfo(getContext().getPackageName(), 0).versionName);
+                            } catch (PackageManager.NameNotFoundException e) {
+                                e.printStackTrace();
+                            }
+
                             // Todo;
                             //new OfflineTask().saveFileLog(log);
                             repository.insertFileLog(log);
