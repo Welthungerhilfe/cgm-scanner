@@ -542,12 +542,6 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                             log.setAge(age);
 
-                            try {
-                                log.setVersion(getContext().getPackageManager().getPackageInfo(getContext().getPackageName(), 0).versionName);
-                            } catch (PackageManager.NameNotFoundException e) {
-                                e.printStackTrace();
-                            }
-
                             repository.insertFileLog(log);
                             // Todo;
                             //new OfflineTask().saveFileLog(log);
@@ -627,14 +621,6 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                             log.setAge(age);
 
-                            try {
-                                log.setVersion(getContext().getPackageManager().getPackageInfo(getContext().getPackageName(), 0).versionName);
-                            } catch (PackageManager.NameNotFoundException e) {
-                                e.printStackTrace();
-                            }
-
-                            // Todo;
-                            //new OfflineTask().saveFileLog(log);
                             repository.insertFileLog(log);
                         };
                         thread.run();

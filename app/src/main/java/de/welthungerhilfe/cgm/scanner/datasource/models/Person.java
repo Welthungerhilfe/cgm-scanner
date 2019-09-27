@@ -50,7 +50,6 @@ public class Person implements Serializable {
     private String createdBy;
     private boolean deleted;
     private String deletedBy;
-    private String version;
 
     @Embedded
     private Loc lastLocation;
@@ -177,13 +176,5 @@ public class Person implements Serializable {
 
     public void setDeletedBy(String deletedBy) {
         this.deletedBy = deletedBy;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
     }
 }

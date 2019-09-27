@@ -247,12 +247,6 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
         measure.setQrCode(qrCode);
 
-        try {
-            measure.setVersion(getContext().getPackageManager().getPackageInfo(getContext().getPackageName(), 0).versionName);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-
         viewModel.insertMeasure(measure);
     }
 

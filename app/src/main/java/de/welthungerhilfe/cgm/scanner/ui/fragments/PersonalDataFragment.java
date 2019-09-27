@@ -253,12 +253,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setCreated(System.currentTimeMillis());
                     person.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
-                    try {
-                        person.setVersion(getContext().getPackageManager().getPackageInfo(getContext().getPackageName(), 0).versionName);
-                    } catch (PackageManager.NameNotFoundException e) {
-                        e.printStackTrace();
-                    }
-
                     viewModel.savePerson(person);
                 }
 

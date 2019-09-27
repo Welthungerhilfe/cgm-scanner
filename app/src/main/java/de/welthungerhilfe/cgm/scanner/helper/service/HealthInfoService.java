@@ -3,6 +3,7 @@ package de.welthungerhilfe.cgm.scanner.helper.service;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -76,6 +77,11 @@ public class HealthInfoService extends Service {
 
                         info.setOwn_data(ownData);
                         info.setTotal_data(totalData);
+                        try {
+                            info.setVersion(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
+                        } catch (PackageManager.NameNotFoundException e) {
+                            e.printStackTrace();
+                        }
 
                         Gson gson = new Gson();
                         String healthData = gson.toJson(info);

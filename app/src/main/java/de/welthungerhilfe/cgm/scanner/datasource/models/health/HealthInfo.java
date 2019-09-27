@@ -6,6 +6,7 @@ public class HealthInfo {
     private String uuid;
     private OwnData own_data;
     private TotalData total_data;
+    private String version;
 
     public long getCreate_timestamp() {
         return create_timestamp;
@@ -45,5 +46,13 @@ public class HealthInfo {
 
     public void setTotal_data(TotalData total_data) {
         this.total_data = total_data;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

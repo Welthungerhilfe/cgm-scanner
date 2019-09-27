@@ -16,7 +16,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 
-@Database(entities = {Person.class, Measure.class, FileLog.class}, version = 3)
+@Database(entities = {Person.class, Measure.class, FileLog.class}, version = 2)
 public abstract class CgmDatabase extends RoomDatabase {
     private static final Object sLock = new Object();
 
@@ -42,20 +42,11 @@ public abstract class CgmDatabase extends RoomDatabase {
         }
     };
 
-    public static final Migration MIGRATION_2_3 = new Migration(2, 3) {
-        @Override
-        public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE measures ADD COLUMN version TEXT;");
-            database.execSQL("ALTER TABLE persons ADD COLUMN version TEXT;");
-            database.execSQL("ALTER TABLE file_logs ADD COLUMN version TEXT;");
-        }
-    };
-
     public static CgmDatabase getInstance(Context context) {
         synchronized (sLock) {
             if (instance == null) {
                 instance = Room.databaseBuilder(context.getApplicationContext(), CgmDatabase.class, DATABASE)
-                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                        .addMigrations(MIGRATION_1_2)
                         .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
                         .build();
             }

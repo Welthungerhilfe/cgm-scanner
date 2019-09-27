@@ -387,12 +387,6 @@ public class ScanModeActivity extends AppCompatActivity {
         measure.setTimestamp(Utils.getUniversalTimestamp());
         measure.setQrCode(person.getQrCode());
 
-        try {
-            measure.setVersion(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-
         measureRepository.insertMeasure(measure);
 
         finish();

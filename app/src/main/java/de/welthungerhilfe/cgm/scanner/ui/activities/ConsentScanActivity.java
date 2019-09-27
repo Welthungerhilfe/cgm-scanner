@@ -980,12 +980,6 @@ public class ConsentScanActivity extends AppCompatActivity {
                 log.setCreateDate(Utils.getUniversalTimestamp());
                 log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
-                try {
-                    log.setVersion(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
-                } catch (PackageManager.NameNotFoundException e) {
-                    e.printStackTrace();
-                }
-
                 fileLogRepository.insertFileLog(log);
             } catch (IOException e) {
                 e.printStackTrace();
