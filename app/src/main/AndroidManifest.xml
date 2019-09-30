@@ -36,7 +36,7 @@
         android:resizeable="true"
         android:smallScreens="true" />
 
-    <uses-feature android:name="android.hardware.camera2.full" />
+    <uses-feature android:name="android.hardware.camera"/>
     <uses-feature android:name="android.hardware.location.gps" />
     <!-- Tell the system this app requires OpenGL ES 2.0. -->
     <uses-feature
