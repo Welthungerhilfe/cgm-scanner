@@ -9,14 +9,16 @@ import android.arch.persistence.room.migration.Migration;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import de.welthungerhilfe.cgm.scanner.datasource.dao.ArtifactResultDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.FileLogDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.MeasureDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.PersonDao;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 
-@Database(entities = {Person.class, Measure.class, FileLog.class}, version = 2)
+@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class}, version = 3)
 public abstract class CgmDatabase extends RoomDatabase {
     private static final Object sLock = new Object();
 
@@ -25,6 +27,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public abstract PersonDao personDao();
     public abstract MeasureDao measureDao();
     public abstract FileLogDao fileLogDao();
+    public abstract ArtifactResultDao artifactResultDao();
 
     public static final String DATABASE = "offline_db";
 
@@ -32,6 +35,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final String TABLE_CONSENT = "consents";
     public static final String TABLE_MEASURE = "measures";
     public static final String TABLE_FILE_LOG = "file_logs";
+    public static final String TABLE_ARTIFACT_RESULT="artifact_result";
 
     public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
