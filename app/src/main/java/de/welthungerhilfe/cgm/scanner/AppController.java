@@ -23,6 +23,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.StrictMode;
+import android.util.Log;
+
+import com.amitshekhar.DebugDB;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -54,7 +57,7 @@ public class AppController extends Application {
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
 
-        //Log.e("Offline DB", DebugDB.getAddressLog());
+        Log.e("Offline DB", DebugDB.getAddressLog());
         /*
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
