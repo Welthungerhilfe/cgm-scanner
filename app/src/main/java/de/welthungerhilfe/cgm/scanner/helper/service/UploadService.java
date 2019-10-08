@@ -106,7 +106,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
         remainingCount = list.size();
         Log.e("UploadService", String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
 
-        if (remainingCount == 0) {
+        if (remainingCount <= 0) {
             stopSelf();
         } else {
             for (int i = 0; i < list.size(); i++) {

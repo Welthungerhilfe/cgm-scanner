@@ -20,6 +20,7 @@ import com.microsoft.azure.storage.queue.*;
 
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
+import java.util.ArrayList;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
@@ -44,9 +45,6 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPersonsLoad, OnMeasuresLoad, OnFileLogsLoad {
     private long prevTimestamp;
 
-    public CloudStorageAccount storageAccount;
-    public CloudQueueClient queueClient;
-
     private CloudQueue personQueue;
     private CloudQueue measureQueue;
     private CloudQueue artifactQueue;
@@ -56,6 +54,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     private FileLogRepository fileLogRepository;
 
     private SessionManager session;
+
+    private List<Person> personList = new ArrayList<>();
+    private List<Measure> measureList = new ArrayList<>();
+    private List<FileLog> fileLogList = new ArrayList<>();
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -70,73 +72,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     @Override
     @AddTrace(name = "onPerformSync", enabled = true)
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        new MessageTask().execute();
-        /*
-        AppController.getInstance().firebaseFirestore.collection("persons")
-                .whereGreaterThan("timestamp", prevTimestamp)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        for (DocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                            Person person = document.toObject(Person.class);
-
-                            if (person != null && person.getTimestamp() > prevTimestamp) {
-                                if (!isSyncing) {
-                                    isSyncing = !isSyncing;
-                                    Crashlytics.setString("sync_data", "app is syncing now");
-                                }
-
-                                if (prevTimestamp > 0 && !person.getDeleted()) {
-                                    String[] arr = person.getId().split("_");
-                                    try {
-                                        if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
-                                            personRepository.insertPerson(person);
-                                        } else {    // created before sync, after sync person was updates, so must update in local room
-                                            personRepository.updatePerson(person);
-                                        }
-                                    } catch (NumberFormatException e) {
-                                        Crashlytics.log(0, "sync_adapter", String.format("could not get timestamp because of underline in personId: %s", person.getId()));
-                                    }
-                                }
-                            }
-
-                            document.getReference().collection("measures")
-                                    .whereGreaterThan("timestamp", prevTimestamp)
-                                    .get()
-                                    .addOnCompleteListener(task1 -> {
-                                        if (task1.isSuccessful()) {
-                                            for (DocumentSnapshot snapshot : Objects.requireNonNull(task1.getResult())) {
-                                                if (!isSyncing) {
-                                                    isSyncing = !isSyncing;
-                                                    Crashlytics.setString("sync_data", "app is syncing now");
-                                                }
-
-                                                Measure measure = snapshot.toObject(Measure.class);
-
-                                                if (measure != null && prevTimestamp > 0 && !measure.getDeleted()) {
-                                                    try {
-                                                        String[] arr = measure.getId().split("_");
-                                                        if (Long.valueOf(arr[2]) > prevTimestamp) {     // person created after sync, so must add to local room
-                                                            measureRepository.insertMeasure(measure);
-                                                        } else {    // created before sync, after sync person was updates, so must update in local room
-                                                            measureRepository.updateMeasure(measure);
-                                                        }
-                                                    } catch (NumberFormatException e) {
-                                                        Crashlytics.log(0, "sync_adapter", String.format("could not get timestamp because of underline in measureId: %s", measure.getId()));
-                                                    }
-                                                }
-                                            }
-
-                                            session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                                        }
-                                    })
-                                    .addOnFailureListener(e -> session.setSyncTimestamp(prevTimestamp));
-                        }
-
-                        session.setSyncTimestamp(Utils.getUniversalTimestamp());
-                    }
-                });
-                */
+        if (personList.size() == 0 && measureList.size() == 0 && fileLogList.size() == 0)
+            new MessageTask().execute();
     }
 
     private void startSyncing() {
@@ -189,50 +126,40 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
     @Override
     @AddTrace(name = "onPersonLoaded", enabled = true)
-    public void onPersonsLoaded(List<Person> personList) {
-        Gson gson = new Gson();
+    public void onPersonsLoaded(List<Person> pList) {
+        personList = pList;
 
         for (int i = 0; i < personList.size(); i++) {
-            String content = gson.toJson(personList.get(i));
-            CloudQueueMessage message = new CloudQueueMessage(personList.get(i).getId());
-            message.setMessageContent(content);
-
-            new WriteTask(personQueue, message).execute();
+            new PersonWriteTask(personList.get(i)).execute();
         }
     }
 
     @Override
     @AddTrace(name = "onMeasureLoaded", enabled = true)
-    public void onMeasuresLoaded(List<Measure> measureList) {
-        Gson gson = new Gson();
+    public void onMeasuresLoaded(List<Measure> mList) {
+        measureList = mList;
 
         for (int i = 0; i < measureList.size(); i++) {
-            String content = gson.toJson(measureList.get(i));
-            CloudQueueMessage message = new CloudQueueMessage(measureList.get(i).getId());
-            message.setMessageContent(content);
-
-            new WriteTask(measureQueue, message).execute();
+            new MeasureWriteTask(measureList.get(i)).execute();
         }
     }
 
     @Override
-    public void onFileLogsLoaded(List<FileLog> list) {
-        Gson gson = new Gson();
-        for (int i = 0; i < list.size(); i++) {
-            String content = gson.toJson(list.get(i));
-            CloudQueueMessage message = new CloudQueueMessage(list.get(i).getId());
-            message.setMessageContent(content);
+    public void onFileLogsLoaded(List<FileLog> fList) {
+        fileLogList = fList;
 
-            new WriteTask(artifactQueue, message).execute();
+        for (int i = 0; i < fileLogList.size(); i++) {
+            new ArtifactWriteTask(fileLogList.get(i)).execute();
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     class MessageTask extends AsyncTask<Void, Void, Boolean> {
         @Override
         protected Boolean doInBackground(Void... voids) {
             try {
-                storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
-                queueClient = storageAccount.createCloudQueueClient();
+                CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
 
                 personQueue = queueClient.getQueueReference("person");
                 personQueue.createIfNotExists();
@@ -257,6 +184,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     class WriteTask extends AsyncTask<Void, Void, Void> {
         CloudQueue queue;
         CloudQueueMessage message;
@@ -278,6 +206,121 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
                 session.setSyncTimestamp(prevTimestamp);
             }
             return null;
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    class PersonWriteTask extends AsyncTask<Void, Void, Boolean> {
+        private Person person;
+
+        PersonWriteTask(Person person) {
+            this.person = person;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            try {
+                Gson gson = new Gson();
+
+                String content = gson.toJson(person);
+                CloudQueueMessage message = new CloudQueueMessage(person.getId());
+                message.setMessageContent(content);
+
+                personQueue.addMessage(message);
+
+                return true;
+            } catch (StorageException e) {
+                e.printStackTrace();
+
+                return false;
+            }
+        }
+
+        public void onPostExecute(Boolean result) {
+            if (result) {
+                session.setSyncTimestamp(person.getTimestamp());
+
+                personList.remove(person);
+            } else {
+                session.setSyncTimestamp(prevTimestamp);
+            }
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    class MeasureWriteTask extends AsyncTask<Void, Void, Boolean> {
+        private Measure measure;
+
+        MeasureWriteTask(Measure measure) {
+            this.measure = measure;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            try {
+                Gson gson = new Gson();
+
+                String content = gson.toJson(measure);
+                CloudQueueMessage message = new CloudQueueMessage(measure.getId());
+
+                message.setMessageContent(content);
+
+                measureQueue.addMessage(message);
+
+                return true;
+            } catch (StorageException e) {
+                e.printStackTrace();
+
+                return false;
+            }
+        }
+
+        public void onPostExecute(Boolean result) {
+            if (result) {
+                session.setSyncTimestamp(measure.getTimestamp());
+
+                measureList.remove(measure);
+            } else {
+                session.setSyncTimestamp(prevTimestamp);
+            }
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    class ArtifactWriteTask extends AsyncTask<Void, Void, Boolean> {
+        private FileLog artifact;
+
+        ArtifactWriteTask(FileLog artifact) {
+            this.artifact = artifact;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            try {
+                Gson gson = new Gson();
+
+                String content = gson.toJson(artifact);
+                CloudQueueMessage message = new CloudQueueMessage(artifact.getId());
+                message.setMessageContent(content);
+
+                artifactQueue.addMessage(message);
+
+                return true;
+            } catch (StorageException e) {
+                e.printStackTrace();
+
+                return false;
+            }
+        }
+
+        public void onPostExecute(Boolean result) {
+            if (result) {
+                session.setSyncTimestamp(artifact.getCreateDate());
+
+                fileLogList.remove(artifact);
+            } else {
+                session.setSyncTimestamp(prevTimestamp);
+            }
         }
     }
 }
