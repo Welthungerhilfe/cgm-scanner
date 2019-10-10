@@ -4,33 +4,53 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Display;
 import android.view.MenuItem;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.atap.tangoservice.Tango;
+import com.google.atap.tangoservice.TangoCameraIntrinsics;
+import com.google.atap.tangoservice.TangoConfig;
+import com.google.atap.tangoservice.TangoCoordinateFramePair;
+import com.google.atap.tangoservice.TangoErrorException;
+import com.google.atap.tangoservice.TangoInvalidException;
+import com.google.atap.tangoservice.TangoOutOfDateException;
+import com.google.atap.tangoservice.TangoPointCloudData;
+import com.google.atap.tangoservice.TangoPoseData;
+import com.google.atap.tangoservice.experimental.TangoImageBuffer;
+import com.projecttango.tangosupport.TangoSupport;
+
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -38,29 +58,39 @@ import butterknife.OnClick;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
 import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
-import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasureScanFragment;
+import de.welthungerhilfe.cgm.scanner.helper.tango.CameraSurfaceRenderer;
+import de.welthungerhilfe.cgm.scanner.helper.tango.ModelMatCalculator;
+import de.welthungerhilfe.cgm.scanner.helper.tango.OverlaySurface;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
+import de.welthungerhilfe.cgm.scanner.utils.MD5;
+import de.welthungerhilfe.cgm.scanner.utils.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
+import static com.projecttango.tangosupport.TangoSupport.initialize;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_BACK;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_FRONT;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_SIDE;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_PREVIEW;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_BACK;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_FRONT;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_SIDE;
 
-public class ScanModeActivity extends AppCompatActivity {
+public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener {
     private final String SCAN_FRAGMENT = "scan_fragment";
     private final int PERMISSION_LOCATION = 0x0001;
     private final int PERMISSION_CAMERA = 0x0002;
+    private final int PERMISSION_STORAGE = 0x0002;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -103,12 +133,11 @@ public class ScanModeActivity extends AppCompatActivity {
 
     @BindView(R.id.lytSelectMode)
     LinearLayout lytSelectMode;
-    @BindView(R.id.lytSelectedMode)
-    LinearLayout lytSelectedMode;
-    @BindView(R.id.imgSelectedMode)
-    ImageView imgSelectedMode;
-    @BindView(R.id.txtSelectedMode)
-    TextView txtSelectedMode;
+
+    @BindView(R.id.lytScanSteps)
+    LinearLayout lytScanSteps;
+    @BindView(R.id.lytScanner)
+    LinearLayout lytScanner;
 
     @OnClick(R.id.lytScanStanding)
     void scanStanding(LinearLayout lytScanStanding) {
@@ -140,71 +169,45 @@ public class ScanModeActivity extends AppCompatActivity {
     }
     @OnClick(R.id.btnScanStep1)
     void scanStep1(Button btnScanStep1) {
-        MeasureScanFragment scanFragment = new MeasureScanFragment();
-        if (SCAN_MODE == SCAN_STANDING) {
-            imgSelectedMode.setImageResource(R.drawable.standing_active);
-            txtSelectedMode.setText(R.string.mode_standing);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
+        } else {
+            if (SCAN_MODE == SCAN_STANDING) {
+                SCAN_STEP = SCAN_STANDING_FRONT;
+            } else if (SCAN_MODE == SCAN_LYING) {
+                SCAN_STEP = SCAN_LYING_FRONT;
+            }
 
-            SCAN_STEP = SCAN_STANDING_FRONT;
-        } else if (SCAN_MODE == SCAN_LYING) {
-            imgSelectedMode.setImageResource(R.drawable.lying_active);
-            txtSelectedMode.setText(R.string.mode_lying);
-
-            SCAN_STEP = SCAN_LYING_FRONT;
+            lytScanner.setVisibility(View.VISIBLE);
         }
-
-        scanFragment.setMode(SCAN_STEP);
-
-        getSupportFragmentManager().beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_bottom, R.anim.slide_out_bottom, R.anim.slide_in_bottom, R.anim.slide_out_bottom)
-                .add(R.id.scanner, scanFragment, SCAN_FRAGMENT)
-                .addToBackStack(null)
-                .commit();
     }
     @OnClick(R.id.btnScanStep2)
     void scanStep2(Button btnScanStep2) {
-        MeasureScanFragment scanFragment = new MeasureScanFragment();
-        if (SCAN_MODE == SCAN_STANDING) {
-            imgSelectedMode.setImageResource(R.drawable.standing_active);
-            txtSelectedMode.setText(R.string.mode_standing);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
+        } else {
+            if (SCAN_MODE == SCAN_STANDING) {
+                SCAN_STEP = SCAN_STANDING_SIDE;
+            } else if (SCAN_MODE == SCAN_LYING) {
+                SCAN_STEP = SCAN_LYING_SIDE;
+            }
 
-            SCAN_STEP = SCAN_STANDING_SIDE;
-        } else if (SCAN_MODE == SCAN_LYING) {
-            imgSelectedMode.setImageResource(R.drawable.lying_active);
-            txtSelectedMode.setText(R.string.mode_lying);
-
-            SCAN_STEP = SCAN_LYING_SIDE;
+            lytScanner.setVisibility(View.VISIBLE);
         }
-
-        scanFragment.setMode(SCAN_STEP);
-
-        getSupportFragmentManager().beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_bottom, R.anim.slide_out_bottom, R.anim.slide_in_bottom, R.anim.slide_out_bottom)
-                .add(R.id.scanner, scanFragment, SCAN_FRAGMENT)
-                .addToBackStack(null)
-                .commit();
     }
     @OnClick(R.id.btnScanStep3)
     void scanStep3(Button btnScanStep3) {
-        MeasureScanFragment scanFragment = new MeasureScanFragment();
-        if (SCAN_MODE == SCAN_STANDING) {
-            imgSelectedMode.setImageResource(R.drawable.standing_active);
-            txtSelectedMode.setText(R.string.mode_standing);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
+        } else {
+            if (SCAN_MODE == SCAN_STANDING) {
+                SCAN_STEP = SCAN_STANDING_BACK;
+            } else if (SCAN_MODE == SCAN_LYING) {
+                SCAN_STEP = SCAN_LYING_BACK;
+            }
 
-            SCAN_STEP = SCAN_STANDING_BACK;
-        } else if (SCAN_MODE == SCAN_LYING) {
-            imgSelectedMode.setImageResource(R.drawable.lying_active);
-            txtSelectedMode.setText(R.string.mode_lying);
-
-            SCAN_STEP = SCAN_LYING_BACK;
+            lytScanner.setVisibility(View.VISIBLE);
         }
-        scanFragment.setMode(SCAN_STEP);
-
-        getSupportFragmentManager().beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_bottom, R.anim.slide_out_bottom, R.anim.slide_in_bottom, R.anim.slide_out_bottom)
-                .add(R.id.scanner, scanFragment, SCAN_FRAGMENT)
-                .addToBackStack(null)
-                .commit();
     }
   
     @OnClick(R.id.btnScanComplete)
@@ -216,6 +219,7 @@ public class ScanModeActivity extends AppCompatActivity {
         @Override
         public void onAddressDetected(String result) {
             location.setAddress(result);
+            measure.setLocation(location);
         }
 
         @Override
@@ -227,7 +231,7 @@ public class ScanModeActivity extends AppCompatActivity {
     private static final String TAG = ScanModeActivity.class.getSimpleName();
 
     public int SCAN_MODE = SCAN_STANDING;
-    public int SCAN_STEP = 0;
+    public int SCAN_STEP = SCAN_PREVIEW;
     private boolean step1 = false, step2 = false, step3 = false;
 
     public Person person;
@@ -235,27 +239,202 @@ public class ScanModeActivity extends AppCompatActivity {
     public Loc location;
 
     private MeasureRepository measureRepository;
+    private FileLogRepository fileLogRepository;
+
+    private Tango mTango;
+    private TangoConfig mConfig;
+    private boolean mIsConnected = false;
+
+    private static GLSurfaceView mCameraSurfaceView;
+    private static OverlaySurface mOverlaySurfaceView;
+    private CameraSurfaceRenderer mRenderer;
+
+    private TextView mTitleView;
+    private ProgressBar progressBar;
+    private FloatingActionButton fab;
+    private Button btnRetake;
+
+    // variables for Pose and point clouds
+    private float mDeltaTime;
+    private int mValidPoseCallbackCount;
+    private int mPointCloudCallbackCount;
+    private boolean mTimeToTakeSnap;
+    private String mPointCloudFilename;
+    private int mNumberOfFilesWritten;
+    private ArrayList<float[]> mPosePositionBuffer;
+    private ArrayList<float[]> mPoseOrientationBuffer;
+    private ArrayList<Float> mPoseTimestampBuffer;
+    private ArrayList<String> mPointCloudFilenameBuffer;
+    private float[] cam2dev_Transform;
+    private int mNumPoseInSequence;
+    private int mPreviousPoseStatus;
+    private float mPosePreviousTimeStamp;
+    private float mPointCloudPreviousTimeStamp;
+    private float mCurrentTimeStamp;
+
+    private File mExtFileDir;
+    private File mScanArtefactsOutputFolder;
+    private String mPointCloudSaveFolderPath;
+    private File mPointCloudSaveFolder;
+    private File mRgbSaveFolder;
+
+    private int mDisplayRotation = Surface.ROTATION_0;
+
+    private boolean mPointCloudAvailable;
+    private boolean mIsRecording;
+    private int mProgress;
+
+    private long mNowTime;
+    private String mNowTimeString;
+
+    private Semaphore mutex_on_mIsRecording;
+
+    private long age = 0;
+
+    private int mConnectedTextureIdGlThread = INVALID_TEXTURE_ID;
+    private AtomicBoolean mIsFrameAvailableTangoThread = new AtomicBoolean(false);
+
+    private static final int INVALID_TEXTURE_ID = 0;
+    private static final int SECS_TO_MILLISECS = 1000;
+
+    public void onStart() {
+        super.onStart();
+
+        mPointCloudFilename = "";
+        mNumberOfFilesWritten = 0;
+        mPosePositionBuffer = new ArrayList<float[]>();
+        mPoseOrientationBuffer = new ArrayList<float[]>();
+        mPoseTimestampBuffer = new ArrayList<Float>();
+        mPointCloudFilenameBuffer = new ArrayList<String>();
+        mNumPoseInSequence = 0;
+        mutex_on_mIsRecording = new Semaphore(1,true);
+        mIsRecording = false;
+        mPointCloudAvailable = false;
+
+        mNowTime = System.currentTimeMillis();
+        mNowTimeString = String.valueOf(mNowTime);
+
+        mTango = new Tango(this, () -> {
+            // Synchronize against disconnecting while the service is being used in
+            // the OpenGL thread or in the UI thread.
+            synchronized (this) {
+                try {
+                    mConfig = setupTangoConfig(mTango);
+                    mTango.connect(mConfig);
+                    startupTango();
+                    initialize(mTango);
+                    mIsConnected = true;
+
+                    setDisplayRotation();
+                } catch (TangoOutOfDateException e) {
+                    Log.e(TAG, getString(R.string.exception_out_of_date), e);
+                    // todo: Crashlytics.log(Log.ERROR, TAG, "TangoOutOfDateException");
+                } catch (TangoErrorException e) {
+                    Log.e(TAG, getString(R.string.exception_tango_error), e);
+                    // todo: Crashlytics.log(Log.ERROR, TAG, "TangoErrorException");
+                } catch (TangoInvalidException e) {
+                    Log.e(TAG, getString(R.string.exception_tango_invalid), e);
+                    // todo: Crashlytics.log(Log.ERROR, TAG, "TangoInvalidException");
+                }
+                setUpExtrinsics();
+            }
+        });
+    }
 
     protected void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
+
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
         measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
-        if (person == null) Log.e(TAG,"person was null!");
-        if (measure == null) Log.e(TAG,"measure was null!");
+
+        if (person == null) {
+            Toast.makeText(this, "Person was not defined", Toast.LENGTH_LONG).show();
+            finish();
+        }
+
+        age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
+
+        if (measure == null) {
+            measure = new Measure();
+            measure.setId(AppController.getInstance().getMeasureId());
+            measure.setQrCode(person.getQrcode());
+            measure.setCreatedBy(AppController.getInstance().firebaseUser.getEmail());
+            measure.setAge(age);
+            measure.setDate(System.currentTimeMillis());
+        }
 
         setContentView(R.layout.activity_scan_mode);
 
         ButterKnife.bind(this);
 
+        mTitleView = findViewById(R.id.txtTitle);
+        progressBar = findViewById(R.id.progressBar);
+        fab = findViewById(R.id.fab_scan_result);
+        fab.setOnClickListener(this);
+        btnRetake = findViewById(R.id.btnRetake);
+
+        findViewById(R.id.btnRetake).setOnClickListener(this);
+        findViewById(R.id.imgClose).setOnClickListener(this);
+
+        mCameraSurfaceView = findViewById(R.id.surfaceview);
+        mOverlaySurfaceView = findViewById(R.id.overlaySurfaceView);
+
         measureRepository = MeasureRepository.getInstance(this);
+        fileLogRepository = FileLogRepository.getInstance(this);
 
         setupToolbar();
 
         getCurrentLocation();
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
+        setupScanArtifacts();
+        setupRenderer();
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_STORAGE);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mCameraSurfaceView.onResume();
+        mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+
+        if (SCAN_STEP == SCAN_STANDING_FRONT || SCAN_STEP == SCAN_STANDING_SIDE || SCAN_STEP == SCAN_STANDING_BACK)
+            mOverlaySurfaceView.setMode(OverlaySurface.INFANT_CLOSE_DOWN_UP_OVERLAY);
+        else if (SCAN_STEP == SCAN_LYING_FRONT || SCAN_STEP == SCAN_LYING_SIDE || SCAN_STEP == SCAN_LYING_BACK)
+            mOverlaySurfaceView.setMode(OverlaySurface.BABY_OVERLAY);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        mCameraSurfaceView.onPause();
+        // Synchronize against disconnecting while the service is being used in the OpenGL
+        // thread or in the UI thread.
+        // NOTE: DO NOT lock against this same object in the Tango callback thread.
+        // Tango.disconnect will block here until all Tango callback calls are finished.
+        // If you lock against this object in a Tango callback thread it will cause a deadlock.
+        synchronized (this) {
+            try {
+                mTango.disconnectCamera(TangoCameraIntrinsics.TANGO_CAMERA_COLOR);
+                // We need to invalidate the connected texture ID so that we cause a
+                // re-connection in the OpenGL thread after resume.
+                mConnectedTextureIdGlThread = INVALID_TEXTURE_ID;
+                mTango.disconnect();
+                mIsConnected = false;
+            } catch (TangoErrorException e) {
+                Log.e(TAG, getString(R.string.exception_tango_error), e);
+                // todo: Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in synchronized disconnect onPause");
+            }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 
     private void setupToolbar() {
@@ -264,6 +443,375 @@ public class ScanModeActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
         actionBar.setTitle(R.string.title_add_measure);
+    }
+
+    private void setupScanArtifacts() {
+        mExtFileDir = AppController.getInstance().getRootDirectory();
+
+        // TODO make part of AppConstants
+        Log.e("Root Directory", mExtFileDir.getParent());
+        mScanArtefactsOutputFolder  = new File(mExtFileDir,person.getQrcode() + "/measurements/" + mNowTimeString + "/");
+        mPointCloudSaveFolder = new File(mScanArtefactsOutputFolder,"pc");
+        mRgbSaveFolder = new File(mScanArtefactsOutputFolder,"rgb");
+
+        if(!mPointCloudSaveFolder.exists()) {
+            boolean created = mPointCloudSaveFolder.mkdirs();
+            if (created) {
+                Log.i(TAG, "Folder: \"" + mPointCloudSaveFolder + "\" created\n");
+            } else {
+                Log.e(TAG,"Folder: \"" + mPointCloudSaveFolder + "\" could not be created!\n");
+            }
+        }
+
+        if(!mRgbSaveFolder.exists()) {
+            boolean created = mRgbSaveFolder.mkdirs();
+            if (created) {
+                Log.i(TAG, "Folder: \"" + mRgbSaveFolder + "\" created\n");
+            } else {
+                Log.e(TAG,"Folder: \"" + mRgbSaveFolder + "\" could not be created!\n");
+            }
+        }
+
+        Log.v(TAG,"mPointCloudSaveFolder: "+mPointCloudSaveFolder);
+        Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
+    }
+
+    // TODO: setup own renderer for scanning process (or attribute Apache License 2.0 from Google)
+    private void setupRenderer() {
+        mCameraSurfaceView.setEGLContextClientVersion(2);
+        mRenderer = new CameraSurfaceRenderer(new CameraSurfaceRenderer.RenderCallback() {
+
+            @Override
+            public void preRender() {
+
+                // This is the work that you would do on your main OpenGL render thread.
+
+                // We need to be careful to not run any Tango-dependent code in the OpenGL
+                // thread unless we know the Tango Service to be properly set up and connected.
+                if (!mIsConnected) {
+                    return;
+                }
+
+                try {
+                    // Synchronize against concurrently disconnecting the service triggered from the
+                    // UI thread.
+                    synchronized (this) {
+                        // Connect the Tango SDK to the OpenGL texture ID where we are going to
+                        // render the camera.
+                        // NOTE: This must be done after the texture is generated and the Tango
+                        // service is connected.
+                        if (mConnectedTextureIdGlThread == INVALID_TEXTURE_ID) {
+                            mConnectedTextureIdGlThread = mRenderer.getTextureId();
+                            //sVideoEncoder.setTextureId(mConnectedTextureIdGlThread);
+                            mTango.connectTextureId(TangoCameraIntrinsics.TANGO_CAMERA_COLOR, mConnectedTextureIdGlThread);
+
+                            Log.d(TAG, "connected to texture id: " + mRenderer.getTextureId());
+                        }
+
+                        // If there is a new RGB camera frame available, update the texture and
+                        // scene camera pose.
+                        if (mIsFrameAvailableTangoThread.compareAndSet(true, false)) {
+
+                            double rgbTimestamp = mTango.updateTexture(TangoCameraIntrinsics.TANGO_CAMERA_COLOR);
+
+                            // {@code rgbTimestamp} contains the exact timestamp at which the
+                            // rendered RGB frame was acquired.
+
+                            // In order to see more details on how to use this timestamp to modify
+                            // the scene camera and achieve an augmented reality effect,
+                            // refer to java_augmented_reality_example and/or
+                            // java_augmented_reality_opengl_example projects.
+
+                        }
+                    }
+                } catch (TangoErrorException e) {
+                    Log.e(TAG, "Tango API call error within the OpenGL thread", e);
+                    // todo: Crashlytics.log(Log.ERROR, TAG, "Tango API call error within the OpenGL thread");
+                } catch (Throwable t) {
+                    Log.e(TAG, "Exception on the OpenGL thread", t);
+                    // todo: Crashlytics.log(Log.ERROR, TAG, "Exception on the OpenGL thread");
+                }
+            }
+        });
+
+        mCameraSurfaceView.setRenderer(mRenderer);
+    }
+
+    private TangoConfig setupTangoConfig(Tango tango) {
+        // Create a new Tango configuration and enable the Camera API.
+        TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_COLORCAMERA, true);
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
+        config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
+        return config;
+    }
+
+    private void startupTango() {
+        // Lock configuration and connect to Tango.
+        // Select coordinate frame pair.
+        final ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<TangoCoordinateFramePair>();
+        framePairs.add(new TangoCoordinateFramePair(TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE, TangoPoseData.COORDINATE_FRAME_DEVICE));
+
+        // Listen for new Tango data.
+        mTango.connectListener(framePairs, new Tango.TangoUpdateCallback() {
+
+            String[] poseStatusCode = {"POSE_INITIALIZING","POSE_VALID","POSE_INVALID","POSE_UNKNOWN"};
+
+            @Override
+            public void onPoseAvailable(final TangoPoseData pose) {
+                mDeltaTime = (float) (pose.timestamp - mPosePreviousTimeStamp) * SECS_TO_MILLISECS;
+                mPosePreviousTimeStamp = (float) pose.timestamp;
+                if (mPreviousPoseStatus != pose.statusCode) {
+                    mValidPoseCallbackCount = 0;
+                }
+                mValidPoseCallbackCount++;
+                mPreviousPoseStatus = pose.statusCode;
+
+                // My pose buffering
+                if (mIsRecording && pose.statusCode == TangoPoseData.POSE_VALID) {
+                    mPosePositionBuffer.add(mNumPoseInSequence, pose.getTranslationAsFloats());
+                    mPoseOrientationBuffer.add(mNumPoseInSequence, pose.getRotationAsFloats());
+                    mPoseTimestampBuffer.add((float)pose.timestamp);
+                    mNumPoseInSequence++;
+                }
+                //End of My pose buffering
+            }
+
+            @Override
+            public void onPointCloudAvailable(final TangoPointCloudData pointCloudData) {
+
+                Log.d(TAG, "recording:"+mIsRecording);
+                // set to true for next RGB image to be written
+                // TODO remove when not necessary anymore (performance/video capture)
+                mPointCloudAvailable = true;
+
+                float[] average = TangoUtils.calculateAveragedDepth(pointCloudData.points, pointCloudData.numPoints);
+
+                mOverlaySurfaceView.setNumPoints(pointCloudData.numPoints);
+                mOverlaySurfaceView.setDistance(average[0]);
+                mOverlaySurfaceView.setConfidence(average[1]);
+
+                // Get pose transforms for openGL to depth/color cameras.
+                TangoPoseData oglTdepthPose = TangoSupport.getPoseAtTime(
+                        pointCloudData.timestamp,
+                        TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
+                        TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
+                        TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
+                        TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
+                        TangoSupport.ROTATION_IGNORED);
+                if (oglTdepthPose.statusCode != TangoPoseData.POSE_VALID) {
+                    //Log.w(TAG, "Could not get depth camera transform at time " + pointCloudData.timestamp);
+                }
+
+                mCurrentTimeStamp = (float) pointCloudData.timestamp;
+                final float frameDelta = (mCurrentTimeStamp - mPointCloudPreviousTimeStamp) * SECS_TO_MILLISECS;
+                mPointCloudPreviousTimeStamp = mCurrentTimeStamp;
+                mPointCloudCallbackCount++;
+
+                // My writing to file function
+
+
+                // Background task for writing to file
+                // TODO refactor to top-level class or make static?
+                Runnable thread = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            mutex_on_mIsRecording.acquire();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                            // todo: Crashlytics.log(Log.WARN, TAG, "InterruptedException aquiring recording mutext");
+                        }
+                        // Saving the frame or not, depending on the current mode.
+                        if ( mIsRecording ) {
+                            // TODO save files to local storage
+                            updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
+                            progressBar.setProgress(mProgress);
+
+                            mPointCloudFilename = "pc_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
+                                    "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
+                            TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
+
+                            File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
+                            FileLog log = new FileLog();
+                            log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
+                            log.setType("pcd");
+                            log.setPath(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename + ".pcd");
+                            log.setHashValue(MD5.getMD5(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd"));
+                            log.setFileSize(artefactFile.length());
+                            log.setUploadDate(0);
+                            log.setDeleted(false);
+                            log.setQrCode(person.getQrcode());
+                            log.setCreateDate(mNowTime);
+                            log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                            log.setAge(age);
+
+                            fileLogRepository.insertFileLog(log);
+                            // Todo;
+                            //new OfflineTask().saveFileLog(log);
+                            // Direct Upload to Firebase Storage
+                            mNumberOfFilesWritten++;
+                            //mTimeToTakeSnap = false;
+                        }
+                        mutex_on_mIsRecording.release();
+                    }
+                };
+                thread.run();
+            }
+
+
+            @Override
+            public void onFrameAvailable(int cameraId) {
+                // This will get called every time a new RGB camera frame is available to be
+                // rendered.
+                //Log.d(TAG, "onFrameAvailable");
+
+                if (cameraId == TangoCameraIntrinsics.TANGO_CAMERA_COLOR) {
+                    // Now that we are receiving onFrameAvailable callbacks, we can switch
+                    // to RENDERMODE_WHEN_DIRTY to drive the render loop from this callback.
+                    // This will result in a frame rate of approximately 30FPS, in synchrony with
+                    // the RGB camera driver.
+                    // If you need to render at a higher rate (i.e., if you want to render complex
+                    // animations smoothly) you  can use RENDERMODE_CONTINUOUSLY throughout the
+                    // application lifecycle.
+                    if (mCameraSurfaceView.getRenderMode() != GLSurfaceView.RENDERMODE_WHEN_DIRTY) {
+                        mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+                    }
+
+                    // Note that the RGB data is not passed as a parameter here.
+                    // Instead, this callback indicates that you can call
+                    // the {@code updateTexture()} method to have the
+                    // RGB data copied directly to the OpenGL texture at the native layer.
+                    // Since that call needs to be done from the OpenGL thread, what we do here is
+                    // set up a flag to tell the OpenGL thread to do that in the next run.
+                    // NOTE: Even if we are using a render-by-request method, this flag is still
+                    // necessary since the OpenGL thread run requested below is not guaranteed
+                    // to run in synchrony with this requesting call.
+                    mIsFrameAvailableTangoThread.set(true);
+                    // Trigger an OpenGL render to update the OpenGL scene with the new RGB data.
+                    mCameraSurfaceView.requestRender();
+                }
+            }
+        });
+
+        mTango.experimentalConnectOnFrameListener(TangoCameraIntrinsics.TANGO_CAMERA_COLOR, (tangoImageBuffer, i) -> {
+            if ( ! mIsRecording || ! mPointCloudAvailable) {
+                return;
+            }
+
+            Runnable thread = () -> {
+                TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
+
+                // TODO save files to local storage
+                String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + currentTangoImageBuffer.timestamp + ".jpg";
+
+                BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
+
+                File artefactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
+                FileLog log = new FileLog();
+                log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
+                log.setType("rgb");
+                log.setPath(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
+                log.setHashValue(MD5.getMD5(mRgbSaveFolder.getPath() + File.separator + currentImgFilename));
+                log.setFileSize(artefactFile.length());
+                log.setUploadDate(0);
+                log.setDeleted(false);
+                log.setQrCode(person.getQrcode());
+                log.setCreateDate(mNowTime);
+                log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                log.setAge(age);
+                // Todo;
+                //new OfflineTask().saveFileLog(log);
+                fileLogRepository.insertFileLog(log);
+            };
+            thread.run();
+        });
+    }
+
+    private void setDisplayRotation() {
+        Display display = getWindowManager().getDefaultDisplay();
+        mDisplayRotation = display.getRotation();
+
+        // We also need to update the camera texture UV coordinates. This must be run in the OpenGL
+        // thread.
+        mCameraSurfaceView.queueEvent((Runnable) () -> {
+            if (mIsConnected) {
+                mRenderer.updateColorCameraTextureUv(mDisplayRotation);
+            }
+        });
+    }
+
+    private void setUpExtrinsics() {
+        // Set device to imu matrix in Model Matrix Calculator.
+        TangoPoseData device2IMUPose = new TangoPoseData();
+        TangoCoordinateFramePair framePair = new TangoCoordinateFramePair();
+        framePair.baseFrame = TangoPoseData.COORDINATE_FRAME_IMU;
+        framePair.targetFrame = TangoPoseData.COORDINATE_FRAME_DEVICE;
+        try {
+            device2IMUPose = mTango.getPoseAtTime(0.0, framePair);
+        } catch (TangoErrorException e) {
+            Toast.makeText(this, R.string.exception_tango_error, Toast.LENGTH_SHORT).show();
+            // todo: Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in device setup");
+        }
+        /*mRenderer.getModelMatCalculator().SetDevice2IMUMatrix(device2IMUPose.getTranslationAsFloats(),device2IMUPose.getRotationAsFloats());*/
+        // Set color camera to imu matrix in Model Matrix Calculator.
+        TangoPoseData color2IMUPose = new TangoPoseData();
+
+        framePair.baseFrame = TangoPoseData.COORDINATE_FRAME_IMU;
+        framePair.targetFrame = TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR;
+        try {
+            color2IMUPose = mTango.getPoseAtTime(0.0, framePair);
+        } catch (TangoErrorException e) {
+            Toast.makeText(this, R.string.exception_tango_error, Toast.LENGTH_SHORT).show();
+            // todo: Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in camera setup");
+        }
+
+        //mRenderer.getModelMatCalculator().SetColorCamera2IMUMatrix(color2IMUPose.getTranslationAsFloats(), color2IMUPose.getRotationAsFloats());
+
+        // Get the Camera2Device transform
+        float[] rot_Dev2IMU = device2IMUPose.getRotationAsFloats();
+        float[] trans_Dev2IMU = device2IMUPose.getTranslationAsFloats();
+        float[] rot_Cam2IMU = color2IMUPose.getRotationAsFloats();
+        float[] trans_Cam2IMU = color2IMUPose.getTranslationAsFloats();
+
+        float[] dev2IMU = new float[16];
+        Matrix.setIdentityM(dev2IMU, 0);
+        dev2IMU = ModelMatCalculator.quaternionMatrixOpenGL(rot_Dev2IMU);
+        dev2IMU[12] += trans_Dev2IMU[0];
+        dev2IMU[13] += trans_Dev2IMU[1];
+        dev2IMU[14] += trans_Dev2IMU[2];
+
+        float[] IMU2dev = new float[16];
+        Matrix.setIdentityM(IMU2dev, 0);
+        Matrix.invertM(IMU2dev, 0, dev2IMU, 0);
+
+        float[] cam2IMU = new float[16];
+        Matrix.setIdentityM(cam2IMU, 0);
+        cam2IMU = ModelMatCalculator.quaternionMatrixOpenGL(rot_Cam2IMU);
+        cam2IMU[12] += trans_Cam2IMU[0];
+        cam2IMU[13] += trans_Cam2IMU[1];
+        cam2IMU[14] += trans_Cam2IMU[2];
+
+        cam2dev_Transform = new float[16];
+        Matrix.setIdentityM(cam2dev_Transform, 0);
+        Matrix.multiplyMM(cam2dev_Transform, 0, IMU2dev, 0, cam2IMU, 0);
+    }
+
+    private void updateScanningProgress(int numPoints, float distance, float confidence) {
+        float minPointsToCompleteScan = 199500.0f;
+        float progressToAddFloat = numPoints / minPointsToCompleteScan;
+        progressToAddFloat = progressToAddFloat*100;
+        int progressToAdd = (int) progressToAddFloat;
+        Log.d(TAG, "numPoints: "+numPoints+" float: "+progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
+        if (mProgress+progressToAdd > 100) {
+            mProgress = 100;
+            runOnUiThread(() -> fab.setImageResource(R.drawable.done));
+        } else {
+            mProgress = mProgress+progressToAdd;
+        }
+
+        Log.d("scan_progress", String.valueOf(mProgress));
+        Log.d("scan_progress_step", String.valueOf(progressToAdd));
     }
 
     private void changeMode() {
@@ -356,26 +904,37 @@ public class ScanModeActivity extends AppCompatActivity {
         animator.start();
     }
 
+    private void startScan() {
+        mProgress = 0;
+
+        resumeScan();
+    }
+
+    private void resumeScan() {
+        if (SCAN_STEP == SCAN_PREVIEW)
+            return;
+
+        mIsRecording = true;
+        fab.setImageResource(R.drawable.stop);
+    }
+
+    private void pauseScan() {
+        mIsRecording = false;
+        fab.setImageResource(R.drawable.recorder);
+    }
+
     public void closeScan() {
-        Fragment fragment = getSupportFragmentManager().findFragmentByTag(SCAN_FRAGMENT);
-        if (fragment != null)
-            getSupportFragmentManager().popBackStack();
+        mIsRecording = false;
+        progressBar.setProgress(0);
+        mProgress = 0;
+
+        lytScanner.setVisibility(View.GONE);
     }
 
     public void completeScan() {
-        if (measure == null) {
-            measure = new Measure();
-            measure.setId(AppController.getInstance().getMeasureId());
-        }
-
-        if (location != null) {
-            measure.setLocation(location);
-        }
-
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
         measure.setDate(Utils.getUniversalTimestamp());
         measure.setType("v1.1.2");
-        long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
         measure.setAge(age);
         measure.setType(AppConstants.VAL_MEASURE_AUTO);
         measure.setWeight(0.0f);
@@ -405,7 +964,7 @@ public class ScanModeActivity extends AppCompatActivity {
 
             if (!isGPSEnabled && !isNetworkEnabled) {
                 startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-            } else if (isNetworkEnabled || isGPSEnabled) {
+            } else {
                 List<String> providers = lm.getProviders(true);
                 for (String provider : providers) {
                     Location l = lm.getLastKnownLocation(provider);
@@ -443,17 +1002,49 @@ public class ScanModeActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSION_LOCATION && grantResults.length > 0 && grantResults[0] >= 0) {
             getCurrentLocation();
-        } else if (requestCode == PERMISSION_CAMERA && (grantResults.length == 0 || grantResults[0] < 0)) {
+        }
+        if (requestCode == PERMISSION_CAMERA && (grantResults.length == 0 || grantResults[0] < 0)) {
             Toast.makeText(ScanModeActivity.this, R.string.permission_camera, Toast.LENGTH_SHORT).show();
+            finish();
+        }
+        if (requestCode == PERMISSION_STORAGE && (grantResults.length == 0 || grantResults[0] < 0)) {
+            Toast.makeText(ScanModeActivity.this, "Storage permission needed!", Toast.LENGTH_SHORT).show();
             finish();
         }
     }
 
     public void onBackPressed() {
-        Fragment fragment = getSupportFragmentManager().findFragmentByTag(SCAN_FRAGMENT);
-        if (fragment != null)
-            getSupportFragmentManager().popBackStack();
-        else
+        if (lytScanner.getVisibility() == View.VISIBLE) {
+            lytScanner.setVisibility(View.GONE);
+        } else {
             finish();
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.fab_scan_result:
+                if (mIsRecording) {
+                    if (mProgress >= 100) {
+                        goToNextStep();
+                    } else {
+                        pauseScan();
+                    }
+                } else {
+                    if (mProgress > 0) {
+                        resumeScan();
+                    } else {
+                        startScan();
+                    }
+                }
+                break;
+            case R.id.imgClose:
+                closeScan();
+                break;
+            case R.id.btnRetake:
+                mProgress = 0;
+                break;
+        }
     }
 }
