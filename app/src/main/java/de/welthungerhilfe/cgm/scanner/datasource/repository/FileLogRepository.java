@@ -1,5 +1,6 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
+import android.annotation.SuppressLint;
 import android.arch.persistence.room.Query;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -28,6 +29,7 @@ public class FileLogRepository {
         return instance;
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void loadQueuedData(OnFileLogsLoad listener) {
         new AsyncTask<Void, Void, List<FileLog>>() {
             @Override
@@ -39,9 +41,10 @@ public class FileLogRepository {
             public void onPostExecute(List<FileLog> data) {
                 listener.onFileLogsLoaded(data);
             }
-        }.execute();
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void insertFileLog(FileLog log) {
         new AsyncTask<Void, Void, Boolean>() {
 
@@ -50,9 +53,10 @@ public class FileLogRepository {
                 database.fileLogDao().saveFileLog(log);
                 return true;
             }
-        }.execute();
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void updateFileLog(FileLog log) {
         new AsyncTask<Void, Void, Boolean>() {
             @Override
@@ -60,21 +64,22 @@ public class FileLogRepository {
                 database.fileLogDao().updateFileLog(log);
                 return true;
             }
-        }.execute();
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void getSyncableLog(OnFileLogsLoad listener, long timestamp) {
-        new AsyncTask<Long, Void, List<FileLog>>() {
+        new AsyncTask<Void, Void, List<FileLog>>() {
             @Override
-            protected List<FileLog> doInBackground(Long... timestamp) {
-                return database.fileLogDao().getSyncableData(timestamp[0]);
+            protected List<FileLog> doInBackground(Void... voids) {
+                return database.fileLogDao().getSyncableData(timestamp);
             }
 
             @Override
             public void onPostExecute(List<FileLog> data) {
                 listener.onFileLogsLoaded(data);
             }
-        }.execute(timestamp);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public int getArtifactCount() {

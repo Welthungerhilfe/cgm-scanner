@@ -5,6 +5,8 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -12,6 +14,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -311,6 +314,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private static final int INVALID_TEXTURE_ID = 0;
     private static final int SECS_TO_MILLISECS = 1000;
 
+
+    private AlertDialog progressDialog;
+
     public void onStart() {
         super.onStart();
 
@@ -402,6 +408,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         setupScanArtifacts();
         setupRenderer();
+
+        progressDialog = new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setView(R.layout.dialog_loading)
+                .create();
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_STORAGE);
@@ -592,7 +603,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             }
 
             @Override
-            public void onPointCloudAvailable(final TangoPointCloudData pointCloudData) {
+            public void onPointCloudAvailable(final TangoPointCloudData pointCloudData) throws TangoErrorException {
 
                 Log.d(TAG, "recording:"+mIsRecording);
                 // set to true for next RGB image to be written
@@ -627,48 +638,45 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 // Background task for writing to file
                 // TODO refactor to top-level class or make static?
-                Runnable thread = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            mutex_on_mIsRecording.acquire();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                            // todo: Crashlytics.log(Log.WARN, TAG, "InterruptedException aquiring recording mutext");
-                        }
-                        // Saving the frame or not, depending on the current mode.
-                        if ( mIsRecording ) {
-                            // TODO save files to local storage
-                            updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
-                            progressBar.setProgress(mProgress);
-
-                            mPointCloudFilename = "pc_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
-                                    "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
-                            TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
-
-                            File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
-                            FileLog log = new FileLog();
-                            log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
-                            log.setType("pcd");
-                            log.setPath(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename + ".pcd");
-                            log.setHashValue(MD5.getMD5(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd"));
-                            log.setFileSize(artefactFile.length());
-                            log.setUploadDate(0);
-                            log.setDeleted(false);
-                            log.setQrCode(person.getQrcode());
-                            log.setCreateDate(mNowTime);
-                            log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-                            log.setAge(age);
-
-                            fileLogRepository.insertFileLog(log);
-                            // Todo;
-                            //new OfflineTask().saveFileLog(log);
-                            // Direct Upload to Firebase Storage
-                            mNumberOfFilesWritten++;
-                            //mTimeToTakeSnap = false;
-                        }
-                        mutex_on_mIsRecording.release();
+                Runnable thread = () -> {
+                    try {
+                        mutex_on_mIsRecording.acquire();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        // todo: Crashlytics.log(Log.WARN, TAG, "InterruptedException aquiring recording mutext");
                     }
+                    // Saving the frame or not, depending on the current mode.
+                    if ( mIsRecording ) {
+                        // TODO save files to local storage
+                        updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
+                        progressBar.setProgress(mProgress);
+
+                        mPointCloudFilename = "pc_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
+                                "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
+                        TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
+
+                        File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
+                        FileLog log = new FileLog();
+                        log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
+                        log.setType("pcd");
+                        log.setPath(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename + ".pcd");
+                        log.setHashValue(MD5.getMD5(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd"));
+                        log.setFileSize(artefactFile.length());
+                        log.setUploadDate(0);
+                        log.setDeleted(false);
+                        log.setQrCode(person.getQrcode());
+                        log.setCreateDate(mNowTime);
+                        log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                        log.setAge(age);
+
+                        fileLogRepository.insertFileLog(log);
+                        // Todo;
+                        //new OfflineTask().saveFileLog(log);
+                        // Direct Upload to Firebase Storage
+                        mNumberOfFilesWritten++;
+                        //mTimeToTakeSnap = false;
+                    }
+                    mutex_on_mIsRecording.release();
                 };
                 thread.run();
             }
@@ -945,6 +953,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         lytScanner.setVisibility(View.GONE);
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void completeScan() {
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
         measure.setDate(Utils.getUniversalTimestamp());
@@ -960,9 +969,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         measure.setTimestamp(Utils.getUniversalTimestamp());
         measure.setQrCode(person.getQrcode());
 
-        measureRepository.insertMeasure(measure);
+        progressDialog.show();
 
-        finish();
+        new SaveMeasureTask(ScanModeActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void getCurrentLocation() {
@@ -1059,6 +1068,26 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             case R.id.btnRetake:
                 mProgress = 0;
                 break;
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    class SaveMeasureTask extends AsyncTask<Void, Void, Void> {
+        private Activity activity;
+
+        SaveMeasureTask(Activity act) {
+            activity = act;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            measureRepository.insertMeasure(measure);
+            return null;
+        }
+
+        public void onPostExecute(Void result) {
+            progressDialog.dismiss();
+            activity.finish();
         }
     }
 }

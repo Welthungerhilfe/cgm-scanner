@@ -1,10 +1,12 @@
 package de.welthungerhilfe.cgm.scanner.datasource.viewmodel;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Transformations;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
 import java.util.List;
@@ -80,9 +82,18 @@ public class CreateDataViewModel extends AndroidViewModel {
         setActiveTab(1);
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void insertMeasure(Measure measure) {
-        measureRepository.insertMeasure(measure);
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                measureRepository.insertMeasure(measure);
+                return null;
+            }
 
-        setActiveTab(2);
+            public void onPostExecute(Void result) {
+                setActiveTab(2);
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 }
