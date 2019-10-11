@@ -4,6 +4,7 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,7 +16,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -87,7 +87,6 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_F
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_SIDE;
 
 public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener {
-    private final String SCAN_FRAGMENT = "scan_fragment";
     private final int PERMISSION_LOCATION = 0x0001;
     private final int PERMISSION_CAMERA = 0x0002;
     private final int PERMISSION_STORAGE = 0x0002;
@@ -167,6 +166,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         changeMode();
     }
+    @SuppressLint("SetTextI18n")
     @OnClick(R.id.btnScanStep1)
     void scanStep1(Button btnScanStep1) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -174,13 +174,18 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         } else {
             if (SCAN_MODE == SCAN_STANDING) {
                 SCAN_STEP = SCAN_STANDING_FRONT;
+
+                mTitleView.setText(getString(R.string.front_view_01) + " - " + getString(R.string.mode_standing));
             } else if (SCAN_MODE == SCAN_LYING) {
                 SCAN_STEP = SCAN_LYING_FRONT;
+
+                mTitleView.setText(getString(R.string.front_view_01) + " - " + getString(R.string.mode_lying));
             }
 
             lytScanner.setVisibility(View.VISIBLE);
         }
     }
+    @SuppressLint("SetTextI18n")
     @OnClick(R.id.btnScanStep2)
     void scanStep2(Button btnScanStep2) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -188,13 +193,18 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         } else {
             if (SCAN_MODE == SCAN_STANDING) {
                 SCAN_STEP = SCAN_STANDING_SIDE;
+
+                mTitleView.setText(getString(R.string.lateral_view_02) + " - " + getString(R.string.mode_standing));
             } else if (SCAN_MODE == SCAN_LYING) {
                 SCAN_STEP = SCAN_LYING_SIDE;
+
+                mTitleView.setText(getString(R.string.lateral_view_02) + " - " + getString(R.string.mode_lying));
             }
 
             lytScanner.setVisibility(View.VISIBLE);
         }
     }
+    @SuppressLint("SetTextI18n")
     @OnClick(R.id.btnScanStep3)
     void scanStep3(Button btnScanStep3) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -202,8 +212,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         } else {
             if (SCAN_MODE == SCAN_STANDING) {
                 SCAN_STEP = SCAN_STANDING_BACK;
+
+                mTitleView.setText(getString(R.string.back_view_03) + " - " + getString(R.string.mode_standing));
             } else if (SCAN_MODE == SCAN_LYING) {
                 SCAN_STEP = SCAN_LYING_BACK;
+
+                mTitleView.setText(getString(R.string.back_view_03) + " - " + getString(R.string.mode_lying));
             }
 
             lytScanner.setVisibility(View.VISIBLE);
