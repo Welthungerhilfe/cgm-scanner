@@ -238,6 +238,7 @@
     <string name="login">Login</string>
     <string name="no_scans">No scans yet today</string>
     <string name="add_scans">To start scanning, tap [+] button</string>
+    <string name="label_wait">Please wait for a moment ...</string>
     <string name="sam_wfa_title">Child is severely under weight</string>
     <string name="sam_wfa_message">Please go to the nearest Malnutrition center/ Nutrition Rehabilitation center</string>
     <string name="mam_wfa_title">Child is moderately under weight</string>
