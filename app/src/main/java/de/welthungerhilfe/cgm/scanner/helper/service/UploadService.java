@@ -28,6 +28,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
@@ -110,8 +112,12 @@ public class UploadService extends Service implements OnFileLogsLoad {
             stopSelf();
         } else {
             for (int i = 0; i < list.size(); i++) {
-                Runnable worker = new UploadThread(list.get(i));
-                executor.execute(worker);
+                try {
+                    Runnable worker = new UploadThread(list.get(i));
+                    executor.execute(worker);
+                } catch (Exception ex) {
+                    remainingCount --;
+                }
             }
         }
     }

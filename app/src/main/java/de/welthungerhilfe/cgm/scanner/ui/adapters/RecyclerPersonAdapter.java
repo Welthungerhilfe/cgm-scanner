@@ -19,6 +19,8 @@
 
 package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
+import android.annotation.SuppressLint;
+import android.arch.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
@@ -78,13 +80,14 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
         return new ViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(RecyclerPersonAdapter.ViewHolder holder, int position) {
         Person person = getItem(position);
 
         holder.txtName.setText(person.getName() + " " + person.getSurname());
 
-        repository.getPersonLastMeasure(measure -> {
+        repository.getPersonLastMeasureLiveData(person.getId()).observe((LifecycleOwner) context, measure -> {
             if (measure != null) {
                 holder.txtWeight.setText(Double.toString(measure.getWeight()));
                 holder.txtHeight.setText(Double.toString(measure.getHeight()));
@@ -92,7 +95,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
                 holder.txtWeight.setText("0.0");
                 holder.txtHeight.setText("0.0");
             }
-        }, person.getId());
+        });
 
         if (personDetailListener != null) {
             holder.bindPersonDetail(person);

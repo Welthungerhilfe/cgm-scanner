@@ -928,6 +928,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private void startScan() {
         mProgress = 0;
+        fab.setImageResource(R.drawable.recorder);
 
         resumeScan();
     }
@@ -1086,7 +1087,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
 
         public void onPostExecute(Void result) {
-            progressDialog.dismiss();
             activity.finish();
         }
     }
