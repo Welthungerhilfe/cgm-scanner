@@ -185,6 +185,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 mTitleView.setText(getString(R.string.front_view_01) + " - " + getString(R.string.mode_lying));
             }
 
+            fab.setImageResource(R.drawable.recorder);
             lytScanner.setVisibility(View.VISIBLE);
         }
     }
@@ -204,6 +205,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 mTitleView.setText(getString(R.string.lateral_view_02) + " - " + getString(R.string.mode_lying));
             }
 
+            fab.setImageResource(R.drawable.recorder);
             lytScanner.setVisibility(View.VISIBLE);
         }
     }
@@ -223,6 +225,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 mTitleView.setText(getString(R.string.back_view_03) + " - " + getString(R.string.mode_lying));
             }
 
+            fab.setImageResource(R.drawable.recorder);
             lytScanner.setVisibility(View.VISIBLE);
         }
     }
@@ -928,7 +931,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private void startScan() {
         mProgress = 0;
-        fab.setImageResource(R.drawable.recorder);
 
         resumeScan();
     }
