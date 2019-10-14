@@ -142,7 +142,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     LinearLayout lytScanner;
 
     @OnClick(R.id.lytScanStanding)
-    void scanStanding(LinearLayout lytScanStanding) {
+    void scanStanding() {
         SCAN_MODE = SCAN_STANDING;
 
         imgScanStanding.setImageResource(R.drawable.standing_active);
@@ -156,7 +156,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         changeMode();
     }
     @OnClick(R.id.lytScanLying)
-    void scanLying(LinearLayout lytScanLying) {
+    void scanLying() {
         SCAN_MODE = SCAN_LYING;
 
         imgScanLying.setImageResource(R.drawable.lying_active);
@@ -171,7 +171,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
     @SuppressLint("SetTextI18n")
     @OnClick(R.id.btnScanStep1)
-    void scanStep1(Button btnScanStep1) {
+    void scanStep1() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
         } else {
@@ -191,7 +191,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
     @SuppressLint("SetTextI18n")
     @OnClick(R.id.btnScanStep2)
-    void scanStep2(Button btnScanStep2) {
+    void scanStep2() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
         } else {
@@ -211,7 +211,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
     @SuppressLint("SetTextI18n")
     @OnClick(R.id.btnScanStep3)
-    void scanStep3(Button btnScanStep3) {
+    void scanStep3() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
         } else {
@@ -231,8 +231,24 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
   
     @OnClick(R.id.btnScanComplete)
-    void completeScan(Button btnScanComplete) {
-        completeScan();
+    void completeScan() {
+        measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+        measure.setDate(Utils.getUniversalTimestamp());
+        measure.setType("v1.1.2");
+        measure.setAge(age);
+        measure.setType(AppConstants.VAL_MEASURE_AUTO);
+        measure.setWeight(0.0f);
+        measure.setHeight(0.0f);
+        measure.setHeadCircumference(0.0f);
+        measure.setMuac(0.0f);
+        measure.setOedema(false);
+        measure.setPersonId(person.getId());
+        measure.setTimestamp(Utils.getUniversalTimestamp());
+        measure.setQrCode(person.getQrcode());
+
+        progressDialog.show();
+
+        new SaveMeasureTask(ScanModeActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private AddressReceiver receiver = new AddressReceiver(new Handler()) {
@@ -265,14 +281,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private TangoConfig mConfig;
     private boolean mIsConnected = false;
 
-    private static GLSurfaceView mCameraSurfaceView;
-    private static OverlaySurface mOverlaySurfaceView;
+    private GLSurfaceView mCameraSurfaceView;
+    private OverlaySurface mOverlaySurfaceView;
     private CameraSurfaceRenderer mRenderer;
 
     private TextView mTitleView;
     private ProgressBar progressBar;
     private FloatingActionButton fab;
-    private Button btnRetake;
 
     // variables for Pose and point clouds
     private float mDeltaTime;
@@ -351,13 +366,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     setDisplayRotation();
                 } catch (TangoOutOfDateException e) {
                     Log.e(TAG, getString(R.string.exception_out_of_date), e);
-                    // todo: Crashlytics.log(Log.ERROR, TAG, "TangoOutOfDateException");
                 } catch (TangoErrorException e) {
                     Log.e(TAG, getString(R.string.exception_tango_error), e);
-                    // todo: Crashlytics.log(Log.ERROR, TAG, "TangoErrorException");
                 } catch (TangoInvalidException e) {
                     Log.e(TAG, getString(R.string.exception_tango_invalid), e);
-                    // todo: Crashlytics.log(Log.ERROR, TAG, "TangoInvalidException");
                 }
                 setUpExtrinsics();
             }
@@ -394,7 +406,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         progressBar = findViewById(R.id.progressBar);
         fab = findViewById(R.id.fab_scan_result);
         fab.setOnClickListener(this);
-        btnRetake = findViewById(R.id.btnRetake);
 
         findViewById(R.id.btnRetake).setOnClickListener(this);
         findViewById(R.id.imgClose).setOnClickListener(this);
@@ -455,7 +466,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 mIsConnected = false;
             } catch (TangoErrorException e) {
                 Log.e(TAG, getString(R.string.exception_tango_error), e);
-                // todo: Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in synchronized disconnect onPause");
             }
         }
     }
@@ -476,7 +486,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private void setupScanArtifacts() {
         mExtFileDir = AppController.getInstance().getRootDirectory();
 
-        // TODO make part of AppConstants
         Log.e("Root Directory", mExtFileDir.getParent());
         mScanArtefactsOutputFolder  = new File(mExtFileDir,person.getQrcode() + "/measurements/" + mNowTimeString + "/");
         mPointCloudSaveFolder = new File(mScanArtefactsOutputFolder,"pc");
@@ -504,7 +513,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
     }
 
-    // TODO: setup own renderer for scanning process (or attribute Apache License 2.0 from Google)
     private void setupRenderer() {
         mCameraSurfaceView.setEGLContextClientVersion(2);
         mRenderer = new CameraSurfaceRenderer(new CameraSurfaceRenderer.RenderCallback() {
@@ -954,27 +962,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         mProgress = 0;
 
         lytScanner.setVisibility(View.GONE);
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    public void completeScan() {
-        measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-        measure.setDate(Utils.getUniversalTimestamp());
-        measure.setType("v1.1.2");
-        measure.setAge(age);
-        measure.setType(AppConstants.VAL_MEASURE_AUTO);
-        measure.setWeight(0.0f);
-        measure.setHeight(0.0f);
-        measure.setHeadCircumference(0.0f);
-        measure.setMuac(0.0f);
-        measure.setOedema(false);
-        measure.setPersonId(person.getId());
-        measure.setTimestamp(Utils.getUniversalTimestamp());
-        measure.setQrCode(person.getQrcode());
-
-        progressDialog.show();
-
-        new SaveMeasureTask(ScanModeActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void getCurrentLocation() {
