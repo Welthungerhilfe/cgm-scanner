@@ -18,6 +18,7 @@
 
 package de.welthungerhilfe.cgm.scanner;
 
+import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -120,7 +121,21 @@ public class AppController extends Application {
         return mExtFileDir;
     }
 
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if (manager != null) {
+            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+                if (serviceClass.getName().equals(service.service.getClassName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public void notifyUpload() {
-        startService(new Intent(getApplicationContext(), UploadService.class));
+        if (!isServiceRunning (UploadService.class)) {
+            startService(new Intent(getApplicationContext(), UploadService.class));
+        }
     }
 }

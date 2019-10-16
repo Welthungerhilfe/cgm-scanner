@@ -280,7 +280,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         } else if (Utils.checkDoubleDecimals(muac) != 1) {
             editManualMuac.setError(tooltip_precision);
             valid = false;
-        } else if (Double.parseDouble(muac) < 9) {
+        } else if (Double.parseDouble(muac) < 7) {
             editManualMuac.setError(tooltipe_muac_min);
             valid = false;
         } else if (Double.parseDouble(muac) > 22) {

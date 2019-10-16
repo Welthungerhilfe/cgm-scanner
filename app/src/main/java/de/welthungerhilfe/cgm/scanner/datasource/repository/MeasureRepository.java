@@ -1,10 +1,12 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.os.AsyncTask;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
@@ -28,16 +30,10 @@ public class MeasureRepository {
     }
 
     public void insertMeasure(Measure measure) {
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                database.measureDao().insertMeasure(measure);
-                return null;
-            }
-        }.execute();
+        database.measureDao().insertMeasure(measure);
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void updateMeasure(Measure measure) {
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -45,35 +41,37 @@ public class MeasureRepository {
                 database.measureDao().updateMeasure(measure);
                 return null;
             }
-        }.execute();
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void getSyncableMeasure(OnMeasuresLoad listener, long timestamp) {
-        new AsyncTask<Long, Void, List<Measure>>() {
+        new AsyncTask<Void, Void, List<Measure>>() {
             @Override
-            protected List<Measure> doInBackground(Long... timestamp) {
-                return database.measureDao().getSyncableMeasure(timestamp[0]);
+            protected List<Measure> doInBackground(Void... voids) {
+                return database.measureDao().getSyncableMeasure(timestamp);
             }
 
             @Override
             public void onPostExecute(List<Measure> data) {
                 listener.onMeasuresLoaded(data);
             }
-        }.execute(timestamp);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void getPersonLastMeasure(OnMeasureLoad listener, String personId) {
-        new AsyncTask<String, Void, Measure>() {
+        new AsyncTask<Void, Void, Measure>() {
             @Override
-            protected Measure doInBackground(String... strings) {
-                return database.measureDao().getLastMeasure(strings[0]);
+            protected Measure doInBackground(Void... voids) {
+                return database.measureDao().getLastMeasure(personId);
             }
 
             @Override
             public void onPostExecute(Measure data) {
                 listener.onMeasureLoad(data);
             }
-        }.execute(personId);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public LiveData<List<Measure>> getPersonMeasures(String personId) {
