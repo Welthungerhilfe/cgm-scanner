@@ -781,16 +781,5 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
         ((ScanModeActivity)getActivity()).goToNextStep();
     }
 
-    HashMap getScanQuality(){
-        HashMap<String,Double> score=new HashMap<>();
-        List<Double> allPoints=artifactResultRepository.getArtifactResult();
-        double totalpoints=0.0;
-        for(int a=0;a<allPoints.size();a++){
-            totalpoints+=allPoints.get(a);
-        }
-        double avergaepoints=totalpoints/allPoints.size();
-        double Artifact_Lighting_score=(Math.abs((double) avergaepoints/38000-1.0)*100*3)/100;
-        score.put("Lighting Penality",Artifact_Lighting_score);
-        return score;
-    }
+
 }
