@@ -50,6 +50,7 @@ import com.projecttango.tangosupport.TangoSupport;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Semaphore;
@@ -61,7 +62,9 @@ import butterknife.OnClick;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
@@ -276,6 +279,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private MeasureRepository measureRepository;
     private FileLogRepository fileLogRepository;
+    private ArtifactResultRepository artifactResultRepository;
 
     private Tango mTango;
     private TangoConfig mConfig;
@@ -325,6 +329,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private Semaphore mutex_on_mIsRecording;
 
     private long age = 0;
+
+    private int noOfPoints;
+    private double averageLigtingPenality=0.00;
 
     private int mConnectedTextureIdGlThread = INVALID_TEXTURE_ID;
     private AtomicBoolean mIsFrameAvailableTangoThread = new AtomicBoolean(false);
@@ -415,6 +422,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         measureRepository = MeasureRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
+        artifactResultRepository = ArtifactResultRepository.getInstance(this);
 
         setupToolbar();
 
@@ -681,11 +689,24 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setAge(age);
 
                         fileLogRepository.insertFileLog(log);
+
+                        ArtifactResult ar=new ArtifactResult();
+                        double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
+                        ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
+                        ar.setArtifact_id(AppController.getInstance().getPersonId());
+                        ar.setKey(String.valueOf(SCAN_STEP));
+                        ar.setMisc("");
+                        ar.setType("PCD_POINTS_v0.2");
+                        noOfPoints = pointCloudData.numPoints;
+                        ar.setReal(noOfPoints);
+                        artifactResultRepository.insertArtifactResult(ar);
                         // Todo;
                         //new OfflineTask().saveFileLog(log);
                         // Direct Upload to Firebase Storage
                         mNumberOfFilesWritten++;
-                        //mTimeToTakeSnap = false;
+                        double Scan_Duration_Penalty=Math.abs((double)mNumberOfFilesWritten/8-1)*100;
+
+                        Log.d("Prajwal",String.valueOf(mNumberOfFilesWritten));
                     }
                     mutex_on_mIsRecording.release();
                 };
@@ -962,6 +983,19 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         mProgress = 0;
 
         lytScanner.setVisibility(View.GONE);
+    }
+
+    private HashMap getScanQuality() {
+        HashMap<String,Double> score=new HashMap<>();
+        List<Double> allPoints=artifactResultRepository.getArtifactResult();
+        double totalpoints=0.0;
+        for(int a=0;a<allPoints.size();a++){
+            totalpoints+=allPoints.get(a);
+        }
+        double avergaepoints=totalpoints/allPoints.size();
+        double Artifact_Lighting_score=(Math.abs((double) avergaepoints/38000-1.0)*100*3)/100;
+        score.put("Lighting Penality",Artifact_Lighting_score);
+        return score;
     }
 
     private void getCurrentLocation() {
