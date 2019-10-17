@@ -1,5 +1,6 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -25,6 +26,7 @@ public class ArtifactResultRepository {
         return instance;
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void insertArtifactResult(ArtifactResult artifactResult) {
         new AsyncTask<Void, Void, Void>() {
 
@@ -33,7 +35,7 @@ public class ArtifactResultRepository {
                 database.artifactResultDao().insertArtifact_quality(artifactResult);
                 return null;
             }
-        }.execute();
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     public List<Double> getArtifactResult(){
         return database.artifactResultDao().getArtifactResult();
