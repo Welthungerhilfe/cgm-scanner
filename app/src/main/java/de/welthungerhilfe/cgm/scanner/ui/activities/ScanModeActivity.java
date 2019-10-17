@@ -235,6 +235,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
   
     @OnClick(R.id.btnScanComplete)
     void completeScan() {
+        AppController.getInstance().notifyUpload();
+
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
         measure.setDate(Utils.getUniversalTimestamp());
         measure.setType("v1.1.2");
@@ -913,11 +915,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 break;
         }
 
+        HashMap<String, Double> result = getScanQuality();
+
+
         if (step1 && step2 && step3) {
             showCompleteButton();
         }
-
-        AppController.getInstance().notifyUpload();
     }
 
     private void showCompleteButton() {
@@ -985,7 +988,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         lytScanner.setVisibility(View.GONE);
     }
 
-    private HashMap getScanQuality() {
+    private HashMap<String, Double> getScanQuality() {
         HashMap<String,Double> score=new HashMap<>();
         List<Double> allPoints=artifactResultRepository.getArtifactResult();
         double totalpoints=0.0;
