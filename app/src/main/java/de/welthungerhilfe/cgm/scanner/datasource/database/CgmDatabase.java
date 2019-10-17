@@ -29,7 +29,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public abstract FileLogDao fileLogDao();
     public abstract ArtifactResultDao artifactResultDao();
 
-    public static final String DATABASE = "offline_db";
+    private static final String DATABASE = "offline_db";
 
     public static final String TABLE_PERSON = "persons";
     public static final String TABLE_CONSENT = "consents";
@@ -40,9 +40,22 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE measures ADD COLUMN qrCode TEXT;");
+            database.execSQL("ALTER TABLE `measures` ADD COLUMN `qrCode` TEXT;");
 
-            database.execSQL("ALTER TABLE file_logs ADD COLUMN age REAL;");
+            database.execSQL("ALTER TABLE `file_logs` ADD COLUMN `age` REAL;");
+        }
+    };
+
+    public static final Migration MIGRATION_2_3 = new Migration(2, 3) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE `artifact_result` (`artifact_id` TEXT NOT NULL, `measure_id` TEXT NOT NULL, PRIMARY KEY(`artifact_id`))");
+
+            database.execSQL("ALTER TABLE `artifact_result` ADD COLUMN `type` TEXT;");
+            database.execSQL("ALTER TABLE `artifact_result` ADD COLUMN `key` TEXT;");
+            database.execSQL("ALTER TABLE `artifact_result` ADD COLUMN `real` REAL DEFAULT 0 NOT NULL;");
+            database.execSQL("ALTER TABLE `artifact_result` ADD COLUMN `confidence_value` TEXT;");
+            database.execSQL("ALTER TABLE `artifact_result` ADD COLUMN `misc` TEXT;");
         }
     };
 
@@ -50,7 +63,7 @@ public abstract class CgmDatabase extends RoomDatabase {
         synchronized (sLock) {
             if (instance == null) {
                 instance = Room.databaseBuilder(context.getApplicationContext(), CgmDatabase.class, DATABASE)
-                        .addMigrations(MIGRATION_1_2)
+                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                         .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
                         .build();
             }

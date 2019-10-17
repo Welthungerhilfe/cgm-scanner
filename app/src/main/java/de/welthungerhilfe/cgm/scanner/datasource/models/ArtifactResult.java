@@ -79,11 +79,12 @@ public class ArtifactResult implements Serializable {
         this.confidence_value = confidence_value;
     }
 
+    @NonNull
     public String getMeasure_id() {
         return measure_id;
     }
 
-    public void setMeasure_id(String measure_id) {
+    public void setMeasure_id(@NonNull String measure_id) {
         this.measure_id = measure_id;
     }
 
