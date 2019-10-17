@@ -697,6 +697,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
                         ar.setArtifact_id(AppController.getInstance().getPersonId());
                         ar.setKey(String.valueOf(SCAN_STEP));
+                        ar.setMeasure_id(measure.getId());
                         ar.setMisc("");
                         ar.setType("PCD_POINTS_v0.2");
                         noOfPoints = pointCloudData.numPoints;
@@ -915,7 +916,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 break;
         }
 
-        HashMap<String, Double> result = getScanQuality();
+       // HashMap<String, Double> result = getScanQuality(mesureid,"101");
 
 
         if (step1 && step2 && step3) {
@@ -988,9 +989,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         lytScanner.setVisibility(View.GONE);
     }
 
-    private HashMap<String, Double> getScanQuality() {
+    private HashMap<String, Double> getScanQuality(String measureid,String scan_step) {
         HashMap<String,Double> score=new HashMap<>();
-        List<Double> allPoints=artifactResultRepository.getArtifactResult();
+        List<Double> allPoints=artifactResultRepository.getArtifactResult(measureid,scan_step);
         double totalpoints=0.0;
         for(int a=0;a<allPoints.size();a++){
             totalpoints+=allPoints.get(a);

@@ -17,8 +17,8 @@ public interface ArtifactResultDao {
     @Insert(onConflict = REPLACE)
     void insertArtifact_quality(ArtifactResult artifactResuslt);
 
-    @Query("SELECT real FROM " + TABLE_ARTIFACT_RESULT )
-    List<Double> getArtifactResult();
+    @Query("SELECT real FROM " + TABLE_ARTIFACT_RESULT + " WHERE measure_id=:measure_id AND `key`=:key"  )
+    List<Double> getArtifactResult(String measure_id,String key);
 }
 
 
