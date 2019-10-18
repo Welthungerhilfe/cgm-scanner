@@ -239,4 +239,6 @@
     <string name="no_scans">कोई स्कैन नहीं :/</string>
     <string name="add_scans">स्कैनिंग शुरू करने के लिए, [+] बटन टैप करें</string>
     <string name="label_wait">Please wait for a moment ...</string>
+    <string name="btn_retake">RE-TAKE</string>
+    <string name="btn_tutorial">TUTORIAL</string>
 </resources>

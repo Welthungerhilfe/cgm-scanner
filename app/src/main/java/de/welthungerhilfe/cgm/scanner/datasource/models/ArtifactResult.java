@@ -15,7 +15,7 @@ import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TAB
 @Entity(tableName = TABLE_ARTIFACT_RESULT)
 public class ArtifactResult implements Serializable {
     private String type;
-    private String key;
+    private int key;
     private double real;
     private String confidence_value;
     private String misc;
@@ -38,11 +38,11 @@ public class ArtifactResult implements Serializable {
     }
 
     @NonNull
-    public String getKey() {
+    public int getKey() {
         return key;
     }
 
-    public void setKey(@NonNull String key) {
+    public void setKey(@NonNull int key) {
         this.key = key;
     }
 

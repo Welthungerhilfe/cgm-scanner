@@ -81,6 +81,7 @@ import de.welthungerhilfe.cgm.scanner.utils.MD5;
 import de.welthungerhilfe.cgm.scanner.utils.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
+import static com.projecttango.tangosupport.TangoSupport.doubleTransformPoint;
 import static com.projecttango.tangosupport.TangoSupport.initialize;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_BACK;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_FRONT;
@@ -144,6 +145,41 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     @BindView(R.id.lytScanner)
     LinearLayout lytScanner;
 
+    @BindView(R.id.imgScanSuccess1)
+    ImageView imgScanSuccess1;
+    @BindView(R.id.imgScanSuccess2)
+    ImageView imgScanSuccess2;
+    @BindView(R.id.imgScanSuccess3)
+    ImageView imgScanSuccess3;
+
+    @BindView(R.id.txtScanStep1)
+    TextView txtScanStep1;
+    @BindView(R.id.txtScanStep2)
+    TextView txtScanStep2;
+    @BindView(R.id.txtScanStep3)
+    TextView txtScanStep3;
+
+    @BindView(R.id.lytScanAgain1)
+    LinearLayout lytScanAgain1;
+    @BindView(R.id.lytScanAgain2)
+    LinearLayout lytScanAgain2;
+    @BindView(R.id.lytScanAgain3)
+    LinearLayout lytScanAgain3;
+
+    @BindView(R.id.btnRetake1)
+    Button btnRetake1;
+    @BindView(R.id.btnRetake2)
+    Button btnRetake2;
+    @BindView(R.id.btnRetake3)
+    Button btnRetake3;
+
+    @BindView(R.id.btnTutorial1)
+    Button btnTutorial1;
+    @BindView(R.id.btnTutorial2)
+    Button btnTutorial2;
+    @BindView(R.id.btnTutorial3)
+    Button btnTutorial3;
+
     @OnClick(R.id.lytScanStanding)
     void scanStanding() {
         SCAN_MODE = SCAN_STANDING;
@@ -173,7 +209,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         changeMode();
     }
     @SuppressLint("SetTextI18n")
-    @OnClick(R.id.btnScanStep1)
+    @OnClick({R.id.btnScanStep1, R.id.btnRetake1})
     void scanStep1() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
@@ -193,7 +229,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
     }
     @SuppressLint("SetTextI18n")
-    @OnClick(R.id.btnScanStep2)
+    @OnClick({R.id.btnScanStep2, R.id.btnRetake2})
     void scanStep2() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
@@ -213,7 +249,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
     }
     @SuppressLint("SetTextI18n")
-    @OnClick(R.id.btnScanStep3)
+    @OnClick({R.id.btnScanStep3, R.id.btnRetake3})
     void scanStep3() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
@@ -231,6 +267,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             fab.setImageResource(R.drawable.recorder);
             lytScanner.setVisibility(View.VISIBLE);
         }
+    }
+
+    @OnClick({R.id.btnTutorial1, R.id.btnTutorial2, R.id.btnTutorial3})
+    void showTutorial() {
+        Intent intent = new Intent(ScanModeActivity.this, TutorialActivity.class);
+        intent.putExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, true);
+        startActivity(intent);
     }
   
     @OnClick(R.id.btnScanComplete)
@@ -701,7 +744,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
                         ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
                         ar.setArtifact_id(AppController.getInstance().getPersonId());
-                        ar.setKey(String.valueOf(SCAN_STEP));
+                        ar.setKey(SCAN_STEP);
                         ar.setMeasure_id(measure.getId());
                         ar.setMisc("");
                         ar.setType("PCD_POINTS_v0.2");
@@ -891,6 +934,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     public void goToNextStep() {
         closeScan();
 
+        /*
         switch (SCAN_STEP) {
             case SCAN_STANDING_FRONT:
             case SCAN_LYING_FRONT:
@@ -920,13 +964,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 step3 = true;
                 break;
         }
+        */
 
-       // HashMap<String, Double> result = getScanQuality(mesureid,"101");
-
-
-        if (step1 && step2 && step3) {
-            showCompleteButton();
-        }
+        getScanQuality(measure.getId(),SCAN_STEP);
     }
 
     private void showCompleteButton() {
@@ -994,17 +1034,69 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         lytScanner.setVisibility(View.GONE);
     }
 
-    private HashMap<String, Double> getScanQuality(String measureid,String scan_step) {
-        HashMap<String,Double> score=new HashMap<>();
-        List<Double> allPoints=artifactResultRepository.getArtifactResult(measureid,scan_step);
-        double totalpoints=0.0;
-        for(int a=0;a<allPoints.size();a++){
-            totalpoints+=allPoints.get(a);
-        }
-        double avergaepoints=totalpoints/allPoints.size();
-        double Artifact_Lighting_score=(Math.abs((double) avergaepoints/38000-1.0)*100*3)/100;
-        score.put("Lighting Penality",Artifact_Lighting_score);
-        return score;
+    @SuppressLint("StaticFieldLeak")
+    private void getScanQuality(String measureId, int scanStep) {
+        new AsyncTask<Void, Void, Double>() {
+            @Override
+            protected Double doInBackground(Void... voids) {
+                return artifactResultRepository.getArtifactResult(measureId, scanStep);
+            }
+
+            @SuppressLint("DefaultLocale")
+            public void onPostExecute(Double results) {
+                double lightScore = (Math.abs(results / 38000 - 1.0) * 100 * 3) / 100;
+
+                Log.e("ScanQuality", String.valueOf(lightScore));
+
+                if (scanStep == SCAN_STANDING_FRONT || scanStep == SCAN_LYING_FRONT) {
+                    btnScanStep1.setVisibility(View.GONE);
+
+                    if (lightScore < 0.5) {
+                        txtScanStep1.setText(String.format("Issues:\n" + "- Light Score : %f", lightScore));
+                        imgScanStep1.setVisibility(View.GONE);
+                        lytScanAgain1.setVisibility(View.VISIBLE);
+                    } else {
+                        lytScanStep1.setVisibility(View.GONE);
+                        btnScanStep1.setVisibility(View.GONE);
+                        imgScanSuccess1.setVisibility(View.VISIBLE);
+
+                        step1 = true;
+                    }
+                } else if (scanStep == SCAN_STANDING_SIDE || scanStep == SCAN_LYING_SIDE) {
+                    btnScanStep2.setVisibility(View.GONE);
+
+                    if (lightScore < 0.5) {
+                        txtScanStep2.setText(String.format("Issues:\n" + "- Light Score : %f", lightScore));
+                        imgScanStep2.setVisibility(View.GONE);
+                        lytScanAgain2.setVisibility(View.VISIBLE);
+                    } else {
+                        lytScanStep2.setVisibility(View.GONE);
+                        btnScanStep2.setVisibility(View.GONE);
+                        imgScanSuccess2.setVisibility(View.VISIBLE);
+
+                        step2 = true;
+                    }
+                } else if (scanStep == SCAN_STANDING_BACK || scanStep == SCAN_LYING_BACK) {
+                    btnScanStep3.setVisibility(View.GONE);
+
+                    if (lightScore < 0.5) {
+                        txtScanStep3.setText(String.format("Issues:\n" + "- Light Score : %f", lightScore));
+                        imgScanStep3.setVisibility(View.GONE);
+                        lytScanAgain3.setVisibility(View.VISIBLE);
+                    } else {
+                        lytScanStep3.setVisibility(View.GONE);
+                        btnScanStep3.setVisibility(View.GONE);
+                        imgScanSuccess3.setVisibility(View.VISIBLE);
+
+                        step3 = true;
+                    }
+                }
+
+                if (step1 && step2 && step3) {
+                    showCompleteButton();
+                }
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void getCurrentLocation() {
