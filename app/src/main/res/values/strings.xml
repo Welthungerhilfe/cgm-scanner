@@ -239,4 +239,6 @@
     <string name="no_scans">No scans yet today</string>
     <string name="add_scans">To start scanning, tap [+] button</string>
     <string name="label_wait">Please wait for a moment ...</string>
+    <string name="btn_retake">RE-TAKE</string>
+    <string name="btn_tutorial">TUTORIAL</string>
 </resources>

@@ -560,7 +560,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
                             ar.setMeasure_id("");
                             ar.setArtifact_id(AppController.getInstance().getPersonId());
-                            ar.setKey(String.valueOf(mode));
+                            ar.setKey(mode);
                             ar.setMisc("");
                             ar.setType("PCD_POINTS_v0.2");
                             ar.setReal(noOfPoints);

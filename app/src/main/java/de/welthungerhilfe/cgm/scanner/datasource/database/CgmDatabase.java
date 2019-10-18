@@ -52,7 +52,7 @@ public abstract class CgmDatabase extends RoomDatabase {
             database.execSQL("CREATE TABLE `artifact_result` (`artifact_id` TEXT NOT NULL, `measure_id` TEXT NOT NULL, PRIMARY KEY(`artifact_id`))");
 
             database.execSQL("ALTER TABLE `artifact_result` ADD COLUMN `type` TEXT;");
-            database.execSQL("ALTER TABLE `artifact_result` ADD COLUMN `key` TEXT;");
+            database.execSQL("ALTER TABLE `artifact_result` ADD COLUMN `key` INTEGER;");
             database.execSQL("ALTER TABLE `artifact_result` ADD COLUMN `real` REAL DEFAULT 0 NOT NULL;");
             database.execSQL("ALTER TABLE `artifact_result` ADD COLUMN `confidence_value` TEXT;");
             database.execSQL("ALTER TABLE `artifact_result` ADD COLUMN `misc` TEXT;");

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "1f94bd95c527ba42dcf80d3187082b03",
+    "identityHash": "25325728776d372d554154d8bd5cb5bd",
     "entities": [
       {
         "tableName": "persons",
@@ -336,7 +336,7 @@
       },
       {
         "tableName": "artifact_result",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`type` TEXT, `key` TEXT, `real` REAL NOT NULL, `confidence_value` TEXT, `misc` TEXT, `measure_id` TEXT NOT NULL, `artifact_id` TEXT NOT NULL, PRIMARY KEY(`artifact_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`type` TEXT, `key` INTEGER NOT NULL, `real` REAL NOT NULL, `confidence_value` TEXT, `misc` TEXT, `measure_id` TEXT NOT NULL, `artifact_id` TEXT NOT NULL, PRIMARY KEY(`artifact_id`))",
         "fields": [
           {
             "fieldPath": "type",
@@ -347,8 +347,8 @@
           {
             "fieldPath": "key",
             "columnName": "key",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "real",
@@ -393,7 +393,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"1f94bd95c527ba42dcf80d3187082b03\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"25325728776d372d554154d8bd5cb5bd\")"
     ]
   }
 }

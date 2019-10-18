@@ -36,15 +36,9 @@ public class ArtifactResultRepository {
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
-    public List<Double> getArtifactResult(String measureId, String key) {
-        new AsyncTask<Void, Void, List<Double>>() {
 
-            @Override
-            protected List<Double> doInBackground(Void... voids) {
-                return database.artifactResultDao().getArtifactResult(measureId,key);
-            }
-        };
-        return null;
+    public double getArtifactResult(String measureId, int key) {
+        return database.artifactResultDao().getArtifactResult(measureId, key);
     }
 
 }
