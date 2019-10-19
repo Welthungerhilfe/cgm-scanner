@@ -558,7 +558,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             ArtifactResult ar=new ArtifactResult();
                             double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
                             ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
-                            ar.setMeasure_id("");
+                            ar.setMeasure_id(measure.getId());
                             ar.setArtifact_id(AppController.getInstance().getPersonId());
                             ar.setKey(String.valueOf(mode));
                             ar.setMisc("");

@@ -344,6 +344,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private AlertDialog progressDialog;
 
+
+    List<Integer> artifactResult=new ArrayList<>();
+
     public void onStart() {
         super.onStart();
 
@@ -692,15 +695,17 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                         fileLogRepository.insertFileLog(log);
 
+                        noOfPoints = pointCloudData.numPoints;
+
                         ArtifactResult ar=new ArtifactResult();
                         double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
+                        artifactResult.add(noOfPoints);
                         ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
                         ar.setArtifact_id(AppController.getInstance().getPersonId());
                         ar.setKey(String.valueOf(SCAN_STEP));
                         ar.setMeasure_id(measure.getId());
                         ar.setMisc("");
                         ar.setType("PCD_POINTS_v0.2");
-                        noOfPoints = pointCloudData.numPoints;
                         ar.setReal(noOfPoints);
                         artifactResultRepository.insertArtifactResult(ar);
                         // Todo;
@@ -916,7 +921,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 break;
         }
 
-       // HashMap<String, Double> result = getScanQuality(mesureid,"101");
+       HashMap<String, Double> result = getScanQuality();
+        Log.d("Prajwal", String.valueOf(result));
+        Log.d("Prajwal","hello");
+        Log.d("Prajwal", String.valueOf(artifactResult.size()));
+
 
 
         if (step1 && step2 && step3) {
@@ -989,16 +998,16 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         lytScanner.setVisibility(View.GONE);
     }
 
-    private HashMap<String, Double> getScanQuality(String measureid,String scan_step) {
+    private HashMap<String, Double> getScanQuality() {
         HashMap<String,Double> score=new HashMap<>();
-        List<Double> allPoints=artifactResultRepository.getArtifactResult(measureid,scan_step);
         double totalpoints=0.0;
-        for(int a=0;a<allPoints.size();a++){
-            totalpoints+=allPoints.get(a);
+        for(int a=0;a<artifactResult.size();a++){
+            totalpoints+=artifactResult.get(a);
         }
-        double avergaepoints=totalpoints/allPoints.size();
+        double avergaepoints=totalpoints/artifactResult.size();
         double Artifact_Lighting_score=(Math.abs((double) avergaepoints/38000-1.0)*100*3)/100;
         score.put("Lighting Penality",Artifact_Lighting_score);
+        artifactResult.clear();
         return score;
     }
 
