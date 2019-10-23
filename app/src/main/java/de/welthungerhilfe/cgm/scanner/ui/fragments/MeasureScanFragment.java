@@ -28,7 +28,6 @@ import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
-import com.google.firebase.perf.metrics.AddTrace;
 import com.projecttango.tangosupport.TangoSupport;
 
 import java.io.File;
@@ -471,7 +470,6 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
             }
 
             @Override
-            @AddTrace(name = "onPointCloudAvailable", enabled = true)
             public void onPointCloudAvailable(final TangoPointCloudData pointCloudData) {
 
                 Log.d(TAG, "recording:"+mIsRecording);
@@ -509,7 +507,6 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                 // TODO refactor to top-level class or make static?
                 Runnable thread = new Runnable() {
                     @Override
-                    @AddTrace(name = "pcRunnable", enabled = true)
                     public void run() {
                         try {
                             mutex_on_mIsRecording.acquire();
@@ -538,11 +535,12 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setDeleted(false);
                             log.setQrCode(mQrCode);
                             log.setCreateDate(mNowTime);
-                            log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                            // ToDo: Add user email from AppCenter Auth;
+                            // log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                             log.setAge(age);
 
                             repository.insertFileLog(log);
-                            // Todo;
+
                             //new OfflineTask().saveFileLog(log);
                             // Direct Upload to Firebase Storage
                             mNumberOfFilesWritten++;
@@ -617,10 +615,9 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setDeleted(false);
                             log.setQrCode(mQrCode);
                             log.setCreateDate(mNowTime);
-                            log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                            // ToDo: Add user email from AppCenter Auth;
+                            // log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                             log.setAge(age);
-                            // Todo;
-                            //new OfflineTask().saveFileLog(log);
                             repository.insertFileLog(log);
                         };
                         thread.run();

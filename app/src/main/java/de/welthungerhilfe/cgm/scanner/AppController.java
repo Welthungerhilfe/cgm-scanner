@@ -25,9 +25,6 @@ import android.content.Intent;
 import android.os.Environment;
 import android.os.StrictMode;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-
 import java.io.File;
 
 import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
@@ -42,18 +39,12 @@ public class AppController extends Application {
 
     private static AppController mInstance;
 
-    public FirebaseAuth firebaseAuth;
-    public FirebaseUser firebaseUser;
-
     @Override
     public void onCreate() {
         super.onCreate();
 
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
         Utils.overrideFont(getApplicationContext(), "SERIF", "roboto.ttf");
-
-        firebaseAuth = FirebaseAuth.getInstance();
-        firebaseUser = firebaseAuth.getCurrentUser();
 
         //Log.e("Offline DB", DebugDB.getAddressLog());
         /*
@@ -87,10 +78,6 @@ public class AppController extends Application {
 
     public static synchronized AppController getInstance() {
         return mInstance;
-    }
-
-    public void prepareFirebaseUser() {
-        firebaseUser = firebaseAuth.getCurrentUser();
     }
 
     public String getPersonId() {

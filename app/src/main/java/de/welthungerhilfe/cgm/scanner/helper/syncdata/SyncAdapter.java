@@ -11,11 +11,9 @@ import android.content.SyncResult;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import com.google.firebase.perf.metrics.AddTrace;
 
 import com.google.gson.Gson;
 import com.microsoft.azure.storage.*;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.queue.*;
 
 import java.net.URISyntaxException;
@@ -37,8 +35,6 @@ import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasuresLoad;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_KEY;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_NAME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
@@ -70,7 +66,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     }
 
     @Override
-    @AddTrace(name = "onPerformSync", enabled = true)
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         if (personList.size() == 0 && measureList.size() == 0 && fileLogList.size() == 0)
             new MessageTask().execute();
@@ -84,7 +79,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
         fileLogRepository.getSyncableLog(this, prevTimestamp);
     }
 
-    @AddTrace(name = "syncImmediately", enabled = true)
     private static void syncImmediately(Account account, Context context) {
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
@@ -92,7 +86,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
         ContentResolver.requestSync(account, context.getString(R.string.sync_authority), bundle);
     }
 
-    @AddTrace(name = "configurePeriodicSync", enabled = true)
     private static void configurePeriodicSync(Account account, Context context) {
 
         String authority = context.getString(R.string.sync_authority);
@@ -105,7 +98,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
         ContentResolver.requestSync(request);
     }
 
-    @AddTrace(name = "startPeriodicSync", enabled = true)
     public static void startPeriodicSync(Account newAccount, Context context) {
 
         configurePeriodicSync(newAccount, context);
@@ -116,7 +108,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
     }
 
-    @AddTrace(name = "startImmediateSync", enabled = true)
     public static void startImmediateSync(Account newAccount, Context context) {
 
         ContentResolver.setSyncAutomatically(newAccount, context.getString(R.string.sync_authority), true);
@@ -125,7 +116,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     }
 
     @Override
-    @AddTrace(name = "onPersonLoaded", enabled = true)
     public void onPersonsLoaded(List<Person> pList) {
         personList = pList;
 
@@ -135,7 +125,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     }
 
     @Override
-    @AddTrace(name = "onMeasureLoaded", enabled = true)
     public void onMeasuresLoaded(List<Measure> mList) {
         measureList = mList;
 
