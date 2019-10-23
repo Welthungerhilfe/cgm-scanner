@@ -78,7 +78,8 @@ public class PersonRepository {
         }
 
         if (filter.isOwn()) {
-            whereClause += String.format(" AND createdBy=%s ", Objects.requireNonNull(AppController.getInstance().firebaseAuth.getCurrentUser()).getEmail());
+            // Todo : add email from AppCenter Auth
+            //whereClause += String.format(" AND createdBy=%s ", Objects.requireNonNull(AppController.getInstance().firebaseAuth.getCurrentUser()).getEmail());
         }
 
         /*
@@ -111,7 +112,8 @@ public class PersonRepository {
     }
 
     public int getOwnPersonCount() {
-        return database.personDao().getOwnPersonCount(AppController.getInstance().firebaseUser.getEmail());
+        // Todo : add email from AppCenter Auth
+        return database.personDao().getOwnPersonCount("email");
     }
 
     public int getTotalPersonCount() {

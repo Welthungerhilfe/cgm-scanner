@@ -104,7 +104,8 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             session.saveRemoteConfig(new RemoteConfig());
         }
 
-        if (AppController.getInstance().firebaseUser != null && session.isSigned()) {
+        // Todo : check if AppCenter signed in
+        if (true && session.isSigned()) {
             Account[] accounts = accountManager.getAccountsByType(AppConstants.ACCOUNT_TYPE);
             if (accounts.length > 0) {
                 if(!ContentResolver.isSyncActive(accounts[0], getString(R.string.sync_authority))) {
@@ -114,14 +115,16 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             } else {
                 session.setSyncTimestamp(0);
 
-                final Account account = new Account(AppController.getInstance().firebaseUser.getEmail(), AppConstants.ACCOUNT_TYPE);
+                // Todo : add email from AppCenter Auth
+                final Account account = new Account("email", AppConstants.ACCOUNT_TYPE);
 
                 accountManager.addAccountExplicitly(account, "welthungerhilfe", null);
 
                 SyncAdapter.startPeriodicSync(account, getApplicationContext());
 
                 final Intent intent = new Intent();
-                intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, AppController.getInstance().firebaseUser.getEmail());
+                // Todo : add email from AppCenter Auth
+                intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, "email");
                 intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
                 intent.putExtra(AccountManager.KEY_AUTHTOKEN, "welthungerhilfe");
 

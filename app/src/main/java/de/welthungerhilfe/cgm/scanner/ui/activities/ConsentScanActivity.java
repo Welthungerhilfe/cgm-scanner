@@ -978,7 +978,8 @@ public class ConsentScanActivity extends AppCompatActivity {
                 log.setQrCode(qrCode);
                 log.setDeleted(false);
                 log.setCreateDate(Utils.getUniversalTimestamp());
-                log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                // Todo : add email from AppCenter Auth
+                log.setCreatedBy("email");
 
                 fileLogRepository.insertFileLog(log);
             } catch (IOException e) {

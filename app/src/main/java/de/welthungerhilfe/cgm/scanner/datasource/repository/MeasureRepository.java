@@ -83,7 +83,8 @@ public class MeasureRepository {
     }
 
     public int getOwnMeasureCount() {
-        return database.measureDao().getOwnMeasureCount(AppController.getInstance().firebaseUser.getEmail());
+        // Todo : add email from AppCenter Auth
+        return database.measureDao().getOwnMeasureCount("email");
     }
 
     public int getTotalMeasureCount() {

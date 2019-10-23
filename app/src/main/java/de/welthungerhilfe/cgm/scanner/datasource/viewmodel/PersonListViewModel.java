@@ -43,7 +43,8 @@ public class PersonListViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<Person>> getAll() {
-        String createdBy = AppController.getInstance().firebaseUser.getEmail();
+        // Todo : add email from AppCenter Auth
+        String createdBy = "email";
         return repository.getAll(createdBy);
     }
 

@@ -191,7 +191,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         String device = Utils.getAndroidID(getContentResolver());
         if (token != null && !session.isFcmSaved()) {
             Map<String, Object> data = new HashMap<>();
-            data.put("user", AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+            // Todo : add email from AppCenter Auth
+            data.put("user", "email");
             data.put("device", device);
             data.put("token", token);
         }
@@ -209,7 +210,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                     break;
                 case R.id.menuLogout:
-                    AppController.getInstance().firebaseAuth.signOut();
+                    // Todo : AppCenter Auth Signout
                     session.setSigned(false);
 
                     Account[] accounts = accountManager.getAccounts();
@@ -226,7 +227,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         });
         View headerView = navMenu.getHeaderView(0);
         TextView txtUsername = headerView.findViewById(R.id.txtUsername);
-        txtUsername.setText(AppController.getInstance().firebaseUser.getEmail());
+        // Todo : add email from AppCenter Auth
+        txtUsername.setText("email");
     }
 
     private void setupActionBar() {

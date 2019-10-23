@@ -250,7 +250,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setAgeEstimated(checkAge.isChecked());
                     person.setTimestamp(Utils.getUniversalTimestamp());
                     person.setCreated(System.currentTimeMillis());
-                    person.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                    // Todo : add email from AppCenter Auth
+                    //person.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
 
                     viewModel.savePerson(person);
                 }

@@ -254,7 +254,8 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
                     for (int j = 0; j < filters.size(); j++) {
                         switch (filters.get(j)) {
                             case 1:  // own data filter
-                                if (!personList.get(i).getCreatedBy().equals(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail())) {
+                                // Todo : add email from AppCenter Auth
+                                if (!personList.get(i).getCreatedBy().equals("email")) {
                                     passed = false;
                                     break label;
                                 }

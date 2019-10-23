@@ -232,7 +232,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
   
     @OnClick(R.id.btnScanComplete)
     void completeScan() {
-        measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+        // Todo : add email from AppCenter Auth
+        measure.setCreatedBy("email");
         measure.setDate(Utils.getUniversalTimestamp());
         measure.setType("v1.1.2");
         measure.setAge(age);
@@ -393,7 +394,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             measure = new Measure();
             measure.setId(AppController.getInstance().getMeasureId());
             measure.setQrCode(person.getQrcode());
-            measure.setCreatedBy(AppController.getInstance().firebaseUser.getEmail());
+            // Todo : add email from AppCenter Auth
+            measure.setCreatedBy("email");
             measure.setAge(age);
             measure.setDate(System.currentTimeMillis());
         }
@@ -677,7 +679,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setDeleted(false);
                         log.setQrCode(person.getQrcode());
                         log.setCreateDate(mNowTime);
-                        log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                        // Todo : add email from AppCenter Auth
+                        log.setCreatedBy("email");
                         log.setAge(age);
 
                         fileLogRepository.insertFileLog(log);
@@ -751,7 +754,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setDeleted(false);
                 log.setQrCode(person.getQrcode());
                 log.setCreateDate(mNowTime);
-                log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                // Todo : add email from AppCenter Auth
+                log.setCreatedBy("email");
                 log.setAge(age);
                 // Todo;
                 //new OfflineTask().saveFileLog(log);
