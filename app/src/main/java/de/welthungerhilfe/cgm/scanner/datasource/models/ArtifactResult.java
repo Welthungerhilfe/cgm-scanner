@@ -37,12 +37,11 @@ public class ArtifactResult implements Serializable {
         this.type = type;
     }
 
-    @NonNull
     public int getKey() {
         return key;
     }
 
-    public void setKey(@NonNull int key) {
+    public void setKey(int key) {
         this.key = key;
     }
 
