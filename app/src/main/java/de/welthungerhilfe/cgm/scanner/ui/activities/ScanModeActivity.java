@@ -331,7 +331,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private boolean mIsConnected = false;
 
     private GLSurfaceView mCameraSurfaceView;
-    private OverlaySurface mOverlaySurfaceView;
+    //private OverlaySurface mOverlaySurfaceView;
     private CameraSurfaceRenderer mRenderer;
 
     private TextView mTitleView;
@@ -528,7 +528,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onDestroy() {
         super.onDestroy();
-        progressDialog.hide();
+        progressDialog.dismiss();
     }
 
     private void setupToolbar() {
