@@ -331,7 +331,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private boolean mIsConnected = false;
 
     private GLSurfaceView mCameraSurfaceView;
-    private OverlaySurface mOverlaySurfaceView;
+    //private OverlaySurface mOverlaySurfaceView;
     private CameraSurfaceRenderer mRenderer;
 
     private TextView mTitleView;
@@ -463,7 +463,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         findViewById(R.id.imgClose).setOnClickListener(this);
 
         mCameraSurfaceView = findViewById(R.id.surfaceview);
-        mOverlaySurfaceView = findViewById(R.id.overlaySurfaceView);
+        //mOverlaySurfaceView = findViewById(R.id.overlaySurfaceView);
 
         measureRepository = MeasureRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
@@ -493,10 +493,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         mCameraSurfaceView.onResume();
         mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
+        /*
         if (SCAN_STEP == SCAN_STANDING_FRONT || SCAN_STEP == SCAN_STANDING_SIDE || SCAN_STEP == SCAN_STANDING_BACK)
             mOverlaySurfaceView.setMode(OverlaySurface.INFANT_CLOSE_DOWN_UP_OVERLAY);
         else if (SCAN_STEP == SCAN_LYING_FRONT || SCAN_STEP == SCAN_LYING_SIDE || SCAN_STEP == SCAN_LYING_BACK)
             mOverlaySurfaceView.setMode(OverlaySurface.BABY_OVERLAY);
+         */
     }
 
     @Override
@@ -526,6 +528,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onDestroy() {
         super.onDestroy();
+        progressDialog.dismiss();
     }
 
     private void setupToolbar() {
@@ -676,9 +679,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 float[] average = TangoUtils.calculateAveragedDepth(pointCloudData.points, pointCloudData.numPoints);
 
+                /*
                 mOverlaySurfaceView.setNumPoints(pointCloudData.numPoints);
                 mOverlaySurfaceView.setDistance(average[0]);
                 mOverlaySurfaceView.setConfidence(average[1]);
+                 */
 
                 // Get pose transforms for openGL to depth/color cameras.
                 TangoPoseData oglTdepthPose = TangoSupport.getPoseAtTime(
