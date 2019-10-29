@@ -2,10 +2,12 @@ package de.welthungerhilfe.cgm.scanner.helper.syncdata;
 
 import android.accounts.Account;
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.os.AsyncTask;
@@ -32,6 +34,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasuresLoad;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonsLoad;
@@ -72,6 +75,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     @Override
     @AddTrace(name = "onPerformSync", enabled = true)
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+        if (!isServiceRunning(UploadService.class)) {
+            getContext().startService(new Intent(getContext(), UploadService.class));
+        }
+
         if (personList.size() == 0 && measureList.size() == 0 && fileLogList.size() == 0)
             new MessageTask().execute();
     }
@@ -322,5 +329,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
                 session.setSyncTimestamp(prevTimestamp);
             }
         }
+    }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
+        if (manager != null) {
+            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+                if (serviceClass.getName().equals(service.service.getClassName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

@@ -120,22 +120,4 @@ public class AppController extends Application {
 
         return mExtFileDir;
     }
-
-    private boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        if (manager != null) {
-            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-                if (serviceClass.getName().equals(service.service.getClassName())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public void notifyUpload() {
-        if (!isServiceRunning (UploadService.class)) {
-            startService(new Intent(getApplicationContext(), UploadService.class));
-        }
-    }
 }

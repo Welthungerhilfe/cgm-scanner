@@ -900,8 +900,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         if (step1 && step2 && step3) {
             showCompleteButton();
         }
-
-        AppController.getInstance().notifyUpload();
     }
 
     private void showCompleteButton() {
