@@ -279,6 +279,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
   
     @OnClick(R.id.btnScanComplete)
     void completeScan() {
+        AppController.getInstance().notifyUpload();
+
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
         measure.setDate(Utils.getUniversalTimestamp());
         measure.setType("v1.1.2");
