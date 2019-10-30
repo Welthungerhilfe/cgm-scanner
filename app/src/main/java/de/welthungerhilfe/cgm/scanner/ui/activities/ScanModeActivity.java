@@ -17,6 +17,7 @@ import android.opengl.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
@@ -278,8 +279,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
   
     @OnClick(R.id.btnScanComplete)
     void completeScan() {
-        AppController.getInstance().notifyUpload();
-
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
         measure.setDate(Utils.getUniversalTimestamp());
         measure.setType("v1.1.2");
@@ -392,10 +391,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         mPointCloudFilename = "";
         mNumberOfFilesWritten = 0;
-        mPosePositionBuffer = new ArrayList<float[]>();
-        mPoseOrientationBuffer = new ArrayList<float[]>();
-        mPoseTimestampBuffer = new ArrayList<Float>();
-        mPointCloudFilenameBuffer = new ArrayList<String>();
+        mPosePositionBuffer = new ArrayList<>();
+        mPoseOrientationBuffer = new ArrayList<>();
+        mPoseTimestampBuffer = new ArrayList<>();
+        mPointCloudFilenameBuffer = new ArrayList<>();
         mNumPoseInSequence = 0;
         mutex_on_mIsRecording = new Semaphore(1,true);
         mIsRecording = false;
@@ -641,7 +640,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private void startupTango() {
         // Lock configuration and connect to Tango.
         // Select coordinate frame pair.
-        final ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<TangoCoordinateFramePair>();
+        final ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<>();
         framePairs.add(new TangoCoordinateFramePair(TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE, TangoPoseData.COORDINATE_FRAME_DEVICE));
 
         // Listen for new Tango data.
@@ -839,7 +838,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         // We also need to update the camera texture UV coordinates. This must be run in the OpenGL
         // thread.
-        mCameraSurfaceView.queueEvent((Runnable) () -> {
+        mCameraSurfaceView.queueEvent(() -> {
             if (mIsConnected) {
                 mRenderer.updateColorCameraTextureUv(mDisplayRotation);
             }
@@ -1147,7 +1146,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PERMISSION_LOCATION && grantResults.length > 0 && grantResults[0] >= 0) {
             getCurrentLocation();
         }
