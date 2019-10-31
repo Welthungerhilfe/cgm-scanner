@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
@@ -540,6 +541,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setCreateDate(mNowTime);
                             log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                             log.setAge(age);
+                            log.setSchema_version(CgmDatabase.version);
 
                             repository.insertFileLog(log);
                             // Todo;
@@ -619,6 +621,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setCreateDate(mNowTime);
                             log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                             log.setAge(age);
+                            log.setSchema_version(CgmDatabase.version);
                             // Todo;
                             //new OfflineTask().saveFileLog(log);
                             repository.insertFileLog(log);

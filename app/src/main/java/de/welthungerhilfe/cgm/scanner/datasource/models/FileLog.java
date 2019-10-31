@@ -24,6 +24,7 @@ public class FileLog implements Serializable {
     private String createdBy;
     private int status;
     private long age;
+    private int schema_version;
 
     @NonNull
     public String getId() {
@@ -120,5 +121,13 @@ public class FileLog implements Serializable {
 
     public void setAge(long age) {
         this.age = age;
+    }
+
+    public int getSchema_version() {
+        return schema_version;
+    }
+
+    public void setSchema_version(int schema_version) {
+        this.schema_version = schema_version;
     }
 }

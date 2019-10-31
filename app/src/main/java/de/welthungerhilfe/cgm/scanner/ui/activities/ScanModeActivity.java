@@ -61,6 +61,7 @@ import butterknife.OnClick;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
@@ -245,6 +246,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         measure.setPersonId(person.getId());
         measure.setTimestamp(Utils.getUniversalTimestamp());
         measure.setQrCode(person.getQrcode());
+        measure.setSchema_version(CgmDatabase.version);
 
         progressDialog.show();
 
@@ -475,7 +477,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onDestroy() {
         super.onDestroy();
-        progressDialog.hide();
+        progressDialog.dismiss();
     }
 
     private void setupToolbar() {
@@ -684,6 +686,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setCreateDate(mNowTime);
                         log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                         log.setAge(age);
+                        log.setSchema_version(CgmDatabase.version);
 
                         fileLogRepository.insertFileLog(log);
                         // Todo;
@@ -758,6 +761,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setCreateDate(mNowTime);
                 log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                 log.setAge(age);
+                log.setSchema_version(CgmDatabase.version);
                 // Todo;
                 //new OfflineTask().saveFileLog(log);
                 fileLogRepository.insertFileLog(log);
