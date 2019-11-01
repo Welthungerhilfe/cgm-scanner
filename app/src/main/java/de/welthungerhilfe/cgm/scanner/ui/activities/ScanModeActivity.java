@@ -475,7 +475,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onDestroy() {
         super.onDestroy();
-        progressDialog.hide();
+        progressDialog.dismiss();
     }
 
     private void setupToolbar() {
