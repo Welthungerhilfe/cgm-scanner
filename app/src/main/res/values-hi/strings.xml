@@ -238,7 +238,6 @@
     <string name="login">लॉग इन करें</string>
     <string name="no_scans">कोई स्कैन नहीं :/</string>
     <string name="add_scans">स्कैनिंग शुरू करने के लिए, [+] बटन टैप करें</string>
-    <string name="label_wait">Please wait for a moment ...</string>
     <string name="sam_wfa_title">Child is severely under weight</string>
     <string name="sam_wfa_message">Please go to the nearest Malnutrition center/ Nutrition Rehabilitation center</string>
     <string name="mam_wfa_title">Child is moderately under weight</string>
