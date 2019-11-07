@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "25325728776d372d554154d8bd5cb5bd",
+    "identityHash": "8b532638da13c1c79276e599e8afb0b6",
     "entities": [
       {
         "tableName": "persons",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT, `surname` TEXT, `birthday` INTEGER NOT NULL, `sex` TEXT, `guardian` TEXT, `isAgeEstimated` INTEGER NOT NULL, `qrcode` TEXT, `created` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `createdBy` TEXT, `deleted` INTEGER NOT NULL, `deletedBy` TEXT, `latitude` REAL, `longitude` REAL, `address` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT, `surname` TEXT, `birthday` INTEGER NOT NULL, `sex` TEXT, `guardian` TEXT, `isAgeEstimated` INTEGER NOT NULL, `qrcode` TEXT, `created` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `createdBy` TEXT, `deleted` INTEGER NOT NULL, `deletedBy` TEXT, `schema_version` INTEGER NOT NULL, `latitude` REAL, `longitude` REAL, `address` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -87,6 +87,12 @@
             "notNull": false
           },
           {
+            "fieldPath": "schema_version",
+            "columnName": "schema_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "lastLocation.latitude",
             "columnName": "latitude",
             "affinity": "REAL",
@@ -116,7 +122,7 @@
       },
       {
         "tableName": "measures",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `personId` TEXT, `date` INTEGER NOT NULL, `type` TEXT, `age` INTEGER NOT NULL, `height` REAL NOT NULL, `weight` REAL NOT NULL, `muac` REAL NOT NULL, `headCircumference` REAL NOT NULL, `artifact` TEXT, `visible` INTEGER NOT NULL, `oedema` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `createdBy` TEXT, `deleted` INTEGER NOT NULL, `deletedBy` TEXT, `qrCode` TEXT, `latitude` REAL, `longitude` REAL, `address` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `personId` TEXT, `date` INTEGER NOT NULL, `type` TEXT, `age` INTEGER NOT NULL, `height` REAL NOT NULL, `weight` REAL NOT NULL, `muac` REAL NOT NULL, `headCircumference` REAL NOT NULL, `artifact` TEXT, `visible` INTEGER NOT NULL, `oedema` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `createdBy` TEXT, `deleted` INTEGER NOT NULL, `deletedBy` TEXT, `qrCode` TEXT, `schema_version` INTEGER NOT NULL, `latitude` REAL, `longitude` REAL, `address` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -221,6 +227,12 @@
             "notNull": false
           },
           {
+            "fieldPath": "schema_version",
+            "columnName": "schema_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "location.latitude",
             "columnName": "latitude",
             "affinity": "REAL",
@@ -250,7 +262,7 @@
       },
       {
         "tableName": "file_logs",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT, `path` TEXT, `hashValue` TEXT, `fileSize` INTEGER NOT NULL, `uploadDate` INTEGER NOT NULL, `deleted` INTEGER NOT NULL, `qrCode` TEXT, `createDate` INTEGER NOT NULL, `createdBy` TEXT, `status` INTEGER NOT NULL, `age` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT, `path` TEXT, `hashValue` TEXT, `fileSize` INTEGER NOT NULL, `uploadDate` INTEGER NOT NULL, `deleted` INTEGER NOT NULL, `qrCode` TEXT, `createDate` INTEGER NOT NULL, `createdBy` TEXT, `status` INTEGER NOT NULL, `age` INTEGER NOT NULL, `schema_version` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -323,6 +335,12 @@
             "columnName": "age",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "schema_version",
+            "columnName": "schema_version",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -393,7 +411,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"25325728776d372d554154d8bd5cb5bd\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"8b532638da13c1c79276e599e8afb0b6\")"
     ]
   }
 }
