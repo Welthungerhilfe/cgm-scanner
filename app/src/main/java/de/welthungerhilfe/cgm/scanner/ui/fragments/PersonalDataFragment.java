@@ -44,6 +44,7 @@ import java.util.Date;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
@@ -251,6 +252,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setTimestamp(Utils.getUniversalTimestamp());
                     person.setCreated(System.currentTimeMillis());
                     person.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                    person.setSchema_version(CgmDatabase.version);
 
                     viewModel.savePerson(person);
                 }

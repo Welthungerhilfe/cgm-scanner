@@ -51,7 +51,6 @@ import com.projecttango.tangosupport.TangoSupport;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Semaphore;
@@ -64,6 +63,7 @@ import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
+import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
@@ -82,7 +82,6 @@ import de.welthungerhilfe.cgm.scanner.utils.MD5;
 import de.welthungerhilfe.cgm.scanner.utils.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-import static com.projecttango.tangosupport.TangoSupport.doubleTransformPoint;
 import static com.projecttango.tangosupport.TangoSupport.initialize;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_BACK;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_FRONT;
@@ -276,7 +275,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         intent.putExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, true);
         startActivity(intent);
     }
-  
+
     @OnClick(R.id.btnScanComplete)
     void completeScan() {
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
@@ -292,6 +291,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         measure.setPersonId(person.getId());
         measure.setTimestamp(Utils.getUniversalTimestamp());
         measure.setQrCode(person.getQrcode());
+        measure.setSchema_version(CgmDatabase.version);
 
         progressDialog.show();
 
@@ -736,6 +736,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setCreateDate(mNowTime);
                         log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                         log.setAge(age);
+                        log.setSchema_version(CgmDatabase.version);
 
                         fileLogRepository.insertFileLog(log);
 
@@ -824,6 +825,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setCreateDate(mNowTime);
                 log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                 log.setAge(age);
+                log.setSchema_version(CgmDatabase.version);
                 // Todo;
                 //new OfflineTask().saveFileLog(log);
                 fileLogRepository.insertFileLog(log);

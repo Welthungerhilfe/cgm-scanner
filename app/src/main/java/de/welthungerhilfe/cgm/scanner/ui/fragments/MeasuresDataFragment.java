@@ -42,6 +42,7 @@ import android.view.inputmethod.InputMethodManager;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 
+import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
@@ -245,6 +246,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setDate(Utils.getUniversalTimestamp());
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
         measure.setQrCode(qrCode);
+        measure.setSchema_version(CgmDatabase.version);
 
         viewModel.insertMeasure(measure);
     }

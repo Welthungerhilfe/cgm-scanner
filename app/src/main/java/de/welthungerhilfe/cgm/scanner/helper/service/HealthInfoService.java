@@ -20,6 +20,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
+import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.health.HealthInfo;
 import de.welthungerhilfe.cgm.scanner.datasource.models.health.OwnData;
 import de.welthungerhilfe.cgm.scanner.datasource.models.health.TotalData;
@@ -76,6 +77,7 @@ public class HealthInfoService extends Service {
 
                         info.setOwn_data(ownData);
                         info.setTotal_data(totalData);
+                        info.setSchema_version(CgmDatabase.version);
 
                         Gson gson = new Gson();
                         String healthData = gson.toJson(info);

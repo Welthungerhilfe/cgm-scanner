@@ -29,6 +29,8 @@ public abstract class CgmDatabase extends RoomDatabase {
     public abstract FileLogDao fileLogDao();
     public abstract ArtifactResultDao artifactResultDao();
 
+    public static final int version = 3;
+
     private static final String DATABASE = "offline_db";
 
     public static final String TABLE_PERSON = "persons";
@@ -49,6 +51,11 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final Migration MIGRATION_2_3 = new Migration(2, 3) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE persons ADD COLUMN schema_version INTEGER NOT NULL DEFAULT 0;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN schema_version INTEGER NOT NULL DEFAULT 0;");
+            database.execSQL("ALTER TABLE file_logs ADD COLUMN schema_version INTEGER NOT NULL DEFAULT 0;");
+
+
             database.execSQL("CREATE TABLE `artifact_result` (`artifact_id` TEXT NOT NULL, `measure_id` TEXT NOT NULL, PRIMARY KEY(`artifact_id`))");
 
             database.execSQL("ALTER TABLE `artifact_result` ADD COLUMN `type` TEXT;");
