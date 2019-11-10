@@ -1037,23 +1037,46 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     @SuppressLint("StaticFieldLeak")
     private void getScanQuality(String measureId, int scanStep) {
-        new AsyncTask<Void, Void, Double>() {
+        new AsyncTask<Void, Void, Boolean>() {
+            private double averagePointCount = 0;
+            private int pointCloudCount = 0;
+
             @Override
-            protected Double doInBackground(Void... voids) {
-                return artifactResultRepository.getArtifactResult(measureId, scanStep);
+            protected Boolean doInBackground(Void... voids) {
+                averagePointCount = artifactResultRepository.getAveragePointCount(measureId, scanStep);
+                pointCloudCount = artifactResultRepository.getPointCloudCount(measureId, scanStep);
+
+                return true;
             }
 
             @SuppressLint("DefaultLocale")
-            public void onPostExecute(Double results) {
-                double lightScore = (Math.abs(results / 38000 - 1.0) * 100 * 3) / 100;
+            public void onPostExecute(Boolean results) {
+                double lightScore = (Math.abs(averagePointCount / 38000 - 1.0) * 100 * 3) / 100;
+
+                double durationScore;
+                if (scanStep % 100 == 1)
+                    durationScore = Math.abs(pointCloudCount / 24 - 1) * 100;
+                else
+                    durationScore = Math.abs(pointCloudCount / 8 - 1) * 100;
 
                 Log.e("ScanQuality", String.valueOf(lightScore));
+                Log.e("DurationQuality", String.valueOf(durationScore));
 
                 if (scanStep == SCAN_STANDING_FRONT || scanStep == SCAN_LYING_FRONT) {
                     btnScanStep1.setVisibility(View.GONE);
 
+                    String issues = "Issues:";
+
                     if (lightScore < 0.5) {
-                        txtScanStep1.setText(String.format("Issues:\n" + "- Light Score : %f", lightScore));
+                        issues = String.format("%s\n - Light Score : %f", issues, lightScore);
+                    }
+
+                    if (durationScore < 0.5) {
+                        issues = String.format("%s\n - Duration Score : %f", issues, durationScore);
+                    }
+
+                    if (lightScore < 0.5 || durationScore < 0.5) {
+                        txtScanStep1.setText(issues);
                         imgScanStep1.setVisibility(View.GONE);
                         lytScanAgain1.setVisibility(View.VISIBLE);
                     } else {
@@ -1066,8 +1089,18 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 } else if (scanStep == SCAN_STANDING_SIDE || scanStep == SCAN_LYING_SIDE) {
                     btnScanStep2.setVisibility(View.GONE);
 
+                    String issues = "Issues:";
+
                     if (lightScore < 0.5) {
-                        txtScanStep2.setText(String.format("Issues:\n" + "- Light Score : %f", lightScore));
+                        issues = String.format("%s\n - Light Score : %f", issues, lightScore);
+                    }
+
+                    if (durationScore < 0.5) {
+                        issues = String.format("%s\n - Duration Score : %f", issues, durationScore);
+                    }
+
+                    if (lightScore < 0.5 || durationScore < 0.5) {
+                        txtScanStep2.setText(issues);
                         imgScanStep2.setVisibility(View.GONE);
                         lytScanAgain2.setVisibility(View.VISIBLE);
                     } else {
@@ -1080,8 +1113,18 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 } else if (scanStep == SCAN_STANDING_BACK || scanStep == SCAN_LYING_BACK) {
                     btnScanStep3.setVisibility(View.GONE);
 
+                    String issues = "Issues:";
+
                     if (lightScore < 0.5) {
-                        txtScanStep3.setText(String.format("Issues:\n" + "- Light Score : %f", lightScore));
+                        issues = String.format("%s\n - Light Score : %f", issues, lightScore);
+                    }
+
+                    if (durationScore < 0.5) {
+                        issues = String.format("%s\n - Duration Score : %f", issues, durationScore);
+                    }
+
+                    if (lightScore < 0.5 || durationScore < 0.5) {
+                        txtScanStep3.setText(issues);
                         imgScanStep3.setVisibility(View.GONE);
                         lytScanAgain3.setVisibility(View.VISIBLE);
                     } else {

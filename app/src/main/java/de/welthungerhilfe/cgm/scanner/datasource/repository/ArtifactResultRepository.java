@@ -41,4 +41,11 @@ public class ArtifactResultRepository {
         return database.artifactResultDao().getArtifactResult(measureId, key);
     }
 
+    public double getAveragePointCount(String measureId, int key) {
+        return database.artifactResultDao().getAveragePointCount(measureId, key);
+    }
+
+    public int getPointCloudCount(String measureId, int key) {
+        return database.artifactResultDao().getPointCloudCount(measureId, key);
+    }
 }
