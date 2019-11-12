@@ -47,6 +47,7 @@ import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
+import com.microsoft.appcenter.crashes.Crashes;
 import com.projecttango.tangosupport.TangoSupport;
 
 import java.io.File;
@@ -417,10 +418,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     setDisplayRotation();
                 } catch (TangoOutOfDateException e) {
                     Log.e(TAG, getString(R.string.exception_out_of_date), e);
+                    Crashes.trackError(e);
                 } catch (TangoErrorException e) {
                     Log.e(TAG, getString(R.string.exception_tango_error), e);
+                    Crashes.trackError(e);
                 } catch (TangoInvalidException e) {
                     Log.e(TAG, getString(R.string.exception_tango_invalid), e);
+                    Crashes.trackError(e);
                 }
                 setUpExtrinsics();
             }
@@ -520,6 +524,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 mIsConnected = false;
             } catch (TangoErrorException e) {
                 Log.e(TAG, getString(R.string.exception_tango_error), e);
+                Crashes.trackError(e);
             }
         }
     }
@@ -616,11 +621,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         }
                     }
                 } catch (TangoErrorException e) {
-                    Log.e(TAG, "Tango API call error within the OpenGL thread", e);
-                    // todo: Crashlytics.log(Log.ERROR, TAG, "Tango API call error within the OpenGL thread");
-                } catch (Throwable t) {
-                    Log.e(TAG, "Exception on the OpenGL thread", t);
-                    // todo: Crashlytics.log(Log.ERROR, TAG, "Exception on the OpenGL thread");
+                    Crashes.trackError(e);
                 }
             }
         });
@@ -711,7 +712,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         mutex_on_mIsRecording.acquire();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
-                        // todo: Crashlytics.log(Log.WARN, TAG, "InterruptedException aquiring recording mutext");
+                        Crashes.trackError(e);
                     }
                     // Saving the frame or not, depending on the current mode.
                     if ( mIsRecording ) {
@@ -856,8 +857,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         try {
             device2IMUPose = mTango.getPoseAtTime(0.0, framePair);
         } catch (TangoErrorException e) {
-            Toast.makeText(this, R.string.exception_tango_error, Toast.LENGTH_SHORT).show();
-            // todo: Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in device setup");
+            e.printStackTrace();
+            Crashes.trackError(e);
         }
         /*mRenderer.getModelMatCalculator().SetDevice2IMUMatrix(device2IMUPose.getTranslationAsFloats(),device2IMUPose.getRotationAsFloats());*/
         // Set color camera to imu matrix in Model Matrix Calculator.
@@ -868,8 +869,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         try {
             color2IMUPose = mTango.getPoseAtTime(0.0, framePair);
         } catch (TangoErrorException e) {
-            Toast.makeText(this, R.string.exception_tango_error, Toast.LENGTH_SHORT).show();
-            // todo: Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in camera setup");
+            e.printStackTrace();
+            Crashes.trackError(e);
         }
 
         //mRenderer.getModelMatCalculator().SetColorCamera2IMUMatrix(color2IMUPose.getTranslationAsFloats(), color2IMUPose.getRotationAsFloats());
