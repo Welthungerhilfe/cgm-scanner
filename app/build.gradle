@@ -8,7 +8,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 28
         versionCode 51
-        versionName "2.2.0-dev"
+        versionName "2.1.5-dev"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
@@ -106,8 +106,8 @@ dependencies {
     // Network Observer
     implementation 'com.novoda:merlin:1.1.7'
     // AppCenter Analytics & Crashlytics
-    implementation "com.microsoft.appcenter:appcenter-analytics:2.2.0"
-    implementation "com.microsoft.appcenter:appcenter-crashes:2.2.0"
+    implementation "com.microsoft.appcenter:appcenter-analytics:2.5.0"
+    implementation "com.microsoft.appcenter:appcenter-crashes:2.5.0"
 
     implementation 'me.dm7.barcodescanner:zxing:1.9.8'
     implementation 'com.google.zxing:core:3.3.0'
