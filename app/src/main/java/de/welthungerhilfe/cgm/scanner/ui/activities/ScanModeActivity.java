@@ -1084,9 +1084,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         lytScanStep1.setVisibility(View.GONE);
                         btnScanStep1.setVisibility(View.GONE);
                         imgScanSuccess1.setVisibility(View.VISIBLE);
-
-                        step1 = true;
                     }
+
+                    step1 = true;
                 } else if (scanStep == SCAN_STANDING_SIDE || scanStep == SCAN_LYING_SIDE) {
                     btnScanStep2.setVisibility(View.GONE);
 
@@ -1108,9 +1108,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         lytScanStep2.setVisibility(View.GONE);
                         btnScanStep2.setVisibility(View.GONE);
                         imgScanSuccess2.setVisibility(View.VISIBLE);
-
-                        step2 = true;
                     }
+
+                    step2 = true;
                 } else if (scanStep == SCAN_STANDING_BACK || scanStep == SCAN_LYING_BACK) {
                     btnScanStep3.setVisibility(View.GONE);
 
@@ -1132,9 +1132,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         lytScanStep3.setVisibility(View.GONE);
                         btnScanStep3.setVisibility(View.GONE);
                         imgScanSuccess3.setVisibility(View.VISIBLE);
-
-                        step3 = true;
                     }
+
+                    step3 = true;
                 }
 
                 if (step1 && step2 && step3) {
