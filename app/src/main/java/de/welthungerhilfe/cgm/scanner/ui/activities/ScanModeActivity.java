@@ -1055,9 +1055,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 double durationScore;
                 if (scanStep % 100 == 1)
-                    durationScore = Math.abs(pointCloudCount / 24 - 1) * 100;
+                    durationScore = 1 - Math.abs(pointCloudCount / 24 - 1);
                 else
-                    durationScore = Math.abs(pointCloudCount / 8 - 1) * 100;
+                    durationScore = 1- Math.abs(pointCloudCount / 8 - 1);
 
                 Log.e("ScanQuality", String.valueOf(lightScore));
                 Log.e("DurationQuality", String.valueOf(durationScore));
@@ -1071,8 +1071,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         issues = String.format("%s\n - Light Score : %f", issues, lightScore);
                     }
 
-                    if (durationScore < 0.5) {
-                        issues = String.format("%s\n - Duration Score : %f", issues, durationScore);
+                    if (pointCloudCount < 8) {
+                        issues = String.format("%s\n - Duration was too short", issues);
+                    } else if (pointCloudCount > 9) {
+                        issues = String.format("%s\n - Duration was too long", issues);
                     }
 
                     if (lightScore < 0.5 || durationScore < 0.5) {
@@ -1095,8 +1097,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         issues = String.format("%s\n - Light Score : %f", issues, lightScore);
                     }
 
-                    if (durationScore < 0.5) {
-                        issues = String.format("%s\n - Duration Score : %f", issues, durationScore);
+                    if (pointCloudCount < 12) {
+                        issues = String.format("%s\n - Duration was too short", issues);
+                    } else if (pointCloudCount > 27) {
+                        issues = String.format("%s\n - Duration was too long", issues);
                     }
 
                     if (lightScore < 0.5 || durationScore < 0.5) {
@@ -1119,8 +1123,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         issues = String.format("%s\n - Light Score : %f", issues, lightScore);
                     }
 
-                    if (durationScore < 0.5) {
-                        issues = String.format("%s\n - Duration Score : %f", issues, durationScore);
+                    if (pointCloudCount < 8) {
+                        issues = String.format("%s\n - Duration was too short", issues);
+                    } else if (pointCloudCount > 9) {
+                        issues = String.format("%s\n - Duration was too long", issues);
                     }
 
                     if (lightScore < 0.5 || durationScore < 0.5) {
