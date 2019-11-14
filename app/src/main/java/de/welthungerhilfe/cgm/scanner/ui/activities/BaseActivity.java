@@ -21,6 +21,7 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.microsoft.appcenter.crashes.Crashes;
 import com.novoda.merlin.Merlin;
 import com.novoda.merlin.registerable.connection.Connectable;
 import com.novoda.merlin.registerable.disconnection.Disconnectable;
@@ -31,16 +32,10 @@ import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class BaseActivity extends AppCompatActivity implements Connectable, Disconnectable {
-    public static class MemoryOutHander implements Thread.UncaughtExceptionHandler {
+    public static class ExceptionHandler implements Thread.UncaughtExceptionHandler {
         @Override
         public void uncaughtException(Thread thread, Throwable ex) {
-            if(ex.getClass().equals(OutOfMemoryError.class))
-            {
-                // todo: Crashlytics.log(0, "memory out", "Memory Out happened in Activity");
-            } else {
-                ex.printStackTrace();
-                // todo: Crashlytics.log(0, "exception", ex.getMessage());
-            }
+            Crashes.trackError(ex);
         }
     }
 
@@ -51,7 +46,7 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
 
-        // Thread.currentThread().setDefaultUncaughtExceptionHandler(new MemoryOutHander());
+        Thread.currentThread().setDefaultUncaughtExceptionHandler(new ExceptionHandler());
     }
 
     @Override
