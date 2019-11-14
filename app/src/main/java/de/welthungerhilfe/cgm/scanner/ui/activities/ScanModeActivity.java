@@ -434,6 +434,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
 
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Crashes.trackError(throwable));
+
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
         measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
 
