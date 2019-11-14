@@ -94,7 +94,7 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_B
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_FRONT;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_SIDE;
 
-public class ScanModeActivity extends BaseActivity implements View.OnClickListener {
+public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener {
     private final int PERMISSION_LOCATION = 0x0001;
     private final int PERMISSION_CAMERA = 0x0002;
     private final int PERMISSION_STORAGE = 0x0002;
