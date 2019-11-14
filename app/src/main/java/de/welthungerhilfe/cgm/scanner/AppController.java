@@ -28,11 +28,13 @@ import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.microsoft.appcenter.crashes.Crashes;
 
 import java.io.File;
 
 import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_KEY;
@@ -45,6 +47,13 @@ public class AppController extends Application {
 
     public FirebaseAuth firebaseAuth;
     public FirebaseUser firebaseUser;
+
+    public static class ExceptionHandler implements Thread.UncaughtExceptionHandler {
+        @Override
+        public void uncaughtException(Thread thread, Throwable ex) {
+            Crashes.trackError(ex);
+        }
+    }
 
     @Override
     public void onCreate() {
@@ -68,6 +77,9 @@ public class AppController extends Application {
         AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent);
         */
+
+        Thread.currentThread();
+        Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
 
         mInstance = this;
     }
