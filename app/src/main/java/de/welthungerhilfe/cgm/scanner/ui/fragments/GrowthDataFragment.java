@@ -107,7 +107,7 @@ public class GrowthDataFragment extends Fragment {
             this.person = person;
             setData();
         });
-        viewModel.getMeasuresLiveData().observe(getViewLifecycleOwner(), measures -> {
+        viewModel.getManualMeasuresLiveData().observe(getViewLifecycleOwner(), measures -> {
             this.measures = measures;
             setData();
         });
