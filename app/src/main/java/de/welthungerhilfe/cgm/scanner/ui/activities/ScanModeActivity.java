@@ -688,15 +688,19 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                  */
 
                 // Get pose transforms for openGL to depth/color cameras.
-                TangoPoseData oglTdepthPose = TangoSupport.getPoseAtTime(
-                        pointCloudData.timestamp,
-                        TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
-                        TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
-                        TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
-                        TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
-                        TangoSupport.ROTATION_IGNORED);
-                if (oglTdepthPose.statusCode != TangoPoseData.POSE_VALID) {
-                    //Log.w(TAG, "Could not get depth camera transform at time " + pointCloudData.timestamp);
+                try {
+                    TangoPoseData oglTdepthPose = TangoSupport.getPoseAtTime(
+                            pointCloudData.timestamp,
+                            TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
+                            TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
+                            TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
+                            TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
+                            TangoSupport.ROTATION_IGNORED);
+                    if (oglTdepthPose.statusCode != TangoPoseData.POSE_VALID) {
+                        //Log.w(TAG, "Could not get depth camera transform at time " + pointCloudData.timestamp);
+                    }
+                } catch (TangoErrorException e) {
+                    Crashes.trackError(e);
                 }
 
                 mCurrentTimeStamp = (float) pointCloudData.timestamp;
