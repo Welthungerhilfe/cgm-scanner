@@ -48,13 +48,6 @@ public class AppController extends Application {
     public FirebaseAuth firebaseAuth;
     public FirebaseUser firebaseUser;
 
-    public static class ExceptionHandler implements Thread.UncaughtExceptionHandler {
-        @Override
-        public void uncaughtException(Thread thread, Throwable ex) {
-            Crashes.trackError(ex);
-        }
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -77,9 +70,6 @@ public class AppController extends Application {
         AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent);
         */
-
-        Thread.currentThread();
-        Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
 
         mInstance = this;
     }
