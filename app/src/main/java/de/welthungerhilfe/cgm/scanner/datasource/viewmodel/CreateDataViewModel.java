@@ -64,6 +64,18 @@ public class CreateDataViewModel extends AndroidViewModel {
         return measuresLiveData;
     }
 
+    public LiveData<List<Measure>> getManualMeasuresLiveData() {
+        measuresLiveData = Transformations.switchMap(personLiveData, person -> {
+            if (person == null)
+                return null;
+            else {
+                return measureRepository.getManualMeasuresLiveData(person.getId());
+            }
+        });
+
+        return measuresLiveData;
+    }
+
     public LiveData<Measure> getLastMeasureLiveData() {
         lastMeasureLiveData = Transformations.switchMap(personLiveData, person -> {
             if (person == null)
