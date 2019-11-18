@@ -1051,16 +1051,16 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             @SuppressLint("DefaultLocale")
             public void onPostExecute(Boolean results) {
-                double lightScore = (Math.abs(averagePointCount / 38000 - 1.0) * 100 * 3) / 100;
+                double lightScore = (Math.abs(averagePointCount / 38000 - 1.0) * 100 * 3);
 
                 double durationScore;
                 if (scanStep % 100 == 1)
-                    durationScore = 1 - Math.abs(pointCloudCount / 24 - 1);
+                    durationScore = Math.abs(1 - Math.abs((double) pointCloudCount / 24 - 1));
                 else
-                    durationScore = 1- Math.abs(pointCloudCount / 8 - 1);
+                    durationScore = Math.abs(1- Math.abs((double) pointCloudCount / 8 - 1));
 
-                Log.e("ScanQuality", String.valueOf(lightScore));
-                Log.e("DurationQuality", String.valueOf(durationScore));
+                Log.e("LightScore", String.valueOf(lightScore));
+                Log.e("DurationScore", String.valueOf(durationScore));
 
                 if (scanStep == SCAN_STANDING_FRONT || scanStep == SCAN_LYING_FRONT) {
                     btnScanStep1.setVisibility(View.GONE);
@@ -1068,14 +1068,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     String issues = "Issues:";
 
                     if (lightScore < 0.5) {
-                        issues = String.format("%s\n - Light Score : %f", issues, lightScore);
+                        issues = String.format("%s\n - Light Score : %d%%", issues, Math.round(lightScore));
                     }
 
-                    if (pointCloudCount < 8) {
-                        issues = String.format("%s\n - Duration was too short", issues);
-                    } else if (pointCloudCount > 9) {
-                        issues = String.format("%s\n - Duration was too long", issues);
-                    }
+                    issues = String.format("%s\n - Duration score : %d%%", issues, Math.round(durationScore * 100));
 
                     if (lightScore < 0.5 || durationScore < 0.5) {
                         txtScanStep1.setText(issues);
@@ -1094,14 +1090,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     String issues = "Issues:";
 
                     if (lightScore < 0.5) {
-                        issues = String.format("%s\n - Light Score : %f", issues, lightScore);
+                        issues = String.format("%s\n - Light Score : %d%%", issues, Math.round(lightScore));
                     }
 
-                    if (pointCloudCount < 12) {
-                        issues = String.format("%s\n - Duration was too short", issues);
-                    } else if (pointCloudCount > 27) {
-                        issues = String.format("%s\n - Duration was too long", issues);
-                    }
+                    issues = String.format("%s\n - Duration score : %d%%", issues, Math.round(durationScore * 100));
 
                     if (lightScore < 0.5 || durationScore < 0.5) {
                         txtScanStep2.setText(issues);
@@ -1120,14 +1112,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     String issues = "Issues:";
 
                     if (lightScore < 0.5) {
-                        issues = String.format("%s\n - Light Score : %f", issues, lightScore);
+                        issues = String.format("%s\n - Light Score : %d%%", issues, Math.round(lightScore));
                     }
 
-                    if (pointCloudCount < 8) {
-                        issues = String.format("%s\n - Duration was too short", issues);
-                    } else if (pointCloudCount > 9) {
-                        issues = String.format("%s\n - Duration was too long", issues);
-                    }
+                    issues = String.format("%s\n - Duration score : %d%%", issues, Math.round(durationScore * 100));
 
                     if (lightScore < 0.5 || durationScore < 0.5) {
                         txtScanStep3.setText(issues);
