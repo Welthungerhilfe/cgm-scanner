@@ -17,6 +17,7 @@ import android.opengl.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
@@ -61,7 +62,10 @@ import butterknife.OnClick;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
+import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
@@ -141,6 +145,41 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     @BindView(R.id.lytScanner)
     LinearLayout lytScanner;
 
+    @BindView(R.id.imgScanSuccess1)
+    ImageView imgScanSuccess1;
+    @BindView(R.id.imgScanSuccess2)
+    ImageView imgScanSuccess2;
+    @BindView(R.id.imgScanSuccess3)
+    ImageView imgScanSuccess3;
+
+    @BindView(R.id.txtScanStep1)
+    TextView txtScanStep1;
+    @BindView(R.id.txtScanStep2)
+    TextView txtScanStep2;
+    @BindView(R.id.txtScanStep3)
+    TextView txtScanStep3;
+
+    @BindView(R.id.lytScanAgain1)
+    LinearLayout lytScanAgain1;
+    @BindView(R.id.lytScanAgain2)
+    LinearLayout lytScanAgain2;
+    @BindView(R.id.lytScanAgain3)
+    LinearLayout lytScanAgain3;
+
+    @BindView(R.id.btnRetake1)
+    Button btnRetake1;
+    @BindView(R.id.btnRetake2)
+    Button btnRetake2;
+    @BindView(R.id.btnRetake3)
+    Button btnRetake3;
+
+    @BindView(R.id.btnTutorial1)
+    Button btnTutorial1;
+    @BindView(R.id.btnTutorial2)
+    Button btnTutorial2;
+    @BindView(R.id.btnTutorial3)
+    Button btnTutorial3;
+
     @OnClick(R.id.lytScanStanding)
     void scanStanding() {
         SCAN_MODE = SCAN_STANDING;
@@ -170,7 +209,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         changeMode();
     }
     @SuppressLint("SetTextI18n")
-    @OnClick(R.id.btnScanStep1)
+    @OnClick({R.id.btnScanStep1, R.id.btnRetake1})
     void scanStep1() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
@@ -190,7 +229,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
     }
     @SuppressLint("SetTextI18n")
-    @OnClick(R.id.btnScanStep2)
+    @OnClick({R.id.btnScanStep2, R.id.btnRetake2})
     void scanStep2() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
@@ -210,7 +249,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
     }
     @SuppressLint("SetTextI18n")
-    @OnClick(R.id.btnScanStep3)
+    @OnClick({R.id.btnScanStep3, R.id.btnRetake3})
     void scanStep3() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
@@ -229,7 +268,14 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             lytScanner.setVisibility(View.VISIBLE);
         }
     }
-  
+
+    @OnClick({R.id.btnTutorial1, R.id.btnTutorial2, R.id.btnTutorial3})
+    void showTutorial() {
+        Intent intent = new Intent(ScanModeActivity.this, TutorialActivity.class);
+        intent.putExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, true);
+        startActivity(intent);
+    }
+
     @OnClick(R.id.btnScanComplete)
     void completeScan() {
         measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
@@ -245,6 +291,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         measure.setPersonId(person.getId());
         measure.setTimestamp(Utils.getUniversalTimestamp());
         measure.setQrCode(person.getQrcode());
+        measure.setSchema_version(CgmDatabase.version);
 
         progressDialog.show();
 
@@ -276,13 +323,14 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private MeasureRepository measureRepository;
     private FileLogRepository fileLogRepository;
+    private ArtifactResultRepository artifactResultRepository;
 
     private Tango mTango;
     private TangoConfig mConfig;
     private boolean mIsConnected = false;
 
     private GLSurfaceView mCameraSurfaceView;
-    private OverlaySurface mOverlaySurfaceView;
+    //private OverlaySurface mOverlaySurfaceView;
     private CameraSurfaceRenderer mRenderer;
 
     private TextView mTitleView;
@@ -326,6 +374,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private long age = 0;
 
+    private int noOfPoints;
+    private double averageLigtingPenality=0.00;
+
     private int mConnectedTextureIdGlThread = INVALID_TEXTURE_ID;
     private AtomicBoolean mIsFrameAvailableTangoThread = new AtomicBoolean(false);
 
@@ -340,10 +391,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         mPointCloudFilename = "";
         mNumberOfFilesWritten = 0;
-        mPosePositionBuffer = new ArrayList<float[]>();
-        mPoseOrientationBuffer = new ArrayList<float[]>();
-        mPoseTimestampBuffer = new ArrayList<Float>();
-        mPointCloudFilenameBuffer = new ArrayList<String>();
+        mPosePositionBuffer = new ArrayList<>();
+        mPoseOrientationBuffer = new ArrayList<>();
+        mPoseTimestampBuffer = new ArrayList<>();
+        mPointCloudFilenameBuffer = new ArrayList<>();
         mNumPoseInSequence = 0;
         mutex_on_mIsRecording = new Semaphore(1,true);
         mIsRecording = false;
@@ -415,6 +466,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         measureRepository = MeasureRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
+        artifactResultRepository = ArtifactResultRepository.getInstance(this);
 
         setupToolbar();
 
@@ -588,7 +640,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private void startupTango() {
         // Lock configuration and connect to Tango.
         // Select coordinate frame pair.
-        final ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<TangoCoordinateFramePair>();
+        final ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<>();
         framePairs.add(new TangoCoordinateFramePair(TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE, TangoPoseData.COORDINATE_FRAME_DEVICE));
 
         // Listen for new Tango data.
@@ -684,13 +736,28 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setCreateDate(mNowTime);
                         log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                         log.setAge(age);
+                        log.setSchema_version(CgmDatabase.version);
 
                         fileLogRepository.insertFileLog(log);
+
+                        ArtifactResult ar=new ArtifactResult();
+                        double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
+                        ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
+                        ar.setArtifact_id(AppController.getInstance().getPersonId());
+                        ar.setKey(SCAN_STEP);
+                        ar.setMeasure_id(measure.getId());
+                        ar.setMisc("");
+                        ar.setType("PCD_POINTS_v0.2");
+                        noOfPoints = pointCloudData.numPoints;
+                        ar.setReal(noOfPoints);
+                        artifactResultRepository.insertArtifactResult(ar);
                         // Todo;
                         //new OfflineTask().saveFileLog(log);
                         // Direct Upload to Firebase Storage
                         mNumberOfFilesWritten++;
-                        //mTimeToTakeSnap = false;
+                        double Scan_Duration_Penalty=Math.abs((double)mNumberOfFilesWritten/8-1)*100;
+
+                        Log.d("Prajwal",String.valueOf(mNumberOfFilesWritten));
                     }
                     mutex_on_mIsRecording.release();
                 };
@@ -758,6 +825,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setCreateDate(mNowTime);
                 log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                 log.setAge(age);
+                log.setSchema_version(CgmDatabase.version);
                 // Todo;
                 //new OfflineTask().saveFileLog(log);
                 fileLogRepository.insertFileLog(log);
@@ -772,7 +840,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         // We also need to update the camera texture UV coordinates. This must be run in the OpenGL
         // thread.
-        mCameraSurfaceView.queueEvent((Runnable) () -> {
+        mCameraSurfaceView.queueEvent(() -> {
             if (mIsConnected) {
                 mRenderer.updateColorCameraTextureUv(mDisplayRotation);
             }
@@ -867,6 +935,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     public void goToNextStep() {
         closeScan();
 
+        /*
         switch (SCAN_STEP) {
             case SCAN_STANDING_FRONT:
             case SCAN_LYING_FRONT:
@@ -896,10 +965,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 step3 = true;
                 break;
         }
+        */
 
-        if (step1 && step2 && step3) {
-            showCompleteButton();
-        }
+        getScanQuality(measure.getId(),SCAN_STEP);
     }
 
     private void showCompleteButton() {
@@ -967,6 +1035,108 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         lytScanner.setVisibility(View.GONE);
     }
 
+    @SuppressLint("StaticFieldLeak")
+    private void getScanQuality(String measureId, int scanStep) {
+        new AsyncTask<Void, Void, Boolean>() {
+            private double averagePointCount = 0;
+            private int pointCloudCount = 0;
+
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                averagePointCount = artifactResultRepository.getAveragePointCount(measureId, scanStep);
+                pointCloudCount = artifactResultRepository.getPointCloudCount(measureId, scanStep);
+
+                return true;
+            }
+
+            @SuppressLint("DefaultLocale")
+            public void onPostExecute(Boolean results) {
+                double lightScore = (Math.abs(averagePointCount / 38000 - 1.0) * 100 * 3);
+
+                double durationScore;
+                if (scanStep % 100 == 1)
+                    durationScore = Math.abs(1 - Math.abs((double) pointCloudCount / 24 - 1));
+                else
+                    durationScore = Math.abs(1- Math.abs((double) pointCloudCount / 8 - 1));
+
+                Log.e("LightScore", String.valueOf(lightScore));
+                Log.e("DurationScore", String.valueOf(durationScore));
+
+                if (scanStep == SCAN_STANDING_FRONT || scanStep == SCAN_LYING_FRONT) {
+                    btnScanStep1.setVisibility(View.GONE);
+
+                    String issues = "Issues:";
+
+                    if (lightScore < 0.5) {
+                        issues = String.format("%s\n - Light Score : %d%%", issues, Math.round(lightScore));
+                    }
+
+                    issues = String.format("%s\n - Duration score : %d%%", issues, Math.round(durationScore * 100));
+
+                    if (lightScore < 0.5 || durationScore < 0.5) {
+                        txtScanStep1.setText(issues);
+                        imgScanStep1.setVisibility(View.GONE);
+                        lytScanAgain1.setVisibility(View.VISIBLE);
+                    } else {
+                        lytScanStep1.setVisibility(View.GONE);
+                        btnScanStep1.setVisibility(View.GONE);
+                        imgScanSuccess1.setVisibility(View.VISIBLE);
+                    }
+
+                    step1 = true;
+                } else if (scanStep == SCAN_STANDING_SIDE || scanStep == SCAN_LYING_SIDE) {
+                    btnScanStep2.setVisibility(View.GONE);
+
+                    String issues = "Issues:";
+
+                    if (lightScore < 0.5) {
+                        issues = String.format("%s\n - Light Score : %d%%", issues, Math.round(lightScore));
+                    }
+
+                    issues = String.format("%s\n - Duration score : %d%%", issues, Math.round(durationScore * 100));
+
+                    if (lightScore < 0.5 || durationScore < 0.5) {
+                        txtScanStep2.setText(issues);
+                        imgScanStep2.setVisibility(View.GONE);
+                        lytScanAgain2.setVisibility(View.VISIBLE);
+                    } else {
+                        lytScanStep2.setVisibility(View.GONE);
+                        btnScanStep2.setVisibility(View.GONE);
+                        imgScanSuccess2.setVisibility(View.VISIBLE);
+                    }
+
+                    step2 = true;
+                } else if (scanStep == SCAN_STANDING_BACK || scanStep == SCAN_LYING_BACK) {
+                    btnScanStep3.setVisibility(View.GONE);
+
+                    String issues = "Issues:";
+
+                    if (lightScore < 0.5) {
+                        issues = String.format("%s\n - Light Score : %d%%", issues, Math.round(lightScore));
+                    }
+
+                    issues = String.format("%s\n - Duration score : %d%%", issues, Math.round(durationScore * 100));
+
+                    if (lightScore < 0.5 || durationScore < 0.5) {
+                        txtScanStep3.setText(issues);
+                        imgScanStep3.setVisibility(View.GONE);
+                        lytScanAgain3.setVisibility(View.VISIBLE);
+                    } else {
+                        lytScanStep3.setVisibility(View.GONE);
+                        btnScanStep3.setVisibility(View.GONE);
+                        imgScanSuccess3.setVisibility(View.VISIBLE);
+                    }
+
+                    step3 = true;
+                }
+
+                if (step1 && step2 && step3) {
+                    showCompleteButton();
+                }
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
     private void getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, PERMISSION_LOCATION);
@@ -1015,7 +1185,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PERMISSION_LOCATION && grantResults.length > 0 && grantResults[0] >= 0) {
             getCurrentLocation();
         }

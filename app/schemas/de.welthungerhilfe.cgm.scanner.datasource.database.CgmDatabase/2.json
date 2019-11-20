@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "b0835c6d51dd221f00f5cfe266e74f47",
+    "identityHash": "076be0d62bd30e72de1a9d5ca1de8c35",
     "entities": [
       {
         "tableName": "persons",
@@ -333,11 +333,61 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "artifact_result",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`type` TEXT NOT NULL, `key` TEXT, `real` REAL NOT NULL, `confidence_value` TEXT, `misc` TEXT, `artifact_id` TEXT, PRIMARY KEY(`type`))",
+        "fields": [
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "key",
+            "columnName": "key",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "real",
+            "columnName": "real",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "confidence_value",
+            "columnName": "confidence_value",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "misc",
+            "columnName": "misc",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "artifact_id",
+            "columnName": "artifact_id",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "type"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"b0835c6d51dd221f00f5cfe266e74f47\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"076be0d62bd30e72de1a9d5ca1de8c35\")"
     ]
   }
 }

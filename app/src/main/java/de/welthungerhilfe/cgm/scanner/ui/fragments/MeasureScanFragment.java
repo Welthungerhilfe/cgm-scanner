@@ -33,12 +33,17 @@ import com.projecttango.tangosupport.TangoSupport;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
@@ -120,13 +125,18 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
     private int mode = SCAN_PREVIEW;
 
     private FileLogRepository repository;
+    private ArtifactResultRepository artifactResultRepository;
     private long age = 0;
+    private int noOfPoints;
+    private double averageLigtingPenality=0.00;
+    private Measure measure;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
         repository = FileLogRepository.getInstance(context);
+        artifactResultRepository=ArtifactResultRepository.getInstance(context);
 
         age = (System.currentTimeMillis() - ((ScanModeActivity) getActivity()).person.getBirthday()) / 1000 / 60 / 60 / 24;
 
@@ -542,10 +552,26 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setAge(age);
 
                             repository.insertFileLog(log);
+                            noOfPoints=pointCloudData.numPoints;
+
+
+                            ArtifactResult ar=new ArtifactResult();
+                            double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
+                            ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
+                            ar.setMeasure_id(measure.getId());
+                            ar.setArtifact_id(AppController.getInstance().getPersonId());
+                            ar.setKey(mode);
+                            ar.setMisc("");
+                            ar.setType("PCD_POINTS_v0.2");
+                            ar.setReal(noOfPoints);
+                            artifactResultRepository.insertArtifactResult(ar);
                             // Todo;
                             //new OfflineTask().saveFileLog(log);
                             // Direct Upload to Firebase Storage
                             mNumberOfFilesWritten++;
+                            double Scan_Duration_Penalty=Math.abs((double)mNumberOfFilesWritten/8-1)*100;
+
+                            Log.d("Prajwal",String.valueOf(mNumberOfFilesWritten));
                             //mTimeToTakeSnap = false;
                         }
                         mutex_on_mIsRecording.release();
@@ -754,4 +780,6 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
         ((ScanModeActivity)getActivity()).goToNextStep();
     }
+
+
 }

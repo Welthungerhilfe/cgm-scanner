@@ -56,6 +56,7 @@ public class Measure implements Serializable {
     private boolean deleted;
     private String deletedBy;
     private String qrCode;
+    private int schema_version;
 
     @Embedded
     private Loc location;
@@ -203,5 +204,13 @@ public class Measure implements Serializable {
 
     public void setQrCode(String qrCode) {
         this.qrCode = qrCode;
+    }
+
+    public int getSchema_version() {
+        return schema_version;
+    }
+
+    public void setSchema_version(int schema_version) {
+        this.schema_version = schema_version;
     }
 }
