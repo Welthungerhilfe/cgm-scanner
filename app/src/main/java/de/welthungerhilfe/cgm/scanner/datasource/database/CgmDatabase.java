@@ -10,6 +10,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 import de.welthungerhilfe.cgm.scanner.datasource.dao.ArtifactResultDao;
+import de.welthungerhilfe.cgm.scanner.datasource.dao.DeviceDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.FileLogDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.MeasureDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.PersonDao;
@@ -28,6 +29,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public abstract PersonDao personDao();
     public abstract MeasureDao measureDao();
     public abstract FileLogDao fileLogDao();
+    public abstract DeviceDao deviceDao();
     public abstract ArtifactResultDao artifactResultDao();
 
     public static final int version = 4;

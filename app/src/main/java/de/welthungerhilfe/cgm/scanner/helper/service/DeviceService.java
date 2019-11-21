@@ -14,6 +14,7 @@ import java.util.TimerTask;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
@@ -75,23 +76,7 @@ public class DeviceService extends Service {
                         device.setTotal_persons(personRepo.getTotalPersonCount());
                         device.setTotal_measures(measureRepo.getTotalMeasureCount());
 
-                        /*
-                        Gson gson = new Gson();
-                        String healthData = gson.toJson(info);
-
-                        try {
-                            CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
-                            CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
-
-                            CloudQueue queue = queueClient.getQueueReference("device");
-                            queue.createIfNotExists();
-
-                            CloudQueueMessage message = new CloudQueueMessage(healthData);
-                            queue.addMessage(message);
-                        } catch (StorageException | InvalidKeyException | URISyntaxException e) {
-                            e.printStackTrace();
-                        }
-                         */
+                        DeviceRepository.getInstance(getBaseContext()).insertDevice(device);
 
                         return null;
                     }

@@ -17,7 +17,6 @@ import com.google.firebase.perf.metrics.AddTrace;
 
 import com.google.gson.Gson;
 import com.microsoft.azure.storage.*;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.queue.*;
 
 import java.net.URISyntaxException;
@@ -27,9 +26,11 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
@@ -40,8 +41,6 @@ import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasuresLoad;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_KEY;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_NAME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
@@ -51,16 +50,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     private CloudQueue personQueue;
     private CloudQueue measureQueue;
     private CloudQueue artifactQueue;
+    private CloudQueue deviceQueue;
 
     private PersonRepository personRepository;
     private MeasureRepository measureRepository;
     private FileLogRepository fileLogRepository;
+    private DeviceRepository deviceRepository;
 
     private SessionManager session;
 
     private List<Person> personList = new ArrayList<>();
     private List<Measure> measureList = new ArrayList<>();
     private List<FileLog> fileLogList = new ArrayList<>();
+    private List<Device> deviceList = new ArrayList<>();
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -68,6 +70,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
         personRepository = PersonRepository.getInstance(context);
         measureRepository = MeasureRepository.getInstance(context);
         fileLogRepository = FileLogRepository.getInstance(context);
+        deviceRepository = DeviceRepository.getInstance(context);
 
         session = new SessionManager(context);
     }
@@ -79,16 +82,95 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
             getContext().startService(new Intent(getContext(), UploadService.class));
         }
 
-        if (personList.size() == 0 && measureList.size() == 0 && fileLogList.size() == 0)
+        if (personList.size() == 0 && measureList.size() == 0 && fileLogList.size() == 0 && deviceList.size() == 0)
             new MessageTask().execute();
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void startSyncing() {
         prevTimestamp = session.getSyncTimestamp();
 
-        personRepository.getSyncablePerson(this, prevTimestamp);
-        measureRepository.getSyncableMeasure(this, prevTimestamp);
-        fileLogRepository.getSyncableLog(this, prevTimestamp);
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                personList = personRepository.getSyncablePerson(prevTimestamp);
+                measureList = measureRepository.getSyncableMeasure(prevTimestamp);
+                fileLogList = fileLogRepository.getSyncableLog(prevTimestamp);
+                deviceList = deviceRepository.getSyncablePerson(prevTimestamp);
+
+                return null;
+            }
+
+            public void onPostExecute(Void result) {
+                startPushingToAzure();
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private void startPushingToAzure() {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                for (int i = 0; i < personList.size(); i++) {
+                    try {
+                        Gson gson = new Gson();
+
+                        String content = gson.toJson(personList.get(i));
+                        CloudQueueMessage message = new CloudQueueMessage(personList.get(i).getId());
+                        message.setMessageContent(content);
+
+                        personQueue.addMessage(message);
+                    } catch (StorageException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                for (int i = 0; i < measureList.size(); i++) {
+                    try {
+                        Gson gson = new Gson();
+
+                        String content = gson.toJson(measureList.get(i));
+                        CloudQueueMessage message = new CloudQueueMessage(measureList.get(i).getId());
+                        message.setMessageContent(content);
+
+                        measureQueue.addMessage(message);
+                    } catch (StorageException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                for (int i = 0; i < fileLogList.size(); i++) {
+                    try {
+                        Gson gson = new Gson();
+
+                        String content = gson.toJson(fileLogList.get(i));
+                        CloudQueueMessage message = new CloudQueueMessage(fileLogList.get(i).getId());
+                        message.setMessageContent(content);
+
+                        artifactQueue.addMessage(message);
+                    } catch (StorageException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                for (int i = 0; i < deviceList.size(); i++) {
+                    try {
+                        Gson gson = new Gson();
+
+                        String content = gson.toJson(deviceList.get(i));
+                        CloudQueueMessage message = new CloudQueueMessage(deviceList.get(i).getId());
+                        message.setMessageContent(content);
+
+                        deviceQueue.addMessage(message);
+                    } catch (StorageException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                return null;
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @AddTrace(name = "syncImmediately", enabled = true)
@@ -176,6 +258,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
                 artifactQueue = queueClient.getQueueReference("artifact");
                 artifactQueue.createIfNotExists();
+
+                deviceQueue = queueClient.getQueueReference("device");
+                deviceQueue.createIfNotExists();
 
                 return true;
             } catch (StorageException | URISyntaxException | InvalidKeyException e) {

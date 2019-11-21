@@ -60,11 +60,8 @@ public class PersonRepository {
         executor.execute(() -> database.personDao().updatePerson(person));
     }
 
-    public void getSyncablePerson(OnPersonsLoad listener, long timestamp) {
-        executor.execute(() -> {
-            List<Person> data = database.personDao().getSyncablePersons(timestamp);
-            listener.onPersonsLoaded(data);
-        });
+    public List<Person> getSyncablePerson(long timestamp) {
+        return database.personDao().getSyncablePersons(timestamp);
     }
 
     public LiveData<List<Person>> getAvailablePersons(PersonFilter filter) {

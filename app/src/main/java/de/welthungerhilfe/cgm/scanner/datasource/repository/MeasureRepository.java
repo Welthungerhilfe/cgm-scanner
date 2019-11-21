@@ -38,25 +38,14 @@ public class MeasureRepository {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                database.measureDao().updateMeasure(measure);
+
                 return null;
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    @SuppressLint("StaticFieldLeak")
-    public void getSyncableMeasure(OnMeasuresLoad listener, long timestamp) {
-        new AsyncTask<Void, Void, List<Measure>>() {
-            @Override
-            protected List<Measure> doInBackground(Void... voids) {
-                return database.measureDao().getSyncableMeasure(timestamp);
-            }
-
-            @Override
-            public void onPostExecute(List<Measure> data) {
-                listener.onMeasuresLoaded(data);
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    public List<Measure> getSyncableMeasure(long timestamp) {
+        return database.measureDao().getSyncableMeasure(timestamp);
     }
 
     @SuppressLint("StaticFieldLeak")

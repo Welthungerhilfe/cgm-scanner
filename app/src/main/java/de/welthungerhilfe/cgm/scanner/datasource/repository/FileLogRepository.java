@@ -67,19 +67,8 @@ public class FileLogRepository {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    @SuppressLint("StaticFieldLeak")
-    public void getSyncableLog(OnFileLogsLoad listener, long timestamp) {
-        new AsyncTask<Void, Void, List<FileLog>>() {
-            @Override
-            protected List<FileLog> doInBackground(Void... voids) {
-                return database.fileLogDao().getSyncableData(timestamp);
-            }
-
-            @Override
-            public void onPostExecute(List<FileLog> data) {
-                listener.onFileLogsLoaded(data);
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    public List<FileLog> getSyncableLog(long timestamp) {
+        return database.fileLogDao().getSyncableData(timestamp);
     }
 
     public long getArtifactCount() {
