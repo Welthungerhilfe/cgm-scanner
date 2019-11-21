@@ -1,6 +1,15 @@
 package de.welthungerhilfe.cgm.scanner.datasource.models;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
+
+import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_DEVICE;
+
+@Entity(tableName = TABLE_DEVICE)
 public class Device {
+    @PrimaryKey
+    @NonNull
     private String id;
     private String uuid;
     private long create_timestamp;

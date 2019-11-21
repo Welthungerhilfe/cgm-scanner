@@ -8,28 +8,15 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import com.google.gson.Gson;
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.queue.CloudQueue;
-import com.microsoft.azure.storage.queue.CloudQueueClient;
-import com.microsoft.azure.storage.queue.CloudQueueMessage;
-
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
-import de.welthungerhilfe.cgm.scanner.datasource.models.health.HealthInfo;
-import de.welthungerhilfe.cgm.scanner.datasource.models.health.OwnData;
-import de.welthungerhilfe.cgm.scanner.datasource.models.health.TotalData;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.HEALTH_INTERVAL;
