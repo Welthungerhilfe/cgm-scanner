@@ -86,11 +86,11 @@ public class MeasureRepository {
         return database.measureDao().getManualMeasuresLiveData(personId);
     }
 
-    public int getOwnMeasureCount() {
+    public long getOwnMeasureCount() {
         return database.measureDao().getOwnMeasureCount(AppController.getInstance().firebaseUser.getEmail());
     }
 
-    public int getTotalMeasureCount() {
+    public long getTotalMeasureCount() {
         return database.measureDao().getTotalMeasureCount();
     }
 }

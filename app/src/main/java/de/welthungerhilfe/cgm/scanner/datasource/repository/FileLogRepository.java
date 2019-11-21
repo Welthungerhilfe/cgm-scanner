@@ -82,15 +82,15 @@ public class FileLogRepository {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public int getArtifactCount() {
+    public long getArtifactCount() {
         return database.fileLogDao().getArtifactCount();
     }
 
-    public int getDeletedArtifactCount() {
+    public long getDeletedArtifactCount() {
         return database.fileLogDao().getDeletedArtifactCount();
     }
 
-    public int getTotalArtifactCount() {
+    public long getTotalArtifactCount() {
         return database.fileLogDao().getTotalArtifactCount();
     }
 

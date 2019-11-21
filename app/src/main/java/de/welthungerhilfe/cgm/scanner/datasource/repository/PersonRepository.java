@@ -110,11 +110,11 @@ public class PersonRepository {
         return database.personDao().getResultPerson(new SimpleSQLiteQuery(query));
     }
 
-    public int getOwnPersonCount() {
+    public long getOwnPersonCount() {
         return database.personDao().getOwnPersonCount(AppController.getInstance().firebaseUser.getEmail());
     }
 
-    public int getTotalPersonCount() {
+    public long getTotalPersonCount() {
         return database.personDao().getTotalPersonCount();
     }
 }

@@ -54,8 +54,8 @@ public interface MeasureDao {
     void deleteMeasureGarbage(long timestamp);
 
     @Query("SELECT COUNT(id) FROM " + TABLE_MEASURE + " WHERE createdBy=:email")
-    int getOwnMeasureCount(String email);
+    long getOwnMeasureCount(String email);
 
     @Query("SELECT COUNT(id) FROM " + TABLE_MEASURE)
-    int getTotalMeasureCount();
+    long getTotalMeasureCount();
 }
