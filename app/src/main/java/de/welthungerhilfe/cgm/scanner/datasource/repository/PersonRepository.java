@@ -1,8 +1,10 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.db.SimpleSQLiteQuery;
 import android.content.Context;
+import android.os.AsyncTask;
 
 import java.util.List;
 import java.util.Locale;
@@ -60,8 +62,19 @@ public class PersonRepository {
         executor.execute(() -> database.personDao().updatePerson(person));
     }
 
-    public List<Person> getSyncablePerson(long timestamp) {
-        return database.personDao().getSyncablePersons(timestamp);
+    @SuppressLint("StaticFieldLeak")
+    public void getSyncablePerson(OnPersonsLoad listener, long timestamp) {
+        new AsyncTask<Void, Void, List<Person>>() {
+
+            @Override
+            protected List<Person> doInBackground(Void... voids) {
+                return database.personDao().getSyncablePersons(timestamp);
+            }
+
+            public void onPostExecute(List<Person> persons) {
+                listener.onPersonsLoaded(persons);
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public LiveData<List<Person>> getAvailablePersons(PersonFilter filter) {

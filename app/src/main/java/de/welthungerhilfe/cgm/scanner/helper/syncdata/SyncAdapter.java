@@ -36,6 +36,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.ui.delegators.OnDevicesLoad;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasuresLoad;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonsLoad;
@@ -44,7 +45,7 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
-public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPersonsLoad, OnMeasuresLoad, OnFileLogsLoad {
+public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPersonsLoad, OnMeasuresLoad, OnFileLogsLoad, OnDevicesLoad {
     private long prevTimestamp;
 
     private CloudQueue personQueue;
@@ -90,87 +91,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     private void startSyncing() {
         prevTimestamp = session.getSyncTimestamp();
 
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                personList = personRepository.getSyncablePerson(prevTimestamp);
-                measureList = measureRepository.getSyncableMeasure(prevTimestamp);
-                fileLogList = fileLogRepository.getSyncableLog(prevTimestamp);
-                deviceList = deviceRepository.getSyncablePerson(prevTimestamp);
-
-                return null;
-            }
-
-            public void onPostExecute(Void result) {
-                startPushingToAzure();
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private void startPushingToAzure() {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                for (int i = 0; i < personList.size(); i++) {
-                    try {
-                        Gson gson = new Gson();
-
-                        String content = gson.toJson(personList.get(i));
-                        CloudQueueMessage message = new CloudQueueMessage(personList.get(i).getId());
-                        message.setMessageContent(content);
-
-                        personQueue.addMessage(message);
-                    } catch (StorageException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                for (int i = 0; i < measureList.size(); i++) {
-                    try {
-                        Gson gson = new Gson();
-
-                        String content = gson.toJson(measureList.get(i));
-                        CloudQueueMessage message = new CloudQueueMessage(measureList.get(i).getId());
-                        message.setMessageContent(content);
-
-                        measureQueue.addMessage(message);
-                    } catch (StorageException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                for (int i = 0; i < fileLogList.size(); i++) {
-                    try {
-                        Gson gson = new Gson();
-
-                        String content = gson.toJson(fileLogList.get(i));
-                        CloudQueueMessage message = new CloudQueueMessage(fileLogList.get(i).getId());
-                        message.setMessageContent(content);
-
-                        artifactQueue.addMessage(message);
-                    } catch (StorageException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                for (int i = 0; i < deviceList.size(); i++) {
-                    try {
-                        Gson gson = new Gson();
-
-                        String content = gson.toJson(deviceList.get(i));
-                        CloudQueueMessage message = new CloudQueueMessage(deviceList.get(i).getId());
-                        message.setMessageContent(content);
-
-                        deviceQueue.addMessage(message);
-                    } catch (StorageException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                return null;
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        personRepository.getSyncablePerson(this, prevTimestamp);
+        measureRepository.getSyncableMeasure(this, prevTimestamp);
+        fileLogRepository.getSyncableLog(this, prevTimestamp);
+        deviceRepository.getSyncablePerson(this, prevTimestamp);
     }
 
     @AddTrace(name = "syncImmediately", enabled = true)
@@ -242,6 +166,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
         }
     }
 
+    @Override
+    public void onDevicesLoaded(List<Device> dList) {
+        deviceList = dList;
+
+        for (int i = 0; i < deviceList.size(); i++) {
+            new DeviceWriteTask(deviceList.get(i)).execute();
+        }
+    }
+
     @SuppressLint("StaticFieldLeak")
     class MessageTask extends AsyncTask<Void, Void, Boolean> {
         @Override
@@ -277,31 +210,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     }
 
     @SuppressLint("StaticFieldLeak")
-    class WriteTask extends AsyncTask<Void, Void, Void> {
-        CloudQueue queue;
-        CloudQueueMessage message;
-
-        WriteTask(CloudQueue queue, CloudQueueMessage message) {
-            this.queue = queue;
-            this.message = message;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            try {
-                queue.addMessage(message);
-
-                session.setSyncTimestamp(Utils.getUniversalTimestamp());
-            } catch (StorageException e) {
-                e.printStackTrace();
-
-                session.setSyncTimestamp(prevTimestamp);
-            }
-            return null;
-        }
-    }
-
-    @SuppressLint("StaticFieldLeak")
     class PersonWriteTask extends AsyncTask<Void, Void, Boolean> {
         private Person person;
 
@@ -333,6 +241,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
                 session.setSyncTimestamp(person.getTimestamp());
 
                 personList.remove(person);
+
+                person.setTimestamp(0);
+                personRepository.updatePerson(person);
             } else {
                 session.setSyncTimestamp(prevTimestamp);
             }
@@ -372,6 +283,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
                 session.setSyncTimestamp(measure.getTimestamp());
 
                 measureList.remove(measure);
+
+                measure.setTimestamp(0);
+                measureRepository.updateMeasure(measure);
             } else {
                 session.setSyncTimestamp(prevTimestamp);
             }
@@ -410,6 +324,47 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
                 session.setSyncTimestamp(artifact.getCreateDate());
 
                 fileLogList.remove(artifact);
+            } else {
+                session.setSyncTimestamp(prevTimestamp);
+            }
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    class DeviceWriteTask extends AsyncTask<Void, Void, Boolean> {
+        private Device device;
+
+        DeviceWriteTask(Device device) {
+            this.device = device;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            try {
+                Gson gson = new Gson();
+
+                String content = gson.toJson(device);
+                CloudQueueMessage message = new CloudQueueMessage(device.getId());
+                message.setMessageContent(content);
+
+                deviceQueue.addMessage(message);
+
+                return true;
+            } catch (StorageException e) {
+                e.printStackTrace();
+
+                return false;
+            }
+        }
+
+        public void onPostExecute(Boolean result) {
+            if (result) {
+                session.setSyncTimestamp(device.getSync_timestamp());
+
+                deviceList.remove(device);
+
+                device.setSync_timestamp(0);
+                deviceRepository.updateDevice(device);
             } else {
                 session.setSyncTimestamp(prevTimestamp);
             }
