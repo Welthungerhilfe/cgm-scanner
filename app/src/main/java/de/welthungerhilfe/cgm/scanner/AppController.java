@@ -46,20 +46,6 @@ public class AppController extends Application {
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
         Utils.overrideFont(getApplicationContext(), "SERIF", "roboto.ttf");
 
-        //Log.e("Offline DB", DebugDB.getAddressLog());
-        /*
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-
-        Intent intent = new Intent(this, HealthInfoService.class);
-        PendingIntent alarmIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
-
-        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent);
-        */
-
         mInstance = this;
     }
 

@@ -25,6 +25,7 @@ import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
@@ -34,8 +35,14 @@ import android.widget.Toast;
 import com.microsoft.appcenter.auth.Auth;
 import com.microsoft.appcenter.auth.SignInResult;
 import com.microsoft.appcenter.utils.async.AppCenterConsumer;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
 
+import net.minidev.json.JSONArray;
+
+import java.text.ParseException;
 import java.util.Date;
+import java.util.Map;
 
 import butterknife.BindString;
 import butterknife.BindView;
@@ -61,7 +68,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     @BindString(R.string.validate_password)
     String strPasswordValidation;
 
-    @OnClick(R.id.btnOK)
+    @OnClick({R.id.btnOK, R.id.btnLoginMicrosoft})
     void doSignIn(TextView btnOK) {
         doSignInAction();
     }
@@ -172,13 +179,29 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 // SignInResult is never null, getUserInformation() returns not null when there is no exception.
                 // Both getIdToken() / getAccessToken() return non null values.
                 String idToken = signInResult.getUserInformation().getIdToken();
-                String accessToken = signInResult.getUserInformation().getAccessToken();
+
+                try {
+                    JWT parsedToken = JWTParser.parse(idToken);
+                    Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
+                    String displayName = (String) claims.get("name");
+
+                    JSONArray emails = (JSONArray) claims.get("emails");
+                    if (emails != null && !emails.isEmpty()) {
+                        String firstEmail = emails.get(0).toString();
+
+                        Log.e("email", firstEmail);
+                    }
+
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
 
                 // Do work with either token.
             } else {
 
                 // Do something with sign in failure.
                 Exception signInFailureException = signInResult.getException();
+                signInFailureException.printStackTrace();
             }
         });
 

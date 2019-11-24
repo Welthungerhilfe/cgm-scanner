@@ -239,4 +239,5 @@
     <string name="no_scans">No scans yet today</string>
     <string name="add_scans">To start scanning, tap [+] button</string>
     <string name="label_wait">Please wait for a moment ...</string>
+    <string name="login_microsoft">Sign In with Microsoft</string>
 </resources>

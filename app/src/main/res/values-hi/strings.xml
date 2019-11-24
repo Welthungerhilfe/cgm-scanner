@@ -239,4 +239,5 @@
     <string name="no_scans">कोई स्कैन नहीं :/</string>
     <string name="add_scans">स्कैनिंग शुरू करने के लिए, [+] बटन टैप करें</string>
     <string name="label_wait">Please wait for a moment ...</string>
+    <string name="login_microsoft">Sign In with Microsoft</string>
 </resources>
