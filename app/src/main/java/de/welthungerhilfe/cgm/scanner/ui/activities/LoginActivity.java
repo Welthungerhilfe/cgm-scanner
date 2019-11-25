@@ -69,7 +69,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     String strPasswordValidation;
 
     @OnClick({R.id.btnOK, R.id.btnLoginMicrosoft})
-    void doSignIn(TextView btnOK) {
+    void doSignIn() {
         doSignInAction();
     }
 
