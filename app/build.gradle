@@ -107,7 +107,7 @@ dependencies {
 
     implementation 'com.github.d-max:spots-dialog:1.1@aar'
 
-    implementation 'com.google.guava:guava:28.1-jre'
+    implementation 'com.google.guava:guava:28.1-android'
 
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
 }

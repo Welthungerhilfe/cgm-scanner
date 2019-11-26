@@ -64,6 +64,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
 import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
 import de.welthungerhilfe.cgm.scanner.helper.tango.CameraSurfaceRenderer;
@@ -232,8 +233,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
   
     @OnClick(R.id.btnScanComplete)
     void completeScan() {
-        // Todo : add email from AppCenter Auth
-        measure.setCreatedBy("email");
+        measure.setCreatedBy(session.getUserEmail());
         measure.setDate(Utils.getUniversalTimestamp());
         measure.setType("v1.1.2");
         measure.setAge(age);
@@ -277,6 +277,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private MeasureRepository measureRepository;
     private FileLogRepository fileLogRepository;
+
+    private SessionManager session;
 
     private Tango mTango;
     private TangoConfig mConfig;
@@ -388,14 +390,15 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             finish();
         }
 
+        session = new SessionManager(ScanModeActivity.this);
+
         age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
 
         if (measure == null) {
             measure = new Measure();
             measure.setId(AppController.getInstance().getMeasureId());
             measure.setQrCode(person.getQrcode());
-            // Todo : add email from AppCenter Auth
-            measure.setCreatedBy("email");
+            measure.setCreatedBy(session.getUserEmail());
             measure.setAge(age);
             measure.setDate(System.currentTimeMillis());
         }
@@ -564,10 +567,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     }
                 } catch (TangoErrorException e) {
                     Log.e(TAG, "Tango API call error within the OpenGL thread", e);
-                    // todo: Crashlytics.log(Log.ERROR, TAG, "Tango API call error within the OpenGL thread");
                 } catch (Throwable t) {
                     Log.e(TAG, "Exception on the OpenGL thread", t);
-                    // todo: Crashlytics.log(Log.ERROR, TAG, "Exception on the OpenGL thread");
                 }
             }
         });
@@ -656,11 +657,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         mutex_on_mIsRecording.acquire();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
-                        // todo: Crashlytics.log(Log.WARN, TAG, "InterruptedException aquiring recording mutext");
                     }
                     // Saving the frame or not, depending on the current mode.
                     if ( mIsRecording ) {
-                        // TODO save files to local storage
                         updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
                         progressBar.setProgress(mProgress);
 
@@ -679,14 +678,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setDeleted(false);
                         log.setQrCode(person.getQrcode());
                         log.setCreateDate(mNowTime);
-                        // Todo : add email from AppCenter Auth
-                        log.setCreatedBy("email");
+                        log.setCreatedBy(session.getUserEmail());
                         log.setAge(age);
 
                         fileLogRepository.insertFileLog(log);
-                        // Todo;
-                        //new OfflineTask().saveFileLog(log);
-                        // Direct Upload to Firebase Storage
+
                         mNumberOfFilesWritten++;
                         //mTimeToTakeSnap = false;
                     }
@@ -754,11 +750,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setDeleted(false);
                 log.setQrCode(person.getQrcode());
                 log.setCreateDate(mNowTime);
-                // Todo : add email from AppCenter Auth
-                log.setCreatedBy("email");
+                log.setCreatedBy(session.getUserEmail());
                 log.setAge(age);
-                // Todo;
-                //new OfflineTask().saveFileLog(log);
                 fileLogRepository.insertFileLog(log);
             };
             thread.run();

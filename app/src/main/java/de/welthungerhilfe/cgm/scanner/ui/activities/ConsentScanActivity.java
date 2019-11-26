@@ -79,6 +79,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.AutoFitTextureView;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
@@ -978,8 +979,7 @@ public class ConsentScanActivity extends AppCompatActivity {
                 log.setQrCode(qrCode);
                 log.setDeleted(false);
                 log.setCreateDate(Utils.getUniversalTimestamp());
-                // Todo : add email from AppCenter Auth
-                log.setCreatedBy("email");
+                log.setCreatedBy(new SessionManager(ConsentScanActivity.this).getUserEmail());
 
                 fileLogRepository.insertFileLog(log);
             } catch (IOException e) {

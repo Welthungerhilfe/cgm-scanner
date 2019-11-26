@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.helper.tango.CameraSurfaceRenderer;
@@ -67,6 +68,8 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
     private Tango mTango;
     private TangoConfig mConfig;
     private boolean mIsConnected = false;
+
+    private SessionManager session;
 
     private int mDisplayRotation = Surface.ROTATION_0;
 
@@ -126,6 +129,8 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
         super.onAttach(context);
 
         repository = FileLogRepository.getInstance(context);
+
+        session = new SessionManager(context);
 
         age = (System.currentTimeMillis() - ((ScanModeActivity) getActivity()).person.getBirthday()) / 1000 / 60 / 60 / 24;
 
@@ -535,8 +540,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setDeleted(false);
                             log.setQrCode(mQrCode);
                             log.setCreateDate(mNowTime);
-                            // ToDo: Add user email from AppCenter Auth;
-                            // log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                            log.setCreatedBy(session.getUserEmail());
                             log.setAge(age);
 
                             repository.insertFileLog(log);
@@ -615,8 +619,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setDeleted(false);
                             log.setQrCode(mQrCode);
                             log.setCreateDate(mNowTime);
-                            // ToDo: Add user email from AppCenter Auth;
-                            // log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                            log.setCreatedBy(session.getUserEmail());
                             log.setAge(age);
                             repository.insertFileLog(log);
                         };

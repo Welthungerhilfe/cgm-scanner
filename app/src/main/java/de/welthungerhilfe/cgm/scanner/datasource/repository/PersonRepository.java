@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.PersonFilter;
 
@@ -26,6 +27,7 @@ public class PersonRepository {
     private static PersonRepository instance;
 
     private CgmDatabase database;
+    private SessionManager session;
 
     private ExecutorService executor;
 
@@ -33,6 +35,7 @@ public class PersonRepository {
 
     private PersonRepository(Context context) {
         database = CgmDatabase.getInstance(context);
+        session = new SessionManager(context);
 
         executor = Executors.newSingleThreadExecutor();
     }
@@ -78,8 +81,7 @@ public class PersonRepository {
         }
 
         if (filter.isOwn()) {
-            // Todo : add email from AppCenter Auth
-            //whereClause += String.format(" AND createdBy=%s ", Objects.requireNonNull(AppController.getInstance().firebaseAuth.getCurrentUser()).getEmail());
+            whereClause += String.format(" AND createdBy=%s ", Objects.requireNonNull(session.getUserEmail()));
         }
 
         /*
@@ -112,8 +114,7 @@ public class PersonRepository {
     }
 
     public int getOwnPersonCount() {
-        // Todo : add email from AppCenter Auth
-        return database.personDao().getOwnPersonCount("email");
+        return database.personDao().getOwnPersonCount(session.getUserEmail());
     }
 
     public int getTotalPersonCount() {

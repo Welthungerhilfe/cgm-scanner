@@ -11,15 +11,18 @@ import java.util.concurrent.ExecutorService;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasureLoad;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasuresLoad;
 
 public class MeasureRepository {
     private static MeasureRepository instance;
     private CgmDatabase database;
+    private SessionManager session;
 
     private MeasureRepository(Context context) {
         database = CgmDatabase.getInstance(context);
+        session = new SessionManager(context);
     }
 
     public static MeasureRepository getInstance(Context context) {
@@ -83,8 +86,7 @@ public class MeasureRepository {
     }
 
     public int getOwnMeasureCount() {
-        // Todo : add email from AppCenter Auth
-        return database.measureDao().getOwnMeasureCount("email");
+        return database.measureDao().getOwnMeasureCount(session.getUserEmail());
     }
 
     public int getTotalMeasureCount() {

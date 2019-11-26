@@ -54,6 +54,7 @@ import android.widget.TextView;
 
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
+import com.microsoft.appcenter.auth.Auth;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 
@@ -99,7 +100,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
-        // todo: Crashlytics.log("Add person by QR");
         startActivity(new Intent(MainActivity.this, QRScanActivity.class));
     }
 
@@ -133,9 +133,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
-
-        // todo: Crashlytics.setUserIdentifier(AppController.getInstance().firebaseUser.getEmail());
-        // todo: Crashlytics.log(0, "user login: ", String.format("user logged in with email %s at %s", AppController.getInstance().firebaseUser.getEmail(), Utils.beautifyDateTime(new Date())));
 
         session = new SessionManager(MainActivity.this);
         accountManager = AccountManager.get(this);
@@ -191,8 +188,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         String device = Utils.getAndroidID(getContentResolver());
         if (token != null && !session.isFcmSaved()) {
             Map<String, Object> data = new HashMap<>();
-            // Todo : add email from AppCenter Auth
-            data.put("user", "email");
+            data.put("user", session.getUserEmail());
             data.put("device", device);
             data.put("token", token);
         }
@@ -210,13 +206,14 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                     break;
                 case R.id.menuLogout:
-                    // Todo : AppCenter Auth Signout
                     session.setSigned(false);
 
                     Account[] accounts = accountManager.getAccounts();
                     for (Account account : accounts) {
                         accountManager.removeAccount(account, null, null);
                     }
+
+                    Auth.signOut();
 
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();
@@ -227,8 +224,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         });
         View headerView = navMenu.getHeaderView(0);
         TextView txtUsername = headerView.findViewById(R.id.txtUsername);
-        // Todo : add email from AppCenter Auth
-        txtUsername.setText("email");
+        txtUsername.setText(session.getUserEmail());
     }
 
     private void setupActionBar() {

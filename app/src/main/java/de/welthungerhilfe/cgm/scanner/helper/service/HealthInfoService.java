@@ -26,12 +26,14 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.health.TotalData;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.HEALTH_INTERVAL;
 
 public class HealthInfoService extends Service {
     private Timer timer = new Timer();
+    private SessionManager session;
 
     @Nullable
     @Override
@@ -42,58 +44,61 @@ public class HealthInfoService extends Service {
     @SuppressLint("StaticFieldLeak")
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
+        session = new SessionManager(getApplicationContext());
+
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                HealthInfo info = new HealthInfo();
-                info.setUuid(Utils.getAndroidID(getContentResolver()));
-                // Todo : add email from AppCenter Auth
-                info.setOwner("email");
-                info.setCreate_timestamp(System.currentTimeMillis());
+                if (session.isSigned()) {
+                    HealthInfo info = new HealthInfo();
+                    info.setUuid(Utils.getAndroidID(getContentResolver()));
+                    info.setOwner(session.getUserEmail());
+                    info.setCreate_timestamp(System.currentTimeMillis());
 
-                OwnData ownData = new OwnData();
-                TotalData totalData = new TotalData();
+                    OwnData ownData = new OwnData();
+                    TotalData totalData = new TotalData();
 
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        PersonRepository personRepo = PersonRepository.getInstance(getBaseContext());
-                        MeasureRepository measureRepo = MeasureRepository.getInstance(getBaseContext());
-                        FileLogRepository fileLogRepo = FileLogRepository.getInstance(getBaseContext());
+                    new AsyncTask<Void, Void, Void>() {
+                        @Override
+                        protected Void doInBackground(Void... voids) {
+                            PersonRepository personRepo = PersonRepository.getInstance(getBaseContext());
+                            MeasureRepository measureRepo = MeasureRepository.getInstance(getBaseContext());
+                            FileLogRepository fileLogRepo = FileLogRepository.getInstance(getBaseContext());
 
-                        ownData.setOwn_persons(personRepo.getOwnPersonCount());
-                        ownData.setOwn_measures(measureRepo.getOwnMeasureCount());
-                        ownData.setArtifacts(fileLogRepo.getArtifactCount());
-                        ownData.setDeleted_artifacts(fileLogRepo.getDeletedArtifactCount());
-                        ownData.setTotal_artifacts(fileLogRepo.getTotalArtifactCount());
-                        ownData.setArtifact_file_size_mb(fileLogRepo.getArtifactFileSize());
-                        ownData.setTotal_artifact_file_size_mb(fileLogRepo.getTotalArtifactFileSize());
+                            ownData.setOwn_persons(personRepo.getOwnPersonCount());
+                            ownData.setOwn_measures(measureRepo.getOwnMeasureCount());
+                            ownData.setArtifacts(fileLogRepo.getArtifactCount());
+                            ownData.setDeleted_artifacts(fileLogRepo.getDeletedArtifactCount());
+                            ownData.setTotal_artifacts(fileLogRepo.getTotalArtifactCount());
+                            ownData.setArtifact_file_size_mb(fileLogRepo.getArtifactFileSize());
+                            ownData.setTotal_artifact_file_size_mb(fileLogRepo.getTotalArtifactFileSize());
 
-                        totalData.setTotal_persons(personRepo.getTotalPersonCount());
-                        totalData.setTotal_measures(measureRepo.getTotalMeasureCount());
+                            totalData.setTotal_persons(personRepo.getTotalPersonCount());
+                            totalData.setTotal_measures(measureRepo.getTotalMeasureCount());
 
-                        info.setOwn_data(ownData);
-                        info.setTotal_data(totalData);
+                            info.setOwn_data(ownData);
+                            info.setTotal_data(totalData);
 
-                        Gson gson = new Gson();
-                        String healthData = gson.toJson(info);
+                            Gson gson = new Gson();
+                            String healthData = gson.toJson(info);
 
-                        try {
-                            CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
-                            CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
+                            try {
+                                CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                                CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
 
-                            CloudQueue queue = queueClient.getQueueReference("device");
-                            queue.createIfNotExists();
+                                CloudQueue queue = queueClient.getQueueReference("device");
+                                queue.createIfNotExists();
 
-                            CloudQueueMessage message = new CloudQueueMessage(healthData);
-                            queue.addMessage(message);
-                        } catch (StorageException | InvalidKeyException | URISyntaxException e) {
-                            e.printStackTrace();
+                                CloudQueueMessage message = new CloudQueueMessage(healthData);
+                                queue.addMessage(message);
+                            } catch (StorageException | InvalidKeyException | URISyntaxException e) {
+                                e.printStackTrace();
+                            }
+
+                            return null;
                         }
-
-                        return null;
-                    }
-                }.execute();
+                    }.execute();
+                }
             }
         }, 0, HEALTH_INTERVAL);
 

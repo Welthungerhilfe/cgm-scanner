@@ -45,6 +45,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasureLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -53,6 +54,8 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
     private List<Person> personList = new ArrayList<>();
     private List<Person> filteredList = new ArrayList<>();
     private int lastPosition = -1;
+
+    private SessionManager session;
 
     private int sortType = 0; // 0 : All, 1 : date, 2 : location, 3 : wasting, 4 : stunting;
     private ArrayList<Integer> filters = new ArrayList<>();
@@ -71,6 +74,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
         context = ctx;
 
         repository = MeasureRepository.getInstance(ctx);
+        session = new SessionManager(ctx);
     }
 
     @Override
@@ -254,8 +258,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
                     for (int j = 0; j < filters.size(); j++) {
                         switch (filters.get(j)) {
                             case 1:  // own data filter
-                                // Todo : add email from AppCenter Auth
-                                if (!personList.get(i).getCreatedBy().equals("email")) {
+                                if (!personList.get(i).getCreatedBy().equals(session.getUserEmail())) {
                                     passed = false;
                                     break label;
                                 }

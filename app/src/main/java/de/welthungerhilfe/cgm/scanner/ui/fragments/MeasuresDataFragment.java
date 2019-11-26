@@ -142,8 +142,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                         dialog.setConfirmListener(result -> {
                             if (result) {
                                 measure.setDeleted(true);
-                                // Todo : add email from AppCenter Auth
-                                // measure.setDeletedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                                measure.setDeletedBy(session.getUserEmail());
                                 measure.setTimestamp(Utils.getUniversalTimestamp());
 
                                 adapterMeasure.removeMeasure(measure);
@@ -242,8 +241,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setPersonId(person.getId());
         measure.setTimestamp(Utils.getUniversalTimestamp());
         measure.setDate(Utils.getUniversalTimestamp());
-        // Todo : add email from AppCenter Auth
-        // measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+        measure.setCreatedBy(session.getUserEmail());
         measure.setQrCode(qrCode);
 
         viewModel.insertMeasure(measure);

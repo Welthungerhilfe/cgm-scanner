@@ -47,6 +47,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -57,6 +58,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private final int REQUEST_LOCATION = 0x1000;
 
     public Context context;
+    private SessionManager session;
 
     private TextView txtDate;
 
@@ -84,6 +86,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         super.onAttach(context);
 
         this.context = context;
+        session = new SessionManager(context);
     }
 
     public void onActivityCreated(Bundle instance) {
@@ -250,8 +253,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setAgeEstimated(checkAge.isChecked());
                     person.setTimestamp(Utils.getUniversalTimestamp());
                     person.setCreated(System.currentTimeMillis());
-                    // Todo : add email from AppCenter Auth
-                    //person.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                    person.setCreatedBy(session.getUserEmail());
 
                     viewModel.savePerson(person);
                 }
