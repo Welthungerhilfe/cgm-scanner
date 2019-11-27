@@ -45,7 +45,31 @@ public class ArtifactResultRepository {
         return database.artifactResultDao().getAveragePointCount(measureId, key);
     }
 
+    public double getAveragePointCountForFront(String measureId) {
+        return database.artifactResultDao().getAveragePointCountForFront(measureId);
+    }
+
+    public double getAveragePointCountForSide(String measureId) {
+        return database.artifactResultDao().getAveragePointCountForSide(measureId);
+    }
+
+    public double getAveragePointCountForBack(String measureId) {
+        return database.artifactResultDao().getAveragePointCountForBack(measureId);
+    }
+
     public int getPointCloudCount(String measureId, int key) {
         return database.artifactResultDao().getPointCloudCount(measureId, key);
+    }
+
+    public int getPointCloudCountForFront(String measureId) {
+        return database.artifactResultDao().getPointCloudCountForFront(measureId);
+    }
+
+    public int getPointCloudCountForSide(String measureId) {
+        return database.artifactResultDao().getPointCloudCountForSide(measureId);
+    }
+
+    public int getPointCloudCountForBack(String measureId) {
+        return database.artifactResultDao().getPointCloudCountForBack(measureId);
     }
 }

@@ -1051,7 +1051,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             @SuppressLint("DefaultLocale")
             public void onPostExecute(Boolean results) {
-                double lightScore = (Math.abs(averagePointCount / 38000 - 1.0) * 100 * 3);
+                double lightScore = (Math.abs(averagePointCount / 38000 - 1.0) * 3);
 
                 double durationScore;
                 if (scanStep % 100 == 1)

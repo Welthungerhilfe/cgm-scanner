@@ -101,9 +101,21 @@
 
                 <TextView
                     android:id="@+id/txtArm"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="20sp"/>
+
+                <TextView
+                    android:id="@+id/txtOverallScore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="20sp"/>
+                    android:visibility="gone"
+                    android:padding="5dp"
+                    android:background="@drawable/view_round"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="20sp" />
 
             </LinearLayout>
 
