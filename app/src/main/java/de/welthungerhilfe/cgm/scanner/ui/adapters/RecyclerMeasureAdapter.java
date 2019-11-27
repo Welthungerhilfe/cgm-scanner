@@ -139,12 +139,18 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                 public void onPostExecute(Boolean result) {
                     double lightScoreFront = (Math.abs(averagePointCountFront / 38000 - 1.0) * 3);
                     double durationScoreFront = Math.abs(1- Math.abs((double) pointCloudCountFront / 8 - 1));
+                    if (lightScoreFront > 1) lightScoreFront -= 1;
+                    if (durationScoreFront > 1) durationScoreFront -= 1;
 
                     double lightScoreSide = (Math.abs(averagePointCountSide / 38000 - 1.0) * 3);
                     double durationScoreSide = Math.abs(1- Math.abs((double) pointCloudCountSide / 24 - 1));
+                    if (lightScoreSide > 1) lightScoreSide -= 1;
+                    if (durationScoreSide > 1) durationScoreSide -= 1;
 
                     double lightScoreBack = (Math.abs(averagePointCountBack / 38000 - 1.0) * 3);
                     double durationScoreBack = Math.abs(1- Math.abs((double) pointCloudCountBack / 8 - 1));
+                    if (lightScoreBack > 1) lightScoreBack -= 1;
+                    if (durationScoreBack > 1) durationScoreBack -=  1;
 
                     Log.e("front-light : ", String.valueOf(lightScoreFront));
                     Log.e("side-light : ", String.valueOf(lightScoreSide));
