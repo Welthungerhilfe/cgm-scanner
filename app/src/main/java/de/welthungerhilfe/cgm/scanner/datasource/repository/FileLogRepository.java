@@ -101,4 +101,12 @@ public class FileLogRepository {
     public double getTotalArtifactFileSize() {
         return database.fileLogDao().getTotalArtifactFileSize();
     }
+
+    public double getMeasureArtifactSize(String measureId) {
+        return database.fileLogDao().getMeasureArtifactSize(measureId);
+    }
+
+    public double getMeasureArtifactUploadedSize(String measureId) {
+        return database.fileLogDao().getMeasureArtifactUploadedSize(measureId);
+    }
 }

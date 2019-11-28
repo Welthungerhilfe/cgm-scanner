@@ -30,6 +30,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -40,6 +41,7 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
@@ -52,6 +54,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
     private List<Measure> measureList;
     private int lastPosition = -1;
 
+    private FileLogRepository artifactRepository;
     private ArtifactResultRepository artifactResultRepository;
 
     private SessionManager session;
@@ -68,6 +71,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
     public RecyclerMeasureAdapter(Context ctx) {
         context = ctx;
 
+        artifactRepository = FileLogRepository.getInstance(context);
         artifactResultRepository = ArtifactResultRepository.getInstance(context);
 
         measureList = new ArrayList<>();
@@ -121,6 +125,9 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                 private double averagePointCountBack = 0;
                 private int pointCloudCountBack = 0;
 
+                private double totalArtifactSize = 0;
+                private double uploadedArtifactSize = 0;
+
                 @Override
                 protected Boolean doInBackground(Void... voids) {
                     averagePointCountFront = artifactResultRepository.getAveragePointCountForFront(measure.getId());
@@ -132,11 +139,19 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                     averagePointCountBack = artifactResultRepository.getAveragePointCountForBack(measure.getId());
                     pointCloudCountBack = artifactResultRepository.getPointCloudCountForBack(measure.getId());
 
+                    totalArtifactSize = artifactRepository.getMeasureArtifactSize(measure.getId());
+                    uploadedArtifactSize = artifactRepository.getMeasureArtifactUploadedSize(measure.getId());
                     return true;
                 }
 
                 @SuppressLint("DefaultLocale")
                 public void onPostExecute(Boolean result) {
+                    if (totalArtifactSize != 0) {
+                        holder.progressUpload.setVisibility(View.VISIBLE);
+                        double progress = uploadedArtifactSize / totalArtifactSize * 100;
+                        holder.progressUpload.setProgress((int)progress);
+                    }
+
                     double lightScoreFront = (Math.abs(averagePointCountFront / 38000 - 1.0) * 3);
                     double durationScoreFront = Math.abs(1- Math.abs((double) pointCloudCountFront / 8 - 1));
                     if (lightScoreFront > 1) lightScoreFront -= 1;
@@ -257,6 +272,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         TextView txtWeight;
         TextView txtArm;
         TextView txtOverallScore;
+        ProgressBar progressUpload;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -269,6 +285,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             txtWeight = itemView.findViewById(R.id.txtWeight);
             txtArm = itemView.findViewById(R.id.txtArm);
             txtOverallScore = itemView.findViewById(R.id.txtOverallScore);
+            progressUpload = itemView.findViewById(R.id.progressUpload);
         }
 
         public void bindSelectListener(Measure measure) {
