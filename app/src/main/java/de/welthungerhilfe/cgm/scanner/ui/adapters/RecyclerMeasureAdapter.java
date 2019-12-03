@@ -160,8 +160,14 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                     Log.e("side-duration : ", String.valueOf(durationScoreSide));
                     Log.e("back-duration : ", String.valueOf(durationScoreBack));
 
+                    double scoreFront = lightScoreFront * durationScoreFront;
+                    double scoreSide = lightScoreSide * durationScoreSide;
+                    double scoreBack = lightScoreBack * durationScoreBack;
 
-                    double overallScore = lightScoreFront * durationScoreFront * lightScoreSide * durationScoreSide * lightScoreBack * durationScoreBack;
+                    double overallScore = 0;
+                    if (scoreFront > overallScore) overallScore = scoreFront;
+                    if (scoreSide > overallScore) overallScore = scoreSide;
+                    if (scoreBack > overallScore) overallScore = scoreBack;
 
                     holder.txtOverallScore.setVisibility(View.VISIBLE);
                     holder.txtOverallScore.setText(String.format("%d%%", Math.round(overallScore * 100)));

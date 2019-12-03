@@ -32,6 +32,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.Collections;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -50,6 +52,12 @@ public class FeedbackDialog extends Dialog {
 
     @BindView(R.id.txtOverallScore)
     TextView txtOverallScore;
+    @BindView(R.id.txtScoreStep1)
+    TextView txtScoreStep1;
+    @BindView(R.id.txtScoreStep2)
+    TextView txtScoreStep2;
+    @BindView(R.id.txtScoreStep3)
+    TextView txtScoreStep3;
     @BindView(R.id.txtFrontFeedback)
     TextView txtFrontFeedback;
     @BindView(R.id.txtSideFeedback)
@@ -120,17 +128,33 @@ public class FeedbackDialog extends Dialog {
                 if (lightScoreFront > 1) lightScoreFront -= 1;
                 if (durationScoreFront > 1) durationScoreFront -= 1;
 
+                double scoreFront = lightScoreFront * durationScoreFront;
+                txtScoreStep1.setText(String.format("%d%%", Math.round(scoreFront * 100)));
+
 
                 double lightScoreSide = (Math.abs(averagePointCountSide / 38000 - 1.0) * 3);
                 double durationScoreSide = Math.abs(1- Math.abs((double) pointCloudCountSide / 24 - 1));
                 if (lightScoreSide > 1) lightScoreSide -= 1;
                 if (durationScoreSide > 1) durationScoreSide -= 1;
 
+                double scoreSide = lightScoreSide * durationScoreSide;
+                txtScoreStep2.setText(String.format("%d%%", Math.round(scoreSide * 100)));
+
 
                 double lightScoreBack = (Math.abs(averagePointCountBack / 38000 - 1.0) * 3);
                 double durationScoreBack = Math.abs(1- Math.abs((double) pointCloudCountBack / 8 - 1));
                 if (lightScoreBack > 1) lightScoreBack -= 1;
                 if (durationScoreBack > 1) durationScoreBack -= 1;
+
+                double scoreBack = lightScoreBack * durationScoreBack;
+                txtScoreStep3.setText(String.format("%d%%", Math.round(scoreBack * 100)));
+
+                double overallScore = 0;
+                if (scoreFront > overallScore) overallScore = scoreFront;
+                if (scoreSide > overallScore) overallScore = scoreSide;
+                if (scoreBack > overallScore) overallScore = scoreBack;
+
+                txtOverallScore.setText(String.format("%d%%", Math.round(overallScore * 100)));
 
                 Log.e("front-light : ", String.valueOf(lightScoreFront));
                 Log.e("side-light : ", String.valueOf(lightScoreSide));
@@ -160,10 +184,5 @@ public class FeedbackDialog extends Dialog {
                 txtBackFeedback.setText(issuesBack);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    @SuppressLint("DefaultLocale")
-    public void setOverallScore(double overallScore) {
-        txtOverallScore.setText(String.format("%d%%", Math.round(overallScore * 100)));
     }
 }
