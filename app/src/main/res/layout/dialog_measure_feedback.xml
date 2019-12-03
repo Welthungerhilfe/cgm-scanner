@@ -59,14 +59,31 @@
 
     </LinearLayout>
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:singleLine="true"
-        android:textSize="20sp"
-        android:textColor="@color/colorPrimary"
-        android:text="@string/front_scan"/>
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textSize="20sp"
+            android:textColor="@color/colorPrimary"
+            android:text="@string/front_scan"/>
+
+        <TextView
+            android:id="@+id/txtScoreStep1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/txtFrontFeedback"
@@ -75,14 +92,31 @@
         android:textSize="18sp"
         android:textColor="@color/colorBlack" />
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:singleLine="true"
-        android:textSize="20sp"
-        android:textColor="@color/colorPrimary"
-        android:text="@string/side_scan"/>
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textSize="20sp"
+            android:textColor="@color/colorPrimary"
+            android:text="@string/side_scan"/>
+
+        <TextView
+            android:id="@+id/txtScoreStep2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/txtSideFeedback"
@@ -91,14 +125,31 @@
         android:textSize="18sp"
         android:textColor="@color/colorBlack" />
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:singleLine="true"
-        android:textSize="20sp"
-        android:textColor="@color/colorPrimary"
-        android:text="@string/back_scan"/>
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textSize="20sp"
+            android:textColor="@color/colorPrimary"
+            android:text="@string/back_scan"/>
+
+        <TextView
+            android:id="@+id/txtScoreStep3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/txtBackFeedback"

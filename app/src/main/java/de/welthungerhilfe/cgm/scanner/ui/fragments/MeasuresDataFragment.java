@@ -269,7 +269,6 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             feedbackDialog = new FeedbackDialog(context);
 
         feedbackDialog.setMeasure(measure);
-        feedbackDialog.setOverallScore(overallScore);
         feedbackDialog.show();
     }
 }
