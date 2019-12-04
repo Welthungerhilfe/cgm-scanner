@@ -1,8 +1,10 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.db.SimpleSQLiteQuery;
 import android.content.Context;
+import android.os.AsyncTask;
 
 import java.util.List;
 import java.util.Locale;
@@ -60,11 +62,19 @@ public class PersonRepository {
         executor.execute(() -> database.personDao().updatePerson(person));
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void getSyncablePerson(OnPersonsLoad listener, long timestamp) {
-        executor.execute(() -> {
-            List<Person> data = database.personDao().getSyncablePersons(timestamp);
-            listener.onPersonsLoaded(data);
-        });
+        new AsyncTask<Void, Void, List<Person>>() {
+
+            @Override
+            protected List<Person> doInBackground(Void... voids) {
+                return database.personDao().getSyncablePersons(timestamp);
+            }
+
+            public void onPostExecute(List<Person> persons) {
+                listener.onPersonsLoaded(persons);
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public LiveData<List<Person>> getAvailablePersons(PersonFilter filter) {
@@ -110,11 +120,11 @@ public class PersonRepository {
         return database.personDao().getResultPerson(new SimpleSQLiteQuery(query));
     }
 
-    public int getOwnPersonCount() {
+    public long getOwnPersonCount() {
         return database.personDao().getOwnPersonCount(AppController.getInstance().firebaseUser.getEmail());
     }
 
-    public int getTotalPersonCount() {
+    public long getTotalPersonCount() {
         return database.personDao().getTotalPersonCount();
     }
 }

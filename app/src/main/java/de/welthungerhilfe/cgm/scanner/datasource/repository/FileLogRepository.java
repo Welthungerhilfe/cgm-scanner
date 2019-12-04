@@ -75,22 +75,21 @@ public class FileLogRepository {
                 return database.fileLogDao().getSyncableData(timestamp);
             }
 
-            @Override
-            public void onPostExecute(List<FileLog> data) {
-                listener.onFileLogsLoaded(data);
+            public void onPostExecute(List<FileLog> logs) {
+                listener.onFileLogsLoaded(logs);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public int getArtifactCount() {
+    public long getArtifactCount() {
         return database.fileLogDao().getArtifactCount();
     }
 
-    public int getDeletedArtifactCount() {
+    public long getDeletedArtifactCount() {
         return database.fileLogDao().getDeletedArtifactCount();
     }
 
-    public int getTotalArtifactCount() {
+    public long getTotalArtifactCount() {
         return database.fileLogDao().getTotalArtifactCount();
     }
 

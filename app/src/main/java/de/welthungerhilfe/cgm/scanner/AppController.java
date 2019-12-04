@@ -111,6 +111,10 @@ public class AppController extends Application {
         return String.format("%s_artifact-%s_%s_%s", Utils.getAndroidID(getContentResolver()), type, timestamp, Utils.getSaltString(16));
     }
 
+    public String getDeviceId() {
+        return String.format("%s-device-%s-%s", Utils.getAndroidID(getContentResolver()), Utils.getUniversalTimestamp(), Utils.getSaltString(16));
+    }
+
     public File getRootDirectory() {
         File mExtFileDir;
         String state = Environment.getExternalStorageState();

@@ -52,9 +52,8 @@ public class MeasureRepository {
                 return database.measureDao().getSyncableMeasure(timestamp);
             }
 
-            @Override
-            public void onPostExecute(List<Measure> data) {
-                listener.onMeasuresLoaded(data);
+            public void onPostExecute(List<Measure> measures) {
+                listener.onMeasuresLoaded(measures);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -86,11 +85,11 @@ public class MeasureRepository {
         return database.measureDao().getManualMeasuresLiveData(personId);
     }
 
-    public int getOwnMeasureCount() {
+    public long getOwnMeasureCount() {
         return database.measureDao().getOwnMeasureCount(AppController.getInstance().firebaseUser.getEmail());
     }
 
-    public int getTotalMeasureCount() {
+    public long getTotalMeasureCount() {
         return database.measureDao().getTotalMeasureCount();
     }
 }
