@@ -1058,25 +1058,26 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             @SuppressLint("DefaultLocale")
             public void onPostExecute(Boolean results) {
-                double lightScore = (Math.abs(averagePointCount / 38000 - 1.0) * 100 * 3) / 100;
+                double lightScore = (Math.abs(averagePointCount / 38000 - 1.0) * 3);
 
                 double durationScore;
                 if (scanStep % 100 == 1)
-                    durationScore = 1 - Math.abs(pointCloudCount / 24 - 1);
+                    durationScore = Math.abs(1- Math.abs((double) pointCloudCount / 24 - 1));
                 else
-                    durationScore = 1- Math.abs(pointCloudCount / 8 - 1);
+                    durationScore = Math.abs(1- Math.abs((double) pointCloudCount / 8 - 1));
+
+                if (lightScore > 1) lightScore -= 1;
+                if (durationScore > 1) durationScore -= 1;
 
                 Log.e("ScanQuality", String.valueOf(lightScore));
                 Log.e("DurationQuality", String.valueOf(durationScore));
 
+                String issues = "Scan Quality :";
+                issues = String.format("%s\n - Light Score : %d%%", issues, Math.round(lightScore * 100));
+                issues = String.format("%s\n - Duration Score : %d%%", issues, Math.round(durationScore * 100));
+
                 if (scanStep == SCAN_STANDING_FRONT || scanStep == SCAN_LYING_FRONT) {
                     btnScanStep1.setVisibility(View.GONE);
-
-                    String issues = "Issues:";
-
-                    if (lightScore < 0.5) {
-                        issues = String.format("%s\n - Light Score : %f", issues, lightScore);
-                    }
 
                     if (pointCloudCount < 8) {
                         issues = String.format("%s\n - Duration was too short", issues);
@@ -1084,25 +1085,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         issues = String.format("%s\n - Duration was too long", issues);
                     }
 
-                    if (lightScore < 0.5 || durationScore < 0.5) {
-                        txtScanStep1.setText(issues);
-                        imgScanStep1.setVisibility(View.GONE);
-                        lytScanAgain1.setVisibility(View.VISIBLE);
-                    } else {
-                        lytScanStep1.setVisibility(View.GONE);
-                        btnScanStep1.setVisibility(View.GONE);
-                        imgScanSuccess1.setVisibility(View.VISIBLE);
-                    }
+                    txtScanStep1.setText(issues);
+                    imgScanStep1.setVisibility(View.GONE);
+                    lytScanAgain1.setVisibility(View.VISIBLE);
 
                     step1 = true;
                 } else if (scanStep == SCAN_STANDING_SIDE || scanStep == SCAN_LYING_SIDE) {
                     btnScanStep2.setVisibility(View.GONE);
-
-                    String issues = "Issues:";
-
-                    if (lightScore < 0.5) {
-                        issues = String.format("%s\n - Light Score : %f", issues, lightScore);
-                    }
 
                     if (pointCloudCount < 12) {
                         issues = String.format("%s\n - Duration was too short", issues);
@@ -1110,25 +1099,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         issues = String.format("%s\n - Duration was too long", issues);
                     }
 
-                    if (lightScore < 0.5 || durationScore < 0.5) {
-                        txtScanStep2.setText(issues);
-                        imgScanStep2.setVisibility(View.GONE);
-                        lytScanAgain2.setVisibility(View.VISIBLE);
-                    } else {
-                        lytScanStep2.setVisibility(View.GONE);
-                        btnScanStep2.setVisibility(View.GONE);
-                        imgScanSuccess2.setVisibility(View.VISIBLE);
-                    }
+                    txtScanStep2.setText(issues);
+                    imgScanStep2.setVisibility(View.GONE);
+                    lytScanAgain2.setVisibility(View.VISIBLE);
 
                     step2 = true;
                 } else if (scanStep == SCAN_STANDING_BACK || scanStep == SCAN_LYING_BACK) {
                     btnScanStep3.setVisibility(View.GONE);
-
-                    String issues = "Issues:";
-
-                    if (lightScore < 0.5) {
-                        issues = String.format("%s\n - Light Score : %f", issues, lightScore);
-                    }
 
                     if (pointCloudCount < 8) {
                         issues = String.format("%s\n - Duration was too short", issues);
@@ -1136,15 +1113,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         issues = String.format("%s\n - Duration was too long", issues);
                     }
 
-                    if (lightScore < 0.5 || durationScore < 0.5) {
-                        txtScanStep3.setText(issues);
-                        imgScanStep3.setVisibility(View.GONE);
-                        lytScanAgain3.setVisibility(View.VISIBLE);
-                    } else {
-                        lytScanStep3.setVisibility(View.GONE);
-                        btnScanStep3.setVisibility(View.GONE);
-                        imgScanSuccess3.setVisibility(View.VISIBLE);
-                    }
+                    txtScanStep3.setText(issues);
+                    imgScanStep3.setVisibility(View.GONE);
+                    lytScanAgain3.setVisibility(View.VISIBLE);
 
                     step3 = true;
                 }
