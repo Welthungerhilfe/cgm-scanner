@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "917ba7e83418dcd783d122d44a796042",
+    "identityHash": "e54f999adfc6e8dbbb86a1c7d4f1e135",
     "entities": [
       {
         "tableName": "persons",
@@ -262,7 +262,7 @@
       },
       {
         "tableName": "file_logs",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT, `path` TEXT, `hashValue` TEXT, `fileSize` INTEGER NOT NULL, `uploadDate` INTEGER NOT NULL, `deleted` INTEGER NOT NULL, `qrCode` TEXT, `createDate` INTEGER NOT NULL, `createdBy` TEXT, `status` INTEGER NOT NULL, `age` INTEGER NOT NULL, `schema_version` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT, `path` TEXT, `hashValue` TEXT, `fileSize` INTEGER NOT NULL, `uploadDate` INTEGER NOT NULL, `deleted` INTEGER NOT NULL, `qrCode` TEXT, `createDate` INTEGER NOT NULL, `createdBy` TEXT, `status` INTEGER NOT NULL, `age` INTEGER NOT NULL, `schema_version` INTEGER NOT NULL, `measureId` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -341,11 +341,73 @@
             "columnName": "schema_version",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "measureId",
+            "columnName": "measureId",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
           "columnNames": [
             "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "artifact_result",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`type` TEXT, `key` INTEGER NOT NULL, `real` REAL NOT NULL, `confidence_value` TEXT, `misc` TEXT, `measure_id` TEXT NOT NULL, `artifact_id` TEXT NOT NULL, PRIMARY KEY(`artifact_id`))",
+        "fields": [
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "key",
+            "columnName": "key",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "real",
+            "columnName": "real",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "confidence_value",
+            "columnName": "confidence_value",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "misc",
+            "columnName": "misc",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "measure_id",
+            "columnName": "measure_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "artifact_id",
+            "columnName": "artifact_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "artifact_id"
           ],
           "autoGenerate": false
         },
@@ -461,67 +523,11 @@
         },
         "indices": [],
         "foreignKeys": []
-      },
-      {
-        "tableName": "artifact_result",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`type` TEXT, `key` INTEGER NOT NULL, `real` REAL NOT NULL, `confidence_value` TEXT, `misc` TEXT, `measure_id` TEXT NOT NULL, `artifact_id` TEXT NOT NULL, PRIMARY KEY(`artifact_id`))",
-        "fields": [
-          {
-            "fieldPath": "type",
-            "columnName": "type",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "key",
-            "columnName": "key",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "real",
-            "columnName": "real",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "confidence_value",
-            "columnName": "confidence_value",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "misc",
-            "columnName": "misc",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "measure_id",
-            "columnName": "measure_id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "artifact_id",
-            "columnName": "artifact_id",
-            "affinity": "TEXT",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "artifact_id"
-          ],
-          "autoGenerate": false
-        },
-        "indices": [],
-        "foreignKeys": []
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"917ba7e83418dcd783d122d44a796042\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"e54f999adfc6e8dbbb86a1c7d4f1e135\")"
     ]
   }
 }

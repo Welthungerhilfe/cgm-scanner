@@ -15,11 +15,12 @@ import de.welthungerhilfe.cgm.scanner.datasource.dao.FileLogDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.MeasureDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.PersonDao;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 
-@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class}, version = 3)
+@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class, Device.class}, version = 4)
 public abstract class CgmDatabase extends RoomDatabase {
     private static final Object sLock = new Object();
 
