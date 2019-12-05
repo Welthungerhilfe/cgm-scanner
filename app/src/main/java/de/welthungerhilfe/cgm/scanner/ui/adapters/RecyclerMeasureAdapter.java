@@ -102,7 +102,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
     @SuppressLint("StaticFieldLeak")
     @Override
     public void onBindViewHolder(RecyclerMeasureAdapter.ViewHolder holder, int position) {
-        Measure measure = measureList.get(position);
+        Measure measure = measureList.get(holder.getAdapterPosition());
 
         if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
             holder.imgType.setImageResource(R.drawable.manual);
@@ -176,7 +176,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                     else if (overallScore < 0.7) holder.txtOverallScore.setBackgroundTintList(context.getColorStateList(R.color.colorYellow));
                     else holder.txtOverallScore.setBackgroundTintList(context.getColorStateList(R.color.colorPrimary));
 
-                    if (feedbackListener != null) holder.bindScanFeedbackListener(measureList.get(position), overallScore);
+                    if (feedbackListener != null) holder.bindScanFeedbackListener(measureList.get(holder.getAdapterPosition()), overallScore);
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
@@ -206,7 +206,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         }
 
         if (listener != null) {
-            holder.bindSelectListener(measureList.get(position));
+            holder.bindSelectListener(measureList.get(holder.getAdapterPosition()));
         }
     }
 
