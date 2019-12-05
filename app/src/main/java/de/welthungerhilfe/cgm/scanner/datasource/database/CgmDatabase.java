@@ -10,6 +10,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 import de.welthungerhilfe.cgm.scanner.datasource.dao.ArtifactResultDao;
+import de.welthungerhilfe.cgm.scanner.datasource.dao.DeviceDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.FileLogDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.MeasureDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.PersonDao;
