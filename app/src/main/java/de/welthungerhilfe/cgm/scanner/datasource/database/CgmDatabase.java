@@ -20,7 +20,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 
-@Database(entities = {Person.class, Measure.class, FileLog.class, Device.class, ArtifactResult.class}, version = 4)
+@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class, Device.class}, version = 4)
 public abstract class CgmDatabase extends RoomDatabase {
     private static final Object sLock = new Object();
 
@@ -74,6 +74,8 @@ public abstract class CgmDatabase extends RoomDatabase {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("CREATE TABLE IF NOT EXISTS `devices` (`id` TEXT NOT NULL, `uuid` TEXT, `create_timestamp` INTEGER NOT NULL, `sync_timestamp` INTEGER NOT NULL, `new_artifact_file_size_mb` REAL NOT NULL, `new_artifacts` INTEGER NOT NULL, `deleted_artifacts` INTEGER NOT NULL, `total_artifact_file_size_mb` REAL NOT NULL, `total_artifacts` INTEGER NOT NULL, `own_measures` INTEGER NOT NULL, `own_persons` INTEGER NOT NULL, `created_by` TEXT, `total_measures` INTEGER NOT NULL, `total_persons` INTEGER NOT NULL, `app_version` TEXT, `schema_version` INTEGER NOT NULL, PRIMARY KEY(`id`))");
+
+            database.execSQL("ALTER TABLE `file_logs` ADD COLUMN `measureId` TEXT;");
         }
     };
 

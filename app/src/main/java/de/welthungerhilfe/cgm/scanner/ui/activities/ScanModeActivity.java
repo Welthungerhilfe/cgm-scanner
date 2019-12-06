@@ -744,6 +744,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                         log.setAge(age);
                         log.setSchema_version(CgmDatabase.version);
+                        log.setMeasureId(measure.getId());
 
                         fileLogRepository.insertFileLog(log);
 
@@ -833,8 +834,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
                 log.setAge(age);
                 log.setSchema_version(CgmDatabase.version);
-                // Todo;
-                //new OfflineTask().saveFileLog(log);
+                log.setMeasureId(measure.getId());
+
                 fileLogRepository.insertFileLog(log);
             };
             thread.run();

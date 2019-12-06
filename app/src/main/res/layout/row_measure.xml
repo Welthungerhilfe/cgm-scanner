@@ -16,6 +16,7 @@
         android:background="@color/colorWhite">
 
         <LinearLayout
+            android:id="@+id/lytContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
@@ -111,7 +112,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
-                    android:padding="5dp"
+                    android:paddingStart="7dp"
+                    android:paddingEnd="7dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
                     android:background="@drawable/view_round"
                     android:backgroundTint="@color/colorPrimary"
                     android:textColor="@color/colorWhite"
@@ -119,9 +123,18 @@
 
             </LinearLayout>
 
+            <ProgressBar
+                android:id="@+id/progressUpload"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:progress="0"/>
+
         </LinearLayout>
 
         <View
+            android:id="@+id/divider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_alignParentBottom="true"
