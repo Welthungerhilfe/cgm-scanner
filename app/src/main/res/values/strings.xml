@@ -257,4 +257,8 @@
     <string name="label_wait">Please wait for a moment ...</string>
     <string name="btn_retake">RE-TAKE</string>
     <string name="btn_tutorial">TUTORIAL</string>
+    <string name="scan_feedback">Scan Feedback</string>
+    <string name="front_scan">01. Front Scan</string>
+    <string name="side_scan">02. 360\' Scan</string>
+    <string name="back_scan">03. Back Scan</string>
 </resources>

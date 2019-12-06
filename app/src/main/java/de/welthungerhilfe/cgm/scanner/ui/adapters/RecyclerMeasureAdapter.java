@@ -19,8 +19,11 @@
 
 package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +39,7 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
@@ -44,8 +48,11 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasureAdapter.ViewHolder> {
     private Context context;
     private OnMeasureSelectListener listener;
+    private OnMeasureFeedbackListener feedbackListener;
     private List<Measure> measureList;
     private int lastPosition = -1;
+
+    private ArtifactResultRepository artifactResultRepository;
 
     private SessionManager session;
     private RemoteConfig config;
@@ -54,8 +61,14 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         void onMeasureSelect(Measure measure);
     }
 
+    public interface OnMeasureFeedbackListener {
+        void onMeasureFeedback(Measure measure, double overallScore);
+    }
+
     public RecyclerMeasureAdapter(Context ctx) {
         context = ctx;
+
+        artifactResultRepository = ArtifactResultRepository.getInstance(context);
 
         measureList = new ArrayList<>();
 
@@ -65,6 +78,10 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
     public void setMeasureSelectListener(OnMeasureSelectListener listener) {
         this.listener = listener;
+    }
+
+    public void setMeasureFeedbackListener(OnMeasureFeedbackListener listener) {
+        this.feedbackListener = listener;
     }
 
     @Override
@@ -82,14 +99,92 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         return new ViewHolder(view);
     }
 
+    @SuppressLint("StaticFieldLeak")
     @Override
     public void onBindViewHolder(RecyclerMeasureAdapter.ViewHolder holder, int position) {
-        Measure measure = measureList.get(position);
+        Measure measure = measureList.get(holder.getAdapterPosition());
 
-        if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL))
+        if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
             holder.imgType.setImageResource(R.drawable.manual);
-        else
+
+            holder.txtOverallScore.setVisibility(View.GONE);
+        } else {
             holder.imgType.setImageResource(R.drawable.machine);
+
+            new AsyncTask<Void, Void, Boolean>() {
+                private double averagePointCountFront = 0;
+                private int pointCloudCountFront = 0;
+
+                private double averagePointCountSide = 0;
+                private int pointCloudCountSide = 0;
+
+                private double averagePointCountBack = 0;
+                private int pointCloudCountBack = 0;
+
+                @Override
+                protected Boolean doInBackground(Void... voids) {
+                    averagePointCountFront = artifactResultRepository.getAveragePointCountForFront(measure.getId());
+                    pointCloudCountFront = artifactResultRepository.getPointCloudCountForFront(measure.getId());
+
+                    averagePointCountSide = artifactResultRepository.getAveragePointCountForSide(measure.getId());
+                    pointCloudCountSide = artifactResultRepository.getPointCloudCountForSide(measure.getId());
+
+                    averagePointCountBack = artifactResultRepository.getAveragePointCountForBack(measure.getId());
+                    pointCloudCountBack = artifactResultRepository.getPointCloudCountForBack(measure.getId());
+
+                    return true;
+                }
+
+                @SuppressLint("DefaultLocale")
+                public void onPostExecute(Boolean result) {
+                    double lightScoreFront = (Math.abs(averagePointCountFront / 38000 - 1.0) * 3);
+                    double durationScoreFront = Math.abs(1- Math.abs((double) pointCloudCountFront / 8 - 1));
+                    if (lightScoreFront > 1) lightScoreFront -= 1;
+                    if (durationScoreFront > 1) durationScoreFront -= 1;
+
+                    double lightScoreSide = (Math.abs(averagePointCountSide / 38000 - 1.0) * 3);
+                    double durationScoreSide = Math.abs(1- Math.abs((double) pointCloudCountSide / 24 - 1));
+                    if (lightScoreSide > 1) lightScoreSide -= 1;
+                    if (durationScoreSide > 1) durationScoreSide -= 1;
+
+                    double lightScoreBack = (Math.abs(averagePointCountBack / 38000 - 1.0) * 3);
+                    double durationScoreBack = Math.abs(1- Math.abs((double) pointCloudCountBack / 8 - 1));
+                    if (lightScoreBack > 1) lightScoreBack -= 1;
+                    if (durationScoreBack > 1) durationScoreBack -=  1;
+
+                    Log.e("front-light : ", String.valueOf(lightScoreFront));
+                    Log.e("side-light : ", String.valueOf(lightScoreSide));
+                    Log.e("back-light : ", String.valueOf(lightScoreBack));
+
+                    Log.e("front-duration : ", String.valueOf(durationScoreFront));
+                    Log.e("side-duration : ", String.valueOf(durationScoreSide));
+                    Log.e("back-duration : ", String.valueOf(durationScoreBack));
+
+                    double scoreFront = lightScoreFront * durationScoreFront;
+                    double scoreSide = lightScoreSide * durationScoreSide;
+                    double scoreBack = lightScoreBack * durationScoreBack;
+
+                    double overallScore = 0;
+                    if (scoreFront > overallScore) overallScore = scoreFront;
+                    if (scoreSide > overallScore) overallScore = scoreSide;
+                    if (scoreBack > overallScore) overallScore = scoreBack;
+
+                    holder.txtOverallScore.setVisibility(View.VISIBLE);
+                    holder.txtOverallScore.setText(String.format("%d%%", Math.round(overallScore * 100)));
+
+                    if (overallScore < 0.5) holder.txtOverallScore.setBackgroundTintList(context.getColorStateList(R.color.colorRed));
+                    else if (overallScore < 0.7) holder.txtOverallScore.setBackgroundTintList(context.getColorStateList(R.color.colorYellow));
+                    else holder.txtOverallScore.setBackgroundTintList(context.getColorStateList(R.color.colorPrimary));
+
+                    if (feedbackListener != null) holder.bindScanFeedbackListener(measureList.get(holder.getAdapterPosition()), overallScore);
+                }
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+            /*
+            holder.txtOverallScore.setVisibility(View.VISIBLE);
+            if (feedbackListener != null) holder.bindScanFeedbackListener(measureList.get(position));
+             */
+        }
 
         if (measure.isOedema()) {
             holder.rytItem.setBackgroundResource(R.color.colorPink);
@@ -111,7 +206,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         }
 
         if (listener != null) {
-            holder.bindSelectListener(measureList.get(position));
+            holder.bindSelectListener(measureList.get(holder.getAdapterPosition()));
         }
     }
 
@@ -158,15 +253,16 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public RelativeLayout rytItem;
+        RelativeLayout rytItem;
 
-        public ImageView imgType;
+        ImageView imgType;
 
-        public TextView txtDate;
-        public TextView txtAuthor;
-        public TextView txtHeight;
-        public TextView txtWeight;
-        public TextView txtArm;
+        TextView txtDate;
+        TextView txtAuthor;
+        TextView txtHeight;
+        TextView txtWeight;
+        TextView txtArm;
+        TextView txtOverallScore;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -178,10 +274,15 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             txtHeight = itemView.findViewById(R.id.txtHeight);
             txtWeight = itemView.findViewById(R.id.txtWeight);
             txtArm = itemView.findViewById(R.id.txtArm);
+            txtOverallScore = itemView.findViewById(R.id.txtOverallScore);
         }
 
         public void bindSelectListener(Measure measure) {
             rytItem.setOnClickListener(v -> listener.onMeasureSelect(measure));
+        }
+
+        public void bindScanFeedbackListener(Measure measure, double overallScore) {
+            txtOverallScore.setOnClickListener(v -> feedbackListener.onMeasureFeedback(measure, overallScore));
         }
     }
 }

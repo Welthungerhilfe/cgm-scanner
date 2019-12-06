@@ -36,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 //import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 
@@ -51,6 +52,7 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerMeasureAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.FeedbackDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualDetailDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -59,7 +61,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.ui.views.SwipeView;
 
-public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.OnManualMeasureListener, RecyclerMeasureAdapter.OnMeasureSelectListener {
+public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.OnManualMeasureListener, RecyclerMeasureAdapter.OnMeasureSelectListener, RecyclerMeasureAdapter.OnMeasureFeedbackListener {
     private Context context;
 
     private SessionManager session;
@@ -72,6 +74,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
     private ManualMeasureDialog measureDialog;
     private ManualDetailDialog detailDialog;
+    private FeedbackDialog feedbackDialog;
 
     private CreateDataViewModel viewModel;
 
@@ -121,6 +124,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
         adapterMeasure = new RecyclerMeasureAdapter(context);
         adapterMeasure.setMeasureSelectListener(this);
+        adapterMeasure.setMeasureFeedbackListener(this);
 
         recyclerMeasure = view.findViewById(R.id.recyclerMeasure);
         recyclerMeasure.setAdapter(adapterMeasure);
@@ -257,5 +261,14 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             detailDialog = new ManualDetailDialog(context);
         detailDialog.setMeasure(measure);
         detailDialog.show();
+    }
+
+    @Override
+    public void onMeasureFeedback(Measure measure, double overallScore) {
+        if (feedbackDialog == null)
+            feedbackDialog = new FeedbackDialog(context);
+
+        feedbackDialog.setMeasure(measure);
+        feedbackDialog.show();
     }
 }
