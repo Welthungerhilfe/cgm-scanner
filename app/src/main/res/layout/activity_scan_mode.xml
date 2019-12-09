@@ -550,14 +550,6 @@
                 android:layout_marginTop="-10dp"
                 android:progress="0"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:layout_centerHorizontal="true"
-                android:text="@string/capture_inside"
-                android:textColor="@color/colorWhite"/>
-
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
