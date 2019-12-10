@@ -21,6 +21,7 @@ package de.welthungerhilfe.cgm.scanner.utils;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.net.ConnectivityManager;
@@ -234,5 +235,31 @@ public class Utils {
         }
 
         return bytes;
+    }
+
+    public static float interpolate(final float a, final float b, final float proportion) {
+        return (a + ((b - a) * proportion));
+    }
+
+    public static int interpolateColor(final int a, final int b, final float proportion) {
+        final float[] hsva = new float[3];
+        final float[] hsvb = new float[3];
+        Color.colorToHSV(a, hsva);
+        Color.colorToHSV(b, hsvb);
+        for (int i = 0; i < 3; i++) {
+            hsvb[i] = interpolate(hsva[i], hsvb[i], proportion);
+        }
+
+        return Color.HSVToColor(hsvb);
+    }
+
+    public static int getColorWithAlpha(int color, float ratio) {
+        int newColor = 0;
+        int alpha = Math.round(Color.alpha(color) * ratio);
+        int r = Color.red(color);
+        int g = Color.green(color);
+        int b = Color.blue(color);
+        newColor = Color.argb(alpha, r, g, b);
+        return newColor;
     }
 }

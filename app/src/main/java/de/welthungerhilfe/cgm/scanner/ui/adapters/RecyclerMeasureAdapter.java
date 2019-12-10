@@ -21,6 +21,8 @@ package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -187,9 +189,28 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                     holder.txtOverallScore.setVisibility(View.VISIBLE);
                     holder.txtOverallScore.setText(String.format("%d%%", Math.round(overallScore * 100)));
 
+                    int darkGreen = context.getResources().getColor(R.color.colorGreenMedium, context.getTheme());
+
+                    int color = Utils.getColorWithAlpha(darkGreen, (float) overallScore);
+
+                    int[][] states = new int[][] {
+                            new int[] { android.R.attr.state_enabled}, // enabled
+                            new int[] {-android.R.attr.state_enabled}, // disabled
+                            new int[] {-android.R.attr.state_checked}, // unchecked
+                            new int[] { android.R.attr.state_pressed}  // pressed
+                    };
+
+                    int[] colors = new int[] {color, color, color, color};
+
+                    ColorStateList stateList = new ColorStateList(states, colors);
+
+                    holder.txtOverallScore.setBackgroundTintList(stateList);
+
+                    /*
                     if (overallScore < 0.5) holder.txtOverallScore.setBackgroundTintList(context.getColorStateList(R.color.colorRed));
                     else if (overallScore < 0.7) holder.txtOverallScore.setBackgroundTintList(context.getColorStateList(R.color.colorYellow));
-                    else holder.txtOverallScore.setBackgroundTintList(context.getColorStateList(R.color.colorPrimary));
+                    else holder.txtOverallScore.setBackgroundTintList(context.getColorStateList(R.color.colorPrimary))
+                     */
 
                     if (feedbackListener != null) holder.bindScanFeedbackListener(measureList.get(holder.getAdapterPosition()), overallScore);
                 }
