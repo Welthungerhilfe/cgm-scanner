@@ -401,9 +401,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         mIsRecording = false;
         mPointCloudAvailable = false;
 
-        mNowTime = System.currentTimeMillis();
-        mNowTimeString = String.valueOf(mNowTime);
-
         mTango = new Tango(this, () -> {
             // Synchronize against disconnecting while the service is being used in
             // the OpenGL thread or in the UI thread.
@@ -443,6 +440,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             Toast.makeText(this, "Person was not defined", Toast.LENGTH_LONG).show();
             finish();
         }
+
+        mNowTime = System.currentTimeMillis();
+        mNowTimeString = String.valueOf(mNowTime);
 
         age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
 
