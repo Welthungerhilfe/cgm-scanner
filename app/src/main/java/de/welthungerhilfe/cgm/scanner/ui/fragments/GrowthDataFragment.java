@@ -74,6 +74,7 @@ public class GrowthDataFragment extends Fragment {
     private TextView txtXAxis;
 
     private TextView txtLabel;
+    private TextView txtZScore;
 
     private int chartType = 0;
 
@@ -124,6 +125,7 @@ public class GrowthDataFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_growth, container, false);
 
         txtLabel = view.findViewById(R.id.txtLabel);
+        txtZScore = view.findViewById(R.id.txtZScore);
         txtYAxis = view.findViewById(R.id.txtYAxis);
         txtXAxis = view.findViewById(R.id.txtXAxis);
 
@@ -183,6 +185,7 @@ public class GrowthDataFragment extends Fragment {
         //setData();
     }
 
+    @SuppressLint("DefaultLocale")
     public void setData() {
         if (person == null || measures == null)
             return;
@@ -308,6 +311,7 @@ public class GrowthDataFragment extends Fragment {
         }
 
         Log.e("Z Score", String.valueOf(zScore));
+        txtZScore.setText(String.format("( z-score : %.2f )", zScore));
 
         if (zScore <= -3) { // SAM
             switch (chartType) {
