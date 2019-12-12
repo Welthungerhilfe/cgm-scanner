@@ -33,6 +33,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -422,6 +423,8 @@ public class GrowthDataFragment extends Fragment {
                 entries.add(new Entry(x, y));
             } catch (NullPointerException ex) {
                 ex.printStackTrace();
+
+                Toast.makeText(getContext(), "Child needs to be older than 3 month to compare arm circumference", Toast.LENGTH_LONG).show();
             }
         }
 
