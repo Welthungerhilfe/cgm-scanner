@@ -13,14 +13,16 @@ import de.welthungerhilfe.cgm.scanner.datasource.dao.ArtifactResultDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.DeviceDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.FileLogDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.MeasureDao;
+import de.welthungerhilfe.cgm.scanner.datasource.dao.MeasureResultDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.PersonDao;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 
-@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class, Device.class}, version = 4)
+@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class, MeasureResult.class, Device.class}, version = 5)
 public abstract class CgmDatabase extends RoomDatabase {
     private static final Object sLock = new Object();
 
@@ -31,8 +33,9 @@ public abstract class CgmDatabase extends RoomDatabase {
     public abstract FileLogDao fileLogDao();
     public abstract DeviceDao deviceDao();
     public abstract ArtifactResultDao artifactResultDao();
+    public abstract MeasureResultDao measureResultDao();
 
-    public static final int version = 4;
+    public static final int version = 5;
 
     private static final String DATABASE = "offline_db";
 
@@ -42,6 +45,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final String TABLE_FILE_LOG = "file_logs";
     public static final String TABLE_DEVICE = "devices";
     public static final String TABLE_ARTIFACT_RESULT="artifact_result";
+    public static final String TABLE_MEASURE_RESULT="measure_result";
 
     public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
@@ -78,6 +82,16 @@ public abstract class CgmDatabase extends RoomDatabase {
             database.execSQL("ALTER TABLE `file_logs` ADD COLUMN `measureId` TEXT;");
         }
     };
+
+    /*
+    public static final Migration MIGRATION_4_5 = new Migration(4, 5) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+
+        }
+    };
+
+     */
 
     public static CgmDatabase getInstance(Context context) {
         synchronized (sLock) {

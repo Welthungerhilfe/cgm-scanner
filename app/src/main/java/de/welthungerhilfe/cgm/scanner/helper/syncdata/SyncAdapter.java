@@ -13,6 +13,7 @@ import android.content.SyncResult;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import com.google.common.collect.Iterables;
 import com.google.firebase.perf.metrics.AddTrace;
 
 import com.google.gson.Gson;
@@ -29,10 +30,12 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
@@ -52,11 +55,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     private CloudQueue measureQueue;
     private CloudQueue artifactQueue;
     private CloudQueue deviceQueue;
+    private CloudQueue measureResultQueue;
 
     private PersonRepository personRepository;
     private MeasureRepository measureRepository;
     private FileLogRepository fileLogRepository;
     private DeviceRepository deviceRepository;
+    private MeasureResultRepository measureResultRepository;
 
     private SessionManager session;
 
@@ -72,6 +77,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
         measureRepository = MeasureRepository.getInstance(context);
         fileLogRepository = FileLogRepository.getInstance(context);
         deviceRepository = DeviceRepository.getInstance(context);
+        measureResultRepository = MeasureResultRepository.getInstance(context);
 
         session = new SessionManager(context);
     }
@@ -89,12 +95,46 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
     @SuppressLint("StaticFieldLeak")
     private void startSyncing() {
+        /*
         prevTimestamp = session.getSyncTimestamp();
 
         personRepository.getSyncablePerson(this, prevTimestamp);
         measureRepository.getSyncableMeasure(this, prevTimestamp);
         fileLogRepository.getSyncableLog(this, prevTimestamp);
         deviceRepository.getSyncablePerson(this, prevTimestamp);
+         */
+
+        try {
+            if (measureResultQueue.exists()) {
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        Iterable<CloudQueueMessage> retrievedMessages;
+
+                        try {
+                            retrievedMessages = measureResultQueue.retrieveMessages(30);
+
+                            Gson gson = new Gson();
+
+                            if (retrievedMessages.iterator().hasNext()) {
+                                CloudQueueMessage message = retrievedMessages.iterator().next();
+
+                                String content = message.getMessageContentAsString();
+                                MeasureResult result = gson.fromJson(content, MeasureResult.class);
+
+                                measureResultRepository.insertMeasureResult(result);
+                            }
+                        } catch (StorageException e) {
+                            e.printStackTrace();
+                        }
+
+                        return null;
+                    }
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
+        } catch (StorageException e) {
+            e.printStackTrace();
+        }
     }
 
     @AddTrace(name = "syncImmediately", enabled = true)
@@ -194,6 +234,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
                 deviceQueue = queueClient.getQueueReference("device");
                 deviceQueue.createIfNotExists();
+
+                // measureResultQueue = queueClient.getQueueReference(Utils.getAndroidID(getContext().getContentResolver()) + "-measure-result");
+                measureResultQueue = queueClient.getQueueReference("bbd1783abcb8d42f-measure-result");
 
                 return true;
             } catch (StorageException | URISyntaxException | InvalidKeyException e) {
