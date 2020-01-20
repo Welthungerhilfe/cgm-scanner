@@ -83,21 +83,18 @@ public abstract class CgmDatabase extends RoomDatabase {
         }
     };
 
-    /*
     public static final Migration MIGRATION_4_5 = new Migration(4, 5) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-
+            database.execSQL("CREATE TABLE IF NOT EXISTS `measure_result` (`measure_id` TEXT PRIMARY KEY NOT NULL, `model_id` TEXT, `key` TEXT, `confidence_value` REAL NOT NULL, `float_value` REAL NOT NULL, `json_value` TEXT)");
         }
     };
-
-     */
 
     public static CgmDatabase getInstance(Context context) {
         synchronized (sLock) {
             if (instance == null) {
                 instance = Room.databaseBuilder(context.getApplicationContext(), CgmDatabase.class, DATABASE)
-                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                         .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
                         .build();
             }

@@ -92,4 +92,8 @@ public class MeasureRepository {
     public long getTotalMeasureCount() {
         return database.measureDao().getTotalMeasureCount();
     }
+
+    public void updateHeight(String measure_id, float float_value) {
+        database.measureDao().updateHeight(measure_id, float_value);
+    }
 }

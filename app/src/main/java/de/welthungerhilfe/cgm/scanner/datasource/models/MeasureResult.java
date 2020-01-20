@@ -2,13 +2,14 @@ package de.welthungerhilfe.cgm.scanner.datasource.models;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
 
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_MEASURE_RESULT;
 
 @Entity(tableName = TABLE_MEASURE_RESULT)
 public class MeasureResult {
-    @PrimaryKey(autoGenerate = true)
-    private int id;
+    @PrimaryKey
+    @NonNull
     private String measure_id;
     private String model_id;
     private String key;
@@ -16,19 +17,11 @@ public class MeasureResult {
     private float float_value;
     private String json_value;
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public String getMeasure_id() {
         return measure_id;
     }
 
-    public void setMeasure_id(String measure_id) {
+    public void setMeasure_id(@NonNull String measure_id) {
         this.measure_id = measure_id;
     }
 

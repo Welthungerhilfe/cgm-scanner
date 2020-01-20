@@ -12,11 +12,15 @@ import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.common.collect.Iterables;
 import com.google.firebase.perf.metrics.AddTrace;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.microsoft.azure.storage.*;
 import com.microsoft.azure.storage.queue.*;
 
@@ -24,11 +28,13 @@ import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.datasource.models.MLResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -95,46 +101,52 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
     @SuppressLint("StaticFieldLeak")
     private void startSyncing() {
-        /*
         prevTimestamp = session.getSyncTimestamp();
 
         personRepository.getSyncablePerson(this, prevTimestamp);
         measureRepository.getSyncableMeasure(this, prevTimestamp);
         fileLogRepository.getSyncableLog(this, prevTimestamp);
         deviceRepository.getSyncablePerson(this, prevTimestamp);
-         */
 
-        try {
-            if (measureResultQueue.exists()) {
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... voids) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    if (measureResultQueue.exists()) {
                         Iterable<CloudQueueMessage> retrievedMessages;
 
                         try {
+                            measureResultQueue.setShouldEncodeMessage(false);
                             retrievedMessages = measureResultQueue.retrieveMessages(30);
-
                             Gson gson = new Gson();
 
-                            if (retrievedMessages.iterator().hasNext()) {
+                            while (retrievedMessages.iterator().hasNext()) {
                                 CloudQueueMessage message = retrievedMessages.iterator().next();
 
-                                String content = message.getMessageContentAsString();
-                                MeasureResult result = gson.fromJson(content, MeasureResult.class);
+                                MeasureResult result = gson.fromJson(message.getMessageContentAsString(), MeasureResult.class);
 
-                                measureResultRepository.insertMeasureResult(result);
+                                MeasureResult dbValue = measureResultRepository.getMeasureResultById(result.getMeasure_id());
+                                if (dbValue == null || result.getConfidence_value() > dbValue.getConfidence_value()) {
+                                    measureResultRepository.insertMeasureResult(result);
+
+                                    if (result.getKey().contains("height")) {
+                                        measureRepository.updateHeight(result.getMeasure_id(), result.getFloat_value());
+                                    }
+                                }
+                                measureResultQueue.deleteMessage(message);
                             }
                         } catch (StorageException e) {
                             e.printStackTrace();
-                        }
 
-                        return null;
+                        }
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                } catch (StorageException e) {
+                    e.printStackTrace();
+                }
+
+                return null;
             }
-        } catch (StorageException e) {
-            e.printStackTrace();
-        }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @AddTrace(name = "syncImmediately", enabled = true)
@@ -223,6 +235,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
                 CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
                 CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
 
+                measureResultQueue = queueClient.getQueueReference(Utils.getAndroidID(getContext().getContentResolver()) + "-measure-result");
+
                 personQueue = queueClient.getQueueReference("person");
                 personQueue.createIfNotExists();
 
@@ -234,9 +248,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
                 deviceQueue = queueClient.getQueueReference("device");
                 deviceQueue.createIfNotExists();
-
-                // measureResultQueue = queueClient.getQueueReference(Utils.getAndroidID(getContext().getContentResolver()) + "-measure-result");
-                measureResultQueue = queueClient.getQueueReference("bbd1783abcb8d42f-measure-result");
 
                 return true;
             } catch (StorageException | URISyntaxException | InvalidKeyException e) {
