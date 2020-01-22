@@ -34,4 +34,12 @@ public class MeasureResultRepository {
     public LiveData<List<MeasureResult>> getMeasureResults() {
         return database.measureResultDao().getMeasureResults();
     }
+
+    public float getConfidence(String id, String key) {
+        return database.measureResultDao().getConfidence(id, key);
+    }
+
+    public float getMaxConfidence(String id) {
+        return database.measureResultDao().getMaxConfidence(id);
+    }
 }

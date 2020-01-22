@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import de.welthungerhilfe.cgm.scanner.R;
@@ -19,6 +20,8 @@ public class PrecisionView extends View {
     private int mWidth, mHeight = -1;
     private int mCenterRadius = 60;
     private int mCircleCount = 0;
+
+    private ArrayList<Float> dots = new ArrayList<>();
 
     public PrecisionView(Context context) {
         super(context);
@@ -56,7 +59,7 @@ public class PrecisionView extends View {
         dotPaint.setColor(context.getColor(R.color.colorBlack));
     }
 
-    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int size = Math.min(getMeasuredWidth(), getMeasuredHeight());
         setMeasuredDimension(size, size);
@@ -84,12 +87,17 @@ public class PrecisionView extends View {
             canvas.drawCircle(mWidth / 2, mHeight / 2, mCenterRadius + i * 20, targetCirclePaint);
         }
 
-        Random random = new Random();
-        for (int i = 0; i < 4; i++) {
-            float randomX = random.nextFloat() * mWidth;
-            float randomY = random.nextFloat() * mHeight;
+        for (int i = 0; i < dots.size(); i++) {
+            float randomX = mWidth * dots.get(i);
+            float randomY = mHeight / 2;
 
             canvas.drawCircle(randomX, randomY, 10, dotPaint);
         }
+    }
+
+    public void addDot(float confidence) {
+        dots.add(confidence);
+
+        invalidate();
     }
 }
