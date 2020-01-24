@@ -8,14 +8,22 @@ import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TAB
 
 @Entity(tableName = TABLE_MEASURE_RESULT)
 public class MeasureResult {
-    @PrimaryKey
-    @NonNull
+    @PrimaryKey(autoGenerate = true)
+    private int id;
     private String measure_id;
     private String model_id;
     private String key;
     private float confidence_value;
     private float float_value;
     private String json_value;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getMeasure_id() {
         return measure_id;
