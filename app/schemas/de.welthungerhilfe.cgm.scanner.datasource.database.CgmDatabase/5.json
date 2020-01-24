@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "7a9f71b0d177a7a3e051d79ac66caf5b",
+    "identityHash": "c5d37ef0a49fe91da423216aa58339a8",
     "entities": [
       {
         "tableName": "persons",
@@ -416,13 +416,19 @@
       },
       {
         "tableName": "measure_result",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`measure_id` TEXT NOT NULL, `model_id` TEXT, `key` TEXT, `confidence_value` REAL NOT NULL, `float_value` REAL NOT NULL, `json_value` TEXT, PRIMARY KEY(`measure_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `measure_id` TEXT, `model_id` TEXT, `key` TEXT, `confidence_value` REAL NOT NULL, `float_value` REAL NOT NULL, `json_value` TEXT)",
         "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "measure_id",
             "columnName": "measure_id",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "model_id",
@@ -457,9 +463,9 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "measure_id"
+            "id"
           ],
-          "autoGenerate": false
+          "autoGenerate": true
         },
         "indices": [],
         "foreignKeys": []
@@ -577,7 +583,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"7a9f71b0d177a7a3e051d79ac66caf5b\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"c5d37ef0a49fe91da423216aa58339a8\")"
     ]
   }
 }
