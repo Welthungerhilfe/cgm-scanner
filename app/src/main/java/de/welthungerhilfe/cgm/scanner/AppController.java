@@ -24,17 +24,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.StrictMode;
-import android.util.Log;
-
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.microsoft.appcenter.crashes.Crashes;
 
 import java.io.File;
 
 import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
-import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_KEY;
@@ -45,31 +39,12 @@ public class AppController extends Application {
 
     private static AppController mInstance;
 
-    public FirebaseAuth firebaseAuth;
-    public FirebaseUser firebaseUser;
-
     @Override
     public void onCreate() {
         super.onCreate();
 
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
         Utils.overrideFont(getApplicationContext(), "SERIF", "roboto.ttf");
-
-        firebaseAuth = FirebaseAuth.getInstance();
-        firebaseUser = firebaseAuth.getCurrentUser();
-
-        /*
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-
-        Intent intent = new Intent(this, HealthInfoService.class);
-        PendingIntent alarmIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
-
-        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent);
-        */
 
         mInstance = this;
     }
@@ -89,10 +64,6 @@ public class AppController extends Application {
 
     public static synchronized AppController getInstance() {
         return mInstance;
-    }
-
-    public void prepareFirebaseUser() {
-        firebaseUser = firebaseAuth.getCurrentUser();
     }
 
     public String getPersonId() {

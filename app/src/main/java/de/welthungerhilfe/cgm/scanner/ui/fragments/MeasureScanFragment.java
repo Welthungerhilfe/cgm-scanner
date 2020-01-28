@@ -28,13 +28,10 @@ import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
-import com.google.firebase.perf.metrics.AddTrace;
 import com.projecttango.tangosupport.TangoSupport;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -45,6 +42,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.helper.tango.CameraSurfaceRenderer;
@@ -73,6 +71,8 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
     private Tango mTango;
     private TangoConfig mConfig;
     private boolean mIsConnected = false;
+
+    private SessionManager session;
 
     private int mDisplayRotation = Surface.ROTATION_0;
 
@@ -137,6 +137,8 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
 
         repository = FileLogRepository.getInstance(context);
         artifactResultRepository=ArtifactResultRepository.getInstance(context);
+
+        session = new SessionManager(context);
 
         age = (System.currentTimeMillis() - ((ScanModeActivity) getActivity()).person.getBirthday()) / 1000 / 60 / 60 / 24;
 
@@ -481,7 +483,6 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
             }
 
             @Override
-            @AddTrace(name = "onPointCloudAvailable", enabled = true)
             public void onPointCloudAvailable(final TangoPointCloudData pointCloudData) {
 
                 Log.d(TAG, "recording:"+mIsRecording);
@@ -519,7 +520,6 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                 // TODO refactor to top-level class or make static?
                 Runnable thread = new Runnable() {
                     @Override
-                    @AddTrace(name = "pcRunnable", enabled = true)
                     public void run() {
                         try {
                             mutex_on_mIsRecording.acquire();
@@ -548,7 +548,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setDeleted(false);
                             log.setQrCode(mQrCode);
                             log.setCreateDate(mNowTime);
-                            log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                            log.setCreatedBy(session.getUserEmail());
                             log.setAge(age);
 
                             repository.insertFileLog(log);
@@ -643,7 +643,7 @@ public class MeasureScanFragment extends Fragment implements View.OnClickListene
                             log.setDeleted(false);
                             log.setQrCode(mQrCode);
                             log.setCreateDate(mNowTime);
-                            log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                            log.setCreatedBy(session.getUserEmail());
                             log.setAge(age);
                             // Todo;
                             //new OfflineTask().saveFileLog(log);

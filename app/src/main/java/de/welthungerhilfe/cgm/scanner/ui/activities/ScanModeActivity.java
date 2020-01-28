@@ -69,6 +69,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
 import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
 import de.welthungerhilfe.cgm.scanner.helper.tango.CameraSurfaceRenderer;
@@ -279,7 +280,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     @OnClick(R.id.btnScanComplete)
     void completeScan() {
-        measure.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+        measure.setCreatedBy(session.getUserEmail());
         measure.setDate(Utils.getUniversalTimestamp());
         measure.setType("v1.1.2");
         measure.setAge(age);
@@ -325,6 +326,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private MeasureRepository measureRepository;
     private FileLogRepository fileLogRepository;
     private ArtifactResultRepository artifactResultRepository;
+
+    private SessionManager session;
 
     private Tango mTango;
     private TangoConfig mConfig;
@@ -450,7 +453,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             measure = new Measure();
             measure.setId(AppController.getInstance().getMeasureId());
             measure.setQrCode(person.getQrcode());
-            measure.setCreatedBy(AppController.getInstance().firebaseUser.getEmail());
+            measure.setCreatedBy(session.getUserEmail());
             measure.setAge(age);
             measure.setDate(System.currentTimeMillis());
         }
@@ -741,7 +744,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setDeleted(false);
                         log.setQrCode(person.getQrcode());
                         log.setCreateDate(mNowTime);
-                        log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                        log.setCreatedBy(session.getUserEmail());
                         log.setAge(age);
                         log.setSchema_version(CgmDatabase.version);
                         log.setMeasureId(measure.getId());
@@ -831,7 +834,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setDeleted(false);
                 log.setQrCode(person.getQrcode());
                 log.setCreateDate(mNowTime);
-                log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                log.setCreatedBy(session.getUserEmail());
                 log.setAge(age);
                 log.setSchema_version(CgmDatabase.version);
                 log.setMeasureId(measure.getId());

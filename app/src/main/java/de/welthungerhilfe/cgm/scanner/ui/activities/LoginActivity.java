@@ -25,13 +25,24 @@ import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.microsoft.appcenter.auth.Auth;
+import com.microsoft.appcenter.auth.SignInResult;
+import com.microsoft.appcenter.utils.async.AppCenterConsumer;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
+
+import net.minidev.json.JSONArray;
+
+import java.text.ParseException;
 import java.util.Date;
+import java.util.Map;
 
 import butterknife.BindString;
 import butterknife.BindView;
@@ -57,8 +68,8 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     @BindString(R.string.validate_password)
     String strPasswordValidation;
 
-    @OnClick(R.id.btnOK)
-    void doSignIn(TextView btnOK) {
+    @OnClick({R.id.btnOK, R.id.btnLoginMicrosoft})
+    void doSignIn() {
         doSignInAction();
     }
 
@@ -100,7 +111,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             session.saveRemoteConfig(new RemoteConfig());
         }
 
-        if (AppController.getInstance().firebaseUser != null && session.isSigned()) {
+        if (session.isSigned()) {
             Account[] accounts = accountManager.getAccountsByType(AppConstants.ACCOUNT_TYPE);
             if (accounts.length > 0) {
                 if(!ContentResolver.isSyncActive(accounts[0], getString(R.string.sync_authority))) {
@@ -110,19 +121,32 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             } else {
                 session.setSyncTimestamp(0);
 
-                final Account account = new Account(AppController.getInstance().firebaseUser.getEmail(), AppConstants.ACCOUNT_TYPE);
+                try {
+                    JWT parsedToken = JWTParser.parse(session.getAuthToken());
+                    Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
 
-                accountManager.addAccountExplicitly(account, "welthungerhilfe", null);
+                    JSONArray emails = (JSONArray) claims.get("emails");
+                    if (emails != null && !emails.isEmpty()) {
+                        String token = (String) claims.get("at_hash");
+                        String firstEmail = emails.get(0).toString();
 
-                SyncAdapter.startPeriodicSync(account, getApplicationContext());
+                        final Account account = new Account(firstEmail, AppConstants.ACCOUNT_TYPE);
 
-                final Intent intent = new Intent();
-                intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, AppController.getInstance().firebaseUser.getEmail());
-                intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
-                intent.putExtra(AccountManager.KEY_AUTHTOKEN, "welthungerhilfe");
+                        accountManager.addAccountExplicitly(account, token, null);
 
-                setAccountAuthenticatorResult(intent.getExtras());
-                setResult(RESULT_OK, intent);
+                        SyncAdapter.startPeriodicSync(account, getApplicationContext());
+
+                        final Intent intent = new Intent();
+                        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, firstEmail);
+                        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
+                        intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
+
+                        setAccountAuthenticatorResult(intent.getExtras());
+                        setResult(RESULT_OK, intent);
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
 
             if (session.getTutorial())
@@ -157,46 +181,65 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     }
 
     private void doSignInAction() {
-        if (!Utils.isNetworkConnectionAvailable(LoginActivity.this)) {
-            Toast.makeText(LoginActivity.this, R.string.error_network, Toast.LENGTH_LONG).show();
-        } else if (validate()) {
-            String email = editUser.getText().toString();
-            String password = editPassword.getText().toString();
-            // todo: Crashlytics.setUserIdentifier(email);
+        Auth.signIn().thenAccept(signInResult -> {
 
-            AppController.getInstance().firebaseAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this, task -> {
-                        if (task.isSuccessful()) {
-                            final Account account = new Account(email, AppConstants.ACCOUNT_TYPE);
+            if (signInResult.getException() == null) {
 
-                            accountManager.addAccountExplicitly(account, password, null);
+                // Sign-in succeeded if exception is null.
+                // SignInResult is never null, getUserInformation() returns not null when there is no exception.
+                // Both getIdToken() / getAccessToken() return non null values.
+                String idToken = signInResult.getUserInformation().getIdToken();
+                session.setAuthToken(idToken);
 
-                            SyncAdapter.startPeriodicSync(account, getApplicationContext());
+                try {
+                    JWT parsedToken = JWTParser.parse(idToken);
+                    Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
 
-                            final Intent intent = new Intent();
-                            intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, email);
-                            intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
-                            intent.putExtra(AccountManager.KEY_AUTHTOKEN, password);
+                    JSONArray emails = (JSONArray) claims.get("emails");
+                    if (emails != null && !emails.isEmpty()) {
+                        String token = (String) claims.get("at_hash");
+                        String firstEmail = emails.get(0).toString();
 
-                            setAccountAuthenticatorResult(intent.getExtras());
-                            setResult(RESULT_OK, intent);
+                        final Account account = new Account(firstEmail, AppConstants.ACCOUNT_TYPE);
+                        accountManager.addAccountExplicitly(account, token, null);
 
-                            // todo: Crashlytics.setUserIdentifier(email);
-                            // todo: Crashlytics.log(0, "user login: ", String.format("user logged in with email %s at %s", email, Utils.beautifyDateTime(new Date())));
+                        SyncAdapter.startPeriodicSync(account, getApplicationContext());
 
-                            session.saveRemoteConfig(new RemoteConfig());
+                        final Intent intent = new Intent();
+                        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, firstEmail);
+                        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
+                        intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
 
-                            session.setSigned(true);
-                            AppController.getInstance().prepareFirebaseUser();
-                            if (session.getTutorial())
-                                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                            else
-                                startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
-                            finish();
-                        } else {
-                            Toast.makeText(LoginActivity.this, R.string.error_login, Toast.LENGTH_LONG).show();
-                        }
-                    });
-        }
+                        setAccountAuthenticatorResult(intent.getExtras());
+                        setResult(RESULT_OK, intent);
+
+
+                        session.saveRemoteConfig(new RemoteConfig());
+
+                        session.setSigned(true);
+                        session.setUserEmail(firstEmail);
+
+                        if (session.getTutorial())
+                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                        else
+                            startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
+                        finish();
+
+                    } else {
+                        Auth.signOut();
+                        Toast.makeText(LoginActivity.this, "Couldn't get user email, please try again", Toast.LENGTH_LONG).show();
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+
+                    Toast.makeText(LoginActivity.this, "Token Parse Failed.", Toast.LENGTH_LONG).show();
+                }
+            } else {
+                Exception signInFailureException = signInResult.getException();
+                signInFailureException.printStackTrace();
+
+                Toast.makeText(LoginActivity.this, R.string.error_login, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

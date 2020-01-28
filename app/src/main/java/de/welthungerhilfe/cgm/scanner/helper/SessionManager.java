@@ -36,6 +36,8 @@ public class SessionManager {
     private final String PREF_KEY_USER = "pref_key_user";
 
     private final String KEY_USER_SIGNED = "key_user_signed";
+    private final String KEY_USER_EMAIL = "key_user_email";
+    private final String KEY_USER_TOKEN = "key_user_token";
     private final String KEY_USER_LOCATION_LATITUDE = "key_user_location_latitude";
     private final String KEY_USER_LOCATION_LONGITUDE = "key_user_location_longitude";
     private final String KEY_USER_LOCATION_ADDRESS = "key_user_location_address";
@@ -63,6 +65,16 @@ public class SessionManager {
 
     public boolean isSigned() {
         return pref.getBoolean(KEY_USER_SIGNED, false);
+    }
+
+    public void setUserEmail(String email) {
+        editor.putString(KEY_USER_EMAIL, email);
+
+        editor.commit();
+    }
+
+    public String getUserEmail() {
+        return pref.getString(KEY_USER_EMAIL, null);
     }
 
     public void setLanguage(String code) {
@@ -157,5 +169,15 @@ public class SessionManager {
             Gson gson = new Gson();
             return gson.fromJson(jsonStr, RemoteConfig.class);
         }
+    }
+
+    public void setAuthToken(String idToken) {
+        editor.putString(KEY_USER_TOKEN, idToken);
+
+        editor.commit();
+    }
+
+    public String getAuthToken() {
+        return pref.getString(KEY_USER_TOKEN, null);
     }
 }

@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
+import com.microsoft.appcenter.auth.Auth;
 import com.microsoft.appcenter.crashes.AbstractCrashesListener;
 import com.microsoft.appcenter.crashes.Crashes;
 import com.microsoft.appcenter.crashes.CrashesListener;
@@ -21,10 +22,14 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 
 public class SplashActivity extends AppCompatActivity {
     public void onCreate(Bundle saveBundle) {
-        AppCenter.start(getApplication(), "{APP_CENTER_KEY}", Analytics.class, Crashes.class);
-        boolean isEnabled = Crashes.isEnabled().get();
-        if (!isEnabled)
+        AppCenter.start(getApplication(), "{APP_CENTER_KEY}", Analytics.class, Crashes.class, Auth.class);
+        boolean isCrashEnabled = Crashes.isEnabled().get();
+        if (!isCrashEnabled)
             Crashes.setEnabled(true);
+
+        boolean isAuthEnabled = Auth.isEnabled().get();
+        if (!isAuthEnabled)
+            Auth.setEnabled(true);
 
         AbstractCrashesListener customListener = new AbstractCrashesListener() {
             @Override

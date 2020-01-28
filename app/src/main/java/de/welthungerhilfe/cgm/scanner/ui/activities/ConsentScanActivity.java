@@ -80,6 +80,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.AutoFitTextureView;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
@@ -979,7 +980,7 @@ public class ConsentScanActivity extends AppCompatActivity {
                 log.setQrCode(qrCode);
                 log.setDeleted(false);
                 log.setCreateDate(Utils.getUniversalTimestamp());
-                log.setCreatedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
+                log.setCreatedBy(new SessionManager(ConsentScanActivity.this).getUserEmail());
                 log.setSchema_version(CgmDatabase.version);
 
                 fileLogRepository.insertFileLog(log);

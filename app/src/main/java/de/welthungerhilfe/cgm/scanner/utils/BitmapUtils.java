@@ -29,11 +29,9 @@ import android.net.Uri;
 import android.os.Environment;
 
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
-import com.google.firebase.perf.metrics.AddTrace;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -259,8 +257,6 @@ public class BitmapUtils {
         return 0xff000000 | (b<<16) | (g<<8) | r;
     }
 
-
-    @AddTrace(name = "writeImageToFile", enabled = true)
     public static Uri writeImageToFile(TangoImageBuffer currentTangoImageBuffer, File rgbSaveFolder, String currentImgFilename) {
         File currentImg = new File(rgbSaveFolder,currentImgFilename);
 

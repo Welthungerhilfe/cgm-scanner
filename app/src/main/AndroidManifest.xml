@@ -74,6 +74,19 @@
             android:name="firebase_crashlytics_collection_enabled"
             android:value="false" />
 
+        <activity android:name="com.microsoft.identity.client.BrowserTabActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="auth"
+                    android:scheme="msal{APP_CENTER_KEY}" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".ui.activities.BaseActivity" />
 

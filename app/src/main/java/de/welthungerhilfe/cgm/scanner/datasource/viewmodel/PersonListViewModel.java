@@ -13,10 +13,13 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.PersonFilter;
 
 public class PersonListViewModel extends AndroidViewModel {
     private PersonRepository repository;
+
+    private SessionManager session;
 
     private PersonFilter filter;
     private MutableLiveData<PersonFilter> filterLiveData;
@@ -27,6 +30,8 @@ public class PersonListViewModel extends AndroidViewModel {
         super(application);
 
         repository = PersonRepository.getInstance(application);
+
+        session = new SessionManager(application.getApplicationContext());
 
         filter = new PersonFilter();
 
@@ -43,8 +48,7 @@ public class PersonListViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<Person>> getAll() {
-        String createdBy = AppController.getInstance().firebaseUser.getEmail();
-        return repository.getAll(createdBy);
+        return repository.getAll(session.getUserEmail());
     }
 
     public LiveData<List<Person>> getPersonListLiveData() {

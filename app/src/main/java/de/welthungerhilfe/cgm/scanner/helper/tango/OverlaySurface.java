@@ -204,7 +204,7 @@ public class OverlaySurface extends SurfaceView implements SurfaceHolder.Callbac
                 surface.unlockCanvasAndPost(canvas);
             }
         } catch (Exception e) {
-            // todo: Crashlytics.log(0, "user login: ", String.format("drawBabyOverlay on Surface at %s", Utils.beautifyDateTime(new Date())));
+            e.printStackTrace();
         }
     }
 
@@ -245,7 +245,7 @@ public class OverlaySurface extends SurfaceView implements SurfaceHolder.Callbac
                 surface.unlockCanvasAndPost(canvas);
             }
         } catch (Exception e) {
-            // todo: Crashlytics.log(0, "user login: ", String.format("drawBabyOverlay on Surface at %s", Utils.beautifyDateTime(new Date())));
+            e.printStackTrace();
         }
     }
 
@@ -299,7 +299,6 @@ public class OverlaySurface extends SurfaceView implements SurfaceHolder.Callbac
     }
 
     private void drawInfantCloseDownUpOverlay() {
-        //TODO
         Surface surface = holder.getSurface();
         Canvas canvas = surface.lockCanvas(null);
         if (canvas != null) {
@@ -365,7 +364,7 @@ public class OverlaySurface extends SurfaceView implements SurfaceHolder.Callbac
                 surface.unlockCanvasAndPost(canvas);
             }
         } catch (Exception e) {
-            // todo: Crashlytics.log(0, "user login: ", String.format("drawInfantOverlay on Surface at %s", Utils.beautifyDateTime(new Date())));
+            e.printStackTrace();
         }
     }
 
