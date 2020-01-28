@@ -18,17 +18,23 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.HEALTH_INTERVAL;
 
 public class DeviceService extends Service {
     private Timer timer = new Timer();
+    private SessionManager session;
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    public void onCreate() {
+        session = new SessionManager(getBaseContext());
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -37,7 +43,7 @@ public class DeviceService extends Service {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if (AppController.getInstance().firebaseUser == null)
+                if (session.isSigned())
                     return;
 
                 Device device = new Device();
@@ -45,7 +51,7 @@ public class DeviceService extends Service {
                 device.setUuid(Utils.getAndroidID(getContentResolver()));
                 device.setCreate_timestamp(Utils.getUniversalTimestamp());
                 device.setSync_timestamp(Utils.getUniversalTimestamp());
-                device.setCreated_by(AppController.getInstance().firebaseUser.getEmail());
+                device.setCreated_by(session.getUserEmail());
                 device.setSchema_version(CgmDatabase.version);
 
                 try {
