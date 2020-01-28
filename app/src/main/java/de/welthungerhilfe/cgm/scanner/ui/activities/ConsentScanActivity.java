@@ -76,6 +76,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -980,6 +981,7 @@ public class ConsentScanActivity extends AppCompatActivity {
                 log.setDeleted(false);
                 log.setCreateDate(Utils.getUniversalTimestamp());
                 log.setCreatedBy(new SessionManager(ConsentScanActivity.this).getUserEmail());
+                log.setSchema_version(CgmDatabase.version);
 
                 fileLogRepository.insertFileLog(log);
             } catch (IOException e) {

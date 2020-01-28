@@ -44,6 +44,9 @@ public interface MeasureDao {
     @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE personId=:personId AND deleted=0 ORDER BY timestamp DESC Limit 1")
     LiveData<Measure> getLastMeasureLiveData(String personId);
 
+    @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE personId=:personId AND deleted=0 AND type='manual' ORDER BY timestamp DESC Limit 1")
+    LiveData<List<Measure>> getManualMeasuresLiveData(String personId);
+
     @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE personId=:personId AND deleted=0")
     LiveData<List<Measure>> getPersonMeasures(String personId);
 
@@ -51,8 +54,11 @@ public interface MeasureDao {
     void deleteMeasureGarbage(long timestamp);
 
     @Query("SELECT COUNT(id) FROM " + TABLE_MEASURE + " WHERE createdBy=:email")
-    int getOwnMeasureCount(String email);
+    long getOwnMeasureCount(String email);
 
     @Query("SELECT COUNT(id) FROM " + TABLE_MEASURE)
-    int getTotalMeasureCount();
+    long getTotalMeasureCount();
+
+    @Query("UPDATE " + TABLE_MEASURE + " SET height=:float_value WHERE id=:measure_id")
+    void updateHeight(String measure_id, float float_value);
 }

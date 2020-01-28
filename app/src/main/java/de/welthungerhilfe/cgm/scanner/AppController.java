@@ -82,6 +82,10 @@ public class AppController extends Application {
         return String.format("%s_artifact-%s_%s_%s", Utils.getAndroidID(getContentResolver()), type, timestamp, Utils.getSaltString(16));
     }
 
+    public String getDeviceId() {
+        return String.format("%s-device-%s-%s", Utils.getAndroidID(getContentResolver()), Utils.getUniversalTimestamp(), Utils.getSaltString(16));
+    }
+
     public File getRootDirectory() {
         File mExtFileDir;
         String state = Environment.getExternalStorageState();
@@ -92,23 +96,5 @@ public class AppController extends Application {
         }
 
         return mExtFileDir;
-    }
-
-    private boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        if (manager != null) {
-            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-                if (serviceClass.getName().equals(service.service.getClassName())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public void notifyUpload() {
-        if (!isServiceRunning (UploadService.class)) {
-            startService(new Intent(getApplicationContext(), UploadService.class));
-        }
     }
 }

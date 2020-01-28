@@ -17,6 +17,7 @@ import android.opengl.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
@@ -46,6 +47,7 @@ import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
+import com.microsoft.appcenter.crashes.Crashes;
 import com.projecttango.tangosupport.TangoSupport;
 
 import java.io.File;
@@ -61,7 +63,10 @@ import butterknife.OnClick;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
+import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
@@ -142,6 +147,41 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     @BindView(R.id.lytScanner)
     LinearLayout lytScanner;
 
+    @BindView(R.id.imgScanSuccess1)
+    ImageView imgScanSuccess1;
+    @BindView(R.id.imgScanSuccess2)
+    ImageView imgScanSuccess2;
+    @BindView(R.id.imgScanSuccess3)
+    ImageView imgScanSuccess3;
+
+    @BindView(R.id.txtScanStep1)
+    TextView txtScanStep1;
+    @BindView(R.id.txtScanStep2)
+    TextView txtScanStep2;
+    @BindView(R.id.txtScanStep3)
+    TextView txtScanStep3;
+
+    @BindView(R.id.lytScanAgain1)
+    LinearLayout lytScanAgain1;
+    @BindView(R.id.lytScanAgain2)
+    LinearLayout lytScanAgain2;
+    @BindView(R.id.lytScanAgain3)
+    LinearLayout lytScanAgain3;
+
+    @BindView(R.id.btnRetake1)
+    Button btnRetake1;
+    @BindView(R.id.btnRetake2)
+    Button btnRetake2;
+    @BindView(R.id.btnRetake3)
+    Button btnRetake3;
+
+    @BindView(R.id.btnTutorial1)
+    Button btnTutorial1;
+    @BindView(R.id.btnTutorial2)
+    Button btnTutorial2;
+    @BindView(R.id.btnTutorial3)
+    Button btnTutorial3;
+
     @OnClick(R.id.lytScanStanding)
     void scanStanding() {
         SCAN_MODE = SCAN_STANDING;
@@ -171,7 +211,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         changeMode();
     }
     @SuppressLint("SetTextI18n")
-    @OnClick(R.id.btnScanStep1)
+    @OnClick({R.id.btnScanStep1, R.id.btnRetake1})
     void scanStep1() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
@@ -191,7 +231,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
     }
     @SuppressLint("SetTextI18n")
-    @OnClick(R.id.btnScanStep2)
+    @OnClick({R.id.btnScanStep2, R.id.btnRetake2})
     void scanStep2() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
@@ -211,7 +251,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
     }
     @SuppressLint("SetTextI18n")
-    @OnClick(R.id.btnScanStep3)
+    @OnClick({R.id.btnScanStep3, R.id.btnRetake3})
     void scanStep3() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
@@ -230,7 +270,14 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             lytScanner.setVisibility(View.VISIBLE);
         }
     }
-  
+
+    @OnClick({R.id.btnTutorial1, R.id.btnTutorial2, R.id.btnTutorial3})
+    void showTutorial() {
+        Intent intent = new Intent(ScanModeActivity.this, TutorialActivity.class);
+        intent.putExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, true);
+        startActivity(intent);
+    }
+
     @OnClick(R.id.btnScanComplete)
     void completeScan() {
         measure.setCreatedBy(session.getUserEmail());
@@ -246,6 +293,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         measure.setPersonId(person.getId());
         measure.setTimestamp(Utils.getUniversalTimestamp());
         measure.setQrCode(person.getQrcode());
+        measure.setSchema_version(CgmDatabase.version);
 
         progressDialog.show();
 
@@ -277,6 +325,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private MeasureRepository measureRepository;
     private FileLogRepository fileLogRepository;
+    private ArtifactResultRepository artifactResultRepository;
 
     private SessionManager session;
 
@@ -285,7 +334,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private boolean mIsConnected = false;
 
     private GLSurfaceView mCameraSurfaceView;
-    private OverlaySurface mOverlaySurfaceView;
+    //private OverlaySurface mOverlaySurfaceView;
     private CameraSurfaceRenderer mRenderer;
 
     private TextView mTitleView;
@@ -329,6 +378,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private long age = 0;
 
+    private int noOfPoints;
+    private double averageLigtingPenality=0.00;
+
     private int mConnectedTextureIdGlThread = INVALID_TEXTURE_ID;
     private AtomicBoolean mIsFrameAvailableTangoThread = new AtomicBoolean(false);
 
@@ -343,17 +395,14 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         mPointCloudFilename = "";
         mNumberOfFilesWritten = 0;
-        mPosePositionBuffer = new ArrayList<float[]>();
-        mPoseOrientationBuffer = new ArrayList<float[]>();
-        mPoseTimestampBuffer = new ArrayList<Float>();
-        mPointCloudFilenameBuffer = new ArrayList<String>();
+        mPosePositionBuffer = new ArrayList<>();
+        mPoseOrientationBuffer = new ArrayList<>();
+        mPoseTimestampBuffer = new ArrayList<>();
+        mPointCloudFilenameBuffer = new ArrayList<>();
         mNumPoseInSequence = 0;
         mutex_on_mIsRecording = new Semaphore(1,true);
         mIsRecording = false;
         mPointCloudAvailable = false;
-
-        mNowTime = System.currentTimeMillis();
-        mNowTimeString = String.valueOf(mNowTime);
 
         mTango = new Tango(this, () -> {
             // Synchronize against disconnecting while the service is being used in
@@ -369,10 +418,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     setDisplayRotation();
                 } catch (TangoOutOfDateException e) {
                     Log.e(TAG, getString(R.string.exception_out_of_date), e);
+                    Crashes.trackError(e);
                 } catch (TangoErrorException e) {
                     Log.e(TAG, getString(R.string.exception_tango_error), e);
+                    Crashes.trackError(e);
                 } catch (TangoInvalidException e) {
                     Log.e(TAG, getString(R.string.exception_tango_invalid), e);
+                    Crashes.trackError(e);
                 }
                 setUpExtrinsics();
             }
@@ -382,6 +434,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
 
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Crashes.trackError(throwable));
+
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
         measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
 
@@ -390,7 +444,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             finish();
         }
 
-        session = new SessionManager(ScanModeActivity.this);
+        mNowTime = System.currentTimeMillis();
+        mNowTimeString = String.valueOf(mNowTime);
 
         age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
 
@@ -416,10 +471,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         findViewById(R.id.imgClose).setOnClickListener(this);
 
         mCameraSurfaceView = findViewById(R.id.surfaceview);
-        mOverlaySurfaceView = findViewById(R.id.overlaySurfaceView);
+        //mOverlaySurfaceView = findViewById(R.id.overlaySurfaceView);
 
         measureRepository = MeasureRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
+        artifactResultRepository = ArtifactResultRepository.getInstance(this);
 
         setupToolbar();
 
@@ -445,10 +501,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         mCameraSurfaceView.onResume();
         mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
+        /*
         if (SCAN_STEP == SCAN_STANDING_FRONT || SCAN_STEP == SCAN_STANDING_SIDE || SCAN_STEP == SCAN_STANDING_BACK)
             mOverlaySurfaceView.setMode(OverlaySurface.INFANT_CLOSE_DOWN_UP_OVERLAY);
         else if (SCAN_STEP == SCAN_LYING_FRONT || SCAN_STEP == SCAN_LYING_SIDE || SCAN_STEP == SCAN_LYING_BACK)
             mOverlaySurfaceView.setMode(OverlaySurface.BABY_OVERLAY);
+         */
     }
 
     @Override
@@ -471,6 +529,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 mIsConnected = false;
             } catch (TangoErrorException e) {
                 Log.e(TAG, getString(R.string.exception_tango_error), e);
+                Crashes.trackError(e);
             }
         }
     }
@@ -478,6 +537,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onDestroy() {
         super.onDestroy();
+        progressDialog.dismiss();
     }
 
     private void setupToolbar() {
@@ -566,9 +626,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         }
                     }
                 } catch (TangoErrorException e) {
-                    Log.e(TAG, "Tango API call error within the OpenGL thread", e);
-                } catch (Throwable t) {
-                    Log.e(TAG, "Exception on the OpenGL thread", t);
+                    Crashes.trackError(e);
                 }
             }
         });
@@ -588,7 +646,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private void startupTango() {
         // Lock configuration and connect to Tango.
         // Select coordinate frame pair.
-        final ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<TangoCoordinateFramePair>();
+        final ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<>();
         framePairs.add(new TangoCoordinateFramePair(TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE, TangoPoseData.COORDINATE_FRAME_DEVICE));
 
         // Listen for new Tango data.
@@ -626,20 +684,26 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 float[] average = TangoUtils.calculateAveragedDepth(pointCloudData.points, pointCloudData.numPoints);
 
+                /*
                 mOverlaySurfaceView.setNumPoints(pointCloudData.numPoints);
                 mOverlaySurfaceView.setDistance(average[0]);
                 mOverlaySurfaceView.setConfidence(average[1]);
+                 */
 
                 // Get pose transforms for openGL to depth/color cameras.
-                TangoPoseData oglTdepthPose = TangoSupport.getPoseAtTime(
-                        pointCloudData.timestamp,
-                        TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
-                        TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
-                        TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
-                        TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
-                        TangoSupport.ROTATION_IGNORED);
-                if (oglTdepthPose.statusCode != TangoPoseData.POSE_VALID) {
-                    //Log.w(TAG, "Could not get depth camera transform at time " + pointCloudData.timestamp);
+                try {
+                    TangoPoseData oglTdepthPose = TangoSupport.getPoseAtTime(
+                            pointCloudData.timestamp,
+                            TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
+                            TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
+                            TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
+                            TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
+                            TangoSupport.ROTATION_IGNORED);
+                    if (oglTdepthPose.statusCode != TangoPoseData.POSE_VALID) {
+                        //Log.w(TAG, "Could not get depth camera transform at time " + pointCloudData.timestamp);
+                    }
+                } catch (TangoErrorException e) {
+                    Crashes.trackError(e);
                 }
 
                 mCurrentTimeStamp = (float) pointCloudData.timestamp;
@@ -657,9 +721,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         mutex_on_mIsRecording.acquire();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                        Crashes.trackError(e);
                     }
                     // Saving the frame or not, depending on the current mode.
                     if ( mIsRecording ) {
+                        // TODO save files to local storage
                         updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
                         progressBar.setProgress(mProgress);
 
@@ -680,11 +746,29 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setCreateDate(mNowTime);
                         log.setCreatedBy(session.getUserEmail());
                         log.setAge(age);
+                        log.setSchema_version(CgmDatabase.version);
+                        log.setMeasureId(measure.getId());
 
                         fileLogRepository.insertFileLog(log);
 
+                        ArtifactResult ar=new ArtifactResult();
+                        double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
+                        ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
+                        ar.setArtifact_id(AppController.getInstance().getPersonId());
+                        ar.setKey(SCAN_STEP);
+                        ar.setMeasure_id(measure.getId());
+                        ar.setMisc("");
+                        ar.setType("PCD_POINTS_v0.2");
+                        noOfPoints = pointCloudData.numPoints;
+                        ar.setReal(noOfPoints);
+                        artifactResultRepository.insertArtifactResult(ar);
+                        // Todo;
+                        //new OfflineTask().saveFileLog(log);
+                        // Direct Upload to Firebase Storage
                         mNumberOfFilesWritten++;
-                        //mTimeToTakeSnap = false;
+                        double Scan_Duration_Penalty=Math.abs((double)mNumberOfFilesWritten/8-1)*100;
+
+                        Log.d("Prajwal",String.valueOf(mNumberOfFilesWritten));
                     }
                     mutex_on_mIsRecording.release();
                 };
@@ -752,6 +836,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setCreateDate(mNowTime);
                 log.setCreatedBy(session.getUserEmail());
                 log.setAge(age);
+                log.setSchema_version(CgmDatabase.version);
+                log.setMeasureId(measure.getId());
+
                 fileLogRepository.insertFileLog(log);
             };
             thread.run();
@@ -764,7 +851,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         // We also need to update the camera texture UV coordinates. This must be run in the OpenGL
         // thread.
-        mCameraSurfaceView.queueEvent((Runnable) () -> {
+        mCameraSurfaceView.queueEvent(() -> {
             if (mIsConnected) {
                 mRenderer.updateColorCameraTextureUv(mDisplayRotation);
             }
@@ -780,8 +867,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         try {
             device2IMUPose = mTango.getPoseAtTime(0.0, framePair);
         } catch (TangoErrorException e) {
-            Toast.makeText(this, R.string.exception_tango_error, Toast.LENGTH_SHORT).show();
-            // todo: Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in device setup");
+            e.printStackTrace();
+            Crashes.trackError(e);
         }
         /*mRenderer.getModelMatCalculator().SetDevice2IMUMatrix(device2IMUPose.getTranslationAsFloats(),device2IMUPose.getRotationAsFloats());*/
         // Set color camera to imu matrix in Model Matrix Calculator.
@@ -792,8 +879,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         try {
             color2IMUPose = mTango.getPoseAtTime(0.0, framePair);
         } catch (TangoErrorException e) {
-            Toast.makeText(this, R.string.exception_tango_error, Toast.LENGTH_SHORT).show();
-            // todo: Crashlytics.log(Log.ERROR, TAG, "TangoErrorException in camera setup");
+            e.printStackTrace();
+            Crashes.trackError(e);
         }
 
         //mRenderer.getModelMatCalculator().SetColorCamera2IMUMatrix(color2IMUPose.getTranslationAsFloats(), color2IMUPose.getRotationAsFloats());
@@ -859,6 +946,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     public void goToNextStep() {
         closeScan();
 
+        /*
         switch (SCAN_STEP) {
             case SCAN_STANDING_FRONT:
             case SCAN_LYING_FRONT:
@@ -888,12 +976,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 step3 = true;
                 break;
         }
+        */
 
-        if (step1 && step2 && step3) {
-            showCompleteButton();
-        }
-
-        AppController.getInstance().notifyUpload();
+        getScanQuality(measure.getId(),SCAN_STEP);
     }
 
     private void showCompleteButton() {
@@ -961,6 +1046,91 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         lytScanner.setVisibility(View.GONE);
     }
 
+    @SuppressLint("StaticFieldLeak")
+    private void getScanQuality(String measureId, int scanStep) {
+        new AsyncTask<Void, Void, Boolean>() {
+            private double averagePointCount = 0;
+            private int pointCloudCount = 0;
+
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                averagePointCount = artifactResultRepository.getAveragePointCount(measureId, scanStep);
+                pointCloudCount = artifactResultRepository.getPointCloudCount(measureId, scanStep);
+
+                return true;
+            }
+
+            @SuppressLint("DefaultLocale")
+            public void onPostExecute(Boolean results) {
+                double lightScore = (Math.abs(averagePointCount / 38000 - 1.0) * 3);
+
+                double durationScore;
+                if (scanStep % 100 == 1)
+                    durationScore = Math.abs(1- Math.abs((double) pointCloudCount / 24 - 1));
+                else
+                    durationScore = Math.abs(1- Math.abs((double) pointCloudCount / 8 - 1));
+
+                if (lightScore > 1) lightScore -= 1;
+                if (durationScore > 1) durationScore -= 1;
+
+                Log.e("ScanQuality", String.valueOf(lightScore));
+                Log.e("DurationQuality", String.valueOf(durationScore));
+
+                String issues = "Scan Quality :";
+                issues = String.format("%s\n - Light Score : %d%%", issues, Math.round(lightScore * 100));
+                issues = String.format("%s\n - Duration Score : %d%%", issues, Math.round(durationScore * 100));
+
+                if (scanStep == SCAN_STANDING_FRONT || scanStep == SCAN_LYING_FRONT) {
+                    btnScanStep1.setVisibility(View.GONE);
+
+                    if (pointCloudCount < 8) {
+                        issues = String.format("%s\n - Duration was too short", issues);
+                    } else if (pointCloudCount > 9) {
+                        issues = String.format("%s\n - Duration was too long", issues);
+                    }
+
+                    txtScanStep1.setText(issues);
+                    imgScanStep1.setVisibility(View.GONE);
+                    lytScanAgain1.setVisibility(View.VISIBLE);
+
+                    step1 = true;
+                } else if (scanStep == SCAN_STANDING_SIDE || scanStep == SCAN_LYING_SIDE) {
+                    btnScanStep2.setVisibility(View.GONE);
+
+                    if (pointCloudCount < 12) {
+                        issues = String.format("%s\n - Duration was too short", issues);
+                    } else if (pointCloudCount > 27) {
+                        issues = String.format("%s\n - Duration was too long", issues);
+                    }
+
+                    txtScanStep2.setText(issues);
+                    imgScanStep2.setVisibility(View.GONE);
+                    lytScanAgain2.setVisibility(View.VISIBLE);
+
+                    step2 = true;
+                } else if (scanStep == SCAN_STANDING_BACK || scanStep == SCAN_LYING_BACK) {
+                    btnScanStep3.setVisibility(View.GONE);
+
+                    if (pointCloudCount < 8) {
+                        issues = String.format("%s\n - Duration was too short", issues);
+                    } else if (pointCloudCount > 9) {
+                        issues = String.format("%s\n - Duration was too long", issues);
+                    }
+
+                    txtScanStep3.setText(issues);
+                    imgScanStep3.setVisibility(View.GONE);
+                    lytScanAgain3.setVisibility(View.VISIBLE);
+
+                    step3 = true;
+                }
+
+                if (step1 && step2 && step3) {
+                    showCompleteButton();
+                }
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
     private void getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, PERMISSION_LOCATION);
@@ -1009,7 +1179,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PERMISSION_LOCATION && grantResults.length > 0 && grantResults[0] >= 0) {
             getCurrentLocation();
         }

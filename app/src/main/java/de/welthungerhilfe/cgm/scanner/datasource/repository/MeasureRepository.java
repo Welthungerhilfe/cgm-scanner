@@ -55,9 +55,8 @@ public class MeasureRepository {
                 return database.measureDao().getSyncableMeasure(timestamp);
             }
 
-            @Override
-            public void onPostExecute(List<Measure> data) {
-                listener.onMeasuresLoaded(data);
+            public void onPostExecute(List<Measure> measures) {
+                listener.onMeasuresLoaded(measures);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -85,11 +84,20 @@ public class MeasureRepository {
         return database.measureDao().getLastMeasureLiveData(personId);
     }
 
-    public int getOwnMeasureCount() {
+    public long getOwnMeasureCount() {
         return database.measureDao().getOwnMeasureCount(session.getUserEmail());
     }
 
-    public int getTotalMeasureCount() {
+    public LiveData<List<Measure>> getManualMeasuresLiveData(String personId) {
+        return database.measureDao().getManualMeasuresLiveData(personId);
+    }
+
+
+    public long getTotalMeasureCount() {
         return database.measureDao().getTotalMeasureCount();
+    }
+
+    public void updateHeight(String measure_id, float float_value) {
+        database.measureDao().updateHeight(measure_id, float_value);
     }
 }

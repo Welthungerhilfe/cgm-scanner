@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.firebase.firebase-perf'
 
 android {
     compileSdkVersion 28
@@ -7,7 +8,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 28
         versionCode 51
-        versionName "2.3.0-dev"
+        versionName "2.3.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
@@ -84,7 +85,7 @@ dependencies {
     implementation "android.arch.persistence.room:runtime:$rootProject.roomVersion"
     annotationProcessor "android.arch.persistence.room:compiler:$rootProject.roomVersion"
     androidTestImplementation "android.arch.persistence.room:testing:$rootProject.roomVersion"
-    debugImplementation 'com.amitshekhar.android:debug-db:1.0.4'
+    //debugImplementation 'com.amitshekhar.android:debug-db:1.0.4'
     // Paging Library
     implementation 'android.arch.paging:runtime:1.0.1'
     // Lifecycle components

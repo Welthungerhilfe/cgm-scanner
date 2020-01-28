@@ -156,7 +156,7 @@
         <service android:name=".helper.service.AddressService"
             android:exported="false"/>
 
-        <service android:name=".helper.service.HealthInfoService"
+        <service android:name=".helper.service.DeviceService"
             android:exported="false"/>
 
         <service android:name=".helper.authenticator.AuthenticatorService"

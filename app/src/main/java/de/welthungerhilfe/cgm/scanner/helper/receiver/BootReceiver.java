@@ -11,6 +11,6 @@ public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.e("Boot", "BOOT completed, start service");
-        context.startService(new Intent(context, UploadService.class));
+        // context.startService(new Intent(context, UploadService.class));
     }
 }

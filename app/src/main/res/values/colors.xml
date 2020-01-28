@@ -19,4 +19,5 @@
     <color name="text_shadow_white">#FFFFFF</color>
     <color name="colorGreyTransparent">#5FFAFAF9</color>
     <color name="colorRed">#DA5734</color>
+    <color name="colorYellow">#E6C743</color>
 </resources>
