@@ -22,4 +22,10 @@ public interface MeasureResultDao {
 
     @Query("SELECT * FROM " + CgmDatabase.TABLE_MEASURE_RESULT)
     LiveData<List<MeasureResult>> getMeasureResults();
+
+    @Query("SELECT MAX(confidence_value) FROM " + CgmDatabase.TABLE_MEASURE_RESULT + " WHERE measure_id=:id AND `key`=:key")
+    float getConfidence(String id, String key);
+
+    @Query("SELECT MAX(confidence_value) FROM " + CgmDatabase.TABLE_MEASURE_RESULT + " WHERE measure_id=:id")
+    float getMaxConfidence(String id);
 }

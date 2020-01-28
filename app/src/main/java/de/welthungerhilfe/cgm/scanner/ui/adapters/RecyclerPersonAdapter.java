@@ -89,8 +89,8 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
         repository.getPersonLastMeasureLiveData(person.getId()).observe((LifecycleOwner) context, measure -> {
             if (measure != null) {
-                holder.txtWeight.setText(Double.toString(measure.getWeight()));
-                holder.txtHeight.setText(Double.toString(measure.getHeight()));
+                holder.txtWeight.setText(String.format("%.3f", measure.getWeight()));
+                holder.txtHeight.setText(String.format("%.2f", measure.getHeight()));
             } else {
                 holder.txtWeight.setText("0.0");
                 holder.txtHeight.setText("0.0");

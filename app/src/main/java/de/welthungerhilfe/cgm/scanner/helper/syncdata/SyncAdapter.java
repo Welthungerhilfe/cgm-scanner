@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.microsoft.azure.storage.*;
 import com.microsoft.azure.storage.queue.*;
 
@@ -96,17 +97,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
         }
 
         if (personList.size() == 0 && measureList.size() == 0 && fileLogList.size() == 0 && deviceList.size() == 0)
-            new MessageTask().execute();
+            new MessageTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @SuppressLint("StaticFieldLeak")
     private void startSyncing() {
         prevTimestamp = session.getSyncTimestamp();
-
-        personRepository.getSyncablePerson(this, prevTimestamp);
-        measureRepository.getSyncableMeasure(this, prevTimestamp);
-        fileLogRepository.getSyncableLog(this, prevTimestamp);
-        deviceRepository.getSyncablePerson(this, prevTimestamp);
 
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -123,21 +119,27 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
                             while (retrievedMessages.iterator().hasNext()) {
                                 CloudQueueMessage message = retrievedMessages.iterator().next();
 
-                                MeasureResult result = gson.fromJson(message.getMessageContentAsString(), MeasureResult.class);
+                                try {
+                                    MeasureResult result = gson.fromJson(message.getMessageContentAsString(), MeasureResult.class);
 
-                                MeasureResult dbValue = measureResultRepository.getMeasureResultById(result.getMeasure_id());
-                                if (dbValue == null || result.getConfidence_value() > dbValue.getConfidence_value()) {
-                                    measureResultRepository.insertMeasureResult(result);
+                                    float confidence = measureResultRepository.getConfidence(result.getMeasure_id(), result.getKey());
+                                    float maxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id());
 
-                                    if (result.getKey().contains("height")) {
+                                    if (result.getConfidence_value() > confidence) {
+                                        measureResultRepository.insertMeasureResult(result);
+                                    }
+
+                                    if (result.getConfidence_value() > maxConfidence) {
                                         measureRepository.updateHeight(result.getMeasure_id(), result.getFloat_value());
                                     }
+                                } catch (JsonSyntaxException e) {
+                                    e.printStackTrace();
                                 }
+
                                 measureResultQueue.deleteMessage(message);
                             }
                         } catch (StorageException e) {
                             e.printStackTrace();
-
                         }
                     }
                 } catch (StorageException e) {
@@ -147,6 +149,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
                 return null;
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        personRepository.getSyncablePerson(this, prevTimestamp);
+        measureRepository.getSyncableMeasure(this, prevTimestamp);
+        fileLogRepository.getSyncableLog(this, prevTimestamp);
+        deviceRepository.getSyncablePerson(this, prevTimestamp);
     }
 
     @AddTrace(name = "syncImmediately", enabled = true)

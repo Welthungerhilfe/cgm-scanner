@@ -232,9 +232,9 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         holder.txtAuthor.setText(Utils.getNameFromEmail(measure.getCreatedBy()));
 
         if (config.isMeasure_visibility()) {
-            holder.txtHeight.setText(Double.toString(measure.getHeight()) + context.getString(R.string.unit_cm));
-            holder.txtWeight.setText(Double.toString(measure.getWeight()) + context.getString(R.string.unit_kg));
-            holder.txtArm.setText(Double.toString(measure.getMuac()) + context.getString(R.string.unit_cm));
+            holder.txtHeight.setText(String.format("%.2f%s", measure.getHeight(), context.getString(R.string.unit_cm)));
+            holder.txtWeight.setText(String.format("%.3f%s", measure.getWeight(), context.getString(R.string.unit_kg)));
+            holder.txtArm.setText(String.format("%.2f%s", measure.getMuac(), context.getString(R.string.unit_cm)));
         } else {
             holder.txtHeight.setText(R.string.field_concealed);
             holder.txtWeight.setText(R.string.field_concealed);

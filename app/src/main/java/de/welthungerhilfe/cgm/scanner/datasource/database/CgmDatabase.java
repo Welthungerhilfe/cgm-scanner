@@ -86,7 +86,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final Migration MIGRATION_4_5 = new Migration(4, 5) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("CREATE TABLE IF NOT EXISTS `measure_result` (`measure_id` TEXT PRIMARY KEY NOT NULL, `model_id` TEXT, `key` TEXT, `confidence_value` REAL NOT NULL, `float_value` REAL NOT NULL, `json_value` TEXT)");
+            database.execSQL("CREATE TABLE IF NOT EXISTS `measure_result` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `measure_id` TEXT, `model_id` TEXT, `key` TEXT, `confidence_value` REAL NOT NULL, `float_value` REAL NOT NULL, `json_value` TEXT)");
         }
     };
 
