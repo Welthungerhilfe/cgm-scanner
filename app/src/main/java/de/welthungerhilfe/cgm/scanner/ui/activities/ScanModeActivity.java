@@ -282,7 +282,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     void completeScan() {
         measure.setCreatedBy(session.getUserEmail());
         measure.setDate(Utils.getUniversalTimestamp());
-        measure.setType("v1.1.2");
+        measure.setType("v0.4");
         measure.setAge(age);
         measure.setType(AppConstants.VAL_MEASURE_AUTO);
         measure.setWeight(0.0f);
