@@ -434,7 +434,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
 
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Crashes.trackError(throwable));
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            Crashes.trackError(throwable);
+            finish();
+        });
 
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
         measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
@@ -446,6 +449,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
+
+        session = new SessionManager(this);
 
         age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
 
