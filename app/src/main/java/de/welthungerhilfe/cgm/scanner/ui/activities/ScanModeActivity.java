@@ -454,7 +454,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             finish();
         }
 
-        executor = Executors.newFixedThreadPool(MULTI_UPLOAD_BUNCH);
+        executor = Executors.newFixedThreadPool(30);
 
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
@@ -691,19 +691,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             @Override
             public void onPointCloudAvailable(final TangoPointCloudData pointCloudData) throws TangoErrorException {
-
-                Log.d(TAG, "recording:"+mIsRecording);
                 // set to true for next RGB image to be written
                 // TODO remove when not necessary anymore (performance/video capture)
                 mPointCloudAvailable = true;
 
                 float[] average = TangoUtils.calculateAveragedDepth(pointCloudData.points, pointCloudData.numPoints);
-
-                /*
-                mOverlaySurfaceView.setNumPoints(pointCloudData.numPoints);
-                mOverlaySurfaceView.setDistance(average[0]);
-                mOverlaySurfaceView.setConfidence(average[1]);
-                 */
 
                 // Get pose transforms for openGL to depth/color cameras.
                 try {
@@ -726,6 +718,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 mPointCloudPreviousTimeStamp = mCurrentTimeStamp;
                 mPointCloudCallbackCount++;
 
+
                 try {
                     mutex_on_mIsRecording.acquire();
                 } catch (InterruptedException e) {
@@ -737,65 +730,62 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
                     progressBar.setProgress(mProgress);
 
-                    synchronized (lock) {
-                        if (runningCount >= MULTI_UPLOAD_BUNCH) {
-                            try {
-                                lock.wait();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+                    Runnable thread = () -> {
+                        synchronized (lock) {
+                            if (runningCount >= MULTI_UPLOAD_BUNCH) {
+                                try {
+                                    lock.wait();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
-                    }
-
-                    new AsyncTask<Void, Void, Void>() {
-                        @Override
-                        protected Void doInBackground(Void... voids) {
-                            mPointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
-                                    "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
-
-                            TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
-
-                            File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
-
-                            FileLog log = new FileLog();
-                            log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
-                            log.setType("pcd");
-                            log.setPath(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename + ".pcd");
-                            log.setHashValue(MD5.getMD5(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd"));
-                            log.setFileSize(artefactFile.length());
-                            log.setUploadDate(0);
-                            log.setDeleted(false);
-                            log.setQrCode(person.getQrcode());
-                            log.setCreateDate(mNowTime);
-                            log.setCreatedBy(session.getUserEmail());
-                            log.setAge(age);
-                            log.setSchema_version(CgmDatabase.version);
-                            log.setMeasureId(measure.getId());
-                            fileLogRepository.insertFileLog(log);
 
 
-                            ArtifactResult ar=new ArtifactResult();
-                            double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
-                            ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
-                            ar.setArtifact_id(AppController.getInstance().getPersonId());
-                            ar.setKey(SCAN_STEP);
-                            ar.setMeasure_id(measure.getId());
-                            ar.setMisc("");
-                            ar.setType("PCD_POINTS_v0.2");
-                            noOfPoints = pointCloudData.numPoints;
-                            ar.setReal(noOfPoints);
-                            artifactResultRepository.insertArtifactResult(ar);
+                        mPointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
+                                "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
 
-                            return null;
+                        TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
+
+                        File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
+
+                        FileLog log = new FileLog();
+                        log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
+                        log.setType("pcd");
+                        log.setPath(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename + ".pcd");
+                        log.setHashValue(MD5.getMD5(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd"));
+                        log.setFileSize(artefactFile.length());
+                        log.setUploadDate(0);
+                        log.setDeleted(false);
+                        log.setQrCode(person.getQrcode());
+                        log.setCreateDate(mNowTime);
+                        log.setCreatedBy(session.getUserEmail());
+                        log.setAge(age);
+                        log.setSchema_version(CgmDatabase.version);
+                        log.setMeasureId(measure.getId());
+                        fileLogRepository.insertFileLog(log);
+
+
+                        ArtifactResult ar=new ArtifactResult();
+                        double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
+                        ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
+                        ar.setArtifact_id(AppController.getInstance().getPersonId());
+                        ar.setKey(SCAN_STEP);
+                        ar.setMeasure_id(measure.getId());
+                        ar.setMisc("");
+                        ar.setType("PCD_POINTS_v0.2");
+                        noOfPoints = pointCloudData.numPoints;
+                        ar.setReal(noOfPoints);
+                        artifactResultRepository.insertArtifactResult(ar);
+
+                        Log.e("numbs", String.valueOf(mNumberOfFilesWritten));
+
+                        synchronized (lock) {
+                            runningCount--;
+                            lock.notify();
                         }
-
-                        public void onPostExecute(Void result) {
-                            synchronized (lock) {
-                                runningCount--;
-                                lock.notify();
-                            }
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    };
+                    executor.execute(thread);
 
                     mNumberOfFilesWritten++;
                 }
@@ -842,53 +832,48 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 return;
             }
 
-            synchronized (lock) {
-                if (runningCount >= MULTI_UPLOAD_BUNCH) {
-                    try {
-                        lock.wait();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+            Runnable thread = () -> {
+                synchronized (lock) {
+                    if (runningCount >= MULTI_UPLOAD_BUNCH) {
+                        try {
+                            lock.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
 
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... voids) {
-                    TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
+                TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
 
-                    String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + currentTangoImageBuffer.timestamp + ".jpg";
+                String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + currentTangoImageBuffer.timestamp + ".jpg";
 
-                    BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
+                BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
 
-                    File artefactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
-                    FileLog log = new FileLog();
-                    log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
-                    log.setType("rgb");
-                    log.setPath(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
-                    log.setHashValue(MD5.getMD5(mRgbSaveFolder.getPath() + File.separator + currentImgFilename));
-                    log.setFileSize(artefactFile.length());
-                    log.setUploadDate(0);
-                    log.setDeleted(false);
-                    log.setQrCode(person.getQrcode());
-                    log.setCreateDate(mNowTime);
-                    log.setCreatedBy(session.getUserEmail());
-                    log.setAge(age);
-                    log.setSchema_version(CgmDatabase.version);
-                    log.setMeasureId(measure.getId());
+                File artefactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
+                FileLog log = new FileLog();
+                log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
+                log.setType("rgb");
+                log.setPath(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
+                log.setHashValue(MD5.getMD5(mRgbSaveFolder.getPath() + File.separator + currentImgFilename));
+                log.setFileSize(artefactFile.length());
+                log.setUploadDate(0);
+                log.setDeleted(false);
+                log.setQrCode(person.getQrcode());
+                log.setCreateDate(mNowTime);
+                log.setCreatedBy(session.getUserEmail());
+                log.setAge(age);
+                log.setSchema_version(CgmDatabase.version);
+                log.setMeasureId(measure.getId());
 
-                    fileLogRepository.insertFileLog(log);
+                fileLogRepository.insertFileLog(log);
 
-                    return null;
+                synchronized (lock) {
+                    runningCount--;
+                    lock.notify();
                 }
+            };
 
-                public void onPostExecute(Void result) {
-                    synchronized (lock) {
-                        runningCount--;
-                        lock.notify();
-                    }
-                }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            executor.execute(thread);
         });
     }
 
