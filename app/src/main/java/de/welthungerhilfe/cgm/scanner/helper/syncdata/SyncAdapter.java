@@ -15,24 +15,18 @@ import android.os.Bundle;
 
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.microsoft.azure.storage.*;
 import com.microsoft.azure.storage.queue.*;
 
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
-import de.welthungerhilfe.cgm.scanner.datasource.models.MLResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -43,23 +37,14 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureResultReposit
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.OnDevicesLoad;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.OnMeasuresLoad;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
-public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPersonsLoad, OnMeasuresLoad, OnFileLogsLoad, OnDevicesLoad {
+public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private long prevTimestamp;
-
-    private CloudQueue personQueue;
-    private CloudQueue measureQueue;
-    private CloudQueue artifactQueue;
-    private CloudQueue deviceQueue;
-    private CloudQueue measureResultQueue;
+    private long currentTimestamp;
 
     private PersonRepository personRepository;
     private MeasureRepository measureRepository;
@@ -68,11 +53,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
     private MeasureResultRepository measureResultRepository;
 
     private SessionManager session;
-
-    private List<Person> personList = new ArrayList<>();
-    private List<Measure> measureList = new ArrayList<>();
-    private List<FileLog> fileLogList = new ArrayList<>();
-    private List<Device> deviceList = new ArrayList<>();
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -88,68 +68,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        if (!isServiceRunning(UploadService.class)) {
+        if (!isServiceRunning()) {
             getContext().startService(new Intent(getContext(), UploadService.class));
         }
 
-        if (personList.size() == 0 && measureList.size() == 0 && fileLogList.size() == 0 && deviceList.size() == 0)
-            new MessageTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        startSyncing();
     }
 
-    @SuppressLint("StaticFieldLeak")
     private void startSyncing() {
         prevTimestamp = session.getSyncTimestamp();
+        currentTimestamp = System.currentTimeMillis();
 
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                try {
-                    if (measureResultQueue.exists()) {
-                        Iterable<CloudQueueMessage> retrievedMessages;
-
-                        try {
-                            measureResultQueue.setShouldEncodeMessage(false);
-                            retrievedMessages = measureResultQueue.retrieveMessages(30);
-                            Gson gson = new Gson();
-
-                            while (retrievedMessages.iterator().hasNext()) {
-                                CloudQueueMessage message = retrievedMessages.iterator().next();
-
-                                try {
-                                    MeasureResult result = gson.fromJson(message.getMessageContentAsString(), MeasureResult.class);
-
-                                    float confidence = measureResultRepository.getConfidence(result.getMeasure_id(), result.getKey());
-                                    float maxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id());
-
-                                    if (result.getConfidence_value() > confidence) {
-                                        measureResultRepository.insertMeasureResult(result);
-                                    }
-
-                                    if (result.getConfidence_value() > maxConfidence) {
-                                        measureRepository.updateHeight(result.getMeasure_id(), result.getFloat_value());
-                                    }
-                                } catch (JsonSyntaxException e) {
-                                    e.printStackTrace();
-                                }
-
-                                measureResultQueue.deleteMessage(message);
-                            }
-                        } catch (StorageException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } catch (StorageException e) {
-                    e.printStackTrace();
-                }
-
-                return null;
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-        personRepository.getSyncablePerson(this, prevTimestamp);
-        measureRepository.getSyncableMeasure(this, prevTimestamp);
-        fileLogRepository.getSyncableLog(this, prevTimestamp);
-        deviceRepository.getSyncablePerson(this, prevTimestamp);
+        new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private static void syncImmediately(Account account, Context context) {
@@ -181,252 +111,151 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements OnPerson
 
     }
 
-    public static void startImmediateSync(Account newAccount, Context context) {
-
-        ContentResolver.setSyncAutomatically(newAccount, context.getString(R.string.sync_authority), true);
-
-        syncImmediately(newAccount, context);
-    }
-
-    @Override
-    public void onPersonsLoaded(List<Person> pList) {
-        personList = pList;
-
-        for (int i = 0; i < personList.size(); i++) {
-            new PersonWriteTask(personList.get(i)).execute();
-        }
-    }
-
-    @Override
-    public void onMeasuresLoaded(List<Measure> mList) {
-        measureList = mList;
-
-        for (int i = 0; i < measureList.size(); i++) {
-            new MeasureWriteTask(measureList.get(i)).execute();
-        }
-    }
-
-    @Override
-    public void onFileLogsLoaded(List<FileLog> fList) {
-        fileLogList = fList;
-
-        for (int i = 0; i < fileLogList.size(); i++) {
-            new ArtifactWriteTask(fileLogList.get(i)).execute();
-        }
-    }
-
-    @Override
-    public void onDevicesLoaded(List<Device> dList) {
-        deviceList = dList;
-
-        for (int i = 0; i < deviceList.size(); i++) {
-            new DeviceWriteTask(deviceList.get(i)).execute();
-        }
-    }
-
     @SuppressLint("StaticFieldLeak")
-    class MessageTask extends AsyncTask<Void, Void, Boolean> {
+    class SyncTask extends AsyncTask<Void, Void, Void> {
+
         @Override
-        protected Boolean doInBackground(Void... voids) {
+        protected Void doInBackground(Void... voids) {
+            CloudStorageAccount storageAccount;
             try {
-                CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
                 CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
 
-                measureResultQueue = queueClient.getQueueReference(Utils.getAndroidID(getContext().getContentResolver()) + "-measure-result");
+                try {
+                    CloudQueue measureResultQueue = queueClient.getQueueReference(Utils.getAndroidID(getContext().getContentResolver()) + "-measure-result");
 
-                personQueue = queueClient.getQueueReference("person");
-                personQueue.createIfNotExists();
+                    if (measureResultQueue.exists()) {
+                        Iterable<CloudQueueMessage> retrievedMessages;
 
-                measureQueue = queueClient.getQueueReference("measure");
-                measureQueue.createIfNotExists();
+                        measureResultQueue.setShouldEncodeMessage(false);
+                        retrievedMessages = measureResultQueue.retrieveMessages(30);
+                        Gson gson = new Gson();
 
-                artifactQueue = queueClient.getQueueReference("artifact");
-                artifactQueue.createIfNotExists();
+                        while (retrievedMessages.iterator().hasNext()) {
+                            CloudQueueMessage message = retrievedMessages.iterator().next();
 
-                deviceQueue = queueClient.getQueueReference("device");
-                deviceQueue.createIfNotExists();
+                            try {
+                                MeasureResult result = gson.fromJson(message.getMessageContentAsString(), MeasureResult.class);
 
-                return true;
-            } catch (StorageException | URISyntaxException | InvalidKeyException e) {
+                                float confidence = measureResultRepository.getConfidence(result.getMeasure_id(), result.getKey());
+                                float maxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id());
+
+                                if (result.getConfidence_value() > confidence) {
+                                    measureResultRepository.insertMeasureResult(result);
+                                }
+
+                                if (result.getConfidence_value() > maxConfidence) {
+                                    measureRepository.updateHeight(result.getMeasure_id(), result.getFloat_value());
+                                }
+                            } catch (JsonSyntaxException e) {
+                                e.printStackTrace();
+                            }
+
+                            measureResultQueue.deleteMessage(message);
+                        }
+                    }
+                } catch (StorageException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    CloudQueue personQueue = queueClient.getQueueReference("person");
+                    personQueue.createIfNotExists();
+
+                    Gson gson = new Gson();
+                    List<Person> syncablePersons = personRepository.getSyncablePerson(prevTimestamp);
+                    for (int i = 0; i < syncablePersons.size(); i++) {
+                        String content = gson.toJson(syncablePersons.get(i));
+                        CloudQueueMessage message = new CloudQueueMessage(syncablePersons.get(i).getId());
+                        message.setMessageContent(content);
+
+                        personQueue.addMessage(message);
+
+                        syncablePersons.get(i).setTimestamp(prevTimestamp);
+
+                        personRepository.updatePerson(syncablePersons.get(i));
+                    }
+                } catch (StorageException e) {
+                    currentTimestamp = prevTimestamp;
+                }
+
+                try {
+                    CloudQueue measureQueue = queueClient.getQueueReference("measure");
+                    measureQueue.createIfNotExists();
+
+                    Gson gson = new Gson();
+                    List<Measure> syncableMeasures = measureRepository.getSyncableMeasure(prevTimestamp);
+                    for (int i = 0; i < syncableMeasures.size(); i++) {
+                        String content = gson.toJson(syncableMeasures.get(i));
+                        CloudQueueMessage message = new CloudQueueMessage(syncableMeasures.get(i).getId());
+                        message.setMessageContent(content);
+
+                        measureQueue.addMessage(message);
+
+                        syncableMeasures.get(i).setTimestamp(prevTimestamp);
+
+                        measureRepository.updateMeasure(syncableMeasures.get(i));
+                    }
+                } catch (StorageException e) {
+                    currentTimestamp = prevTimestamp;
+                }
+
+                try {
+                    CloudQueue artifactQueue = queueClient.getQueueReference("artifact");
+                    artifactQueue.createIfNotExists();
+
+                    Gson gson = new Gson();
+                    List<FileLog> syncableArtifacts = fileLogRepository.getSyncableLog(prevTimestamp);
+                    for (int i = 0; i < syncableArtifacts.size(); i++) {
+                        String content = gson.toJson(syncableArtifacts.get(i));
+                        CloudQueueMessage message = new CloudQueueMessage(syncableArtifacts.get(i).getId());
+                        message.setMessageContent(content);
+
+                        artifactQueue.addMessage(message);
+
+                        syncableArtifacts.get(i).setCreateDate(prevTimestamp);
+
+                        fileLogRepository.updateFileLog(syncableArtifacts.get(i));
+                    }
+                } catch (StorageException e) {
+                    currentTimestamp = prevTimestamp;
+                }
+
+                try {
+                    CloudQueue deviceQueue = queueClient.getQueueReference("device");
+                    deviceQueue.createIfNotExists();
+
+                    Gson gson = new Gson();
+                    List<Device> syncableDevices = deviceRepository.getSyncableDevice(prevTimestamp);
+                    for (int i = 0; i < syncableDevices.size(); i++) {
+                        String content = gson.toJson(syncableDevices.get(i));
+                        CloudQueueMessage message = new CloudQueueMessage(syncableDevices.get(i).getId());
+                        message.setMessageContent(content);
+
+                        deviceQueue.addMessage(message);
+
+                        syncableDevices.get(i).setSync_timestamp(prevTimestamp);
+
+                        deviceRepository.updateDevice(syncableDevices.get(i));
+                    }
+                } catch (StorageException e) {
+                    currentTimestamp = prevTimestamp;
+                }
+
+                session.setSyncTimestamp(currentTimestamp);
+            } catch (URISyntaxException | InvalidKeyException e) {
                 e.printStackTrace();
-
-                return false;
             }
-        }
 
-        public void onPostExecute(Boolean result) {
-            if (result)
-                startSyncing();
+            return null;
         }
     }
 
-    @SuppressLint("StaticFieldLeak")
-    class PersonWriteTask extends AsyncTask<Void, Void, Boolean> {
-        private Person person;
-
-        PersonWriteTask(Person person) {
-            this.person = person;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            try {
-                Gson gson = new Gson();
-
-                String content = gson.toJson(person);
-                CloudQueueMessage message = new CloudQueueMessage(person.getId());
-                message.setMessageContent(content);
-
-                personQueue.addMessage(message);
-
-                return true;
-            } catch (StorageException e) {
-                e.printStackTrace();
-
-                return false;
-            }
-        }
-
-        public void onPostExecute(Boolean result) {
-            if (result) {
-                session.setSyncTimestamp(person.getTimestamp());
-
-                personList.remove(person);
-
-                person.setTimestamp(0);
-                personRepository.updatePerson(person);
-            } else {
-                session.setSyncTimestamp(prevTimestamp);
-            }
-        }
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    class MeasureWriteTask extends AsyncTask<Void, Void, Boolean> {
-        private Measure measure;
-
-        MeasureWriteTask(Measure measure) {
-            this.measure = measure;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            try {
-                Gson gson = new Gson();
-
-                String content = gson.toJson(measure);
-                CloudQueueMessage message = new CloudQueueMessage(measure.getId());
-
-                message.setMessageContent(content);
-
-                measureQueue.addMessage(message);
-
-                return true;
-            } catch (StorageException e) {
-                e.printStackTrace();
-
-                return false;
-            }
-        }
-
-        public void onPostExecute(Boolean result) {
-            if (result) {
-                session.setSyncTimestamp(measure.getTimestamp());
-
-                measureList.remove(measure);
-
-                measure.setTimestamp(0);
-                measureRepository.updateMeasure(measure);
-            } else {
-                session.setSyncTimestamp(prevTimestamp);
-            }
-        }
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    class ArtifactWriteTask extends AsyncTask<Void, Void, Boolean> {
-        private FileLog artifact;
-
-        ArtifactWriteTask(FileLog artifact) {
-            this.artifact = artifact;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            try {
-                Gson gson = new Gson();
-
-                String content = gson.toJson(artifact);
-                CloudQueueMessage message = new CloudQueueMessage(artifact.getId());
-                message.setMessageContent(content);
-
-                artifactQueue.addMessage(message);
-
-                return true;
-            } catch (StorageException e) {
-                e.printStackTrace();
-
-                return false;
-            }
-        }
-
-        public void onPostExecute(Boolean result) {
-            if (result) {
-                session.setSyncTimestamp(artifact.getCreateDate());
-
-                fileLogList.remove(artifact);
-            } else {
-                session.setSyncTimestamp(prevTimestamp);
-            }
-        }
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    class DeviceWriteTask extends AsyncTask<Void, Void, Boolean> {
-        private Device device;
-
-        DeviceWriteTask(Device device) {
-            this.device = device;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            try {
-                Gson gson = new Gson();
-
-                String content = gson.toJson(device);
-                CloudQueueMessage message = new CloudQueueMessage(device.getId());
-                message.setMessageContent(content);
-
-                deviceQueue.addMessage(message);
-
-                return true;
-            } catch (StorageException e) {
-                e.printStackTrace();
-
-                return false;
-            }
-        }
-
-        public void onPostExecute(Boolean result) {
-            if (result) {
-                session.setSyncTimestamp(device.getSync_timestamp());
-
-                deviceList.remove(device);
-
-                device.setSync_timestamp(0);
-                deviceRepository.updateDevice(device);
-            } else {
-                session.setSyncTimestamp(prevTimestamp);
-            }
-        }
-    }
-
-    private boolean isServiceRunning(Class<?> serviceClass) {
+    private boolean isServiceRunning() {
         ActivityManager manager = (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
         if (manager != null) {
             for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-                if (serviceClass.getName().equals(service.service.getClassName())) {
+                if (UploadService.class.getName().equals(service.service.getClassName())) {
                     return true;
                 }
             }

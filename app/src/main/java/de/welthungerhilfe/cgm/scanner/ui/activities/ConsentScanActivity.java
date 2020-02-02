@@ -1,6 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -29,6 +30,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -948,6 +950,7 @@ public class ConsentScanActivity extends AppCompatActivity {
             this.data = data.clone();
         }
 
+        @SuppressLint("StaticFieldLeak")
         @Override
         public void run() {
             final long timestamp = Utils.getUniversalTimestamp();
@@ -983,7 +986,17 @@ public class ConsentScanActivity extends AppCompatActivity {
                 log.setCreatedBy(new SessionManager(ConsentScanActivity.this).getUserEmail());
                 log.setSchema_version(CgmDatabase.version);
 
-                fileLogRepository.insertFileLog(log);
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        fileLogRepository.insertFileLog(log);
+                        return null;
+                    }
+
+                    public void onPostExecute(Void result) {
+                        finish();
+                    }
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
@@ -994,8 +1007,6 @@ public class ConsentScanActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-
-                finish();
             }
         }
 

@@ -20,11 +20,13 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -161,29 +163,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         });
 
-        /*
-        RemoteConfig config = session.getRemoteConfig();
-        if (config.isDebug()) {
-            startService(new Intent(this, MemoryMonitorService.class));
-        }
-        */
         startService(new Intent(this, DeviceService.class));
     }
 
     public void onNewIntent(Intent intent) {
         if (adapterData != null)
             adapterData.notifyDataSetChanged();
-    }
-
-    private void saveFcmToken() {
-        String token = session.getFcmToken();
-        String device = Utils.getAndroidID(getContentResolver());
-        if (token != null && !session.isFcmSaved()) {
-            Map<String, Object> data = new HashMap<>();
-            data.put("user", session.getUserEmail());
-            data.put("device", device);
-            data.put("token", token);
-        }
     }
 
     private void setupSidemenu() {
@@ -278,6 +263,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     private void setupRecyclerView() {
         SwipeView swipeController = new SwipeView(ItemTouchHelper.LEFT, this) {
+            @SuppressLint("StaticFieldLeak")
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
@@ -292,19 +278,24 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     ConfirmDialog dialog = new ConfirmDialog(MainActivity.this);
                     dialog.setMessage(R.string.delete_person);
                     dialog.setConfirmListener(result -> {
-                        // ToDo: Remove person when swipe
-                        /*
                         if (result) {
-                            person.setDeleted(true);
-                            person.setDeletedBy(AppController.getInstance().firebaseAuth.getCurrentUser().getEmail());
-                            person.setTimestamp(Utils.getUniversalTimestamp());
-                            personRepository.updatePerson(person);
+                            new AsyncTask<Void, Void, Void>() {
+                                @Override
+                                protected Void doInBackground(Void... voids) {
+                                    person.setDeleted(true);
+                                    person.setDeletedBy(session.getUserEmail());
+                                    person.setTimestamp(Utils.getUniversalTimestamp());
 
-                            adapterData.removePerson(person);
+                                    return null;
+                                }
+
+                                public void onPostExecute(Void result) {
+                                    viewModel.updatePerson(person);
+                                }
+                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                         } else {
                             adapterData.notifyItemChanged(position);
                         }
-                        */
                     });
                     dialog.show();
                 }

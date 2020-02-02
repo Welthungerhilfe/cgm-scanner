@@ -31,7 +31,7 @@ public interface PersonDao {
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE qrcode=:qrCode AND deleted=0 LIMIT 1")
     LiveData<Person> getPersonByQr(String qrCode);
 
-    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE timestamp>:timestamp")
+    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE timestamp>:timestamp ORDER By timestamp")
     List<Person> getSyncablePersons(long timestamp);
 
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 AND (id=:key OR qrcode=:key)")

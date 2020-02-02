@@ -25,16 +25,8 @@ public class ArtifactResultRepository {
         return instance;
     }
 
-    @SuppressLint("StaticFieldLeak")
     public void insertArtifactResult(ArtifactResult artifactResult) {
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                database.artifactResultDao().insertArtifact_quality(artifactResult);
-                return null;
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        database.artifactResultDao().insertArtifact_quality(artifactResult);
     }
 
     public double getArtifactResult(String measureId, int key) {
