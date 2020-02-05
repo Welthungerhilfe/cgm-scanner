@@ -42,4 +42,8 @@ public class MeasureResultRepository {
     public float getMaxConfidence(String id) {
         return database.measureResultDao().getMaxConfidence(id);
     }
+
+    public List<MeasureResult> getAll() {
+        return database.measureResultDao().getAll();
+    }
 }

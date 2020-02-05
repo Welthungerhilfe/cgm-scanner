@@ -26,6 +26,9 @@ import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
+import java.util.Locale;
+
+import de.welthungerhilfe.cgm.scanner.datasource.repository.CsvExportableModel;
 
 import static android.arch.persistence.room.ForeignKey.CASCADE;
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_MEASURE;
@@ -35,7 +38,7 @@ import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TAB
  */
 
 @Entity(tableName = TABLE_MEASURE)
-public class Measure implements Serializable {
+public class Measure extends CsvExportableModel implements Serializable {
     @PrimaryKey
     @NonNull
     private String id;
@@ -212,5 +215,16 @@ public class Measure implements Serializable {
 
     public void setSchema_version(int schema_version) {
         this.schema_version = schema_version;
+    }
+
+    @Override
+    public String getCsvFormattedString() {
+        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d",id,personId,date,type,age,height,weight,
+                muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version);
+    }
+
+    @Override
+    public String getCsvHeaderString() {
+        return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version";
     }
 }

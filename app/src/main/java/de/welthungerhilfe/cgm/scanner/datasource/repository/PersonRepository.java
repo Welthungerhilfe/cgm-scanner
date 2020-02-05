@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonsLoad;
@@ -129,5 +130,9 @@ public class PersonRepository {
 
     public long getTotalPersonCount() {
         return database.personDao().getTotalPersonCount();
+    }
+
+    public List<Person> getAll() {
+        return database.personDao().getAll();
     }
 }

@@ -54,4 +54,8 @@ public class DeviceRepository {
     public void updateDevice(Device device) {
         executor.execute(() -> database.deviceDao().updateDevice(device));
     }
+
+    public List<Device> getAll() {
+        return database.deviceDao().getAll();
+    }
 }

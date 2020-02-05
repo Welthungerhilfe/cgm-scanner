@@ -4,10 +4,14 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
+import java.util.Locale;
+
+import de.welthungerhilfe.cgm.scanner.datasource.repository.CsvExportableModel;
+
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_MEASURE_RESULT;
 
 @Entity(tableName = TABLE_MEASURE_RESULT)
-public class MeasureResult {
+public class MeasureResult extends CsvExportableModel {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String measure_id;
@@ -71,5 +75,15 @@ public class MeasureResult {
 
     public void setJson_value(String json_value) {
         this.json_value = json_value;
+    }
+
+    @Override
+    public String getCsvFormattedString() {
+        return String.format(Locale.US, "%d,%s,%s,%s,%f,%f,%s",id,measure_id,model_id,key,confidence_value,float_value,json_value);
+    }
+
+    @Override
+    public String getCsvHeaderString() {
+        return "id,measure_id,model_id,key,confidence_value,float_value,json_value";
     }
 }

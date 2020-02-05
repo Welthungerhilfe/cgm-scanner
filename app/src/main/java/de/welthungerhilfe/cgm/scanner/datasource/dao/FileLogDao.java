@@ -50,4 +50,7 @@ public interface FileLogDao {
 
     @Query("SELECT SUM(fileSize)/1024/1024 FROM " + TABLE_FILE_LOG + " WHERE measureId=:measureId AND deleted=1")
     double getMeasureArtifactUploadedSize(String measureId);
+
+    @Query("SELECT * FROM " + TABLE_FILE_LOG)
+    List<FileLog> getAll();
 }

@@ -4,10 +4,14 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
+import java.util.Locale;
+
+import de.welthungerhilfe.cgm.scanner.datasource.repository.CsvExportableModel;
+
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_DEVICE;
 
 @Entity(tableName = TABLE_DEVICE)
-public class Device {
+public class Device extends CsvExportableModel {
     @PrimaryKey
     @NonNull
     private String id;
@@ -153,5 +157,16 @@ public class Device {
 
     public void setSchema_version(int schema_version) {
         this.schema_version = schema_version;
+    }
+
+    @Override
+    public String getCsvFormattedString() {
+        return String.format(Locale.US, "%s,%s,%d,%d,%f,%d,%d,%f,%d,%d,%d,%s,%d,%d,%s,%d", id, uuid, create_timestamp, sync_timestamp, new_artifact_file_size_mb,
+                new_artifacts,deleted_artifacts,total_artifact_file_size_mb,total_artifacts,own_measures,own_persons,created_by,total_measures,total_persons,app_version,schema_version);
+    }
+
+    @Override
+    public String getCsvHeaderString() {
+        return "id,uuid,create_timestamp,sync_timestamp,new_artifact_file_size_mb,new_artifacts,deleted_artifacts,total_artifact_file_size_mb,total_artifacts,own_measures,own_persons,created_by,total_measures,total_persons,app_version,schema_version";
     }
 }

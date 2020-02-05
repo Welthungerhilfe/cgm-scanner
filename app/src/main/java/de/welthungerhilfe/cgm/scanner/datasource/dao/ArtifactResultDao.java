@@ -42,6 +42,9 @@ public interface ArtifactResultDao {
 
     @Query("SELECT AVG(real) FROM " + TABLE_ARTIFACT_RESULT + " WHERE measure_id=:measure_id AND (`key`=102 OR `key`=202)")
     double getAveragePointCountForBack(String measure_id);
+
+    @Query("SELECT * FROM " + TABLE_ARTIFACT_RESULT)
+    List<ArtifactResult> getAll();
 }
 
 
