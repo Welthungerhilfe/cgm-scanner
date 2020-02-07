@@ -145,7 +145,7 @@ public class FileLog extends CsvExportableModel implements Serializable {
 
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%s,%s,%d,%d,%b,%s,%d,%s,%d,%d,%d,%s",id,type,path,hashValue,fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId);
+        return String.format(Locale.US, "%s,%s,%s,%s,%d,%d,%b,%s,%d,%s,%d,%d,%d,%s",id,type,path,hashValue.replace("\n", "").replace("\r", ""),fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId);
     }
 
     @Override
