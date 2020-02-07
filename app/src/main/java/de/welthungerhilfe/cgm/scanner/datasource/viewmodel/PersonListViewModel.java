@@ -5,6 +5,7 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Transformations;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
 import java.util.List;
@@ -117,5 +118,9 @@ public class PersonListViewModel extends AndroidViewModel {
         filter.setPage(0);
         filter.clearFilterLocation();
         filterLiveData.setValue(filter);
+    }
+
+    public void updatePerson(Person person) {
+        repository.updatePerson(person);
     }
 }

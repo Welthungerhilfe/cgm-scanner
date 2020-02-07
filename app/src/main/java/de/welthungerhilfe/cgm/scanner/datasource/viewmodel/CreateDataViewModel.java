@@ -88,10 +88,20 @@ public class CreateDataViewModel extends AndroidViewModel {
         return lastMeasureLiveData;
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void savePerson(Person person) {
-        personRepository.insertPerson(person);
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                personRepository.insertPerson(person);
 
-        setActiveTab(1);
+                return null;
+            }
+
+            public void onPostExecute(Void result) {
+                setActiveTab(1);
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @SuppressLint("StaticFieldLeak")

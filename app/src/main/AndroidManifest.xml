@@ -183,12 +183,6 @@
             android:exported="false"
             android:name="com.novoda.merlin.service.MerlinService" />
 
-        <service android:name=".helper.notification.PushNotificationService">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
         <provider
             android:name=".helper.syncdata.StubProvider"
             android:authorities="de.welthungerhilfe.cgm.scanner"

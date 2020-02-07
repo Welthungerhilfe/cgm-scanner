@@ -181,26 +181,6 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
         return personFilter;
     }
 
-    public void updatePerson(Person person) {
-        int index = filteredList.indexOf(person);
-        notifyItemChanged(index);
-
-        for (int i = 0; i < personList.size(); i++) {
-            if (person.getId().equals(personList.get(i).getId())) {
-                personList.remove(i);
-                personList.add(i, person);
-                break;
-            }
-        }
-    }
-
-    public void removePerson(Person person) {
-        int index = filteredList.indexOf(person);
-        filteredList.remove(index);
-        personList.remove(person);
-        notifyItemRemoved(index);
-    }
-
     public void doSort(int sortType) {
         this.sortType = sortType;
         getFilter().filter("");

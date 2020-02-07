@@ -44,41 +44,16 @@ public class FileLogRepository {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    @SuppressLint("StaticFieldLeak")
     public void insertFileLog(FileLog log) {
-        new AsyncTask<Void, Void, Boolean>() {
-
-            @Override
-            protected Boolean doInBackground(Void... voids) {
-                database.fileLogDao().saveFileLog(log);
-                return true;
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        database.fileLogDao().saveFileLog(log);
     }
 
-    @SuppressLint("StaticFieldLeak")
     public void updateFileLog(FileLog log) {
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... voids) {
-                database.fileLogDao().updateFileLog(log);
-                return true;
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        database.fileLogDao().updateFileLog(log);
     }
 
-    @SuppressLint("StaticFieldLeak")
-    public void getSyncableLog(OnFileLogsLoad listener, long timestamp) {
-        new AsyncTask<Void, Void, List<FileLog>>() {
-            @Override
-            protected List<FileLog> doInBackground(Void... voids) {
-                return database.fileLogDao().getSyncableData(timestamp);
-            }
-
-            public void onPostExecute(List<FileLog> logs) {
-                listener.onFileLogsLoaded(logs);
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    public List<FileLog> getSyncableLog(long timestamp) {
+        return database.fileLogDao().getSyncableData(timestamp);
     }
 
     public long getArtifactCount() {

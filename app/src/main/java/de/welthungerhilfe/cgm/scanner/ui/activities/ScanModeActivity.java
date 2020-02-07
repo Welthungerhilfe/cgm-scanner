@@ -54,6 +54,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -85,6 +87,7 @@ import de.welthungerhilfe.cgm.scanner.utils.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static com.projecttango.tangosupport.TangoSupport.initialize;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.MULTI_UPLOAD_BUNCH;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_BACK;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_FRONT;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_SIDE;
@@ -282,7 +285,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     void completeScan() {
         measure.setCreatedBy(session.getUserEmail());
         measure.setDate(Utils.getUniversalTimestamp());
-        measure.setType("v0.4");
         measure.setAge(age);
         measure.setType(AppConstants.VAL_MEASURE_AUTO);
         measure.setWeight(0.0f);
@@ -390,6 +392,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private AlertDialog progressDialog;
 
+    private final Object lock = new Object();
+    private ExecutorService executor;
+
+    private int runningCount = 0;
+
     public void onStart() {
         super.onStart();
 
@@ -446,6 +453,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             Toast.makeText(this, "Person was not defined", Toast.LENGTH_LONG).show();
             finish();
         }
+
+        executor = Executors.newFixedThreadPool(30);
 
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
@@ -648,6 +657,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         return config;
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void startupTango() {
         // Lock configuration and connect to Tango.
         // Select coordinate frame pair.
@@ -681,19 +691,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             @Override
             public void onPointCloudAvailable(final TangoPointCloudData pointCloudData) throws TangoErrorException {
-
-                Log.d(TAG, "recording:"+mIsRecording);
                 // set to true for next RGB image to be written
                 // TODO remove when not necessary anymore (performance/video capture)
                 mPointCloudAvailable = true;
 
                 float[] average = TangoUtils.calculateAveragedDepth(pointCloudData.points, pointCloudData.numPoints);
-
-                /*
-                mOverlaySurfaceView.setNumPoints(pointCloudData.numPoints);
-                mOverlaySurfaceView.setDistance(average[0]);
-                mOverlaySurfaceView.setConfidence(average[1]);
-                 */
 
                 // Get pose transforms for openGL to depth/color cameras.
                 try {
@@ -716,29 +718,37 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 mPointCloudPreviousTimeStamp = mCurrentTimeStamp;
                 mPointCloudCallbackCount++;
 
-                // My writing to file function
+
+                try {
+                    mutex_on_mIsRecording.acquire();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    Crashes.trackError(e);
+                }
+                // Saving the frame or not, depending on the current mode.
+                if ( mIsRecording ) {
+                    updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
+                    progressBar.setProgress(mProgress);
+
+                    Runnable thread = () -> {
+                        synchronized (lock) {
+                            if (runningCount >= MULTI_UPLOAD_BUNCH) {
+                                try {
+                                    lock.wait();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
 
 
-                // Background task for writing to file
-                // TODO refactor to top-level class or make static?
-                Runnable thread = () -> {
-                    try {
-                        mutex_on_mIsRecording.acquire();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        Crashes.trackError(e);
-                    }
-                    // Saving the frame or not, depending on the current mode.
-                    if ( mIsRecording ) {
-                        // TODO save files to local storage
-                        updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
-                        progressBar.setProgress(mProgress);
-
-                        mPointCloudFilename = "pc_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
+                        mPointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
                                 "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
+
                         TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
 
                         File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
+
                         FileLog log = new FileLog();
                         log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
                         log.setType("pcd");
@@ -753,8 +763,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setAge(age);
                         log.setSchema_version(CgmDatabase.version);
                         log.setMeasureId(measure.getId());
-
                         fileLogRepository.insertFileLog(log);
+
 
                         ArtifactResult ar=new ArtifactResult();
                         double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
@@ -767,17 +777,19 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         noOfPoints = pointCloudData.numPoints;
                         ar.setReal(noOfPoints);
                         artifactResultRepository.insertArtifactResult(ar);
-                        // Todo;
-                        //new OfflineTask().saveFileLog(log);
-                        // Direct Upload to Firebase Storage
-                        mNumberOfFilesWritten++;
-                        double Scan_Duration_Penalty=Math.abs((double)mNumberOfFilesWritten/8-1)*100;
 
-                        Log.d("Prajwal",String.valueOf(mNumberOfFilesWritten));
-                    }
-                    mutex_on_mIsRecording.release();
-                };
-                thread.run();
+                        Log.e("numbs", String.valueOf(mNumberOfFilesWritten));
+
+                        synchronized (lock) {
+                            runningCount--;
+                            lock.notify();
+                        }
+                    };
+                    executor.execute(thread);
+
+                    mNumberOfFilesWritten++;
+                }
+                mutex_on_mIsRecording.release();
             }
 
 
@@ -821,9 +833,18 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             }
 
             Runnable thread = () -> {
+                synchronized (lock) {
+                    if (runningCount >= MULTI_UPLOAD_BUNCH) {
+                        try {
+                            lock.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
                 TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
 
-                // TODO save files to local storage
                 String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + currentTangoImageBuffer.timestamp + ".jpg";
 
                 BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
@@ -845,8 +866,14 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setMeasureId(measure.getId());
 
                 fileLogRepository.insertFileLog(log);
+
+                synchronized (lock) {
+                    runningCount--;
+                    lock.notify();
+                }
             };
-            thread.run();
+
+            executor.execute(thread);
         });
     }
 

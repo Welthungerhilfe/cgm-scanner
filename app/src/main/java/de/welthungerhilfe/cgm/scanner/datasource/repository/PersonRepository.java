@@ -1,22 +1,16 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
-import android.annotation.SuppressLint;
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.db.SimpleSQLiteQuery;
 import android.content.Context;
-import android.os.AsyncTask;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.OnPersonsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.PersonFilter;
 
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_PERSON;
@@ -31,15 +25,9 @@ public class PersonRepository {
     private CgmDatabase database;
     private SessionManager session;
 
-    private ExecutorService executor;
-
-    private final int PAGE_SIZE = 30;
-
     private PersonRepository(Context context) {
         database = CgmDatabase.getInstance(context);
         session = new SessionManager(context);
-
-        executor = Executors.newSingleThreadExecutor();
     }
 
     public static PersonRepository getInstance(Context context) {
@@ -58,32 +46,22 @@ public class PersonRepository {
     }
 
     public void insertPerson(Person person) {
-        executor.execute(() -> database.personDao().insertPerson(person));
+        database.personDao().insertPerson(person);
     }
 
     public void updatePerson(Person person) {
-        executor.execute(() -> database.personDao().updatePerson(person));
+        database.personDao().updatePerson(person);
     }
 
-    @SuppressLint("StaticFieldLeak")
-    public void getSyncablePerson(OnPersonsLoad listener, long timestamp) {
-        new AsyncTask<Void, Void, List<Person>>() {
-
-            @Override
-            protected List<Person> doInBackground(Void... voids) {
-                return database.personDao().getSyncablePersons(timestamp);
-            }
-
-            public void onPostExecute(List<Person> persons) {
-                listener.onPersonsLoaded(persons);
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    public List<Person> getSyncablePerson(long timestamp) {
+        return database.personDao().getSyncablePersons(timestamp);
     }
 
     public LiveData<List<Person>> getAvailablePersons(PersonFilter filter) {
         String selectClause = "*";
         String whereClause = "deleted=0";
         String orderByClause = "created DESC";
+        int PAGE_SIZE = 30;
         String limitClause = String.format(Locale.US, "LIMIT %d OFFSET %d", PAGE_SIZE, filter.getPage() * PAGE_SIZE);
 
         if (filter.isDate()) {

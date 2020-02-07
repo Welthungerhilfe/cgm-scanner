@@ -27,6 +27,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.FILE_NOT_FOUND;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.MULTI_UPLOAD_BUNCH;
@@ -155,6 +156,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 CloudBlockBlob blob = container.getBlockBlobReference(path + arr[arr.length - 1]);
                 blob.upload(stream, stream.available());
 
+                log.setUploadDate(Utils.getUniversalTimestamp());
+
                 if (file.delete()) {
                     log.setDeleted(true);
                     log.setStatus(UPLOADED_DELETED);
@@ -168,6 +171,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
             } catch (Exception e) {
                 log.setStatus(UPLOAD_ERROR);
             }
+            log.setCreateDate(Utils.getUniversalTimestamp());
 
             repository.updateFileLog(log);
 
