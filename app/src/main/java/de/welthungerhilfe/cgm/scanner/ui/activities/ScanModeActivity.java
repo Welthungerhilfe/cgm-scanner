@@ -698,6 +698,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 float[] average = TangoUtils.calculateAveragedDepth(pointCloudData.points, pointCloudData.numPoints);
 
                 // Get pose transforms for openGL to depth/color cameras.
+                /*
                 try {
                     TangoPoseData oglTdepthPose = TangoSupport.getPoseAtTime(
                             pointCloudData.timestamp,
@@ -712,6 +713,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 } catch (TangoErrorException e) {
                     Crashes.trackError(e);
                 }
+                 */
 
                 mCurrentTimeStamp = (float) pointCloudData.timestamp;
                 final float frameDelta = (mCurrentTimeStamp - mPointCloudPreviousTimeStamp) * SECS_TO_MILLISECS;
