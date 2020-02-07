@@ -26,6 +26,9 @@ import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
+import java.util.Locale;
+
+import de.welthungerhilfe.cgm.scanner.datasource.repository.CsvExportableModel;
 
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_PERSON;
 
@@ -34,7 +37,7 @@ import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TAB
  */
 
 @Entity(tableName = TABLE_PERSON)
-public class Person implements Serializable {
+public class Person extends CsvExportableModel implements Serializable {
     @PrimaryKey
     @NonNull
     private String id;  // firebase id
@@ -185,5 +188,15 @@ public class Person implements Serializable {
 
     public void setSchema_version(int schema_version) {
         this.schema_version = schema_version;
+    }
+
+    @Override
+    public String getCsvFormattedString() {
+        return String.format(Locale.US, "%s,%s,%s,%d,%s,%s,%b,%s,%d,%d,%s,%b,%s,%d",id,name,surname,birthday,sex,guardian,isAgeEstimated,qrcode,created,timestamp,createdBy,deleted,deletedBy,schema_version);
+    }
+
+    @Override
+    public String getCsvHeaderString() {
+        return "id,name,surname,birthday,sex,guardian,isAgeEstimated,qrcode,created,timestamp,createdBy,deleted,deletedBy,schema_version";
     }
 }

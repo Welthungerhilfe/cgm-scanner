@@ -64,4 +64,8 @@ public class ArtifactResultRepository {
     public int getPointCloudCountForBack(String measureId) {
         return database.artifactResultDao().getPointCloudCountForBack(measureId);
     }
+
+    public List<ArtifactResult> getAll() {
+        return database.artifactResultDao().getAll();
+    }
 }

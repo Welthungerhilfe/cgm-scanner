@@ -5,11 +5,14 @@ import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
+import java.util.Locale;
+
+import de.welthungerhilfe.cgm.scanner.datasource.repository.CsvExportableModel;
 
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_FILE_LOG;
 
 @Entity(tableName = TABLE_FILE_LOG)
-public class FileLog implements Serializable {
+public class FileLog extends CsvExportableModel implements Serializable {
     @PrimaryKey
     @NonNull
     private String id;
@@ -138,5 +141,15 @@ public class FileLog implements Serializable {
 
     public void setMeasureId(String measureId) {
         this.measureId = measureId;
+    }
+
+    @Override
+    public String getCsvFormattedString() {
+        return String.format(Locale.US, "%s,%s,%s,%s,%d,%d,%b,%s,%d,%s,%d,%d,%d,%s",id,type,path,hashValue,fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId);
+    }
+
+    @Override
+    public String getCsvHeaderString() {
+        return "id,type,path,hashValue,fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId";
     }
 }

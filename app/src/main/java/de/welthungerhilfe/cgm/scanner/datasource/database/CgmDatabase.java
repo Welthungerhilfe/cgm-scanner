@@ -37,7 +37,7 @@ public abstract class CgmDatabase extends RoomDatabase {
 
     public static final int version = 5;
 
-    private static final String DATABASE = "offline_db";
+    public static final String DATABASE = "offline_db";
 
     public static final String TABLE_PERSON = "persons";
     public static final String TABLE_CONSENT = "consents";

@@ -26,4 +26,7 @@ public interface DeviceDao {
 
     @Delete
     void deleteDevice(Device device);
+
+    @Query("SELECT * FROM " + TABLE_DEVICE)
+    List<Device> getAll();
 }

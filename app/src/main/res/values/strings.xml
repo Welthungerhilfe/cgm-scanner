@@ -262,4 +262,7 @@
     <string name="side_scan">02. 360\' Scan</string>
     <string name="back_scan">03. Back Scan</string>
     <string name="login_microsoft">Sign In with Microsoft</string>
+    <string name="backup">Backup</string>
+    <string name="last_backup_date">Last Backup Date</string>
+    <string name="backup_now">Backup Now</string>
 </resources>

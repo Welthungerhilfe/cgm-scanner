@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.PersonFilter;
@@ -107,5 +108,9 @@ public class PersonRepository {
 
     public long getTotalPersonCount() {
         return database.personDao().getTotalPersonCount();
+    }
+
+    public List<Person> getAll() {
+        return database.personDao().getAll();
     }
 }

@@ -5,15 +5,16 @@ import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
-import com.google.errorprone.annotations.ForOverride;
-
 import java.io.Serializable;
+import java.util.Locale;
+
+import de.welthungerhilfe.cgm.scanner.datasource.repository.CsvExportableModel;
 
 import static android.arch.persistence.room.ForeignKey.CASCADE;
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_ARTIFACT_RESULT;
 
 @Entity(tableName = TABLE_ARTIFACT_RESULT)
-public class ArtifactResult implements Serializable {
+public class ArtifactResult extends CsvExportableModel implements Serializable {
     private String type;
     private int key;
     private double real;
@@ -87,4 +88,12 @@ public class ArtifactResult implements Serializable {
         this.measure_id = measure_id;
     }
 
+    public String getCsvFormattedString() {
+        return String.format(Locale.US, "%s,%d,%f,%s,%s,%s,%s", type, key, real, confidence_value, misc, measure_id, artifact_id);
+    }
+
+    @Override
+    public String getCsvHeaderString() {
+        return "type, key, real, confidence_value, misc, measure_id, artifact_id";
+    }
 }

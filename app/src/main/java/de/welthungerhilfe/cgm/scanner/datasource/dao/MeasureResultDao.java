@@ -28,4 +28,7 @@ public interface MeasureResultDao {
 
     @Query("SELECT MAX(confidence_value) FROM " + CgmDatabase.TABLE_MEASURE_RESULT + " WHERE measure_id=:id")
     float getMaxConfidence(String id);
+
+    @Query("SELECT * FROM " + CgmDatabase.TABLE_MEASURE_RESULT)
+    List<MeasureResult> getAll();
 }

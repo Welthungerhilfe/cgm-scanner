@@ -42,6 +42,7 @@ public class SessionManager {
     private final String KEY_USER_LOCATION_LONGITUDE = "key_user_location_longitude";
     private final String KEY_USER_LOCATION_ADDRESS = "key_user_location_address";
     private final String KEY_SYNC_TIMESTAMP = "sync_timestamp";
+    private final String KEY_BACKUP_TIMESTAMP = "backup_timestamp";
     private final String KEY_LANGUAGE = "key_language";
     private final String KEY_CONNECTION_TIMESTAMP = "key_connection_timestamp";
     private final String KEY_TUTORIAL = "key_tutorial";
@@ -102,6 +103,16 @@ public class SessionManager {
         location.setAddress(pref.getString(KEY_USER_LOCATION_ADDRESS, ""));
 
         return location;
+    }
+
+    public void setBackupTimestamp(long timestamp) {
+        editor.putLong(KEY_BACKUP_TIMESTAMP, timestamp);
+
+        editor.commit();
+    }
+
+    public long getBackupTimestamp() {
+        return pref.getLong(KEY_BACKUP_TIMESTAMP, 0);
     }
 
     public void setSyncTimestamp(long timestamp) {
@@ -180,4 +191,5 @@ public class SessionManager {
     public String getAuthToken() {
         return pref.getString(KEY_USER_TOKEN, null);
     }
+
 }

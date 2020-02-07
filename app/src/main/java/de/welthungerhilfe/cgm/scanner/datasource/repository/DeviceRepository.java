@@ -35,4 +35,8 @@ public class DeviceRepository {
     public void updateDevice(Device device) {
         database.deviceDao().updateDevice(device);
     }
+
+    public List<Device> getAll() {
+        return database.deviceDao().getAll();
+    }
 }
