@@ -731,6 +731,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     progressBar.setProgress(mProgress);
 
                     Runnable thread = () -> {
+                        /*
                         synchronized (lock) {
                             if (runningCount >= MULTI_UPLOAD_BUNCH) {
                                 try {
@@ -740,6 +741,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                                 }
                             }
                         }
+                         */
 
 
                         mPointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
@@ -780,10 +782,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                         Log.e("numbs", String.valueOf(mNumberOfFilesWritten));
 
+                        /*
                         synchronized (lock) {
                             runningCount--;
                             lock.notify();
                         }
+
+                         */
                     };
                     executor.execute(thread);
 
@@ -833,6 +838,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             }
 
             Runnable thread = () -> {
+                /*
                 synchronized (lock) {
                     if (runningCount >= MULTI_UPLOAD_BUNCH) {
                         try {
@@ -842,6 +848,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         }
                     }
                 }
+
+                 */
 
                 TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
 
@@ -867,10 +875,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 fileLogRepository.insertFileLog(log);
 
+                /*
                 synchronized (lock) {
                     runningCount--;
                     lock.notify();
                 }
+
+                 */
             };
 
             executor.execute(thread);
