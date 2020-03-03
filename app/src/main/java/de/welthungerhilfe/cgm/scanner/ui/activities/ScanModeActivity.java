@@ -470,6 +470,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             measure.setCreatedBy(session.getUserEmail());
             measure.setAge(age);
             measure.setDate(System.currentTimeMillis());
+            measure.setArtifact_synced(false);
         }
 
         setContentView(R.layout.activity_scan_mode);

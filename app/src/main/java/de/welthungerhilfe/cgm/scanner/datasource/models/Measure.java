@@ -60,6 +60,7 @@ public class Measure extends CsvExportableModel implements Serializable {
     private String deletedBy;
     private String qrCode;
     private int schema_version;
+    private boolean artifact_synced;
 
     @Embedded
     private Loc location;
@@ -215,6 +216,14 @@ public class Measure extends CsvExportableModel implements Serializable {
 
     public void setSchema_version(int schema_version) {
         this.schema_version = schema_version;
+    }
+
+    public boolean isArtifact_synced() {
+        return artifact_synced;
+    }
+
+    public void setArtifact_synced(boolean artifact_synced) {
+        this.artifact_synced = artifact_synced;
     }
 
     @Override
