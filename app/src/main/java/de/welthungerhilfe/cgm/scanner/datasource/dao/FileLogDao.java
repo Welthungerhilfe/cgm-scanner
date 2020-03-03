@@ -53,4 +53,10 @@ public interface FileLogDao {
 
     @Query("SELECT * FROM " + TABLE_FILE_LOG)
     List<FileLog> getAll();
+
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE measureId=:measureId ORDER BY createDate LIMIT :size OFFSET :offset")
+    List<FileLog> getArtifactsForMeasure(String measureId, int offset, int size);
+
+    @Query("SELECT count(*) FROM " + TABLE_FILE_LOG + " WHERE measureId=:measureId")
+    long getTotalArtifactCountForMeasure(String measureId);
 }

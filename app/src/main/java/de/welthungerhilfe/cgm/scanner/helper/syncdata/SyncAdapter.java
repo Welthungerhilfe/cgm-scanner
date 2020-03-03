@@ -19,12 +19,17 @@ import com.google.gson.JsonSyntaxException;
 import com.microsoft.azure.storage.*;
 import com.microsoft.azure.storage.queue.*;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
@@ -195,11 +200,36 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         syncableMeasures.get(i).setTimestamp(prevTimestamp);
 
                         measureRepository.updateMeasure(syncableMeasures.get(i));
+
+                        CloudQueue measureArtifactsQueue = queueClient.getQueueReference("artifact-list");
+                        measureArtifactsQueue.createIfNotExists();
+
+                        long totalNumbers  = fileLogRepository.getTotalArtifactCountForMeasure(syncableMeasures.get(i).getId());
+                        final int size = 50;
+                        int offset = 0;
+
+                        while (offset + 1 < totalNumbers) {
+                            List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(syncableMeasures.get(i).getId(), offset, size);
+
+                            ArtifactList artifactList = new ArtifactList();
+                            artifactList.setMeasure_id(syncableMeasures.get(i).getId());
+                            artifactList.setStart(offset + 1);
+                            artifactList.setEnd(offset + measureArtifacts.size());
+                            artifactList.setArtifacts(measureArtifacts);
+                            artifactList.setTotal(totalNumbers);
+
+                            offset += measureArtifacts.size();
+
+                            CloudQueueMessage measureArtifactsMessage = new CloudQueueMessage(syncableMeasures.get(i).getId());
+                            measureArtifactsMessage.setMessageContent(gson.toJson(artifactList));
+                            measureArtifactsQueue.addMessage(measureArtifactsMessage);
+                        }
                     }
                 } catch (StorageException e) {
                     currentTimestamp = prevTimestamp;
                 }
 
+                /*
                 try {
                     CloudQueue artifactQueue = queueClient.getQueueReference("artifact");
                     artifactQueue.createIfNotExists();
@@ -220,6 +250,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 } catch (StorageException e) {
                     currentTimestamp = prevTimestamp;
                 }
+
+                 */
 
                 try {
                     CloudQueue deviceQueue = queueClient.getQueueReference("device");
