@@ -47,10 +47,18 @@ import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
+import com.google.gson.Gson;
 import com.microsoft.appcenter.crashes.Crashes;
+import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.queue.CloudQueue;
+import com.microsoft.azure.storage.queue.CloudQueueClient;
+import com.microsoft.azure.storage.queue.CloudQueueMessage;
 import com.projecttango.tangosupport.TangoSupport;
 
 import java.io.File;
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -65,6 +73,7 @@ import butterknife.OnClick;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
@@ -1244,7 +1253,59 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         @Override
         protected Void doInBackground(Void... voids) {
+            Gson gson = new Gson();
+
             measureRepository.insertMeasure(measure);
+
+            try {
+                CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
+
+                try {
+                    if (!measure.isArtifact_synced()) {
+                        CloudQueue measureArtifactsQueue = queueClient.getQueueReference("artifact-list");
+                        measureArtifactsQueue.createIfNotExists();
+
+                        long totalNumbers  = fileLogRepository.getTotalArtifactCountForMeasure(measure.getId());
+                        final int size = 50;
+                        int offset = 0;
+
+                        while (offset + 1 < totalNumbers) {
+                            List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(measure.getId(), offset, size);
+
+                            ArtifactList artifactList = new ArtifactList();
+                            artifactList.setMeasure_id(measure.getId());
+                            artifactList.setStart(offset + 1);
+                            artifactList.setEnd(offset + measureArtifacts.size());
+                            artifactList.setArtifacts(measureArtifacts);
+                            artifactList.setTotal(totalNumbers);
+
+                            offset += measureArtifacts.size();
+
+                            CloudQueueMessage measureArtifactsMessage = new CloudQueueMessage(measure.getId());
+                            measureArtifactsMessage.setMessageContent(gson.toJson(artifactList));
+                            measureArtifactsQueue.addMessage(measureArtifactsMessage);
+                        }
+
+                        measure.setArtifact_synced(true);
+                    }
+
+                    CloudQueue measureQueue = queueClient.getQueueReference("measure");
+                    measureQueue.createIfNotExists();
+
+                    CloudQueueMessage message = new CloudQueueMessage(measure.getId());
+                    message.setMessageContent(gson.toJson(message));
+                    measureQueue.addMessage(message);
+
+                    measure.setTimestamp(session.getSyncTimestamp());
+                    measureRepository.updateMeasure(measure);
+                } catch (StorageException e) {
+                    e.printStackTrace();
+                }
+            } catch (URISyntaxException | InvalidKeyException e) {
+                e.printStackTrace();
+            }
+
             return null;
         }
 
