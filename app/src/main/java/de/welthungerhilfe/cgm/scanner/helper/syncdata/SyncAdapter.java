@@ -197,33 +197,36 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         measureQueue.addMessage(message);
 
-                        syncableMeasures.get(i).setTimestamp(prevTimestamp);
+                        if (!syncableMeasures.get(i).isArtifact_synced()) {
+                            CloudQueue measureArtifactsQueue = queueClient.getQueueReference("artifact-list");
+                            measureArtifactsQueue.createIfNotExists();
 
-                        measureRepository.updateMeasure(syncableMeasures.get(i));
+                            long totalNumbers  = fileLogRepository.getTotalArtifactCountForMeasure(syncableMeasures.get(i).getId());
+                            final int size = 50;
+                            int offset = 0;
 
-                        CloudQueue measureArtifactsQueue = queueClient.getQueueReference("artifact-list");
-                        measureArtifactsQueue.createIfNotExists();
+                            while (offset + 1 < totalNumbers) {
+                                List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(syncableMeasures.get(i).getId(), offset, size);
 
-                        long totalNumbers  = fileLogRepository.getTotalArtifactCountForMeasure(syncableMeasures.get(i).getId());
-                        final int size = 50;
-                        int offset = 0;
+                                ArtifactList artifactList = new ArtifactList();
+                                artifactList.setMeasure_id(syncableMeasures.get(i).getId());
+                                artifactList.setStart(offset + 1);
+                                artifactList.setEnd(offset + measureArtifacts.size());
+                                artifactList.setArtifacts(measureArtifacts);
+                                artifactList.setTotal(totalNumbers);
 
-                        while (offset + 1 < totalNumbers) {
-                            List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(syncableMeasures.get(i).getId(), offset, size);
+                                offset += measureArtifacts.size();
 
-                            ArtifactList artifactList = new ArtifactList();
-                            artifactList.setMeasure_id(syncableMeasures.get(i).getId());
-                            artifactList.setStart(offset + 1);
-                            artifactList.setEnd(offset + measureArtifacts.size());
-                            artifactList.setArtifacts(measureArtifacts);
-                            artifactList.setTotal(totalNumbers);
+                                CloudQueueMessage measureArtifactsMessage = new CloudQueueMessage(syncableMeasures.get(i).getId());
+                                measureArtifactsMessage.setMessageContent(gson.toJson(artifactList));
+                                measureArtifactsQueue.addMessage(measureArtifactsMessage);
+                            }
 
-                            offset += measureArtifacts.size();
-
-                            CloudQueueMessage measureArtifactsMessage = new CloudQueueMessage(syncableMeasures.get(i).getId());
-                            measureArtifactsMessage.setMessageContent(gson.toJson(artifactList));
-                            measureArtifactsQueue.addMessage(measureArtifactsMessage);
+                            syncableMeasures.get(i).setArtifact_synced(true);
                         }
+
+                        syncableMeasures.get(i).setTimestamp(prevTimestamp);
+                        measureRepository.updateMeasure(syncableMeasures.get(i));
                     }
                 } catch (StorageException e) {
                     currentTimestamp = prevTimestamp;
