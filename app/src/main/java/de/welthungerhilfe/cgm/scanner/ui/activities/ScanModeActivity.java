@@ -47,10 +47,18 @@ import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
+import com.google.gson.Gson;
 import com.microsoft.appcenter.crashes.Crashes;
+import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.queue.CloudQueue;
+import com.microsoft.azure.storage.queue.CloudQueueClient;
+import com.microsoft.azure.storage.queue.CloudQueueMessage;
 import com.projecttango.tangosupport.TangoSupport;
 
 import java.io.File;
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -65,6 +73,7 @@ import butterknife.OnClick;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
@@ -470,6 +479,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             measure.setCreatedBy(session.getUserEmail());
             measure.setAge(age);
             measure.setDate(System.currentTimeMillis());
+            measure.setArtifact_synced(false);
         }
 
         setContentView(R.layout.activity_scan_mode);
@@ -733,64 +743,44 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     progressBar.setProgress(mProgress);
 
                     Runnable thread = () -> {
-                        /*
-                        synchronized (lock) {
-                            if (runningCount >= MULTI_UPLOAD_BUNCH) {
-                                try {
-                                    lock.wait();
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                         */
-
-
                         mPointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
                                 "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
 
                         TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
 
-                        File artefactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
+                        File artifactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
+                        if (artifactFile.exists()) {
+                            FileLog log = new FileLog();
+                            log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
+                            log.setType("pcd");
+                            log.setPath(artifactFile.getPath());
+                            log.setHashValue(MD5.getMD5(artifactFile.getPath()));
+                            log.setFileSize(artifactFile.length());
+                            log.setUploadDate(0);
+                            log.setDeleted(false);
+                            log.setQrCode(person.getQrcode());
+                            log.setCreateDate(mNowTime);
+                            log.setCreatedBy(session.getUserEmail());
+                            log.setAge(age);
+                            log.setSchema_version(CgmDatabase.version);
+                            log.setMeasureId(measure.getId());
+                            fileLogRepository.insertFileLog(log);
 
-                        FileLog log = new FileLog();
-                        log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
-                        log.setType("pcd");
-                        log.setPath(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename + ".pcd");
-                        log.setHashValue(MD5.getMD5(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd"));
-                        log.setFileSize(artefactFile.length());
-                        log.setUploadDate(0);
-                        log.setDeleted(false);
-                        log.setQrCode(person.getQrcode());
-                        log.setCreateDate(mNowTime);
-                        log.setCreatedBy(session.getUserEmail());
-                        log.setAge(age);
-                        log.setSchema_version(CgmDatabase.version);
-                        log.setMeasureId(measure.getId());
-                        fileLogRepository.insertFileLog(log);
 
+                            ArtifactResult ar=new ArtifactResult();
+                            double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
+                            ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
+                            ar.setArtifact_id(AppController.getInstance().getPersonId());
+                            ar.setKey(SCAN_STEP);
+                            ar.setMeasure_id(measure.getId());
+                            ar.setMisc("");
+                            ar.setType("PCD_POINTS_v0.2");
+                            noOfPoints = pointCloudData.numPoints;
+                            ar.setReal(noOfPoints);
+                            artifactResultRepository.insertArtifactResult(ar);
 
-                        ArtifactResult ar=new ArtifactResult();
-                        double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
-                        ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
-                        ar.setArtifact_id(AppController.getInstance().getPersonId());
-                        ar.setKey(SCAN_STEP);
-                        ar.setMeasure_id(measure.getId());
-                        ar.setMisc("");
-                        ar.setType("PCD_POINTS_v0.2");
-                        noOfPoints = pointCloudData.numPoints;
-                        ar.setReal(noOfPoints);
-                        artifactResultRepository.insertArtifactResult(ar);
-
-                        Log.e("numbs", String.valueOf(mNumberOfFilesWritten));
-
-                        /*
-                        synchronized (lock) {
-                            runningCount--;
-                            lock.notify();
+                            Log.e("numbs", String.valueOf(mNumberOfFilesWritten));
                         }
-
-                         */
                     };
                     executor.execute(thread);
 
@@ -840,52 +830,32 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             }
 
             Runnable thread = () -> {
-                /*
-                synchronized (lock) {
-                    if (runningCount >= MULTI_UPLOAD_BUNCH) {
-                        try {
-                            lock.wait();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
-                 */
-
                 TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
 
                 String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + currentTangoImageBuffer.timestamp + ".jpg";
 
                 BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
 
-                File artefactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
-                FileLog log = new FileLog();
-                log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
-                log.setType("rgb");
-                log.setPath(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
-                log.setHashValue(MD5.getMD5(mRgbSaveFolder.getPath() + File.separator + currentImgFilename));
-                log.setFileSize(artefactFile.length());
-                log.setUploadDate(0);
-                log.setDeleted(false);
-                log.setQrCode(person.getQrcode());
-                log.setCreateDate(mNowTime);
-                log.setCreatedBy(session.getUserEmail());
-                log.setAge(age);
-                log.setSchema_version(CgmDatabase.version);
-                log.setMeasureId(measure.getId());
+                File artifactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
+                if (artifactFile.exists()) {
+                    FileLog log = new FileLog();
+                    log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
+                    log.setType("rgb");
+                    log.setPath(artifactFile.getPath());
+                    log.setHashValue(MD5.getMD5(artifactFile.getPath()));
+                    log.setFileSize(artifactFile.length());
+                    log.setUploadDate(0);
+                    log.setDeleted(false);
+                    log.setQrCode(person.getQrcode());
+                    log.setCreateDate(mNowTime);
+                    log.setCreatedBy(session.getUserEmail());
+                    log.setAge(age);
+                    log.setSchema_version(CgmDatabase.version);
+                    log.setMeasureId(measure.getId());
 
-                fileLogRepository.insertFileLog(log);
-
-                /*
-                synchronized (lock) {
-                    runningCount--;
-                    lock.notify();
+                    fileLogRepository.insertFileLog(log);
                 }
-
-                 */
             };
-
             executor.execute(thread);
         });
     }
@@ -1283,7 +1253,59 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         @Override
         protected Void doInBackground(Void... voids) {
+            Gson gson = new Gson();
+
             measureRepository.insertMeasure(measure);
+
+            try {
+                CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
+
+                try {
+                    if (!measure.isArtifact_synced()) {
+                        CloudQueue measureArtifactsQueue = queueClient.getQueueReference("artifact-list");
+                        measureArtifactsQueue.createIfNotExists();
+
+                        long totalNumbers  = fileLogRepository.getTotalArtifactCountForMeasure(measure.getId());
+                        final int size = 50;
+                        int offset = 0;
+
+                        while (offset + 1 < totalNumbers) {
+                            List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(measure.getId(), offset, size);
+
+                            ArtifactList artifactList = new ArtifactList();
+                            artifactList.setMeasure_id(measure.getId());
+                            artifactList.setStart(offset + 1);
+                            artifactList.setEnd(offset + measureArtifacts.size());
+                            artifactList.setArtifacts(measureArtifacts);
+                            artifactList.setTotal(totalNumbers);
+
+                            offset += measureArtifacts.size();
+
+                            CloudQueueMessage measureArtifactsMessage = new CloudQueueMessage(measure.getId());
+                            measureArtifactsMessage.setMessageContent(gson.toJson(artifactList));
+                            measureArtifactsQueue.addMessage(measureArtifactsMessage);
+                        }
+
+                        measure.setArtifact_synced(true);
+                    }
+
+                    CloudQueue measureQueue = queueClient.getQueueReference("measure");
+                    measureQueue.createIfNotExists();
+
+                    CloudQueueMessage message = new CloudQueueMessage(measure.getId());
+                    message.setMessageContent(gson.toJson(message));
+                    measureQueue.addMessage(message);
+
+                    measure.setTimestamp(session.getSyncTimestamp());
+                    measureRepository.updateMeasure(measure);
+                } catch (StorageException e) {
+                    e.printStackTrace();
+                }
+            } catch (URISyntaxException | InvalidKeyException e) {
+                e.printStackTrace();
+            }
+
             return null;
         }
 

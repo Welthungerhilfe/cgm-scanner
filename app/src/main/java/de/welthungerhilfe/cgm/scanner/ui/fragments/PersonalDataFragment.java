@@ -235,9 +235,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
                     String sex = "";
                     if (radioMale.isChecked())
-                        sex = radioMale.getText().toString();
+                        sex = "male";
                     else if (radioFemale.isChecked())
-                        sex = radioFemale.getText().toString();
+                        sex = "female";
 
                     if (person == null) {
                         person = new Person();

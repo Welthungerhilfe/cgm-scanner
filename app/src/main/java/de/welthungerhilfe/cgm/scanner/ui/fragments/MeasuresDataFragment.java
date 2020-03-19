@@ -249,6 +249,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setCreatedBy(session.getUserEmail());
         measure.setQrCode(qrCode);
         measure.setSchema_version(CgmDatabase.version);
+        measure.setArtifact_synced(true);
 
         viewModel.insertMeasure(measure);
     }
