@@ -184,10 +184,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     break;
                 case R.id.menuLogout:
                     session.setSigned(false);
+                    session.setAzureAccountName("");
+                    session.setAzureAccountKey("");
 
                     Account[] accounts = accountManager.getAccounts();
                     for (Account account : accounts) {
-                        accountManager.removeAccount(account, null, null);
+                        accountManager.removeAccount(account, MainActivity.this, null, null);
                     }
 
                     Auth.signOut();

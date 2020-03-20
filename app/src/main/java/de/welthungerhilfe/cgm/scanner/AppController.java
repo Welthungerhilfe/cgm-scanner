@@ -18,26 +18,24 @@
 
 package de.welthungerhilfe.cgm.scanner;
 
-import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Environment;
 import android.os.StrictMode;
 
 import java.io.File;
 
 import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
-import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_KEY;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.AZURE_ACCOUNT_NAME;
 
 public class AppController extends Application {
     public static final String TAG = AppController.class.getSimpleName();
 
     private static AppController mInstance;
+
+    private SessionManager session;
 
     @Override
     public void onCreate() {
@@ -45,6 +43,8 @@ public class AppController extends Application {
 
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
         Utils.overrideFont(getApplicationContext(), "SERIF", "roboto.ttf");
+
+        session = new SessionManager(this);
 
         mInstance = this;
     }
@@ -55,7 +55,10 @@ public class AppController extends Application {
     }
 
     public String getAzureConnection() {
-        return String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", AZURE_ACCOUNT_NAME, AZURE_ACCOUNT_KEY);
+        if (session.getAzureAccountName() == null || session.getAzureAccountKey() == null)
+            return null;
+        else
+            return String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", session.getAzureAccountName(), session.getAzureAccountKey());
     }
 
     public boolean isAdmin() {
