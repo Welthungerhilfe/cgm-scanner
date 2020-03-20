@@ -87,4 +87,12 @@ public class FileLogRepository {
     public List<FileLog> getAll() {
         return database.fileLogDao().getAll();
     }
+
+    public List<FileLog> getArtifactsForMeasure(String measureId, int offset, int limit) {
+        return database.fileLogDao().getArtifactsForMeasure(measureId, offset, limit);
+    }
+
+    public long getTotalArtifactCountForMeasure(String measureId) {
+        return database.fileLogDao().getTotalArtifactCountForMeasure(measureId);
+    }
 }
