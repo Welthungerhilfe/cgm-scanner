@@ -32,14 +32,20 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.common.collect.Iterators;
 import com.microsoft.appcenter.auth.Auth;
 import com.microsoft.appcenter.auth.SignInResult;
 import com.microsoft.appcenter.utils.async.AppCenterConsumer;
+import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.StorageCredentialsAccountAndKey;
+import com.microsoft.azure.storage.table.CloudTableClient;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
 import net.minidev.json.JSONArray;
 
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
@@ -48,13 +54,11 @@ import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class LoginActivity extends AccountAuthenticatorActivity {
 
@@ -189,45 +193,63 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 // SignInResult is never null, getUserInformation() returns not null when there is no exception.
                 // Both getIdToken() / getAccessToken() return non null values.
                 String idToken = signInResult.getUserInformation().getIdToken();
-                session.setAuthToken(idToken);
-
                 try {
                     JWT parsedToken = JWTParser.parse(idToken);
                     Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
 
-                    JSONArray emails = (JSONArray) claims.get("emails");
-                    if (emails != null && !emails.isEmpty()) {
-                        String token = (String) claims.get("at_hash");
-                        String firstEmail = emails.get(0).toString();
+                    String azureAccountName = (String) claims.get("extension_azure_account_name");
+                    String azureAccountKey = (String) claims.get("extension_azure_account_key");
+                    if (azureAccountName != null && !azureAccountName.equals("") && azureAccountKey != null && !azureAccountKey.equals("")) {
+                        JSONArray emails = (JSONArray) claims.get("emails");
+                        if (emails != null && !emails.isEmpty()) {
+                            try {
+                                CloudStorageAccount.parse(String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", azureAccountName, azureAccountKey));
 
-                        final Account account = new Account(firstEmail, AppConstants.ACCOUNT_TYPE);
-                        accountManager.addAccountExplicitly(account, token, null);
+                                session.setAzureAccountName(azureAccountName);
+                                session.setAzureAccountKey(azureAccountKey);
 
-                        SyncAdapter.startPeriodicSync(account, getApplicationContext());
+                                session.setAuthToken(idToken);
 
-                        final Intent intent = new Intent();
-                        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, firstEmail);
-                        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
-                        intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
+                                String token = (String) claims.get("at_hash");
+                                String firstEmail = emails.get(0).toString();
 
-                        setAccountAuthenticatorResult(intent.getExtras());
-                        setResult(RESULT_OK, intent);
+                                final Account account = new Account(firstEmail, AppConstants.ACCOUNT_TYPE);
+                                accountManager.addAccountExplicitly(account, token, null);
+
+                                SyncAdapter.startPeriodicSync(account, getApplicationContext());
+
+                                final Intent intent = new Intent();
+                                intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, firstEmail);
+                                intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
+                                intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
+
+                                setAccountAuthenticatorResult(intent.getExtras());
+                                setResult(RESULT_OK, intent);
 
 
-                        session.saveRemoteConfig(new RemoteConfig());
+                                session.saveRemoteConfig(new RemoteConfig());
+                                session.setSigned(true);
+                                session.setUserEmail(firstEmail);
 
-                        session.setSigned(true);
-                        session.setUserEmail(firstEmail);
+                                if (session.getTutorial())
+                                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                                else
+                                    startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
 
-                        if (session.getTutorial())
-                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                        else
-                            startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
-                        finish();
+                                finish();
+                            } catch (URISyntaxException | InvalidKeyException e) {
+                                e.printStackTrace();
 
+                                Auth.signOut();
+                                Toast.makeText(this, "Backend account is invalid", Toast.LENGTH_LONG).show();
+                            }
+                        } else {
+                            Auth.signOut();
+                            Toast.makeText(LoginActivity.this, "Couldn't get user email, please try again", Toast.LENGTH_LONG).show();
+                        }
                     } else {
                         Auth.signOut();
-                        Toast.makeText(LoginActivity.this, "Couldn't get user email, please try again", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Couldn't find your backend", Toast.LENGTH_LONG).show();
                     }
                 } catch (ParseException e) {
                     e.printStackTrace();

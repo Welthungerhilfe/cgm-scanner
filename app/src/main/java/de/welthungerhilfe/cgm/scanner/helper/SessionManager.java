@@ -49,6 +49,8 @@ public class SessionManager {
     private final String KEY_FCM_TOKEN = "key_fcm_token";
     private final String KEY_FCM_TOKEN_SAVED = "key_fcm_token_saved";
     private final String KEY_REMOTE_CONFIG = "key_remote_config";
+    private final String KEY_AZURE_ACCOUNT_NAME = "key_azure_account_name";
+    private final String KEY_AZURE_ACCOUNT_KEY = "key_azure_account_key";
 
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
@@ -190,6 +192,26 @@ public class SessionManager {
 
     public String getAuthToken() {
         return pref.getString(KEY_USER_TOKEN, null);
+    }
+
+    public void setAzureAccountName(String accountName) {
+        editor.putString(KEY_AZURE_ACCOUNT_NAME, accountName);
+
+        editor.commit();
+    }
+
+    public String getAzureAccountName() {
+        return pref.getString(KEY_AZURE_ACCOUNT_NAME, null);
+    }
+
+    public void setAzureAccountKey(String accountKey) {
+        editor.putString(KEY_AZURE_ACCOUNT_KEY, accountKey);
+
+        editor.commit();
+    }
+
+    public String getAzureAccountKey() {
+        return pref.getString(KEY_AZURE_ACCOUNT_KEY, null);
     }
 
 }
