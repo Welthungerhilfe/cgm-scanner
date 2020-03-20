@@ -64,4 +64,7 @@ public interface MeasureDao {
 
     @Query("SELECT * FROM " + TABLE_MEASURE)
     List<Measure> getAll();
+
+    @Query("UPDATE " + TABLE_MEASURE + " SET resulted_at=:currentTimeMillis WHERE id=:measure_id")
+    void updateResultTimestamp(String measure_id, long currentTimeMillis);
 }

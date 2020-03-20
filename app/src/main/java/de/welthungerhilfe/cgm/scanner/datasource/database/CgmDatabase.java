@@ -22,7 +22,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 
-@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class, MeasureResult.class, Device.class}, version = 6)
+@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class, MeasureResult.class, Device.class}, version = 7)
 public abstract class CgmDatabase extends RoomDatabase {
     private static final Object sLock = new Object();
 
@@ -104,6 +104,14 @@ public abstract class CgmDatabase extends RoomDatabase {
         }
     };
 
+    public static final Migration MIGRATION_6_7 = new Migration(6, 7) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE measures ADD COLUMN uploaded_at INTEGER NOT NULL DEFAULT 0;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN resulted_at INTEGER NOT NULL DEFAULT 0;");
+        }
+    };
+
     public static final Migration MIGRATION_6_5 = new Migration(6, 5) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
@@ -115,7 +123,7 @@ public abstract class CgmDatabase extends RoomDatabase {
         synchronized (sLock) {
             if (instance == null) {
                 instance = Room.databaseBuilder(context.getApplicationContext(), CgmDatabase.class, DATABASE)
-                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_4, MIGRATION_5_6)
+                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_4, MIGRATION_5_6, MIGRATION_6_7)
                         .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
                         .build();
             }
