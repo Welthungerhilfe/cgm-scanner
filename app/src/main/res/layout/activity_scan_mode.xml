@@ -499,7 +499,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -531,11 +531,6 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
-            <!--de.welthungerhilfe.cgm.scanner.helper.tango.OverlaySurface
-                android:id="@+id/overlaySurfaceView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/-->
 
             <android.opengl.GLSurfaceView
                 android:id="@+id/surfaceview"

@@ -38,10 +38,9 @@
 
     <uses-feature android:name="android.hardware.camera"/>
     <uses-feature android:name="android.hardware.location.gps" />
-    <!-- Tell the system this app requires OpenGL ES 2.0. -->
-    <uses-feature
-        android:glEsVersion="0x00020000"
-        android:required="true" />
+
+    <uses-feature android:name="android.hardware.camera.ar" android:required="true"/>
+    <uses-feature android:glEsVersion="0x00020000" android:required="true" />
 
     <application
         android:name=".AppController"
@@ -54,9 +53,10 @@
         android:windowSoftInputMode="adjustResize"
         android:theme="@style/AppTheme.NoActionBar"
         tools:replace="android:allowBackup">
-		<uses-library
-            android:name="com.projecttango.libtango_device2"
-            android:required="true" />
+
+        <meta-data
+            android:name="com.google.ar.core"
+            android:value="required" />
 
         <meta-data
             android:name="com.google.android.gms.version"

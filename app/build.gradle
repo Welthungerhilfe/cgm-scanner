@@ -76,8 +76,8 @@ dependencies {
     implementation 'org.greenrobot:eventbus:3.1.1'
     implementation 'com.jaredrummler:material-spinner:1.2.4'
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
-    implementation 'com.google.tango:sdk-base:1.55'
-    implementation 'com.google.tango:support-base:1.54'
+
+    implementation 'com.google.ar:core:1.16.0'
 
     // Azure components
     implementation 'com.microsoft.azure.android:azure-storage-android:2.0.0@aar'

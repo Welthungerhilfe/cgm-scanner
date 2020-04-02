@@ -28,8 +28,6 @@ import android.graphics.YuvImage;
 import android.net.Uri;
 import android.os.Environment;
 
-import com.google.atap.tangoservice.experimental.TangoImageBuffer;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -256,36 +254,4 @@ public class BitmapUtils {
         b = b>255? 255 : b<0 ? 0 : b;
         return 0xff000000 | (b<<16) | (g<<8) | r;
     }
-
-    public static Uri writeImageToFile(TangoImageBuffer currentTangoImageBuffer, File rgbSaveFolder, String currentImgFilename) {
-        File currentImg = new File(rgbSaveFolder,currentImgFilename);
-
-        int currentImgWidth = currentTangoImageBuffer.width;
-        int currentImgHeight = currentTangoImageBuffer.height;
-
-        // TODO performance:
-        // 1. write only to file here (or write video from GLSurface)
-        // 2. queue in upload service #18
-        // 3. post-processing (rotate) in UploadService
-
-        // switched heigth and width for rotated image
-            /*
-            byte[] YuvImageByteArray = rotateYUV420Degree90(currentTangoImageBuffer.data.array(), currentImgWidth, currentImgHeight);
-            int tmp = currentImgWidth;
-            currentImgWidth = currentImgHeight;
-            currentImgHeight = tmp;
-            */
-        byte[] YuvImageByteArray = currentTangoImageBuffer.data.array();
-
-        try (FileOutputStream out = new FileOutputStream(currentImg)) {
-            YuvImage yuvImage = new YuvImage(YuvImageByteArray, ImageFormat.NV21, currentImgWidth, currentImgHeight, null);
-            yuvImage.compressToJpeg(new Rect(0, 0, currentImgWidth, currentImgHeight), 50, out);
-            out.flush();
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Uri.fromFile(currentImg);
-    }
-
 }

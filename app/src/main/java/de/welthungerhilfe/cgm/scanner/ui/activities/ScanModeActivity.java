@@ -8,15 +8,32 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.ImageFormat;
+import android.graphics.SurfaceTexture;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CaptureFailure;
+import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.TotalCaptureResult;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.Image;
+import android.media.ImageReader;
+import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.ConditionVariable;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -24,6 +41,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Size;
 import android.view.Display;
 import android.view.MenuItem;
 import android.view.Surface;
@@ -37,16 +55,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.atap.tangoservice.Tango;
-import com.google.atap.tangoservice.TangoCameraIntrinsics;
-import com.google.atap.tangoservice.TangoConfig;
-import com.google.atap.tangoservice.TangoCoordinateFramePair;
-import com.google.atap.tangoservice.TangoErrorException;
-import com.google.atap.tangoservice.TangoInvalidException;
-import com.google.atap.tangoservice.TangoOutOfDateException;
-import com.google.atap.tangoservice.TangoPointCloudData;
-import com.google.atap.tangoservice.TangoPoseData;
-import com.google.atap.tangoservice.experimental.TangoImageBuffer;
+import com.google.ar.core.ArCoreApk;
+import com.google.ar.core.Config;
+import com.google.ar.core.Session;
+import com.google.ar.core.SharedCamera;
+import com.google.ar.core.exceptions.UnavailableException;
 import com.google.gson.Gson;
 import com.microsoft.appcenter.crashes.Crashes;
 import com.microsoft.azure.storage.CloudStorageAccount;
@@ -54,18 +67,24 @@ import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.queue.CloudQueue;
 import com.microsoft.azure.storage.queue.CloudQueueClient;
 import com.microsoft.azure.storage.queue.CloudQueueMessage;
-import com.projecttango.tangosupport.TangoSupport;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.ShortBuffer;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -81,6 +100,10 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultReposi
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.helper.arcore.render.BackgroundRenderer;
+import de.welthungerhilfe.cgm.scanner.helper.arcore.render.OcclusionRenderer;
+import de.welthungerhilfe.cgm.scanner.helper.arcore.tool.CameraPermissionHelper;
+import de.welthungerhilfe.cgm.scanner.helper.arcore.tool.DisplayRotationHelper;
 import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
 import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
 import de.welthungerhilfe.cgm.scanner.helper.tango.CameraSurfaceRenderer;
@@ -90,12 +113,8 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
-import de.welthungerhilfe.cgm.scanner.utils.MD5;
-import de.welthungerhilfe.cgm.scanner.utils.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-import static com.projecttango.tangosupport.TangoSupport.initialize;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.MULTI_UPLOAD_BUNCH;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_BACK;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_FRONT;
@@ -107,7 +126,7 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_B
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_FRONT;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_SIDE;
 
-public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener {
+public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener, GLSurfaceView.Renderer, ImageReader.OnImageAvailableListener, SurfaceTexture.OnFrameAvailableListener {
     private final int PERMISSION_LOCATION = 0x0001;
     private final int PERMISSION_CAMERA = 0x0002;
     private final int PERMISSION_STORAGE = 0x0002;
@@ -340,8 +359,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private SessionManager session;
 
-    private Tango mTango;
-    private TangoConfig mConfig;
     private boolean mIsConnected = false;
 
     private GLSurfaceView mCameraSurfaceView;
@@ -352,23 +369,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private ProgressBar progressBar;
     private FloatingActionButton fab;
 
-    // variables for Pose and point clouds
-    private float mDeltaTime;
-    private int mValidPoseCallbackCount;
-    private int mPointCloudCallbackCount;
-    private boolean mTimeToTakeSnap;
-    private String mPointCloudFilename;
-    private int mNumberOfFilesWritten;
-    private ArrayList<float[]> mPosePositionBuffer;
-    private ArrayList<float[]> mPoseOrientationBuffer;
-    private ArrayList<Float> mPoseTimestampBuffer;
-    private ArrayList<String> mPointCloudFilenameBuffer;
-    private float[] cam2dev_Transform;
-    private int mNumPoseInSequence;
-    private int mPreviousPoseStatus;
-    private float mPosePreviousTimeStamp;
-    private float mPointCloudPreviousTimeStamp;
-    private float mCurrentTimeStamp;
 
     private File mExtFileDir;
     private File mScanArtefactsOutputFolder;
@@ -401,59 +401,162 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private AlertDialog progressDialog;
 
-    private final Object lock = new Object();
-    private ExecutorService executor;
 
-    private int runningCount = 0;
+    // Google AR Core
+    private DisplayRotationHelper displayRotationHelper;
+
+    private boolean surfaceCreated;
+
+    private final BackgroundRenderer backgroundRenderer = new BackgroundRenderer();
+    private final OcclusionRenderer occlusionRenderer = new OcclusionRenderer();
+
+    private final AtomicBoolean shouldUpdateSurfaceTexture = new AtomicBoolean(false);
+
+    private Session sharedSession;
+
+    private CameraDevice cameraDevice;
+
+    private SharedCamera sharedCamera;
+
+    private String cameraId;
+
+    boolean initialized = false;
+
+    private ImageReader cpuImageReader;
+
+    private HandlerThread backgroundThread;
+    private Handler backgroundHandler;
+
+    private List<CaptureRequest.Key<?>> keysThatCanCauseCaptureDelaysWhenModified;
+
+    private boolean captureSessionChangesPossible = true;
+
+    private CaptureRequest.Builder previewCaptureRequestBuilder;
+
+    private final ConditionVariable safeToExitApp = new ConditionVariable();
+
+    boolean isGlAttached;
+
+    private CameraCaptureSession captureSession;
+
+    private final CameraDevice.StateCallback cameraDeviceCallback = new CameraDevice.StateCallback() {
+        @Override
+        public void onOpened(CameraDevice cameraDevice) {
+            Log.d(TAG, "Camera device ID " + cameraDevice.getId() + " opened.");
+            ScanModeActivity.this.cameraDevice = cameraDevice;
+            createCameraPreviewSession();
+        }
+
+        @Override
+        public void onClosed(CameraDevice cameraDevice) {
+            Log.d(TAG, "Camera device ID " + cameraDevice.getId() + " closed.");
+            ScanModeActivity.this.cameraDevice = null;
+            safeToExitApp.open();
+        }
+
+        @Override
+        public void onDisconnected(CameraDevice cameraDevice) {
+            Log.w(TAG, "Camera device ID " + cameraDevice.getId() + " disconnected.");
+            cameraDevice.close();
+            ScanModeActivity.this.cameraDevice = null;
+        }
+
+        @Override
+        public void onError(CameraDevice cameraDevice, int error) {
+            Log.e(TAG, "Camera device ID " + cameraDevice.getId() + " error " + error);
+            cameraDevice.close();
+            ScanModeActivity.this.cameraDevice = null;
+            // Fatal error. Quit application.
+            finish();
+        }
+    };
+
+    CameraCaptureSession.StateCallback cameraCaptureCallback = new CameraCaptureSession.StateCallback() {
+        // Called when the camera capture session is first configured after the app
+        // is initialized, and again each time the activity is resumed.
+        @Override
+        public void onConfigured(CameraCaptureSession session) {
+            Log.d(TAG, "Camera capture session configured.");
+            captureSession = session;
+            resumeCamera2();
+        }
+
+        @Override
+        public void onSurfacePrepared(
+                CameraCaptureSession session, Surface surface) {
+            Log.d(TAG, "Camera capture surface prepared.");
+        }
+
+        @Override
+        public void onReady(CameraCaptureSession session) {
+            Log.d(TAG, "Camera capture session ready.");
+        }
+
+        @Override
+        public void onActive(CameraCaptureSession session) {
+            Log.d(TAG, "Camera capture session active.");
+            synchronized (ScanModeActivity.this) {
+                captureSessionChangesPossible = true;
+                ScanModeActivity.this.notify();
+            }
+        }
+
+        @Override
+        public void onCaptureQueueEmpty(CameraCaptureSession session) {
+            Log.w(TAG, "Camera capture queue empty.");
+        }
+
+        @Override
+        public void onClosed(CameraCaptureSession session) {
+            Log.d(TAG, "Camera capture session closed.");
+        }
+
+        @Override
+        public void onConfigureFailed(CameraCaptureSession session) {
+            Log.e(TAG, "Failed to configure camera capture session.");
+        }
+    };
+
+    private final CameraCaptureSession.CaptureCallback captureSessionCallback = new CameraCaptureSession.CaptureCallback() {
+        @Override
+        public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+            shouldUpdateSurfaceTexture.set(true);
+        }
+
+        @Override
+        public void onCaptureBufferLost(CameraCaptureSession session, CaptureRequest request, Surface target, long frameNumber) {
+            Log.e(TAG, "onCaptureBufferLost: " + frameNumber);
+        }
+
+        @Override
+        public void onCaptureFailed(CameraCaptureSession session, CaptureRequest request, CaptureFailure failure) {
+            Log.e(TAG, "onCaptureFailed: " + failure.getFrameNumber() + " " + failure.getReason());
+        }
+
+        @Override
+        public void onCaptureSequenceAborted(CameraCaptureSession session, int sequenceId) {
+            Log.e(TAG, "onCaptureSequenceAborted: " + sequenceId + " " + session);
+        }
+    };
 
     public void onStart() {
         super.onStart();
 
-        mPointCloudFilename = "";
-        mNumberOfFilesWritten = 0;
-        mPosePositionBuffer = new ArrayList<>();
-        mPoseOrientationBuffer = new ArrayList<>();
-        mPoseTimestampBuffer = new ArrayList<>();
-        mPointCloudFilenameBuffer = new ArrayList<>();
-        mNumPoseInSequence = 0;
         mutex_on_mIsRecording = new Semaphore(1,true);
         mIsRecording = false;
         mPointCloudAvailable = false;
-
-        mTango = new Tango(this, () -> {
-            // Synchronize against disconnecting while the service is being used in
-            // the OpenGL thread or in the UI thread.
-            synchronized (this) {
-                try {
-                    mConfig = setupTangoConfig(mTango);
-                    mTango.connect(mConfig);
-                    startupTango();
-                    initialize(mTango);
-                    mIsConnected = true;
-
-                    setDisplayRotation();
-                } catch (TangoOutOfDateException e) {
-                    Log.e(TAG, getString(R.string.exception_out_of_date), e);
-                    Crashes.trackError(e);
-                } catch (TangoErrorException e) {
-                    Log.e(TAG, getString(R.string.exception_tango_error), e);
-                    Crashes.trackError(e);
-                } catch (TangoInvalidException e) {
-                    Log.e(TAG, getString(R.string.exception_tango_invalid), e);
-                    Crashes.trackError(e);
-                }
-                setUpExtrinsics();
-            }
-        });
     }
 
     protected void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
 
+        /*
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             Crashes.trackError(throwable);
             finish();
         });
+
+         */
 
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
         measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
@@ -462,8 +565,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             Toast.makeText(this, "Person was not defined", Toast.LENGTH_LONG).show();
             finish();
         }
-
-        executor = Executors.newFixedThreadPool(30);
 
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
@@ -494,8 +595,16 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         findViewById(R.id.btnRetake).setOnClickListener(this);
         findViewById(R.id.imgClose).setOnClickListener(this);
 
+        // GL surface view that renders camera preview image.
         mCameraSurfaceView = findViewById(R.id.surfaceview);
-        //mOverlaySurfaceView = findViewById(R.id.overlaySurfaceView);
+        mCameraSurfaceView.setPreserveEGLContextOnPause(true);
+        mCameraSurfaceView.setEGLContextClientVersion(2);
+        mCameraSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        mCameraSurfaceView.setRenderer(this);
+        mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+
+        // Helpers, see hello_ar_java sample to learn more.
+        displayRotationHelper = new DisplayRotationHelper(this);
 
         measureRepository = MeasureRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
@@ -506,7 +615,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         getCurrentLocation();
 
         setupScanArtifacts();
-        setupRenderer();
 
         progressDialog = new AlertDialog.Builder(this)
                 .setCancelable(false)
@@ -522,46 +630,54 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     protected void onResume() {
         super.onResume();
 
-        mCameraSurfaceView.onResume();
-        mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        waitUntilCameraCaptureSessionIsActive();
+        startBackgroundThread();
 
-        /*
-        if (SCAN_STEP == SCAN_STANDING_FRONT || SCAN_STEP == SCAN_STANDING_SIDE || SCAN_STEP == SCAN_STANDING_BACK)
-            mOverlaySurfaceView.setMode(OverlaySurface.INFANT_CLOSE_DOWN_UP_OVERLAY);
-        else if (SCAN_STEP == SCAN_LYING_FRONT || SCAN_STEP == SCAN_LYING_SIDE || SCAN_STEP == SCAN_LYING_BACK)
-            mOverlaySurfaceView.setMode(OverlaySurface.BABY_OVERLAY);
-         */
+        mCameraSurfaceView.onResume();
+
+        if (surfaceCreated) {
+            if (initialized) System.exit(0);
+            openCamera();
+        }
+
+        displayRotationHelper.onResume();
     }
 
     @Override
     protected void onPause() {
-        super.onPause();
-
         mCameraSurfaceView.onPause();
-        // Synchronize against disconnecting while the service is being used in the OpenGL
-        // thread or in the UI thread.
-        // NOTE: DO NOT lock against this same object in the Tango callback thread.
-        // Tango.disconnect will block here until all Tango callback calls are finished.
-        // If you lock against this object in a Tango callback thread it will cause a deadlock.
-        synchronized (this) {
-            try {
-                mTango.disconnectCamera(TangoCameraIntrinsics.TANGO_CAMERA_COLOR);
-                // We need to invalidate the connected texture ID so that we cause a
-                // re-connection in the OpenGL thread after resume.
-                mConnectedTextureIdGlThread = INVALID_TEXTURE_ID;
-                mTango.disconnect();
-                mIsConnected = false;
-            } catch (TangoErrorException e) {
-                Log.e(TAG, getString(R.string.exception_tango_error), e);
-                Crashes.trackError(e);
-            }
-        }
+        waitUntilCameraCaptureSessionIsActive();
+        displayRotationHelper.onPause();
+        closeCamera();
+        stopBackgroundThread();
+
+        super.onPause();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         progressDialog.dismiss();
+    }
+
+    private void startBackgroundThread() {
+        backgroundThread = new HandlerThread("sharedCameraBackground");
+        backgroundThread.start();
+        backgroundHandler = new Handler(backgroundThread.getLooper());
+    }
+
+    // Stop background handler thread.
+    private void stopBackgroundThread() {
+        if (backgroundThread != null) {
+            backgroundThread.quitSafely();
+            try {
+                backgroundThread.join();
+                backgroundThread = null;
+                backgroundHandler = null;
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Interrupted while trying to join background handler thread", e);
+            }
+        }
     }
 
     private void setupToolbar() {
@@ -602,333 +718,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
     }
 
-    private void setupRenderer() {
-        mCameraSurfaceView.setEGLContextClientVersion(2);
-        mRenderer = new CameraSurfaceRenderer(new CameraSurfaceRenderer.RenderCallback() {
-
-            @Override
-            public void preRender() {
-
-                // This is the work that you would do on your main OpenGL render thread.
-
-                // We need to be careful to not run any Tango-dependent code in the OpenGL
-                // thread unless we know the Tango Service to be properly set up and connected.
-                if (!mIsConnected) {
-                    return;
-                }
-
-                try {
-                    // Synchronize against concurrently disconnecting the service triggered from the
-                    // UI thread.
-                    synchronized (this) {
-                        // Connect the Tango SDK to the OpenGL texture ID where we are going to
-                        // render the camera.
-                        // NOTE: This must be done after the texture is generated and the Tango
-                        // service is connected.
-                        if (mConnectedTextureIdGlThread == INVALID_TEXTURE_ID) {
-                            mConnectedTextureIdGlThread = mRenderer.getTextureId();
-                            //sVideoEncoder.setTextureId(mConnectedTextureIdGlThread);
-                            mTango.connectTextureId(TangoCameraIntrinsics.TANGO_CAMERA_COLOR, mConnectedTextureIdGlThread);
-
-                            Log.d(TAG, "connected to texture id: " + mRenderer.getTextureId());
-                        }
-
-                        // If there is a new RGB camera frame available, update the texture and
-                        // scene camera pose.
-                        if (mIsFrameAvailableTangoThread.compareAndSet(true, false)) {
-
-                            double rgbTimestamp = mTango.updateTexture(TangoCameraIntrinsics.TANGO_CAMERA_COLOR);
-
-                            // {@code rgbTimestamp} contains the exact timestamp at which the
-                            // rendered RGB frame was acquired.
-
-                            // In order to see more details on how to use this timestamp to modify
-                            // the scene camera and achieve an augmented reality effect,
-                            // refer to java_augmented_reality_example and/or
-                            // java_augmented_reality_opengl_example projects.
-
-                        }
-                    }
-                } catch (TangoErrorException e) {
-                    Crashes.trackError(e);
-                }
-            }
-        });
-
-        mCameraSurfaceView.setRenderer(mRenderer);
-    }
-
-    private TangoConfig setupTangoConfig(Tango tango) {
-        // Create a new Tango configuration and enable the Camera API.
-        TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
-        config.putBoolean(TangoConfig.KEY_BOOLEAN_COLORCAMERA, true);
-        config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
-        config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
-        return config;
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private void startupTango() {
-        // Lock configuration and connect to Tango.
-        // Select coordinate frame pair.
-        final ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<>();
-        framePairs.add(new TangoCoordinateFramePair(TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE, TangoPoseData.COORDINATE_FRAME_DEVICE));
-
-        // Listen for new Tango data.
-        mTango.connectListener(framePairs, new Tango.TangoUpdateCallback() {
-
-            String[] poseStatusCode = {"POSE_INITIALIZING","POSE_VALID","POSE_INVALID","POSE_UNKNOWN"};
-
-            @Override
-            public void onPoseAvailable(final TangoPoseData pose) {
-                mDeltaTime = (float) (pose.timestamp - mPosePreviousTimeStamp) * SECS_TO_MILLISECS;
-                mPosePreviousTimeStamp = (float) pose.timestamp;
-                if (mPreviousPoseStatus != pose.statusCode) {
-                    mValidPoseCallbackCount = 0;
-                }
-                mValidPoseCallbackCount++;
-                mPreviousPoseStatus = pose.statusCode;
-
-                // My pose buffering
-                if (mIsRecording && pose.statusCode == TangoPoseData.POSE_VALID) {
-                    mPosePositionBuffer.add(mNumPoseInSequence, pose.getTranslationAsFloats());
-                    mPoseOrientationBuffer.add(mNumPoseInSequence, pose.getRotationAsFloats());
-                    mPoseTimestampBuffer.add((float)pose.timestamp);
-                    mNumPoseInSequence++;
-                }
-                //End of My pose buffering
-            }
-
-            @Override
-            public void onPointCloudAvailable(final TangoPointCloudData pointCloudData) throws TangoErrorException {
-                // set to true for next RGB image to be written
-                // TODO remove when not necessary anymore (performance/video capture)
-                mPointCloudAvailable = true;
-
-                float[] average = TangoUtils.calculateAveragedDepth(pointCloudData.points, pointCloudData.numPoints);
-
-                // Get pose transforms for openGL to depth/color cameras.
-                /*
-                try {
-                    TangoPoseData oglTdepthPose = TangoSupport.getPoseAtTime(
-                            pointCloudData.timestamp,
-                            TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
-                            TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
-                            TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
-                            TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
-                            TangoSupport.ROTATION_IGNORED);
-                    if (oglTdepthPose.statusCode != TangoPoseData.POSE_VALID) {
-                        //Log.w(TAG, "Could not get depth camera transform at time " + pointCloudData.timestamp);
-                    }
-                } catch (TangoErrorException e) {
-                    Crashes.trackError(e);
-                }
-                 */
-
-                mCurrentTimeStamp = (float) pointCloudData.timestamp;
-                final float frameDelta = (mCurrentTimeStamp - mPointCloudPreviousTimeStamp) * SECS_TO_MILLISECS;
-                mPointCloudPreviousTimeStamp = mCurrentTimeStamp;
-                mPointCloudCallbackCount++;
-
-
-                try {
-                    mutex_on_mIsRecording.acquire();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    Crashes.trackError(e);
-                }
-                // Saving the frame or not, depending on the current mode.
-                if ( mIsRecording ) {
-                    updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
-                    progressBar.setProgress(mProgress);
-
-                    Runnable thread = () -> {
-                        mPointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
-                                "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
-
-                        TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
-
-                        File artifactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
-                        if (artifactFile.exists()) {
-                            FileLog log = new FileLog();
-                            log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
-                            log.setType("pcd");
-                            log.setPath(artifactFile.getPath());
-                            log.setHashValue(MD5.getMD5(artifactFile.getPath()));
-                            log.setFileSize(artifactFile.length());
-                            log.setUploadDate(0);
-                            log.setDeleted(false);
-                            log.setQrCode(person.getQrcode());
-                            log.setCreateDate(mNowTime);
-                            log.setCreatedBy(session.getUserEmail());
-                            log.setAge(age);
-                            log.setSchema_version(CgmDatabase.version);
-                            log.setMeasureId(measure.getId());
-                            fileLogRepository.insertFileLog(log);
-
-
-                            ArtifactResult ar=new ArtifactResult();
-                            double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
-                            ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
-                            ar.setArtifact_id(AppController.getInstance().getPersonId());
-                            ar.setKey(SCAN_STEP);
-                            ar.setMeasure_id(measure.getId());
-                            ar.setMisc("");
-                            ar.setType("PCD_POINTS_v0.2");
-                            noOfPoints = pointCloudData.numPoints;
-                            ar.setReal(noOfPoints);
-                            artifactResultRepository.insertArtifactResult(ar);
-
-                            Log.e("numbs", String.valueOf(mNumberOfFilesWritten));
-                        }
-                    };
-                    executor.execute(thread);
-
-                    mNumberOfFilesWritten++;
-                }
-                mutex_on_mIsRecording.release();
-            }
-
-
-            @Override
-            public void onFrameAvailable(int cameraId) {
-                // This will get called every time a new RGB camera frame is available to be
-                // rendered.
-                //Log.d(TAG, "onFrameAvailable");
-
-                if (cameraId == TangoCameraIntrinsics.TANGO_CAMERA_COLOR) {
-                    // Now that we are receiving onFrameAvailable callbacks, we can switch
-                    // to RENDERMODE_WHEN_DIRTY to drive the render loop from this callback.
-                    // This will result in a frame rate of approximately 30FPS, in synchrony with
-                    // the RGB camera driver.
-                    // If you need to render at a higher rate (i.e., if you want to render complex
-                    // animations smoothly) you  can use RENDERMODE_CONTINUOUSLY throughout the
-                    // application lifecycle.
-                    if (mCameraSurfaceView.getRenderMode() != GLSurfaceView.RENDERMODE_WHEN_DIRTY) {
-                        mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-                    }
-
-                    // Note that the RGB data is not passed as a parameter here.
-                    // Instead, this callback indicates that you can call
-                    // the {@code updateTexture()} method to have the
-                    // RGB data copied directly to the OpenGL texture at the native layer.
-                    // Since that call needs to be done from the OpenGL thread, what we do here is
-                    // set up a flag to tell the OpenGL thread to do that in the next run.
-                    // NOTE: Even if we are using a render-by-request method, this flag is still
-                    // necessary since the OpenGL thread run requested below is not guaranteed
-                    // to run in synchrony with this requesting call.
-                    mIsFrameAvailableTangoThread.set(true);
-                    // Trigger an OpenGL render to update the OpenGL scene with the new RGB data.
-                    mCameraSurfaceView.requestRender();
-                }
-            }
-        });
-
-        mTango.experimentalConnectOnFrameListener(TangoCameraIntrinsics.TANGO_CAMERA_COLOR, (tangoImageBuffer, i) -> {
-            if ( ! mIsRecording || ! mPointCloudAvailable) {
-                return;
-            }
-
-            Runnable thread = () -> {
-                TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
-
-                String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + currentTangoImageBuffer.timestamp + ".jpg";
-
-                BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
-
-                File artifactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
-                if (artifactFile.exists()) {
-                    FileLog log = new FileLog();
-                    log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
-                    log.setType("rgb");
-                    log.setPath(artifactFile.getPath());
-                    log.setHashValue(MD5.getMD5(artifactFile.getPath()));
-                    log.setFileSize(artifactFile.length());
-                    log.setUploadDate(0);
-                    log.setDeleted(false);
-                    log.setQrCode(person.getQrcode());
-                    log.setCreateDate(mNowTime);
-                    log.setCreatedBy(session.getUserEmail());
-                    log.setAge(age);
-                    log.setSchema_version(CgmDatabase.version);
-                    log.setMeasureId(measure.getId());
-
-                    fileLogRepository.insertFileLog(log);
-                }
-            };
-            executor.execute(thread);
-        });
-    }
-
-    private void setDisplayRotation() {
-        Display display = getWindowManager().getDefaultDisplay();
-        mDisplayRotation = display.getRotation();
-
-        // We also need to update the camera texture UV coordinates. This must be run in the OpenGL
-        // thread.
-        mCameraSurfaceView.queueEvent(() -> {
-            if (mIsConnected) {
-                mRenderer.updateColorCameraTextureUv(mDisplayRotation);
-            }
-        });
-    }
-
-    private void setUpExtrinsics() {
-        // Set device to imu matrix in Model Matrix Calculator.
-        TangoPoseData device2IMUPose = new TangoPoseData();
-        TangoCoordinateFramePair framePair = new TangoCoordinateFramePair();
-        framePair.baseFrame = TangoPoseData.COORDINATE_FRAME_IMU;
-        framePair.targetFrame = TangoPoseData.COORDINATE_FRAME_DEVICE;
-        try {
-            device2IMUPose = mTango.getPoseAtTime(0.0, framePair);
-        } catch (TangoErrorException e) {
-            e.printStackTrace();
-            Crashes.trackError(e);
-        }
-        /*mRenderer.getModelMatCalculator().SetDevice2IMUMatrix(device2IMUPose.getTranslationAsFloats(),device2IMUPose.getRotationAsFloats());*/
-        // Set color camera to imu matrix in Model Matrix Calculator.
-        TangoPoseData color2IMUPose = new TangoPoseData();
-
-        framePair.baseFrame = TangoPoseData.COORDINATE_FRAME_IMU;
-        framePair.targetFrame = TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR;
-        try {
-            color2IMUPose = mTango.getPoseAtTime(0.0, framePair);
-        } catch (TangoErrorException e) {
-            e.printStackTrace();
-            Crashes.trackError(e);
-        }
-
-        //mRenderer.getModelMatCalculator().SetColorCamera2IMUMatrix(color2IMUPose.getTranslationAsFloats(), color2IMUPose.getRotationAsFloats());
-
-        // Get the Camera2Device transform
-        float[] rot_Dev2IMU = device2IMUPose.getRotationAsFloats();
-        float[] trans_Dev2IMU = device2IMUPose.getTranslationAsFloats();
-        float[] rot_Cam2IMU = color2IMUPose.getRotationAsFloats();
-        float[] trans_Cam2IMU = color2IMUPose.getTranslationAsFloats();
-
-        float[] dev2IMU = new float[16];
-        Matrix.setIdentityM(dev2IMU, 0);
-        dev2IMU = ModelMatCalculator.quaternionMatrixOpenGL(rot_Dev2IMU);
-        dev2IMU[12] += trans_Dev2IMU[0];
-        dev2IMU[13] += trans_Dev2IMU[1];
-        dev2IMU[14] += trans_Dev2IMU[2];
-
-        float[] IMU2dev = new float[16];
-        Matrix.setIdentityM(IMU2dev, 0);
-        Matrix.invertM(IMU2dev, 0, dev2IMU, 0);
-
-        float[] cam2IMU = new float[16];
-        Matrix.setIdentityM(cam2IMU, 0);
-        cam2IMU = ModelMatCalculator.quaternionMatrixOpenGL(rot_Cam2IMU);
-        cam2IMU[12] += trans_Cam2IMU[0];
-        cam2IMU[13] += trans_Cam2IMU[1];
-        cam2IMU[14] += trans_Cam2IMU[2];
-
-        cam2dev_Transform = new float[16];
-        Matrix.setIdentityM(cam2dev_Transform, 0);
-        Matrix.multiplyMM(cam2dev_Transform, 0, IMU2dev, 0, cam2IMU, 0);
-    }
-
     private void updateScanningProgress(int numPoints, float distance, float confidence) {
         float minPointsToCompleteScan = 199500.0f;
         float progressToAddFloat = numPoints / minPointsToCompleteScan;
@@ -960,39 +749,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     public void goToNextStep() {
         closeScan();
-
-        /*
-        switch (SCAN_STEP) {
-            case SCAN_STANDING_FRONT:
-            case SCAN_LYING_FRONT:
-                lytScanStep1.setVisibility(View.GONE);
-                btnScanStep1.setText(R.string.retake_scan);
-                btnScanStep1.setTextColor(getResources().getColor(R.color.colorWhite, getTheme()));
-                btnScanStep1.setBackground(getResources().getDrawable(R.drawable.button_green_circular, getTheme()));
-
-                step1 = true;
-                break;
-            case SCAN_STANDING_SIDE:
-            case SCAN_LYING_SIDE:
-                lytScanStep2.setVisibility(View.GONE);
-                btnScanStep2.setText(R.string.retake_scan);
-                btnScanStep2.setTextColor(getResources().getColor(R.color.colorWhite, getTheme()));
-                btnScanStep2.setBackground(getResources().getDrawable(R.drawable.button_green_circular, getTheme()));
-
-                step2 = true;
-                break;
-            case SCAN_STANDING_BACK:
-            case SCAN_LYING_BACK:
-                lytScanStep3.setVisibility(View.GONE);
-                btnScanStep3.setText(R.string.retake_scan);
-                btnScanStep3.setTextColor(getResources().getColor(R.color.colorWhite, getTheme()));
-                btnScanStep3.setBackground(getResources().getDrawable(R.drawable.button_green_circular, getTheme()));
-
-                step3 = true;
-                break;
-        }
-        */
-
         getScanQuality(measure.getId(),SCAN_STEP);
     }
 
@@ -1241,6 +997,367 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 mProgress = 0;
                 break;
         }
+    }
+
+    @Override
+    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+        surfaceCreated = true;
+
+        // Set GL clear color to black.
+        GLES20.glClearColor(0f, 0f, 0.5f, 1.0f);
+
+        // Prepare the rendering objects. This involves reading shaders, so may throw an IOException.
+        try {
+            // Create the camera preview image texture. Used in non-AR and AR mode.
+            backgroundRenderer.createOnGlThread(this);
+            occlusionRenderer.createOnGlThread(this);
+
+            openCamera();
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to read an asset file", e);
+        }
+    }
+
+    @Override
+    public void onSurfaceChanged(GL10 gl10, int width, int height) {
+        GLES20.glViewport(0, 0, width, height);
+        displayRotationHelper.onSurfaceChanged(width, height);
+    }
+
+    @Override
+    public void onDrawFrame(GL10 gl10) {
+        // Use the cGL clear color specified in onSurfaceCreated() to erase the GL surface.
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+
+        if (!shouldUpdateSurfaceTexture.get()) {
+            // Not ready to draw.
+            return;
+        }
+
+        // Handle display rotations.
+        displayRotationHelper.updateSessionIfNeeded(sharedSession);
+
+        try {
+            onDrawFrameCamera2();
+        } catch (Throwable t) {
+            // Avoid crashing the application due to unhandled exceptions.
+            Log.e(TAG, "Exception on the OpenGL thread", t);
+        }
+    }
+
+    public void onDrawFrameCamera2() {
+        SurfaceTexture texture = sharedCamera.getSurfaceTexture();
+
+        // Ensure the surface is attached to the GL context.
+        if (!isGlAttached) {
+            texture.attachToGLContext(backgroundRenderer.getTextureId());
+            isGlAttached = true;
+        }
+
+        // Update the surface.
+        texture.updateTexImage();
+
+        // Account for any difference between camera sensor orientation and display orientation.
+        int rotationDegrees = displayRotationHelper.getCameraSensorToDisplayRotation(cameraId);
+
+        // Determine size of the camera preview image.
+        Size size = sharedSession.getCameraConfig().getTextureSize();
+
+        // Determine aspect ratio of the output GL surface, accounting for the current display rotation
+        // relative to the camera sensor orientation of the device.
+        float displayAspectRatio =
+                displayRotationHelper.getCameraSensorRelativeViewportAspectRatio(cameraId);
+
+        // Render camera preview image to the GL surface.
+        //backgroundRenderer.draw(size.getWidth(), size.getHeight(), displayAspectRatio, rotationDegrees);
+        occlusionRenderer.draw(true);
+    }
+
+    private void openCamera() {
+        // Don't open camera if already opened.
+        if (cameraDevice != null) {
+            return;
+        }
+
+        // Verify CAMERA_PERMISSION has been granted.
+        if (!CameraPermissionHelper.hasCameraPermission(this)) {
+            CameraPermissionHelper.requestCameraPermission(this);
+            return;
+        }
+
+        // Make sure that ARCore is installed, up to date, and supported on this device.
+        if (!isARCoreSupportedAndUpToDate()) {
+            return;
+        }
+
+        if (sharedSession == null) {
+            try {
+                // Create ARCore session that supports camera sharing.
+                sharedSession = new Session(this, EnumSet.of(Session.Feature.SHARED_CAMERA));
+            } catch (UnavailableException e) {
+                Log.e(TAG, "Failed to create ARCore session that supports camera sharing", e);
+                return;
+            }
+
+            // Enable auto focus mode while ARCore is running.
+            Config config = sharedSession.getConfig();
+            config.setFocusMode(Config.FocusMode.AUTO);
+            sharedSession.configure(config);
+        }
+
+        // Store the ARCore shared camera reference.
+        sharedCamera = sharedSession.getSharedCamera();
+
+        // Store the ID of the camera used by ARCore.
+        cameraId = sharedSession.getCameraConfig().getCameraId();
+
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ScanModeActivity.this);
+                    String[] res = occlusionRenderer.getResolutions(ScanModeActivity.this, cameraId).toArray(new String[0]);
+
+                    if (res.length > 0)
+                    {
+                        builder.setTitle("Choose ToF resolution");
+                        builder.setItems(res, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                openCamera(which);
+                                initialized = true;
+                            }
+                        });
+                    } else {
+                        builder.setTitle("Camera2 API: ToF not found");
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                System.exit(0);
+                            }
+                        });
+                    }
+
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+            });
+        }).start();
+    }
+
+    private void openCamera(int index) {
+
+        occlusionRenderer.initCamera(this, cameraId, index);
+
+        // Use the currently configured CPU image size.
+        cpuImageReader = ImageReader.newInstance(occlusionRenderer.getDepthWidth(), occlusionRenderer.getDepthHeight(), ImageFormat.DEPTH16, 2);
+        cpuImageReader.setOnImageAvailableListener(this, backgroundHandler);
+
+        // When ARCore is running, make sure it also updates our CPU image surface.
+        sharedCamera.setAppSurfaces(this.cameraId, Arrays.asList(cpuImageReader.getSurface()));
+
+        try {
+
+            // Wrap our callback in a shared camera callback.
+            CameraDevice.StateCallback wrappedCallback =
+                    sharedCamera.createARDeviceStateCallback(cameraDeviceCallback, backgroundHandler);
+
+            // Store a reference to the camera system service.
+            // Reference to the camera system service.
+            CameraManager cameraManager = (CameraManager) this.getSystemService(Context.CAMERA_SERVICE);
+
+            // Get the characteristics for the ARCore camera.
+            CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(this.cameraId);
+
+            // On Android P and later, get list of keys that are difficult to apply per-frame and can
+            // result in unexpected delays when modified during the capture session lifetime.
+            if (Build.VERSION.SDK_INT >= 28) {
+                keysThatCanCauseCaptureDelaysWhenModified = characteristics.getAvailableSessionKeys();
+                if (keysThatCanCauseCaptureDelaysWhenModified == null) {
+                    // Initialize the list to an empty list if getAvailableSessionKeys() returns null.
+                    keysThatCanCauseCaptureDelaysWhenModified = new ArrayList<>();
+                }
+            }
+
+            // Prevent app crashes due to quick operations on camera open / close by waiting for the
+            // capture session's onActive() callback to be triggered.
+            captureSessionChangesPossible = false;
+
+            // Open the camera device using the ARCore wrapped callback.
+            cameraManager.openCamera(cameraId, wrappedCallback, backgroundHandler);
+        } catch (CameraAccessException | IllegalArgumentException | SecurityException e) {
+            Log.e(TAG, "Failed to open camera", e);
+        }
+    }
+
+    private void closeCamera() {
+        if (captureSession != null) {
+            captureSession.close();
+            captureSession = null;
+        }
+        if (cameraDevice != null) {
+            waitUntilCameraCaptureSessionIsActive();
+            safeToExitApp.close();
+            cameraDevice.close();
+            safeToExitApp.block();
+        }
+        if (cpuImageReader != null) {
+            cpuImageReader.close();
+            cpuImageReader = null;
+        }
+    }
+
+    private void resumeCamera2() {
+        setRepeatingCaptureRequest();
+        sharedCamera.getSurfaceTexture().setOnFrameAvailableListener(this);
+    }
+
+    private void setRepeatingCaptureRequest() {
+        try {
+            captureSession.setRepeatingRequest(
+                    previewCaptureRequestBuilder.build(), captureSessionCallback, backgroundHandler);
+        } catch (CameraAccessException e) {
+            Log.e(TAG, "Failed to set repeating request", e);
+        }
+    }
+
+    private synchronized void waitUntilCameraCaptureSessionIsActive() {
+        while (!captureSessionChangesPossible) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Unable to wait for a safe time to make changes to the capture session", e);
+            }
+        }
+    }
+
+    private boolean isARCoreSupportedAndUpToDate() {
+        // Make sure ARCore is installed and supported on this device.
+        ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(this);
+        switch (availability) {
+            case SUPPORTED_INSTALLED:
+                break;
+            case SUPPORTED_APK_TOO_OLD:
+            case SUPPORTED_NOT_INSTALLED:
+                try {
+                    // Request ARCore installation or update if needed.
+                    ArCoreApk.InstallStatus installStatus =
+                            ArCoreApk.getInstance().requestInstall(this, /*userRequestedInstall=*/ true);
+                    switch (installStatus) {
+                        case INSTALL_REQUESTED:
+                            Log.e(TAG, "ARCore installation requested.");
+                            return false;
+                        case INSTALLED:
+                            break;
+                    }
+                } catch (UnavailableException e) {
+                    Log.e(TAG, "ARCore not installed", e);
+                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "ARCore not installed\n" + e, Toast.LENGTH_LONG).show());
+                    finish();
+                    return false;
+                }
+                break;
+            case UNKNOWN_ERROR:
+            case UNKNOWN_CHECKING:
+            case UNKNOWN_TIMED_OUT:
+            case UNSUPPORTED_DEVICE_NOT_CAPABLE:
+                Log.e(
+                        TAG,
+                        "ARCore is not supported on this device, ArCoreApk.checkAvailability() returned "
+                                + availability);
+                runOnUiThread(
+                        () ->
+                                Toast.makeText(
+                                        getApplicationContext(),
+                                        "ARCore is not supported on this device, "
+                                                + "ArCoreApk.checkAvailability() returned "
+                                                + availability,
+                                        Toast.LENGTH_LONG)
+                                        .show());
+                return false;
+        }
+        return true;
+    }
+
+    private void createCameraPreviewSession() {
+        try {
+            // Note that isGlAttached will be set to true in AR mode in onDrawFrame().
+            sharedSession.setCameraTextureName(backgroundRenderer.getTextureId());
+            sharedCamera.getSurfaceTexture().setOnFrameAvailableListener(this);
+
+            // Create an ARCore compatible capture request using `TEMPLATE_RECORD`.
+            previewCaptureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+
+            // Build surfaces list, starting with ARCore provided surfaces.
+            List<Surface> surfaceList = sharedCamera.getArCoreSurfaces();
+
+            // Add a CPU image reader surface. On devices that don't support CPU image access, the image
+            // may arrive significantly later, or not arrive at all.
+            surfaceList.add(cpuImageReader.getSurface());
+
+            // Surface list should now contain three surfaces:
+            // 0. sharedCamera.getSurfaceTexture()
+            // 1. …
+            // 2. cpuImageReader.getSurface()
+
+            // Add ARCore surfaces and CPU image surface targets.
+            for (Surface surface : surfaceList) {
+                previewCaptureRequestBuilder.addTarget(surface);
+            }
+
+            // Wrap our callback in a shared camera callback.
+            CameraCaptureSession.StateCallback wrappedCallback = sharedCamera.createARSessionStateCallback(cameraCaptureCallback, backgroundHandler);
+
+            // Create camera capture session for camera preview using ARCore wrapped callback.
+            cameraDevice.createCaptureSession(surfaceList, wrappedCallback, backgroundHandler);
+        } catch (CameraAccessException e) {
+            Log.e(TAG, "CameraAccessException", e);
+        }
+    }
+
+    @Override
+    public void onImageAvailable(ImageReader imageReader) {
+        Image image = imageReader.acquireLatestImage();
+        if (image == null) {
+            Log.w(TAG, "onImageAvailable: Skipping null image.");
+            return;
+        }
+
+        Image.Plane plane = image.getPlanes()[0];
+        ShortBuffer shortDepthBuffer = plane.getBuffer().asShortBuffer();
+        ArrayList<Short> pixel = new ArrayList<Short>();
+        while (shortDepthBuffer.hasRemaining()) {
+            pixel.add(shortDepthBuffer.get());
+        }
+        int stride = plane.getRowStride();
+
+        int offset = 0;
+        float[] output = new float[image.getWidth() * image.getHeight()];
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                int depthSample = pixel.get((int)(y / 2) * stride + x);
+                int depthRange = (depthSample & 0x1FFF);
+                int depthConfidence = ((depthSample >> 13) & 0x7);
+                float depthPercentage = depthConfidence == 0 ? 1.f : (depthConfidence - 1) / 7.f;
+                output[offset + x] = 0.0001f * depthRange;
+            }
+            offset += image.getWidth();
+        }
+        image.close();
+
+        occlusionRenderer.update(output);
+    }
+
+    @Override
+    public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+
     }
 
     @SuppressLint("StaticFieldLeak")
