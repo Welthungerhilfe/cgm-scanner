@@ -69,9 +69,12 @@ import com.microsoft.azure.storage.queue.CloudQueueClient;
 import com.microsoft.azure.storage.queue.CloudQueueMessage;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
+import java.nio.channels.FileChannel;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -992,6 +995,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case R.id.imgClose:
                 closeScan();
+                closeCamera();
                 break;
             case R.id.btnRetake:
                 mProgress = 0;
@@ -1330,11 +1334,24 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
+        File out = new File(AppController.getInstance().getRootDirectory(), String.format("depth16/out%d.depth16", System.currentTimeMillis()));
+
         Image.Plane plane = image.getPlanes()[0];
-        ShortBuffer shortDepthBuffer = plane.getBuffer().asShortBuffer();
+        ByteBuffer buffer = plane.getBuffer();
+        ShortBuffer shortBuffer = buffer.asShortBuffer();
+        try {
+            FileOutputStream stream = new FileOutputStream(out);
+            FileChannel channel = stream.getChannel();
+            channel.write(buffer);
+            stream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         ArrayList<Short> pixel = new ArrayList<Short>();
-        while (shortDepthBuffer.hasRemaining()) {
-            pixel.add(shortDepthBuffer.get());
+        while (shortBuffer.hasRemaining()) {
+            pixel.add(shortBuffer.get());
         }
         int stride = plane.getRowStride();
 
