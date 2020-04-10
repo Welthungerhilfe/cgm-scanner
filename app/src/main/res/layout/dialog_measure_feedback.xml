@@ -49,13 +49,14 @@
             android:textColor="@color/colorGreyDark"
             android:textStyle="bold"/>
 
-        <TextView
-            android:id="@+id/txtOverallScore"
+        <android.support.v7.widget.AppCompatRatingBar
+            android:id="@+id/ratingOverall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="@color/colorPrimary" />
+            android:isIndicator="true"
+            style="@style/CustomRatingBar"
+            android:numStars="5"
+            android:rating="3.5"/>
 
     </LinearLayout>
 
@@ -63,34 +64,156 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:gravity="center_vertical">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:singleLine="true"
             android:textSize="20sp"
             android:textColor="@color/colorPrimary"
             android:text="@string/front_scan"/>
 
-        <TextView
-            android:id="@+id/txtScoreStep1"
+        <android.support.v7.widget.AppCompatRatingBar
+            android:id="@+id/ratingStep1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="@color/colorPrimary" />
+            android:isIndicator="true"
+            style="@style/CustomRatingBar"
+            android:numStars="5"
+            android:rating="3.5"/>
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/txtFrontFeedback"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textColor="@color/colorBlack" />
+        android:orientation="vertical"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_feedback_light"/>
+
+            <android.support.v7.widget.AppCompatRatingBar
+                android:id="@+id/ratingLightStep1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:isIndicator="true"
+                style="@style/CustomRatingBar"
+                android:numStars="5"
+                android:rating="3.5"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_feedback_duration"/>
+
+            <android.support.v7.widget.AppCompatRatingBar
+                android:id="@+id/ratingDurationStep1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:isIndicator="true"
+                style="@style/CustomRatingBar"
+                android:numStars="5"
+                android:rating="3.5"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_feedback_precision"/>
+
+            <android.support.v7.widget.AppCompatRatingBar
+                android:id="@+id/ratingPrecisionStep1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:isIndicator="true"
+                style="@style/CustomRatingBar"
+                android:numStars="5"
+                android:rating="3.5"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_feedback_visibility"/>
+
+            <android.support.v7.widget.AppCompatRatingBar
+                android:id="@+id/ratingVisibilityStep1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:isIndicator="true"
+                style="@style/CustomRatingBar"
+                android:numStars="5"
+                android:rating="3.5"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_feedback_child_no"/>
+
+            <android.support.v7.widget.AppCompatRatingBar
+                android:id="@+id/ratingChildNoStep1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:isIndicator="true"
+                style="@style/CustomRatingBar"
+                android:numStars="5"
+                android:rating="3.5"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -100,30 +223,153 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:singleLine="true"
             android:textSize="20sp"
             android:textColor="@color/colorPrimary"
             android:text="@string/side_scan"/>
 
-        <TextView
-            android:id="@+id/txtScoreStep2"
+        <android.support.v7.widget.AppCompatRatingBar
+            android:id="@+id/ratingStep2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="@color/colorPrimary" />
+            android:isIndicator="true"
+            style="@style/CustomRatingBar"
+            android:numStars="5"
+            android:rating="3.5"/>
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/txtSideFeedback"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textColor="@color/colorBlack" />
+        android:orientation="vertical"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_feedback_light"/>
+
+            <android.support.v7.widget.AppCompatRatingBar
+                android:id="@+id/ratingLightStep2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:isIndicator="true"
+                style="@style/CustomRatingBar"
+                android:numStars="5"
+                android:rating="3.5"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_feedback_duration"/>
+
+            <android.support.v7.widget.AppCompatRatingBar
+                android:id="@+id/ratingDurationStep2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:isIndicator="true"
+                style="@style/CustomRatingBar"
+                android:numStars="5"
+                android:rating="3.5"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_feedback_precision"/>
+
+            <android.support.v7.widget.AppCompatRatingBar
+                android:id="@+id/ratingPrecisionStep2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:isIndicator="true"
+                style="@style/CustomRatingBar"
+                android:numStars="5"
+                android:rating="3.5"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_feedback_visibility"/>
+
+            <android.support.v7.widget.AppCompatRatingBar
+                android:id="@+id/ratingVisibilityStep2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:isIndicator="true"
+                style="@style/CustomRatingBar"
+                android:numStars="5"
+                android:rating="3.5"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_feedback_child_no"/>
+
+            <android.support.v7.widget.AppCompatRatingBar
+                android:id="@+id/ratingChildNoStep2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:isIndicator="true"
+                style="@style/CustomRatingBar"
+                android:numStars="5"
+                android:rating="3.5"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -133,30 +379,153 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:singleLine="true"
             android:textSize="20sp"
             android:textColor="@color/colorPrimary"
             android:text="@string/back_scan"/>
 
-        <TextView
-            android:id="@+id/txtScoreStep3"
+        <android.support.v7.widget.AppCompatRatingBar
+            android:id="@+id/ratingStep3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="@color/colorPrimary" />
+            android:isIndicator="true"
+            style="@style/CustomRatingBar"
+            android:numStars="5"
+            android:rating="3.5"/>
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/txtBackFeedback"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textColor="@color/colorBlack" />
+        android:orientation="vertical"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_feedback_light"/>
+
+            <android.support.v7.widget.AppCompatRatingBar
+                android:id="@+id/ratingLightStep3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:isIndicator="true"
+                style="@style/CustomRatingBar"
+                android:numStars="5"
+                android:rating="3.5"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_feedback_duration"/>
+
+            <android.support.v7.widget.AppCompatRatingBar
+                android:id="@+id/ratingDurationStep3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:isIndicator="true"
+                style="@style/CustomRatingBar"
+                android:numStars="5"
+                android:rating="3.5"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_feedback_precision"/>
+
+            <android.support.v7.widget.AppCompatRatingBar
+                android:id="@+id/ratingPrecisionStep3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:isIndicator="true"
+                style="@style/CustomRatingBar"
+                android:numStars="5"
+                android:rating="3.5"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_feedback_visibility"/>
+
+            <android.support.v7.widget.AppCompatRatingBar
+                android:id="@+id/ratingVisibilityStep3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                style="@style/CustomRatingBar"
+                android:isIndicator="true"
+                android:numStars="5"
+                android:rating="3.5"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_feedback_child_no"/>
+
+            <android.support.v7.widget.AppCompatRatingBar
+                android:id="@+id/ratingChildNoStep3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:isIndicator="true"
+                style="@style/CustomRatingBar"
+                android:numStars="5"
+                android:rating="3.5"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/btnOK"
