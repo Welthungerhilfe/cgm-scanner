@@ -27,10 +27,12 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.AppCompatRatingBar;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.Collections;
@@ -98,6 +100,13 @@ public class FeedbackDialog extends Dialog {
     @BindView(R.id.ratingChildNoStep3)
     AppCompatRatingBar ratingChildNoStep3;
 
+
+    @BindView(R.id.lytPrecisionStep1)
+    LinearLayout lytPrecisionStep1;
+    @BindView(R.id.lytPrecisionStep2)
+    LinearLayout lytPrecisionStep2;
+    @BindView(R.id.lytPrecisionStep3)
+    LinearLayout lytPrecisionStep3;
 
     @OnClick(R.id.btnOK)
     void OnConfirm() {
@@ -207,15 +216,27 @@ public class FeedbackDialog extends Dialog {
 
                 ratingLightStep1.setRating(5 * (float)lightScoreFront);
                 ratingDurationStep1.setRating(5 * (float)durationScoreFront);
-                ratingPrecisionStep1.setRating(5 * frontHeightConfidence);
+
+                if (frontHeightConfidence > 0) {
+                    lytPrecisionStep1.setVisibility(View.VISIBLE);
+                    ratingPrecisionStep1.setRating(5 * frontHeightConfidence);
+                }
 
                 ratingLightStep2.setRating(5 * (float)lightScoreSide);
                 ratingDurationStep2.setRating(5 * (float)durationScoreSide);
-                ratingPrecisionStep2.setRating(5 * sideHeightConfidence);
+
+                if (sideHeightConfidence > 0) {
+                    lytPrecisionStep2.setVisibility(View.VISIBLE);
+                    ratingPrecisionStep2.setRating(5 * sideHeightConfidence);
+                }
 
                 ratingLightStep3.setRating(5 * (float)lightScoreBack);
                 ratingDurationStep3.setRating(5 * (float)durationScoreBack);
-                ratingPrecisionStep3.setRating(5 * backHeightConfidence);
+
+                if (backHeightConfidence > 0) {
+                    lytPrecisionStep3.setVisibility(View.VISIBLE);
+                    ratingPrecisionStep3.setRating(5 * backHeightConfidence);
+                }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }

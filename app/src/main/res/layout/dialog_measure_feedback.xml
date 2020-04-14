@@ -56,7 +56,7 @@
             android:isIndicator="true"
             style="@style/CustomRatingBar"
             android:numStars="5"
-            android:rating="3.5"/>
+            android:rating="0"/>
 
     </LinearLayout>
 
@@ -82,7 +82,7 @@
             android:isIndicator="true"
             style="@style/CustomRatingBar"
             android:numStars="5"
-            android:rating="3.5"/>
+            android:rating="0"/>
 
     </LinearLayout>
 
@@ -113,7 +113,7 @@
                 android:isIndicator="true"
                 style="@style/CustomRatingBar"
                 android:numStars="5"
-                android:rating="3.5"/>
+                android:rating="0"/>
 
         </LinearLayout>
 
@@ -137,11 +137,13 @@
                 android:isIndicator="true"
                 style="@style/CustomRatingBar"
                 android:numStars="5"
-                android:rating="3.5"/>
+                android:rating="0"/>
 
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/lytPrecisionStep1"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -161,11 +163,13 @@
                 android:isIndicator="true"
                 style="@style/CustomRatingBar"
                 android:numStars="5"
-                android:rating="3.5"/>
+                android:rating="0"/>
 
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/lytVisibilityStep1"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -185,11 +189,13 @@
                 android:isIndicator="true"
                 style="@style/CustomRatingBar"
                 android:numStars="5"
-                android:rating="3.5"/>
+                android:rating="0"/>
 
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/lytChildNumStep1"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -209,7 +215,7 @@
                 android:isIndicator="true"
                 style="@style/CustomRatingBar"
                 android:numStars="5"
-                android:rating="3.5"/>
+                android:rating="0"/>
 
         </LinearLayout>
 
@@ -238,7 +244,7 @@
             android:isIndicator="true"
             style="@style/CustomRatingBar"
             android:numStars="5"
-            android:rating="3.5"/>
+            android:rating="0"/>
 
     </LinearLayout>
 
@@ -269,7 +275,7 @@
                 android:isIndicator="true"
                 style="@style/CustomRatingBar"
                 android:numStars="5"
-                android:rating="3.5"/>
+                android:rating="0"/>
 
         </LinearLayout>
 
@@ -293,11 +299,13 @@
                 android:isIndicator="true"
                 style="@style/CustomRatingBar"
                 android:numStars="5"
-                android:rating="3.5"/>
+                android:rating="0"/>
 
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/lytPrecisionStep2"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -317,11 +325,13 @@
                 android:isIndicator="true"
                 style="@style/CustomRatingBar"
                 android:numStars="5"
-                android:rating="3.5"/>
+                android:rating="0"/>
 
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/lytVisibilityStep2"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -341,11 +351,13 @@
                 android:isIndicator="true"
                 style="@style/CustomRatingBar"
                 android:numStars="5"
-                android:rating="3.5"/>
+                android:rating="0"/>
 
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/lytChildNumStep2"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -365,7 +377,7 @@
                 android:isIndicator="true"
                 style="@style/CustomRatingBar"
                 android:numStars="5"
-                android:rating="3.5"/>
+                android:rating="0"/>
 
         </LinearLayout>
 
@@ -394,7 +406,7 @@
             android:isIndicator="true"
             style="@style/CustomRatingBar"
             android:numStars="5"
-            android:rating="3.5"/>
+            android:rating="0"/>
 
     </LinearLayout>
 
@@ -425,7 +437,7 @@
                 android:isIndicator="true"
                 style="@style/CustomRatingBar"
                 android:numStars="5"
-                android:rating="3.5"/>
+                android:rating="0"/>
 
         </LinearLayout>
 
@@ -449,11 +461,13 @@
                 android:isIndicator="true"
                 style="@style/CustomRatingBar"
                 android:numStars="5"
-                android:rating="3.5"/>
+                android:rating="0"/>
 
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/lytPrecisionStep3"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -473,11 +487,13 @@
                 android:isIndicator="true"
                 style="@style/CustomRatingBar"
                 android:numStars="5"
-                android:rating="3.5"/>
+                android:rating="0"/>
 
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/lytVisibilityStep3"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -497,11 +513,13 @@
                 style="@style/CustomRatingBar"
                 android:isIndicator="true"
                 android:numStars="5"
-                android:rating="3.5"/>
+                android:rating="0"/>
 
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/lytChildNumStep3"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -521,7 +539,7 @@
                 android:isIndicator="true"
                 style="@style/CustomRatingBar"
                 android:numStars="5"
-                android:rating="3.5"/>
+                android:rating="0"/>
 
         </LinearLayout>
 
