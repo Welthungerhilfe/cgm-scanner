@@ -54,9 +54,12 @@ import com.microsoft.azure.storage.queue.CloudQueueClient;
 import com.microsoft.azure.storage.queue.CloudQueueMessage;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
+import java.nio.channels.FileChannel;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -885,8 +888,23 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
+        File dir = new File(AppController.getInstance().getRootDirectory(), "depth16/");
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+        File out = new File(dir, String.format("out%d.depth16", System.currentTimeMillis()));
         Image.Plane plane = image.getPlanes()[0];
-        ShortBuffer shortDepthBuffer = plane.getBuffer().asShortBuffer();
+        ByteBuffer buffer = plane.getBuffer();
+        ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
+        try {
+            FileOutputStream stream = new FileOutputStream(out);
+            FileChannel channel = stream.getChannel();
+            channel.write(buffer);
+            stream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         ArrayList<Short> pixel = new ArrayList<>();
         while (shortDepthBuffer.hasRemaining()) {
             pixel.add(shortDepthBuffer.get());
