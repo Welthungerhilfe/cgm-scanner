@@ -100,28 +100,9 @@ public class OcclusionRenderer {
     return output;
   }
 
-  public void initCamera(Context context, String cameraId, int index) {
-    boolean ok = false;
-    try {
-      int current = 0;
-      CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
-      CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
-      for (Size s : characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.DEPTH16)) {
-        depthWidth = s.getWidth();
-        depthHeight = s.getHeight();
-        ok = true;
-        if (current == index)
-          break;
-        else;
-          current++;
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    if (!ok) {
-      Log.e("ARCoreApp", "Depth sensor not found!");
-      System.exit(1);
-    }
+  public void initCamera(int width, int height) {
+    depthWidth = width;
+    depthHeight = height;
   }
 
   public synchronized void update(float[] data) {
@@ -132,8 +113,8 @@ public class OcclusionRenderer {
     for (int y = 0; y < depthHeight; y++) {
       for (int x = 0; x < depthWidth; x++) {
         if (data[input] > 0) {
-          array[index++] = 2.0f * (x + 0.5f) / (float)depthWidth - 1.0f;
           array[index++] = -2.0f * (y + 0.5f) / (float)depthHeight + 1.0f;
+          array[index++] = -2.0f * (x + 0.5f) / (float)depthWidth + 1.0f;
           array[index++] = data[input];
           numPoints++;
         }
@@ -151,7 +132,7 @@ public class OcclusionRenderer {
    * Renders the point cloud. ARCore point cloud is given in world space.
    *
    */
-  public synchronized void draw(boolean render) {
+  public synchronized void draw(boolean render, float pointSize) {
 
     if (verticesBuffer == null)
       return;
@@ -163,7 +144,7 @@ public class OcclusionRenderer {
     GLES20.glUseProgram(programName);
     GLES20.glEnableVertexAttribArray(positionAttribute);
     GLES20.glVertexAttribPointer(positionAttribute, FLOATS_PER_POINT, GLES20.GL_FLOAT, false, BYTES_PER_POINT, verticesBuffer);
-    GLES20.glUniform1f(pointSizeUniform, 125.0f);
+    GLES20.glUniform1f(pointSizeUniform, pointSize);
 
     GLES20.glDrawArrays(GLES20.GL_POINTS, 0, numPoints);
     GLES20.glDisableVertexAttribArray(positionAttribute);
