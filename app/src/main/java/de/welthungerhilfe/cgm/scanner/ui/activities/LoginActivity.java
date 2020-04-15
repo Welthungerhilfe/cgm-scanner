@@ -181,6 +181,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     }
 
     private void doSignInAction() {
+        startActivity(new Intent(getApplicationContext(), MainActivity.class));
+    }
+
+    /*private void doSignInAction() {
         Auth.signIn().thenAccept(signInResult -> {
 
             if (signInResult.getException() == null) {
@@ -241,5 +245,5 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 Toast.makeText(LoginActivity.this, R.string.error_login, Toast.LENGTH_LONG).show();
             }
         });
-    }
+    }*/
 }

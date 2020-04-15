@@ -8,30 +8,23 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.TotalCaptureResult;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.Image;
 import android.media.ImageReader;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -41,8 +34,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.Size;
-import android.view.Display;
 import android.view.MenuItem;
 import android.view.Surface;
 import android.view.View;
@@ -55,13 +46,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.ar.core.ArCoreApk;
-import com.google.ar.core.Config;
-import com.google.ar.core.Session;
-import com.google.ar.core.SharedCamera;
-import com.google.ar.core.exceptions.UnavailableException;
 import com.google.gson.Gson;
-import com.microsoft.appcenter.crashes.Crashes;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.queue.CloudQueue;
@@ -69,20 +54,13 @@ import com.microsoft.azure.storage.queue.CloudQueueClient;
 import com.microsoft.azure.storage.queue.CloudQueueMessage;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
-import java.nio.channels.FileChannel;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
+import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -92,39 +70,31 @@ import javax.microedition.khronos.opengles.GL10;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
-import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.helper.arcore.render.BackgroundRenderer;
-import de.welthungerhilfe.cgm.scanner.helper.arcore.render.OcclusionRenderer;
-import de.welthungerhilfe.cgm.scanner.helper.arcore.tool.CameraPermissionHelper;
-import de.welthungerhilfe.cgm.scanner.helper.arcore.tool.DisplayRotationHelper;
-import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
-import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
-import de.welthungerhilfe.cgm.scanner.helper.tango.CameraSurfaceRenderer;
-import de.welthungerhilfe.cgm.scanner.helper.tango.ModelMatCalculator;
-import de.welthungerhilfe.cgm.scanner.helper.tango.OverlaySurface;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.helper.camera2.DepthmapRenderer;
+import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
+import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
+import de.welthungerhilfe.cgm.scanner.helper.tango.CameraSurfaceRenderer;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.MULTI_UPLOAD_BUNCH;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_BACK;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_FRONT;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_SIDE;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_PREVIEW;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_BACK;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_FRONT;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_SIDE;
@@ -404,143 +374,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private AlertDialog progressDialog;
 
-
-    // Google AR Core
-    private DisplayRotationHelper displayRotationHelper;
-
-    private boolean surfaceCreated;
-
-    private final BackgroundRenderer backgroundRenderer = new BackgroundRenderer();
-    private final OcclusionRenderer occlusionRenderer = new OcclusionRenderer();
-
-    private final AtomicBoolean shouldUpdateSurfaceTexture = new AtomicBoolean(false);
-
-    private Session sharedSession;
-
-    private CameraDevice cameraDevice;
-
-    private SharedCamera sharedCamera;
-
-    private String cameraId;
-
-    boolean initialized = false;
-
-    private ImageReader cpuImageReader;
-
-    private HandlerThread backgroundThread;
-    private Handler backgroundHandler;
-
-    private List<CaptureRequest.Key<?>> keysThatCanCauseCaptureDelaysWhenModified;
-
-    private boolean captureSessionChangesPossible = true;
-
-    private CaptureRequest.Builder previewCaptureRequestBuilder;
-
-    private final ConditionVariable safeToExitApp = new ConditionVariable();
-
-    boolean isGlAttached;
-
-    private CameraCaptureSession captureSession;
-
-    private final CameraDevice.StateCallback cameraDeviceCallback = new CameraDevice.StateCallback() {
-        @Override
-        public void onOpened(CameraDevice cameraDevice) {
-            Log.d(TAG, "Camera device ID " + cameraDevice.getId() + " opened.");
-            ScanModeActivity.this.cameraDevice = cameraDevice;
-            createCameraPreviewSession();
-        }
-
-        @Override
-        public void onClosed(CameraDevice cameraDevice) {
-            Log.d(TAG, "Camera device ID " + cameraDevice.getId() + " closed.");
-            ScanModeActivity.this.cameraDevice = null;
-            safeToExitApp.open();
-        }
-
-        @Override
-        public void onDisconnected(CameraDevice cameraDevice) {
-            Log.w(TAG, "Camera device ID " + cameraDevice.getId() + " disconnected.");
-            cameraDevice.close();
-            ScanModeActivity.this.cameraDevice = null;
-        }
-
-        @Override
-        public void onError(CameraDevice cameraDevice, int error) {
-            Log.e(TAG, "Camera device ID " + cameraDevice.getId() + " error " + error);
-            cameraDevice.close();
-            ScanModeActivity.this.cameraDevice = null;
-            // Fatal error. Quit application.
-            finish();
-        }
-    };
-
-    CameraCaptureSession.StateCallback cameraCaptureCallback = new CameraCaptureSession.StateCallback() {
-        // Called when the camera capture session is first configured after the app
-        // is initialized, and again each time the activity is resumed.
-        @Override
-        public void onConfigured(CameraCaptureSession session) {
-            Log.d(TAG, "Camera capture session configured.");
-            captureSession = session;
-            resumeCamera2();
-        }
-
-        @Override
-        public void onSurfacePrepared(
-                CameraCaptureSession session, Surface surface) {
-            Log.d(TAG, "Camera capture surface prepared.");
-        }
-
-        @Override
-        public void onReady(CameraCaptureSession session) {
-            Log.d(TAG, "Camera capture session ready.");
-        }
-
-        @Override
-        public void onActive(CameraCaptureSession session) {
-            Log.d(TAG, "Camera capture session active.");
-            synchronized (ScanModeActivity.this) {
-                captureSessionChangesPossible = true;
-                ScanModeActivity.this.notify();
-            }
-        }
-
-        @Override
-        public void onCaptureQueueEmpty(CameraCaptureSession session) {
-            Log.w(TAG, "Camera capture queue empty.");
-        }
-
-        @Override
-        public void onClosed(CameraCaptureSession session) {
-            Log.d(TAG, "Camera capture session closed.");
-        }
-
-        @Override
-        public void onConfigureFailed(CameraCaptureSession session) {
-            Log.e(TAG, "Failed to configure camera capture session.");
-        }
-    };
-
-    private final CameraCaptureSession.CaptureCallback captureSessionCallback = new CameraCaptureSession.CaptureCallback() {
-        @Override
-        public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
-            shouldUpdateSurfaceTexture.set(true);
-        }
-
-        @Override
-        public void onCaptureBufferLost(CameraCaptureSession session, CaptureRequest request, Surface target, long frameNumber) {
-            Log.e(TAG, "onCaptureBufferLost: " + frameNumber);
-        }
-
-        @Override
-        public void onCaptureFailed(CameraCaptureSession session, CaptureRequest request, CaptureFailure failure) {
-            Log.e(TAG, "onCaptureFailed: " + failure.getFrameNumber() + " " + failure.getReason());
-        }
-
-        @Override
-        public void onCaptureSequenceAborted(CameraCaptureSession session, int sequenceId) {
-            Log.e(TAG, "onCaptureSequenceAborted: " + sequenceId + " " + session);
-        }
-    };
+    //Camera2 API
+    private ImageReader mImageReader;
+    private CameraDevice mCameraDevice;
+    private final DepthmapRenderer depthmapRenderer = new DepthmapRenderer();
 
     public void onStart() {
         super.onStart();
@@ -606,8 +443,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         mCameraSurfaceView.setRenderer(this);
         mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
-        // Helpers, see hello_ar_java sample to learn more.
-        displayRotationHelper = new DisplayRotationHelper(this);
+        depthmapRenderer.initCamera(this);
 
         measureRepository = MeasureRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
@@ -633,26 +469,14 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     protected void onResume() {
         super.onResume();
 
-        waitUntilCameraCaptureSessionIsActive();
-        startBackgroundThread();
-
+        openCamera();
         mCameraSurfaceView.onResume();
-
-        if (surfaceCreated) {
-            if (initialized) System.exit(0);
-            openCamera();
-        }
-
-        displayRotationHelper.onResume();
     }
 
     @Override
     protected void onPause() {
-        mCameraSurfaceView.onPause();
-        waitUntilCameraCaptureSessionIsActive();
-        displayRotationHelper.onPause();
         closeCamera();
-        stopBackgroundThread();
+        mCameraSurfaceView.onPause();
 
         super.onPause();
     }
@@ -661,26 +485,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     public void onDestroy() {
         super.onDestroy();
         progressDialog.dismiss();
-    }
-
-    private void startBackgroundThread() {
-        backgroundThread = new HandlerThread("sharedCameraBackground");
-        backgroundThread.start();
-        backgroundHandler = new Handler(backgroundThread.getLooper());
-    }
-
-    // Stop background handler thread.
-    private void stopBackgroundThread() {
-        if (backgroundThread != null) {
-            backgroundThread.quitSafely();
-            try {
-                backgroundThread.join();
-                backgroundThread = null;
-                backgroundHandler = null;
-            } catch (InterruptedException e) {
-                Log.e(TAG, "Interrupted while trying to join background handler thread", e);
-            }
-        }
     }
 
     private void setupToolbar() {
@@ -1003,307 +807,76 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
+    /**
+     * Opens the camera
+     */
+    private void openCamera() {
+        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_CAMERA);
+            return;
+        }
+        mImageReader = ImageReader.newInstance(depthmapRenderer.getDepthWidth(),
+                depthmapRenderer.getDepthHeight(),
+                ImageFormat.DEPTH16, 5);
+        mImageReader.setOnImageAvailableListener(this, null);
+        CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+        try {
+            manager.openCamera(depthmapRenderer.getDepthCameraId(), callBack, null);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException("Interrupted while trying to lock camera opening.", e);
+        }
+    }
+
+    /**
+     * Closes the current {@link CameraDevice}.
+     */
+    private void closeCamera() {
+        if (null != mImageReader) {
+            mImageReader.close();
+            mImageReader = null;
+        }
+        if (null != mCameraDevice)
+        {
+            mCameraDevice.close();
+            mCameraDevice = null;
+            System.exit(0);
+        }
+    }
+
+    // GL surface created callback. Will be called on the GL thread.
     @Override
-    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        surfaceCreated = true;
-
-        // Set GL clear color to black.
-        GLES20.glClearColor(0f, 0f, 0.5f, 1.0f);
-
+    public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         // Prepare the rendering objects. This involves reading shaders, so may throw an IOException.
         try {
-            // Create the camera preview image texture. Used in non-AR and AR mode.
-            backgroundRenderer.createOnGlThread(this);
-            occlusionRenderer.createOnGlThread(this);
-
-            openCamera();
+            depthmapRenderer.createOnGlThread(this);
         } catch (IOException e) {
             Log.e(TAG, "Failed to read an asset file", e);
         }
     }
 
+    // GL surface changed callback. Will be called on the GL thread.
     @Override
-    public void onSurfaceChanged(GL10 gl10, int width, int height) {
+    public void onSurfaceChanged(GL10 gl, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
-        displayRotationHelper.onSurfaceChanged(width, height);
     }
 
+    // GL draw callback. Will be called each frame on the GL thread.
     @Override
-    public void onDrawFrame(GL10 gl10) {
+    public void onDrawFrame(GL10 gl) {
         // Use the cGL clear color specified in onSurfaceCreated() to erase the GL surface.
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        if (!shouldUpdateSurfaceTexture.get()) {
-            // Not ready to draw.
-            return;
-        }
-
-        // Handle display rotations.
-        displayRotationHelper.updateSessionIfNeeded(sharedSession);
-
         try {
-            onDrawFrameCamera2();
+            depthmapRenderer.draw(this, 1);
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
         }
     }
 
-    public void onDrawFrameCamera2() {
-        SurfaceTexture texture = sharedCamera.getSurfaceTexture();
-
-        // Ensure the surface is attached to the GL context.
-        if (!isGlAttached) {
-            texture.attachToGLContext(backgroundRenderer.getTextureId());
-            isGlAttached = true;
-        }
-
-        // Update the surface.
-        texture.updateTexImage();
-
-        // Account for any difference between camera sensor orientation and display orientation.
-        int rotationDegrees = displayRotationHelper.getCameraSensorToDisplayRotation(cameraId);
-
-        // Determine size of the camera preview image.
-        Size size = sharedSession.getCameraConfig().getTextureSize();
-
-        // Determine aspect ratio of the output GL surface, accounting for the current display rotation
-        // relative to the camera sensor orientation of the device.
-        float displayAspectRatio =
-                displayRotationHelper.getCameraSensorRelativeViewportAspectRatio(cameraId);
-
-        // Render camera preview image to the GL surface.
-        //backgroundRenderer.draw(size.getWidth(), size.getHeight(), displayAspectRatio, rotationDegrees);
-        int displayWidth = mCameraSurfaceView.getWidth();
-        int displayHeight = mCameraSurfaceView.getHeight();
-        int depthHeight = displayWidth / occlusionRenderer.getDepthHeight() * occlusionRenderer.getDepthWidth();
-        float minDepth = Math.min(occlusionRenderer.getDepthWidth(), occlusionRenderer.getDepthHeight());
-        float minDisplay = Math.min(displayWidth, displayHeight);
-        GLES20.glViewport(0, displayHeight / 2 - depthHeight / 2, displayWidth, depthHeight);
-        occlusionRenderer.draw(true, minDisplay / minDepth);
-        GLES20.glViewport(0, 0, displayWidth, displayHeight);
-    }
-
-    private void openCamera() {
-        // Don't open camera if already opened.
-        if (cameraDevice != null) {
-            return;
-        }
-
-        // Verify CAMERA_PERMISSION has been granted.
-        if (!CameraPermissionHelper.hasCameraPermission(this)) {
-            CameraPermissionHelper.requestCameraPermission(this);
-            return;
-        }
-
-        // Make sure that ARCore is installed, up to date, and supported on this device.
-        if (!isARCoreSupportedAndUpToDate()) {
-            return;
-        }
-
-        if (sharedSession == null) {
-            try {
-                // Create ARCore session that supports camera sharing.
-                sharedSession = new Session(this, EnumSet.of(Session.Feature.SHARED_CAMERA));
-            } catch (UnavailableException e) {
-                Log.e(TAG, "Failed to create ARCore session that supports camera sharing", e);
-                return;
-            }
-
-            // Enable auto focus mode while ARCore is running.
-            Config config = sharedSession.getConfig();
-            config.setFocusMode(Config.FocusMode.AUTO);
-            sharedSession.configure(config);
-        }
-
-        // Store the ARCore shared camera reference.
-        sharedCamera = sharedSession.getSharedCamera();
-
-        // Store the ID of the camera used by ARCore.
-        cameraId = sharedSession.getCameraConfig().getCameraId();
-
-
-        new Thread(() -> {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            openCamera(240, 180);
-            initialized = true;
-        }).start();
-    }
-
-    private void openCamera(int width, int height) {
-
-        occlusionRenderer.initCamera(width, height);
-
-        // Use the currently configured CPU image size.
-        cpuImageReader = ImageReader.newInstance(occlusionRenderer.getDepthWidth(), occlusionRenderer.getDepthHeight(), ImageFormat.DEPTH16, 2);
-        cpuImageReader.setOnImageAvailableListener(this, backgroundHandler);
-
-        // When ARCore is running, make sure it also updates our CPU image surface.
-        sharedCamera.setAppSurfaces(this.cameraId, Arrays.asList(cpuImageReader.getSurface()));
-
-        try {
-
-            // Wrap our callback in a shared camera callback.
-            CameraDevice.StateCallback wrappedCallback =
-                    sharedCamera.createARDeviceStateCallback(cameraDeviceCallback, backgroundHandler);
-
-            // Store a reference to the camera system service.
-            // Reference to the camera system service.
-            CameraManager cameraManager = (CameraManager) this.getSystemService(Context.CAMERA_SERVICE);
-
-            // Get the characteristics for the ARCore camera.
-            CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(this.cameraId);
-
-            // On Android P and later, get list of keys that are difficult to apply per-frame and can
-            // result in unexpected delays when modified during the capture session lifetime.
-            if (Build.VERSION.SDK_INT >= 28) {
-                keysThatCanCauseCaptureDelaysWhenModified = characteristics.getAvailableSessionKeys();
-                if (keysThatCanCauseCaptureDelaysWhenModified == null) {
-                    // Initialize the list to an empty list if getAvailableSessionKeys() returns null.
-                    keysThatCanCauseCaptureDelaysWhenModified = new ArrayList<>();
-                }
-            }
-
-            // Prevent app crashes due to quick operations on camera open / close by waiting for the
-            // capture session's onActive() callback to be triggered.
-            captureSessionChangesPossible = false;
-
-            // Open the camera device using the ARCore wrapped callback.
-            cameraManager.openCamera(cameraId, wrappedCallback, backgroundHandler);
-        } catch (CameraAccessException | IllegalArgumentException | SecurityException e) {
-            Log.e(TAG, "Failed to open camera", e);
-        }
-    }
-
-    private void closeCamera() {
-        if (captureSession != null) {
-            captureSession.close();
-            captureSession = null;
-        }
-        if (cameraDevice != null) {
-            waitUntilCameraCaptureSessionIsActive();
-            safeToExitApp.close();
-            cameraDevice.close();
-            safeToExitApp.block();
-        }
-        if (cpuImageReader != null) {
-            cpuImageReader.close();
-            cpuImageReader = null;
-        }
-    }
-
-    private void resumeCamera2() {
-        setRepeatingCaptureRequest();
-        sharedCamera.getSurfaceTexture().setOnFrameAvailableListener(this);
-    }
-
-    private void setRepeatingCaptureRequest() {
-        try {
-            captureSession.setRepeatingRequest(
-                    previewCaptureRequestBuilder.build(), captureSessionCallback, backgroundHandler);
-        } catch (CameraAccessException e) {
-            Log.e(TAG, "Failed to set repeating request", e);
-        }
-    }
-
-    private synchronized void waitUntilCameraCaptureSessionIsActive() {
-        while (!captureSessionChangesPossible) {
-            try {
-                this.wait();
-            } catch (InterruptedException e) {
-                Log.e(TAG, "Unable to wait for a safe time to make changes to the capture session", e);
-            }
-        }
-    }
-
-    private boolean isARCoreSupportedAndUpToDate() {
-        // Make sure ARCore is installed and supported on this device.
-        ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(this);
-        switch (availability) {
-            case SUPPORTED_INSTALLED:
-                break;
-            case SUPPORTED_APK_TOO_OLD:
-            case SUPPORTED_NOT_INSTALLED:
-                try {
-                    // Request ARCore installation or update if needed.
-                    ArCoreApk.InstallStatus installStatus =
-                            ArCoreApk.getInstance().requestInstall(this, /*userRequestedInstall=*/ true);
-                    switch (installStatus) {
-                        case INSTALL_REQUESTED:
-                            Log.e(TAG, "ARCore installation requested.");
-                            return false;
-                        case INSTALLED:
-                            break;
-                    }
-                } catch (UnavailableException e) {
-                    Log.e(TAG, "ARCore not installed", e);
-                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "ARCore not installed\n" + e, Toast.LENGTH_LONG).show());
-                    finish();
-                    return false;
-                }
-                break;
-            case UNKNOWN_ERROR:
-            case UNKNOWN_CHECKING:
-            case UNKNOWN_TIMED_OUT:
-            case UNSUPPORTED_DEVICE_NOT_CAPABLE:
-                Log.e(
-                        TAG,
-                        "ARCore is not supported on this device, ArCoreApk.checkAvailability() returned "
-                                + availability);
-                runOnUiThread(
-                        () ->
-                                Toast.makeText(
-                                        getApplicationContext(),
-                                        "ARCore is not supported on this device, "
-                                                + "ArCoreApk.checkAvailability() returned "
-                                                + availability,
-                                        Toast.LENGTH_LONG)
-                                        .show());
-                return false;
-        }
-        return true;
-    }
-
-    private void createCameraPreviewSession() {
-        try {
-            // Note that isGlAttached will be set to true in AR mode in onDrawFrame().
-            sharedSession.setCameraTextureName(backgroundRenderer.getTextureId());
-            sharedCamera.getSurfaceTexture().setOnFrameAvailableListener(this);
-
-            // Create an ARCore compatible capture request using `TEMPLATE_RECORD`.
-            previewCaptureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
-
-            // Build surfaces list, starting with ARCore provided surfaces.
-            List<Surface> surfaceList = sharedCamera.getArCoreSurfaces();
-
-            // Add a CPU image reader surface. On devices that don't support CPU image access, the image
-            // may arrive significantly later, or not arrive at all.
-            surfaceList.add(cpuImageReader.getSurface());
-
-            // Surface list should now contain three surfaces:
-            // 0. sharedCamera.getSurfaceTexture()
-            // 1. …
-            // 2. cpuImageReader.getSurface()
-
-            // Add ARCore surfaces and CPU image surface targets.
-            for (Surface surface : surfaceList) {
-                previewCaptureRequestBuilder.addTarget(surface);
-            }
-
-            // Wrap our callback in a shared camera callback.
-            CameraCaptureSession.StateCallback wrappedCallback = sharedCamera.createARSessionStateCallback(cameraCaptureCallback, backgroundHandler);
-
-            // Create camera capture session for camera preview using ARCore wrapped callback.
-            cameraDevice.createCaptureSession(surfaceList, wrappedCallback, backgroundHandler);
-        } catch (CameraAccessException e) {
-            Log.e(TAG, "CameraAccessException", e);
-        }
-    }
-
+    // CPU image reader callback.
     @Override
     public void onImageAvailable(ImageReader imageReader) {
         Image image = imageReader.acquireLatestImage();
@@ -1312,47 +885,80 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
-        File dir = new File(AppController.getInstance().getRootDirectory(), "depth16/");
-        if (!dir.exists()) {
-            dir.mkdir();
-        }
-        File out = new File(dir, String.format("out%d.depth16", System.currentTimeMillis()));
-
         Image.Plane plane = image.getPlanes()[0];
-        ByteBuffer buffer = plane.getBuffer();
-        ShortBuffer shortBuffer = buffer.asShortBuffer();
-        try {
-            FileOutputStream stream = new FileOutputStream(out);
-            FileChannel channel = stream.getChannel();
-            channel.write(buffer);
-            stream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        ArrayList<Short> pixel = new ArrayList<Short>();
-        while (shortBuffer.hasRemaining()) {
-            pixel.add(shortBuffer.get());
+        ShortBuffer shortDepthBuffer = plane.getBuffer().asShortBuffer();
+        ArrayList<Short> pixel = new ArrayList<>();
+        while (shortDepthBuffer.hasRemaining()) {
+            pixel.add(shortDepthBuffer.get());
         }
         int stride = plane.getRowStride();
 
         int offset = 0;
+        float[] outputRGB = new float[image.getWidth() * image.getHeight()];
         float[] output = new float[image.getWidth() * image.getHeight()];
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
-                int depthSample = pixel.get((int)(y / 2) * stride + x);
+                int depthSample = pixel.get((y / 2) * stride + x);
                 int depthRange = (depthSample & 0x1FFF);
                 int depthConfidence = ((depthSample >> 13) & 0x7);
                 float depthPercentage = depthConfidence == 0 ? 1.f : (depthConfidence - 1) / 7.f;
-                output[offset + x] = 0.0001f * depthRange;
+                output[offset + x] = 0.001f * depthRange;
+                outputRGB[offset + x] = depthPercentage;
             }
             offset += image.getWidth();
         }
         image.close();
 
-        occlusionRenderer.update(output);
+        try {
+            depthmapRenderer.update(output, outputRGB);
+        } catch (Exception e) {
+            //the device returned depthmap with wrong resolution
+            e.printStackTrace();
+        }
     }
+
+    CameraDevice.StateCallback callBack = new CameraDevice.StateCallback() {
+        @Override
+        public void onOpened(CameraDevice cameraDevice) {
+            Surface imageReaderSurface = mImageReader.getSurface();
+            mCameraDevice = cameraDevice;
+
+            try {
+                final CaptureRequest.Builder requestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+                requestBuilder.addTarget(imageReaderSurface);
+
+                cameraDevice.createCaptureSession(Collections.singletonList(imageReaderSurface),new CameraCaptureSession.StateCallback() {
+
+                    @Override
+                    public void onConfigured(CameraCaptureSession cameraCaptureSession) {
+                        CameraCaptureSession.CaptureCallback captureCallback = new CameraCaptureSession.CaptureCallback() {};
+
+                        try {
+                            HandlerThread handlerThread = new HandlerThread("DepthBackgroundThread");
+                            handlerThread.start();
+                            Handler handler = new Handler(handlerThread.getLooper());
+                            cameraCaptureSession.setRepeatingRequest(requestBuilder.build(),captureCallback,handler);
+
+                        } catch (CameraAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    @Override
+                    public void onConfigureFailed(CameraCaptureSession cameraCaptureSession) {
+
+                    }
+                },null);
+            } catch (CameraAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        @Override
+        public void onDisconnected(CameraDevice cameraDevice) {
+        }
+        @Override
+        public void onError(CameraDevice cameraDevice, int i) {
+        }
+    };
 
     @Override
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {

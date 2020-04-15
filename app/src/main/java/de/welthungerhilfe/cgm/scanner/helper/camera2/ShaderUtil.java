@@ -16,19 +16,19 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package de.welthungerhilfe.cgm.scanner.helper.arcore.render;
+
+package de.welthungerhilfe.cgm.scanner.helper.camera2;
 
 import android.content.Context;
 import android.opengl.GLES20;
 import android.util.Log;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /** Shader helper functions. */
-public class ShaderUtil {
+class ShaderUtil {
   /**
    * Converts a raw text file, saved as a resource, into an OpenGL ES shader.
    *
@@ -36,7 +36,7 @@ public class ShaderUtil {
    * @param filename The filename of the asset file about to be turned into a shader.
    * @return The shader object handler.
    */
-  public static int loadGLShader(String tag, Context context, int type, String filename)
+  static int loadGLShader(String tag, Context context, int type, String filename)
       throws IOException {
     String code = readRawTextFileFromAssets(context, filename);
     int shader = GLES20.glCreateShader(type);
@@ -65,9 +65,8 @@ public class ShaderUtil {
    * Checks if we've had an error inside of OpenGL ES, and if so what that error is.
    *
    * @param label Label to report in case of error.
-   * @throws RuntimeException If an OpenGL error is detected.
    */
-  public static void checkGLError(String tag, String label) {
+  static void checkGLError(String tag, String label) {
     int lastError = GLES20.GL_NO_ERROR;
     // Drain the queue of all errors.
     int error;
