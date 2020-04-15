@@ -1074,7 +1074,14 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         // Render camera preview image to the GL surface.
         //backgroundRenderer.draw(size.getWidth(), size.getHeight(), displayAspectRatio, rotationDegrees);
-        occlusionRenderer.draw(true);
+        int displayWidth = mCameraSurfaceView.getWidth();
+        int displayHeight = mCameraSurfaceView.getHeight();
+        int depthHeight = displayWidth / occlusionRenderer.getDepthHeight() * occlusionRenderer.getDepthWidth();
+        float minDepth = Math.min(occlusionRenderer.getDepthWidth(), occlusionRenderer.getDepthHeight());
+        float minDisplay = Math.min(displayWidth, displayHeight);
+        GLES20.glViewport(0, displayHeight / 2 - depthHeight / 2, displayWidth, depthHeight);
+        occlusionRenderer.draw(true, minDisplay / minDepth);
+        GLES20.glViewport(0, 0, displayWidth, displayHeight);
     }
 
     private void openCamera() {
@@ -1122,43 +1129,14 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ScanModeActivity.this);
-                    String[] res = occlusionRenderer.getResolutions(ScanModeActivity.this, cameraId).toArray(new String[0]);
-
-                    if (res.length > 0)
-                    {
-                        builder.setTitle("Choose ToF resolution");
-                        builder.setItems(res, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                openCamera(which);
-                                initialized = true;
-                            }
-                        });
-                    } else {
-                        builder.setTitle("Camera2 API: ToF not found");
-                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                System.exit(0);
-                            }
-                        });
-                    }
-
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                }
-            });
+            openCamera(240, 180);
+            initialized = true;
         }).start();
     }
 
-    private void openCamera(int index) {
+    private void openCamera(int width, int height) {
 
-        occlusionRenderer.initCamera(this, cameraId, index);
+        occlusionRenderer.initCamera(width, height);
 
         // Use the currently configured CPU image size.
         cpuImageReader = ImageReader.newInstance(occlusionRenderer.getDepthWidth(), occlusionRenderer.getDepthHeight(), ImageFormat.DEPTH16, 2);
@@ -1334,7 +1312,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
-        File out = new File(AppController.getInstance().getRootDirectory(), String.format("depth16/out%d.depth16", System.currentTimeMillis()));
+        File dir = new File(AppController.getInstance().getRootDirectory(), "depth16/");
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+        File out = new File(dir, String.format("out%d.depth16", System.currentTimeMillis()));
 
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
