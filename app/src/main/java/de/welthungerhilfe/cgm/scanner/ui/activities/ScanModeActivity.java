@@ -366,6 +366,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private AlertDialog progressDialog;
 
     private final Camera2Manager mCamera2Manager = new Camera2Manager();
+    private int mColorCameraFrame;
+    private int mDepthCameraFrame;
 
     public void onStart() {
         super.onStart();
@@ -796,7 +798,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void OnColorDataReceived(Bitmap bitmap, long timestamp) {
-        if (mIsRecording) {
+        mColorCameraFrame++;
+        if (mIsRecording && (mColorCameraFrame % 10 == 0)) {
             String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + timestamp + ".jpg";
             currentImgFilename = currentImgFilename.replace('/', '_');
 
@@ -878,7 +881,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 output[y * width + x] = Color.argb(value, 0.0f, 0.0f, 0.0f);
             }
         }
-        if (mIsRecording) {
+
+        mDepthCameraFrame++;
+        if (mIsRecording && (mDepthCameraFrame % 10 == 0)) {
             updateScanningProgress(count);
             progressBar.setProgress(mProgress);
 
