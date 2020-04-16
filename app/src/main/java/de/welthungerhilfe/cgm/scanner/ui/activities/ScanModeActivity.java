@@ -55,6 +55,7 @@ import java.nio.channels.FileChannel;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -65,6 +66,7 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
@@ -77,6 +79,7 @@ import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.camera2.Camera2Manager;
 import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
 import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
+import de.welthungerhilfe.cgm.scanner.utils.MD5;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING;
@@ -334,7 +337,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private File mExtFileDir;
     private File mScanArtefactsOutputFolder;
-    private String mPointCloudSaveFolderPath;
     private File mPointCloudSaveFolder;
     private File mRgbSaveFolder;
 
@@ -479,7 +481,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         Log.e("Root Directory", mExtFileDir.getParent());
         mScanArtefactsOutputFolder  = new File(mExtFileDir,person.getQrcode() + "/measurements/" + mNowTimeString + "/");
-        mPointCloudSaveFolder = new File(mScanArtefactsOutputFolder,"pc");
+        mPointCloudSaveFolder = new File(mScanArtefactsOutputFolder,"depth16");
         mRgbSaveFolder = new File(mScanArtefactsOutputFolder,"rgb");
 
         if(!mPointCloudSaveFolder.exists()) {
@@ -790,13 +792,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    public void OnColorDataReceived(Bitmap bitmap) {
+    public void OnColorDataReceived(Bitmap bitmap, long timestamp) {
         if (mIsRecording) {
-            File dir = new File(AppController.getInstance().getRootDirectory(), "rgb/");
-            if (!dir.exists()) {
-                dir.mkdir();
-            }
-            File out = new File(dir, String.format("out%d.jpg", System.currentTimeMillis()));
+            String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + timestamp + ".jpg";
+            currentImgFilename = currentImgFilename.replace('/', '_');
+
+            File out = new File(mRgbSaveFolder, currentImgFilename);
             try {
                 FileOutputStream fOutputStream = new FileOutputStream(out);
 
@@ -809,6 +810,29 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            String finalCurrentImgFilename = currentImgFilename;
+            new Thread(() -> {
+                File artifactFile = new File(mRgbSaveFolder.getPath() + File.separator + finalCurrentImgFilename);
+                if (artifactFile.exists()) {
+                    FileLog log = new FileLog();
+                    log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
+                    log.setType("rgb");
+                    log.setPath(artifactFile.getPath());
+                    log.setHashValue(MD5.getMD5(artifactFile.getPath()));
+                    log.setFileSize(artifactFile.length());
+                    log.setUploadDate(0);
+                    log.setDeleted(false);
+                    log.setQrCode(person.getQrcode());
+                    log.setCreateDate(mNowTime);
+                    log.setCreatedBy(session.getUserEmail());
+                    log.setAge(age);
+                    log.setSchema_version(CgmDatabase.version);
+                    log.setMeasureId(measure.getId());
+
+                    fileLogRepository.insertFileLog(log);
+                }
+            }).start();
         }
 
         float scale = bitmap.getWidth() / (float)bitmap.getHeight();
@@ -826,22 +850,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
         ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
-
-        if (mIsRecording) {
-            File dir = new File(AppController.getInstance().getRootDirectory(), "depth16/");
-            if (!dir.exists()) {
-                dir.mkdir();
-            }
-            File out = new File(dir, String.format("out%d.depth16", System.currentTimeMillis()));
-            try {
-                FileOutputStream stream = new FileOutputStream(out);
-                FileChannel channel = stream.getChannel();
-                channel.write(buffer);
-                stream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
         ArrayList<Short> pixel = new ArrayList<>();
         while (shortDepthBuffer.hasRemaining()) {
@@ -868,6 +876,55 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
         if (mIsRecording) {
             updateScanningProgress(count);
+            progressBar.setProgress(mProgress);
+
+            String filename = "depth16_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + image.getTimestamp() + ".depth16";
+            filename = filename.replace('/', '_');
+            File out = new File(mPointCloudSaveFolder, filename);
+            try {
+                FileOutputStream stream = new FileOutputStream(out);
+                FileChannel channel = stream.getChannel();
+                channel.write(buffer);
+                stream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            int finalCount = count;
+            String finalFilename = filename;
+            new Thread(() -> {
+                File artifactFile = new File(mPointCloudSaveFolder, finalFilename);
+                if (artifactFile.exists()) {
+                    FileLog log = new FileLog();
+                    log.setId(AppController.getInstance().getArtifactId("scan-depth16", mNowTime));
+                    log.setType("depth16");
+                    log.setPath(artifactFile.getPath());
+                    log.setHashValue(MD5.getMD5(artifactFile.getPath()));
+                    log.setFileSize(artifactFile.length());
+                    log.setUploadDate(0);
+                    log.setDeleted(false);
+                    log.setQrCode(person.getQrcode());
+                    log.setCreateDate(mNowTime);
+                    log.setCreatedBy(session.getUserEmail());
+                    log.setAge(age);
+                    log.setSchema_version(CgmDatabase.version);
+                    log.setMeasureId(measure.getId());
+                    fileLogRepository.insertFileLog(log);
+
+
+                    ArtifactResult ar = new ArtifactResult();
+                    double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
+                    ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
+                    ar.setArtifact_id(AppController.getInstance().getPersonId());
+                    ar.setKey(SCAN_STEP);
+                    ar.setMeasure_id(measure.getId());
+                    ar.setMisc("");
+                    ar.setType("PCD_POINTS_v0.2");
+                    noOfPoints = finalCount;
+                    ar.setReal(noOfPoints);
+                    artifactResultRepository.insertArtifactResult(ar);
+                }
+            }).start();
         }
 
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);

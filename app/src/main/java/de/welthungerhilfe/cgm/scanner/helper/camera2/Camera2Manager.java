@@ -51,7 +51,7 @@ public class Camera2Manager {
 
   public interface CameraDataListener
   {
-    void OnColorDataReceived(Bitmap bitmap);
+    void OnColorDataReceived(Bitmap bitmap, long timestamp);
 
     void OnDepthDataReceived(Image image);
   }
@@ -149,7 +149,7 @@ public class Camera2Manager {
 
       allocationRgb.copyTo(bitmap);
       for (CameraDataListener listener : listeners) {
-        listener.OnColorDataReceived(bitmap);
+        listener.OnColorDataReceived(bitmap, image.getTimestamp());
       }
       allocationYuv.destroy();
       allocationRgb.destroy();
