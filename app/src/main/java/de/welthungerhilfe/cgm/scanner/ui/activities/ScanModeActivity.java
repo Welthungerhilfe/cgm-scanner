@@ -55,7 +55,6 @@ import java.nio.channels.FileChannel;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -840,6 +839,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
 
         float scale = bitmap.getWidth() / (float)bitmap.getHeight();
+        //scale *= mColorCameraPreview.getHeight() / (float)bitmap.getWidth();
         mColorCameraPreview.setImageBitmap(bitmap);
         mColorCameraPreview.setRotation(90);
         mColorCameraPreview.setScaleX(scale);
@@ -871,11 +871,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 float depth = 0.001f * (depthSample & 0x1FFF);
                 if (depth > 0.01f) {
                     count++;
+                } else {
+                    depth = Float.MAX_VALUE;
                 }
-                float r = Math.min(depth * 1.0f, 1);
-                float g = Math.min(depth * 2.0f, 1);
-                float b = Math.min(depth * 3.0f, 1);
-                output[y * width + x] = Color.argb(0.5f, r, g, b);
+                float value = Math.max(Math.min(depth - 1.25f, 1.0f), 0.0f);
+                output[y * width + x] = Color.argb(value, 0.0f, 0.0f, 0.0f);
             }
         }
         if (mIsRecording) {
