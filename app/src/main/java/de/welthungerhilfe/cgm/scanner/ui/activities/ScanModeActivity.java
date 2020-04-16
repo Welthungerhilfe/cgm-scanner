@@ -504,7 +504,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
     }
 
-    private void updateScanningProgress(int numPoints, float distance, float confidence) {
+    private void updateScanningProgress(int numPoints) {
         float minPointsToCompleteScan = 199500.0f;
         float progressToAddFloat = numPoints / minPointsToCompleteScan;
         progressToAddFloat = progressToAddFloat*100;
@@ -512,7 +512,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         Log.d(TAG, "numPoints: "+numPoints+" float: "+progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
         if (mProgress+progressToAdd > 100) {
             mProgress = 100;
-            runOnUiThread(() -> fab.setImageResource(R.drawable.done));
+            runOnUiThread(() -> {
+                mProgress = 0;
+                mIsRecording = false;
+                fab.setImageResource(R.drawable.done);
+            });
         } else {
             mProgress = mProgress+progressToAdd;
         }
@@ -847,17 +851,25 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         int width = image.getWidth();
         int height = image.getHeight();
 
+        int count = 0;
         int[] output = new int[width * height];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int depthSample = pixel.get((y / 2) * stride + x);
                 float depth = 0.001f * (depthSample & 0x1FFF);
+                if (depth > 0.01f) {
+                    count++;
+                }
                 float r = Math.min(depth * 1.0f, 1);
                 float g = Math.min(depth * 2.0f, 1);
                 float b = Math.min(depth * 3.0f, 1);
                 output[y * width + x] = Color.argb(0.5f, r, g, b);
             }
         }
+        if (mIsRecording) {
+            updateScanningProgress(count);
+        }
+
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         bitmap.setPixels(output, 0, width, 0, 0, width, height);
         mDepthCameraPreview.setImageBitmap(bitmap);
