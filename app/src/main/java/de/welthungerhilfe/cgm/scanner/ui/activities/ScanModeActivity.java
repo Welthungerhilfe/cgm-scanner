@@ -842,7 +842,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
 
         float scale = bitmap.getWidth() / (float)bitmap.getHeight();
-        //scale *= mColorCameraPreview.getHeight() / (float)bitmap.getWidth();
+        scale *= mColorCameraPreview.getHeight() / (float)bitmap.getWidth();
         mColorCameraPreview.setImageBitmap(bitmap);
         mColorCameraPreview.setRotation(90);
         mColorCameraPreview.setScaleX(scale);
@@ -936,8 +936,23 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             }).start();
         }
 
+        int smoothAmount = 2;
+        int[] smoothed = new int[width * height];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                count = 0;
+                int color = 0;
+                for (int j = Math.max(y - smoothAmount, 0); j <= Math.min(y + smoothAmount, height - 1); j++) {
+                    for (int i = Math.max(x - smoothAmount, 0); i <= Math.min(x + smoothAmount, width - 1); i++) {
+                        color += Color.alpha(output[j * width + i]);
+                        count++;
+                    }
+                }
+                smoothed[y * width + x] = Color.argb(color / count, 0, 0, 0);
+            }
+        }
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        bitmap.setPixels(output, 0, width, 0, 0, width, height);
+        bitmap.setPixels(smoothed, 0, width, 0, 0, width, height);
         mDepthCameraPreview.setImageBitmap(bitmap);
     }
 
