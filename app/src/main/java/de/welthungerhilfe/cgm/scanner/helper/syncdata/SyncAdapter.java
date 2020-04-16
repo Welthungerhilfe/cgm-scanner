@@ -151,6 +151,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                                 if (result.getConfidence_value() > maxConfidence) {
                                     measureRepository.updateHeight(result.getMeasure_id(), result.getFloat_value());
+                                    measureRepository.updateResultTimestamp(result.getMeasure_id(), System.currentTimeMillis());
                                 }
                             } catch (JsonSyntaxException e) {
                                 e.printStackTrace();
@@ -222,6 +223,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 measureArtifactsQueue.addMessage(measureArtifactsMessage);
                             }
 
+                            syncableMeasures.get(i).setUploaded_at(System.currentTimeMillis());
                             syncableMeasures.get(i).setArtifact_synced(true);
                         }
 

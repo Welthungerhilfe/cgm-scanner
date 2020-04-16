@@ -158,7 +158,7 @@ public class SettingsActivity extends BaseActivity {
             txtSettingAccount.setText(accounts[0].name);
         }
 
-        txtSettingAzureAccount.setText(AppConstants.AZURE_ACCOUNT_NAME);
+        txtSettingAzureAccount.setText(session.getAzureAccountName());
 
         String code = session.getLanguage();
         switch (code) {

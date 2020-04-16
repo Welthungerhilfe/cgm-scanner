@@ -61,6 +61,8 @@ public class Measure extends CsvExportableModel implements Serializable {
     private String qrCode;
     private int schema_version;
     private boolean artifact_synced;
+    private long uploaded_at;
+    private long resulted_at;
 
     @Embedded
     private Loc location;
@@ -226,14 +228,30 @@ public class Measure extends CsvExportableModel implements Serializable {
         this.artifact_synced = artifact_synced;
     }
 
+    public long getUploaded_at() {
+        return uploaded_at;
+    }
+
+    public void setUploaded_at(long uploaded_at) {
+        this.uploaded_at = uploaded_at;
+    }
+
+    public long getResulted_at() {
+        return resulted_at;
+    }
+
+    public void setResulted_at(long resulted_at) {
+        this.resulted_at = resulted_at;
+    }
+
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d",id,personId,date,type,age,height,weight,
-                muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version);
+        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d",id,personId,date,type,age,height,weight,
+                muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version";
+        return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at";
     }
 }

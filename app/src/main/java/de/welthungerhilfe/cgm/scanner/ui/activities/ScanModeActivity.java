@@ -1288,6 +1288,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         }
 
                         measure.setArtifact_synced(true);
+                        measure.setUploaded_at(System.currentTimeMillis());
                     }
 
                     CloudQueue measureQueue = queueClient.getQueueReference("measure");

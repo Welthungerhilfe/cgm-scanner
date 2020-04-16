@@ -35,6 +35,7 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
     public static class ExceptionHandler implements Thread.UncaughtExceptionHandler {
         @Override
         public void uncaughtException(Thread thread, Throwable ex) {
+            ex.printStackTrace();
             Crashes.trackError(ex);
         }
     }

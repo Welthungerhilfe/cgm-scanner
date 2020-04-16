@@ -66,4 +66,8 @@ public class MeasureRepository {
     public List<Measure> getAll() {
         return database.measureDao().getAll();
     }
+
+    public void updateResultTimestamp(String measure_id, long currentTimeMillis) {
+        database.measureDao().updateResultTimestamp(measure_id, currentTimeMillis);
+    }
 }
