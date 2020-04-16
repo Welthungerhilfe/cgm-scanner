@@ -343,6 +343,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private int mDisplayRotation = Surface.ROTATION_0;
 
     private boolean mPointCloudAvailable;
+    private boolean mIsDone;
     private boolean mIsRecording;
     private int mProgress;
 
@@ -371,6 +372,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         super.onStart();
 
         mutex_on_mIsRecording = new Semaphore(1,true);
+        mIsDone = false;
         mIsRecording = false;
         mPointCloudAvailable = false;
     }
@@ -515,7 +517,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         if (mProgress+progressToAdd > 100) {
             mProgress = 100;
             runOnUiThread(() -> {
-                mProgress = 0;
+                mIsDone = true;
                 mIsRecording = false;
                 fab.setImageResource(R.drawable.done);
             });
@@ -597,11 +599,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void pauseScan() {
+        mIsDone = false;
         mIsRecording = false;
         fab.setImageResource(R.drawable.recorder);
     }
 
     public void closeScan() {
+        mIsDone = false;
         mIsRecording = false;
         progressBar.setProgress(0);
         mProgress = 0;
@@ -768,7 +772,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.fab_scan_result:
-                if (mIsRecording) {
+                if (mIsDone || mIsRecording) {
                     if (mProgress >= 100) {
                         goToNextStep();
                     } else {
