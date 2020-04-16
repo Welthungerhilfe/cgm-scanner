@@ -10,23 +10,15 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.ImageFormat;
-import android.graphics.SurfaceTexture;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CaptureRequest;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.Image;
-import android.media.ImageReader;
-import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -62,13 +54,9 @@ import java.nio.ShortBuffer;
 import java.nio.channels.FileChannel;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -86,10 +74,9 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.helper.camera2.DepthmapRenderer;
+import de.welthungerhilfe.cgm.scanner.helper.camera2.Camera2Manager;
 import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
 import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
-import de.welthungerhilfe.cgm.scanner.helper.tango.CameraSurfaceRenderer;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING;
@@ -102,7 +89,7 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_B
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_FRONT;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_SIDE;
 
-public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener, GLSurfaceView.Renderer, ImageReader.OnImageAvailableListener, SurfaceTexture.OnFrameAvailableListener {
+public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener, Camera2Manager.CameraDataListener {
     private final int PERMISSION_LOCATION = 0x0001;
     private final int PERMISSION_CAMERA = 0x0002;
     private final int PERMISSION_STORAGE = 0x0002;
@@ -337,9 +324,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private boolean mIsConnected = false;
 
-    private GLSurfaceView mCameraSurfaceView;
-    //private OverlaySurface mOverlaySurfaceView;
-    private CameraSurfaceRenderer mRenderer;
+    private ImageView mColorCameraPreview;
+    private ImageView mDepthCameraPreview;
 
     private TextView mTitleView;
     private ProgressBar progressBar;
@@ -377,10 +363,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private AlertDialog progressDialog;
 
-    //Camera2 API
-    private ImageReader mImageReader;
-    private CameraDevice mCameraDevice;
-    private final DepthmapRenderer depthmapRenderer = new DepthmapRenderer();
+    private final Camera2Manager mCamera2Manager = new Camera2Manager();
 
     public void onStart() {
         super.onStart();
@@ -438,15 +421,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         findViewById(R.id.btnRetake).setOnClickListener(this);
         findViewById(R.id.imgClose).setOnClickListener(this);
 
-        // GL surface view that renders camera preview image.
-        mCameraSurfaceView = findViewById(R.id.surfaceview);
-        mCameraSurfaceView.setPreserveEGLContextOnPause(true);
-        mCameraSurfaceView.setEGLContextClientVersion(2);
-        mCameraSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        mCameraSurfaceView.setRenderer(this);
-        mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-
-        depthmapRenderer.initCamera(this);
+        mColorCameraPreview = findViewById(R.id.colorCameraPreview);
+        mColorCameraPreview.setImageBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
+        mDepthCameraPreview = findViewById(R.id.depthCameraPreview);
+        mDepthCameraPreview.setImageBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
 
         measureRepository = MeasureRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
@@ -471,16 +449,14 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onResume() {
         super.onResume();
-
-        openCamera();
-        mCameraSurfaceView.onResume();
+        mCamera2Manager.openCamera(this, PERMISSION_CAMERA);
+        mCamera2Manager.addListener(this);
     }
 
     @Override
     protected void onPause() {
-        closeCamera();
-        mCameraSurfaceView.onPause();
-
+        mCamera2Manager.removeListener(this);
+        mCamera2Manager.closeCamera();
         super.onPause();
     }
 
@@ -802,7 +778,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case R.id.imgClose:
                 closeScan();
-                closeCamera();
                 break;
             case R.id.btnRetake:
                 mProgress = 0;
@@ -810,99 +785,58 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
-    /**
-     * Opens the camera
-     */
-    private void openCamera() {
-        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_CAMERA);
-            return;
-        }
-        mImageReader = ImageReader.newInstance(depthmapRenderer.getDepthWidth(),
-                depthmapRenderer.getDepthHeight(),
-                ImageFormat.DEPTH16, 5);
-        mImageReader.setOnImageAvailableListener(this, null);
-        CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-        try {
-            manager.openCamera(depthmapRenderer.getDepthCameraId(), callBack, null);
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            throw new RuntimeException("Interrupted while trying to lock camera opening.", e);
-        }
-    }
-
-    /**
-     * Closes the current {@link CameraDevice}.
-     */
-    private void closeCamera() {
-        if (null != mImageReader) {
-            mImageReader.close();
-            mImageReader = null;
-        }
-        if (null != mCameraDevice)
-        {
-            mCameraDevice.close();
-            mCameraDevice = null;
-            System.exit(0);
-        }
-    }
-
-    // GL surface created callback. Will be called on the GL thread.
     @Override
-    public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        // Prepare the rendering objects. This involves reading shaders, so may throw an IOException.
-        try {
-            depthmapRenderer.createOnGlThread(this);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to read an asset file", e);
+    public void OnColorDataReceived(Bitmap bitmap) {
+        if (mIsRecording) {
+            File dir = new File(AppController.getInstance().getRootDirectory(), "rgb/");
+            if (!dir.exists()) {
+                dir.mkdir();
+            }
+            File out = new File(dir, String.format("out%d.jpg", System.currentTimeMillis()));
+            try {
+                FileOutputStream fOutputStream = new FileOutputStream(out);
+
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fOutputStream);
+
+                fOutputStream.flush();
+                fOutputStream.close();
+
+                MediaStore.Images.Media.insertImage(getContentResolver(), out.getAbsolutePath(), out.getName(), out.getName());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+
+        float scale = bitmap.getWidth() / (float)bitmap.getHeight();
+        mColorCameraPreview.setImageBitmap(bitmap);
+        mColorCameraPreview.setRotation(90);
+        mColorCameraPreview.setScaleX(scale);
+        mColorCameraPreview.setScaleY(scale);
+        mDepthCameraPreview.setRotation(90);
+        mDepthCameraPreview.setScaleX(scale);
+        mDepthCameraPreview.setScaleY(scale);
     }
 
-    // GL surface changed callback. Will be called on the GL thread.
     @Override
-    public void onSurfaceChanged(GL10 gl, int width, int height) {
-        GLES20.glViewport(0, 0, width, height);
-    }
-
-    // GL draw callback. Will be called each frame on the GL thread.
-    @Override
-    public void onDrawFrame(GL10 gl) {
-        // Use the cGL clear color specified in onSurfaceCreated() to erase the GL surface.
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-
-        try {
-            depthmapRenderer.draw(this, 1);
-        } catch (Throwable t) {
-            // Avoid crashing the application due to unhandled exceptions.
-            Log.e(TAG, "Exception on the OpenGL thread", t);
-        }
-    }
-
-    // CPU image reader callback.
-    @Override
-    public void onImageAvailable(ImageReader imageReader) {
-        Image image = imageReader.acquireLatestImage();
-        if (image == null) {
-            Log.w(TAG, "onImageAvailable: Skipping null image.");
-            return;
-        }
-
-        File dir = new File(AppController.getInstance().getRootDirectory(), "depth16/");
-        if (!dir.exists()) {
-            dir.mkdir();
-        }
-        File out = new File(dir, String.format("out%d.depth16", System.currentTimeMillis()));
+    public void OnDepthDataReceived(Image image) {
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
         ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
-        try {
-            FileOutputStream stream = new FileOutputStream(out);
-            FileChannel channel = stream.getChannel();
-            channel.write(buffer);
-            stream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        if (mIsRecording) {
+            File dir = new File(AppController.getInstance().getRootDirectory(), "depth16/");
+            if (!dir.exists()) {
+                dir.mkdir();
+            }
+            File out = new File(dir, String.format("out%d.depth16", System.currentTimeMillis()));
+            try {
+                FileOutputStream stream = new FileOutputStream(out);
+                FileChannel channel = stream.getChannel();
+                channel.write(buffer);
+                stream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         ArrayList<Short> pixel = new ArrayList<>();
@@ -910,77 +844,23 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             pixel.add(shortDepthBuffer.get());
         }
         int stride = plane.getRowStride();
+        int width = image.getWidth();
+        int height = image.getHeight();
 
-        int offset = 0;
-        float[] outputRGB = new float[image.getWidth() * image.getHeight()];
-        float[] output = new float[image.getWidth() * image.getHeight()];
-        for (int y = 0; y < image.getHeight(); y++) {
-            for (int x = 0; x < image.getWidth(); x++) {
+        int[] output = new int[width * height];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
                 int depthSample = pixel.get((y / 2) * stride + x);
-                int depthRange = (depthSample & 0x1FFF);
-                int depthConfidence = ((depthSample >> 13) & 0x7);
-                float depthPercentage = depthConfidence == 0 ? 1.f : (depthConfidence - 1) / 7.f;
-                output[offset + x] = 0.001f * depthRange;
-                outputRGB[offset + x] = depthPercentage;
-            }
-            offset += image.getWidth();
-        }
-        image.close();
-
-        try {
-            depthmapRenderer.update(output, outputRGB);
-        } catch (Exception e) {
-            //the device returned depthmap with wrong resolution
-            e.printStackTrace();
-        }
-    }
-
-    CameraDevice.StateCallback callBack = new CameraDevice.StateCallback() {
-        @Override
-        public void onOpened(CameraDevice cameraDevice) {
-            Surface imageReaderSurface = mImageReader.getSurface();
-            mCameraDevice = cameraDevice;
-
-            try {
-                final CaptureRequest.Builder requestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-                requestBuilder.addTarget(imageReaderSurface);
-
-                cameraDevice.createCaptureSession(Collections.singletonList(imageReaderSurface),new CameraCaptureSession.StateCallback() {
-
-                    @Override
-                    public void onConfigured(CameraCaptureSession cameraCaptureSession) {
-                        CameraCaptureSession.CaptureCallback captureCallback = new CameraCaptureSession.CaptureCallback() {};
-
-                        try {
-                            HandlerThread handlerThread = new HandlerThread("DepthBackgroundThread");
-                            handlerThread.start();
-                            Handler handler = new Handler(handlerThread.getLooper());
-                            cameraCaptureSession.setRepeatingRequest(requestBuilder.build(),captureCallback,handler);
-
-                        } catch (CameraAccessException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    @Override
-                    public void onConfigureFailed(CameraCaptureSession cameraCaptureSession) {
-
-                    }
-                },null);
-            } catch (CameraAccessException e) {
-                e.printStackTrace();
+                float depth = 0.001f * (depthSample & 0x1FFF);
+                float r = Math.min(depth * 1.0f, 1);
+                float g = Math.min(depth * 2.0f, 1);
+                float b = Math.min(depth * 3.0f, 1);
+                output[y * width + x] = Color.argb(0.5f, r, g, b);
             }
         }
-        @Override
-        public void onDisconnected(CameraDevice cameraDevice) {
-        }
-        @Override
-        public void onError(CameraDevice cameraDevice, int i) {
-        }
-    };
-
-    @Override
-    public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bitmap.setPixels(output, 0, width, 0, 0, width, height);
+        mDepthCameraPreview.setImageBitmap(bitmap);
     }
 
     @SuppressLint("StaticFieldLeak")
