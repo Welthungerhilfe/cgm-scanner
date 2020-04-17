@@ -139,6 +139,13 @@
                 android:numStars="5"
                 android:rating="0"/>
 
+            <ImageView
+                android:id="@+id/imgDurationStep1"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:visibility="gone"
+                android:src="@drawable/ic_arrow_down" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -301,6 +308,13 @@
                 android:numStars="5"
                 android:rating="0"/>
 
+            <ImageView
+                android:id="@+id/imgDurationStep2"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:visibility="gone"
+                android:src="@drawable/ic_arrow_down" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -462,6 +476,13 @@
                 style="@style/CustomRatingBar"
                 android:numStars="5"
                 android:rating="0"/>
+
+            <ImageView
+                android:id="@+id/imgDurationStep3"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:visibility="gone"
+                android:src="@drawable/ic_arrow_down" />
 
         </LinearLayout>
 
