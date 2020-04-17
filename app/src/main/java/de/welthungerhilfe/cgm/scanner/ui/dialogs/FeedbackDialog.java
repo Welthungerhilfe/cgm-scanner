@@ -207,10 +207,10 @@ public class FeedbackDialog extends Dialog {
                 double scoreSide = lightScoreSide * durationScoreSide;
                 ratingStep2.setRating(5 * (float)scoreSide);
 
-                if (pointCloudCountSide < 8) {
+                if (pointCloudCountSide < 12) {
                     imgDurationStep2.setImageResource(R.drawable.ic_arrow_down);
                     imgDurationStep2.setVisibility(View.VISIBLE);
-                } else if (pointCloudCountSide > 9) {
+                } else if (pointCloudCountSide > 27) {
                     imgDurationStep2.setImageResource(R.drawable.ic_arrow_up);
                     imgDurationStep2.setVisibility(View.VISIBLE);
                 } else {
