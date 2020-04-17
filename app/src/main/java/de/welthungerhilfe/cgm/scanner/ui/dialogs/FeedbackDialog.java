@@ -188,8 +188,15 @@ public class FeedbackDialog extends Dialog {
                 double scoreFront = lightScoreFront * durationScoreFront;
                 ratingStep1.setRating(5 * (float)scoreFront);
 
-                if (pointCloudCountFront < 8) imgDurationStep1.setImageResource(R.drawable.ic_arrow_down);
-                else if (pointCloudCountFront > 9) imgDurationStep1.setImageResource(R.drawable.ic_arrow_up);
+                if (pointCloudCountFront < 8) {
+                    imgDurationStep1.setImageResource(R.drawable.ic_arrow_down);
+                    imgDurationStep1.setVisibility(View.VISIBLE);
+                } else if (pointCloudCountFront > 9) {
+                    imgDurationStep1.setImageResource(R.drawable.ic_arrow_up);
+                    imgDurationStep1.setVisibility(View.VISIBLE);
+                } else {
+                    imgDurationStep1.setVisibility(View.GONE);
+                }
 
 
                 double lightScoreSide = (Math.abs(averagePointCountSide / 38000 - 1.0) * 3);
@@ -200,8 +207,15 @@ public class FeedbackDialog extends Dialog {
                 double scoreSide = lightScoreSide * durationScoreSide;
                 ratingStep2.setRating(5 * (float)scoreSide);
 
-                if (pointCloudCountSide < 8) imgDurationStep2.setImageResource(R.drawable.ic_arrow_down);
-                else if (pointCloudCountSide > 9) imgDurationStep2.setImageResource(R.drawable.ic_arrow_up);
+                if (pointCloudCountSide < 8) {
+                    imgDurationStep2.setImageResource(R.drawable.ic_arrow_down);
+                    imgDurationStep2.setVisibility(View.VISIBLE);
+                } else if (pointCloudCountSide > 9) {
+                    imgDurationStep2.setImageResource(R.drawable.ic_arrow_up);
+                    imgDurationStep2.setVisibility(View.VISIBLE);
+                } else {
+                    imgDurationStep2.setVisibility(View.GONE);
+                }
 
                 double lightScoreBack = (Math.abs(averagePointCountBack / 38000 - 1.0) * 3);
                 double durationScoreBack = Math.abs(1- Math.abs((double) pointCloudCountBack / 8 - 1));
@@ -211,8 +225,15 @@ public class FeedbackDialog extends Dialog {
                 double scoreBack = lightScoreBack * durationScoreBack;
                 ratingStep3.setRating(5 * (float)scoreBack);
 
-                if (pointCloudCountBack < 8) imgDurationStep3.setImageResource(R.drawable.ic_arrow_down);
-                else if (pointCloudCountBack > 9) imgDurationStep3.setImageResource(R.drawable.ic_arrow_up);
+                if (pointCloudCountBack < 8) {
+                    imgDurationStep3.setImageResource(R.drawable.ic_arrow_down);
+                    imgDurationStep3.setVisibility(View.VISIBLE);
+                } else if (pointCloudCountBack > 9) {
+                    imgDurationStep3.setImageResource(R.drawable.ic_arrow_up);
+                    imgDurationStep3.setVisibility(View.VISIBLE);
+                } else {
+                    imgDurationStep3.setVisibility(View.GONE);
+                }
 
                 double overallScore = 0;
                 if (scoreFront > overallScore) overallScore = scoreFront;
