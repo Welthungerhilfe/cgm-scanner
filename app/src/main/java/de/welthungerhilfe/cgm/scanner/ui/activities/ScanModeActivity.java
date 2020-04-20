@@ -1,6 +1,5 @@
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
-
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -10,13 +9,15 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationManager;
-import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
+import android.media.Image;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -24,9 +25,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Display;
 import android.view.MenuItem;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -37,15 +36,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.atap.tangoservice.Tango;
-import com.google.atap.tangoservice.TangoCameraIntrinsics;
-import com.google.atap.tangoservice.TangoConfig;
-import com.google.atap.tangoservice.TangoCoordinateFramePair;
-import com.google.atap.tangoservice.TangoErrorException;
-import com.google.atap.tangoservice.TangoInvalidException;
-import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPointCloudData;
-import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 import com.google.gson.Gson;
 import com.microsoft.appcenter.crashes.Crashes;
@@ -54,60 +45,59 @@ import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.queue.CloudQueue;
 import com.microsoft.azure.storage.queue.CloudQueueClient;
 import com.microsoft.azure.storage.queue.CloudQueueMessage;
-import com.projecttango.tangosupport.TangoSupport;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.nio.ShortBuffer;
+import java.nio.channels.FileChannel;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
-import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
-import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
-import de.welthungerhilfe.cgm.scanner.helper.tango.CameraSurfaceRenderer;
-import de.welthungerhilfe.cgm.scanner.helper.tango.ModelMatCalculator;
-import de.welthungerhilfe.cgm.scanner.helper.tango.OverlaySurface;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.helper.camera.Camera2Camera;
+import de.welthungerhilfe.cgm.scanner.helper.camera.ICamera;
+import de.welthungerhilfe.cgm.scanner.helper.camera.TangoCamera;
+import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
+import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.utils.MD5;
 import de.welthungerhilfe.cgm.scanner.utils.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-import static com.projecttango.tangosupport.TangoSupport.initialize;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.MULTI_UPLOAD_BUNCH;
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_BACK;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_FRONT;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING_SIDE;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_PREVIEW;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_LYING;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_BACK;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_FRONT;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_SIDE;
 
-public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener {
+public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener, Camera2Camera.Camera2DataListener, TangoCamera.TangoCameraListener {
     private final int PERMISSION_LOCATION = 0x0001;
     private final int PERMISSION_CAMERA = 0x0002;
     private final int PERMISSION_STORAGE = 0x0002;
@@ -340,111 +330,41 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private SessionManager session;
 
-    private Tango mTango;
-    private TangoConfig mConfig;
-    private boolean mIsConnected = false;
-
-    private GLSurfaceView mCameraSurfaceView;
-    //private OverlaySurface mOverlaySurfaceView;
-    private CameraSurfaceRenderer mRenderer;
-
     private TextView mTitleView;
     private ProgressBar progressBar;
     private FloatingActionButton fab;
 
     // variables for Pose and point clouds
-    private float mDeltaTime;
-    private int mValidPoseCallbackCount;
-    private int mPointCloudCallbackCount;
-    private boolean mTimeToTakeSnap;
     private String mPointCloudFilename;
     private int mNumberOfFilesWritten;
-    private ArrayList<float[]> mPosePositionBuffer;
-    private ArrayList<float[]> mPoseOrientationBuffer;
-    private ArrayList<Float> mPoseTimestampBuffer;
-    private ArrayList<String> mPointCloudFilenameBuffer;
-    private float[] cam2dev_Transform;
-    private int mNumPoseInSequence;
-    private int mPreviousPoseStatus;
-    private float mPosePreviousTimeStamp;
-    private float mPointCloudPreviousTimeStamp;
-    private float mCurrentTimeStamp;
 
-    private File mExtFileDir;
-    private File mScanArtefactsOutputFolder;
-    private String mPointCloudSaveFolderPath;
     private File mPointCloudSaveFolder;
     private File mRgbSaveFolder;
 
-    private int mDisplayRotation = Surface.ROTATION_0;
-
-    private boolean mPointCloudAvailable;
     private boolean mIsRecording;
     private int mProgress;
+
+    private int noOfPoints;
 
     private long mNowTime;
     private String mNowTimeString;
 
-    private Semaphore mutex_on_mIsRecording;
-
     private long age = 0;
-
-    private int noOfPoints;
-    private double averageLigtingPenality=0.00;
-
-    private int mConnectedTextureIdGlThread = INVALID_TEXTURE_ID;
-    private AtomicBoolean mIsFrameAvailableTangoThread = new AtomicBoolean(false);
-
-    private static final int INVALID_TEXTURE_ID = 0;
-    private static final int SECS_TO_MILLISECS = 1000;
-
 
     private AlertDialog progressDialog;
 
-    private final Object lock = new Object();
     private ExecutorService executor;
 
-    private int runningCount = 0;
+    private ICamera mCameraInstance;
 
     public void onStart() {
         super.onStart();
 
         mPointCloudFilename = "";
         mNumberOfFilesWritten = 0;
-        mPosePositionBuffer = new ArrayList<>();
-        mPoseOrientationBuffer = new ArrayList<>();
-        mPoseTimestampBuffer = new ArrayList<>();
-        mPointCloudFilenameBuffer = new ArrayList<>();
-        mNumPoseInSequence = 0;
-        mutex_on_mIsRecording = new Semaphore(1,true);
         mIsRecording = false;
-        mPointCloudAvailable = false;
 
-        mTango = new Tango(this, () -> {
-            // Synchronize against disconnecting while the service is being used in
-            // the OpenGL thread or in the UI thread.
-            synchronized (this) {
-                try {
-                    mConfig = setupTangoConfig(mTango);
-                    mTango.connect(mConfig);
-                    startupTango();
-                    initialize(mTango);
-                    mIsConnected = true;
-
-                    setDisplayRotation();
-                } catch (TangoOutOfDateException e) {
-                    Log.e(TAG, getString(R.string.exception_out_of_date), e);
-                    Crashes.trackError(e);
-                } catch (TangoErrorException e) {
-                    Log.e(TAG, getString(R.string.exception_tango_error), e);
-                    Crashes.trackError(e);
-                } catch (TangoInvalidException e) {
-                    Log.e(TAG, getString(R.string.exception_tango_invalid), e);
-                    Crashes.trackError(e);
-                }
-                setUpExtrinsics();
-            }
-        });
+        getCamera().onStart();
     }
 
     protected void onCreate(Bundle savedBundle) {
@@ -494,8 +414,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         findViewById(R.id.btnRetake).setOnClickListener(this);
         findViewById(R.id.imgClose).setOnClickListener(this);
 
-        mCameraSurfaceView = findViewById(R.id.surfaceview);
-        //mOverlaySurfaceView = findViewById(R.id.overlaySurfaceView);
+        getCamera().onCreate();
 
         measureRepository = MeasureRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
@@ -506,7 +425,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         getCurrentLocation();
 
         setupScanArtifacts();
-        setupRenderer();
 
         progressDialog = new AlertDialog.Builder(this)
                 .setCancelable(false)
@@ -521,41 +439,15 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onResume() {
         super.onResume();
-
-        mCameraSurfaceView.onResume();
-        mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-
-        /*
-        if (SCAN_STEP == SCAN_STANDING_FRONT || SCAN_STEP == SCAN_STANDING_SIDE || SCAN_STEP == SCAN_STANDING_BACK)
-            mOverlaySurfaceView.setMode(OverlaySurface.INFANT_CLOSE_DOWN_UP_OVERLAY);
-        else if (SCAN_STEP == SCAN_LYING_FRONT || SCAN_STEP == SCAN_LYING_SIDE || SCAN_STEP == SCAN_LYING_BACK)
-            mOverlaySurfaceView.setMode(OverlaySurface.BABY_OVERLAY);
-         */
+        getCamera().onResume();
+        getCamera().addListener(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-
-        mCameraSurfaceView.onPause();
-        // Synchronize against disconnecting while the service is being used in the OpenGL
-        // thread or in the UI thread.
-        // NOTE: DO NOT lock against this same object in the Tango callback thread.
-        // Tango.disconnect will block here until all Tango callback calls are finished.
-        // If you lock against this object in a Tango callback thread it will cause a deadlock.
-        synchronized (this) {
-            try {
-                mTango.disconnectCamera(TangoCameraIntrinsics.TANGO_CAMERA_COLOR);
-                // We need to invalidate the connected texture ID so that we cause a
-                // re-connection in the OpenGL thread after resume.
-                mConnectedTextureIdGlThread = INVALID_TEXTURE_ID;
-                mTango.disconnect();
-                mIsConnected = false;
-            } catch (TangoErrorException e) {
-                Log.e(TAG, getString(R.string.exception_tango_error), e);
-                Crashes.trackError(e);
-            }
-        }
+        getCamera().removeListener(this);
+        getCamera().onPause();
     }
 
     @Override
@@ -573,12 +465,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void setupScanArtifacts() {
-        mExtFileDir = AppController.getInstance().getRootDirectory();
+        File extFileDir = AppController.getInstance().getRootDirectory();
 
-        Log.e("Root Directory", mExtFileDir.getParent());
-        mScanArtefactsOutputFolder  = new File(mExtFileDir,person.getQrcode() + "/measurements/" + mNowTimeString + "/");
-        mPointCloudSaveFolder = new File(mScanArtefactsOutputFolder,"pc");
-        mRgbSaveFolder = new File(mScanArtefactsOutputFolder,"rgb");
+        Log.e("Root Directory", extFileDir.getParent());
+        File scanArtefactsOutputFolder  = new File(extFileDir,person.getQrcode() + "/measurements/" + mNowTimeString + "/");
+        mPointCloudSaveFolder = new File(scanArtefactsOutputFolder,isTangoDevice() ? "pc" : "depth16");
+        mRgbSaveFolder = new File(scanArtefactsOutputFolder,"rgb");
 
         if(!mPointCloudSaveFolder.exists()) {
             boolean created = mPointCloudSaveFolder.mkdirs();
@@ -602,334 +494,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
     }
 
-    private void setupRenderer() {
-        mCameraSurfaceView.setEGLContextClientVersion(2);
-        mRenderer = new CameraSurfaceRenderer(new CameraSurfaceRenderer.RenderCallback() {
-
-            @Override
-            public void preRender() {
-
-                // This is the work that you would do on your main OpenGL render thread.
-
-                // We need to be careful to not run any Tango-dependent code in the OpenGL
-                // thread unless we know the Tango Service to be properly set up and connected.
-                if (!mIsConnected) {
-                    return;
-                }
-
-                try {
-                    // Synchronize against concurrently disconnecting the service triggered from the
-                    // UI thread.
-                    synchronized (this) {
-                        // Connect the Tango SDK to the OpenGL texture ID where we are going to
-                        // render the camera.
-                        // NOTE: This must be done after the texture is generated and the Tango
-                        // service is connected.
-                        if (mConnectedTextureIdGlThread == INVALID_TEXTURE_ID) {
-                            mConnectedTextureIdGlThread = mRenderer.getTextureId();
-                            //sVideoEncoder.setTextureId(mConnectedTextureIdGlThread);
-                            mTango.connectTextureId(TangoCameraIntrinsics.TANGO_CAMERA_COLOR, mConnectedTextureIdGlThread);
-
-                            Log.d(TAG, "connected to texture id: " + mRenderer.getTextureId());
-                        }
-
-                        // If there is a new RGB camera frame available, update the texture and
-                        // scene camera pose.
-                        if (mIsFrameAvailableTangoThread.compareAndSet(true, false)) {
-
-                            double rgbTimestamp = mTango.updateTexture(TangoCameraIntrinsics.TANGO_CAMERA_COLOR);
-
-                            // {@code rgbTimestamp} contains the exact timestamp at which the
-                            // rendered RGB frame was acquired.
-
-                            // In order to see more details on how to use this timestamp to modify
-                            // the scene camera and achieve an augmented reality effect,
-                            // refer to java_augmented_reality_example and/or
-                            // java_augmented_reality_opengl_example projects.
-
-                        }
-                    }
-                } catch (TangoErrorException e) {
-                    Crashes.trackError(e);
-                }
-            }
-        });
-
-        mCameraSurfaceView.setRenderer(mRenderer);
-    }
-
-    private TangoConfig setupTangoConfig(Tango tango) {
-        // Create a new Tango configuration and enable the Camera API.
-        TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
-        config.putBoolean(TangoConfig.KEY_BOOLEAN_COLORCAMERA, true);
-        config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
-        config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
-        return config;
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private void startupTango() {
-        // Lock configuration and connect to Tango.
-        // Select coordinate frame pair.
-        final ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<>();
-        framePairs.add(new TangoCoordinateFramePair(TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE, TangoPoseData.COORDINATE_FRAME_DEVICE));
-
-        // Listen for new Tango data.
-        mTango.connectListener(framePairs, new Tango.TangoUpdateCallback() {
-
-            String[] poseStatusCode = {"POSE_INITIALIZING","POSE_VALID","POSE_INVALID","POSE_UNKNOWN"};
-
-            @Override
-            public void onPoseAvailable(final TangoPoseData pose) {
-                mDeltaTime = (float) (pose.timestamp - mPosePreviousTimeStamp) * SECS_TO_MILLISECS;
-                mPosePreviousTimeStamp = (float) pose.timestamp;
-                if (mPreviousPoseStatus != pose.statusCode) {
-                    mValidPoseCallbackCount = 0;
-                }
-                mValidPoseCallbackCount++;
-                mPreviousPoseStatus = pose.statusCode;
-
-                // My pose buffering
-                if (mIsRecording && pose.statusCode == TangoPoseData.POSE_VALID) {
-                    mPosePositionBuffer.add(mNumPoseInSequence, pose.getTranslationAsFloats());
-                    mPoseOrientationBuffer.add(mNumPoseInSequence, pose.getRotationAsFloats());
-                    mPoseTimestampBuffer.add((float)pose.timestamp);
-                    mNumPoseInSequence++;
-                }
-                //End of My pose buffering
-            }
-
-            @Override
-            public void onPointCloudAvailable(final TangoPointCloudData pointCloudData) throws TangoErrorException {
-                // set to true for next RGB image to be written
-                // TODO remove when not necessary anymore (performance/video capture)
-                mPointCloudAvailable = true;
-
-                float[] average = TangoUtils.calculateAveragedDepth(pointCloudData.points, pointCloudData.numPoints);
-
-                // Get pose transforms for openGL to depth/color cameras.
-                /*
-                try {
-                    TangoPoseData oglTdepthPose = TangoSupport.getPoseAtTime(
-                            pointCloudData.timestamp,
-                            TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
-                            TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
-                            TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
-                            TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
-                            TangoSupport.ROTATION_IGNORED);
-                    if (oglTdepthPose.statusCode != TangoPoseData.POSE_VALID) {
-                        //Log.w(TAG, "Could not get depth camera transform at time " + pointCloudData.timestamp);
-                    }
-                } catch (TangoErrorException e) {
-                    Crashes.trackError(e);
-                }
-                 */
-
-                mCurrentTimeStamp = (float) pointCloudData.timestamp;
-                final float frameDelta = (mCurrentTimeStamp - mPointCloudPreviousTimeStamp) * SECS_TO_MILLISECS;
-                mPointCloudPreviousTimeStamp = mCurrentTimeStamp;
-                mPointCloudCallbackCount++;
-
-
-                try {
-                    mutex_on_mIsRecording.acquire();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    Crashes.trackError(e);
-                }
-                // Saving the frame or not, depending on the current mode.
-                if ( mIsRecording ) {
-                    updateScanningProgress(pointCloudData.numPoints, average[0], average[1]);
-                    progressBar.setProgress(mProgress);
-
-                    Runnable thread = () -> {
-                        mPointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
-                                "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
-
-                        TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
-
-                        File artifactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
-                        if (artifactFile.exists()) {
-                            FileLog log = new FileLog();
-                            log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
-                            log.setType("pcd");
-                            log.setPath(artifactFile.getPath());
-                            log.setHashValue(MD5.getMD5(artifactFile.getPath()));
-                            log.setFileSize(artifactFile.length());
-                            log.setUploadDate(0);
-                            log.setDeleted(false);
-                            log.setQrCode(person.getQrcode());
-                            log.setCreateDate(mNowTime);
-                            log.setCreatedBy(session.getUserEmail());
-                            log.setAge(age);
-                            log.setSchema_version(CgmDatabase.version);
-                            log.setMeasureId(measure.getId());
-                            fileLogRepository.insertFileLog(log);
-
-
-                            ArtifactResult ar=new ArtifactResult();
-                            double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
-                            ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
-                            ar.setArtifact_id(AppController.getInstance().getPersonId());
-                            ar.setKey(SCAN_STEP);
-                            ar.setMeasure_id(measure.getId());
-                            ar.setMisc("");
-                            ar.setType("PCD_POINTS_v0.2");
-                            noOfPoints = pointCloudData.numPoints;
-                            ar.setReal(noOfPoints);
-                            artifactResultRepository.insertArtifactResult(ar);
-
-                            Log.e("numbs", String.valueOf(mNumberOfFilesWritten));
-                        }
-                    };
-                    executor.execute(thread);
-
-                    mNumberOfFilesWritten++;
-                }
-                mutex_on_mIsRecording.release();
-            }
-
-
-            @Override
-            public void onFrameAvailable(int cameraId) {
-                // This will get called every time a new RGB camera frame is available to be
-                // rendered.
-                //Log.d(TAG, "onFrameAvailable");
-
-                if (cameraId == TangoCameraIntrinsics.TANGO_CAMERA_COLOR) {
-                    // Now that we are receiving onFrameAvailable callbacks, we can switch
-                    // to RENDERMODE_WHEN_DIRTY to drive the render loop from this callback.
-                    // This will result in a frame rate of approximately 30FPS, in synchrony with
-                    // the RGB camera driver.
-                    // If you need to render at a higher rate (i.e., if you want to render complex
-                    // animations smoothly) you  can use RENDERMODE_CONTINUOUSLY throughout the
-                    // application lifecycle.
-                    if (mCameraSurfaceView.getRenderMode() != GLSurfaceView.RENDERMODE_WHEN_DIRTY) {
-                        mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-                    }
-
-                    // Note that the RGB data is not passed as a parameter here.
-                    // Instead, this callback indicates that you can call
-                    // the {@code updateTexture()} method to have the
-                    // RGB data copied directly to the OpenGL texture at the native layer.
-                    // Since that call needs to be done from the OpenGL thread, what we do here is
-                    // set up a flag to tell the OpenGL thread to do that in the next run.
-                    // NOTE: Even if we are using a render-by-request method, this flag is still
-                    // necessary since the OpenGL thread run requested below is not guaranteed
-                    // to run in synchrony with this requesting call.
-                    mIsFrameAvailableTangoThread.set(true);
-                    // Trigger an OpenGL render to update the OpenGL scene with the new RGB data.
-                    mCameraSurfaceView.requestRender();
-                }
-            }
-        });
-
-        mTango.experimentalConnectOnFrameListener(TangoCameraIntrinsics.TANGO_CAMERA_COLOR, (tangoImageBuffer, i) -> {
-            if ( ! mIsRecording || ! mPointCloudAvailable) {
-                return;
-            }
-
-            Runnable thread = () -> {
-                TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
-
-                String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + currentTangoImageBuffer.timestamp + ".jpg";
-
-                BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
-
-                File artifactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
-                if (artifactFile.exists()) {
-                    FileLog log = new FileLog();
-                    log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
-                    log.setType("rgb");
-                    log.setPath(artifactFile.getPath());
-                    log.setHashValue(MD5.getMD5(artifactFile.getPath()));
-                    log.setFileSize(artifactFile.length());
-                    log.setUploadDate(0);
-                    log.setDeleted(false);
-                    log.setQrCode(person.getQrcode());
-                    log.setCreateDate(mNowTime);
-                    log.setCreatedBy(session.getUserEmail());
-                    log.setAge(age);
-                    log.setSchema_version(CgmDatabase.version);
-                    log.setMeasureId(measure.getId());
-
-                    fileLogRepository.insertFileLog(log);
-                }
-            };
-            executor.execute(thread);
-        });
-    }
-
-    private void setDisplayRotation() {
-        Display display = getWindowManager().getDefaultDisplay();
-        mDisplayRotation = display.getRotation();
-
-        // We also need to update the camera texture UV coordinates. This must be run in the OpenGL
-        // thread.
-        mCameraSurfaceView.queueEvent(() -> {
-            if (mIsConnected) {
-                mRenderer.updateColorCameraTextureUv(mDisplayRotation);
-            }
-        });
-    }
-
-    private void setUpExtrinsics() {
-        // Set device to imu matrix in Model Matrix Calculator.
-        TangoPoseData device2IMUPose = new TangoPoseData();
-        TangoCoordinateFramePair framePair = new TangoCoordinateFramePair();
-        framePair.baseFrame = TangoPoseData.COORDINATE_FRAME_IMU;
-        framePair.targetFrame = TangoPoseData.COORDINATE_FRAME_DEVICE;
-        try {
-            device2IMUPose = mTango.getPoseAtTime(0.0, framePair);
-        } catch (TangoErrorException e) {
-            e.printStackTrace();
-            Crashes.trackError(e);
-        }
-        /*mRenderer.getModelMatCalculator().SetDevice2IMUMatrix(device2IMUPose.getTranslationAsFloats(),device2IMUPose.getRotationAsFloats());*/
-        // Set color camera to imu matrix in Model Matrix Calculator.
-        TangoPoseData color2IMUPose = new TangoPoseData();
-
-        framePair.baseFrame = TangoPoseData.COORDINATE_FRAME_IMU;
-        framePair.targetFrame = TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR;
-        try {
-            color2IMUPose = mTango.getPoseAtTime(0.0, framePair);
-        } catch (TangoErrorException e) {
-            e.printStackTrace();
-            Crashes.trackError(e);
-        }
-
-        //mRenderer.getModelMatCalculator().SetColorCamera2IMUMatrix(color2IMUPose.getTranslationAsFloats(), color2IMUPose.getRotationAsFloats());
-
-        // Get the Camera2Device transform
-        float[] rot_Dev2IMU = device2IMUPose.getRotationAsFloats();
-        float[] trans_Dev2IMU = device2IMUPose.getTranslationAsFloats();
-        float[] rot_Cam2IMU = color2IMUPose.getRotationAsFloats();
-        float[] trans_Cam2IMU = color2IMUPose.getTranslationAsFloats();
-
-        float[] dev2IMU = new float[16];
-        Matrix.setIdentityM(dev2IMU, 0);
-        dev2IMU = ModelMatCalculator.quaternionMatrixOpenGL(rot_Dev2IMU);
-        dev2IMU[12] += trans_Dev2IMU[0];
-        dev2IMU[13] += trans_Dev2IMU[1];
-        dev2IMU[14] += trans_Dev2IMU[2];
-
-        float[] IMU2dev = new float[16];
-        Matrix.setIdentityM(IMU2dev, 0);
-        Matrix.invertM(IMU2dev, 0, dev2IMU, 0);
-
-        float[] cam2IMU = new float[16];
-        Matrix.setIdentityM(cam2IMU, 0);
-        cam2IMU = ModelMatCalculator.quaternionMatrixOpenGL(rot_Cam2IMU);
-        cam2IMU[12] += trans_Cam2IMU[0];
-        cam2IMU[13] += trans_Cam2IMU[1];
-        cam2IMU[14] += trans_Cam2IMU[2];
-
-        cam2dev_Transform = new float[16];
-        Matrix.setIdentityM(cam2dev_Transform, 0);
-        Matrix.multiplyMM(cam2dev_Transform, 0, IMU2dev, 0, cam2IMU, 0);
-    }
-
-    private void updateScanningProgress(int numPoints, float distance, float confidence) {
+    private void updateScanningProgress(int numPoints) {
         float minPointsToCompleteScan = 199500.0f;
         float progressToAddFloat = numPoints / minPointsToCompleteScan;
         progressToAddFloat = progressToAddFloat*100;
@@ -960,38 +525,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     public void goToNextStep() {
         closeScan();
-
-        /*
-        switch (SCAN_STEP) {
-            case SCAN_STANDING_FRONT:
-            case SCAN_LYING_FRONT:
-                lytScanStep1.setVisibility(View.GONE);
-                btnScanStep1.setText(R.string.retake_scan);
-                btnScanStep1.setTextColor(getResources().getColor(R.color.colorWhite, getTheme()));
-                btnScanStep1.setBackground(getResources().getDrawable(R.drawable.button_green_circular, getTheme()));
-
-                step1 = true;
-                break;
-            case SCAN_STANDING_SIDE:
-            case SCAN_LYING_SIDE:
-                lytScanStep2.setVisibility(View.GONE);
-                btnScanStep2.setText(R.string.retake_scan);
-                btnScanStep2.setTextColor(getResources().getColor(R.color.colorWhite, getTheme()));
-                btnScanStep2.setBackground(getResources().getDrawable(R.drawable.button_green_circular, getTheme()));
-
-                step2 = true;
-                break;
-            case SCAN_STANDING_BACK:
-            case SCAN_LYING_BACK:
-                lytScanStep3.setVisibility(View.GONE);
-                btnScanStep3.setText(R.string.retake_scan);
-                btnScanStep3.setTextColor(getResources().getColor(R.color.colorWhite, getTheme()));
-                btnScanStep3.setBackground(getResources().getDrawable(R.drawable.button_green_circular, getTheme()));
-
-                step3 = true;
-                break;
-        }
-        */
 
         getScanQuality(measure.getId(),SCAN_STEP);
     }
@@ -1312,6 +845,236 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         public void onPostExecute(Void result) {
             activity.finish();
+        }
+    }
+
+    private ICamera getCamera() {
+        if (mCameraInstance == null) {
+            if (isTangoDevice()) {
+                mCameraInstance = new TangoCamera(this);
+            } else {
+                mCameraInstance = new Camera2Camera(this);
+            }
+        }
+        return mCameraInstance;
+    }
+
+    private boolean isTangoDevice() {
+        //Note: the compatibility is checked by AndroidManifest
+        return Build.VERSION.SDK_INT <= 24;
+    }
+
+    @Override
+    public void onColorDataReceived(Bitmap bitmap, long timestamp, int frameIndex) {
+        if (mIsRecording && (frameIndex % 10 == 0)) {
+            String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + timestamp + ".jpg";
+            currentImgFilename = currentImgFilename.replace('/', '_');
+
+            File out = new File(mRgbSaveFolder, currentImgFilename);
+            try {
+                FileOutputStream fOutputStream = new FileOutputStream(out);
+
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fOutputStream);
+
+                fOutputStream.flush();
+                fOutputStream.close();
+
+                MediaStore.Images.Media.insertImage(getContentResolver(), out.getAbsolutePath(), out.getName(), out.getName());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            String finalCurrentImgFilename = currentImgFilename;
+            new Thread(() -> {
+                File artifactFile = new File(mRgbSaveFolder.getPath() + File.separator + finalCurrentImgFilename);
+                if (artifactFile.exists()) {
+                    FileLog log = new FileLog();
+                    log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
+                    log.setType("rgb");
+                    log.setPath(artifactFile.getPath());
+                    log.setHashValue(MD5.getMD5(artifactFile.getPath()));
+                    log.setFileSize(artifactFile.length());
+                    log.setUploadDate(0);
+                    log.setDeleted(false);
+                    log.setQrCode(person.getQrcode());
+                    log.setCreateDate(mNowTime);
+                    log.setCreatedBy(session.getUserEmail());
+                    log.setAge(age);
+                    log.setSchema_version(CgmDatabase.version);
+                    log.setMeasureId(measure.getId());
+
+                    fileLogRepository.insertFileLog(log);
+                }
+            }).start();
+        }
+    }
+
+    @Override
+    public void onDepthDataReceived(Image image, int frameIndex) {
+        Image.Plane plane = image.getPlanes()[0];
+        ByteBuffer buffer = plane.getBuffer();
+        ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
+
+        ArrayList<Short> pixel = new ArrayList<>();
+        while (shortDepthBuffer.hasRemaining()) {
+            pixel.add(shortDepthBuffer.get());
+        }
+        int stride = plane.getRowStride();
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        int count = 0;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int depthSample = pixel.get((y / 2) * stride + x);
+                if ((depthSample & 0x1FFF) > 0) {
+                    count++;
+                }
+            }
+        }
+
+        if (mIsRecording && (frameIndex % 10 == 0)) {
+            updateScanningProgress(count);
+            progressBar.setProgress(mProgress);
+
+            String filename = "depth16_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + image.getTimestamp() + ".depth16";
+            filename = filename.replace('/', '_');
+            File out = new File(mPointCloudSaveFolder, filename);
+            try {
+                FileOutputStream stream = new FileOutputStream(out);
+                FileChannel channel = stream.getChannel();
+                channel.write(buffer);
+                stream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            int finalCount = count;
+            String finalFilename = filename;
+            new Thread(() -> {
+                File artifactFile = new File(mPointCloudSaveFolder, finalFilename);
+                if (artifactFile.exists()) {
+                    FileLog log = new FileLog();
+                    log.setId(AppController.getInstance().getArtifactId("scan-depth16", mNowTime));
+                    log.setType("depth16");
+                    log.setPath(artifactFile.getPath());
+                    log.setHashValue(MD5.getMD5(artifactFile.getPath()));
+                    log.setFileSize(artifactFile.length());
+                    log.setUploadDate(0);
+                    log.setDeleted(false);
+                    log.setQrCode(person.getQrcode());
+                    log.setCreateDate(mNowTime);
+                    log.setCreatedBy(session.getUserEmail());
+                    log.setAge(age);
+                    log.setSchema_version(CgmDatabase.version);
+                    log.setMeasureId(measure.getId());
+                    fileLogRepository.insertFileLog(log);
+
+
+                    ArtifactResult ar = new ArtifactResult();
+                    double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
+                    ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
+                    ar.setArtifact_id(AppController.getInstance().getPersonId());
+                    ar.setKey(SCAN_STEP);
+                    ar.setMeasure_id(measure.getId());
+                    ar.setMisc("");
+                    ar.setType("PCD_POINTS_v0.2");
+                    noOfPoints = finalCount;
+                    ar.setReal(noOfPoints);
+                    artifactResultRepository.insertArtifactResult(ar);
+                }
+            }).start();
+        }
+    }
+
+    @Override
+    public void onTangoColorData(TangoImageBuffer tangoImageBuffer) {
+        if ( ! mIsRecording) {
+            return;
+        }
+
+        Runnable thread = () -> {
+            TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
+
+            String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + currentTangoImageBuffer.timestamp + ".jpg";
+            currentImgFilename = currentImgFilename.replace('/', '_');
+
+            BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
+
+            File artifactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
+            if (artifactFile.exists()) {
+                FileLog log = new FileLog();
+                log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
+                log.setType("rgb");
+                log.setPath(artifactFile.getPath());
+                log.setHashValue(MD5.getMD5(artifactFile.getPath()));
+                log.setFileSize(artifactFile.length());
+                log.setUploadDate(0);
+                log.setDeleted(false);
+                log.setQrCode(person.getQrcode());
+                log.setCreateDate(mNowTime);
+                log.setCreatedBy(session.getUserEmail());
+                log.setAge(age);
+                log.setSchema_version(CgmDatabase.version);
+                log.setMeasureId(measure.getId());
+
+                fileLogRepository.insertFileLog(log);
+            }
+        };
+        executor.execute(thread);
+    }
+
+    @Override
+    public void onTangoDepthData(TangoPointCloudData pointCloudData) {
+        // Saving the frame or not, depending on the current mode.
+        if ( mIsRecording ) {
+            updateScanningProgress(pointCloudData.numPoints);
+            progressBar.setProgress(mProgress);
+
+            Runnable thread = () -> {
+                mPointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
+                        "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
+                mPointCloudFilename = mPointCloudFilename.replace('/', '_');
+
+                TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, mPointCloudFilename);
+
+                File artifactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + mPointCloudFilename +".pcd");
+                if (artifactFile.exists()) {
+                    FileLog log = new FileLog();
+                    log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
+                    log.setType("pcd");
+                    log.setPath(artifactFile.getPath());
+                    log.setHashValue(MD5.getMD5(artifactFile.getPath()));
+                    log.setFileSize(artifactFile.length());
+                    log.setUploadDate(0);
+                    log.setDeleted(false);
+                    log.setQrCode(person.getQrcode());
+                    log.setCreateDate(mNowTime);
+                    log.setCreatedBy(session.getUserEmail());
+                    log.setAge(age);
+                    log.setSchema_version(CgmDatabase.version);
+                    log.setMeasureId(measure.getId());
+                    fileLogRepository.insertFileLog(log);
+
+
+                    ArtifactResult ar=new ArtifactResult();
+                    double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
+                    ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
+                    ar.setArtifact_id(AppController.getInstance().getPersonId());
+                    ar.setKey(SCAN_STEP);
+                    ar.setMeasure_id(measure.getId());
+                    ar.setMisc("");
+                    ar.setType("PCD_POINTS_v0.2");
+                    noOfPoints = pointCloudData.numPoints;
+                    ar.setReal(noOfPoints);
+                    artifactResultRepository.insertArtifactResult(ar);
+
+                    Log.e("numbs", String.valueOf(mNumberOfFilesWritten));
+                }
+            };
+            executor.execute(thread);
+
+            mNumberOfFilesWritten++;
         }
     }
 }

@@ -139,43 +139,4 @@ public class TangoUtils {
                 imageBuffer.stride, imageBuffer.frameNumber,
                 imageBuffer.timestamp, imageBuffer.format, clone);
     }
-
-    /**
-     * Calculates the average depth at Center from a point cloud buffer.
-     */
-    public static float[] calculateAveragedDepth(FloatBuffer pointCloudBuffer, int numPoints) {
-        float totalZ = 0;
-        float averageZ = 0;
-        float totalC = 0;
-        float averageC = 0;
-        float currentX;
-        float currentY;
-        int countingPoints = 0;
-
-        if (numPoints != 0) {
-            int numFloats = 4 * numPoints;
-            for (int i = 0; i < numFloats; i++) {
-                currentX = pointCloudBuffer.get(i);
-                i++;
-                currentY = pointCloudBuffer.get(i);
-                i++;
-                if (currentX < 0.01 && currentX > -0.01 && currentY < 0.01 && currentY > -0.1) {
-                    totalZ = totalZ + pointCloudBuffer.get(i);
-                    countingPoints++;
-                    i++;
-                    totalC = totalC + pointCloudBuffer.get(i);
-                } else {
-                    i++;
-                }
-            }
-            averageZ = totalZ / countingPoints;
-            averageC = totalC / countingPoints;
-        }
-        float[] average = new float[2];
-        average[0] = averageZ;
-        average[1] = averageC;
-        return average;
-    }
-
-
 }
