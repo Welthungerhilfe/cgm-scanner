@@ -866,28 +866,28 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    public void onColorDataReceived(Bitmap bitmap, long timestamp, int frameIndex) {
+    public void onColorDataReceived(Bitmap bitmap, int frameIndex) {
         if (mIsRecording && (frameIndex % 10 == 0)) {
-            String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + timestamp + ".jpg";
-            currentImgFilename = currentImgFilename.replace('/', '_');
 
-            File out = new File(mRgbSaveFolder, currentImgFilename);
-            try {
-                FileOutputStream fOutputStream = new FileOutputStream(out);
-
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 75, fOutputStream);
-
-                fOutputStream.flush();
-                fOutputStream.close();
-
-                MediaStore.Images.Media.insertImage(getContentResolver(), out.getAbsolutePath(), out.getName(), out.getName());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            String finalCurrentImgFilename = currentImgFilename;
             new Thread(() -> {
-                File artifactFile = new File(mRgbSaveFolder.getPath() + File.separator + finalCurrentImgFilename);
+                String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
+                currentImgFilename = currentImgFilename.replace('/', '_');
+
+                File out = new File(mRgbSaveFolder, currentImgFilename);
+                try {
+                    FileOutputStream fOutputStream = new FileOutputStream(out);
+
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 75, fOutputStream);
+
+                    fOutputStream.flush();
+                    fOutputStream.close();
+
+                    MediaStore.Images.Media.insertImage(getContentResolver(), out.getAbsolutePath(), out.getName(), out.getName());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                File artifactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
                 if (artifactFile.exists()) {
                     FileLog log = new FileLog();
                     log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
@@ -945,25 +945,25 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             updateScanningProgress(count);
             progressBar.setProgress(mProgress);
 
-            String filename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + image.getTimestamp() + ".depth";
-            filename = filename.replace('/', '_');
-            File out = new File(mPointCloudSaveFolder, filename);
-            try {
-                FileOutputStream stream = new FileOutputStream(out);
-                ZipOutputStream zip = new ZipOutputStream(stream);
-                byte[] info = (width + "x" + height + "_0.001_7\n").getBytes();
-                zip.putNextEntry(new ZipEntry("data"));
-                zip.write(info, 0, info.length);
-                zip.write(data, 0, data.length);
-                zip.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
             int finalCount = count;
-            String finalFilename = filename;
             new Thread(() -> {
-                File artifactFile = new File(mPointCloudSaveFolder, finalFilename);
+
+                String filename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
+                filename = filename.replace('/', '_');
+                File out = new File(mPointCloudSaveFolder, filename);
+                try {
+                    FileOutputStream stream = new FileOutputStream(out);
+                    ZipOutputStream zip = new ZipOutputStream(stream);
+                    byte[] info = (width + "x" + height + "_0.001_7\n").getBytes();
+                    zip.putNextEntry(new ZipEntry("data"));
+                    zip.write(info, 0, info.length);
+                    zip.write(data, 0, data.length);
+                    zip.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                File artifactFile = new File(mPointCloudSaveFolder, filename);
                 if (artifactFile.exists()) {
                     FileLog log = new FileLog();
                     log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));

@@ -42,12 +42,14 @@ import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Surface;
 import android.view.View;
 import android.widget.ImageView;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import de.welthungerhilfe.cgm.scanner.R;
 
@@ -55,7 +57,7 @@ public class Camera2Camera implements ICamera {
 
   public interface Camera2DataListener
   {
-    void onColorDataReceived(Bitmap bitmap, long timestamp, int frameIndex);
+    void onColorDataReceived(Bitmap bitmap, int frameIndex);
 
     void onDepthDataReceived(Image image, int frameIndex);
   }
@@ -66,8 +68,6 @@ public class Camera2Camera implements ICamera {
   private ImageReader mImageReaderDepth16;
   private ImageReader mImageReaderRGB;
   private CameraDevice mCameraDevice;
-  private int mColorCameraFrame;
-  private int mDepthCameraFrame;
   private String mDepthCameraId = "0";
   private int mDepthWidth = 240;
   private int mDepthHeight = 180;
@@ -139,6 +139,8 @@ public class Camera2Camera implements ICamera {
 
     //set depth camera
     initDepthCamera(activity);
+      final int[] frameIndex = {1};
+    HashMap<Long, Bitmap> cache = new HashMap<>();
     mImageReaderDepth16 = ImageReader.newInstance(mDepthWidth, mDepthHeight, ImageFormat.DEPTH16, 5);
     mImageReaderDepth16.setOnImageAvailableListener(imageReader -> {
       Image image = imageReader.acquireLatestImage();
@@ -146,9 +148,27 @@ public class Camera2Camera implements ICamera {
         Log.w(TAG, "onImageAvailable: Skipping null image.");
         return;
       }
-      mDepthCameraFrame++;
-      for (Camera2DataListener listener : mListeners) {
-        listener.onDepthDataReceived(image, mDepthCameraFrame);
+      if (!cache.isEmpty()) {
+        Bitmap bitmap = null;
+        long bestDiff = Long.MAX_VALUE;
+        for (Long timestamp : cache.keySet()) {
+          long diff = Math.abs(image.getTimestamp() - timestamp) / 1000; //in microseconds
+          if (bestDiff > diff) {
+            bestDiff = diff;
+            bitmap = cache.get(timestamp);
+          }
+        }
+
+        if (bitmap != null && bestDiff < 50000) {
+          for (Camera2DataListener listener : mListeners) {
+            listener.onDepthDataReceived(image, frameIndex[0]);
+          }
+          for (Camera2DataListener listener : mListeners) {
+            listener.onColorDataReceived(bitmap, frameIndex[0]);
+          }
+          cache.clear();
+            frameIndex[0]++;
+        }
       }
       image.close();
     }, null);
@@ -174,10 +194,7 @@ public class Camera2Camera implements ICamera {
       scriptYuvToRgb.forEach(allocationRgb);
       allocationRgb.copyTo(bitmap);
 
-      mColorCameraFrame++;
-      for (Camera2DataListener listener : mListeners) {
-        listener.onColorDataReceived(bitmap, image.getTimestamp(), mColorCameraFrame);
-      }
+      cache.put(image.getTimestamp(), bitmap);
       allocationYuv.destroy();
       allocationRgb.destroy();
       rs.destroy();
