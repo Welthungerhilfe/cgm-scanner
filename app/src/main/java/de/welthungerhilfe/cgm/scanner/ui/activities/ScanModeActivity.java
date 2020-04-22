@@ -52,13 +52,14 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
-import java.nio.channels.FileChannel;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -469,7 +470,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         Log.e("Root Directory", extFileDir.getParent());
         File scanArtefactsOutputFolder  = new File(extFileDir,person.getQrcode() + "/measurements/" + mNowTimeString + "/");
-        mPointCloudSaveFolder = new File(scanArtefactsOutputFolder,isTangoDevice() ? "pc" : "depth16");
+        mPointCloudSaveFolder = new File(scanArtefactsOutputFolder,isTangoDevice() ? "pc" : "depth");
         mRgbSaveFolder = new File(scanArtefactsOutputFolder,"rgb");
 
         if(!mPointCloudSaveFolder.exists()) {
@@ -874,7 +875,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             try {
                 FileOutputStream fOutputStream = new FileOutputStream(out);
 
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fOutputStream);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 75, fOutputStream);
 
                 fOutputStream.flush();
                 fOutputStream.close();
@@ -924,12 +925,19 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         int height = image.getHeight();
 
         int count = 0;
+        int index = 0;
+        byte[] data = new byte[width * height * 3];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int depthSample = pixel.get((y / 2) * stride + x);
-                if ((depthSample & 0x1FFF) > 0) {
+                int depthRange = depthSample & 0x1FFF;
+                int depthConfidence = ((depthSample >> 13) & 0x7);
+                if (depthRange > 0) {
                     count++;
                 }
+                data[index++] = (byte) (depthRange / 256);
+                data[index++] = (byte) (depthRange % 256);
+                data[index++] = (byte) depthConfidence;
             }
         }
 
@@ -937,14 +945,17 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             updateScanningProgress(count);
             progressBar.setProgress(mProgress);
 
-            String filename = "depth16_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + image.getTimestamp() + ".depth16";
+            String filename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + image.getTimestamp() + ".depth";
             filename = filename.replace('/', '_');
             File out = new File(mPointCloudSaveFolder, filename);
             try {
                 FileOutputStream stream = new FileOutputStream(out);
-                FileChannel channel = stream.getChannel();
-                channel.write(buffer);
-                stream.close();
+                ZipOutputStream zip = new ZipOutputStream(stream);
+                byte[] info = (width + "x" + height + "_0.001_7\n").getBytes();
+                zip.putNextEntry(new ZipEntry("data"));
+                zip.write(info, 0, info.length);
+                zip.write(data, 0, data.length);
+                zip.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -955,8 +966,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 File artifactFile = new File(mPointCloudSaveFolder, finalFilename);
                 if (artifactFile.exists()) {
                     FileLog log = new FileLog();
-                    log.setId(AppController.getInstance().getArtifactId("scan-depth16", mNowTime));
-                    log.setType("depth16");
+                    log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
+                    log.setType("depth");
                     log.setPath(artifactFile.getPath());
                     log.setHashValue(MD5.getMD5(artifactFile.getPath()));
                     log.setFileSize(artifactFile.length());
