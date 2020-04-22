@@ -53,10 +53,11 @@
         android:largeHeap="true"
         android:windowSoftInputMode="adjustResize"
         android:theme="@style/AppTheme.NoActionBar"
+        android:extractNativeLibs="true"
         tools:replace="android:allowBackup">
 		<uses-library
             android:name="com.projecttango.libtango_device2"
-            android:required="true" />
+            android:required="false" />
 
         <meta-data
             android:name="com.google.android.gms.version"
