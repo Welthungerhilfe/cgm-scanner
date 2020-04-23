@@ -26,13 +26,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
-import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CaptureRequest;
 import android.media.Image;
 import android.media.ImageReader;
+import android.opengl.GLES20;
+import android.opengl.GLSurfaceView;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -42,20 +42,26 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.util.Log;
 import android.view.Surface;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.ar.core.ArCoreApk;
+import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
+import com.google.ar.core.Coordinates2d;
+import com.google.ar.core.Frame;
 import com.google.ar.core.Session;
 import com.google.ar.core.SharedCamera;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 
 import de.welthungerhilfe.cgm.scanner.R;
 
@@ -68,6 +74,22 @@ public class ARCoreCamera implements ICamera {
     void onDepthDataReceived(Image image, int frameIndex);
   }
 
+  /**
+   * (-1, 1) ------- (1, 1)
+   *   |    \           |
+   *   |       \        |
+   *   |          \     |
+   *   |             \  |
+   * (-1, -1) ------ (1, -1)
+   * Ensure triangles are front-facing, to support glCullFace().
+   * This quad will be drawn using GL_TRIANGLE_STRIP which draws two
+   * triangles: v0->v1->v2, then v2->v1->v3.
+   */
+  private static final float[] QUAD_COORDS = new float[] {
+    -1.0f, -1.0f, +1.0f, -1.0f, -1.0f, +1.0f, +1.0f, +1.0f,
+  };
+  private static final int FLOAT_SIZE = 4;
+
   private static final String TAG = ARCoreCamera.class.getSimpleName();
 
   //Camera2 API
@@ -75,20 +97,18 @@ public class ARCoreCamera implements ICamera {
   private ImageReader mImageReaderRGB;
   private HandlerThread backgroundThread;
   private Handler backgroundHandler;
-  private boolean captureSessionChangesPossible = true;
-  private CaptureRequest.Builder previewCaptureRequestBuilder;
   private final ConditionVariable safeToExitApp = new ConditionVariable();
   private CameraCaptureSession captureSession;
 
   //ARCore API
   private Session sharedSession;
   private CameraDevice cameraDevice;
-  private SharedCamera sharedCamera;
 
   //App integration objects
   private Activity mActivity;
   private ImageView mColorCameraPreview;
   private ArrayList<Camera2DataListener> mListeners;
+  private String mCameraCalibration;
 
   public ARCoreCamera(Activity activity) {
     mActivity = activity;
@@ -112,19 +132,38 @@ public class ARCoreCamera implements ICamera {
     mColorCameraPreview = mActivity.findViewById(R.id.colorCameraPreview);
     mColorCameraPreview.setImageBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
 
-    mActivity.findViewById(R.id.surfaceview).setVisibility(View.GONE);
+    GLSurfaceView glSurfaceView = mActivity.findViewById(R.id.surfaceview);
+    glSurfaceView.setRenderer(new GLSurfaceView.Renderer() {
+
+      private int textures[] = new int[1];
+      private int width, height;
+
+      @Override
+      public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+        GLES20.glGenTextures(1, textures, 0);
+      }
+
+      @Override
+      public void onSurfaceChanged(GL10 gl10, int width, int height) {
+        this.width = width;
+        this.height = height;
+      }
+
+      @Override
+      public void onDrawFrame(GL10 gl10) {
+        updateCalibration(textures[0], width, height);
+      }
+    });
   }
 
   @Override
   public void onResume() {
-    waitUntilCameraCaptureSessionIsActive();
     startBackgroundThread();
     openCamera();
   }
 
   @Override
   public void onPause() {
-    waitUntilCameraCaptureSessionIsActive();
     closeCamera();
     stopBackgroundThread();
   }
@@ -135,7 +174,6 @@ public class ARCoreCamera implements ICamera {
       captureSession = null;
     }
     if (cameraDevice != null) {
-      waitUntilCameraCaptureSessionIsActive();
       safeToExitApp.close();
       cameraDevice.close();
       safeToExitApp.block();
@@ -150,56 +188,10 @@ public class ARCoreCamera implements ICamera {
       mImageReaderRGB.close();
       mImageReaderRGB = null;
     }
-  }
-
-  private void setRepeatingCaptureRequest() {
-    try {
-      captureSession.setRepeatingRequest(previewCaptureRequestBuilder.build(), null, backgroundHandler);
-    } catch (CameraAccessException e) {
-      Log.e(TAG, "Failed to set repeating request", e);
-    }
-  }
-
-  private synchronized void waitUntilCameraCaptureSessionIsActive() {
-    while (!captureSessionChangesPossible) {
-      try {
-        this.wait();
-      } catch (InterruptedException e) {
-        Log.e(TAG, "Unable to wait for a safe time to make changes to the capture session", e);
-      }
-    }
-  }
-
-  private void createCameraPreviewSession() {
-    try {
-      // Create an ARCore compatible capture request using `TEMPLATE_RECORD`.
-      previewCaptureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
-
-      // Build surfaces list, starting with ARCore provided surfaces.
-      List<Surface> surfaceList = sharedCamera.getArCoreSurfaces();
-
-      // Add a CPU image reader surface. On devices that don't support CPU image access, the image
-      // may arrive significantly later, or not arrive at all.
-      surfaceList.add(mImageReaderDepth16.getSurface());
-      surfaceList.add(mImageReaderRGB.getSurface());
-
-      // Surface list should now contain three surfaces:
-      // 0. sharedCamera.getSurfaceTexture()
-      // 1. …
-      // 2. cpuImageReader.getSurface()
-
-      // Add ARCore surfaces and CPU image surface targets.
-      for (Surface surface : surfaceList) {
-        previewCaptureRequestBuilder.addTarget(surface);
-      }
-
-      // Wrap our callback in a shared camera callback.
-      CameraCaptureSession.StateCallback wrappedCallback = sharedCamera.createARSessionStateCallback(cameraCaptureCallback, backgroundHandler);
-
-      // Create camera capture session for camera preview using ARCore wrapped callback.
-      cameraDevice.createCaptureSession(surfaceList, wrappedCallback, backgroundHandler);
-    } catch (CameraAccessException e) {
-      Log.e(TAG, "CameraAccessException", e);
+    if (sharedSession != null) {
+      sharedSession.pause();
+      sharedSession.close();
+      sharedSession = null;
     }
   }
 
@@ -211,7 +203,7 @@ public class ARCoreCamera implements ICamera {
     }
 
     //set depth camera
-      final int[] frameIndex = {1};
+    final int[] frameIndex = {1};
     HashMap<Long, Bitmap> cache = new HashMap<>();
     mImageReaderDepth16 = ImageReader.newInstance(240, 180, ImageFormat.DEPTH16, 5);
     mImageReaderDepth16.setOnImageAvailableListener(imageReader -> {
@@ -238,8 +230,9 @@ public class ARCoreCamera implements ICamera {
           for (Camera2DataListener listener : mListeners) {
             listener.onColorDataReceived(bitmap, frameIndex[0]);
           }
+
           cache.clear();
-            frameIndex[0]++;
+          frameIndex[0]++;
         }
       }
       image.close();
@@ -272,13 +265,14 @@ public class ARCoreCamera implements ICamera {
       rs.destroy();
 
       //update preview window
-      float scale = bitmap.getWidth() / (float)bitmap.getHeight();
-      scale *= mColorCameraPreview.getHeight() / (float)bitmap.getWidth();
-      mColorCameraPreview.setImageBitmap(bitmap);
-      mColorCameraPreview.setRotation(90);
-      mColorCameraPreview.setScaleX(scale);
-      mColorCameraPreview.setScaleY(scale);
-
+      mActivity.runOnUiThread(() -> {
+        float scale = bitmap.getWidth() / (float)bitmap.getHeight();
+        scale *= mColorCameraPreview.getHeight() / (float)bitmap.getWidth();
+        mColorCameraPreview.setImageBitmap(bitmap);
+        mColorCameraPreview.setRotation(90);
+        mColorCameraPreview.setScaleX(scale);
+        mColorCameraPreview.setScaleY(scale);
+      });
       image.close();
     }, backgroundHandler);
 
@@ -301,14 +295,14 @@ public class ARCoreCamera implements ICamera {
         return;
       }
 
-      // Enable fixed focus mode while ARCore is running.
+      // Enable auto focus mode while ARCore is running.
       Config config = sharedSession.getConfig();
-      config.setFocusMode(Config.FocusMode.FIXED);
+      config.setFocusMode(Config.FocusMode.AUTO);
       sharedSession.configure(config);
     }
 
     // Store the ARCore shared camera reference.
-    sharedCamera = sharedSession.getSharedCamera();
+    SharedCamera sharedCamera = sharedSession.getSharedCamera();
 
     // Store the ID of the camera used by ARCore.
     String cameraId = sharedSession.getCameraConfig().getCameraId();
@@ -328,13 +322,10 @@ public class ARCoreCamera implements ICamera {
       // Reference to the camera system service.
       CameraManager cameraManager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
 
-      // Prevent app crashes due to quick operations on camera open / close by waiting for the
-      // capture session's onActive() callback to be triggered.
-      captureSessionChangesPossible = false;
-
       // Open the camera device using the ARCore wrapped callback.
       cameraManager.openCamera(cameraId, wrappedCallback, backgroundHandler);
-    } catch (CameraAccessException | IllegalArgumentException | SecurityException e) {
+      sharedSession.resume();
+    } catch (Exception e) {
       Log.e(TAG, "Failed to open camera", e);
     }
   }
@@ -470,13 +461,49 @@ public class ARCoreCamera implements ICamera {
     return true;
   }
 
+  private void updateCalibration(int texture, int width, int height) {
+    try {
+      //init buffers
+      float[] projection = new float[16];
+      ByteBuffer bbCoords = ByteBuffer.allocateDirect(QUAD_COORDS.length * FLOAT_SIZE);
+      bbCoords.order(ByteOrder.nativeOrder());
+      FloatBuffer quadCoords = bbCoords.asFloatBuffer();
+      quadCoords.put(QUAD_COORDS);
+      quadCoords.position(0);
+      ByteBuffer bbTexCoordsTransformed = ByteBuffer.allocateDirect(QUAD_COORDS.length * FLOAT_SIZE);
+      bbTexCoordsTransformed.order(ByteOrder.nativeOrder());
+      FloatBuffer quadTexCoords = bbTexCoordsTransformed.asFloatBuffer();
+
+      //get calibration from ARCore
+      sharedSession.setCameraTextureName(texture);
+      sharedSession.setDisplayGeometry(0, width, height);
+      Frame frame = sharedSession.update();
+      frame.transformCoordinates2d(Coordinates2d.OPENGL_NORMALIZED_DEVICE_COORDINATES, quadCoords, Coordinates2d.TEXTURE_NORMALIZED, quadTexCoords);
+      Camera camera = frame.getCamera();
+      camera.getProjectionMatrix(projection, 0, 0.1f, 100.0f);
+
+      //extract calibration into string
+      quadTexCoords.position(0);
+      quadCoords.position(0);
+      mCameraCalibration = "";
+      mCameraCalibration += "Projection matrix:\n";
+      for (int i = 0 ; i < projection.length; i++) {
+        mCameraCalibration += projection[i] + (i % 4 == 3 ? ",\n" : ",");
+      }
+      mCameraCalibration += "Frame clip:\n";
+      for (int i = 0 ; i < QUAD_COORDS.length / 2; i++) {
+        mCameraCalibration += quadCoords.get() + "," + quadCoords.get() + " -> " + quadTexCoords.get() + "," + quadTexCoords.get() + ":\n";
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 
   private final CameraDevice.StateCallback cameraDeviceCallback = new CameraDevice.StateCallback() {
     @Override
     public void onOpened(CameraDevice cameraDevice) {
       Log.d(TAG, "Camera device ID " + cameraDevice.getId() + " opened.");
       ARCoreCamera.this.cameraDevice = cameraDevice;
-      createCameraPreviewSession();
     }
 
     @Override
@@ -500,53 +527,6 @@ public class ARCoreCamera implements ICamera {
       ARCoreCamera.this.cameraDevice = null;
       // Fatal error. Quit application.
       mActivity.finish();
-    }
-  };
-
-
-  private CameraCaptureSession.StateCallback cameraCaptureCallback = new CameraCaptureSession.StateCallback() {
-    // Called when the camera capture session is first configured after the app
-    // is initialized, and again each time the activity is resumed.
-    @Override
-    public void onConfigured(CameraCaptureSession session) {
-      Log.d(TAG, "Camera capture session configured.");
-      captureSession = session;
-      setRepeatingCaptureRequest();
-    }
-
-    @Override
-    public void onSurfacePrepared(
-            CameraCaptureSession session, Surface surface) {
-      Log.d(TAG, "Camera capture surface prepared.");
-    }
-
-    @Override
-    public void onReady(CameraCaptureSession session) {
-      Log.d(TAG, "Camera capture session ready.");
-    }
-
-    @Override
-    public void onActive(CameraCaptureSession session) {
-      Log.d(TAG, "Camera capture session active.");
-      synchronized (ARCoreCamera.this) {
-        captureSessionChangesPossible = true;
-        ARCoreCamera.this.notify();
-      }
-    }
-
-    @Override
-    public void onCaptureQueueEmpty(CameraCaptureSession session) {
-      Log.w(TAG, "Camera capture queue empty.");
-    }
-
-    @Override
-    public void onClosed(CameraCaptureSession session) {
-      Log.d(TAG, "Camera capture session closed.");
-    }
-
-    @Override
-    public void onConfigureFailed(CameraCaptureSession session) {
-      Log.e(TAG, "Failed to configure camera capture session.");
     }
   };
 }
