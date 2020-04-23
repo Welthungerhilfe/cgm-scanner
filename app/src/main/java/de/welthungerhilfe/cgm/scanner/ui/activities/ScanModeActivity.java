@@ -78,7 +78,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.helper.camera.Camera2Camera;
+import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ICamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoCamera;
 import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
@@ -98,7 +98,7 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_B
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_FRONT;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SCAN_STANDING_SIDE;
 
-public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener, Camera2Camera.Camera2DataListener, TangoCamera.TangoCameraListener {
+public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener, ARCoreCamera.Camera2DataListener, TangoCamera.TangoCameraListener {
     private final int PERMISSION_LOCATION = 0x0001;
     private final int PERMISSION_CAMERA = 0x0002;
     private final int PERMISSION_STORAGE = 0x0002;
@@ -854,7 +854,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             if (isTangoDevice()) {
                 mCameraInstance = new TangoCamera(this);
             } else {
-                mCameraInstance = new Camera2Camera(this);
+                mCameraInstance = new ARCoreCamera(this);
             }
         }
         return mCameraInstance;
