@@ -195,7 +195,7 @@ public class ARCoreCamera implements ICamera {
     }
   }
 
-  private void openCamera() {
+  private synchronized void openCamera() {
 
     //check permissions
     if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -461,8 +461,16 @@ public class ARCoreCamera implements ICamera {
     return true;
   }
 
-  private void updateCalibration(int texture, int width, int height) {
+  public synchronized String getCalibration() {
+    return mCameraCalibration;
+  }
+
+  private synchronized void updateCalibration(int texture, int width, int height) {
     try {
+      if (sharedSession == null) {
+        return;
+      }
+
       //init buffers
       float[] projection = new float[16];
       ByteBuffer bbCoords = ByteBuffer.allocateDirect(QUAD_COORDS.length * FLOAT_SIZE);
@@ -488,11 +496,11 @@ public class ARCoreCamera implements ICamera {
       mCameraCalibration = "";
       mCameraCalibration += "Projection matrix:\n";
       for (int i = 0 ; i < projection.length; i++) {
-        mCameraCalibration += projection[i] + (i % 4 == 3 ? ",\n" : ",");
+        mCameraCalibration += projection[i] + (i % 4 == 3 ? "\n" : " ");
       }
       mCameraCalibration += "Frame clip:\n";
       for (int i = 0 ; i < QUAD_COORDS.length / 2; i++) {
-        mCameraCalibration += quadCoords.get() + "," + quadCoords.get() + " -> " + quadTexCoords.get() + "," + quadTexCoords.get() + ":\n";
+        mCameraCalibration += quadCoords.get() + " " + quadCoords.get() + " -> " + quadTexCoords.get() + " " + quadTexCoords.get() + "\n";
       }
     } catch (Exception e) {
       e.printStackTrace();

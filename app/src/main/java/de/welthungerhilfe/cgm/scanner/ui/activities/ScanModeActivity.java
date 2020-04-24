@@ -17,7 +17,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -339,6 +338,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private String mPointCloudFilename;
     private int mNumberOfFilesWritten;
 
+    private File mScanArtefactsOutputFolder;
     private File mPointCloudSaveFolder;
     private File mRgbSaveFolder;
 
@@ -469,9 +469,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         File extFileDir = AppController.getInstance().getRootDirectory();
 
         Log.e("Root Directory", extFileDir.getParent());
-        File scanArtefactsOutputFolder  = new File(extFileDir,person.getQrcode() + "/measurements/" + mNowTimeString + "/");
-        mPointCloudSaveFolder = new File(scanArtefactsOutputFolder,isTangoDevice() ? "pc" : "depth");
-        mRgbSaveFolder = new File(scanArtefactsOutputFolder,"rgb");
+        mScanArtefactsOutputFolder = new File(extFileDir,person.getQrcode() + "/measurements/" + mNowTimeString + "/");
+        mPointCloudSaveFolder = new File(mScanArtefactsOutputFolder,isTangoDevice() ? "pc" : "depth");
+        mRgbSaveFolder = new File(mScanArtefactsOutputFolder,"rgb");
 
         if(!mPointCloudSaveFolder.exists()) {
             boolean created = mPointCloudSaveFolder.mkdirs();
@@ -875,14 +875,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 File out = new File(mRgbSaveFolder, currentImgFilename);
                 try {
-                    FileOutputStream fOutputStream = new FileOutputStream(out);
-
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 75, fOutputStream);
-
-                    fOutputStream.flush();
-                    fOutputStream.close();
-
-                    MediaStore.Images.Media.insertImage(getContentResolver(), out.getAbsolutePath(), out.getName(), out.getName());
+                    FileOutputStream fileOutputStream = new FileOutputStream(out);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 75, fileOutputStream);
+                    fileOutputStream.flush();
+                    fileOutputStream.close();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -905,6 +901,38 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setMeasureId(measure.getId());
 
                     fileLogRepository.insertFileLog(log);
+                }
+
+                artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
+                if (!artifactFile.exists()) {
+                    String calibration = ((ARCoreCamera)mCameraInstance).getCalibration();
+                    if (calibration != null) {
+                        try {
+                            FileOutputStream fileOutputStream = new FileOutputStream(artifactFile.getAbsolutePath());
+                            fileOutputStream.write(calibration.getBytes());
+                            fileOutputStream.flush();
+                            fileOutputStream.close();
+
+                            FileLog log = new FileLog();
+                            log.setId(AppController.getInstance().getArtifactId("camera-calibration", mNowTime));
+                            log.setType("calibration");
+                            log.setPath(artifactFile.getPath());
+                            log.setHashValue(MD5.getMD5(artifactFile.getPath()));
+                            log.setFileSize(artifactFile.length());
+                            log.setUploadDate(0);
+                            log.setDeleted(false);
+                            log.setQrCode(person.getQrcode());
+                            log.setCreateDate(mNowTime);
+                            log.setCreatedBy(session.getUserEmail());
+                            log.setAge(age);
+                            log.setSchema_version(CgmDatabase.version);
+                            log.setMeasureId(measure.getId());
+
+                            fileLogRepository.insertFileLog(log);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }).start();
         }
@@ -958,6 +986,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     zip.putNextEntry(new ZipEntry("data"));
                     zip.write(info, 0, info.length);
                     zip.write(data, 0, data.length);
+                    zip.flush();
                     zip.close();
                 } catch (IOException e) {
                     e.printStackTrace();
