@@ -8,6 +8,7 @@ android {
         targetSdkVersion 28
         versionCode 51
         versionName "2.4.1"
+        manifestPlaceholders = [arCameraRequired:"false", arcoreValue:"optional", tangoRequired:"false"]
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
@@ -36,13 +37,25 @@ android {
     dataBinding {
         enabled = true
     }
+    flavorDimensions "platform"
+    productFlavors {
+        arcore {
+            dimension "platform"
+            minSdkVersion 28
+            manifestPlaceholders = [arCameraRequired:"true", arcoreValue:"required", tangoRequired:"false"]
+        }
+        tango {
+            dimension "platform"
+            minSdkVersion 23
+            manifestPlaceholders = [arCameraRequired:"false", arcoreValue:"optional", tangoRequired:"true"]
+        }
+    }
     sourceSets {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
     lintOptions {
         abortOnError true
     }
-    buildToolsVersion '27.0.3'
 }
 
 dependencies {
