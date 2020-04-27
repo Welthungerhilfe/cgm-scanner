@@ -133,7 +133,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         Iterable<CloudQueueMessage> retrievedMessages;
 
                         measureResultQueue.setShouldEncodeMessage(false);
-                        retrievedMessages = measureResultQueue.retrieveMessages(1);
+                        retrievedMessages = measureResultQueue.retrieveMessages(30);
                         Gson gson = new Gson();
 
                         while (retrievedMessages.iterator().hasNext()) {
