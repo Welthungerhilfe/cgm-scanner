@@ -24,9 +24,6 @@ package de.welthungerhilfe.cgm.scanner.helper;
  */
 
 public class AppConstants {
-    public static final String AZURE_ACCOUNT_NAME = "{AZURE_ACCOUNT_NAME}";
-    public static final String AZURE_ACCOUNT_KEY = "{AZURE_ACCOUNT_KEY}";
-
     public static final int MAX_IMAGE_SIZE = 800;
 
     public static final long SYNC_INTERVAL = 60 * 5;

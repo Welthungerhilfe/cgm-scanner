@@ -19,6 +19,7 @@ import java.util.Collections;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 
 public class SplashActivity extends AppCompatActivity {
     public void onCreate(Bundle saveBundle) {
@@ -34,7 +35,7 @@ public class SplashActivity extends AppCompatActivity {
         AbstractCrashesListener customListener = new AbstractCrashesListener() {
             @Override
             public Iterable<ErrorAttachmentLog> getErrorAttachments(ErrorReport report) {
-                ErrorAttachmentLog azureAccount = ErrorAttachmentLog.attachmentWithText("Azure Account Name : " + AppConstants.AZURE_ACCOUNT_NAME, "azure_account.txt");
+                ErrorAttachmentLog azureAccount = ErrorAttachmentLog.attachmentWithText("Azure Account Name : " + new SessionManager(SplashActivity.this).getAzureAccountName(), "azure_account.txt");
 
                 return Collections.singletonList(azureAccount);
             }

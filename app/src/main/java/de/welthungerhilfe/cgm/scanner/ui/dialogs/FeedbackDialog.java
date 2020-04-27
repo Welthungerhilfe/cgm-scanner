@@ -157,7 +157,7 @@ public class FeedbackDialog extends Dialog {
             private double averagePointCountBack = 0;
             private int pointCloudCountBack = 0;
 
-            private float frontHeightConfidence, sideHeightConfidence, backHeightConfidence;
+            private float frontConfidence, sideConfidence, backConfidence;
 
             @Override
             protected Boolean doInBackground(Void... voids) {
@@ -170,9 +170,9 @@ public class FeedbackDialog extends Dialog {
                 averagePointCountBack = artifactResultRepository.getAveragePointCountForBack(measure.getId());
                 pointCloudCountBack = artifactResultRepository.getPointCloudCountForBack(measure.getId());
 
-                frontHeightConfidence = measureResultRepository.getConfidence(measure.getId(), "height_front");
-                sideHeightConfidence = measureResultRepository.getConfidence(measure.getId(), "height_360");
-                backHeightConfidence = measureResultRepository.getConfidence(measure.getId(), "height_back");
+                frontConfidence = measureResultRepository.getConfidence(measure.getId(), "%_front");
+                sideConfidence = measureResultRepository.getConfidence(measure.getId(), "%_360");
+                backConfidence = measureResultRepository.getConfidence(measure.getId(), "%_back");
 
                 return true;
             }
@@ -252,25 +252,25 @@ public class FeedbackDialog extends Dialog {
                 ratingLightStep1.setRating(5 * (float)lightScoreFront);
                 ratingDurationStep1.setRating(5 * (float)durationScoreFront);
 
-                if (frontHeightConfidence > 0) {
+                if (frontConfidence > 0) {
                     lytPrecisionStep1.setVisibility(View.VISIBLE);
-                    ratingPrecisionStep1.setRating(5 * frontHeightConfidence);
+                    ratingPrecisionStep1.setRating(5 * frontConfidence);
                 }
 
                 ratingLightStep2.setRating(5 * (float)lightScoreSide);
                 ratingDurationStep2.setRating(5 * (float)durationScoreSide);
 
-                if (sideHeightConfidence > 0) {
+                if (sideConfidence > 0) {
                     lytPrecisionStep2.setVisibility(View.VISIBLE);
-                    ratingPrecisionStep2.setRating(5 * sideHeightConfidence);
+                    ratingPrecisionStep2.setRating(5 * sideConfidence);
                 }
 
                 ratingLightStep3.setRating(5 * (float)lightScoreBack);
                 ratingDurationStep3.setRating(5 * (float)durationScoreBack);
 
-                if (backHeightConfidence > 0) {
+                if (backConfidence > 0) {
                     lytPrecisionStep3.setVisibility(View.VISIBLE);
-                    ratingPrecisionStep3.setRating(5 * backHeightConfidence);
+                    ratingPrecisionStep3.setRating(5 * backConfidence);
                 }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
