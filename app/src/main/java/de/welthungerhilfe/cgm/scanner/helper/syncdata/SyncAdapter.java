@@ -280,7 +280,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
 
                 session.setSyncTimestamp(currentTimestamp);
-            } catch (URISyntaxException | InvalidKeyException e) {
+            } catch (URISyntaxException | InvalidKeyException | IllegalArgumentException e) {
                 e.printStackTrace();
             }
 
