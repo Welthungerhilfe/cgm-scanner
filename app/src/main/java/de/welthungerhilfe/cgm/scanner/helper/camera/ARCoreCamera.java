@@ -33,6 +33,7 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -483,21 +484,26 @@ public class ARCoreCamera implements ICamera {
       FloatBuffer quadTexCoords = bbTexCoordsTransformed.asFloatBuffer();
 
       //get calibration from ARCore
+      float nearClip = 0.1f;
+      float farClip = 100.0f;
       sharedSession.setCameraTextureName(texture);
       sharedSession.setDisplayGeometry(0, width, height);
       Frame frame = sharedSession.update();
       frame.transformCoordinates2d(Coordinates2d.OPENGL_NORMALIZED_DEVICE_COORDINATES, quadCoords, Coordinates2d.TEXTURE_NORMALIZED, quadTexCoords);
       Camera camera = frame.getCamera();
-      camera.getProjectionMatrix(projection, 0, 0.1f, 100.0f);
+      camera.getProjectionMatrix(projection, 0, nearClip, farClip);
+      Matrix.invertM(projection, 0, projection, 0);
 
       //extract calibration into string
       quadTexCoords.position(0);
       quadCoords.position(0);
       mCameraCalibration = "";
-      mCameraCalibration += "Projection matrix:\n";
+      mCameraCalibration += "Inverse of projection matrix:\n";
       for (int i = 0 ; i < projection.length; i++) {
         mCameraCalibration += projection[i] + (i % 4 == 3 ? "\n" : " ");
       }
+      mCameraCalibration += "Camera clip:\n";
+      mCameraCalibration += nearClip + " " + farClip + "\n";
       mCameraCalibration += "Frame clip:\n";
       for (int i = 0 ; i < QUAD_COORDS.length / 2; i++) {
         mCameraCalibration += quadCoords.get() + " " + quadCoords.get() + " -> " + quadTexCoords.get() + " " + quadTexCoords.get() + "\n";
