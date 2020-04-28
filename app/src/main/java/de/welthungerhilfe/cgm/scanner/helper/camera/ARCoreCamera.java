@@ -125,10 +125,6 @@ public class ARCoreCamera implements ICamera {
   }
 
   @Override
-  public void onStart() {
-  }
-
-  @Override
   public void onCreate() {
     mColorCameraPreview = mActivity.findViewById(R.id.colorCameraPreview);
     mColorCameraPreview.setImageBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
@@ -159,8 +155,14 @@ public class ARCoreCamera implements ICamera {
 
   @Override
   public void onResume() {
-    startBackgroundThread();
-    openCamera();
+    if (mActivity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+      if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        if (mActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+          startBackgroundThread();
+          openCamera();
+        }
+      }
+    }
   }
 
   @Override
@@ -268,7 +270,7 @@ public class ARCoreCamera implements ICamera {
       //update preview window
       mActivity.runOnUiThread(() -> {
         float scale = bitmap.getWidth() / (float)bitmap.getHeight();
-        scale *= mColorCameraPreview.getHeight() / (float)bitmap.getWidth();
+        //scale *= mColorCameraPreview.getHeight() / (float)bitmap.getWidth();
         mColorCameraPreview.setImageBitmap(bitmap);
         mColorCameraPreview.setRotation(90);
         mColorCameraPreview.setScaleX(scale);

@@ -23,7 +23,6 @@ public interface ICamera {
     void addListener(Object listener);
     void removeListener(Object listener);
 
-    void onStart();
     void onCreate();
     void onResume();
     void onPause();

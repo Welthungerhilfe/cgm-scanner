@@ -18,7 +18,9 @@
  */
 package de.welthungerhilfe.cgm.scanner.helper.camera;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 import android.view.Display;
@@ -91,6 +93,7 @@ public class TangoCamera implements ICamera {
         mListeners.remove(listener);
     }
 
+    @Override
     public void onCreate() {
         mCameraSurfaceView = mActivity.findViewById(R.id.surfaceview);
         mCameraSurfaceView.setEGLContextClientVersion(2);
@@ -140,12 +143,22 @@ public class TangoCamera implements ICamera {
 
     @Override
     public void onResume() {
-        mCameraSurfaceView.onResume();
-        mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        if (mActivity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                if (mActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                    startTango();
+                    mCameraSurfaceView.onResume();
+                    mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+                }
+            }
+        }
     }
 
     @Override
     public void onPause() {
+        if (mTango == null) {
+            return;
+        }
 
         mCameraSurfaceView.onPause();
         // Synchronize against disconnecting while the service is being used in the OpenGL
@@ -168,7 +181,11 @@ public class TangoCamera implements ICamera {
         }
     }
 
-    public void onStart() {
+    private void startTango() {
+        if (mTango != null) {
+            return;
+        }
+
         mPointCloudAvailable = false;
         mutex_on_mIsRecording = new Semaphore(1,true);
 

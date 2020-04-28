@@ -364,8 +364,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         mPointCloudFilename = "";
         mNumberOfFilesWritten = 0;
         mIsRecording = false;
-
-        getCamera().onStart();
     }
 
     protected void onCreate(Bundle savedBundle) {
