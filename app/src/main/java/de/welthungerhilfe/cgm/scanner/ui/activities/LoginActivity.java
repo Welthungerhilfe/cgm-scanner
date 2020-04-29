@@ -54,6 +54,7 @@ import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -185,6 +186,11 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     }
 
     private void doSignInAction() {
+        if (BuildConfig.DEBUG) {
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            return;
+        }
+
         Auth.signIn().thenAccept(signInResult -> {
 
             if (signInResult.getException() == null) {
