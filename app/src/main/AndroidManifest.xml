@@ -49,6 +49,7 @@
         android:supportsRtl="true"
         android:largeHeap="true"
         android:windowSoftInputMode="adjustResize"
+	android:extractNativeLibs="true"
         android:theme="@style/AppTheme.NoActionBar"
         android:extractNativeLibs="true"
         tools:replace="android:allowBackup">
