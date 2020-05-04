@@ -867,7 +867,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     public void onColorDataReceived(Bitmap bitmap, int frameIndex) {
         if (mIsRecording && (frameIndex % 10 == 0)) {
 
-            new Thread(() -> {
+            Runnable thread = () -> {
                 String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
                 currentImgFilename = currentImgFilename.replace('/', '_');
 
@@ -932,7 +932,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         }
                     }
                 }
-            }).start();
+            };
+            executor.execute(thread);
         }
     }
 
@@ -972,7 +973,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             progressBar.setProgress(mProgress);
 
             int finalCount = count;
-            new Thread(() -> {
+            Runnable thread = () -> {
 
                 String filename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
                 filename = filename.replace('/', '_');
@@ -1021,7 +1022,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     ar.setReal(noOfPoints);
                     artifactResultRepository.insertArtifactResult(ar);
                 }
-            }).start();
+            };
+            executor.execute(thread);
         }
     }
 
