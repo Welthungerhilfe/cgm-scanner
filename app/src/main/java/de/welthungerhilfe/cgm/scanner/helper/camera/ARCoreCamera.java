@@ -21,13 +21,9 @@ package de.welthungerhilfe.cgm.scanner.helper.camera;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
-import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraManager;
 import android.media.Image;
 import android.media.ImageReader;
 import android.opengl.GLES20;
@@ -97,7 +93,6 @@ public class ARCoreCamera implements ICamera {
   private ImageReader mImageReaderRGB;
   private HandlerThread backgroundThread;
   private Handler backgroundHandler;
-  private CameraCaptureSession captureSession;
 
   //ARCore API
   private Session sharedSession;
@@ -267,10 +262,6 @@ public class ARCoreCamera implements ICamera {
       mImageReaderRGB.close();
       mImageReaderRGB = null;
     }
-    if (captureSession != null) {
-      captureSession.close();
-      captureSession = null;
-    }
     if (sharedSession != null) {
       sharedSession.pause();
       sharedSession.close();
@@ -313,19 +304,9 @@ public class ARCoreCamera implements ICamera {
     sharedCamera.setAppSurfaces(cameraId, surfaces);
 
     try {
-
-      // Wrap our callback in a shared camera callback.
-      CameraDevice.StateCallback wrappedCallback = sharedCamera.createARDeviceStateCallback(cameraDeviceCallback, backgroundHandler);
-
-      // Store a reference to the camera system service.
-      // Reference to the camera system service.
-      CameraManager cameraManager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
-
-      // Open the camera device using the ARCore wrapped callback.
-      cameraManager.openCamera(cameraId, wrappedCallback, backgroundHandler);
       sharedSession.resume();
     } catch (Exception e) {
-      Log.e(TAG, "Failed to open camera", e);
+      Log.e(TAG, "Failed to start ARCore", e);
     }
   }
 
@@ -443,27 +424,4 @@ public class ARCoreCamera implements ICamera {
       e.printStackTrace();
     }
   }
-
-  private final CameraDevice.StateCallback cameraDeviceCallback = new CameraDevice.StateCallback() {
-    @Override
-    public void onOpened(CameraDevice cameraDevice) {
-      Log.d(TAG, "Camera device ID " + cameraDevice.getId() + " opened.");
-    }
-
-    @Override
-    public void onClosed(CameraDevice cameraDevice) {
-      Log.d(TAG, "Camera device ID " + cameraDevice.getId() + " closed.");
-    }
-
-    @Override
-    public void onDisconnected(CameraDevice cameraDevice) {
-      Log.w(TAG, "Camera device ID " + cameraDevice.getId() + " disconnected.");
-      cameraDevice.close();
-    }
-
-    @Override
-    public void onError(CameraDevice cameraDevice, int error) {
-      Log.e(TAG, "Camera device ID " + cameraDevice.getId() + " error " + error);
-    }
-  };
 }
