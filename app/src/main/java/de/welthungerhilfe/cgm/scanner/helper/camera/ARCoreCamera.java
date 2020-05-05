@@ -105,12 +105,14 @@ public class ARCoreCamera implements ICamera {
   private HashMap<Long, Bitmap> mCache;
   private String mCameraCalibration;
   private int mFrameIndex;
+  private float mPixelIntensity;
 
   public ARCoreCamera(Activity activity) {
     mActivity = activity;
     mCache = new HashMap<>();
     mListeners = new ArrayList<>();
     mFrameIndex = 1;
+    mPixelIntensity = 0;
   }
 
   public void addListener(Object listener) {
@@ -288,6 +290,7 @@ public class ARCoreCamera implements ICamera {
       // Enable auto focus mode while ARCore is running.
       Config config = sharedSession.getConfig();
       config.setFocusMode(Config.FocusMode.AUTO);
+      config.setLightEstimationMode(Config.LightEstimationMode.AMBIENT_INTENSITY);
       sharedSession.configure(config);
     }
 
@@ -377,6 +380,10 @@ public class ARCoreCamera implements ICamera {
     return mCameraCalibration;
   }
 
+  public float getLightIntensity() {
+    return mPixelIntensity;
+  }
+
   private void updateFrame(int texture, int width, int height) {
     try {
       if (sharedSession == null) {
@@ -405,6 +412,8 @@ public class ARCoreCamera implements ICamera {
       camera.getProjectionMatrix(projection, 0, nearClip, farClip);
       Matrix.invertM(projection, 0, projection, 0);
 
+      //get light estimation from ARCore
+      mPixelIntensity = frame.getLightEstimate().getPixelIntensity();
 
       //extract calibration into string
       quadTexCoords.position(0);

@@ -345,8 +345,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private boolean mIsRecording;
     private int mProgress;
 
-    private int noOfPoints;
-
     private long mNowTime;
     private String mNowTimeString;
 
@@ -1011,15 +1009,15 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
 
                     ArtifactResult ar = new ArtifactResult();
-                    double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
-                    ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
+                    double Artifact_Confidence_penalty=Math.abs((double) finalCount/38000-1.0)*100*3;
+                    float Artifact_Light_estimation=Math.min(((ARCoreCamera)mCameraInstance).getLightIntensity() * 2.0f, 0.99f);
+                    ar.setConfidence_value(String.valueOf(100 - Artifact_Confidence_penalty));
                     ar.setArtifact_id(AppController.getInstance().getPersonId());
                     ar.setKey(SCAN_STEP);
                     ar.setMeasure_id(measure.getId());
                     ar.setMisc("");
                     ar.setType("PCD_POINTS_v0.2");
-                    noOfPoints = finalCount;
-                    ar.setReal(noOfPoints);
+                    ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
                     artifactResultRepository.insertArtifactResult(ar);
                 }
             };
@@ -1098,15 +1096,14 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
 
                     ArtifactResult ar=new ArtifactResult();
-                    double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
+                    double Artifact_Lighting_penalty=Math.abs((double) pointCloudData.numPoints/38000-1.0)*100*3;
                     ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
                     ar.setArtifact_id(AppController.getInstance().getPersonId());
                     ar.setKey(SCAN_STEP);
                     ar.setMeasure_id(measure.getId());
                     ar.setMisc("");
                     ar.setType("PCD_POINTS_v0.2");
-                    noOfPoints = pointCloudData.numPoints;
-                    ar.setReal(noOfPoints);
+                    ar.setReal(pointCloudData.numPoints);
                     artifactResultRepository.insertArtifactResult(ar);
 
                     Log.e("numbs", String.valueOf(mNumberOfFilesWritten));
