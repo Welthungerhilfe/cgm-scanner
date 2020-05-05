@@ -36,12 +36,14 @@ import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.util.Log;
+import android.util.Size;
 import android.view.Surface;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
+import com.google.ar.core.CameraConfig;
 import com.google.ar.core.Config;
 import com.google.ar.core.Coordinates2d;
 import com.google.ar.core.Frame;
@@ -90,7 +92,6 @@ public class ARCoreCamera implements ICamera {
 
   //Camera2 API
   private ImageReader mImageReaderDepth16;
-  private ImageReader mImageReaderRGB;
   private HandlerThread backgroundThread;
   private Handler backgroundHandler;
 
@@ -127,10 +128,6 @@ public class ARCoreCamera implements ICamera {
   public void onCreate() {
     mColorCameraPreview = mActivity.findViewById(R.id.colorCameraPreview);
     mColorCameraPreview.setImageBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
-
-    //set color camera
-    mImageReaderRGB = ImageReader.newInstance(640,480, ImageFormat.YUV_420_888, 5);
-    mImageReaderRGB.setOnImageAvailableListener(imageReader -> onProcessColorData(imageReader.acquireLatestImage()), backgroundHandler);
 
     //set depth camera
     mImageReaderDepth16 = ImageReader.newInstance(240, 180, ImageFormat.DEPTH16, 5);
@@ -188,10 +185,6 @@ public class ARCoreCamera implements ICamera {
   }
 
   private void onProcessColorData(Image image) {
-    if (image == null) {
-      Log.w(TAG, "onImageAvailable: Skipping null image.");
-      return;
-    }
     final ByteBuffer yuvBytes = BitmapUtils.imageToByteBuffer(image);
 
     // Convert YUV to RGB
@@ -259,11 +252,6 @@ public class ARCoreCamera implements ICamera {
       mImageReaderDepth16.close();
       mImageReaderDepth16 = null;
     }
-    if (null != mImageReaderRGB) {
-      mImageReaderRGB.setOnImageAvailableListener(null, null);
-      mImageReaderRGB.close();
-      mImageReaderRGB = null;
-    }
     if (sharedSession != null) {
       sharedSession.pause();
       sharedSession.close();
@@ -292,6 +280,21 @@ public class ARCoreCamera implements ICamera {
       config.setFocusMode(Config.FocusMode.AUTO);
       config.setLightEstimationMode(Config.LightEstimationMode.AMBIENT_INTENSITY);
       sharedSession.configure(config);
+
+      // Choose the camera configuration
+      CameraConfig selectedConfig = null;
+      for (CameraConfig cameraConfig : sharedSession.getSupportedCameraConfigs()) {
+        if (cameraConfig.getFacingDirection() == CameraConfig.FacingDirection.BACK) {
+          Size resolution = cameraConfig.getImageSize();
+          if ((resolution.getWidth() == 640) && (resolution.getHeight() == 480)) {
+            selectedConfig = cameraConfig;
+          } else if (selectedConfig == null) {
+            selectedConfig = cameraConfig;
+          }
+        }
+      }
+      assert selectedConfig != null;
+      sharedSession.setCameraConfig(selectedConfig);
     }
 
     // Store the ARCore shared camera reference.
@@ -303,7 +306,6 @@ public class ARCoreCamera implements ICamera {
     // When ARCore is running, make sure it also updates our CPU image surface.
     ArrayList<Surface> surfaces = new ArrayList<>();
     surfaces.add(mImageReaderDepth16.getSurface());
-    surfaces.add(mImageReaderRGB.getSurface());
     sharedCamera.setAppSurfaces(cameraId, surfaces);
 
     try {
@@ -414,6 +416,9 @@ public class ARCoreCamera implements ICamera {
 
       //get light estimation from ARCore
       mPixelIntensity = frame.getLightEstimate().getPixelIntensity();
+
+      //process camera data
+      onProcessColorData(frame.acquireCameraImage());
 
       //extract calibration into string
       quadTexCoords.position(0);

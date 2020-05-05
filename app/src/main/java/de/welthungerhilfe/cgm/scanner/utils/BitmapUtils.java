@@ -260,9 +260,8 @@ public class BitmapUtils {
     }
 
     public static ByteBuffer imageToByteBuffer(Image image) {
-        final Rect crop   = image.getCropRect();
-        final int  width  = crop.width();
-        final int  height = crop.height();
+        final int  width  = image.getWidth();
+        final int  height = image.getHeight();
 
         final Image.Plane[] planes     = image.getPlanes();
         final byte[]        rowData    = new byte[planes[0].getRowStride()];
@@ -291,7 +290,7 @@ public class BitmapUtils {
             final int widthShifted  = width >> shift;
             final int heightShifted = height >> shift;
 
-            buffer.position(rowStride * (crop.top >> shift) + pixelStride * (crop.left >> shift));
+            buffer.position(0);
 
             for (int row = 0; row < heightShifted; row++) {
                 int length;
