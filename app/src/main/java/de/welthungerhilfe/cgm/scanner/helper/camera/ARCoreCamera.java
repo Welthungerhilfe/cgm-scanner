@@ -282,13 +282,22 @@ public class ARCoreCamera implements ICamera {
       sharedSession.configure(config);
 
       // Choose the camera configuration
+      int selectedRank = -1;
       CameraConfig selectedConfig = null;
       for (CameraConfig cameraConfig : sharedSession.getSupportedCameraConfigs()) {
         if (cameraConfig.getFacingDirection() == CameraConfig.FacingDirection.BACK) {
+
+          int rank = 0;
           Size resolution = cameraConfig.getImageSize();
           if ((resolution.getWidth() == 640) && (resolution.getHeight() == 480)) {
-            selectedConfig = cameraConfig;
-          } else if (selectedConfig == null) {
+            rank += 1;
+          }
+          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.REQUIRE_AND_USE) {
+            rank += 2;
+          }
+
+          if (selectedRank < rank) {
+            selectedRank = rank;
             selectedConfig = cameraConfig;
           }
         }

@@ -970,7 +970,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             updateScanningProgress(count);
             progressBar.setProgress(mProgress);
 
-            int finalCount = count;
+            float lightIntensity = ((ARCoreCamera)mCameraInstance).getLightIntensity() * 2.0f;
+            float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
+            float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
+            double Artifact_Confidence_penalty = Math.abs((double) count/38000-1.0)*100*3;
+
             Runnable thread = () -> {
 
                 String filename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
@@ -1009,8 +1013,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
 
                     ArtifactResult ar = new ArtifactResult();
-                    double Artifact_Confidence_penalty=Math.abs((double) finalCount/38000-1.0)*100*3;
-                    float Artifact_Light_estimation=Math.min(((ARCoreCamera)mCameraInstance).getLightIntensity() * 2.0f, 0.99f);
                     ar.setConfidence_value(String.valueOf(100 - Artifact_Confidence_penalty));
                     ar.setArtifact_id(AppController.getInstance().getPersonId());
                     ar.setKey(SCAN_STEP);
