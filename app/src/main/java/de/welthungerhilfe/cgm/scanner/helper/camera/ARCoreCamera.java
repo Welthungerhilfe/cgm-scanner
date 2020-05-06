@@ -25,8 +25,12 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CaptureRequest;
 import android.media.Image;
 import android.media.ImageReader;
 import android.opengl.GLES20;
@@ -58,6 +62,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 
@@ -98,6 +103,7 @@ public class ARCoreCamera implements ICamera {
   private ImageReader mImageReaderDepth16;
   private HandlerThread mBackgroundThread;
   private Handler mBackgroundHandler;
+  private CameraDevice mCameraDevice;
   private String mDepthCameraId;
 
   //ARCore API
@@ -283,7 +289,11 @@ public class ARCoreCamera implements ICamera {
   }
 
   private void closeCamera() {
-    if (null != mImageReaderDepth16) {
+    if (mCameraDevice != null) {
+      mCameraDevice.close();
+      mCameraDevice = null;
+    }
+    if (mImageReaderDepth16 != null) {
       mImageReaderDepth16.setOnImageAvailableListener(null, null);
       mImageReaderDepth16.close();
       mImageReaderDepth16 = null;
@@ -328,7 +338,7 @@ public class ARCoreCamera implements ICamera {
           if ((resolution.getWidth() == 640) && (resolution.getHeight() == 480)) {
             rank += 1;
           }
-          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.REQUIRE_AND_USE) {
+          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.DO_NOT_USE) {
             rank += 2;
           }
 
@@ -354,7 +364,14 @@ public class ARCoreCamera implements ICamera {
       surfaces.add(mImageReaderDepth16.getSurface());
       sharedCamera.setAppSurfaces(cameraId, surfaces);
     } else {
-      //TODO:support for Samsung devices
+      CameraManager manager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
+      try {
+        manager.openCamera(mDepthCameraId, mSeparatedCameraCallback, null);
+      } catch (CameraAccessException e) {
+        e.printStackTrace();
+      } catch (Exception e) {
+        throw new RuntimeException("Interrupted while trying to lock camera opening.", e);
+      }
     }
 
     try {
@@ -487,4 +504,46 @@ public class ARCoreCamera implements ICamera {
       e.printStackTrace();
     }
   }
+
+  CameraDevice.StateCallback mSeparatedCameraCallback = new CameraDevice.StateCallback() {
+    @Override
+    public void onOpened(CameraDevice cameraDevice) {
+      Surface imageReaderSurface = mImageReaderDepth16.getSurface();
+      mCameraDevice = cameraDevice;
+
+      try {
+        final CaptureRequest.Builder requestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+        requestBuilder.addTarget(imageReaderSurface);
+
+        cameraDevice.createCaptureSession(Collections.singletonList(imageReaderSurface),new CameraCaptureSession.StateCallback() {
+
+          @Override
+          public void onConfigured(CameraCaptureSession cameraCaptureSession) {
+            CameraCaptureSession.CaptureCallback captureCallback = new CameraCaptureSession.CaptureCallback() {};
+
+            try {
+              HandlerThread handlerThread = new HandlerThread("DepthBackgroundThread");
+              handlerThread.start();
+              Handler handler = new Handler(handlerThread.getLooper());
+              cameraCaptureSession.setRepeatingRequest(requestBuilder.build(),captureCallback,handler);
+
+            } catch (CameraAccessException e) {
+              e.printStackTrace();
+            }
+          }
+          @Override
+          public void onConfigureFailed(CameraCaptureSession cameraCaptureSession) {
+          }
+        },null);
+      } catch (CameraAccessException e) {
+        e.printStackTrace();
+      }
+    }
+    @Override
+    public void onDisconnected(CameraDevice cameraDevice) {
+    }
+    @Override
+    public void onError(CameraDevice cameraDevice, int i) {
+    }
+  };
 }

@@ -937,36 +937,36 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onDepthDataReceived(Image image, int frameIndex) {
-        Image.Plane plane = image.getPlanes()[0];
-        ByteBuffer buffer = plane.getBuffer();
-        ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
-
-        ArrayList<Short> pixel = new ArrayList<>();
-        while (shortDepthBuffer.hasRemaining()) {
-            pixel.add(shortDepthBuffer.get());
-        }
-        int stride = plane.getRowStride();
-        int width = image.getWidth();
-        int height = image.getHeight();
-
-        int count = 0;
-        int index = 0;
-        byte[] data = new byte[width * height * 3];
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int depthSample = pixel.get((y / 2) * stride + x);
-                int depthRange = depthSample & 0x1FFF;
-                int depthConfidence = ((depthSample >> 13) & 0x7);
-                if (depthRange > 0) {
-                    count++;
-                }
-                data[index++] = (byte) (depthRange / 256);
-                data[index++] = (byte) (depthRange % 256);
-                data[index++] = (byte) depthConfidence;
-            }
-        }
-
         if (mIsRecording && (frameIndex % 10 == 0)) {
+            Image.Plane plane = image.getPlanes()[0];
+            ByteBuffer buffer = plane.getBuffer();
+            ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
+
+            ArrayList<Short> pixel = new ArrayList<>();
+            while (shortDepthBuffer.hasRemaining()) {
+                pixel.add(shortDepthBuffer.get());
+            }
+            int stride = plane.getRowStride();
+            int width = image.getWidth();
+            int height = image.getHeight();
+
+            int count = 0;
+            int index = 0;
+            byte[] data = new byte[width * height * 3];
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int depthSample = pixel.get((y / 2) * stride + x);
+                    int depthRange = depthSample & 0x1FFF;
+                    int depthConfidence = ((depthSample >> 13) & 0x7);
+                    if (depthRange > 0) {
+                        count++;
+                    }
+                    data[index++] = (byte) (depthRange / 256);
+                    data[index++] = (byte) (depthRange % 256);
+                    data[index++] = (byte) depthConfidence;
+                }
+            }
+
             updateScanningProgress(count);
             progressBar.setProgress(mProgress);
 
