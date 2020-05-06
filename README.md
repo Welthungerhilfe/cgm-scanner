@@ -9,9 +9,9 @@ We provide a game-changer in measurement and data processing for malnourished ch
 
 ## App development
 
-We are going to bring our app on new devices. The app is going to target Google ARCore and also Google Tango. To make this possible we have to do some major changes in our repository. Not all changes could be done immediatelly and that's why we defined current and future branch politics.
+We are going to bring our app on new devices. The app is going to target Google ARCore and also Google Tango. To make this possible we have to do some major changes in our repository. Not all changes could be done immediatelly and that's why we defined current and future branch policies.
 
-## Current branch politic
+## Current branch policy
 
 #### master branch
 - Contains only Google Tango version
@@ -23,7 +23,7 @@ We are going to bring our app on new devices. The app is going to target Google 
 - We merge only ARCore specific features into develop
 - We merge master into develop regularly
 
-## Future branch politic
+## Future branch policy
 
 #### master branch
 - Contains Google ARCore and Google Tango versions
