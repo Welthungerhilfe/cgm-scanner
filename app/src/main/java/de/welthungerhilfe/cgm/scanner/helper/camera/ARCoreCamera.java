@@ -143,43 +143,6 @@ public class ARCoreCamera implements ICamera {
     mColorCameraPreview = mActivity.findViewById(R.id.colorCameraPreview);
     mColorCameraPreview.setImageBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
 
-    //detect depth camera
-    try {
-      CameraManager manager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
-      for (String cameraId : manager.getCameraIdList()) {
-        CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
-        Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
-        if (facing != null) {
-          if (facing == CameraCharacteristics.LENS_FACING_BACK) {
-            int[] ch = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
-            if (ch != null) {
-              for (int c : ch) {
-                if (c == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT) {
-                  mDepthCameraId = cameraId;
-                }
-              }
-              mDepthCameraIntrinsic = characteristics.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION);
-            }
-          }
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    //set depth camera
-    int depthWidth = 240;
-    int depthHeight = 180;
-    if (Build.MANUFACTURER.toUpperCase().startsWith("SAMSUNG")) {
-      //all supported Samsung devices except S10 5G have VGA resolution
-      if (!Build.MODEL.startsWith("beyondx")) {
-        depthWidth = 640;
-        depthHeight = 480;
-      }
-    }
-    mImageReaderDepth16 = ImageReader.newInstance(depthWidth, depthHeight, ImageFormat.DEPTH16, 5);
-    mImageReaderDepth16.setOnImageAvailableListener(imageReader -> onProcessDepthData(imageReader.acquireLatestImage()), null);
-
     //setup ARCore cycle
     mGLSurfaceView = mActivity.findViewById(R.id.surfaceview);
     mGLSurfaceView.setRenderer(new GLSurfaceView.Renderer() {
@@ -214,6 +177,7 @@ public class ARCoreCamera implements ICamera {
       if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
         if (mActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
           if (isARCoreSupportedAndUpToDate()) {
+            setupDepthSensor();
             openCamera();
           }
         }
@@ -381,6 +345,45 @@ public class ARCoreCamera implements ICamera {
     } catch (Exception e) {
       Log.e(TAG, "Failed to start ARCore", e);
     }
+  }
+
+  private void setupDepthSensor() {
+    //detect depth camera
+    try {
+      CameraManager manager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
+      for (String cameraId : manager.getCameraIdList()) {
+        CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
+        Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
+        if (facing != null) {
+          if (facing == CameraCharacteristics.LENS_FACING_BACK) {
+            int[] ch = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
+            if (ch != null) {
+              for (int c : ch) {
+                if (c == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT) {
+                  mDepthCameraId = cameraId;
+                }
+              }
+              mDepthCameraIntrinsic = characteristics.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION);
+            }
+          }
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    //set depth camera
+    int depthWidth = 240;
+    int depthHeight = 180;
+    if (Build.MANUFACTURER.toUpperCase().startsWith("SAMSUNG")) {
+      //all supported Samsung devices except S10 5G have VGA resolution
+      if (!Build.MODEL.startsWith("beyondx")) {
+        depthWidth = 640;
+        depthHeight = 480;
+      }
+    }
+    mImageReaderDepth16 = ImageReader.newInstance(depthWidth, depthHeight, ImageFormat.DEPTH16, 5);
+    mImageReaderDepth16.setOnImageAvailableListener(imageReader -> onProcessDepthData(imageReader.acquireLatestImage()), null);
   }
 
   private boolean isARCoreSupportedAndUpToDate() {
