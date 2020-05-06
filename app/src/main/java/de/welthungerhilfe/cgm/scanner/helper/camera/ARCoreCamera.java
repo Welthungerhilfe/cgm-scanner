@@ -21,14 +21,18 @@ package de.welthungerhilfe.cgm.scanner.helper.camera;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
 import android.media.Image;
 import android.media.ImageReader;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.renderscript.Allocation;
@@ -92,11 +96,12 @@ public class ARCoreCamera implements ICamera {
 
   //Camera2 API
   private ImageReader mImageReaderDepth16;
-  private HandlerThread backgroundThread;
-  private Handler backgroundHandler;
+  private HandlerThread mBackgroundThread;
+  private Handler mBackgroundHandler;
+  private String mDepthCameraId;
 
   //ARCore API
-  private Session sharedSession;
+  private Session mSession;
 
   //App integration objects
   private Activity mActivity;
@@ -129,14 +134,45 @@ public class ARCoreCamera implements ICamera {
     mColorCameraPreview = mActivity.findViewById(R.id.colorCameraPreview);
     mColorCameraPreview.setImageBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
 
+    //detect depth camera
+    try {
+      CameraManager manager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
+      for (String cameraId : manager.getCameraIdList()) {
+        CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
+        Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
+        if (facing != null) {
+          if (facing == CameraCharacteristics.LENS_FACING_BACK) {
+            int[] ch = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
+            if (ch != null) {
+              for (int c : ch) {
+                if (c == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT) {
+                  mDepthCameraId = cameraId;
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
     //set depth camera
-    mImageReaderDepth16 = ImageReader.newInstance(240, 180, ImageFormat.DEPTH16, 5);
-    mImageReaderDepth16.setOnImageAvailableListener(imageReader -> onProcessDepthData(imageReader.acquireLatestImage()), backgroundHandler);
+    int depthWidth = 240;
+    int depthHeight = 180;
+    if (Build.MANUFACTURER.toUpperCase().startsWith("SAMSUNG")) {
+      //all supported Samsung devices except S10 5G have VGA resolution
+      if (!Build.MODEL.startsWith("beyondx")) {
+        depthWidth = 640;
+        depthHeight = 480;
+      }
+    }
+    mImageReaderDepth16 = ImageReader.newInstance(depthWidth, depthHeight, ImageFormat.DEPTH16, 5);
+    mImageReaderDepth16.setOnImageAvailableListener(imageReader -> onProcessDepthData(imageReader.acquireLatestImage()), mBackgroundHandler);
 
-
+    //setup ARCore cycle
     mGLSurfaceView = mActivity.findViewById(R.id.surfaceview);
     mGLSurfaceView.setRenderer(new GLSurfaceView.Renderer() {
-
       private int[] textures = new int[1];
       private int width, height;
 
@@ -252,10 +288,10 @@ public class ARCoreCamera implements ICamera {
       mImageReaderDepth16.close();
       mImageReaderDepth16 = null;
     }
-    if (sharedSession != null) {
-      sharedSession.pause();
-      sharedSession.close();
-      sharedSession = null;
+    if (mSession != null) {
+      mSession.pause();
+      mSession.close();
+      mSession = null;
     }
   }
 
@@ -266,25 +302,25 @@ public class ARCoreCamera implements ICamera {
       return;
     }
 
-    if (sharedSession == null) {
+    if (mSession == null) {
       try {
         // Create ARCore session that supports camera sharing.
-        sharedSession = new Session(mActivity, EnumSet.of(Session.Feature.SHARED_CAMERA));
+        mSession = new Session(mActivity, EnumSet.of(Session.Feature.SHARED_CAMERA));
       } catch (Exception e) {
         Log.e(TAG, "Failed to create ARCore session that supports camera sharing", e);
         return;
       }
 
       // Enable auto focus mode while ARCore is running.
-      Config config = sharedSession.getConfig();
+      Config config = mSession.getConfig();
       config.setFocusMode(Config.FocusMode.AUTO);
       config.setLightEstimationMode(Config.LightEstimationMode.AMBIENT_INTENSITY);
-      sharedSession.configure(config);
+      mSession.configure(config);
 
       // Choose the camera configuration
       int selectedRank = -1;
       CameraConfig selectedConfig = null;
-      for (CameraConfig cameraConfig : sharedSession.getSupportedCameraConfigs()) {
+      for (CameraConfig cameraConfig : mSession.getSupportedCameraConfigs()) {
         if (cameraConfig.getFacingDirection() == CameraConfig.FacingDirection.BACK) {
 
           int rank = 0;
@@ -303,41 +339,45 @@ public class ARCoreCamera implements ICamera {
         }
       }
       assert selectedConfig != null;
-      sharedSession.setCameraConfig(selectedConfig);
+      mSession.setCameraConfig(selectedConfig);
     }
 
     // Store the ARCore shared camera reference.
-    SharedCamera sharedCamera = sharedSession.getSharedCamera();
+    SharedCamera sharedCamera = mSession.getSharedCamera();
 
     // Store the ID of the camera used by ARCore.
-    String cameraId = sharedSession.getCameraConfig().getCameraId();
+    String cameraId = mSession.getCameraConfig().getCameraId();
 
     // When ARCore is running, make sure it also updates our CPU image surface.
-    ArrayList<Surface> surfaces = new ArrayList<>();
-    surfaces.add(mImageReaderDepth16.getSurface());
-    sharedCamera.setAppSurfaces(cameraId, surfaces);
+    if (cameraId.compareTo(mDepthCameraId) == 0) {
+      ArrayList<Surface> surfaces = new ArrayList<>();
+      surfaces.add(mImageReaderDepth16.getSurface());
+      sharedCamera.setAppSurfaces(cameraId, surfaces);
+    } else {
+      //TODO:support for Samsung devices
+    }
 
     try {
-      sharedSession.resume();
+      mSession.resume();
     } catch (Exception e) {
       Log.e(TAG, "Failed to start ARCore", e);
     }
   }
 
   private void startBackgroundThread() {
-    backgroundThread = new HandlerThread("sharedCameraBackground");
-    backgroundThread.start();
-    backgroundHandler = new Handler(backgroundThread.getLooper());
+    mBackgroundThread = new HandlerThread("sharedCameraBackground");
+    mBackgroundThread.start();
+    mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
   }
 
   // Stop background handler thread.
   private void stopBackgroundThread() {
-    if (backgroundThread != null) {
-      backgroundThread.quitSafely();
+    if (mBackgroundThread != null) {
+      mBackgroundThread.quitSafely();
       try {
-        backgroundThread.join();
-        backgroundThread = null;
-        backgroundHandler = null;
+        mBackgroundThread.join();
+        mBackgroundThread = null;
+        mBackgroundHandler = null;
       } catch (InterruptedException e) {
         Log.e(TAG, "Interrupted while trying to join background handler thread", e);
       }
@@ -397,7 +437,7 @@ public class ARCoreCamera implements ICamera {
 
   private void updateFrame(int texture, int width, int height) {
     try {
-      if (sharedSession == null) {
+      if (mSession == null) {
         return;
       }
 
@@ -415,9 +455,9 @@ public class ARCoreCamera implements ICamera {
       //get calibration from ARCore
       float nearClip = 0.1f;
       float farClip = 100.0f;
-      sharedSession.setCameraTextureName(texture);
-      sharedSession.setDisplayGeometry(0, width, height);
-      Frame frame = sharedSession.update();
+      mSession.setCameraTextureName(texture);
+      mSession.setDisplayGeometry(0, width, height);
+      Frame frame = mSession.update();
       frame.transformCoordinates2d(Coordinates2d.OPENGL_NORMALIZED_DEVICE_COORDINATES, quadCoords, Coordinates2d.TEXTURE_NORMALIZED, quadTexCoords);
       Camera camera = frame.getCamera();
       camera.getProjectionMatrix(projection, 0, nearClip, farClip);
