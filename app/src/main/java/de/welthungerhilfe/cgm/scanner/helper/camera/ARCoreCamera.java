@@ -50,6 +50,7 @@ import android.widget.Toast;
 import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
 import com.google.ar.core.CameraConfig;
+import com.google.ar.core.CameraIntrinsics;
 import com.google.ar.core.Config;
 import com.google.ar.core.Coordinates2d;
 import com.google.ar.core.Frame;
@@ -100,7 +101,10 @@ public class ARCoreCamera implements ICamera {
   //Camera2 API
   private ImageReader mImageReaderDepth16;
   private CameraDevice mCameraDevice;
+  private String mColorCameraId;
   private String mDepthCameraId;
+  private float[] mColorCameraIntrinsic;
+  private float[] mDepthCameraIntrinsic;
 
   //ARCore API
   private Session mSession;
@@ -119,6 +123,9 @@ public class ARCoreCamera implements ICamera {
     mActivity = activity;
     mCache = new HashMap<>();
     mListeners = new ArrayList<>();
+
+    mColorCameraIntrinsic = new float[4];
+    mDepthCameraIntrinsic = new float[4];
     mFrameIndex = 1;
     mPixelIntensity = 0;
   }
@@ -151,6 +158,7 @@ public class ARCoreCamera implements ICamera {
                   mDepthCameraId = cameraId;
                 }
               }
+              mDepthCameraIntrinsic = characteristics.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION);
             }
           }
         }
@@ -350,13 +358,13 @@ public class ARCoreCamera implements ICamera {
     SharedCamera sharedCamera = mSession.getSharedCamera();
 
     // Store the ID of the camera used by ARCore.
-    String cameraId = mSession.getCameraConfig().getCameraId();
+    mColorCameraId = mSession.getCameraConfig().getCameraId();
 
     // When ARCore is running, make sure it also updates our CPU image surface.
-    if (cameraId.compareTo(mDepthCameraId) == 0) {
+    if (mColorCameraId.compareTo(mDepthCameraId) == 0) {
       ArrayList<Surface> surfaces = new ArrayList<>();
       surfaces.add(mImageReaderDepth16.getSurface());
-      sharedCamera.setAppSurfaces(cameraId, surfaces);
+      sharedCamera.setAppSurfaces(mColorCameraId, surfaces);
     } else {
       CameraManager manager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
       try {
@@ -453,6 +461,14 @@ public class ARCoreCamera implements ICamera {
       Camera camera = frame.getCamera();
       camera.getProjectionMatrix(projection, 0, nearClip, farClip);
       Matrix.invertM(projection, 0, projection, 0);
+      CameraIntrinsics intrinsics = camera.getImageIntrinsics();
+      mColorCameraIntrinsic[0] = intrinsics.getFocalLength()[0];
+      mColorCameraIntrinsic[1] = intrinsics.getFocalLength()[1];
+      mColorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[0];
+      mColorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[1];
+      if (mColorCameraId.compareTo(mDepthCameraId) == 0) {
+        mDepthCameraIntrinsic = mColorCameraIntrinsic;
+      }
 
       //get light estimation from ARCore
       mPixelIntensity = frame.getLightEstimate().getPixelIntensity();
@@ -474,6 +490,10 @@ public class ARCoreCamera implements ICamera {
       for (int i = 0 ; i < QUAD_COORDS.length / 2; i++) {
         mCameraCalibration += quadCoords.get() + " " + quadCoords.get() + " -> " + quadTexCoords.get() + " " + quadTexCoords.get() + "\n";
       }
+      mCameraCalibration += "Color camera intrinsic:\n";
+      mCameraCalibration += mColorCameraIntrinsic[0] + " " + mColorCameraIntrinsic[1] + " " + mColorCameraIntrinsic[2] + " " + mColorCameraIntrinsic[3] + "\n";
+      mCameraCalibration += "Depth camera intrinsic:\n";
+      mCameraCalibration += mDepthCameraIntrinsic[0] + " " + mDepthCameraIntrinsic[1] + " " + mDepthCameraIntrinsic[2] + " " + mDepthCameraIntrinsic[3] + "\n";
     } catch (Exception e) {
       e.printStackTrace();
     }
