@@ -493,7 +493,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private void updateScanningProgress(int numPoints) {
         float minPointsToCompleteScan = 199500.0f;
-        float progressToAddFloat = numPoints / minPointsToCompleteScan;
+        float maxProgressPerframe = Math.min(numPoints, minPointsToCompleteScan * 0.135f);
+        float progressToAddFloat = maxProgressPerframe / minPointsToCompleteScan;
         progressToAddFloat = progressToAddFloat*100;
         int progressToAdd = (int) progressToAddFloat;
         Log.d(TAG, "numPoints: "+numPoints+" float: "+progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
