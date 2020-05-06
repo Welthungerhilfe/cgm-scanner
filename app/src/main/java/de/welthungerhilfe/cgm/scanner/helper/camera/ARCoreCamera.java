@@ -37,8 +37,6 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Build;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
@@ -101,8 +99,6 @@ public class ARCoreCamera implements ICamera {
 
   //Camera2 API
   private ImageReader mImageReaderDepth16;
-  private HandlerThread mBackgroundThread;
-  private Handler mBackgroundHandler;
   private CameraDevice mCameraDevice;
   private String mDepthCameraId;
 
@@ -174,7 +170,7 @@ public class ARCoreCamera implements ICamera {
       }
     }
     mImageReaderDepth16 = ImageReader.newInstance(depthWidth, depthHeight, ImageFormat.DEPTH16, 5);
-    mImageReaderDepth16.setOnImageAvailableListener(imageReader -> onProcessDepthData(imageReader.acquireLatestImage()), mBackgroundHandler);
+    mImageReaderDepth16.setOnImageAvailableListener(imageReader -> onProcessDepthData(imageReader.acquireLatestImage()), null);
 
     //setup ARCore cycle
     mGLSurfaceView = mActivity.findViewById(R.id.surfaceview);
@@ -210,7 +206,6 @@ public class ARCoreCamera implements ICamera {
       if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
         if (mActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
           if (isARCoreSupportedAndUpToDate()) {
-            startBackgroundThread();
             openCamera();
           }
         }
@@ -223,7 +218,6 @@ public class ARCoreCamera implements ICamera {
     mGLSurfaceView.onPause();
 
     closeCamera();
-    stopBackgroundThread();
   }
 
   private void onProcessColorData(Image image) {
@@ -381,26 +375,6 @@ public class ARCoreCamera implements ICamera {
     }
   }
 
-  private void startBackgroundThread() {
-    mBackgroundThread = new HandlerThread("sharedCameraBackground");
-    mBackgroundThread.start();
-    mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
-  }
-
-  // Stop background handler thread.
-  private void stopBackgroundThread() {
-    if (mBackgroundThread != null) {
-      mBackgroundThread.quitSafely();
-      try {
-        mBackgroundThread.join();
-        mBackgroundThread = null;
-        mBackgroundHandler = null;
-      } catch (InterruptedException e) {
-        Log.e(TAG, "Interrupted while trying to join background handler thread", e);
-      }
-    }
-  }
-
   private boolean isARCoreSupportedAndUpToDate() {
     // Make sure ARCore is installed and supported on this device.
     ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(mActivity);
@@ -505,7 +479,7 @@ public class ARCoreCamera implements ICamera {
     }
   }
 
-  CameraDevice.StateCallback mSeparatedCameraCallback = new CameraDevice.StateCallback() {
+  private CameraDevice.StateCallback mSeparatedCameraCallback = new CameraDevice.StateCallback() {
     @Override
     public void onOpened(CameraDevice cameraDevice) {
       Surface imageReaderSurface = mImageReaderDepth16.getSurface();
@@ -519,14 +493,8 @@ public class ARCoreCamera implements ICamera {
 
           @Override
           public void onConfigured(CameraCaptureSession cameraCaptureSession) {
-            CameraCaptureSession.CaptureCallback captureCallback = new CameraCaptureSession.CaptureCallback() {};
-
             try {
-              HandlerThread handlerThread = new HandlerThread("DepthBackgroundThread");
-              handlerThread.start();
-              Handler handler = new Handler(handlerThread.getLooper());
-              cameraCaptureSession.setRepeatingRequest(requestBuilder.build(),captureCallback,handler);
-
+              cameraCaptureSession.setRepeatingRequest(requestBuilder.build(),null,null);
             } catch (CameraAccessException e) {
               e.printStackTrace();
             }
