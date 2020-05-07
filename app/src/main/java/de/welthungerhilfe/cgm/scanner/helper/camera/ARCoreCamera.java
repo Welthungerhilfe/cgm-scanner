@@ -105,6 +105,7 @@ public class ARCoreCamera implements ICamera {
   private String mDepthCameraId;
   private float[] mColorCameraIntrinsic;
   private float[] mDepthCameraIntrinsic;
+  private float[] mDepthCameraTranslation;
   private int mDepthWidth;
   private int mDepthHeight;
 
@@ -128,6 +129,7 @@ public class ARCoreCamera implements ICamera {
 
     mColorCameraIntrinsic = new float[4];
     mDepthCameraIntrinsic = new float[4];
+    mDepthCameraTranslation = new float[3];
     mFrameIndex = 1;
     mPixelIntensity = 0;
   }
@@ -376,6 +378,7 @@ public class ARCoreCamera implements ICamera {
                   mDepthCameraId = cameraId;
                 }
               }
+              mDepthCameraTranslation = characteristics.get(CameraCharacteristics.LENS_POSE_TRANSLATION);
               mDepthCameraIntrinsic = characteristics.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION);
               if (mDepthCameraIntrinsic != null) {
                 mDepthCameraIntrinsic[0] /= (float)mDepthWidth;
@@ -514,6 +517,8 @@ public class ARCoreCamera implements ICamera {
       mCameraCalibration += mColorCameraIntrinsic[0] + " " + mColorCameraIntrinsic[1] + " " + mColorCameraIntrinsic[2] + " " + mColorCameraIntrinsic[3] + "\n";
       mCameraCalibration += "Depth camera intrinsic:\n";
       mCameraCalibration += mDepthCameraIntrinsic[0] + " " + mDepthCameraIntrinsic[1] + " " + mDepthCameraIntrinsic[2] + " " + mDepthCameraIntrinsic[3] + "\n";
+      mCameraCalibration += "Depth camera position:\n";
+      mCameraCalibration += mDepthCameraTranslation[0] + " " + mDepthCameraTranslation[1] + " " + mDepthCameraTranslation[2] + "\n";
     } catch (Exception e) {
       e.printStackTrace();
     }
