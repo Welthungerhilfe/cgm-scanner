@@ -105,6 +105,8 @@ public class ARCoreCamera implements ICamera {
   private String mDepthCameraId;
   private float[] mColorCameraIntrinsic;
   private float[] mDepthCameraIntrinsic;
+  private int mDepthWidth;
+  private int mDepthHeight;
 
   //ARCore API
   private Session mSession;
@@ -349,13 +351,13 @@ public class ARCoreCamera implements ICamera {
 
   private void setupDepthSensor() {
     //set depth camera resolution
-    int depthWidth = 240;
-    int depthHeight = 180;
+    mDepthWidth = 240;
+    mDepthHeight = 180;
     if (Build.MANUFACTURER.toUpperCase().startsWith("SAMSUNG")) {
       //all supported Samsung devices except S10 5G have VGA resolution
       if (!Build.MODEL.startsWith("beyondx")) {
-        depthWidth = 640;
-        depthHeight = 480;
+        mDepthWidth = 640;
+        mDepthHeight = 480;
       }
     }
 
@@ -376,10 +378,10 @@ public class ARCoreCamera implements ICamera {
               }
               mDepthCameraIntrinsic = characteristics.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION);
               if (mDepthCameraIntrinsic != null) {
-                mDepthCameraIntrinsic[0] /= (float)depthWidth;
-                mDepthCameraIntrinsic[1] /= (float)depthHeight;
-                mDepthCameraIntrinsic[2] /= (float)depthWidth;
-                mDepthCameraIntrinsic[3] /= (float)depthHeight;
+                mDepthCameraIntrinsic[0] /= (float)mDepthWidth;
+                mDepthCameraIntrinsic[1] /= (float)mDepthHeight;
+                mDepthCameraIntrinsic[2] /= (float)mDepthWidth;
+                mDepthCameraIntrinsic[3] /= (float)mDepthHeight;
               }
             }
           }
@@ -390,7 +392,7 @@ public class ARCoreCamera implements ICamera {
     }
 
     //set image reader
-    mImageReaderDepth16 = ImageReader.newInstance(depthWidth, depthHeight, ImageFormat.DEPTH16, 5);
+    mImageReaderDepth16 = ImageReader.newInstance(mDepthWidth, mDepthHeight, ImageFormat.DEPTH16, 5);
     mImageReaderDepth16.setOnImageAvailableListener(imageReader -> onProcessDepthData(imageReader.acquireLatestImage()), null);
   }
 
@@ -439,6 +441,13 @@ public class ARCoreCamera implements ICamera {
 
   public String getCalibration() {
     return mCameraCalibration;
+  }
+
+  public float getDepthSensorDensity() {
+    float output = 240 * 180;
+    output /= (float)mDepthWidth;
+    output /= (float)mDepthHeight;
+    return output;
   }
 
   public float getLightIntensity() {

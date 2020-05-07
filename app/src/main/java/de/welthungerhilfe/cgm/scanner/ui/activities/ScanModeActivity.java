@@ -491,9 +491,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
     }
 
-    private void updateScanningProgress(int numPoints) {
+    private void updateScanningProgress(int numPoints, float density) {
         float minPointsToCompleteScan = 199500.0f;
-        float maxProgressPerframe = Math.min(numPoints, minPointsToCompleteScan * 0.135f);
+        float maxProgressPerframe = Math.min(numPoints, minPointsToCompleteScan * density);
         float progressToAddFloat = maxProgressPerframe / minPointsToCompleteScan;
         progressToAddFloat = progressToAddFloat*100;
         int progressToAdd = (int) progressToAddFloat;
@@ -967,8 +967,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     data[index++] = (byte) depthConfidence;
                 }
             }
-
-            updateScanningProgress(count);
+            float density = ((ARCoreCamera)mCameraInstance).getDepthSensorDensity();
+            updateScanningProgress(count, density);
             progressBar.setProgress(mProgress);
 
             float lightIntensity = ((ARCoreCamera)mCameraInstance).getLightIntensity() * 2.0f;
@@ -1011,7 +1011,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
                     fileLogRepository.insertFileLog(log);
-
 
                     ArtifactResult ar = new ArtifactResult();
                     ar.setConfidence_value(String.valueOf(100 - Artifact_Confidence_penalty));
@@ -1069,7 +1068,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     public void onTangoDepthData(TangoPointCloudData pointCloudData) {
         // Saving the frame or not, depending on the current mode.
         if ( mIsRecording ) {
-            updateScanningProgress(pointCloudData.numPoints);
+            updateScanningProgress(pointCloudData.numPoints, 1);
             progressBar.setProgress(mProgress);
 
             Runnable thread = () -> {
