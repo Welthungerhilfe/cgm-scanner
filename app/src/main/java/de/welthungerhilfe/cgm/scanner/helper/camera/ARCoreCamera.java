@@ -464,6 +464,7 @@ public class ARCoreCamera implements ICamera {
       }
 
       //init buffers
+      float[] inverse = new float[16];
       float[] projection = new float[16];
       ByteBuffer bbCoords = ByteBuffer.allocateDirect(QUAD_COORDS.length * FLOAT_SIZE);
       bbCoords.order(ByteOrder.nativeOrder());
@@ -483,7 +484,7 @@ public class ARCoreCamera implements ICamera {
       frame.transformCoordinates2d(Coordinates2d.OPENGL_NORMALIZED_DEVICE_COORDINATES, quadCoords, Coordinates2d.TEXTURE_NORMALIZED, quadTexCoords);
       Camera camera = frame.getCamera();
       camera.getProjectionMatrix(projection, 0, nearClip, farClip);
-      Matrix.invertM(projection, 0, projection, 0);
+      Matrix.invertM(inverse, 0, projection, 0);
       CameraIntrinsics intrinsics = camera.getImageIntrinsics();
       mColorCameraIntrinsic[0] = intrinsics.getFocalLength()[0] / (float)intrinsics.getImageDimensions()[0];
       mColorCameraIntrinsic[1] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
@@ -504,8 +505,8 @@ public class ARCoreCamera implements ICamera {
       quadCoords.position(0);
       mCameraCalibration = "";
       mCameraCalibration += "Inverse of projection matrix:\n";
-      for (int i = 0 ; i < projection.length; i++) {
-        mCameraCalibration += projection[i] + (i % 4 == 3 ? "\n" : " ");
+      for (int i = 0 ; i < inverse.length; i++) {
+        mCameraCalibration += inverse[i] + (i % 4 == 3 ? "\n" : " ");
       }
       mCameraCalibration += "Camera clip:\n";
       mCameraCalibration += nearClip + " " + farClip + "\n";
@@ -519,6 +520,10 @@ public class ARCoreCamera implements ICamera {
       mCameraCalibration += mDepthCameraIntrinsic[0] + " " + mDepthCameraIntrinsic[1] + " " + mDepthCameraIntrinsic[2] + " " + mDepthCameraIntrinsic[3] + "\n";
       mCameraCalibration += "Depth camera position:\n";
       mCameraCalibration += mDepthCameraTranslation[0] + " " + mDepthCameraTranslation[1] + " " + mDepthCameraTranslation[2] + "\n";
+      mCameraCalibration += "Projection matrix:\n";
+      for (int i = 0 ; i < projection.length; i++) {
+        mCameraCalibration += projection[i] + (i % 4 == 3 ? "\n" : " ");
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
