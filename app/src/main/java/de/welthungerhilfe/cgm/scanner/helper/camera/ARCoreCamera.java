@@ -348,6 +348,17 @@ public class ARCoreCamera implements ICamera {
   }
 
   private void setupDepthSensor() {
+    //set depth camera resolution
+    int depthWidth = 240;
+    int depthHeight = 180;
+    if (Build.MANUFACTURER.toUpperCase().startsWith("SAMSUNG")) {
+      //all supported Samsung devices except S10 5G have VGA resolution
+      if (!Build.MODEL.startsWith("beyondx")) {
+        depthWidth = 640;
+        depthHeight = 480;
+      }
+    }
+
     //detect depth camera
     try {
       CameraManager manager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
@@ -364,6 +375,12 @@ public class ARCoreCamera implements ICamera {
                 }
               }
               mDepthCameraIntrinsic = characteristics.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION);
+              if (mDepthCameraIntrinsic != null) {
+                mDepthCameraIntrinsic[0] /= (float)depthWidth;
+                mDepthCameraIntrinsic[1] /= (float)depthHeight;
+                mDepthCameraIntrinsic[2] /= (float)depthWidth;
+                mDepthCameraIntrinsic[3] /= (float)depthHeight;
+              }
             }
           }
         }
@@ -372,16 +389,7 @@ public class ARCoreCamera implements ICamera {
       e.printStackTrace();
     }
 
-    //set depth camera
-    int depthWidth = 240;
-    int depthHeight = 180;
-    if (Build.MANUFACTURER.toUpperCase().startsWith("SAMSUNG")) {
-      //all supported Samsung devices except S10 5G have VGA resolution
-      if (!Build.MODEL.startsWith("beyondx")) {
-        depthWidth = 640;
-        depthHeight = 480;
-      }
-    }
+    //set image reader
     mImageReaderDepth16 = ImageReader.newInstance(depthWidth, depthHeight, ImageFormat.DEPTH16, 5);
     mImageReaderDepth16.setOnImageAvailableListener(imageReader -> onProcessDepthData(imageReader.acquireLatestImage()), null);
   }
@@ -465,10 +473,10 @@ public class ARCoreCamera implements ICamera {
       camera.getProjectionMatrix(projection, 0, nearClip, farClip);
       Matrix.invertM(projection, 0, projection, 0);
       CameraIntrinsics intrinsics = camera.getImageIntrinsics();
-      mColorCameraIntrinsic[0] = intrinsics.getFocalLength()[0];
-      mColorCameraIntrinsic[1] = intrinsics.getFocalLength()[1];
-      mColorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[0];
-      mColorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[1];
+      mColorCameraIntrinsic[0] = intrinsics.getFocalLength()[0] / (float)intrinsics.getImageDimensions()[0];
+      mColorCameraIntrinsic[1] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
+      mColorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
+      mColorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[1] / (float)intrinsics.getImageDimensions()[1];
       if (mColorCameraId.compareTo(mDepthCameraId) == 0) {
         mDepthCameraIntrinsic = mColorCameraIntrinsic;
       }
