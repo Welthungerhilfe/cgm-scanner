@@ -80,22 +80,6 @@ public class ARCoreCamera implements ICamera {
     void onDepthDataReceived(Image image, int frameIndex);
   }
 
-  /**
-   * (-1, 1) ------- (1, 1)
-   *   |    \           |
-   *   |       \        |
-   *   |          \     |
-   *   |             \  |
-   * (-1, -1) ------ (1, -1)
-   * Ensure triangles are front-facing, to support glCullFace().
-   * This quad will be drawn using GL_TRIANGLE_STRIP which draws two
-   * triangles: v0->v1->v2, then v2->v1->v3.
-   */
-  private static final float[] QUAD_COORDS = new float[] {
-    -1.0f, -1.0f, +1.0f, -1.0f, -1.0f, +1.0f, +1.0f, +1.0f,
-  };
-  private static final int FLOAT_SIZE = 4;
-
   private static final String TAG = ARCoreCamera.class.getSimpleName();
 
   //Camera2 API
@@ -463,29 +447,11 @@ public class ARCoreCamera implements ICamera {
         return;
       }
 
-      //init buffers
-      float[] inverse = new float[16];
-      float[] projection = new float[16];
-      ByteBuffer bbCoords = ByteBuffer.allocateDirect(QUAD_COORDS.length * FLOAT_SIZE);
-      bbCoords.order(ByteOrder.nativeOrder());
-      FloatBuffer quadCoords = bbCoords.asFloatBuffer();
-      quadCoords.put(QUAD_COORDS);
-      quadCoords.position(0);
-      ByteBuffer bbTexCoordsTransformed = ByteBuffer.allocateDirect(QUAD_COORDS.length * FLOAT_SIZE);
-      bbTexCoordsTransformed.order(ByteOrder.nativeOrder());
-      FloatBuffer quadTexCoords = bbTexCoordsTransformed.asFloatBuffer();
-
       //get calibration from ARCore
-      float nearClip = 0.1f;
-      float farClip = 100.0f;
       mSession.setCameraTextureName(texture);
       mSession.setDisplayGeometry(0, width, height);
       Frame frame = mSession.update();
-      frame.transformCoordinates2d(Coordinates2d.OPENGL_NORMALIZED_DEVICE_COORDINATES, quadCoords, Coordinates2d.TEXTURE_NORMALIZED, quadTexCoords);
-      Camera camera = frame.getCamera();
-      camera.getProjectionMatrix(projection, 0, nearClip, farClip);
-      Matrix.invertM(inverse, 0, projection, 0);
-      CameraIntrinsics intrinsics = camera.getImageIntrinsics();
+      CameraIntrinsics intrinsics = frame.getCamera().getImageIntrinsics();
       mColorCameraIntrinsic[0] = intrinsics.getFocalLength()[0] / (float)intrinsics.getImageDimensions()[0];
       mColorCameraIntrinsic[1] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
       mColorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
@@ -501,29 +467,13 @@ public class ARCoreCamera implements ICamera {
       onProcessColorData(frame.acquireCameraImage());
 
       //extract calibration into string
-      quadTexCoords.position(0);
-      quadCoords.position(0);
       mCameraCalibration = "";
-      mCameraCalibration += "Inverse of projection matrix:\n";
-      for (int i = 0 ; i < inverse.length; i++) {
-        mCameraCalibration += inverse[i] + (i % 4 == 3 ? "\n" : " ");
-      }
-      mCameraCalibration += "Camera clip:\n";
-      mCameraCalibration += nearClip + " " + farClip + "\n";
-      mCameraCalibration += "Frame clip:\n";
-      for (int i = 0 ; i < QUAD_COORDS.length / 2; i++) {
-        mCameraCalibration += quadCoords.get() + " " + quadCoords.get() + " -> " + quadTexCoords.get() + " " + quadTexCoords.get() + "\n";
-      }
       mCameraCalibration += "Color camera intrinsic:\n";
       mCameraCalibration += mColorCameraIntrinsic[0] + " " + mColorCameraIntrinsic[1] + " " + mColorCameraIntrinsic[2] + " " + mColorCameraIntrinsic[3] + "\n";
       mCameraCalibration += "Depth camera intrinsic:\n";
       mCameraCalibration += mDepthCameraIntrinsic[0] + " " + mDepthCameraIntrinsic[1] + " " + mDepthCameraIntrinsic[2] + " " + mDepthCameraIntrinsic[3] + "\n";
       mCameraCalibration += "Depth camera position:\n";
       mCameraCalibration += mDepthCameraTranslation[0] + " " + mDepthCameraTranslation[1] + " " + mDepthCameraTranslation[2] + "\n";
-      mCameraCalibration += "Projection matrix:\n";
-      for (int i = 0 ; i < projection.length; i++) {
-        mCameraCalibration += projection[i] + (i % 4 == 3 ? "\n" : " ");
-      }
     } catch (Exception e) {
       e.printStackTrace();
     }
