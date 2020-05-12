@@ -35,7 +35,6 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
 import android.os.Build;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
@@ -48,18 +47,14 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.ar.core.ArCoreApk;
-import com.google.ar.core.Camera;
 import com.google.ar.core.CameraConfig;
 import com.google.ar.core.CameraIntrinsics;
 import com.google.ar.core.Config;
-import com.google.ar.core.Coordinates2d;
 import com.google.ar.core.Frame;
 import com.google.ar.core.Session;
 import com.google.ar.core.SharedCamera;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -360,15 +355,15 @@ public class ARCoreCamera implements ICamera {
               for (int c : ch) {
                 if (c == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT) {
                   mDepthCameraId = cameraId;
+                  mDepthCameraTranslation = characteristics.get(CameraCharacteristics.LENS_POSE_TRANSLATION);
+                  mDepthCameraIntrinsic = characteristics.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION);
+                  if (mDepthCameraIntrinsic != null) {
+                    mDepthCameraIntrinsic[0] /= (float)mDepthWidth;
+                    mDepthCameraIntrinsic[1] /= (float)mDepthHeight;
+                    mDepthCameraIntrinsic[2] /= (float)mDepthWidth;
+                    mDepthCameraIntrinsic[3] /= (float)mDepthHeight;
+                  }
                 }
-              }
-              mDepthCameraTranslation = characteristics.get(CameraCharacteristics.LENS_POSE_TRANSLATION);
-              mDepthCameraIntrinsic = characteristics.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION);
-              if (mDepthCameraIntrinsic != null) {
-                mDepthCameraIntrinsic[0] /= (float)mDepthWidth;
-                mDepthCameraIntrinsic[1] /= (float)mDepthHeight;
-                mDepthCameraIntrinsic[2] /= (float)mDepthWidth;
-                mDepthCameraIntrinsic[3] /= (float)mDepthHeight;
               }
             }
           }
