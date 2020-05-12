@@ -345,8 +345,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private boolean mIsRecording;
     private int mProgress;
 
-    private int noOfPoints;
-
     private long mNowTime;
     private String mNowTimeString;
 
@@ -493,9 +491,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
     }
 
-    private void updateScanningProgress(int numPoints) {
+    private void updateScanningProgress(int numPoints, float density) {
         float minPointsToCompleteScan = 199500.0f;
-        float progressToAddFloat = numPoints / minPointsToCompleteScan;
+        float maxProgressPerframe = Math.min(numPoints, minPointsToCompleteScan * density);
+        float progressToAddFloat = maxProgressPerframe / minPointsToCompleteScan;
         progressToAddFloat = progressToAddFloat*100;
         int progressToAdd = (int) progressToAddFloat;
         Log.d(TAG, "numPoints: "+numPoints+" float: "+progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
@@ -867,7 +866,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     public void onColorDataReceived(Bitmap bitmap, int frameIndex) {
         if (mIsRecording && (frameIndex % 10 == 0)) {
 
-            new Thread(() -> {
+            Runnable thread = () -> {
                 String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
                 currentImgFilename = currentImgFilename.replace('/', '_');
 
@@ -932,47 +931,52 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         }
                     }
                 }
-            }).start();
+            };
+            executor.execute(thread);
         }
     }
 
     @Override
     public void onDepthDataReceived(Image image, int frameIndex) {
-        Image.Plane plane = image.getPlanes()[0];
-        ByteBuffer buffer = plane.getBuffer();
-        ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
-
-        ArrayList<Short> pixel = new ArrayList<>();
-        while (shortDepthBuffer.hasRemaining()) {
-            pixel.add(shortDepthBuffer.get());
-        }
-        int stride = plane.getRowStride();
-        int width = image.getWidth();
-        int height = image.getHeight();
-
-        int count = 0;
-        int index = 0;
-        byte[] data = new byte[width * height * 3];
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int depthSample = pixel.get((y / 2) * stride + x);
-                int depthRange = depthSample & 0x1FFF;
-                int depthConfidence = ((depthSample >> 13) & 0x7);
-                if (depthRange > 0) {
-                    count++;
-                }
-                data[index++] = (byte) (depthRange / 256);
-                data[index++] = (byte) (depthRange % 256);
-                data[index++] = (byte) depthConfidence;
-            }
-        }
-
         if (mIsRecording && (frameIndex % 10 == 0)) {
-            updateScanningProgress(count);
+            Image.Plane plane = image.getPlanes()[0];
+            ByteBuffer buffer = plane.getBuffer();
+            ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
+
+            ArrayList<Short> pixel = new ArrayList<>();
+            while (shortDepthBuffer.hasRemaining()) {
+                pixel.add(shortDepthBuffer.get());
+            }
+            int stride = plane.getRowStride();
+            int width = image.getWidth();
+            int height = image.getHeight();
+
+            int count = 0;
+            int index = 0;
+            byte[] data = new byte[width * height * 3];
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int depthSample = pixel.get((y / 2) * stride + x);
+                    int depthRange = depthSample & 0x1FFF;
+                    int depthConfidence = ((depthSample >> 13) & 0x7);
+                    if (depthRange > 0) {
+                        count++;
+                    }
+                    data[index++] = (byte) (depthRange / 256);
+                    data[index++] = (byte) (depthRange % 256);
+                    data[index++] = (byte) depthConfidence;
+                }
+            }
+            float density = ((ARCoreCamera)mCameraInstance).getDepthSensorDensity();
+            updateScanningProgress(count, density);
             progressBar.setProgress(mProgress);
 
-            int finalCount = count;
-            new Thread(() -> {
+            float lightIntensity = ((ARCoreCamera)mCameraInstance).getLightIntensity() * 2.0f;
+            float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
+            float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
+            double Artifact_Confidence_penalty = Math.abs((double) count/38000-1.0)*100*3;
+
+            Runnable thread = () -> {
 
                 String filename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
                 filename = filename.replace('/', '_');
@@ -1008,20 +1012,18 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setMeasureId(measure.getId());
                     fileLogRepository.insertFileLog(log);
 
-
                     ArtifactResult ar = new ArtifactResult();
-                    double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
-                    ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
+                    ar.setConfidence_value(String.valueOf(100 - Artifact_Confidence_penalty));
                     ar.setArtifact_id(AppController.getInstance().getPersonId());
                     ar.setKey(SCAN_STEP);
                     ar.setMeasure_id(measure.getId());
                     ar.setMisc("");
                     ar.setType("PCD_POINTS_v0.2");
-                    noOfPoints = finalCount;
-                    ar.setReal(noOfPoints);
+                    ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
                     artifactResultRepository.insertArtifactResult(ar);
                 }
-            }).start();
+            };
+            executor.execute(thread);
         }
     }
 
@@ -1066,7 +1068,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     public void onTangoDepthData(TangoPointCloudData pointCloudData) {
         // Saving the frame or not, depending on the current mode.
         if ( mIsRecording ) {
-            updateScanningProgress(pointCloudData.numPoints);
+            updateScanningProgress(pointCloudData.numPoints, 1);
             progressBar.setProgress(mProgress);
 
             Runnable thread = () -> {
@@ -1096,15 +1098,14 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
 
                     ArtifactResult ar=new ArtifactResult();
-                    double Artifact_Lighting_penalty=Math.abs((double) noOfPoints/38000-1.0)*100*3;
+                    double Artifact_Lighting_penalty=Math.abs((double) pointCloudData.numPoints/38000-1.0)*100*3;
                     ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
                     ar.setArtifact_id(AppController.getInstance().getPersonId());
                     ar.setKey(SCAN_STEP);
                     ar.setMeasure_id(measure.getId());
                     ar.setMisc("");
                     ar.setType("PCD_POINTS_v0.2");
-                    noOfPoints = pointCloudData.numPoints;
-                    ar.setReal(noOfPoints);
+                    ar.setReal(pointCloudData.numPoints);
                     artifactResultRepository.insertArtifactResult(ar);
 
                     Log.e("numbs", String.valueOf(mNumberOfFilesWritten));

@@ -2,7 +2,6 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -18,10 +17,11 @@ import de.welthungerhilfe.cgm.scanner.ui.fragments.Tutorial3Fragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.Tutorial4Fragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.ui.views.PagerView;
 
 public class TutorialActivity extends AppCompatActivity {
     @BindView(R.id.viewPager)
-    ViewPager viewPager;
+    PagerView viewPager;
     @BindView(R.id.lytStart)
     LinearLayout lytStart;
 
@@ -57,6 +57,7 @@ public class TutorialActivity extends AppCompatActivity {
         adapter.addFragment(tur4, "tutorial4");
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(4);
+        viewPager.setSwipeEnabled(false);
     }
 
     public void gotoNext() {

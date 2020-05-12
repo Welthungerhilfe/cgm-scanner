@@ -89,7 +89,7 @@
                     android:layout_height="28dp"
                     android:layout_marginLeft="12dp"
                     android:gravity="center"
-                    android:background="@drawable/button_green_light_circular">
+                    android:background="@drawable/button_white_circular">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
