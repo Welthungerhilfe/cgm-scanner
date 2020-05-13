@@ -111,7 +111,7 @@ public class FeedbackDialog extends Dialog {
             private double averagePointCountBack = 0;
             private int pointCloudCountBack = 0;
 
-            private float frontHeightConfidence, sideHeightConfidence, backHeightConfidence;
+            private float frontConfidence, sideConfidence, backConfidence;
 
             @Override
             protected Boolean doInBackground(Void... voids) {
@@ -124,9 +124,9 @@ public class FeedbackDialog extends Dialog {
                 averagePointCountBack = artifactResultRepository.getAveragePointCountForBack(measure.getId());
                 pointCloudCountBack = artifactResultRepository.getPointCloudCountForBack(measure.getId());
 
-                frontHeightConfidence = measureResultRepository.getConfidence(measure.getId(), "height_front");
-                sideHeightConfidence = measureResultRepository.getConfidence(measure.getId(), "height_360");
-                backHeightConfidence = measureResultRepository.getConfidence(measure.getId(), "height_back");
+                frontConfidence = measureResultRepository.getConfidence(measure.getId(), "%_front");
+                sideConfidence = measureResultRepository.getConfidence(measure.getId(), "%_360");
+                backConfidence = measureResultRepository.getConfidence(measure.getId(), "%_back");
 
                 return true;
             }
@@ -179,21 +179,21 @@ public class FeedbackDialog extends Dialog {
                 issuesFront = String.format("%s\n - Duration score : %d%%", issuesFront, Math.round(durationScoreFront * 100));
                 if (pointCloudCountFront < 8) issuesFront = String.format("%s\n - Duration was too short", issuesFront);
                 else if (pointCloudCountFront > 9) issuesFront = String.format("%s\n - Duration was too long", issuesFront);
-                issuesFront = String.format("%s\n - Scan Precision : %d%%", issuesFront, Math.round(frontHeightConfidence * 100));
+                issuesFront = String.format("%s\n - Scan Precision : %d%%", issuesFront, Math.round(frontConfidence * 100));
                 txtFrontFeedback.setText(issuesFront);
 
                 String issuesSide = String.format(" - Light Score : %d%%", Math.round(lightScoreSide * 100));
                 issuesSide = String.format("%s\n - Duration score : %d%%", issuesSide, Math.round(durationScoreSide * 100));
                 if (pointCloudCountSide < 12) issuesSide = String.format("%s\n - Duration was too short", issuesSide);
                 else if (pointCloudCountSide > 27) issuesSide = String.format("%s\n - Duration was too long", issuesSide);
-                issuesSide = String.format("%s\n - Scan Precision : %d%%", issuesSide, Math.round(sideHeightConfidence * 100));
+                issuesSide = String.format("%s\n - Scan Precision : %d%%", issuesSide, Math.round(sideConfidence * 100));
                 txtSideFeedback.setText(issuesSide);
 
                 String issuesBack = String.format(" - Light Score : %d%%", Math.round(lightScoreBack * 100));
                 issuesBack = String.format("%s\n - Duration score : %d%%", issuesBack, Math.round(durationScoreBack * 100));
                 if (pointCloudCountBack < 8) issuesBack = String.format("%s\n - Duration was too short", issuesBack);
                 else if (pointCloudCountBack > 9) issuesBack = String.format("%s\n - Duration was too long", issuesBack);
-                issuesBack = String.format("%s\n - Scan Precision : %d%%", issuesBack, Math.round(backHeightConfidence * 100));
+                issuesBack = String.format("%s\n - Scan Precision : %d%%", issuesBack, Math.round(backConfidence * 100));
                 txtBackFeedback.setText(issuesBack);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
