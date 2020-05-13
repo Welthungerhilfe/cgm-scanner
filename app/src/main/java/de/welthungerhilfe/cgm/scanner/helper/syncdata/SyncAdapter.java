@@ -142,17 +142,29 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             try {
                                 MeasureResult result = gson.fromJson(message.getMessageContentAsString(), MeasureResult.class);
 
-                                float confidence = measureResultRepository.getConfidence(result.getMeasure_id(), result.getKey());
-                                float maxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id());
-
-                                if (result.getConfidence_value() > confidence) {
+                                float keyMaxConfident = measureResultRepository.getConfidence(result.getMeasure_id(), result.getKey());
+                                if (result.getConfidence_value() > keyMaxConfident) {
                                     measureResultRepository.insertMeasureResult(result);
                                 }
 
-                                if (result.getConfidence_value() > maxConfidence) {
-                                    measureRepository.updateHeight(result.getMeasure_id(), result.getFloat_value());
-                                    measureRepository.updateResultTimestamp(result.getMeasure_id(), System.currentTimeMillis());
+                                float fieldMaxConfidence = 0;
+                                if (result.getKey().contains("weight")) {
+                                    fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "weight%");
+
+                                    if (result.getConfidence_value() >= fieldMaxConfidence) {
+                                        measureRepository.updateWeight(result.getMeasure_id(), result.getFloat_value());
+                                        measureRepository.updateResultTimestamp(result.getMeasure_id(), System.currentTimeMillis());
+                                    }
+                                } else if (result.getKey().contains("height")) {
+                                    fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "height%");
+
+                                    if (result.getConfidence_value() >= fieldMaxConfidence) {
+                                        measureRepository.updateHeight(result.getMeasure_id(), result.getFloat_value());
+                                        measureRepository.updateResultTimestamp(result.getMeasure_id(), System.currentTimeMillis());
+                                    }
                                 }
+
+
                             } catch (JsonSyntaxException e) {
                                 e.printStackTrace();
                             }
@@ -280,7 +292,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
 
                 session.setSyncTimestamp(currentTimestamp);
-            } catch (URISyntaxException | InvalidKeyException e) {
+            } catch (URISyntaxException | InvalidKeyException | IllegalArgumentException e) {
                 e.printStackTrace();
             }
 

@@ -63,6 +63,10 @@ public class MeasureRepository {
         database.measureDao().updateHeight(measure_id, float_value);
     }
 
+    public void updateWeight(String measure_id, float float_value) {
+        database.measureDao().updateWeight(measure_id, float_value);
+    }
+
     public List<Measure> getAll() {
         return database.measureDao().getAll();
     }
