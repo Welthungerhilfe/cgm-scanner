@@ -68,12 +68,14 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 blobClient = storageAccount.createCloudBlobClient();
 
                 loadQueueFileLogs();
-            } catch (URISyntaxException | InvalidKeyException e) {
+
+                return START_STICKY;
+            } catch (URISyntaxException | InvalidKeyException | IllegalArgumentException e) {
                 e.printStackTrace();
             }
         }
 
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     @Override

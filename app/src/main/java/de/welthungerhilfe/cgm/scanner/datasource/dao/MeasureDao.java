@@ -62,6 +62,9 @@ public interface MeasureDao {
     @Query("UPDATE " + TABLE_MEASURE + " SET height=:float_value WHERE id=:measure_id")
     void updateHeight(String measure_id, float float_value);
 
+    @Query("UPDATE " + TABLE_MEASURE + " SET weight=:float_value WHERE id=:measure_id")
+    void updateWeight(String measure_id, float float_value);
+
     @Query("SELECT * FROM " + TABLE_MEASURE)
     List<Measure> getAll();
 

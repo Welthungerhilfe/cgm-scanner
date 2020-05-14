@@ -7,6 +7,7 @@ import android.arch.persistence.room.Query;
 
 import java.util.List;
 
+import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 
@@ -23,11 +24,11 @@ public interface MeasureResultDao {
     @Query("SELECT * FROM " + CgmDatabase.TABLE_MEASURE_RESULT)
     LiveData<List<MeasureResult>> getMeasureResults();
 
-    @Query("SELECT MAX(confidence_value) FROM " + CgmDatabase.TABLE_MEASURE_RESULT + " WHERE measure_id=:id AND `key`=:key")
+    @Query("SELECT MAX(confidence_value) FROM " + CgmDatabase.TABLE_MEASURE_RESULT + " WHERE measure_id=:id AND `key` LIKE :key")
     float getConfidence(String id, String key);
 
-    @Query("SELECT MAX(confidence_value) FROM " + CgmDatabase.TABLE_MEASURE_RESULT + " WHERE measure_id=:id")
-    float getMaxConfidence(String id);
+    @Query("SELECT MAX(confidence_value) FROM " + CgmDatabase.TABLE_MEASURE_RESULT + " WHERE measure_id=:id AND `key` LIKE :key")
+    float getMaxConfidence(String id, String key);
 
     @Query("SELECT * FROM " + CgmDatabase.TABLE_MEASURE_RESULT)
     List<MeasureResult> getAll();
