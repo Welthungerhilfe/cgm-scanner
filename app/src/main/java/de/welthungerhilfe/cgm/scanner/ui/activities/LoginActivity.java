@@ -23,22 +23,20 @@ import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.google.common.collect.Iterators;
-import com.microsoft.appcenter.auth.Auth;
-import com.microsoft.appcenter.auth.SignInResult;
-import com.microsoft.appcenter.utils.async.AppCenterConsumer;
 import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.StorageCredentialsAccountAndKey;
-import com.microsoft.azure.storage.table.CloudTableClient;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
@@ -47,13 +45,11 @@ import net.minidev.json.JSONArray;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.text.ParseException;
-import java.util.Date;
 import java.util.Map;
 
-import butterknife.BindString;
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -62,26 +58,12 @@ import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
 
 public class LoginActivity extends AccountAuthenticatorActivity {
 
-    @BindView(R.id.editUser)
-    EditText editUser;
-    @BindView(R.id.editPassword)
-    EditText editPassword;
-
-    @BindString(R.string.validate_user)
-    String strUserValidation;
-    @BindString(R.string.validate_password)
-    String strPasswordValidation;
-
-    @OnClick({R.id.btnOK, R.id.btnLoginMicrosoft})
+    @OnClick({R.id.btnLoginMicrosoft})
     void doSignIn() {
         doSignInAction();
     }
 
-    @OnClick(R.id.txtForgot)
-    void doForgot(TextView txtForgot) {
-
-    }
-
+    private WebView webView;
     private SessionManager session;
     private AccountManager accountManager;
 
@@ -94,17 +76,8 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         ButterKnife.bind(this);
 
         accountManager = AccountManager.get(this);
-
-        editPassword.setOnEditorActionListener((textView, actionId, keyEvent) -> {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                doSignInAction();
-
-                return true;
-            }
-            return false;
-        });
-
         session = new SessionManager(this);
+        webView = findViewById(R.id.loginView);
     }
 
     public void onStart() {
@@ -161,107 +134,123 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         }
     }
 
-    private boolean validate() {
-        boolean valid = true;
-
-        String user = editUser.getText().toString();
-        String password = editPassword.getText().toString();
-
-        if (user.isEmpty()) {
-            editUser.setError(strUserValidation);
-            valid = false;
-        } else {
-            editUser.setError(null);
-        }
-
-        if (password.isEmpty()) {
-            editPassword.setError(strPasswordValidation);
-            valid = false;
-        } else {
-            editPassword.setError(null);
-        }
-
-        return valid;
-    }
-
     private void doSignInAction() {
-        Auth.signIn().thenAccept(signInResult -> {
+        if (BuildConfig.DEBUG) {
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            return;
+        }
 
-            if (signInResult.getException() == null) {
+        String tenant = "{B2C_TENANT}";
+        String clientID = "{B2C_CLIENT_ID}";
+        String responseURL = "{B2C_RESPONSE_URL}";
+        String scope = "{B2C_SCOPE}";
 
-                // Sign-in succeeded if exception is null.
-                // SignInResult is never null, getUserInformation() returns not null when there is no exception.
-                // Both getIdToken() / getAccessToken() return non null values.
-                String idToken = signInResult.getUserInformation().getIdToken();
-                try {
-                    JWT parsedToken = JWTParser.parse(idToken);
-                    Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
+        String url = "https://whhict4x.b2clogin.com/whhict4x.onmicrosoft.com/oauth2/v2.0/";
+        url += "authorize?p=B2C_1_signupsignin1&client_id=" + clientID;
+        url += "&nonce=defaultNonce&redirect_uri=" + responseURL;
+        url += "&scope=https://" + tenant + ".onmicrosoft.com/" + clientID + "/" + scope;
+        url += "&response_type=token&prompt=login&response_mode=query";
+        url += "&authorization_user_agent=WEBVIEW";
 
-                    String azureAccountName = (String) claims.get("extension_azure_account_name");
-                    String azureAccountKey = (String) claims.get("extension_azure_account_key");
-                    if (azureAccountName != null && !azureAccountName.equals("") && azureAccountKey != null && !azureAccountKey.equals("")) {
-                        JSONArray emails = (JSONArray) claims.get("emails");
-                        if (emails != null && !emails.isEmpty()) {
-                            try {
-                                CloudStorageAccount.parse(String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", azureAccountName, azureAccountKey));
-
-                                session.setAzureAccountName(azureAccountName);
-                                session.setAzureAccountKey(azureAccountKey);
-
-                                session.setAuthToken(idToken);
-
-                                String token = (String) claims.get("at_hash");
-                                String firstEmail = emails.get(0).toString();
-
-                                final Account account = new Account(firstEmail, AppConstants.ACCOUNT_TYPE);
-                                accountManager.addAccountExplicitly(account, token, null);
-
-                                SyncAdapter.startPeriodicSync(account, getApplicationContext());
-
-                                final Intent intent = new Intent();
-                                intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, firstEmail);
-                                intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
-                                intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
-
-                                setAccountAuthenticatorResult(intent.getExtras());
-                                setResult(RESULT_OK, intent);
-
-
-                                session.saveRemoteConfig(new RemoteConfig());
-                                session.setSigned(true);
-                                session.setUserEmail(firstEmail);
-
-                                if (session.getTutorial())
-                                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                                else
-                                    startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
-
-                                finish();
-                            } catch (URISyntaxException | InvalidKeyException e) {
-                                e.printStackTrace();
-
-                                Auth.signOut();
-                                Toast.makeText(this, "Backend account is invalid", Toast.LENGTH_LONG).show();
-                            }
-                        } else {
-                            Auth.signOut();
-                            Toast.makeText(LoginActivity.this, "Couldn't get user email, please try again", Toast.LENGTH_LONG).show();
-                        }
-                    } else {
-                        Auth.signOut();
-                        Toast.makeText(this, "Couldn't find your backend", Toast.LENGTH_LONG).show();
+        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String stringUrl) {
+                if (stringUrl.startsWith(responseURL)) {
+                    try {
+                        String authToken = Uri.parse(stringUrl).getQueryParameter("access_token");
+                        processToken(authToken);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(LoginActivity.this, "Unable to login.", Toast.LENGTH_LONG).show();
                     }
-                } catch (ParseException e) {
-                    e.printStackTrace();
-
-                    Toast.makeText(LoginActivity.this, "Token Parse Failed.", Toast.LENGTH_LONG).show();
+                    webView.setVisibility(View.GONE);
                 }
-            } else {
-                Exception signInFailureException = signInResult.getException();
-                signInFailureException.printStackTrace();
-
-                Toast.makeText(LoginActivity.this, R.string.error_login, Toast.LENGTH_LONG).show();
             }
         });
+
+        if (isConnected()) {
+            webView.getSettings().setJavaScriptEnabled(true);
+            webView.setVisibility(View.VISIBLE);
+            webView.loadUrl(url);
+        } else {
+            Toast.makeText(LoginActivity.this, "No internet connection.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private boolean isConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (null != cm) {
+            NetworkInfo info = cm.getActiveNetworkInfo();
+            return (info != null && info.isConnected());
+        }
+        return false;
+    }
+
+    private boolean processToken(String idToken) {
+        try {
+            JWT parsedToken = JWTParser.parse(idToken);
+            Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
+
+            String azureAccountName = (String) claims.get("extension_azure_account_name");
+            String azureAccountKey = (String) claims.get("extension_azure_account_key");
+            if (azureAccountName != null && !azureAccountName.equals("") && azureAccountKey != null && !azureAccountKey.equals("")) {
+                JSONArray emails = (JSONArray) claims.get("emails");
+                if (emails != null && !emails.isEmpty()) {
+                    try {
+                        CloudStorageAccount.parse(String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", azureAccountName, azureAccountKey));
+
+                        session.setAzureAccountName(azureAccountName);
+                        session.setAzureAccountKey(azureAccountKey);
+
+                        session.setAuthToken(idToken);
+
+                        String token = (String) claims.get("at_hash");
+                        String firstEmail = emails.get(0).toString();
+
+                        final Account account = new Account(firstEmail, AppConstants.ACCOUNT_TYPE);
+                        accountManager.addAccountExplicitly(account, token, null);
+
+                        SyncAdapter.startPeriodicSync(account, getApplicationContext());
+
+                        final Intent intent = new Intent();
+                        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, firstEmail);
+                        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
+                        intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
+
+                        setAccountAuthenticatorResult(intent.getExtras());
+                        setResult(RESULT_OK, intent);
+
+
+                        session.saveRemoteConfig(new RemoteConfig());
+                        session.setSigned(true);
+                        session.setUserEmail(firstEmail);
+
+                        if (session.getTutorial())
+                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                        else
+                            startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
+
+                        finish();
+                        return true;
+                    } catch (URISyntaxException | InvalidKeyException e) {
+                        e.printStackTrace();
+
+                        Toast.makeText(this, "Backend account is invalid", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(LoginActivity.this, "Couldn't get user email, please try again", Toast.LENGTH_LONG).show();
+                }
+            } else {
+                Toast.makeText(this, "Couldn't find your backend", Toast.LENGTH_LONG).show();
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+
+            Toast.makeText(LoginActivity.this, "Token Parse Failed.", Toast.LENGTH_LONG).show();
+        }
+
+        return false;
     }
 }
