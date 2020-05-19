@@ -47,6 +47,7 @@ import java.security.InvalidKeyException;
 import java.text.ParseException;
 import java.util.Map;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
@@ -58,12 +59,14 @@ import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
 
 public class LoginActivity extends AccountAuthenticatorActivity {
 
+    @BindView(R.id.loginView)
+    WebView webView;
+
     @OnClick({R.id.btnLoginMicrosoft})
     void doSignIn() {
         doSignInAction();
     }
 
-    private WebView webView;
     private SessionManager session;
     private AccountManager accountManager;
 
@@ -77,9 +80,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         accountManager = AccountManager.get(this);
         session = new SessionManager(this);
-        webView = findViewById(R.id.loginView);
     }
 
+    @Override
     public void onStart() {
         super.onStart();
 
@@ -158,12 +161,19 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             public void onPageFinished(WebView view, String stringUrl) {
                 if (stringUrl.startsWith(responseURL)) {
                     try {
-                        String authToken = Uri.parse(stringUrl).getQueryParameter("access_token");
-                        processToken(authToken);
+                        String error = Uri.parse(stringUrl).getQueryParameter("error");
+                        if ((error == null) || (error.length() == 0)) {
+                            String authToken = Uri.parse(stringUrl).getQueryParameter("access_token");
+                            if (processToken(authToken)) {
+                                webView.loadUrl("about:blank");
+                                return;
+                            }
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                         Toast.makeText(LoginActivity.this, "Unable to login.", Toast.LENGTH_LONG).show();
                     }
+                    webView.loadUrl("about:blank");
                     webView.setVisibility(View.GONE);
                 }
             }
