@@ -826,7 +826,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     measureQueue.createIfNotExists();
 
                     CloudQueueMessage message = new CloudQueueMessage(measure.getId());
-                    message.setMessageContent(gson.toJson(message));
+                    message.setMessageContent(gson.toJson(measure));
                     measureQueue.addMessage(message);
 
                     measure.setTimestamp(session.getSyncTimestamp());
