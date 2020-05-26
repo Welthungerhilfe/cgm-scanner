@@ -68,6 +68,45 @@ import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 
 public class ARCoreCamera implements ICamera {
 
+  public class CameraCalibration {
+    private float[] colorCameraIntrinsic;
+    private float[] depthCameraIntrinsic;
+    private float[] depthCameraTranslation;
+    private boolean valid;
+
+    private CameraCalibration() {
+      colorCameraIntrinsic = new float[4];
+      depthCameraIntrinsic = new float[4];
+      depthCameraTranslation = new float[3];
+      valid = false;
+    }
+
+    public float[] getIntrinsic(boolean rgbCamera) {
+      return rgbCamera ? colorCameraIntrinsic : depthCameraIntrinsic;
+    }
+
+    public boolean isValid() {
+      return valid;
+    }
+
+    private void setValid() {
+      valid = true;
+    }
+
+    @Override
+    public String toString() {
+      String output = "";
+      output += "Color camera intrinsic:\n";
+      output += colorCameraIntrinsic[0] + " " + colorCameraIntrinsic[1] + " " + colorCameraIntrinsic[2] + " " + colorCameraIntrinsic[3] + "\n";
+      output += "Depth camera intrinsic:\n";
+      output += depthCameraIntrinsic[0] + " " + depthCameraIntrinsic[1] + " " + depthCameraIntrinsic[2] + " " + depthCameraIntrinsic[3] + "\n";
+      output += "Depth camera position:\n";
+      output += depthCameraTranslation[0] + " " + depthCameraTranslation[1] + " " + depthCameraTranslation[2] + "\n";
+      return output;
+    }
+  }
+
+
   public interface Camera2DataListener
   {
     void onColorDataReceived(Bitmap bitmap, int frameIndex);
@@ -82,9 +121,6 @@ public class ARCoreCamera implements ICamera {
   private CameraDevice mCameraDevice;
   private String mColorCameraId;
   private String mDepthCameraId;
-  private float[] mColorCameraIntrinsic;
-  private float[] mDepthCameraIntrinsic;
-  private float[] mDepthCameraTranslation;
   private int mDepthWidth;
   private int mDepthHeight;
 
@@ -97,7 +133,7 @@ public class ARCoreCamera implements ICamera {
   private GLSurfaceView mGLSurfaceView;
   private ArrayList<Camera2DataListener> mListeners;
   private HashMap<Long, Bitmap> mCache;
-  private String mCameraCalibration;
+  private CameraCalibration mCameraCalibration;
   private int mFrameIndex;
   private float mPixelIntensity;
 
@@ -106,9 +142,7 @@ public class ARCoreCamera implements ICamera {
     mCache = new HashMap<>();
     mListeners = new ArrayList<>();
 
-    mColorCameraIntrinsic = new float[4];
-    mDepthCameraIntrinsic = new float[4];
-    mDepthCameraTranslation = new float[3];
+    mCameraCalibration = new CameraCalibration();
     mFrameIndex = 1;
     mPixelIntensity = 0;
   }
@@ -355,13 +389,13 @@ public class ARCoreCamera implements ICamera {
               for (int c : ch) {
                 if (c == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT) {
                   mDepthCameraId = cameraId;
-                  mDepthCameraTranslation = characteristics.get(CameraCharacteristics.LENS_POSE_TRANSLATION);
-                  mDepthCameraIntrinsic = characteristics.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION);
-                  if (mDepthCameraIntrinsic != null) {
-                    mDepthCameraIntrinsic[0] /= (float)mDepthWidth;
-                    mDepthCameraIntrinsic[1] /= (float)mDepthHeight;
-                    mDepthCameraIntrinsic[2] /= (float)mDepthWidth;
-                    mDepthCameraIntrinsic[3] /= (float)mDepthHeight;
+                  mCameraCalibration.depthCameraTranslation = characteristics.get(CameraCharacteristics.LENS_POSE_TRANSLATION);
+                  mCameraCalibration.depthCameraIntrinsic = characteristics.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION);
+                  if (mCameraCalibration.depthCameraIntrinsic != null) {
+                    mCameraCalibration.depthCameraIntrinsic[0] /= (float)mDepthWidth;
+                    mCameraCalibration.depthCameraIntrinsic[1] /= (float)mDepthHeight;
+                    mCameraCalibration.depthCameraIntrinsic[2] /= (float)mDepthWidth;
+                    mCameraCalibration.depthCameraIntrinsic[3] /= (float)mDepthHeight;
                   }
                 }
               }
@@ -421,7 +455,7 @@ public class ARCoreCamera implements ICamera {
     return true;
   }
 
-  public String getCalibration() {
+  public CameraCalibration getCalibration() {
     return mCameraCalibration;
   }
 
@@ -447,13 +481,14 @@ public class ARCoreCamera implements ICamera {
       mSession.setDisplayGeometry(0, width, height);
       Frame frame = mSession.update();
       CameraIntrinsics intrinsics = frame.getCamera().getImageIntrinsics();
-      mColorCameraIntrinsic[0] = intrinsics.getFocalLength()[0] / (float)intrinsics.getImageDimensions()[0];
-      mColorCameraIntrinsic[1] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
-      mColorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
-      mColorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[1] / (float)intrinsics.getImageDimensions()[1];
+      mCameraCalibration.colorCameraIntrinsic[0] = intrinsics.getFocalLength()[0] / (float)intrinsics.getImageDimensions()[0];
+      mCameraCalibration.colorCameraIntrinsic[1] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
+      mCameraCalibration.colorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
+      mCameraCalibration.colorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[1] / (float)intrinsics.getImageDimensions()[1];
       if (mColorCameraId.compareTo(mDepthCameraId) == 0) {
-        mDepthCameraIntrinsic = mColorCameraIntrinsic;
+        mCameraCalibration.depthCameraIntrinsic = mCameraCalibration.colorCameraIntrinsic;
       }
+      mCameraCalibration.setValid();
 
       //get light estimation from ARCore
       mPixelIntensity = frame.getLightEstimate().getPixelIntensity();
@@ -461,14 +496,6 @@ public class ARCoreCamera implements ICamera {
       //process camera data
       onProcessColorData(frame.acquireCameraImage());
 
-      //extract calibration into string
-      mCameraCalibration = "";
-      mCameraCalibration += "Color camera intrinsic:\n";
-      mCameraCalibration += mColorCameraIntrinsic[0] + " " + mColorCameraIntrinsic[1] + " " + mColorCameraIntrinsic[2] + " " + mColorCameraIntrinsic[3] + "\n";
-      mCameraCalibration += "Depth camera intrinsic:\n";
-      mCameraCalibration += mDepthCameraIntrinsic[0] + " " + mDepthCameraIntrinsic[1] + " " + mDepthCameraIntrinsic[2] + " " + mDepthCameraIntrinsic[3] + "\n";
-      mCameraCalibration += "Depth camera position:\n";
-      mCameraCalibration += mDepthCameraTranslation[0] + " " + mDepthCameraTranslation[1] + " " + mDepthCameraTranslation[2] + "\n";
     } catch (Exception e) {
       e.printStackTrace();
     }
