@@ -1006,7 +1006,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 }
 
                 //upload pointcloud
-                artifactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + pointCloudFilename +".pcd");
+                artifactFile = new File(mPointCloudSaveFolder.getPath(), pointCloudFilename);
                 if (artifactFile.exists()) {
                     FileLog log = new FileLog();
                     log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
