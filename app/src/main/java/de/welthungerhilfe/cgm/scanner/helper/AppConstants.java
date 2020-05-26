@@ -42,6 +42,8 @@ public class AppConstants {
 
     public static final String LOCAL_CONSENT_URL = "/{qrcode}/consent/{scantimestamp}/consent/";
     public static final String STORAGE_CONSENT_URL = "qrcode/{qrcode}/consent/{scantimestamp}/";
+    public static final String STORAGE_CALIBRATION_URL = "qrcode/{qrcode}/measure/{scantimestamp}/";
+    public static final String STORAGE_DEPTH_URL = "qrcode/{qrcode}/measure/{scantimestamp}/depth/";
     public static final String STORAGE_PC_URL = "qrcode/{qrcode}/measure/{scantimestamp}/pc/";
     public static final String STORAGE_RGB_URL = "qrcode/{qrcode}/measure/{scantimestamp}/rgb/";
 
