@@ -37,6 +37,7 @@ public class ARCoreUtils {
     public static class Depthmap {
         byte[] confidence;
         short[] depth;
+        int count;
         int width;
         int height;
 
@@ -44,12 +45,17 @@ public class ARCoreUtils {
             this.width = width;
             this.height = height;
 
+            count = 0;
             confidence = new byte[width * height];
             depth = new short[width * height];
         }
 
         private float getConfidence(int x, int y) {
             return confidence[y * width + x] / 7.0f;
+        }
+
+        public int getCount() {
+            return count;
         }
 
         public byte[] getData() {
@@ -101,6 +107,9 @@ public class ARCoreUtils {
                 if ((x < 1) || (y < 1) || (x >= width - 1) || (y >= height - 1)) {
                     depthConfidence = 0;
                     depthRange = 0;
+                }
+                if (depthRange > 0) {
+                    depthmap.count++;
                 }
                 depthmap.confidence[y * width + x] = (byte) depthConfidence;
                 depthmap.depth[y * width + x] = (short) depthRange;
