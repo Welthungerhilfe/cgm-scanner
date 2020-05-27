@@ -52,15 +52,12 @@ import android.widget.TextView;
 
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
-import com.microsoft.appcenter.auth.Auth;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 
 import java.io.File;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -191,8 +188,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     for (Account account : accounts) {
                         accountManager.removeAccount(account, MainActivity.this, null, null);
                     }
-
-                    Auth.signOut();
 
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();
