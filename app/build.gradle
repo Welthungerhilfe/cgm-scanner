@@ -6,8 +6,8 @@ android {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 302
-        versionName "3.0.2-dev"
+        versionCode 300
+        versionName "3.0.0-rc1"
         manifestPlaceholders = [arCameraRequired:"false", arcoreValue:"optional", tangoRequired:"false"]
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
