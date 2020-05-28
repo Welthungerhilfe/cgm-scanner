@@ -471,10 +471,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             case R.id.actionSearch:
                 openSearchBar();
                 break;
-            case R.id.actionQr:
-                //startActivity(new Intent(MainActivity.this, QRScanActivity.class));
+            /*case R.id.actionQr:
                 startActivity(new Intent(MainActivity.this, ConsentScanActivity.class));
-                break;
+                break;*/
             case R.id.actionFilter:
                 openSort();
                 break;

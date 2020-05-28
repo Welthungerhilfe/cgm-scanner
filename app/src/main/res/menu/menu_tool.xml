@@ -20,10 +20,10 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/actionQr"
+    <!--item android:id="@+id/actionQr"
         android:title="@string/menu_qr"
         android:icon="@drawable/qr"
-        app:showAsAction="always"/>
+        app:showAsAction="always"/!-->
 
     <item
         android:id="@+id/actionSearch"
