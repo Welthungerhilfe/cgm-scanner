@@ -57,9 +57,9 @@ public class UploadManagerActivity extends AppCompatActivity {
         });
         viewModel.getSpeedLiveData().observe(this, speed -> {
             if (speed.doubleValue() != 0) {
-                if (speed.doubleValue() / 1024 / 1024 > 0)
+                if (speed.doubleValue() / 1024 / 1024 > 1)
                     txtUploadSpeed.setText(String.format("%.2fMB/S", speed.doubleValue() / 1024 / 1024));
-                else if (speed.doubleValue() / 1024 > 0)
+                else if (speed.doubleValue() / 1024 > 1)
                     txtUploadSpeed.setText(String.format("%dKB/S", (int) (speed.doubleValue() / 1024)));
                 else
                     txtUploadSpeed.setText(String.format("%dB/S", (int) (speed.doubleValue())));
