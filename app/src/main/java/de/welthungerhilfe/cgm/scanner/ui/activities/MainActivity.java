@@ -52,15 +52,12 @@ import android.widget.TextView;
 
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
-import com.microsoft.appcenter.auth.Auth;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 
 import java.io.File;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -192,8 +189,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                         accountManager.removeAccount(account, MainActivity.this, null, null);
                     }
 
-                    Auth.signOut();
-
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();
                     break;
@@ -318,6 +313,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
                     switch (view.getId()) {
                         case R.id.rytFilterData:
+                            adapterData.clear();
                             viewModel.setFilterOwn();
                             break;
                         case R.id.rytFilterDate:
@@ -327,6 +323,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                             doFilterByLocation();
                             break;
                         case R.id.rytFilterClear:
+                            adapterData.clear();
                             viewModel.setFilterNo();
                             break;
                         case R.id.rytSortDate:
@@ -348,63 +345,37 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 .create();
 
         viewModel.getPersonFilterLiveData().observe(this, filter -> {
-            if (filter.isOwn()) {
-                sortDialog.getHolderView().findViewById(R.id.imgFilterData).setVisibility(View.VISIBLE);
-            } else {
-                sortDialog.getHolderView().findViewById(R.id.imgFilterData).setVisibility(View.INVISIBLE);
-            }
+            View view = sortDialog.getHolderView();
 
+            //filter check icon
+            boolean anyFilter = filter.isOwn() || filter.isDate() || filter.isLocation();
+            view.findViewById(R.id.imgFilterData).setVisibility(filter.isOwn() ? View.VISIBLE : View.INVISIBLE);
+            view.findViewById(R.id.imgFilterDate).setVisibility(filter.isDate() ? View.VISIBLE : View.INVISIBLE);
+            view.findViewById(R.id.imgFilterLocation).setVisibility(filter.isLocation() ? View.VISIBLE : View.INVISIBLE);
+            view.findViewById(R.id.imgFilterClear).setVisibility(anyFilter ? View.INVISIBLE : View.VISIBLE);
+
+            //sort check icon
+            int sort = filter.getSortType();
+            view.findViewById(R.id.imgSortDate).setVisibility(sort == SORT_DATE ? View.VISIBLE : View.INVISIBLE);
+            view.findViewById(R.id.imgSortLocation).setVisibility(sort == SORT_LOCATION ? View.VISIBLE : View.INVISIBLE);
+            view.findViewById(R.id.imgSortWasting).setVisibility(sort == SORT_WASTING ? View.VISIBLE : View.INVISIBLE);
+            view.findViewById(R.id.imgSortStunting).setVisibility(sort == SORT_STUNTING ? View.VISIBLE : View.INVISIBLE);
+
+            //set date info
             if (filter.isDate()) {
-                sortDialog.getHolderView().findViewById(R.id.imgFilterDate).setVisibility(View.VISIBLE);
-
                 int diff = (int) Math.ceil((double) (filter.getToDate() - filter.getFromDate()) / 1000 / 3600 / 24);
-                TextView txtView = sortDialog.getHolderView().findViewById(R.id.txtFilterDate);
+                TextView txtView = view.findViewById(R.id.txtFilterDate);
                 txtView.setText(getResources().getString(R.string.last_days, diff));
-            } else {
-                sortDialog.getHolderView().findViewById(R.id.imgFilterDate).setVisibility(View.INVISIBLE);
             }
 
+            //set location info
             if (filter.isLocation()) {
-                sortDialog.getHolderView().findViewById(R.id.imgFilterLocation).setVisibility(View.VISIBLE);
                 TextView txtView = sortDialog.getHolderView().findViewById(R.id.txtFilterLocation);
-
                 if (filter.getFromLOC() != null) {
                     txtView.setText(filter.getFromLOC().getAddress());
                 } else {
                     txtView.setText(R.string.last_location_error);
                 }
-            } else {
-                sortDialog.getHolderView().findViewById(R.id.imgFilterLocation).setVisibility(View.INVISIBLE);
-            }
-
-            if (filter.isOwn() || filter.isDate() || filter.isLocation()) {
-                sortDialog.getHolderView().findViewById(R.id.imgFilterClear).setVisibility(View.INVISIBLE);
-            } else {
-                sortDialog.getHolderView().findViewById(R.id.imgFilterClear).setVisibility(View.VISIBLE);
-            }
-
-            if (filter.getSortType() == SORT_DATE) {
-                sortDialog.getHolderView().findViewById(R.id.imgSortDate).setVisibility(View.VISIBLE);
-            } else {
-                sortDialog.getHolderView().findViewById(R.id.imgSortDate).setVisibility(View.INVISIBLE);
-            }
-
-            if (filter.getSortType() == SORT_LOCATION) {
-                sortDialog.getHolderView().findViewById(R.id.imgSortLocation).setVisibility(View.VISIBLE);
-            } else {
-                sortDialog.getHolderView().findViewById(R.id.imgSortLocation).setVisibility(View.INVISIBLE);
-            }
-
-            if (filter.getSortType() == SORT_WASTING) {
-                sortDialog.getHolderView().findViewById(R.id.imgSortWasting).setVisibility(View.VISIBLE);
-            } else {
-                sortDialog.getHolderView().findViewById(R.id.imgSortWasting).setVisibility(View.INVISIBLE);
-            }
-
-            if (filter.getSortType() == SORT_STUNTING) {
-                sortDialog.getHolderView().findViewById(R.id.imgSortStunting).setVisibility(View.VISIBLE);
-            } else {
-                sortDialog.getHolderView().findViewById(R.id.imgSortStunting).setVisibility(View.INVISIBLE);
             }
         });
     }
@@ -477,8 +448,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 openSearchBar();
                 break;
             case R.id.actionQr:
-                //startActivity(new Intent(MainActivity.this, QRScanActivity.class));
-                startActivity(new Intent(MainActivity.this, ConsentScanActivity.class));
+                startActivity(new Intent(MainActivity.this, QRScanActivity.class));
+                //startActivity(new Intent(MainActivity.this, ConsentScanActivity.class));
                 break;
             case R.id.actionFilter:
                 openSort();
@@ -500,6 +471,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         if (reqCode == REQUEST_LOCATION && resCode == Activity.RESULT_OK) {
             int radius = result.getIntExtra(AppConstants.EXTRA_RADIUS, 0);
 
+            adapterData.clear();
             viewModel.setFilterLocation(session.getLocation(), radius);
         }
     }
