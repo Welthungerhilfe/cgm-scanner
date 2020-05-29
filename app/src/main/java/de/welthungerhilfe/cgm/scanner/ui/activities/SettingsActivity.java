@@ -30,6 +30,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
+import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
@@ -71,6 +72,9 @@ public class SettingsActivity extends BaseActivity {
 
     @BindView(R.id.txtSettingBackupDate)
     TextView txtSettingBackupDate;
+
+    @BindView(R.id.testQAlayout)
+    LinearLayout layoutTestQA;
 
     @OnClick(R.id.submenu_performance_measurement)
     void openPerformanceMeasurement(View view) {
@@ -137,6 +141,11 @@ public class SettingsActivity extends BaseActivity {
 
     @SuppressLint("StaticFieldLeak")
     private void initUI() {
+        boolean devBackend = session.getAzureAccountName().endsWith("dev");
+        boolean devVersion = BuildConfig.VERSION_NAME.endsWith("dev");
+        boolean showQA = BuildConfig.DEBUG || devBackend || devVersion;
+        layoutTestQA.setVisibility(showQA ? View.VISIBLE : View.GONE);
+
         txtSettingUuid.setText(Utils.getAndroidID(getContentResolver()));
 
         try {

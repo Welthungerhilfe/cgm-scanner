@@ -113,6 +113,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
                     android:text="@string/backup"
                     android:textColor="@color/colorPrimary"
                     android:textSize="20sp" />
@@ -384,7 +385,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Test/QA environment"
+                    android:text="@string/test_qa_environment"
                     android:textColor="@color/colorPrimary"
                     android:textSize="20sp" />
 
