@@ -225,6 +225,7 @@
     <string name="menuSettings">Settings</string>
     <string name="menuFastUpload">Fast Upload</string>
     <string name="menuLogout">Logout</string>
+    <string name="performance_measurement">Performance Measurement</string>
     <string name="remote_config">Remote Config</string>
     <string name="remote_debug">Debug</string>
     <string name="remote_sync_period">Sync Period</string>

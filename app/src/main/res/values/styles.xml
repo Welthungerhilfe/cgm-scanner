@@ -51,4 +51,8 @@
         <item name="android:textStyle">bold</item>
         <item name="textAllCaps">true</item>
     </style>
+
+    <style name="noAnimTheme" parent="@style/AppTheme.NoActionBar">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
 </resources>

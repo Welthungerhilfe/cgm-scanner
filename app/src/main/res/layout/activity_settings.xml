@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appBar"
@@ -27,8 +27,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/activity_horizontal_margin"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="@dimen/activity_horizontal_margin">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -39,8 +39,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/about"
-                    android:textSize="20sp"
-                    android:textColor="@color/colorPrimary"/>
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="20sp" />
 
                 <com.balysv.materialripple.MaterialRippleLayout
                     android:layout_width="match_parent"
@@ -60,15 +60,15 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/version"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
+                            android:textColor="@color/colorBlack"
+                            android:textSize="18sp" />
 
                         <TextView
                             android:id="@+id/txtSettingVersion"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textSize="18sp"
-                            android:layout_marginTop="@dimen/activity_section_margin" />
+                            android:layout_marginTop="@dimen/activity_section_margin"
+                            android:textSize="18sp" />
                     </LinearLayout>
 
                 </com.balysv.materialripple.MaterialRippleLayout>
@@ -91,15 +91,15 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/uuid"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
+                            android:textColor="@color/colorBlack"
+                            android:textSize="18sp" />
 
                         <TextView
                             android:id="@+id/txtSettingUuid"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textSize="18sp"
-                            android:layout_marginTop="@dimen/activity_section_margin" />
+                            android:layout_marginTop="@dimen/activity_section_margin"
+                            android:textSize="18sp" />
                     </LinearLayout>
 
                 </com.balysv.materialripple.MaterialRippleLayout>
@@ -114,8 +114,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/backup"
-                    android:textSize="20sp"
-                    android:textColor="@color/colorPrimary"/>
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="20sp" />
 
                 <com.balysv.materialripple.MaterialRippleLayout
                     android:layout_width="match_parent"
@@ -135,15 +135,15 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/last_backup_date"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
+                            android:textColor="@color/colorBlack"
+                            android:textSize="18sp" />
 
                         <TextView
                             android:id="@+id/txtSettingBackupDate"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textSize="18sp"
-                            android:layout_marginTop="@dimen/activity_section_margin" />
+                            android:layout_marginTop="@dimen/activity_section_margin"
+                            android:textSize="18sp" />
                     </LinearLayout>
 
                 </com.balysv.materialripple.MaterialRippleLayout>
@@ -157,7 +157,7 @@
                     android:background="@drawable/button_pink_round"
                     android:text="@string/backup_now"
                     android:textColor="@color/colorWhite"
-                    android:textSize="14sp"/>
+                    android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -170,8 +170,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/account"
-                    android:textSize="20sp"
-                    android:textColor="@color/colorPrimary"/>
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="20sp" />
 
                 <com.balysv.materialripple.MaterialRippleLayout
                     android:layout_width="match_parent"
@@ -192,15 +192,15 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text=""
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
+                            android:textColor="@color/colorBlack"
+                            android:textSize="18sp" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/activity_section_margin"
-                            android:textSize="18sp"
-                            android:text="@string/app_name_long"/>
+                            android:text="@string/app_name_long"
+                            android:textSize="18sp" />
                     </LinearLayout>
 
                 </com.balysv.materialripple.MaterialRippleLayout>
@@ -224,15 +224,15 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text=""
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
+                            android:textColor="@color/colorBlack"
+                            android:textSize="18sp" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/activity_section_margin"
-                            android:textSize="18sp"
-                            android:text="@string/azure_account"/>
+                            android:text="@string/azure_account"
+                            android:textSize="18sp" />
                     </LinearLayout>
 
                 </com.balysv.materialripple.MaterialRippleLayout>
@@ -249,8 +249,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/language"
-                    android:textSize="20sp"
-                    android:textColor="@color/colorPrimary"/>
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="20sp" />
 
                 <RadioGroup
                     android:layout_width="match_parent"
@@ -274,17 +274,17 @@
                             <ImageView
                                 android:layout_width="42dp"
                                 android:layout_height="42dp"
-                                android:src="@drawable/usa"
-                                android:contentDescription="@string/content_image"/>
+                                android:contentDescription="@string/content_image"
+                                android:src="@drawable/usa" />
 
                             <TextView
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
                                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                                android:textSize="18sp"
+                                android:layout_weight="1"
                                 android:text="@string/lang_english"
-                                android:textColor="@color/colorBlack"/>
+                                android:textColor="@color/colorBlack"
+                                android:textSize="18sp" />
 
                             <android.support.v7.widget.AppCompatRadioButton
                                 android:id="@+id/radioEnglish"
@@ -312,17 +312,17 @@
                             <ImageView
                                 android:layout_width="42dp"
                                 android:layout_height="42dp"
-                                android:src="@drawable/germany"
-                                android:contentDescription="@string/content_image"/>
+                                android:contentDescription="@string/content_image"
+                                android:src="@drawable/germany" />
 
                             <TextView
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
                                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                                android:textSize="18sp"
+                                android:layout_weight="1"
                                 android:text="@string/lang_german"
-                                android:textColor="@color/colorBlack"/>
+                                android:textColor="@color/colorBlack"
+                                android:textSize="18sp" />
 
                             <android.support.v7.widget.AppCompatRadioButton
                                 android:id="@+id/radioGerman"
@@ -350,17 +350,17 @@
                             <ImageView
                                 android:layout_width="42dp"
                                 android:layout_height="42dp"
-                                android:src="@drawable/india"
-                                android:contentDescription="@string/content_image"/>
+                                android:contentDescription="@string/content_image"
+                                android:src="@drawable/india" />
 
                             <TextView
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
                                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                                android:textSize="18sp"
+                                android:layout_weight="1"
                                 android:text="@string/lang_hindi"
-                                android:textColor="@color/colorBlack"/>
+                                android:textColor="@color/colorBlack"
+                                android:textSize="18sp" />
 
                             <android.support.v7.widget.AppCompatRadioButton
                                 android:id="@+id/radioHindi"
@@ -375,6 +375,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/testQAlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
@@ -383,17 +384,19 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/remote_config"
-                    android:textSize="20sp"
-                    android:textColor="@color/colorPrimary"/>
+                    android:text="Test/QA environment"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="20sp" />
 
                 <com.balysv.materialripple.MaterialRippleLayout
+                    android:id="@+id/submenu_performance_measurement"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     android:layout_marginTop="@dimen/activity_group_margin"
                     android:paddingLeft="@dimen/activity_horizontal_margin"
                     android:paddingRight="@dimen/activity_horizontal_margin"
-                    app:mrl_rippleOverlay="true">
+                    app:mrl_rippleOverlay="true"
+                    android:visibility="gone">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -404,21 +407,19 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/remote_debug"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                        <TextView
-                            android:id="@+id/txtSettingDebug"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/activity_section_margin"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
+                            android:drawableRight="@drawable/right"
+                            android:text="@string/performance_measurement"
+                            android:textColor="@color/colorBlack"
                             android:textSize="18sp" />
+
                     </LinearLayout>
 
                 </com.balysv.materialripple.MaterialRippleLayout>
 
                 <com.balysv.materialripple.MaterialRippleLayout
+                    android:id="@+id/submenu_remote_config"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     android:layout_marginTop="@dimen/activity_group_margin"
@@ -435,140 +436,13 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/remote_sync_period"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
+                            android:drawableRight="@drawable/right"
+                            android:text="@string/remote_config"
+                            android:textColor="@color/colorBlack"
+                            android:textSize="18sp" />
 
-                        <TextView
-                            android:id="@+id/txtSettingSyncPeriod"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/activity_section_margin"
-                            android:textSize="18sp"/>
-                    </LinearLayout>
-
-                </com.balysv.materialripple.MaterialRippleLayout>
-
-                <com.balysv.materialripple.MaterialRippleLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_marginTop="@dimen/activity_group_margin"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    app:mrl_rippleOverlay="true">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/remote_allow_delete"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                        <TextView
-                            android:id="@+id/txtSettingAllowDelete"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/activity_section_margin"
-                            android:textSize="18sp"/>
-                    </LinearLayout>
-
-                </com.balysv.materialripple.MaterialRippleLayout>
-
-                <com.balysv.materialripple.MaterialRippleLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_marginTop="@dimen/activity_group_margin"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    app:mrl_rippleOverlay="true">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/remote_allow_edit"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                        <TextView
-                            android:id="@+id/txtSettingAllowEdit"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/activity_section_margin"
-                            android:textSize="18sp"/>
-                    </LinearLayout>
-
-                </com.balysv.materialripple.MaterialRippleLayout>
-
-                <com.balysv.materialripple.MaterialRippleLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_marginTop="@dimen/activity_group_margin"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    app:mrl_rippleOverlay="true">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/remote_edit_time"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                        <TextView
-                            android:id="@+id/txtSettingEditTime"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/activity_section_margin"
-                            android:textSize="18sp"/>
-                    </LinearLayout>
-
-                </com.balysv.materialripple.MaterialRippleLayout>
-
-                <com.balysv.materialripple.MaterialRippleLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_marginTop="@dimen/activity_group_margin"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    app:mrl_rippleOverlay="true">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/remote_measure_visibility"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                        <TextView
-                            android:id="@+id/txtSettingMeasureVisibility"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/activity_section_margin"
-                            android:textSize="18sp"/>
                     </LinearLayout>
 
                 </com.balysv.materialripple.MaterialRippleLayout>

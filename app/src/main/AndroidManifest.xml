@@ -136,6 +136,12 @@
         <activity android:name=".ui.activities.SettingsActivity"
             android:screenOrientation="portrait" />
 
+        <activity android:name=".ui.activities.SettingsRemoteConfigActivity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".ui.activities.SettingsPerformanceActivity"
+            android:screenOrientation="portrait" />
+
         <activity android:name=".ui.activities.ScanModeActivity"
             android:screenOrientation="portrait" />
 

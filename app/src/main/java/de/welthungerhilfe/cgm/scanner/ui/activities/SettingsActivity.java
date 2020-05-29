@@ -17,22 +17,17 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -74,21 +69,22 @@ public class SettingsActivity extends BaseActivity {
     @BindView(R.id.radioHindi)
     AppCompatRadioButton radioHindi;
 
-    @BindView(R.id.txtSettingDebug)
-    TextView txtSettingDebug;
-    @BindView(R.id.txtSettingSyncPeriod)
-    TextView txtSettingSyncPeriod;
-    @BindView(R.id.txtSettingAllowDelete)
-    TextView txtSettingAllowDelete;
-    @BindView(R.id.txtSettingAllowEdit)
-    TextView txtSettingAllowEdit;
-    @BindView(R.id.txtSettingEditTime)
-    TextView txtSettingEditTime;
-    @BindView(R.id.txtSettingMeasureVisibility)
-    TextView txtSettingMeasureVisibility;
-
     @BindView(R.id.txtSettingBackupDate)
     TextView txtSettingBackupDate;
+
+    @OnClick(R.id.submenu_performance_measurement)
+    void openPerformanceMeasurement(View view) {
+        Intent intent = new Intent(SettingsActivity.this, SettingsPerformanceActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(intent);
+    }
+
+    @OnClick(R.id.submenu_remote_config)
+    void openRemoteConfig(View view) {
+        Intent intent = new Intent(SettingsActivity.this, SettingsRemoteConfigActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(intent);
+    }
 
     @OnClick(R.id.lytLangEnglish)
     void onEnglish(LinearLayout lytLangEnglish) {
@@ -172,13 +168,6 @@ public class SettingsActivity extends BaseActivity {
                 radioHindi.setChecked(true);
                 break;
         }
-
-        txtSettingDebug.setText(String.valueOf(config.isDebug()));
-        txtSettingSyncPeriod.setText(String.valueOf(config.getSync_period()));
-        txtSettingAllowDelete.setText(String.valueOf(config.isAllow_delete()));
-        txtSettingAllowEdit.setText(String.valueOf(config.isAllow_edit()));
-        txtSettingEditTime.setText(String.valueOf(config.getTime_to_allow_editing()));
-        txtSettingMeasureVisibility.setText(String.valueOf(config.isMeasure_visibility()));
 
         if (session.getBackupTimestamp() == 0) txtSettingBackupDate.setText("No backups");
         else txtSettingBackupDate.setText(Utils.beautifyDate(session.getBackupTimestamp()));
@@ -359,6 +348,7 @@ public class SettingsActivity extends BaseActivity {
         return super.onOptionsItemSelected(menuItem);
     }
 
+    @Override
     public void onBackPressed() {
         finish();
     }

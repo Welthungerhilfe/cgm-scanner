@@ -225,6 +225,7 @@
     <string name="menuSettings">सेटिंग्स</string>
     <string name="menuFastUpload">Fast Upload</string>
     <string name="menuLogout">लोग आउट</string>
+    <string name="performance_measurement">प्रदर्शन माप</string>
     <string name="remote_config">रिमोट कॉन्फिगर</string>
     <string name="remote_debug">डिबग</string>
     <string name="remote_sync_period">अवधि सिंक करे </string>
