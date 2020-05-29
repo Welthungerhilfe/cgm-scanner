@@ -1,6 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Query;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -9,6 +10,7 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_FILE_LOG;
@@ -94,5 +96,9 @@ public class FileLogRepository {
 
     public long getTotalArtifactCountForMeasure(String measureId) {
         return database.fileLogDao().getTotalArtifactCountForMeasure(measureId);
+    }
+
+    public LiveData<UploadStatus> getMeasureUploadProgress(String measureId) {
+        return database.fileLogDao().getMeasureUploadProgress(measureId);
     }
 }

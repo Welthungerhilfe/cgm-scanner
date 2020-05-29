@@ -52,12 +52,12 @@
         android:supportsRtl="true"
         android:largeHeap="true"
         android:windowSoftInputMode="adjustResize"
-	android:extractNativeLibs="true"
+	    android:extractNativeLibs="true"
         android:theme="@style/AppTheme.NoActionBar"
         tools:replace="android:allowBackup">
 		<uses-library
             android:name="com.projecttango.libtango_device2"
-            android:required="true" />
+            android:required="false" />
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -137,6 +137,9 @@
             android:screenOrientation="portrait" />
 
         <activity android:name=".ui.activities.ScanModeActivity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".ui.activities.UploadManagerActivity"
             android:screenOrientation="portrait" />
 
         <receiver

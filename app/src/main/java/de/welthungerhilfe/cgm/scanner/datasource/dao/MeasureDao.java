@@ -70,4 +70,7 @@ public interface MeasureDao {
 
     @Query("UPDATE " + TABLE_MEASURE + " SET resulted_at=:currentTimeMillis WHERE id=:measure_id")
     void updateResultTimestamp(String measure_id, long currentTimeMillis);
+
+    @Query("SELECT * FROM measures WHERE id IN (SELECT measureId FROM file_logs WHERE status=0 GROUP BY measureId)")
+    LiveData<List<Measure>> getUploadMeasures();
 }

@@ -174,6 +174,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     private void setupSidemenu() {
         navMenu.setNavigationItemSelectedListener(menuItem -> {
             switch (menuItem.getItemId()) {
+                case R.id.menuUploadManager:
+                    startActivity(new Intent(MainActivity.this, UploadManagerActivity.class));
+                    break;
                 case R.id.menuTutorial:
                     Intent intent = new Intent(MainActivity.this, TutorialActivity.class);
                     intent.putExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, true);
