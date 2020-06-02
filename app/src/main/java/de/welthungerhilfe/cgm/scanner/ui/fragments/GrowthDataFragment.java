@@ -384,7 +384,7 @@ public class GrowthDataFragment extends Fragment {
                     break;
             }
 
-            if (y == 0)
+            if (x == 0 || y == 0)
                 continue;
 
             final float fX = x;
