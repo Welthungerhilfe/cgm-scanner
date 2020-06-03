@@ -1,7 +1,6 @@
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
-import android.arch.lifecycle.AndroidViewModel;
-import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -17,13 +16,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.UploadManagerViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerUploadAdapter;
 
-public class UploadManagerActivity extends AppCompatActivity {
+public class UploadManagerActivity extends AppCompatActivity implements Runnable {
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.recyclerScans)
@@ -39,6 +36,14 @@ public class UploadManagerActivity extends AppCompatActivity {
     @BindView(R.id.txtExpectTime)
     TextView txtExpectTime;
 
+    private int progress = 0;
+    private double uploadedSize = 0;
+    private double totalSize = 0;
+    private boolean running = false;
+    private UploadManagerViewModel viewModel;
+
+    private double previousUploadSize = 0;
+
     public void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
         setContentView(R.layout.activity_upload_manager);
@@ -47,46 +52,9 @@ public class UploadManagerActivity extends AppCompatActivity {
 
         setupToolbar();
 
-        UploadManagerViewModel viewModel = ViewModelProviders.of(this).get(UploadManagerViewModel.class);
-        viewModel.getUploadStatusLiveData().observe(this, status -> {
-            txtTotalSize.setText(String.format("%.2f MB", status.getTotal() / 1024 / 1024));
-            txtUploadedSize.setText(String.format("%.2f MB", status.getUploaded() / 1024 / 1024));
-
-            double progress = status.getUploaded() / status.getTotal() * 100;
-            progressOverall.setProgress((int) progress);
-        });
-        viewModel.getSpeedLiveData().observe(this, speed -> {
-            if (speed.doubleValue() != 0) {
-                if (speed.doubleValue() / 1024 / 1024 > 1)
-                    txtUploadSpeed.setText(String.format("%.2fMB/S", speed.doubleValue() / 1024 / 1024));
-                else if (speed.doubleValue() / 1024 > 1)
-                    txtUploadSpeed.setText(String.format("%dKB/S", (int) (speed.doubleValue() / 1024)));
-                else
-                    txtUploadSpeed.setText(String.format("%dB/S", (int) (speed.doubleValue())));
-
-                UploadStatus status = viewModel.getUploadStatusLiveData().getValue();
-                double expected = (status.getTotal() - status.getUploaded()) / speed.doubleValue();
-                if (expected < 60)
-                    txtExpectTime.setText("Less than 1 minute");
-                else if (expected < 3600)
-                    txtExpectTime.setText(String.format("%d minutes", (int) (expected / 60)));
-                else if (expected < 3600 * 24)
-                    txtExpectTime.setText(String.format("%d hours", (int) (expected / 60 / 60)));
-                else
-                    txtExpectTime.setText(String.format("%d hours", (int) (expected / 60 / 60 / 24)));
-            }
-        });
-        viewModel.getExpectTimeLiveData().observe(this, time -> {
-            double expected = time.doubleValue();
-            if (expected > 60)
-                txtUploadSpeed.setText(String.format("%d minutes", time.intValue() / 60));
-            else if (expected > 60 * 60)
-                txtUploadSpeed.setText(String.format("%d hours", time.intValue() / 60 / 60));
-            else if (expected > 60 * 60 * 24)
-                txtUploadSpeed.setText(String.format("%d days", time.intValue() / 60 / 60 / 24));
-            else
-                txtUploadSpeed.setText(String.format("%d seconds", time.intValue()));
-        });
+        if (viewModel == null) {
+            viewModel = ViewModelProviders.of(this).get(UploadManagerViewModel.class);
+        }
 
         RecyclerUploadAdapter adapter = new RecyclerUploadAdapter(this);
         recyclerScans.setAdapter(adapter);
@@ -116,7 +84,76 @@ public class UploadManagerActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(menuItem);
     }
 
+    @Override
     public void onBackPressed() {
         finish();
+    }
+
+    @Override
+    protected synchronized void onPause() {
+        super.onPause();
+        viewModel.getUploadStatusLiveData().removeObserver(uploadStatusObserver);
+
+        running = false;
+    }
+
+    @Override
+    protected synchronized void onResume() {
+        super.onResume();
+        viewModel.getUploadStatusLiveData().observe(this, uploadStatusObserver);
+
+        running = true;
+        new Thread(this).start();
+    }
+
+    private Observer<UploadStatus> uploadStatusObserver = status -> {
+        totalSize = status.getTotal();
+        uploadedSize = status.getUploaded();
+        progress = (int) (uploadedSize / totalSize * 100);
+
+        txtTotalSize.setText(String.format("%.2f MB", totalSize / 1024 / 1024));
+        txtUploadedSize.setText(String.format("%.2f MB", uploadedSize / 1024 / 1024));
+        progressOverall.setProgress(progress);
+    };
+
+    @Override
+    public void run() {
+        while (running) {
+            //update UI
+            runOnUiThread(() -> {
+                if (running) {
+                    if (previousUploadSize > 0) {
+                        double speed = uploadedSize - previousUploadSize;
+                        if (speed / 1024 / 1024 > 1)
+                            txtUploadSpeed.setText(String.format("%.2fMB/S", speed / 1024 / 1024));
+                        else if (speed / 1024 > 1)
+                            txtUploadSpeed.setText(String.format("%dKB/S", (int) (speed / 1024)));
+                        else
+                            txtUploadSpeed.setText(String.format("%dB/S", (int) (speed)));
+
+                        if (speed / 1024 > 1) {
+                            double time = (totalSize - uploadedSize) / speed;
+
+                            if (time < 60)
+                                txtExpectTime.setText("less than 1 minute");
+                            else if (time < 60 * 60)
+                                txtExpectTime.setText(String.format("%d minutes", (int) (time / 60)));
+                            else if (time < 60 * 60 * 24)
+                                txtExpectTime.setText(String.format("%d hours", (int) (time / 60 / 60)));
+                            else
+                                txtExpectTime.setText(String.format("%d days", (int) (time / 60 / 60 / 24)));
+                        }
+                    }
+                    previousUploadSize = uploadedSize;
+                }
+            });
+
+            //wait a second before next update
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
