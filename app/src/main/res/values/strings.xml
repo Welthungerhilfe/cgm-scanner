@@ -266,5 +266,17 @@
     <string name="backup">Backup</string>
     <string name="last_backup_date">Last Backup Date</string>
     <string name="backup_now">Backup Now</string>
+
     <string name="test_qa_environment">Test/QA environment</string>
+    <string name="profile_result_title">Measure time to get result</string>
+    <string name="profile_result_timestamp_scan">Last scan completed</string>
+    <string name="profile_result_timestamp_start">Last scan upload start</string>
+    <string name="profile_result_timestamp_end">Last scan upload end</string>
+    <string name="profile_result_timestamp_receive">Last scan result receive</string>
+    <string name="profile_result_timestamp_average">Last 10 scans average process time</string>
+    <string name="profile_performance_title">Measure scanning performance</string>
+    <string name="profile_performance_color_time">Time to process color frame</string>
+    <string name="profile_performance_depth_time">Time to process depth frame</string>
+    <string name="profile_performance_color_size">Last scan color data size</string>
+    <string name="profile_performance_depth_size">Last scan depth data size</string>
 </resources>

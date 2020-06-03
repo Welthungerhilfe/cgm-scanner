@@ -108,4 +108,12 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
         }
         session.setConnectionTimestamp(System.currentTimeMillis());
     }
+
+    public void sleep(long miliseconds) {
+        try {
+            Thread.sleep(miliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }
