@@ -21,10 +21,12 @@ package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -43,6 +45,7 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
+import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -80,12 +83,17 @@ public class RecyclerUploadAdapter extends RecyclerView.Adapter<RecyclerUploadAd
 
     @Override
     public void onBindViewHolder(RecyclerUploadAdapter.ViewHolder holder, int position) {
-        Measure measure = measureList.get(holder.getAdapterPosition());
+        Measure measure = measureList.get(position);
 
-        artifactRepository.getMeasureUploadProgress(measure.getId()).observe((LifecycleOwner) context, status -> {
+        final String measureId = measure.getId();
+        Observer<UploadStatus> statusObserver = status -> {
             double progress = status.getUploaded() / status.getTotal() * 100;
-            holder.progressUpload.setProgress((int) progress);
-        });
+            if (progress >= 100)
+                artifactRepository.getMeasureUploadProgress(measureId).removeObservers((LifecycleOwner) context);
+            else
+                holder.progressUpload.setProgress((int) progress);
+        };
+        artifactRepository.getMeasureUploadProgress(measureId).observeForever(statusObserver);
 
         holder.txtDate.setText(Utils.beautifyHourMinute(measure.getDate()));
         holder.txtAuthor.setText(Utils.getNameFromEmail(measure.getCreatedBy()));

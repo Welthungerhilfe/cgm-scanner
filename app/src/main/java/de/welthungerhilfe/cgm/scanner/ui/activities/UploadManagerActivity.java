@@ -12,6 +12,8 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -43,6 +45,8 @@ public class UploadManagerActivity extends AppCompatActivity implements Runnable
     private UploadManagerViewModel viewModel;
 
     private double previousUploadSize = 0;
+    private ArrayList<Double> secSpeedQueue = new ArrayList<>();
+    private static final int SPEED_CALC_INTERVAL = 10; // calculate average upload speed of 10 secs
 
     public void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
@@ -108,12 +112,22 @@ public class UploadManagerActivity extends AppCompatActivity implements Runnable
 
     private Observer<UploadStatus> uploadStatusObserver = status -> {
         totalSize = status.getTotal();
-        uploadedSize = status.getUploaded();
-        progress = (int) (uploadedSize / totalSize * 100);
-
         txtTotalSize.setText(String.format("%.2f MB", totalSize / 1024 / 1024));
+
+        uploadedSize = status.getUploaded();
         txtUploadedSize.setText(String.format("%.2f MB", uploadedSize / 1024 / 1024));
+
+        progress = (int) (uploadedSize / totalSize * 100);
         progressOverall.setProgress(progress);
+
+        if (progress >= 100) {
+            running = false;
+            previousUploadSize = 0;
+            txtUploadSpeed.setText("");
+            txtExpectTime.setText("Upload Completed");
+        } else {
+            running = true;
+        }
     };
 
     @Override
@@ -123,7 +137,18 @@ public class UploadManagerActivity extends AppCompatActivity implements Runnable
             runOnUiThread(() -> {
                 if (running) {
                     if (previousUploadSize > 0) {
-                        double speed = uploadedSize - previousUploadSize;
+                        double secSpeed = uploadedSize - previousUploadSize;
+                        secSpeedQueue.add(secSpeed);
+                        if (secSpeedQueue.size() > SPEED_CALC_INTERVAL) {
+                            secSpeedQueue.remove(0);
+                        }
+
+                        double speed = 0;
+                        for (double sp : secSpeedQueue) {
+                            speed += sp;
+                        }
+                        speed /= secSpeedQueue.size();
+
                         if (speed / 1024 / 1024 > 1)
                             txtUploadSpeed.setText(String.format("%.2fMB/S", speed / 1024 / 1024));
                         else if (speed / 1024 > 1)

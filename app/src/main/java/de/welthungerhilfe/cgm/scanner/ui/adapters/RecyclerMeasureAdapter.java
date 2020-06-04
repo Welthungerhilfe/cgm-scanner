@@ -20,10 +20,13 @@
 package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,6 +45,7 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
+import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -107,8 +111,8 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
     @SuppressLint("StaticFieldLeak")
     @Override
-    public void onBindViewHolder(RecyclerMeasureAdapter.ViewHolder holder, int position) {
-        Measure measure = measureList.get(holder.getAdapterPosition());
+    public void onBindViewHolder(@NonNull RecyclerMeasureAdapter.ViewHolder holder, int position) {
+        Measure measure = measureList.get(position);
 
         if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
             holder.imgType.setImageResource(R.drawable.manual);
@@ -116,6 +120,19 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.txtOverallScore.setVisibility(View.GONE);
         } else {
             holder.imgType.setImageResource(R.drawable.machine);
+
+            final String measureId = measure.getId();
+            Observer<UploadStatus> statusObserver = status -> {
+                double progress = status.getUploaded() / status.getTotal() * 100;
+                if (progress >= 100) {
+                    holder.progressUpload.setVisibility(View.GONE);
+                    artifactRepository.getMeasureUploadProgress(measureId).removeObservers((LifecycleOwner) context);
+                } else {
+                    holder.progressUpload.setVisibility(View.VISIBLE);
+                    holder.progressUpload.setProgress((int) progress);
+                }
+            };
+            artifactRepository.getMeasureUploadProgress(measureId).observeForever(statusObserver);
 
             new AsyncTask<Void, Void, Boolean>() {
                 private double averagePointCountFront = 0;
@@ -127,9 +144,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                 private double averagePointCountBack = 0;
                 private int pointCloudCountBack = 0;
 
-                private double totalArtifactSize = 0;
-                private double uploadedArtifactSize = 0;
-
                 @Override
                 protected Boolean doInBackground(Void... voids) {
                     averagePointCountFront = artifactResultRepository.getAveragePointCountForFront(measure.getId());
@@ -140,20 +154,11 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
                     averagePointCountBack = artifactResultRepository.getAveragePointCountForBack(measure.getId());
                     pointCloudCountBack = artifactResultRepository.getPointCloudCountForBack(measure.getId());
-
-                    totalArtifactSize = artifactRepository.getMeasureArtifactSize(measure.getId());
-                    uploadedArtifactSize = artifactRepository.getMeasureArtifactUploadedSize(measure.getId());
                     return true;
                 }
 
                 @SuppressLint("DefaultLocale")
                 public void onPostExecute(Boolean result) {
-                    if (totalArtifactSize != 0) {
-                        holder.progressUpload.setVisibility(View.VISIBLE);
-                        double progress = uploadedArtifactSize / totalArtifactSize * 100;
-                        holder.progressUpload.setProgress((int)progress);
-                    }
-
                     double lightScoreFront = (Math.abs(averagePointCountFront / 38000 - 1.0) * 3);
                     double durationScoreFront = Math.abs(1- Math.abs((double) pointCloudCountFront / 8 - 1));
                     if (lightScoreFront > 1) lightScoreFront -= 1;

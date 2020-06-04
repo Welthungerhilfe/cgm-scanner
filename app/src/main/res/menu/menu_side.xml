@@ -28,7 +28,7 @@
     <group>
         <item
             android:id="@+id/menuUploadManager"
-            android:icon="@drawable/menu_scans"
+            android:icon="@drawable/ic_upload"
             android:title="@string/menuUploadManager" />
     </group>
     <group>
