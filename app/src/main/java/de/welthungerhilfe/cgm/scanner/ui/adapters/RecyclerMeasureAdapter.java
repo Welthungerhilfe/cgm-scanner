@@ -132,7 +132,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                     holder.progressUpload.setProgress((int) progress);
                 }
             };
-            artifactRepository.getMeasureUploadProgress(measureId).observeForever(statusObserver);
+            artifactRepository.getMeasureUploadProgress(measureId).observe((LifecycleOwner) context, statusObserver);
 
             new AsyncTask<Void, Void, Boolean>() {
                 private double averagePointCountFront = 0;
