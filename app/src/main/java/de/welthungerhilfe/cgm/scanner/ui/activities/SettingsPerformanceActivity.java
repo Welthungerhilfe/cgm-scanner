@@ -45,6 +45,7 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
     public static final String KEY_TEST_PERFORMANCE_DEPTH_TIME = "KEY_TEST_PERFORMANCE_DEPTH_TIME";
 
     public static final String KEY_TEST_RESULT = "KEY_TEST_RESULT";
+    public static final String KEY_TEST_RESULT_ID = "KEY_TEST_RESULT_ID";
     public static final String KEY_TEST_RESULT_SCAN = "KEY_TEST_RESULT_SCAN";
     public static final String KEY_TEST_RESULT_START = "KEY_TEST_RESULT_START";
     public static final String KEY_TEST_RESULT_END = "KEY_TEST_RESULT_END";
@@ -146,18 +147,22 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
         switch(compoundButton.getId()) {
             case R.id.profile_performance_switch:
                 LocalPersistency.setBoolean(this, KEY_TEST_PERFORMANCE, value);
-                LocalPersistency.setLong(this, KEY_TEST_PERFORMANCE_COLOR_SIZE, 0);
-                LocalPersistency.setLong(this, KEY_TEST_PERFORMANCE_DEPTH_SIZE, 0);
-                LocalPersistency.setLong(this, KEY_TEST_PERFORMANCE_COLOR_TIME, 0);
-                LocalPersistency.setLong(this, KEY_TEST_PERFORMANCE_DEPTH_TIME, 0);
+                if (!value) {
+                    LocalPersistency.setLong(this, KEY_TEST_PERFORMANCE_COLOR_SIZE, 0);
+                    LocalPersistency.setLong(this, KEY_TEST_PERFORMANCE_DEPTH_SIZE, 0);
+                    LocalPersistency.setLong(this, KEY_TEST_PERFORMANCE_COLOR_TIME, 0);
+                    LocalPersistency.setLong(this, KEY_TEST_PERFORMANCE_DEPTH_TIME, 0);
+                }
                 break;
             case R.id.profile_result_switch:
                 LocalPersistency.setBoolean(this, KEY_TEST_RESULT, value);
-                LocalPersistency.setLong(this, KEY_TEST_RESULT_SCAN, 0);
-                LocalPersistency.setLong(this, KEY_TEST_RESULT_START, 0);
-                LocalPersistency.setLong(this, KEY_TEST_RESULT_END, 0);
-                LocalPersistency.setLong(this, KEY_TEST_RESULT_RECEIVE, 0);
-                LocalPersistency.setLongArray(this, KEY_TEST_RESULT_AVERAGE, new ArrayList<>());
+                if (!value) {
+                    LocalPersistency.setLong(this, KEY_TEST_RESULT_SCAN, 0);
+                    LocalPersistency.setLong(this, KEY_TEST_RESULT_START, 0);
+                    LocalPersistency.setLong(this, KEY_TEST_RESULT_END, 0);
+                    LocalPersistency.setLong(this, KEY_TEST_RESULT_RECEIVE, 0);
+                    LocalPersistency.setLongArray(this, KEY_TEST_RESULT_AVERAGE, new ArrayList<>());
+                }
                 break;
         }
     }

@@ -1,6 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.utils;
 
-import java.text.SimpleDateFormat;
+import android.text.format.DateFormat;
+
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -45,10 +46,9 @@ public class DataFormat {
 
     public static String timestamp(long milliSeconds) {
         if (milliSeconds > 0) {
-            SimpleDateFormat formatter = new SimpleDateFormat("MM:ss", Locale.US);
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis((int) milliSeconds);
-            return formatter.format(calendar.getTime());
+            Calendar cal = Calendar.getInstance(Locale.US);
+            cal.setTimeInMillis(milliSeconds);
+            return DateFormat.format("hh:mm", cal).toString();
         } else {
             return "- - : - -";
         }

@@ -56,10 +56,24 @@ public class LocalPersistency {
         return output;
     }
 
+    public static String getString(Context context, String key) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(key, "");
+    }
+
+    public static ArrayList<String> getStringArray(Context context, String key) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        int count = pref.getInt(key + COUNT_EXTENSION, 0);
+        ArrayList<String> output = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            output.add(pref.getString(key + "_" + i, ""));
+        }
+        return output;
+    }
+
     public static void setBoolean(Context context, String key, boolean value) {
         SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
         e.putBoolean(key, value);
-        e.commit();
+        e.apply();
     }
 
     public static void setBooleanArray(Context context, String key, ArrayList<Boolean> value) {
@@ -68,13 +82,13 @@ public class LocalPersistency {
         for (int i = 0; i < value.size(); i++) {
             e.putBoolean(key + "_" + i, value.get(i));
         }
-        e.commit();
+        e.apply();
     }
 
     public static void setLong(Context context, String key, long value) {
         SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
         e.putLong(key, value);
-        e.commit();
+        e.apply();
     }
 
     public static void setLongArray(Context context, String key, ArrayList<Long> value) {
@@ -83,6 +97,21 @@ public class LocalPersistency {
         for (int i = 0; i < value.size(); i++) {
             e.putLong(key + "_" + i, value.get(i));
         }
-        e.commit();
+        e.apply();
+    }
+
+    public static void setString(Context context, String key, String value) {
+        SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        e.putString(key, value);
+        e.apply();
+    }
+
+    public static void setStringArray(Context context, String key, ArrayList<String> value) {
+        SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        e.putInt(key + COUNT_EXTENSION, value.size());
+        for (int i = 0; i < value.size(); i++) {
+            e.putString(key + "_" + i, value.get(i));
+        }
+        e.apply();
     }
 }
