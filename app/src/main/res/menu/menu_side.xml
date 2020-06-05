@@ -37,12 +37,12 @@
             android:icon="@drawable/menu_tutorial"
             android:title="@string/menuTutorial" />
     </group>
-    <group>
+    <!--group>
         <item
             android:id="@+id/menuHelp"
             android:icon="@drawable/menu_help"
             android:title="@string/menuHelp" />
-    </group>
+    </group!-->
     <group>
         <item
             android:id="@+id/menuSettings"
