@@ -27,11 +27,14 @@ import android.view.MenuItem;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class SettingsPerformanceActivity extends BaseActivity implements CompoundButton.OnCheckedChangeListener, Runnable {
 
@@ -143,9 +146,18 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
         switch(compoundButton.getId()) {
             case R.id.profile_performance_switch:
                 LocalPersistency.setBoolean(this, KEY_TEST_PERFORMANCE, value);
+                LocalPersistency.setLong(this, KEY_TEST_PERFORMANCE_COLOR_SIZE, 0);
+                LocalPersistency.setLong(this, KEY_TEST_PERFORMANCE_DEPTH_SIZE, 0);
+                LocalPersistency.setLong(this, KEY_TEST_PERFORMANCE_COLOR_TIME, 0);
+                LocalPersistency.setLong(this, KEY_TEST_PERFORMANCE_DEPTH_TIME, 0);
                 break;
             case R.id.profile_result_switch:
                 LocalPersistency.setBoolean(this, KEY_TEST_RESULT, value);
+                LocalPersistency.setLong(this, KEY_TEST_RESULT_SCAN, 0);
+                LocalPersistency.setLong(this, KEY_TEST_RESULT_START, 0);
+                LocalPersistency.setLong(this, KEY_TEST_RESULT_END, 0);
+                LocalPersistency.setLong(this, KEY_TEST_RESULT_RECEIVE, 0);
+                LocalPersistency.setLongArray(this, KEY_TEST_RESULT_AVERAGE, new ArrayList<>());
                 break;
         }
     }
@@ -162,7 +174,7 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
             long resultStart = LocalPersistency.getLong(this, KEY_TEST_RESULT_START);
             long resultEnd = LocalPersistency.getLong(this, KEY_TEST_RESULT_END);
             long resultReceive = LocalPersistency.getLong(this, KEY_TEST_RESULT_RECEIVE);
-            long resultAverage = LocalPersistency.getLong(this, KEY_TEST_RESULT_AVERAGE);
+            long resultAverage = Utils.averageValue(LocalPersistency.getLongArray(this, KEY_TEST_RESULT_AVERAGE));
 
             //update UI
             runOnUiThread(() -> {
