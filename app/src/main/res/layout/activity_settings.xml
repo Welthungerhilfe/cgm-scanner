@@ -396,6 +396,7 @@
                     android:layout_marginTop="@dimen/activity_group_margin"
                     android:paddingLeft="@dimen/activity_horizontal_margin"
                     android:paddingRight="@dimen/activity_horizontal_margin"
+                    android:visibility="gone"
                     app:mrl_rippleOverlay="true">
 
                     <LinearLayout
