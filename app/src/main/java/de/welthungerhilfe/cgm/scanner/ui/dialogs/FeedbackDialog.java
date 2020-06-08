@@ -25,11 +25,14 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.AppCompatCheckBox;
+import android.support.v7.widget.AppCompatRatingBar;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.Collections;
@@ -52,21 +55,64 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 public class FeedbackDialog extends Dialog {
     private final int REQUEST_LOCATION = 0x1000;
 
-    @BindView(R.id.txtOverallScore)
-    TextView txtOverallScore;
-    @BindView(R.id.txtScoreStep1)
-    TextView txtScoreStep1;
-    @BindView(R.id.txtScoreStep2)
-    TextView txtScoreStep2;
-    @BindView(R.id.txtScoreStep3)
-    TextView txtScoreStep3;
-    @BindView(R.id.txtFrontFeedback)
-    TextView txtFrontFeedback;
-    @BindView(R.id.txtSideFeedback)
-    TextView txtSideFeedback;
-    @BindView(R.id.txtBackFeedback)
-    TextView txtBackFeedback;
+    @BindView(R.id.ratingOverall)
+    AppCompatRatingBar ratingOverall;
 
+    @BindView(R.id.ratingStep1)
+    AppCompatRatingBar ratingStep1;
+    @BindView(R.id.ratingStep2)
+    AppCompatRatingBar ratingStep2;
+    @BindView(R.id.ratingStep3)
+    AppCompatRatingBar ratingStep3;
+
+    @BindView(R.id.ratingLightStep1)
+    AppCompatRatingBar ratingLightStep1;
+    @BindView(R.id.ratingLightStep2)
+    AppCompatRatingBar ratingLightStep2;
+    @BindView(R.id.ratingLightStep3)
+    AppCompatRatingBar ratingLightStep3;
+
+    @BindView(R.id.ratingDurationStep1)
+    AppCompatRatingBar ratingDurationStep1;
+    @BindView(R.id.ratingDurationStep2)
+    AppCompatRatingBar ratingDurationStep2;
+    @BindView(R.id.ratingDurationStep3)
+    AppCompatRatingBar ratingDurationStep3;
+
+    @BindView(R.id.ratingPrecisionStep1)
+    AppCompatRatingBar ratingPrecisionStep1;
+    @BindView(R.id.ratingPrecisionStep2)
+    AppCompatRatingBar ratingPrecisionStep2;
+    @BindView(R.id.ratingPrecisionStep3)
+    AppCompatRatingBar ratingPrecisionStep3;
+
+    @BindView(R.id.ratingVisibilityStep1)
+    AppCompatRatingBar ratingVisibilityStep1;
+    @BindView(R.id.ratingVisibilityStep2)
+    AppCompatRatingBar ratingVisibilityStep2;
+    @BindView(R.id.ratingVisibilityStep3)
+    AppCompatRatingBar ratingVisibilityStep3;
+
+    @BindView(R.id.ratingChildNoStep1)
+    AppCompatRatingBar ratingChildNoStep1;
+    @BindView(R.id.ratingChildNoStep2)
+    AppCompatRatingBar ratingChildNoStep2;
+    @BindView(R.id.ratingChildNoStep3)
+    AppCompatRatingBar ratingChildNoStep3;
+
+    @BindView(R.id.imgDurationStep1)
+    ImageView imgDurationStep1;
+    @BindView(R.id.imgDurationStep2)
+    ImageView imgDurationStep2;
+    @BindView(R.id.imgDurationStep3)
+    ImageView imgDurationStep3;
+
+    @BindView(R.id.lytPrecisionStep1)
+    LinearLayout lytPrecisionStep1;
+    @BindView(R.id.lytPrecisionStep2)
+    LinearLayout lytPrecisionStep2;
+    @BindView(R.id.lytPrecisionStep3)
+    LinearLayout lytPrecisionStep3;
 
     @OnClick(R.id.btnOK)
     void OnConfirm() {
@@ -140,7 +186,17 @@ public class FeedbackDialog extends Dialog {
                 if (durationScoreFront > 1) durationScoreFront -= 1;
 
                 double scoreFront = lightScoreFront * durationScoreFront;
-                txtScoreStep1.setText(String.format("%d%%", Math.round(scoreFront * 100)));
+                ratingStep1.setRating(5 * (float)scoreFront);
+
+                if (pointCloudCountFront < 8) {
+                    imgDurationStep1.setImageResource(R.drawable.ic_arrow_down);
+                    imgDurationStep1.setVisibility(View.VISIBLE);
+                } else if (pointCloudCountFront > 9) {
+                    imgDurationStep1.setImageResource(R.drawable.ic_arrow_up);
+                    imgDurationStep1.setVisibility(View.VISIBLE);
+                } else {
+                    imgDurationStep1.setVisibility(View.GONE);
+                }
 
 
                 double lightScoreSide = (Math.abs(averagePointCountSide / 38000 - 1.0) * 3);
@@ -149,8 +205,17 @@ public class FeedbackDialog extends Dialog {
                 if (durationScoreSide > 1) durationScoreSide -= 1;
 
                 double scoreSide = lightScoreSide * durationScoreSide;
-                txtScoreStep2.setText(String.format("%d%%", Math.round(scoreSide * 100)));
+                ratingStep2.setRating(5 * (float)scoreSide);
 
+                if (pointCloudCountSide < 12) {
+                    imgDurationStep2.setImageResource(R.drawable.ic_arrow_down);
+                    imgDurationStep2.setVisibility(View.VISIBLE);
+                } else if (pointCloudCountSide > 27) {
+                    imgDurationStep2.setImageResource(R.drawable.ic_arrow_up);
+                    imgDurationStep2.setVisibility(View.VISIBLE);
+                } else {
+                    imgDurationStep2.setVisibility(View.GONE);
+                }
 
                 double lightScoreBack = (Math.abs(averagePointCountBack / 38000 - 1.0) * 3);
                 double durationScoreBack = Math.abs(1- Math.abs((double) pointCloudCountBack / 8 - 1));
@@ -158,14 +223,23 @@ public class FeedbackDialog extends Dialog {
                 if (durationScoreBack > 1) durationScoreBack -= 1;
 
                 double scoreBack = lightScoreBack * durationScoreBack;
-                txtScoreStep3.setText(String.format("%d%%", Math.round(scoreBack * 100)));
+                ratingStep3.setRating(5 * (float)scoreBack);
+
+                if (pointCloudCountBack < 8) {
+                    imgDurationStep3.setImageResource(R.drawable.ic_arrow_down);
+                    imgDurationStep3.setVisibility(View.VISIBLE);
+                } else if (pointCloudCountBack > 9) {
+                    imgDurationStep3.setImageResource(R.drawable.ic_arrow_up);
+                    imgDurationStep3.setVisibility(View.VISIBLE);
+                } else {
+                    imgDurationStep3.setVisibility(View.GONE);
+                }
 
                 double overallScore = 0;
                 if (scoreFront > overallScore) overallScore = scoreFront;
                 if (scoreSide > overallScore) overallScore = scoreSide;
                 if (scoreBack > overallScore) overallScore = scoreBack;
-
-                txtOverallScore.setText(String.format("%d%%", Math.round(overallScore * 100)));
+                ratingOverall.setRating(5 * (float)overallScore);
 
                 Log.e("front-light : ", String.valueOf(lightScoreFront));
                 Log.e("side-light : ", String.valueOf(lightScoreSide));
@@ -175,26 +249,29 @@ public class FeedbackDialog extends Dialog {
                 Log.e("side-duration : ", String.valueOf(durationScoreSide));
                 Log.e("back-duration : ", String.valueOf(durationScoreBack));
 
-                String issuesFront = String.format(" - Light Score : %d%%", Math.round(lightScoreFront * 100));
-                issuesFront = String.format("%s\n - Duration score : %d%%", issuesFront, Math.round(durationScoreFront * 100));
-                if (pointCloudCountFront < 8) issuesFront = String.format("%s\n - Duration was too short", issuesFront);
-                else if (pointCloudCountFront > 9) issuesFront = String.format("%s\n - Duration was too long", issuesFront);
-                issuesFront = String.format("%s\n - Scan Precision : %d%%", issuesFront, Math.round(frontConfidence * 100));
-                txtFrontFeedback.setText(issuesFront);
+                ratingLightStep1.setRating(5 * (float)lightScoreFront);
+                ratingDurationStep1.setRating(5 * (float)durationScoreFront);
 
-                String issuesSide = String.format(" - Light Score : %d%%", Math.round(lightScoreSide * 100));
-                issuesSide = String.format("%s\n - Duration score : %d%%", issuesSide, Math.round(durationScoreSide * 100));
-                if (pointCloudCountSide < 12) issuesSide = String.format("%s\n - Duration was too short", issuesSide);
-                else if (pointCloudCountSide > 27) issuesSide = String.format("%s\n - Duration was too long", issuesSide);
-                issuesSide = String.format("%s\n - Scan Precision : %d%%", issuesSide, Math.round(sideConfidence * 100));
-                txtSideFeedback.setText(issuesSide);
+                if (frontConfidence > 0) {
+                    lytPrecisionStep1.setVisibility(View.VISIBLE);
+                    ratingPrecisionStep1.setRating(5 * frontConfidence);
+                }
 
-                String issuesBack = String.format(" - Light Score : %d%%", Math.round(lightScoreBack * 100));
-                issuesBack = String.format("%s\n - Duration score : %d%%", issuesBack, Math.round(durationScoreBack * 100));
-                if (pointCloudCountBack < 8) issuesBack = String.format("%s\n - Duration was too short", issuesBack);
-                else if (pointCloudCountBack > 9) issuesBack = String.format("%s\n - Duration was too long", issuesBack);
-                issuesBack = String.format("%s\n - Scan Precision : %d%%", issuesBack, Math.round(backConfidence * 100));
-                txtBackFeedback.setText(issuesBack);
+                ratingLightStep2.setRating(5 * (float)lightScoreSide);
+                ratingDurationStep2.setRating(5 * (float)durationScoreSide);
+
+                if (sideConfidence > 0) {
+                    lytPrecisionStep2.setVisibility(View.VISIBLE);
+                    ratingPrecisionStep2.setRating(5 * sideConfidence);
+                }
+
+                ratingLightStep3.setRating(5 * (float)lightScoreBack);
+                ratingDurationStep3.setRating(5 * (float)durationScoreBack);
+
+                if (backConfidence > 0) {
+                    lytPrecisionStep3.setVisibility(View.VISIBLE);
+                    ratingPrecisionStep3.setRating(5 * backConfidence);
+                }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }

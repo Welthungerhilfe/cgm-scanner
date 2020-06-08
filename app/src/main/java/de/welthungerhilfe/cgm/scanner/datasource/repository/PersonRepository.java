@@ -67,6 +67,8 @@ public class PersonRepository {
 
         if (filter.isDate()) {
             whereClause += String.format(Locale.US, " AND created<=%d AND created>=%d ", filter.getToDate(), filter.getFromDate());
+        } else {
+            whereClause += " AND STRFTIME('%Y-%m-%d', DATETIME(created/1000, 'unixepoch'))=DATE('now')";
         }
 
         if (filter.isOwn()) {
@@ -82,8 +84,6 @@ public class PersonRepository {
 
         if (filter.isQuery()) {
             whereClause += String.format(" AND (name LIKE \"%%%s%%\" OR surname LIKE \"%%%s%%\")", filter.getQuery(), filter.getQuery());
-        } else {
-            whereClause += " AND STRFTIME('%Y-%m-%d', DATETIME(created/1000, 'unixepoch'))=DATE('now')";
         }
 
         switch (filter.getSortType()) {

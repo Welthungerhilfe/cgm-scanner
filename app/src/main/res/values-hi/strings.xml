@@ -279,4 +279,13 @@
     <string name="profile_performance_depth_time">गहराई फ्रेम को संसाधित करने का समय</string>
     <string name="profile_performance_color_size">अंतिम स्कैन रंग डेटा आकार</string>
     <string name="profile_performance_depth_size">अंतिम स्कैन गहराई डेटा आकार</string>
+
+    <string name="label_overview">Overview</string>
+    <string name="label_upload_speed">Upload Speed : </string>
+    <string name="label_upload_expect">"Expected Time : "</string>
+    <string name="label_total_size">"Total Size : "</string>
+    <string name="label_uploaded_size">"Uploaded Size : "</string>
+    <string name="menuUploadManager">Upload Manager</string>
+    <string name="label_upload_status">Upload Status</string>
+    <string name="abbr_qr">QR code</string>
 </resources>

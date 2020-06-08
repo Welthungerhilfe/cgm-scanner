@@ -84,6 +84,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
 import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
+import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.helper.tango.CameraSurfaceRenderer;
 import de.welthungerhilfe.cgm.scanner.helper.tango.ModelMatCalculator;
 import de.welthungerhilfe.cgm.scanner.helper.tango.OverlaySurface;
@@ -1320,7 +1321,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
 
         public void onPostExecute(Void result) {
+            if (!AppController.getInstance().isUploadRunning()) {
+                startService(new Intent(ScanModeActivity.this, UploadService.class));
+            }
             activity.finish();
         }
     }
+
+
 }
