@@ -49,10 +49,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -66,6 +65,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
@@ -76,6 +76,7 @@ import de.welthungerhilfe.cgm.scanner.helper.camera.ICamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoCamera;
 import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
 import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
+import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.utils.ARCoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.utils.MD5;
@@ -293,6 +294,14 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         progressDialog.show();
 
+        if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_RESULT)) {
+            LocalPersistency.setString(this, SettingsPerformanceActivity.KEY_TEST_RESULT_ID, measure.getId());
+            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_RESULT_SCAN, System.currentTimeMillis());
+            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_RESULT_START, 0);
+            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_RESULT_END, 0);
+            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE, 0);
+            LocalPersistency.setLongArray(this, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE, new ArrayList<>());
+        }
         new SaveMeasureTask(ScanModeActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -347,8 +356,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private AlertDialog progressDialog;
 
-    private ExecutorService executor;
-
     private ICamera mCameraInstance;
 
     public void onStart() {
@@ -373,8 +380,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             Toast.makeText(this, "Person was not defined", Toast.LENGTH_LONG).show();
             finish();
         }
-
-        executor = Executors.newFixedThreadPool(30);
 
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
@@ -848,6 +853,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
 
         public void onPostExecute(Void result) {
+            if (!AppController.getInstance().isUploadRunning()) {
+                startService(new Intent(ScanModeActivity.this, UploadService.class));
+            }
             activity.finish();
         }
     }

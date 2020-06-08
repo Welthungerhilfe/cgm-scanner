@@ -52,6 +52,7 @@
         android:theme="@style/AppTheme.NoActionBar"
         android:extractNativeLibs="true"
         tools:replace="android:allowBackup">
+
 		<uses-library
             android:name="com.projecttango.libtango_device2"
             android:required="${tangoRequired}" />
@@ -136,7 +137,16 @@
         <activity android:name=".ui.activities.SettingsActivity"
             android:screenOrientation="portrait" />
 
+        <activity android:name=".ui.activities.SettingsRemoteConfigActivity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".ui.activities.SettingsPerformanceActivity"
+            android:screenOrientation="portrait" />
+
         <activity android:name=".ui.activities.ScanModeActivity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".ui.activities.UploadManagerActivity"
             android:screenOrientation="portrait" />
 
         <receiver
