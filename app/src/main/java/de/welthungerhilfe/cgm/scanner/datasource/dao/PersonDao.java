@@ -22,7 +22,7 @@ public interface PersonDao {
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 ORDER BY created DESC")
     List<Person> getPersons();
 
-    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 AND createdBy=:email")
+    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 AND createdBy LIKE :email")
     LiveData<List<Person>> getOwnPersons(String email);
 
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE id=:id AND deleted=0")
@@ -34,7 +34,7 @@ public interface PersonDao {
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE timestamp>:timestamp ORDER By timestamp")
     List<Person> getSyncablePersons(long timestamp);
 
-    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 AND (id=:key OR qrcode=:key)")
+    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 AND (id=:key OR qrcode LIKE :key)")
     LiveData<Person> findPerson(String key);
 
     @Insert(onConflict = REPLACE)
@@ -52,7 +52,7 @@ public interface PersonDao {
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 ORDER BY created DESC LIMIT :pageSize OFFSET :index")
     LiveData<List<Person>> loadMore(int index, int pageSize);
 
-    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 AND STRFTIME('%Y-%m-%d', DATETIME(created/1000, 'unixepoch'))=DATE('now') AND createdBy=:createdBy ORDER BY created DESC")
+    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE deleted=0 AND STRFTIME('%Y-%m-%d', DATETIME(created/1000, 'unixepoch'))=DATE('now') AND createdBy LIKE :createdBy ORDER BY created DESC")
     LiveData<List<Person>> getAll(String createdBy);
 
     @Query("SELECT * FROM " + TABLE_PERSON)
@@ -64,7 +64,7 @@ public interface PersonDao {
     @RawQuery(observedEntities = Person.class)
     LiveData<List<Person>> getResultPerson(SupportSQLiteQuery query);
 
-    @Query("SELECT COUNT(id) FROM " + TABLE_PERSON + " WHERE createdBy=:email")
+    @Query("SELECT COUNT(id) FROM " + TABLE_PERSON + " WHERE createdBy LIKE :email")
     long getOwnPersonCount(String email);
 
     @Query("SELECT COUNT(id) FROM " + TABLE_PERSON)
