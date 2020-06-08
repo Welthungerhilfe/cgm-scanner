@@ -225,6 +225,7 @@
     <string name="menuSettings">सेटिंग्स</string>
     <string name="menuFastUpload">Fast Upload</string>
     <string name="menuLogout">लोग आउट</string>
+    <string name="performance_measurement">प्रदर्शन माप</string>
     <string name="remote_config">रिमोट कॉन्फिगर</string>
     <string name="remote_debug">डिबग</string>
     <string name="remote_sync_period">अवधि सिंक करे </string>
@@ -265,6 +266,20 @@
     <string name="backup">Backup</string>
     <string name="last_backup_date">Last Backup Date</string>
     <string name="backup_now">Backup Now</string>
+
+    <string name="test_qa_environment">परीक्षण/क्यूए वातावरण</string>
+    <string name="profile_result_title">परिणाम प्राप्त करने के लिए समय को मापें</string>
+    <string name="profile_result_timestamp_scan">अंतिम स्कैन पूरा हुआ</string>
+    <string name="profile_result_timestamp_start">अंतिम स्कैन अपलोड शुरू</string>
+    <string name="profile_result_timestamp_end">अंतिम स्कैन अपलोड अंत</string>
+    <string name="profile_result_timestamp_receive">अंतिम स्कैन परिणाम प्राप्त करते हैं</string>
+    <string name="profile_result_timestamp_average">अंतिम 10 स्कैन औसत प्रक्रिया समय</string>
+    <string name="profile_performance_title">स्कैनिंग प्रदर्शन को मापें</string>
+    <string name="profile_performance_color_time">रंग फ्रेम को संसाधित करने का समय</string>
+    <string name="profile_performance_depth_time">गहराई फ्रेम को संसाधित करने का समय</string>
+    <string name="profile_performance_color_size">अंतिम स्कैन रंग डेटा आकार</string>
+    <string name="profile_performance_depth_size">अंतिम स्कैन गहराई डेटा आकार</string>
+
     <string name="label_overview">Overview</string>
     <string name="label_upload_speed">Upload Speed : </string>
     <string name="label_upload_expect">"Expected Time : "</string>
