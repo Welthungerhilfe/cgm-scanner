@@ -52,7 +52,7 @@
         android:supportsRtl="true"
         android:largeHeap="true"
         android:windowSoftInputMode="adjustResize"
-	android:extractNativeLibs="true"
+	    android:extractNativeLibs="true"
         android:theme="@style/AppTheme.NoActionBar"
         tools:replace="android:allowBackup">
 		<uses-library
@@ -137,6 +137,9 @@
             android:screenOrientation="portrait" />
 
         <activity android:name=".ui.activities.ScanModeActivity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".ui.activities.UploadManagerActivity"
             android:screenOrientation="portrait" />
 
         <receiver

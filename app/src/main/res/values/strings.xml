@@ -265,4 +265,12 @@
     <string name="backup">Backup</string>
     <string name="last_backup_date">Last Backup Date</string>
     <string name="backup_now">Backup Now</string>
+    <string name="label_overview">Overview</string>
+    <string name="label_upload_speed">Upload Speed : </string>
+    <string name="label_upload_expect">"Expected Time : "</string>
+    <string name="label_total_size">"Total Size : "</string>
+    <string name="label_uploaded_size">"Uploaded Size : "</string>
+    <string name="menuUploadManager">Upload Manager</string>
+    <string name="label_upload_status">Upload Status</string>
+    <string name="abbr_qr">QR code : </string>
 </resources>

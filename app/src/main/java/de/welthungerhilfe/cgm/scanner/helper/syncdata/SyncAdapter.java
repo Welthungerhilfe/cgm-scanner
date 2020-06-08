@@ -73,7 +73,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        if (!isServiceRunning()) {
+        if (!AppController.getInstance().isUploadRunning()) {
             getContext().startService(new Intent(getContext(), UploadService.class));
         }
 
@@ -298,17 +298,5 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             return null;
         }
-    }
-
-    private boolean isServiceRunning() {
-        ActivityManager manager = (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
-        if (manager != null) {
-            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-                if (UploadService.class.getName().equals(service.service.getClassName())) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }
