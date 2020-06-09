@@ -18,7 +18,6 @@ import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -27,7 +26,9 @@ import java.util.concurrent.Executors;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
@@ -40,7 +41,6 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOADED_DELETE
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOAD_ERROR;
 
 public class UploadService extends Service implements OnFileLogsLoad {
-    private HashMap<String, String> artefact2measureID;
     private List<String> pendingArtefacts;
     private static int remainingCount = 0;
 
@@ -54,7 +54,6 @@ public class UploadService extends Service implements OnFileLogsLoad {
     public void onCreate() {
         repository = FileLogRepository.getInstance(getApplicationContext());
 
-        artefact2measureID = new HashMap<>();
         pendingArtefacts = new ArrayList<>();
 
         executor = Executors.newFixedThreadPool(MULTI_UPLOAD_BUNCH);
@@ -104,6 +103,21 @@ public class UploadService extends Service implements OnFileLogsLoad {
         remainingCount = list.size();
         Log.e("UploadService", String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
 
+        Context c = getApplicationContext();
+        if (LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT)) {
+            String measureId = LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID);
+            boolean finished = true;
+            for (FileLog log : list) {
+                if (measureId.compareTo(log.getMeasureId()) == 0) {
+                    finished = false;
+                    break;
+                }
+            }
+            if (finished) {
+                new Thread(() -> onUploadFinished(measureId)).start();
+            }
+        }
+
         if (remainingCount <= 0) {
             stopSelf();
         } else {
@@ -127,6 +141,16 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
         @Override
         public void run() {
+            Context c = getApplicationContext();
+            if (LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT)) {
+                String measureId = LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID);
+                if (measureId.compareTo(log.getMeasureId()) == 0) {
+                    if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_START) == 0) {
+                        LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_START, System.currentTimeMillis());
+                    }
+                }
+            }
+
             synchronized (lock) {
                 if (pendingArtefacts.size() >= MULTI_UPLOAD_BUNCH) {
                     try {
@@ -137,20 +161,6 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 }
             }
 
-            Context c = getApplicationContext();
-            if (LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT)) {
-                String measureID = LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID);
-                if (measureID.compareTo(log.getMeasureId()) == 0) {
-                    if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_START) == 0) {
-                        LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_START, System.currentTimeMillis());
-                    }
-                }
-            }
-
-            if (artefact2measureID.containsKey(log.getId())) {
-                artefact2measureID.remove(log.getId());
-            }
-            artefact2measureID.put(log.getId(), log.getMeasureId());
             pendingArtefacts.add(log.getId());
 
             String path = "";
@@ -210,23 +220,66 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 if (remainingCount <= 0) {
                     loadQueueFileLogs();
                 }
-
-                if (LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT)) {
-                    String measureID = LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID);
-                    boolean finished = true;
-                    for (String artefact : pendingArtefacts) {
-                        if (artefact2measureID.get(artefact).compareTo(measureID) == 0) {
-                            finished = false;
-                            break;
-                        }
-                    }
-                    if (finished) {
-                        LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_END, System.currentTimeMillis());
-                    }
-                }
-
                 lock.notify();
             }
+        }
+    }
+
+    private void onUploadFinished(String measureId) {
+
+        //do not continue if the previous timestamps are missing
+        Context c = getApplicationContext();
+        if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_SCAN) == 0) {
+            return;
+        }
+        if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_START) == 0) {
+            return;
+        }
+
+        //set timestamp for the end of upload
+        if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_END) == 0) {
+            LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_END, System.currentTimeMillis());
+        }
+
+        if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE) == 0) {
+
+            //wait for result
+            Log.e("UploadService", "Started waiting for a result");
+            while (true) {
+                Measure measure = MeasureRepository.getInstance(getApplicationContext()).getMeasure(measureId);
+
+                if (measure == null) {
+                    Log.e("UploadService", "Checking for the result of " + measureId + " -> null");
+                } else if (measure.getHeight() == 0) {
+                    Log.e("UploadService", "Checking for the result of " + measureId + " -> no height");
+                } else if (measure.getWeight() == 0) {
+                    Log.e("UploadService", "Checking for the result of " + measureId + " -> no weight");
+                } else {
+                    Log.e("UploadService", "Checking for the result of " + measureId + " -> valid");
+                    break;
+                }
+
+                try {
+                    Thread.sleep(60000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            Log.e("UploadService", "Stopped waiting for a result");
+
+            //set receive timestamp
+            LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE, System.currentTimeMillis());
+
+            //update average time
+            long diff = 0;
+            diff += LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE);
+            diff -= LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_SCAN);
+            ArrayList<Long> last = LocalPersistency.getLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE);
+            last.add(diff);
+            if (last.size() > 10) {
+                last.remove(0);
+            }
+            LocalPersistency.setLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE, last);
         }
     }
 }

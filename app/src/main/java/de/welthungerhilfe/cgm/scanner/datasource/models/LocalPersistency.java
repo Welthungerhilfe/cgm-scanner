@@ -73,7 +73,7 @@ public class LocalPersistency {
     public static void setBoolean(Context context, String key, boolean value) {
         SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
         e.putBoolean(key, value);
-        e.apply();
+        e.commit();
     }
 
     public static void setBooleanArray(Context context, String key, ArrayList<Boolean> value) {
@@ -82,13 +82,13 @@ public class LocalPersistency {
         for (int i = 0; i < value.size(); i++) {
             e.putBoolean(key + "_" + i, value.get(i));
         }
-        e.apply();
+        e.commit();
     }
 
     public static void setLong(Context context, String key, long value) {
         SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
         e.putLong(key, value);
-        e.apply();
+        e.commit();
     }
 
     public static void setLongArray(Context context, String key, ArrayList<Long> value) {
@@ -97,13 +97,13 @@ public class LocalPersistency {
         for (int i = 0; i < value.size(); i++) {
             e.putLong(key + "_" + i, value.get(i));
         }
-        e.apply();
+        e.commit();
     }
 
     public static void setString(Context context, String key, String value) {
         SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
         e.putString(key, value);
-        e.apply();
+        e.commit();
     }
 
     public static void setStringArray(Context context, String key, ArrayList<String> value) {
@@ -112,6 +112,6 @@ public class LocalPersistency {
         for (int i = 0; i < value.size(); i++) {
             e.putString(key + "_" + i, value.get(i));
         }
-        e.apply();
+        e.commit();
     }
 }

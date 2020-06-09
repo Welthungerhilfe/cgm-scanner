@@ -270,7 +270,7 @@
     <string name="test_qa_environment">Test/QA Umgebung</string>
     <string name="profile_result_title">Messen Sie die Zeit, um das Ergebnis zu erhalten</string>
     <string name="profile_result_timestamp_scan">Letzter Scan abgeschlossen</string>
-    <string name="profile_result_timestamp_start">Start des letzten Scan-Uploads</string>
+    <string name="profile_result_timestamp_start">Letzter Scan-Upload startet</string>
     <string name="profile_result_timestamp_end">Letzter Scan-Upload beendet</string>
     <string name="profile_result_timestamp_receive">Letztes Scanergebnis empfangen</string>
     <string name="profile_result_timestamp_average">Die letzten 10 Scans haben eine durchschnittliche Prozesszeit</string>
