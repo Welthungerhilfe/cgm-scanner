@@ -186,8 +186,8 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
                 if (running) {
                     txtProfileColorSize.setText(DataFormat.filesize(profileColorSize));
                     txtProfileDepthSize.setText(DataFormat.filesize(profileDepthSize));
-                    txtProfileColorTime.setText(DataFormat.filesize(profileColorTime));
-                    txtProfileDepthTime.setText(DataFormat.filesize(profileDepthTime));
+                    txtProfileColorTime.setText(DataFormat.time(profileColorTime));
+                    txtProfileDepthTime.setText(DataFormat.time(profileDepthTime));
                     txtResultScan.setText(DataFormat.timestamp(resultScan));
                     txtResultStart.setText(DataFormat.timestamp(resultStart));
                     txtResultEnd.setText(DataFormat.timestamp(resultEnd));
