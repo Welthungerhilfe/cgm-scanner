@@ -352,6 +352,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private long mNowTime;
     private String mNowTimeString;
 
+    private long mColorSize;
+    private long mColorTime;
+    private long mDepthSize;
+    private long mDepthTime;
+
     private long age = 0;
 
     private AlertDialog progressDialog;
@@ -363,6 +368,17 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         mNumberOfFilesWritten = 0;
         mIsRecording = false;
+
+        mColorSize = 0;
+        mColorTime = 0;
+        mDepthSize = 0;
+        mDepthTime = 0;
+        if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
+            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_SIZE, 0);
+            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_SIZE, 0);
+            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, 0);
+            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_TIME, 0);
+        }
     }
 
     protected void onCreate(Bundle savedBundle) {
@@ -880,6 +896,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     public void onColorDataReceived(Bitmap bitmap, int frameIndex) {
         if (mIsRecording && (frameIndex % 10 == 0)) {
 
+            long profile = System.currentTimeMillis();
             ARCoreCamera.CameraCalibration calibration = ((ARCoreCamera)mCameraInstance).getCalibration();
 
             Runnable thread = () -> {
@@ -899,6 +916,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 //upload RGB data
                 if (artifactFile.exists()) {
+                    mColorSize += artifactFile.length();
+                    mColorTime += System.currentTimeMillis() - profile;
+                    if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
+                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_SIZE, mColorSize);
+                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, mColorTime);
+                    }
+
                     FileLog log = new FileLog();
                     log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
                     log.setType("rgb");
@@ -957,6 +981,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     public void onDepthDataReceived(Image image, int frameIndex) {
         if (mIsRecording && (frameIndex % 10 == 0)) {
 
+            long profile = System.currentTimeMillis();
             long timestamp = image.getTimestamp();
             ARCoreUtils.Depthmap depthmap = ARCoreUtils.extractDepthmap(image);
             float density = ((ARCoreCamera)mCameraInstance).getDepthSensorDensity();
@@ -982,7 +1007,18 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 String pointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".pcd";
                 pointCloudFilename = pointCloudFilename.replace('/', '_');
                 ARCoreUtils.writeDepthmapToPcdFile(depthmap, calibration, timestamp, mPointCloudSaveFolder, pointCloudFilename);
+                File artifactFilePCD = new File(mPointCloudSaveFolder.getPath(), pointCloudFilename);
                 mNumberOfFilesWritten++;
+
+                //profile process
+                if (artifactFile.exists() && artifactFilePCD.exists()) {
+                    mDepthSize += artifactFile.length() + artifactFilePCD.length();
+                    mDepthTime += System.currentTimeMillis() - profile;
+                    if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
+                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_SIZE, mDepthSize);
+                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_TIME, mDepthTime);
+                    }
+                }
 
                 //upload depthmap
                 if (artifactFile.exists()) {
@@ -1014,14 +1050,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 }
 
                 //upload pointcloud
-                artifactFile = new File(mPointCloudSaveFolder.getPath(), pointCloudFilename);
-                if (artifactFile.exists()) {
+                if (artifactFilePCD.exists()) {
                     FileLog log = new FileLog();
                     log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
                     log.setType("pcd");
-                    log.setPath(artifactFile.getPath());
-                    log.setHashValue(MD5.getMD5(artifactFile.getPath()));
-                    log.setFileSize(artifactFile.length());
+                    log.setPath(artifactFilePCD.getPath());
+                    log.setHashValue(MD5.getMD5(artifactFilePCD.getPath()));
+                    log.setFileSize(artifactFilePCD.length());
                     log.setUploadDate(0);
                     log.setDeleted(false);
                     log.setQrCode(person.getQrcode());
@@ -1043,16 +1078,23 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
+        long profile = System.currentTimeMillis();
         Runnable thread = () -> {
             TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
-
             String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + currentTangoImageBuffer.timestamp + ".jpg";
             currentImgFilename = currentImgFilename.replace('/', '_');
-
             BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
-
             File artifactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
+
+
             if (artifactFile.exists()) {
+                mColorSize += artifactFile.length();
+                mColorTime += System.currentTimeMillis() - profile;
+                if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
+                    LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_SIZE, mColorSize);
+                    LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, mColorTime);
+                }
+
                 FileLog log = new FileLog();
                 log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
                 log.setType("rgb");
@@ -1080,16 +1122,25 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         if ( mIsRecording ) {
             updateScanningProgress(pointCloudData.numPoints, 1);
             progressBar.setProgress(mProgress);
+            long profile = System.currentTimeMillis();
 
             Runnable thread = () -> {
                 String pointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
                         "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
                 pointCloudFilename = pointCloudFilename.replace('/', '_');
                 TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, pointCloudFilename);
+                File artifactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + pointCloudFilename +".pcd");
                 mNumberOfFilesWritten++;
 
-                File artifactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + pointCloudFilename +".pcd");
+
                 if (artifactFile.exists()) {
+                    mDepthSize += artifactFile.length();
+                    mDepthTime += System.currentTimeMillis() - profile;
+                    if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
+                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_SIZE, mDepthSize);
+                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_TIME, mDepthTime);
+                    }
+
                     FileLog log = new FileLog();
                     log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
                     log.setType("pcd");
