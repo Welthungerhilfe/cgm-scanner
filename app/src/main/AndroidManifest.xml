@@ -52,7 +52,7 @@
         android:supportsRtl="true"
         android:largeHeap="true"
         android:windowSoftInputMode="adjustResize"
-	android:extractNativeLibs="true"
+	    android:extractNativeLibs="true"
         android:theme="@style/AppTheme.NoActionBar"
         tools:replace="android:allowBackup">
 		<uses-library
@@ -146,6 +146,17 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".helper.receiver.ResultGenerationReceiver"
+            android:enabled="true"
+            android:process=":remote" >
+
+            <intent-filter>
+                <action android:name="de.welthungerhilfe.cgm.scanner.action.ACTION_RESULT_GENERATED" />
+            </intent-filter>
+
         </receiver>
 
         <service android:name=".helper.service.UploadService"

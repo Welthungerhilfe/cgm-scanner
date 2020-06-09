@@ -26,6 +26,8 @@ package de.welthungerhilfe.cgm.scanner.helper;
 public class AppConstants {
     public static final int MAX_IMAGE_SIZE = 800;
 
+    public static final String ACTION_RESULT_GENERATED = "de.welthungerhilfe.cgm.scanner.action.ACTION_RESULT_GENERATED";
+
     public static final long SYNC_INTERVAL = 60 * 5;
     public static final long SYNC_FLEXTIME = SYNC_INTERVAL / 3;
     public static final long LOG_MONITOR_INTERVAL = 10 * 1000; // 10 seconds

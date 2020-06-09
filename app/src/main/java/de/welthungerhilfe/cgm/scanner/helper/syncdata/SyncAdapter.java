@@ -44,6 +44,7 @@ import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.ACTION_RESULT_GENERATED;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
@@ -154,6 +155,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     if (result.getConfidence_value() >= fieldMaxConfidence) {
                                         measureRepository.updateWeight(result.getMeasure_id(), result.getFloat_value());
                                         measureRepository.updateResultTimestamp(result.getMeasure_id(), System.currentTimeMillis());
+
+                                        Intent intent = new Intent();
+                                        intent.setAction(ACTION_RESULT_GENERATED);
+                                        getContext().sendBroadcast(intent);
                                     }
                                 } else if (result.getKey().contains("height")) {
                                     fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "height%");
@@ -161,6 +166,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     if (result.getConfidence_value() >= fieldMaxConfidence) {
                                         measureRepository.updateHeight(result.getMeasure_id(), result.getFloat_value());
                                         measureRepository.updateResultTimestamp(result.getMeasure_id(), System.currentTimeMillis());
+
+                                        Intent intent = new Intent();
+                                        intent.setAction(ACTION_RESULT_GENERATED);
+                                        getContext().sendBroadcast(intent);
                                     }
                                 }
 
