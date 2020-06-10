@@ -162,10 +162,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         });
 
         startService(new Intent(this, DeviceService.class));
-
-        Intent intent = new Intent();
-        intent.setAction(ACTION_RESULT_GENERATED);
-        sendBroadcast(intent);
     }
 
     public void onNewIntent(Intent intent) {

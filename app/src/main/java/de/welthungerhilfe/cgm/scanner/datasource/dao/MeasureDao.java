@@ -23,8 +23,8 @@ public interface MeasureDao {
     @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE timestamp>:timestamp")
     List<Measure> getSyncableMeasure(long timestamp);
 
-    @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE id=:id")
-    Measure findMeasure(String id);
+    @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE id=:id LIMIT 1")
+    Measure getMeasureById(String id);
 
     @Insert(onConflict = REPLACE)
     void insertMeasure(Measure measure);
@@ -70,4 +70,7 @@ public interface MeasureDao {
 
     @Query("UPDATE " + TABLE_MEASURE + " SET resulted_at=:currentTimeMillis WHERE id=:measure_id")
     void updateResultTimestamp(String measure_id, long currentTimeMillis);
+
+    @Query("UPDATE " + TABLE_MEASURE + " SET received_at=:currentTimeMillis WHERE id=:measure_id")
+    void updateReceiveTimestamp(String measure_id, long currentTimeMillis);
 }
