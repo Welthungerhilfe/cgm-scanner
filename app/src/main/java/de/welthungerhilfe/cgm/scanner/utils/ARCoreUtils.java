@@ -40,6 +40,7 @@ public class ARCoreUtils {
         int count;
         int width;
         int height;
+        long timestamp;
 
         private Depthmap(int width, int height) {
             this.width = width;
@@ -83,6 +84,8 @@ public class ARCoreUtils {
         public int getWidth() {
             return width;
         }
+
+        public long getTimestamp() { return timestamp; }
     }
 
     public static Depthmap extractDepthmap(Image image) {
@@ -99,6 +102,7 @@ public class ARCoreUtils {
         int height = image.getHeight();
 
         Depthmap depthmap = new Depthmap(width, height);
+        depthmap.timestamp = image.getTimestamp();
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int depthSample = pixel.get((y / 2) * stride + x);

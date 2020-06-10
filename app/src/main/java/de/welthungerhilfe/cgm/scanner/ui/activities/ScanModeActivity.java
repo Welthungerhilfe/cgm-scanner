@@ -48,10 +48,16 @@ import com.microsoft.azure.storage.queue.CloudQueueMessage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -361,6 +367,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private AlertDialog progressDialog;
 
+    private ExecutorService executor;
+    private HashMap<Integer, Integer> threads;
+
     private ICamera mCameraInstance;
 
     public void onStart() {
@@ -396,6 +405,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             Toast.makeText(this, "Person was not defined", Toast.LENGTH_LONG).show();
             finish();
         }
+
+        executor = Executors.newFixedThreadPool(20);
+        threads = new HashMap<>();
 
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
@@ -667,6 +679,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     lytScanAgain1.setVisibility(View.VISIBLE);
 
                     step1 = true;
+
                 } else if (scanStep == SCAN_STANDING_SIDE || scanStep == SCAN_LYING_SIDE) {
                     btnScanStep2.setVisibility(View.GONE);
 
@@ -675,12 +688,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     } else if (pointCloudCount > 27) {
                         issues = String.format("%s\n - Duration was too long", issues);
                     }
-
                     txtScanStep2.setText(issues);
                     imgScanStep2.setVisibility(View.GONE);
                     lytScanAgain2.setVisibility(View.VISIBLE);
 
                     step2 = true;
+
                 } else if (scanStep == SCAN_STANDING_BACK || scanStep == SCAN_LYING_BACK) {
                     btnScanStep3.setVisibility(View.GONE);
 
@@ -812,6 +825,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         @Override
         protected Void doInBackground(Void... voids) {
             Gson gson = new Gson();
+            Set<Integer> steps;
+            synchronized (threads) {
+                steps = threads.keySet();
+            }
+            for (Integer step : steps) {
+                waitUntilFinished(step);
+            }
 
             measureRepository.insertMeasure(measure);
 
@@ -899,6 +919,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             long profile = System.currentTimeMillis();
             ARCoreCamera.CameraCalibration calibration = ((ARCoreCamera)mCameraInstance).getCalibration();
 
+            int scanStep = SCAN_STEP;
             Runnable thread = () -> {
 
                 //write RGB data
@@ -972,8 +993,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         }
                     }
                 }
+                onThreadChange(scanStep,-1);
             };
-            new Thread(thread).start();
+            onThreadChange(scanStep,1);
+            executor.execute(thread);
         }
     }
 
@@ -982,33 +1005,44 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         if (mIsRecording && (frameIndex % 10 == 0)) {
 
             long profile = System.currentTimeMillis();
-            long timestamp = image.getTimestamp();
             ARCoreUtils.Depthmap depthmap = ARCoreUtils.extractDepthmap(image);
+            long timestamp = depthmap.getTimestamp();
             float density = ((ARCoreCamera)mCameraInstance).getDepthSensorDensity();
-            updateScanningProgress(depthmap.getCount(), density);
-            progressBar.setProgress(mProgress);
-
             float lightIntensity = ((ARCoreCamera)mCameraInstance).getLightIntensity() * 2.0f;
             float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
             float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
             double Artifact_Confidence_penalty = Math.abs((double) depthmap.getCount()/38000-1.0)*100*3;
-
             ARCoreCamera.CameraCalibration calibration = ((ARCoreCamera)mCameraInstance).getCalibration();
+
+            String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
+            String pointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".pcd";
+            mNumberOfFilesWritten++;
+
+            updateScanningProgress(depthmap.getCount(), density);
+            progressBar.setProgress(mProgress);
+
+            int scanStep = SCAN_STEP;
+            new Thread(() -> {
+                ArtifactResult ar = new ArtifactResult();
+                ar.setConfidence_value(String.valueOf(100 - Artifact_Confidence_penalty));
+                ar.setArtifact_id(AppController.getInstance().getPersonId());
+                ar.setKey(scanStep);
+                ar.setMeasure_id(measure.getId());
+                ar.setMisc("");
+                ar.setType("PCD_POINTS_v0.2");
+                ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
+                artifactResultRepository.insertArtifactResult(ar);
+            }).start();
 
             Runnable thread = () -> {
 
                 //write depthmap
-                String filename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
-                filename = filename.replace('/', '_');
-                File artifactFile = new File(mDepthmapSaveFolder, filename);
+                File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                 ARCoreUtils.writeDepthmap(depthmap, artifactFile);
 
                 //write pointcloud
-                String pointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".pcd";
-                pointCloudFilename = pointCloudFilename.replace('/', '_');
-                ARCoreUtils.writeDepthmapToPcdFile(depthmap, calibration, timestamp, mPointCloudSaveFolder, pointCloudFilename);
                 File artifactFilePCD = new File(mPointCloudSaveFolder.getPath(), pointCloudFilename);
-                mNumberOfFilesWritten++;
+                ARCoreUtils.writeDepthmapToPcdFile(depthmap, calibration, timestamp, mPointCloudSaveFolder, pointCloudFilename);
 
                 //profile process
                 if (artifactFile.exists() && artifactFilePCD.exists()) {
@@ -1037,16 +1071,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
                     fileLogRepository.insertFileLog(log);
-
-                    ArtifactResult ar = new ArtifactResult();
-                    ar.setConfidence_value(String.valueOf(100 - Artifact_Confidence_penalty));
-                    ar.setArtifact_id(AppController.getInstance().getPersonId());
-                    ar.setKey(SCAN_STEP);
-                    ar.setMeasure_id(measure.getId());
-                    ar.setMisc("");
-                    ar.setType("PCD_POINTS_v0.2");
-                    ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
-                    artifactResultRepository.insertArtifactResult(ar);
                 }
 
                 //upload pointcloud
@@ -1067,8 +1091,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setMeasureId(measure.getId());
                     fileLogRepository.insertFileLog(log);
                 }
+                onThreadChange(scanStep,-1);
             };
-            new Thread(thread).start();
+            onThreadChange(scanStep,1);
+            executor.execute(thread);
         }
     }
 
@@ -1078,14 +1104,14 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
-        long profile = System.currentTimeMillis();
+        TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
+        String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + currentTangoImageBuffer.timestamp + ".jpg";
+
+        int scanStep = SCAN_STEP;
         Runnable thread = () -> {
-            TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
-            String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + currentTangoImageBuffer.timestamp + ".jpg";
-            currentImgFilename = currentImgFilename.replace('/', '_');
+            long profile = System.currentTimeMillis();
             BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
             File artifactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
-
 
             if (artifactFile.exists()) {
                 mColorSize += artifactFile.length();
@@ -1112,26 +1138,46 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 fileLogRepository.insertFileLog(log);
             }
+            onThreadChange(scanStep,-1);
         };
-        new Thread(thread).start();
+        onThreadChange(scanStep,1);
+        executor.execute(thread);
     }
 
     @Override
     public void onTangoDepthData(TangoPointCloudData pointCloudData) {
         // Saving the frame or not, depending on the current mode.
         if ( mIsRecording ) {
-            updateScanningProgress(pointCloudData.numPoints, 1);
-            progressBar.setProgress(mProgress);
             long profile = System.currentTimeMillis();
+            int numPoints = pointCloudData.numPoints;
+            double timestamp = pointCloudData.timestamp;
+            ByteBuffer buffer = ByteBuffer.allocate(pointCloudData.numPoints * 4 * 4);
+            buffer.order(ByteOrder.LITTLE_ENDIAN);
+            buffer.asFloatBuffer().put(pointCloudData.points);
+
+            updateScanningProgress(numPoints, 1);
+            progressBar.setProgress(mProgress);
+
+            String pointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
+                    "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten++);
+
+            int scanStep = SCAN_STEP;
+            new Thread(() -> {
+                ArtifactResult ar=new ArtifactResult();
+                double Artifact_Lighting_penalty=Math.abs((double) numPoints/38000-1.0)*100*3;
+                ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
+                ar.setArtifact_id(AppController.getInstance().getPersonId());
+                ar.setKey(scanStep);
+                ar.setMeasure_id(measure.getId());
+                ar.setMisc("");
+                ar.setType("PCD_POINTS_v0.2");
+                ar.setReal(numPoints);
+                artifactResultRepository.insertArtifactResult(ar);
+            }).start();
 
             Runnable thread = () -> {
-                String pointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
-                        "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten);
-                pointCloudFilename = pointCloudFilename.replace('/', '_');
-                TangoUtils.writePointCloudToPcdFile(pointCloudData, mPointCloudSaveFolder, pointCloudFilename);
                 File artifactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + pointCloudFilename +".pcd");
-                mNumberOfFilesWritten++;
-
+                TangoUtils.writePointCloudToPcdFile(buffer, numPoints, timestamp, artifactFile);
 
                 if (artifactFile.exists()) {
                     mDepthSize += artifactFile.length();
@@ -1157,22 +1203,40 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setMeasureId(measure.getId());
                     fileLogRepository.insertFileLog(log);
 
-
-                    ArtifactResult ar=new ArtifactResult();
-                    double Artifact_Lighting_penalty=Math.abs((double) pointCloudData.numPoints/38000-1.0)*100*3;
-                    ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
-                    ar.setArtifact_id(AppController.getInstance().getPersonId());
-                    ar.setKey(SCAN_STEP);
-                    ar.setMeasure_id(measure.getId());
-                    ar.setMisc("");
-                    ar.setType("PCD_POINTS_v0.2");
-                    ar.setReal(pointCloudData.numPoints);
-                    artifactResultRepository.insertArtifactResult(ar);
-
                     Log.e("numbs", String.valueOf(mNumberOfFilesWritten));
                 }
+                onThreadChange(scanStep, -1);
             };
-            new Thread(thread).start();
+            onThreadChange(scanStep,1);
+            executor.execute(thread);
+        }
+    }
+
+    private void onThreadChange(int scanStep, int diff) {
+        synchronized (threads) {
+            if (threads.containsKey(scanStep)) {
+                int value = threads.get(scanStep);
+                value += diff;
+                threads.remove(scanStep);
+                threads.put(scanStep, value);
+            } else {
+                threads.put(scanStep, diff);
+            }
+        }
+    }
+
+    private void waitUntilFinished(int scanStep) {
+        while (true) {
+            synchronized (threads) {
+                if (threads.containsKey(scanStep) && threads.get(scanStep) == 0) {
+                    break;
+                }
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
