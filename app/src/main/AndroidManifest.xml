@@ -158,6 +158,17 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".helper.receiver.ResultGenerationReceiver"
+            android:enabled="true"
+            android:process=":remote" >
+
+            <intent-filter>
+                <action android:name="de.welthungerhilfe.cgm.scanner.action.ACTION_RESULT_GENERATED" />
+            </intent-filter>
+
+        </receiver>
+
         <service android:name=".helper.service.UploadService"
             android:exported="false" />
 
