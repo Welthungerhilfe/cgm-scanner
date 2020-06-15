@@ -1,6 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.helper.service;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -17,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -24,8 +26,10 @@ import java.util.concurrent.Executors;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -36,6 +40,7 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOADED_DELETE
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOAD_ERROR;
 
 public class UploadService extends Service implements OnFileLogsLoad {
+    private HashMap<String, String> artefact2measureID;
     private List<String> pendingArtefacts;
     private static int remainingCount = 0;
 
@@ -49,6 +54,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
     public void onCreate() {
         repository = FileLogRepository.getInstance(getApplicationContext());
 
+        artefact2measureID = new HashMap<>();
         pendingArtefacts = new ArrayList<>();
 
         executor = Executors.newFixedThreadPool(MULTI_UPLOAD_BUNCH);
@@ -131,10 +137,30 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 }
             }
 
+            Context c = getApplicationContext();
+            if (LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT)) {
+                String measureID = LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID);
+                if (measureID.compareTo(log.getMeasureId()) == 0) {
+                    if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_START) == 0) {
+                        LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_START, System.currentTimeMillis());
+                    }
+                }
+            }
+
+            if (artefact2measureID.containsKey(log.getId())) {
+                artefact2measureID.remove(log.getId());
+            }
+            artefact2measureID.put(log.getId(), log.getMeasureId());
             pendingArtefacts.add(log.getId());
 
             String path = "";
             switch (log.getType()) {
+                case "calibration":
+                    path = AppConstants.STORAGE_CALIBRATION_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                    break;
+                case "depth":
+                    path = AppConstants.STORAGE_DEPTH_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                    break;
                 case "pcd":
                     path = AppConstants.STORAGE_PC_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
                     break;
@@ -183,6 +209,20 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 Log.e("UploadService", String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
                 if (remainingCount <= 0) {
                     loadQueueFileLogs();
+                }
+
+                if (LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT)) {
+                    String measureID = LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID);
+                    boolean finished = true;
+                    for (String artefact : pendingArtefacts) {
+                        if (artefact2measureID.get(artefact).compareTo(measureID) == 0) {
+                            finished = false;
+                            break;
+                        }
+                    }
+                    if (finished) {
+                        LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_END, System.currentTimeMillis());
+                    }
                 }
 
                 lock.notify();

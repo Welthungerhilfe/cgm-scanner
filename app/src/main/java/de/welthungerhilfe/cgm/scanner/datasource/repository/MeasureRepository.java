@@ -82,4 +82,8 @@ public class MeasureRepository {
     public void updateReceiveTimestamp(String measure_id, long currentTimeMillis) {
         database.measureDao().updateReceiveTimestamp(measure_id, currentTimeMillis);
     }
+
+    public LiveData<List<Measure>> getUploadMeasures() {
+        return database.measureDao().getUploadMeasures();
+    }
 }

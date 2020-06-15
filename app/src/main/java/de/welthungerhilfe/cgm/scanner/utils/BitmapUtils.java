@@ -25,6 +25,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Environment;
 
@@ -34,6 +35,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 
@@ -255,6 +257,65 @@ public class BitmapUtils {
         g = g>255? 255 : g<0 ? 0 : g;
         b = b>255? 255 : b<0 ? 0 : b;
         return 0xff000000 | (b<<16) | (g<<8) | r;
+    }
+
+    public static ByteBuffer imageToByteBuffer(Image image) {
+        final int  width  = image.getWidth();
+        final int  height = image.getHeight();
+
+        final Image.Plane[] planes     = image.getPlanes();
+        final byte[]        rowData    = new byte[planes[0].getRowStride()];
+        final int           bufferSize = width * height * ImageFormat.getBitsPerPixel(ImageFormat.YUV_420_888) / 8;
+        final ByteBuffer    output     = ByteBuffer.allocateDirect(bufferSize);
+
+        int channelOffset = 0;
+        int outputStride = 0;
+
+        for (int planeIndex = 0; planeIndex < 3; planeIndex++) {
+            if (planeIndex == 0) {
+                outputStride = 1;
+            } else if (planeIndex == 1) {
+                channelOffset = width * height + 1;
+                outputStride = 2;
+            } else {
+                channelOffset = width * height;
+                outputStride = 2;
+            }
+
+            final ByteBuffer buffer      = planes[planeIndex].getBuffer();
+            final int        rowStride   = planes[planeIndex].getRowStride();
+            final int        pixelStride = planes[planeIndex].getPixelStride();
+
+            final int shift         = (planeIndex == 0) ? 0 : 1;
+            final int widthShifted  = width >> shift;
+            final int heightShifted = height >> shift;
+
+            buffer.position(0);
+
+            for (int row = 0; row < heightShifted; row++) {
+                int length;
+
+                if (pixelStride == 1 && outputStride == 1) {
+                    length = widthShifted;
+                    buffer.get(output.array(), channelOffset, length);
+                    channelOffset += length;
+                } else {
+                    length = (widthShifted - 1) * pixelStride + 1;
+                    buffer.get(rowData, 0, length);
+
+                    for (int col = 0; col < widthShifted; col++) {
+                        output.array()[channelOffset] = rowData[col * pixelStride];
+                        channelOffset += outputStride;
+                    }
+                }
+
+                if (row < heightShifted - 1) {
+                    buffer.position(buffer.position() + rowStride - length);
+                }
+            }
+        }
+
+        return output;
     }
 
     public static Uri writeImageToFile(TangoImageBuffer currentTangoImageBuffer, File rgbSaveFolder, String currentImgFilename) {

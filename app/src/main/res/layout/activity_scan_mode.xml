@@ -532,13 +532,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <!--de.welthungerhilfe.cgm.scanner.helper.tango.OverlaySurface
-                android:id="@+id/overlaySurfaceView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/-->
-
             <android.opengl.GLSurfaceView
                 android:id="@+id/surfaceview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+            <ImageView
+                android:id="@+id/colorCameraPreview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
 

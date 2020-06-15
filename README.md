@@ -7,29 +7,12 @@ We provide a game-changer in measurement and data processing for malnourished ch
 - [GitHub main project](https://github.com/Welthungerhilfe/ChildGrowthMonitor/)
 - info@childgrowthmonitor.org
 
-## App development
-
-We are going to bring our app on new devices. The app is going to target Google ARCore and also Google Tango. To make this possible we have to do some major changes in our repository. Not all changes could be done immediatelly and that's why we defined current and future branch policies.
-
-## Current branch policy
+## Branch policy
 
 #### master branch
-- Contains only Google Tango version
-- We review all pull requests
-- We do not merge develop into master
-
-#### develop branch
-- Contains Google ARCore and Google Tango versions
-- We merge only ARCore specific features into develop
-- We merge master into develop regularly
-
-## Future branch policy
-
-#### master branch
-- Contains Google ARCore and Google Tango versions
 - Master branch contains source codes of the version on Google Play
 - We merge develop into master after passing all tests
 
 #### develop branch
-- Contains Google ARCore and Google Tango versions
+- All features merged into develop are finished and tested
 - Developers do all pull requests into develop

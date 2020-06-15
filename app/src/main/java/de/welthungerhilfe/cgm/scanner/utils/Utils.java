@@ -27,18 +27,15 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
-import android.telecom.TelecomManager;
-import android.telephony.TelephonyManager;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -49,6 +46,18 @@ import java.util.UUID;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 
 public class Utils {
+
+    public static long averageValue(ArrayList<Long> values) {
+        long value = 0;
+        for (long l : values) {
+            value += l;
+        }
+        if (values.size() > 0) {
+            value /= values.size();
+        }
+        return value;
+    }
+
     public static void overrideFont(Context context, String defaultFontNameToOverride, String customFontFileNameInAssets) {
         try {
             final Typeface customFontTypeface = Typeface.createFromAsset(context.getAssets(), customFontFileNameInAssets);

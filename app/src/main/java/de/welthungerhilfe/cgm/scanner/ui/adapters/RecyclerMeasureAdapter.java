@@ -20,13 +20,16 @@
 package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.AppCompatRatingBar;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -39,13 +42,13 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
+import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -107,15 +110,28 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
     @SuppressLint("StaticFieldLeak")
     @Override
-    public void onBindViewHolder(RecyclerMeasureAdapter.ViewHolder holder, int position) {
-        Measure measure = measureList.get(holder.getAdapterPosition());
+    public void onBindViewHolder(@NonNull RecyclerMeasureAdapter.ViewHolder holder, int position) {
+        Measure measure = measureList.get(position);
 
         if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
             holder.imgType.setImageResource(R.drawable.manual);
 
-            holder.txtOverallScore.setVisibility(View.GONE);
+            holder.rateOverallScore.setVisibility(View.GONE);
         } else {
             holder.imgType.setImageResource(R.drawable.machine);
+
+            final String measureId = measure.getId();
+            Observer<UploadStatus> statusObserver = status -> {
+                double progress = status.getUploaded() / status.getTotal() * 100;
+                if (progress >= 100) {
+                    holder.progressUpload.setVisibility(View.GONE);
+                    artifactRepository.getMeasureUploadProgress(measureId).removeObservers((LifecycleOwner) context);
+                } else {
+                    holder.progressUpload.setVisibility(View.VISIBLE);
+                    holder.progressUpload.setProgress((int) progress);
+                }
+            };
+            artifactRepository.getMeasureUploadProgress(measureId).observe((LifecycleOwner) context, statusObserver);
 
             new AsyncTask<Void, Void, Boolean>() {
                 private double averagePointCountFront = 0;
@@ -127,9 +143,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                 private double averagePointCountBack = 0;
                 private int pointCloudCountBack = 0;
 
-                private double totalArtifactSize = 0;
-                private double uploadedArtifactSize = 0;
-
                 @Override
                 protected Boolean doInBackground(Void... voids) {
                     averagePointCountFront = artifactResultRepository.getAveragePointCountForFront(measure.getId());
@@ -140,20 +153,11 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
                     averagePointCountBack = artifactResultRepository.getAveragePointCountForBack(measure.getId());
                     pointCloudCountBack = artifactResultRepository.getPointCloudCountForBack(measure.getId());
-
-                    totalArtifactSize = artifactRepository.getMeasureArtifactSize(measure.getId());
-                    uploadedArtifactSize = artifactRepository.getMeasureArtifactUploadedSize(measure.getId());
                     return true;
                 }
 
                 @SuppressLint("DefaultLocale")
                 public void onPostExecute(Boolean result) {
-                    if (totalArtifactSize != 0) {
-                        holder.progressUpload.setVisibility(View.VISIBLE);
-                        double progress = uploadedArtifactSize / totalArtifactSize * 100;
-                        holder.progressUpload.setProgress((int)progress);
-                    }
-
                     double lightScoreFront = (Math.abs(averagePointCountFront / 38000 - 1.0) * 3);
                     double durationScoreFront = Math.abs(1- Math.abs((double) pointCloudCountFront / 8 - 1));
                     if (lightScoreFront > 1) lightScoreFront -= 1;
@@ -186,40 +190,11 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                     if (scoreSide > overallScore) overallScore = scoreSide;
                     if (scoreBack > overallScore) overallScore = scoreBack;
 
-                    holder.txtOverallScore.setVisibility(View.VISIBLE);
-                    holder.txtOverallScore.setText(String.format("%d%%", Math.round(overallScore * 100)));
-
-                    int darkGreen = context.getResources().getColor(R.color.colorGreenMedium, context.getTheme());
-
-                    int color = Utils.getColorWithAlpha(darkGreen, (float) overallScore);
-
-                    int[][] states = new int[][] {
-                            new int[] { android.R.attr.state_enabled}, // enabled
-                            new int[] {-android.R.attr.state_enabled}, // disabled
-                            new int[] {-android.R.attr.state_checked}, // unchecked
-                            new int[] { android.R.attr.state_pressed}  // pressed
-                    };
-
-                    int[] colors = new int[] {color, color, color, color};
-
-                    ColorStateList stateList = new ColorStateList(states, colors);
-
-                    holder.txtOverallScore.setBackgroundTintList(stateList);
-
-                    /*
-                    if (overallScore < 0.5) holder.txtOverallScore.setBackgroundTintList(context.getColorStateList(R.color.colorRed));
-                    else if (overallScore < 0.7) holder.txtOverallScore.setBackgroundTintList(context.getColorStateList(R.color.colorYellow));
-                    else holder.txtOverallScore.setBackgroundTintList(context.getColorStateList(R.color.colorPrimary))
-                     */
+                    holder.rateOverallScore.setRating(5 * (float)overallScore);
 
                     if (feedbackListener != null) holder.bindScanFeedbackListener(measureList.get(holder.getAdapterPosition()), overallScore);
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-            /*
-            holder.txtOverallScore.setVisibility(View.VISIBLE);
-            if (feedbackListener != null) holder.bindScanFeedbackListener(measureList.get(position));
-             */
         }
 
         if (measure.isOedema()) {
@@ -298,8 +273,8 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         TextView txtHeight;
         TextView txtWeight;
         TextView txtArm;
-        TextView txtOverallScore;
         ProgressBar progressUpload;
+        AppCompatRatingBar rateOverallScore;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -311,7 +286,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             txtHeight = itemView.findViewById(R.id.txtHeight);
             txtWeight = itemView.findViewById(R.id.txtWeight);
             txtArm = itemView.findViewById(R.id.txtArm);
-            txtOverallScore = itemView.findViewById(R.id.txtOverallScore);
+            rateOverallScore = itemView.findViewById(R.id.rateOverallScore);
             progressUpload = itemView.findViewById(R.id.progressUpload);
         }
 
@@ -320,7 +295,12 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         }
 
         public void bindScanFeedbackListener(Measure measure, double overallScore) {
-            txtOverallScore.setOnClickListener(v -> feedbackListener.onMeasureFeedback(measure, overallScore));
+            rateOverallScore.setOnTouchListener((view, motionEvent) -> {
+                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    feedbackListener.onMeasureFeedback(measure, overallScore);
+                }
+                return true;
+            });
         }
     }
 }

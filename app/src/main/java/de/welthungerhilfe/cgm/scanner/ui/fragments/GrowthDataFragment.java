@@ -49,6 +49,7 @@ import com.jaredrummler.materialspinner.MaterialSpinner;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -230,18 +231,10 @@ public class GrowthDataFragment extends Fragment {
                     median = Double.parseDouble(arr[2]);
                     coefficient = Double.parseDouble(arr[3]);
                     standard = median * coefficient;
-
-                    Log.e("Median", String.valueOf(median));
-                    Log.e("Coefficient", String.valueOf(coefficient));
-                    Log.e("Standard Deviation", String.valueOf(standard));
                 } else if (chartType == 2 && lastMeasure != null && rule == lastMeasure.getHeight()) {
                     median = Double.parseDouble(arr[2]);
                     coefficient = Double.parseDouble(arr[3]);
                     standard = median * coefficient;
-
-                    Log.e("Median", String.valueOf(median));
-                    Log.e("Coefficient", String.valueOf(coefficient));
-                    Log.e("Standard Deviation", String.valueOf(standard));
                 }
 
                 p3.add(new Entry(rule, Float.parseFloat(arr[6])));
@@ -269,7 +262,6 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_weight);
 
                 if (lastMeasure != null && median != 0 && standard != 0) {
-                    Log.e("Current Value", String.valueOf(lastMeasure.getWeight()));
                     zScore = (lastMeasure.getWeight() - median) / standard;
                 }
                 break;
@@ -278,7 +270,6 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_height);
 
                 if (lastMeasure != null && median != 0 && standard != 0) {
-                    Log.e("Current Value", String.valueOf(lastMeasure.getHeight()));
                     zScore = (lastMeasure.getHeight() - median) / standard;
                 }
                 break;
@@ -287,15 +278,12 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_weight);
 
                 if (lastMeasure != null && median != 0 && standard != 0) {
-                    Log.e("Current Value", String.valueOf(lastMeasure.getWeight()));
                     zScore = (lastMeasure.getWeight() - median) / standard;
                 }
                 break;
             case 3:
                 txtXAxis.setText(R.string.axis_age);
                 txtYAxis.setText(R.string.axis_muac);
-
-                Log.e("Current Value", String.valueOf(lastMeasure.getMuac()));
 
                 if (lastMeasure.getMuac() < 11.5) { // SAM (red)
                     zScore = -3;
@@ -307,7 +295,6 @@ public class GrowthDataFragment extends Fragment {
                 break;
         }
 
-        Log.e("Z Score", String.valueOf(zScore));
         txtZScore.setText(String.format("( z-score : %.2f )", zScore));
 
         if (zScore <= -3) { // SAM
@@ -362,9 +349,6 @@ public class GrowthDataFragment extends Fragment {
         ArrayList<Entry> entries = new ArrayList<>();
 
         for (Measure measure : measures) {
-            if (!measure.getType().equals("manual"))
-                continue;
-
             float x = 0, y = 0;
             switch (chartType) {
                 case 0:
@@ -376,7 +360,8 @@ public class GrowthDataFragment extends Fragment {
                     y = (float) measure.getHeight();
                     break;
                 case 2:
-                    x = (float) measure.getHeight();
+                    DecimalFormat decimalFormat = new DecimalFormat("#.#");
+                    x = Float.parseFloat(decimalFormat.format(measure.getHeight()));
                     y = (float) measure.getWeight();
                     break;
                 case 3:
@@ -384,6 +369,9 @@ public class GrowthDataFragment extends Fragment {
                     y = (float) measure.getMuac();
                     break;
             }
+
+            if (x == 0 || y == 0)
+                continue;
 
             final float fX = x;
             Entry v3 = Iterables.tryFind(p3, input -> input.getX() == fX).orNull();

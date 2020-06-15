@@ -3,12 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/colorWhite">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="4"
+        android:layout_weight="1"
         android:padding="32dp"
         android:orientation="vertical"
         android:background="@color/colorPrimary">
@@ -118,7 +119,7 @@
 
             <ImageView
                 android:layout_width="match_parent"
-                android:layout_height="220dp"
+                android:layout_height="wrap_content"
                 android:src="@drawable/tutorial3"
                 tools:ignore="ContentDescription" />
 
@@ -128,16 +129,17 @@
                 android:gravity="center"
                 android:text="@string/lyedown"
                 android:textColor="@color/colorWhite"
-                android:textSize="18sp"/>
+                android:textSize="18sp"
+                android:visibility="gone"/>
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="6"
+        android:layout_weight="1"
         android:padding="32dp"
         android:background="@color/colorWhite"
         android:orientation="vertical">
@@ -189,21 +191,20 @@
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btnNext"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginLeft="12dp"
-            android:layout_marginRight="12dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="40dp"
-            android:text="@string/next_tutorial"
-            android:textColor="@color/colorWhite"
-            android:textStyle="bold"
-            android:textSize="20sp"
-            android:background="@drawable/button_green_light_circular"/>
+    </LinearLayout>
 
-    </RelativeLayout>
+    <Button
+        android:id="@+id/btnNext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="40dp"
+        android:text="@string/next_tutorial"
+        android:textColor="@color/colorWhite"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:background="@drawable/button_green_light_circular"/>
 
 </LinearLayout>
