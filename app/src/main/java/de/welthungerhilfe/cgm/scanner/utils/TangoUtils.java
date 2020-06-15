@@ -12,7 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
+import java.util.Locale;
 
 /**
  * Child Growth Monitor - quick and accurate data on malnutrition
@@ -82,44 +82,32 @@ public class TangoUtils {
     }
 
     // This function writes the XYZC points to .pcd files in binary
-    public static Uri writePointCloudToPcdFile(TangoPointCloudData pointCloudData,
-                                               File pointCloudSaveFolder, String pointCloudFilename) {
-
-        ByteBuffer myBuffer = ByteBuffer.allocate(pointCloudData.numPoints * 4 * 4);
-        myBuffer.order(ByteOrder.LITTLE_ENDIAN);
-        myBuffer.asFloatBuffer().put(pointCloudData.points);
-        File file = new File(pointCloudSaveFolder, pointCloudFilename+".pcd");
+    public static Uri writePointCloudToPcdFile(ByteBuffer buffer, int numPoints, double timestamp, File file) {
 
         try {
-            DataOutputStream out = new DataOutputStream(new BufferedOutputStream(
-                    new FileOutputStream(file)));
-            float confidence;
-
-
-            out.write(("# timestamp 1 1 float "+pointCloudData.timestamp+"\n").getBytes());
-
+            FileOutputStream out = new FileOutputStream(file);
+            out.write(("# timestamp 1 1 float "+timestamp+"\n").getBytes());
             out.write(("# .PCD v.7 - Point Cloud Data file format\n" +
                     "VERSION .7\n" +
                     "FIELDS x y z c\n" +
                     "SIZE 4 4 4 4\n" +
                     "TYPE F F F F\n" +
                     "COUNT 1 1 1 1\n" +
-                    "WIDTH " + pointCloudData.numPoints + "\n"+
+                    "WIDTH " + numPoints + "\n"+
                     "HEIGHT 1\n" +
-                    // TODO Pose Data to VIEWPOINT http://pointclouds.org/documentation/tutorials/pcd_file_format.php
                     "VIEWPOINT 0 0 0 1 0 0 0\n" +
-                    "POINTS " + pointCloudData.numPoints + "\n" +
-                    // TODO "DATA binary"
+                    "POINTS " + numPoints + "\n" +
                     "DATA ascii\n").getBytes());
 
-            for (int i = 0; i < pointCloudData.numPoints; i++) {
-                float pcx =  myBuffer.getFloat(4 * i * 4);
-                float pcy =  myBuffer.getFloat((4 * i + 1) * 4);
-                float pcz = myBuffer.getFloat((4 * i + 2) * 4);
-                float pcc = myBuffer.getFloat((4 * i + 3) * 4);
-                out.write((pcx+" "+pcy+" "+pcz+" "+pcc+"\n").getBytes());
+            StringBuilder output = new StringBuilder();
+            for (int i = 0; i < numPoints; i++) {
+                float pcx =  buffer.getFloat();
+                float pcy =  buffer.getFloat();
+                float pcz = buffer.getFloat();
+                float pcc = buffer.getFloat();
+                output.append(String.format(Locale.US, "%f %f %f %f\n", pcx, pcy, pcz, pcc));
             }
-
+            out.write(output.toString().getBytes());
             out.close();
 
         } catch (IOException e) {
