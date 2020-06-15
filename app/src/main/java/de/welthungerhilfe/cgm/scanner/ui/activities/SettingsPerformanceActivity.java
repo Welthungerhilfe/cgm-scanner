@@ -184,15 +184,15 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
             //update UI
             runOnUiThread(() -> {
                 if (running) {
-                    txtProfileColorSize.setText(DataFormat.filesize(profileColorSize));
-                    txtProfileDepthSize.setText(DataFormat.filesize(profileDepthSize));
-                    txtProfileColorTime.setText(DataFormat.time(profileColorTime));
-                    txtProfileDepthTime.setText(DataFormat.time(profileDepthTime));
-                    txtResultScan.setText(DataFormat.timestamp(resultScan));
-                    txtResultStart.setText(DataFormat.timestamp(resultStart));
-                    txtResultEnd.setText(DataFormat.timestamp(resultEnd));
-                    txtResultReceive.setText(DataFormat.timestamp(resultReceive));
-                    txtResultAverage.setText(DataFormat.time(resultAverage));
+                    txtProfileColorSize.setText(DataFormat.filesize(this, profileColorSize));
+                    txtProfileDepthSize.setText(DataFormat.filesize(this, profileDepthSize));
+                    txtProfileColorTime.setText(DataFormat.time(this, profileColorTime));
+                    txtProfileDepthTime.setText(DataFormat.time(this, profileDepthTime));
+                    txtResultScan.setText(DataFormat.timestamp(this, resultScan));
+                    txtResultStart.setText(DataFormat.timestamp(this, resultStart));
+                    txtResultEnd.setText(DataFormat.timestamp(this, resultEnd));
+                    txtResultReceive.setText(DataFormat.timestamp(this, resultReceive));
+                    txtResultAverage.setText(DataFormat.time(this, resultAverage));
                 }
             });
 

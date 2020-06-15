@@ -306,7 +306,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_RESULT_START, 0);
             LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_RESULT_END, 0);
             LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE, 0);
-            LocalPersistency.setLongArray(this, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE, new ArrayList<>());
         }
         new SaveMeasureTask(ScanModeActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
