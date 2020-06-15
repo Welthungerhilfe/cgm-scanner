@@ -2,7 +2,6 @@ package de.welthungerhilfe.cgm.scanner.helper.syncdata;
 
 import android.accounts.Account;
 import android.annotation.SuppressLint;
-import android.app.ActivityManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -13,18 +12,17 @@ import android.content.SyncResult;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.microsoft.azure.storage.*;
-import com.microsoft.azure.storage.queue.*;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.queue.CloudQueue;
+import com.microsoft.azure.storage.queue.CloudQueueClient;
+import com.microsoft.azure.storage.queue.CloudQueueMessage;
 
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
+import java.util.ArrayList;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
@@ -32,6 +30,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -42,6 +41,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureResultReposit
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
@@ -147,16 +147,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     measureResultRepository.insertMeasureResult(result);
                                 }
 
-                                float fieldMaxConfidence = 0;
                                 if (result.getKey().contains("weight")) {
-                                    fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "weight%");
+                                    float fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "weight%");
 
                                     if (result.getConfidence_value() >= fieldMaxConfidence) {
                                         measureRepository.updateWeight(result.getMeasure_id(), result.getFloat_value());
                                         measureRepository.updateResultTimestamp(result.getMeasure_id(), System.currentTimeMillis());
                                     }
                                 } else if (result.getKey().contains("height")) {
-                                    fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "height%");
+                                    float fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "height%");
 
                                     if (result.getConfidence_value() >= fieldMaxConfidence) {
                                         measureRepository.updateHeight(result.getMeasure_id(), result.getFloat_value());
@@ -164,6 +163,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     }
                                 }
 
+                                if (result.getKey().contains("height") && result.getKey().contains("weight")) {
+                                    if (result.getConfidence_value() >= measureResultRepository.getMaxConfidence(result.getMeasure_id(), "weight%")) {
+                                        if (result.getConfidence_value() >= measureResultRepository.getMaxConfidence(result.getMeasure_id(), "height%")) {
+                                            onResultReceived(result);
+                                        }
+                                    }
+                                }
 
                             } catch (JsonSyntaxException e) {
                                 e.printStackTrace();
@@ -297,6 +303,32 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }
 
             return null;
+        }
+
+        private void onResultReceived(MeasureResult result) {
+
+            Context c = getContext();
+            if (!LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT))
+                return;
+            if (LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID).compareTo(result.getMeasure_id()) != 0)
+                return;
+
+            if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE) == 0) {
+
+                //set receive timestamp
+                LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE, System.currentTimeMillis());
+
+                //update average time
+                long diff = 0;
+                diff += LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE);
+                diff -= LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_SCAN);
+                ArrayList<Long> last = LocalPersistency.getLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE);
+                last.add(diff);
+                if (last.size() > 10) {
+                    last.remove(0);
+                }
+                LocalPersistency.setLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE, last);
+            }
         }
     }
 }

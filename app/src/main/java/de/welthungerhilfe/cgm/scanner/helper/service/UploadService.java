@@ -26,9 +26,7 @@ import java.util.concurrent.Executors;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
@@ -239,47 +237,6 @@ public class UploadService extends Service implements OnFileLogsLoad {
         //set timestamp for the end of upload
         if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_END) == 0) {
             LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_END, System.currentTimeMillis());
-        }
-
-        if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE) == 0) {
-
-            //wait for result
-            Log.e("UploadService", "Started waiting for a result");
-            while (true) {
-                Measure measure = MeasureRepository.getInstance(getApplicationContext()).getMeasure(measureId);
-
-                if (measure == null) {
-                    Log.e("UploadService", "Checking for the result of " + measureId + " -> null");
-                } else if (measure.getHeight() == 0) {
-                    Log.e("UploadService", "Checking for the result of " + measureId + " -> no height");
-                } else if (measure.getWeight() == 0) {
-                    Log.e("UploadService", "Checking for the result of " + measureId + " -> no weight");
-                } else {
-                    Log.e("UploadService", "Checking for the result of " + measureId + " -> valid");
-                    break;
-                }
-
-                try {
-                    Thread.sleep(60000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            Log.e("UploadService", "Stopped waiting for a result");
-
-            //set receive timestamp
-            LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE, System.currentTimeMillis());
-
-            //update average time
-            long diff = 0;
-            diff += LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE);
-            diff -= LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_SCAN);
-            ArrayList<Long> last = LocalPersistency.getLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE);
-            last.add(diff);
-            if (last.size() > 10) {
-                last.remove(0);
-            }
-            LocalPersistency.setLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE, last);
         }
     }
 }
