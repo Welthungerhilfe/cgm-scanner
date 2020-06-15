@@ -112,7 +112,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 }
             }
             if (finished) {
-                new Thread(() -> onUploadFinished(measureId)).start();
+                onUploadFinished();
             }
         }
 
@@ -223,7 +223,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
         }
     }
 
-    private void onUploadFinished(String measureId) {
+    private void onUploadFinished() {
 
         //do not continue if the previous timestamps are missing
         Context c = getApplicationContext();

@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
@@ -44,6 +45,7 @@ import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.ACTION_RESULT_GENERATED;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
@@ -151,15 +153,45 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     float fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "weight%");
 
                                     if (result.getConfidence_value() >= fieldMaxConfidence) {
-                                        measureRepository.updateWeight(result.getMeasure_id(), result.getFloat_value());
-                                        measureRepository.updateResultTimestamp(result.getMeasure_id(), System.currentTimeMillis());
+                                        JsonObject object = new Gson().fromJson(result.getJson_value(), JsonObject.class);
+                                        long timestamp = object.get("timestamp").getAsLong();
+
+                                        Measure measure = measureRepository.getMeasureById(result.getMeasure_id());
+                                        if (measure != null) {
+                                            measure.setWeight(result.getFloat_value());
+                                            measure.setResulted_at(timestamp);
+                                            measure.setReceived_at(System.currentTimeMillis());
+                                            measureRepository.updateMeasure(measure);
+
+                                            Intent intent = new Intent();
+                                            intent.setAction(ACTION_RESULT_GENERATED);
+                                            intent.putExtra("qr_code", measure.getQrCode());
+                                            intent.putExtra("weight", measure.getWeight());
+                                            intent.putExtra("received_at", measure.getReceived_at());
+                                            getContext().sendBroadcast(intent);
+                                        }
                                     }
                                 } else if (result.getKey().contains("height")) {
                                     float fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "height%");
 
                                     if (result.getConfidence_value() >= fieldMaxConfidence) {
-                                        measureRepository.updateHeight(result.getMeasure_id(), result.getFloat_value());
-                                        measureRepository.updateResultTimestamp(result.getMeasure_id(), System.currentTimeMillis());
+                                        JsonObject object = new Gson().fromJson(result.getJson_value(), JsonObject.class);
+                                        long timestamp = object.get("timestamp").getAsLong();
+
+                                        Measure measure = measureRepository.getMeasureById(result.getMeasure_id());
+                                        if (measure != null) {
+                                            measure.setWeight(result.getFloat_value());
+                                            measure.setResulted_at(timestamp);
+                                            measure.setReceived_at(System.currentTimeMillis());
+                                            measureRepository.updateMeasure(measure);
+
+                                            Intent intent = new Intent();
+                                            intent.setAction(ACTION_RESULT_GENERATED);
+                                            intent.putExtra("qr_code", measure.getQrCode());
+                                            intent.putExtra("height", measure.getHeight());
+                                            intent.putExtra("received_at", measure.getReceived_at());
+                                            getContext().sendBroadcast(intent);
+                                        }
                                     }
                                 }
 

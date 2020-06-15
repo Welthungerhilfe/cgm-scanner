@@ -76,6 +76,7 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.ui.views.SwipeView;
 
+import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.ACTION_RESULT_GENERATED;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_DATE;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_LOCATION;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_STUNTING;

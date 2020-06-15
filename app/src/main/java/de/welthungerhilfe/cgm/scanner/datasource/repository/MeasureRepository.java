@@ -38,6 +38,10 @@ public class MeasureRepository {
         return database.measureDao().getSyncableMeasure(timestamp);
     }
 
+    public Measure getMeasureById(String id) {
+        return database.measureDao().getMeasureById(id);
+    }
+
     public LiveData<List<Measure>> getPersonMeasures(String personId) {
         return database.measureDao().getPersonMeasures(personId);
     }
@@ -75,8 +79,8 @@ public class MeasureRepository {
         database.measureDao().updateResultTimestamp(measure_id, currentTimeMillis);
     }
 
-    public Measure getMeasure(String id) {
-        return database.measureDao().findMeasure(id);
+    public void updateReceiveTimestamp(String measure_id, long currentTimeMillis) {
+        database.measureDao().updateReceiveTimestamp(measure_id, currentTimeMillis);
     }
 
     public LiveData<List<Measure>> getUploadMeasures() {
