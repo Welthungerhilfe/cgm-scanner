@@ -171,7 +171,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Toast.makeText(LoginActivity.this, R.string.login_error_unable, Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this, R.string.error_login, Toast.LENGTH_LONG).show();
                     }
                     webView.loadUrl("about:blank");
                     webView.setVisibility(View.GONE);
@@ -184,7 +184,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             webView.setVisibility(View.VISIBLE);
             webView.loadUrl(url);
         } else {
-            Toast.makeText(LoginActivity.this, R.string.login_error_nonet, Toast.LENGTH_LONG).show();
+            Toast.makeText(LoginActivity.this, R.string.error_network, Toast.LENGTH_LONG).show();
         }
     }
 

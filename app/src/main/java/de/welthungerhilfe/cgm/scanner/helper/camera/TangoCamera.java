@@ -31,8 +31,6 @@ import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoConfig;
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoErrorException;
-import com.google.atap.tangoservice.TangoInvalidException;
-import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
@@ -175,7 +173,7 @@ public class TangoCamera implements ICamera {
                 mTango.disconnect();
                 mIsConnected = false;
             } catch (TangoErrorException e) {
-                Log.e(TAG, mActivity.getString(R.string.exception_tango_error), e);
+                Log.e(TAG, e.getMessage());
                 Crashes.trackError(e);
             }
         }
@@ -201,14 +199,8 @@ public class TangoCamera implements ICamera {
                     mIsConnected = true;
 
                     setDisplayRotation();
-                } catch (TangoOutOfDateException e) {
-                    Log.e(TAG, mActivity.getString(R.string.exception_out_of_date), e);
-                    Crashes.trackError(e);
-                } catch (TangoErrorException e) {
-                    Log.e(TAG, mActivity.getString(R.string.exception_tango_error), e);
-                    Crashes.trackError(e);
-                } catch (TangoInvalidException e) {
-                    Log.e(TAG, mActivity.getString(R.string.exception_tango_invalid), e);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage());
                     Crashes.trackError(e);
                 }
             }
