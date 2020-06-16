@@ -401,7 +401,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
 
         if (person == null) {
-            Toast.makeText(this, "Person was not defined", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.person_not_defined, Toast.LENGTH_LONG).show();
             finish();
         }
 
@@ -660,17 +660,17 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 Log.e("ScanQuality", String.valueOf(lightScore));
                 Log.e("DurationQuality", String.valueOf(durationScore));
 
-                String issues = "Scan Quality :";
-                issues = String.format("%s\n - Light Score : %d%%", issues, Math.round(lightScore * 100));
-                issues = String.format("%s\n - Duration Score : %d%%", issues, Math.round(durationScore * 100));
+                String issues = getString(R.string.scan_quality);
+                issues = String.format("%s\n - " + getString(R.string.score_light) + "%d%%", issues, Math.round(lightScore * 100));
+                issues = String.format("%s\n - " + getString(R.string.score_duration) + "%d%%", issues, Math.round(durationScore * 100));
 
                 if (scanStep == SCAN_STANDING_FRONT || scanStep == SCAN_LYING_FRONT) {
                     btnScanStep1.setVisibility(View.GONE);
 
                     if (pointCloudCount < 8) {
-                        issues = String.format("%s\n - Duration was too short", issues);
+                        issues = String.format("%s\n - " + getString(R.string.score_duration_short), issues);
                     } else if (pointCloudCount > 9) {
-                        issues = String.format("%s\n - Duration was too long", issues);
+                        issues = String.format("%s\n - " + getString(R.string.score_duration_long), issues);
                     }
 
                     txtScanStep1.setText(issues);
@@ -683,9 +683,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     btnScanStep2.setVisibility(View.GONE);
 
                     if (pointCloudCount < 12) {
-                        issues = String.format("%s\n - Duration was too short", issues);
+                        issues = String.format("%s\n - " + getString(R.string.score_duration_short), issues);
                     } else if (pointCloudCount > 27) {
-                        issues = String.format("%s\n - Duration was too long", issues);
+                        issues = String.format("%s\n - " + getString(R.string.score_duration_long), issues);
                     }
                     txtScanStep2.setText(issues);
                     imgScanStep2.setVisibility(View.GONE);
@@ -697,9 +697,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     btnScanStep3.setVisibility(View.GONE);
 
                     if (pointCloudCount < 8) {
-                        issues = String.format("%s\n - Duration was too short", issues);
+                        issues = String.format("%s\n - " + getString(R.string.score_duration_short), issues);
                     } else if (pointCloudCount > 9) {
-                        issues = String.format("%s\n - Duration was too long", issues);
+                        issues = String.format("%s\n - " + getString(R.string.score_duration_long), issues);
                     }
 
                     txtScanStep3.setText(issues);
@@ -773,7 +773,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             finish();
         }
         if (requestCode == PERMISSION_STORAGE && (grantResults.length == 0 || grantResults[0] < 0)) {
-            Toast.makeText(ScanModeActivity.this, "Storage permission needed!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ScanModeActivity.this, R.string.storage_permission_needed, Toast.LENGTH_SHORT).show();
             finish();
         }
     }

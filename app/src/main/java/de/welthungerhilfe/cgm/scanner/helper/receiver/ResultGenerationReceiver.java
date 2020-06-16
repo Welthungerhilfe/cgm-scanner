@@ -60,8 +60,8 @@ public class ResultGenerationReceiver extends BroadcastReceiver {
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .setOngoing(false);
 
-        notificationBuilder.setContentTitle(String.format("Result Generation At %s", Utils.beautifyDate(timestamp)));
-        notificationBuilder.setContentText(String.format("%s result for %s : %.2f%s", type, qrCode, value, type.equals("weight") ? "kg" : "cm"));
+        notificationBuilder.setContentTitle(String.format(context.getString(R.string.result_generation_at) + " %s", Utils.beautifyDate(timestamp)));
+        notificationBuilder.setContentText(String.format(Locale.US, "%s " + context.getString(R.string.result_for) + " %s : %.2f%s", type, qrCode, value, type.equals("weight") ? "kg" : "cm"));
 
         int notificationID = Integer.parseInt(new SimpleDateFormat("ddHHmmss",  Locale.US).format(new Date()));
         notificationManager.notify(notificationID, notificationBuilder.build());

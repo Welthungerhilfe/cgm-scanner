@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:visibility="invisible"
-        android:text="QR code is not readable"
+        android:text="@string/qr_not_readable"
         android:textColor="@color/colorWhite"
         android:background="@drawable/view_alert"/>
 

@@ -408,7 +408,7 @@ public class GrowthDataFragment extends Fragment {
             } catch (NullPointerException ex) {
                 ex.printStackTrace();
 
-                Toast.makeText(getContext(), "Child needs to be older than 3 month to compare arm circumference", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), R.string.older_3_months, Toast.LENGTH_LONG).show();
             }
         }
 

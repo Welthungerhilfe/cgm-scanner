@@ -159,7 +159,7 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
 
         runOnUiThread(() -> {
             Geocoder geocoder = new Geocoder(LocationSearchActivity.this, Locale.getDefault());
-            String result = "Could not parse address from location";
+            String result = getString(R.string.address_parse_error);
             try {
                 List <Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
                 if (addressList != null && addressList.size() > 0) {
@@ -273,7 +273,7 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
             if (grantResults.length > 0 && grantResults[0] >= 0) {
                 getCurrentLocation();
             } else {
-                Toast.makeText(LocationSearchActivity.this, "App can't get device location", Toast.LENGTH_LONG).show();
+                Toast.makeText(LocationSearchActivity.this, R.string.address_error, Toast.LENGTH_LONG).show();
             }
         }
     }

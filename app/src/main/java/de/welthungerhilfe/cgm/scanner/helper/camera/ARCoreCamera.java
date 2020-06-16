@@ -433,7 +433,6 @@ public class ARCoreCamera implements ICamera {
           }
         } catch (Exception e) {
           Log.e(TAG, "ARCore not installed", e);
-          mActivity.runOnUiThread(() -> Toast.makeText(mActivity, "ARCore not installed\n" + e, Toast.LENGTH_LONG).show());
           mActivity.finish();
           return false;
         }
@@ -442,14 +441,8 @@ public class ARCoreCamera implements ICamera {
       case UNKNOWN_CHECKING:
       case UNKNOWN_TIMED_OUT:
       case UNSUPPORTED_DEVICE_NOT_CAPABLE:
-        Log.e(
-                TAG,
-                "ARCore is not supported on this device, ArCoreApk.checkAvailability() returned "
-                        + availability);
-        mActivity.runOnUiThread(() ->
-                        Toast.makeText(mActivity, "ARCore is not supported on this device, "
-                                        + "ArCoreApk.checkAvailability() returned "
-                                        + availability, Toast.LENGTH_LONG).show());
+        Log.e(TAG, "ARCore is not supported on this device, ArCoreApk.checkAvailability() returned " + availability);
+        mActivity.finish();
         return false;
     }
     return true;
