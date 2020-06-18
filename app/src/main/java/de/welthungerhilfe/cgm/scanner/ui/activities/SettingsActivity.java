@@ -179,7 +179,7 @@ public class SettingsActivity extends BaseActivity {
                 break;
         }
 
-        if (session.getBackupTimestamp() == 0) txtSettingBackupDate.setText("No backups");
+        if (session.getBackupTimestamp() == 0) txtSettingBackupDate.setText(R.string.no_backups);
         else txtSettingBackupDate.setText(Utils.beautifyDate(session.getBackupTimestamp()));
 
 

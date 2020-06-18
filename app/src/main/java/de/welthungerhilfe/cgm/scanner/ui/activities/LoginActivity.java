@@ -171,7 +171,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Toast.makeText(LoginActivity.this, "Unable to login.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this, R.string.error_login, Toast.LENGTH_LONG).show();
                     }
                     webView.loadUrl("about:blank");
                     webView.setVisibility(View.GONE);
@@ -184,7 +184,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             webView.setVisibility(View.VISIBLE);
             webView.loadUrl(url);
         } else {
-            Toast.makeText(LoginActivity.this, "No internet connection.", Toast.LENGTH_LONG).show();
+            Toast.makeText(LoginActivity.this, R.string.error_network, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -247,18 +247,18 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                     } catch (URISyntaxException | InvalidKeyException e) {
                         e.printStackTrace();
 
-                        Toast.makeText(this, "Backend account is invalid", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, R.string.login_error_nobackend, Toast.LENGTH_LONG).show();
                     }
                 } else {
-                    Toast.makeText(LoginActivity.this, "Couldn't get user email, please try again", Toast.LENGTH_LONG).show();
+                    Toast.makeText(LoginActivity.this, R.string.login_error_invalid, Toast.LENGTH_LONG).show();
                 }
             } else {
-                Toast.makeText(this, "Couldn't find your backend", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.login_error_backend, Toast.LENGTH_LONG).show();
             }
         } catch (ParseException e) {
             e.printStackTrace();
 
-            Toast.makeText(LoginActivity.this, "Token Parse Failed.", Toast.LENGTH_LONG).show();
+            Toast.makeText(LoginActivity.this, R.string.login_error_parse, Toast.LENGTH_LONG).show();
         }
 
         return false;

@@ -30,7 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:text="Search by QR"
+            android:text="@string/search_by_qr"
             android:textColor="@color/colorWhite"
             android:textSize="20sp"/>
 
@@ -56,7 +56,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/activity_group_margin"
-            android:text="Scan QR code in the consent form to search a profile"
+            android:text="@string/scan_qr_code_desc"
             android:textColor="@color/colorWhite"
             android:textSize="18sp"/>
 

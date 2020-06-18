@@ -5,9 +5,6 @@
     <string name="permission_camera">"Camera permission needed!"</string>
     <string name="loading">loading…</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
     <string name="validate_user">Please input user name</string>
     <string name="validate_password">Please input password</string>
     
@@ -54,13 +51,13 @@
     <string name="sort_date">old person on top</string>
     <string name="sort_location">nearest person on top</string>
     <string name="wasting">Wasting</string>
-    <string name="wasting_weight_height">worst weight/height on top</string>
+    <string name="wasting_weight_height">lowest weight/height on top</string>
     <string name="stunting">Stunting</string>
-    <string name="stunting_height_age">worst height/age on top</string>
+    <string name="stunting_height_age">lowest height/age on top</string>
     <string name="no_filter">No filter</string>
     <string name="clear_filters">Clear all filters</string>
     <string name="no_persons">NO PERSONS REGISTERED</string>
-    <string name="circuit">circumcircle</string>
+    <string name="circuit">circumcise</string>
     <string name="own_data">Only own data</string>
     <string name="created_by_self">show only children created by myself</string>
 
@@ -191,10 +188,6 @@
         <item>@string/selector_scan</item>
     </string-array>
 
-    <string name="exception_tango_error">"There was an error"</string>
-    <string name="exception_tango_invalid">"Scanning session invalidated"</string>
-    <string name="exception_out_of_date">"Please update Tango Core App!"</string>
-
     <string name="mode_standing">Standing Up</string>
     <string name="mode_lying">Lying Down</string>
 
@@ -240,11 +233,11 @@
     <string name="no_scans">No scans yet today</string>
     <string name="add_scans">To start scanning, tap [+] button</string>
     <string name="sam_wfa_title">Child is severely under weight</string>
-    <string name="sam_wfa_message">Please go to the nearest Malnutrition center/ Nutrition Rehabilitation center</string>
+    <string name="sam_wfa_message">Please go to the nearest Malnutrition center / Nutrition Rehabilitation center</string>
     <string name="mam_wfa_title">Child is moderately under weight</string>
     <string name="mam_wfa_message">Please go to Anganwadi center or Anganwadi Worker</string>
-    <string name="sam_acfa_title">Severly Malnourished</string>
-    <string name="sam_acfa_message">Please go to the nearest Malnutrition center/Nutritional Rehabilitation center</string>
+    <string name="sam_acfa_title">Severely Malnourished</string>
+    <string name="sam_acfa_message">Please go to the nearest Malnutrition center / Nutritional Rehabilitation center</string>
     <string name="mam_acfa_title">Moderately Malnourished</string>
     <string name="mam_acfa_message">Please look for ASHA or AWW at your nearest health center</string>
     <string name="mam_wfh_title">Moderately wasted</string>
@@ -255,7 +248,7 @@
     <string name="sam_hfa_message">Contact a local doctor or health officer</string>
     <string name="mam_hfa_title">Follow-up Examination</string>
     <string name="mam_hfa_message">Contact a local doctor or health officer</string>
-    <string name="label_wait">Please wait for a moment ...</string>
+    <string name="label_wait">Please wait for a moment…</string>
     <string name="btn_retake">RE-TAKE</string>
     <string name="btn_tutorial">TUTORIAL</string>
     <string name="scan_feedback">Scan Feedback</string>
@@ -266,6 +259,7 @@
     <string name="backup">Backup</string>
     <string name="last_backup_date">Last Backup Date</string>
     <string name="backup_now">Backup Now</string>
+    <string name="no_backups">No backups</string>
 
     <string name="test_qa_environment">Test/QA environment</string>
     <string name="profile_result_title">Measure time to get result</string>
@@ -282,10 +276,38 @@
 
     <string name="label_overview">Overview</string>
     <string name="label_upload_speed">Upload Speed : </string>
-    <string name="label_upload_expect">"Expected Time : "</string>
-    <string name="label_total_size">"Total Size : "</string>
-    <string name="label_uploaded_size">"Uploaded Size : "</string>
+    <string name="label_upload_expect">Expected Time : </string>
+    <string name="label_total_size">Total Size : </string>
+    <string name="label_uploaded_size">Uploaded Size : </string>
     <string name="menuUploadManager">Upload Manager</string>
     <string name="label_upload_status">Upload Status</string>
     <string name="abbr_qr">QR code : </string>
+    <string name="qr_not_readable">QR Code is not readable</string>
+    <string name="search_by_qr">Search by QR</string>
+    <string name="scan_qr_code_desc">Scan QR code in the consent form to search a profile</string>
+    <string name="address_parse_error">Could not parse address from location</string>
+    <string name="address_error">App can\'t get device location</string>
+    <string name="person_not_defined">Person was not defined</string>
+    <string name="storage_permission_needed">Storage permission needed!</string>
+    <string name="older_3_months">Child needs to be older than 3 month to compare arm circumference</string>
+
+    <string name="login_error_parse">Token Parse Failed</string>
+    <string name="login_error_backend">Couldn\'t find your backend</string>
+    <string name="login_error_invalid">Couldn\'t get user email, please try again</string>
+    <string name="login_error_nobackend">Backend account is invalid</string>
+
+    <string name="scan_quality">Scan Quality : </string>
+    <string name="score_light">Light Score : </string>
+    <string name="score_duration">Duration Score : </string>
+    <string name="score_duration_short">Duration was too short</string>
+    <string name="score_duration_long">Duration was too long</string>
+
+    <string name="upload_completed">Upload Completed</string>
+    <string name="less_than_minute">less than 1 minute</string>
+    <string name="minutes">minutes</string>
+    <string name="hours">hours</string>
+    <string name="days">days</string>
+
+    <string name="result_generation_at">Result generation at</string>
+    <string name="result_for">result for</string>
 </resources>
