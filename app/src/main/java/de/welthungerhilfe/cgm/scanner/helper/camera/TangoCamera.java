@@ -50,7 +50,7 @@ public class TangoCamera implements ICamera {
     public interface TangoCameraListener {
         void onTangoColorData(TangoImageBuffer tangoImageBuffer);
 
-        void onTangoDepthData(TangoPointCloudData pointCloudData);
+        void onTangoDepthData(TangoPointCloudData pointCloudData, String pose);
     }
 
     //constants
@@ -66,6 +66,7 @@ public class TangoCamera implements ICamera {
     private int mDisplayRotation = Surface.ROTATION_0;
     private Semaphore mutex_on_mIsRecording;
     private AtomicBoolean mIsFrameAvailableTangoThread;
+    private String mPose;
 
     //App integration objects
     private Activity mActivity;
@@ -79,6 +80,7 @@ public class TangoCamera implements ICamera {
 
         mIsConnected = false;
         mIsFrameAvailableTangoThread = new AtomicBoolean(false);
+        mPose = "0 0 0 1 0 0 0";
     }
 
     @Override
@@ -227,6 +229,23 @@ public class TangoCamera implements ICamera {
 
             @Override
             public void onPoseAvailable(final TangoPoseData pose) {
+                if (pose.statusCode == TangoPoseData.POSE_VALID) {
+                    try {
+                        mutex_on_mIsRecording.acquire();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        Crashes.trackError(e);
+                    }
+                    mPose = "";
+                    mPose += pose.rotation[0] + " ";
+                    mPose += pose.rotation[1] + " ";
+                    mPose += pose.rotation[2] + " ";
+                    mPose += pose.rotation[3] + " ";
+                    mPose += pose.translation[0] + " ";
+                    mPose += pose.translation[1] + " ";
+                    mPose += pose.translation[2];
+                    mutex_on_mIsRecording.release();
+                }
             }
 
             @Override
@@ -242,7 +261,7 @@ public class TangoCamera implements ICamera {
                     Crashes.trackError(e);
                 }
                 for (TangoCameraListener listener : mListeners) {
-                    listener.onTangoDepthData(pointCloudData);
+                    listener.onTangoDepthData(pointCloudData, mPose);
                 }
                 mutex_on_mIsRecording.release();
             }
