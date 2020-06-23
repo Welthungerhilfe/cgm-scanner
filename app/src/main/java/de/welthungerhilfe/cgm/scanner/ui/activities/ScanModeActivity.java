@@ -52,11 +52,8 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.InvalidKeyException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -368,7 +365,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private AlertDialog progressDialog;
 
     private ExecutorService executor;
-    private HashMap<Integer, Integer> threads;
+    private int threadsCount = 0;
+    private final Object threadsLock = new Object();
 
     private ICamera mCameraInstance;
 
@@ -407,7 +405,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
 
         executor = Executors.newFixedThreadPool(20);
-        threads = new HashMap<>();
 
         mNowTime = System.currentTimeMillis();
         mNowTimeString = String.valueOf(mNowTime);
@@ -777,6 +774,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             Toast.makeText(ScanModeActivity.this, R.string.storage_permission_needed, Toast.LENGTH_SHORT).show();
             finish();
         }
+        setupScanArtifacts();
     }
 
     public void onBackPressed() {
@@ -825,14 +823,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         @Override
         protected Void doInBackground(Void... voids) {
             Gson gson = new Gson();
-            Set<Integer> steps;
-            synchronized (threads) {
-                steps = threads.keySet();
-            }
-            for (Integer step : steps) {
-                waitUntilFinished(step);
-            }
 
+            waitUntilFinished();
             measureRepository.insertMeasure(measure);
 
             try {
@@ -919,7 +911,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             long profile = System.currentTimeMillis();
             ARCoreCamera.CameraCalibration calibration = ((ARCoreCamera)mCameraInstance).getCalibration();
 
-            int scanStep = SCAN_STEP;
             Runnable thread = () -> {
 
                 //write RGB data
@@ -993,9 +984,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         }
                     }
                 }
-                onThreadChange(scanStep,-1);
+                onThreadChange(-1);
             };
-            onThreadChange(scanStep,1);
+            onThreadChange(1);
             executor.execute(thread);
         }
     }
@@ -1091,9 +1082,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setMeasureId(measure.getId());
                     fileLogRepository.insertFileLog(log);
                 }
-                onThreadChange(scanStep,-1);
+                onThreadChange(-1);
             };
-            onThreadChange(scanStep,1);
+            onThreadChange(1);
             executor.execute(thread);
         }
     }
@@ -1107,7 +1098,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
         String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + currentTangoImageBuffer.timestamp + ".jpg";
 
-        int scanStep = SCAN_STEP;
         Runnable thread = () -> {
             long profile = System.currentTimeMillis();
             BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
@@ -1138,9 +1128,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 fileLogRepository.insertFileLog(log);
             }
-            onThreadChange(scanStep,-1);
+            onThreadChange(-1);
         };
-        onThreadChange(scanStep,1);
+        onThreadChange(1);
         executor.execute(thread);
     }
 
@@ -1205,37 +1195,37 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                     Log.e("numbs", String.valueOf(mNumberOfFilesWritten));
                 }
-                onThreadChange(scanStep, -1);
+                onThreadChange(-1);
             };
-            onThreadChange(scanStep,1);
+            onThreadChange(1);
             executor.execute(thread);
         }
     }
 
-    private void onThreadChange(int scanStep, int diff) {
-        synchronized (threads) {
-            if (threads.containsKey(scanStep)) {
-                int value = threads.get(scanStep);
-                value += diff;
-                threads.remove(scanStep);
-                threads.put(scanStep, value);
+    private void onThreadChange(int diff) {
+        synchronized (threadsLock) {
+            threadsCount += diff;
+            if (threadsCount == 0) {
+                Log.d("ScanModeActivity", "The last thread finished");
+                threadsLock.notify();
             } else {
-                threads.put(scanStep, diff);
+                Log.d("ScanModeActivity", "Amount of threads : " + threadsCount);
             }
         }
     }
 
-    private void waitUntilFinished(int scanStep) {
-        while (true) {
-            synchronized (threads) {
-                if (threads.containsKey(scanStep) && threads.get(scanStep) == 0) {
-                    break;
+    private void waitUntilFinished() {
+        synchronized (threadsLock) {
+            if (threadsCount > 0) {
+                Log.d("ScanModeActivity", "Start waiting on running threads");
+                try {
+                    threadsLock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.d("ScanModeActivity", "Stop waiting on running threads");
+            } else {
+                Log.d("ScanModeActivity", "All threads already finished");
             }
         }
     }
