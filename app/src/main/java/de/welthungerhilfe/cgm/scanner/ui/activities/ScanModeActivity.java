@@ -35,6 +35,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.ar.core.Pose;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 import com.google.gson.Gson;
@@ -1000,11 +1001,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    public void onDepthDataReceived(Image image, int frameIndex) {
+    public void onDepthDataReceived(Image image, Pose pose, int frameIndex) {
         if (mIsRecording && (frameIndex % 10 == 0)) {
 
             long profile = System.currentTimeMillis();
-            ARCoreUtils.Depthmap depthmap = ARCoreUtils.extractDepthmap(image);
+            ARCoreUtils.Depthmap depthmap = ARCoreUtils.extractDepthmap(image, pose);
             long timestamp = depthmap.getTimestamp();
             float density = ((ARCoreCamera)mCameraInstance).getDepthSensorDensity();
             float lightIntensity = ((ARCoreCamera)mCameraInstance).getLightIntensity() * 2.0f;
@@ -1144,7 +1145,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    public void onTangoDepthData(TangoPointCloudData pointCloudData) {
+    public void onTangoDepthData(TangoPointCloudData pointCloudData, String pose) {
         // Saving the frame or not, depending on the current mode.
         if ( mIsRecording ) {
             long profile = System.currentTimeMillis();
@@ -1176,7 +1177,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             Runnable thread = () -> {
                 File artifactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + pointCloudFilename +".pcd");
-                TangoUtils.writePointCloudToPcdFile(buffer, numPoints, timestamp, artifactFile);
+                TangoUtils.writePointCloudToPcdFile(buffer, numPoints, timestamp, pose, artifactFile);
 
                 if (artifactFile.exists()) {
                     mDepthSize += artifactFile.length();

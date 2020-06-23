@@ -82,7 +82,7 @@ public class TangoUtils {
     }
 
     // This function writes the XYZC points to .pcd files in binary
-    public static Uri writePointCloudToPcdFile(ByteBuffer buffer, int numPoints, double timestamp, File file) {
+    public static Uri writePointCloudToPcdFile(ByteBuffer buffer, int numPoints, double timestamp, String pose, File file) {
 
         try {
             FileOutputStream out = new FileOutputStream(file);
@@ -95,7 +95,7 @@ public class TangoUtils {
                     "COUNT 1 1 1 1\n" +
                     "WIDTH " + numPoints + "\n"+
                     "HEIGHT 1\n" +
-                    "VIEWPOINT 0 0 0 1 0 0 0\n" +
+                    "VIEWPOINT " + pose + "\n" +
                     "POINTS " + numPoints + "\n" +
                     "DATA ascii\n").getBytes());
 

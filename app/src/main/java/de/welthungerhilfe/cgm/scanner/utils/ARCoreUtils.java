@@ -2,6 +2,8 @@ package de.welthungerhilfe.cgm.scanner.utils;
 
 import android.media.Image;
 
+import com.google.ar.core.Pose;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,6 +42,8 @@ public class ARCoreUtils {
         int count;
         int width;
         int height;
+        float[] position;
+        float[] rotation;
         long timestamp;
 
         private Depthmap(int width, int height) {
@@ -49,6 +53,8 @@ public class ARCoreUtils {
             count = 0;
             confidence = new byte[width * height];
             depth = new short[width * height];
+            position = new float[] {0, 0, 0};
+            rotation = new float[] {0, 0, 0, 1};
         }
 
         private float getConfidence(int x, int y) {
@@ -77,6 +83,18 @@ public class ARCoreUtils {
             return depth[y * width + x] * 0.001f;
         }
 
+        public String getPose(String separator) {
+            String output = "";
+            output += rotation[0] + separator;
+            output += rotation[1] + separator;
+            output += rotation[2] + separator;
+            output += rotation[3] + separator;
+            output += position[0] + separator;
+            output += position[1] + separator;
+            output += position[2];
+            return output;
+        }
+
         public int getHeight() {
             return height;
         }
@@ -88,7 +106,7 @@ public class ARCoreUtils {
         public long getTimestamp() { return timestamp; }
     }
 
-    public static Depthmap extractDepthmap(Image image) {
+    public static Depthmap extractDepthmap(Image image, Pose pose) {
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
         ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
@@ -102,6 +120,8 @@ public class ARCoreUtils {
         int height = image.getHeight();
 
         Depthmap depthmap = new Depthmap(width, height);
+        depthmap.position = pose.getTranslation();
+        depthmap.rotation = pose.getRotationQuaternion();
         depthmap.timestamp = image.getTimestamp();
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -127,7 +147,7 @@ public class ARCoreUtils {
             byte[] data = depthmap.getData();
             FileOutputStream stream = new FileOutputStream(file);
             ZipOutputStream zip = new ZipOutputStream(stream);
-            byte[] info = (depthmap.getWidth() + "x" + depthmap.getHeight() + "_0.001_7\n").getBytes();
+            byte[] info = (depthmap.getWidth() + "x" + depthmap.getHeight() + "_0.001_7_" + depthmap.getPose("_") + "\n").getBytes();
             zip.putNextEntry(new ZipEntry("data"));
             zip.write(info, 0, info.length);
             zip.write(data, 0, data.length);
@@ -176,7 +196,7 @@ public class ARCoreUtils {
                     "COUNT 1 1 1 1\n" +
                     "WIDTH " + count + "\n" +
                     "HEIGHT 1\n" +
-                    "VIEWPOINT 0 0 0 1 0 0 0\n" +
+                    "VIEWPOINT " + depthmap.getPose(" ") + "\n" +
                     "POINTS " + count + "\n" +
                     "DATA ascii\n";
 
