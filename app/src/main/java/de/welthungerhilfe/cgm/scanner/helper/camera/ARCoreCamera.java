@@ -44,13 +44,14 @@ import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.google.ar.core.ArCoreApk;
+import com.google.ar.core.Camera;
 import com.google.ar.core.CameraConfig;
 import com.google.ar.core.CameraIntrinsics;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
+import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.SharedCamera;
 
@@ -68,7 +69,7 @@ import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 
 public class ARCoreCamera implements ICamera {
 
-  public class CameraCalibration {
+  public static class CameraCalibration {
     private float[] colorCameraIntrinsic;
     private float[] depthCameraIntrinsic;
     private float[] depthCameraTranslation;
@@ -111,7 +112,7 @@ public class ARCoreCamera implements ICamera {
   {
     void onColorDataReceived(Bitmap bitmap, int frameIndex);
 
-    void onDepthDataReceived(Image image, int frameIndex);
+    void onDepthDataReceived(Image image, Pose pose, int frameIndex);
   }
 
   private static final String TAG = ARCoreCamera.class.getSimpleName();
@@ -126,6 +127,8 @@ public class ARCoreCamera implements ICamera {
 
   //ARCore API
   private Session mSession;
+  private Pose mPose;
+  private final Object mLock;
 
   //App integration objects
   private Activity mActivity;
@@ -143,6 +146,7 @@ public class ARCoreCamera implements ICamera {
     mListeners = new ArrayList<>();
 
     mCameraCalibration = new CameraCalibration();
+    mLock = new Object();
     mFrameIndex = 1;
     mPixelIntensity = 0;
   }
@@ -245,6 +249,12 @@ public class ARCoreCamera implements ICamera {
       Log.w(TAG, "onImageAvailable: Skipping null image.");
       return;
     }
+
+    Pose pose;
+    synchronized (mLock) {
+      pose = mPose;
+    }
+
     if (!mCache.isEmpty()) {
       Bitmap bitmap = null;
       long bestDiff = Long.MAX_VALUE;
@@ -258,7 +268,7 @@ public class ARCoreCamera implements ICamera {
 
       if (bitmap != null && bestDiff < 50000) {
         for (Camera2DataListener listener : mListeners) {
-          listener.onDepthDataReceived(image, mFrameIndex);
+          listener.onDepthDataReceived(image, pose, mFrameIndex);
         }
         for (Camera2DataListener listener : mListeners) {
           listener.onColorDataReceived(bitmap, mFrameIndex);
@@ -433,7 +443,6 @@ public class ARCoreCamera implements ICamera {
           }
         } catch (Exception e) {
           Log.e(TAG, "ARCore not installed", e);
-          mActivity.runOnUiThread(() -> Toast.makeText(mActivity, "ARCore not installed\n" + e, Toast.LENGTH_LONG).show());
           mActivity.finish();
           return false;
         }
@@ -442,14 +451,8 @@ public class ARCoreCamera implements ICamera {
       case UNKNOWN_CHECKING:
       case UNKNOWN_TIMED_OUT:
       case UNSUPPORTED_DEVICE_NOT_CAPABLE:
-        Log.e(
-                TAG,
-                "ARCore is not supported on this device, ArCoreApk.checkAvailability() returned "
-                        + availability);
-        mActivity.runOnUiThread(() ->
-                        Toast.makeText(mActivity, "ARCore is not supported on this device, "
-                                        + "ArCoreApk.checkAvailability() returned "
-                                        + availability, Toast.LENGTH_LONG).show());
+        Log.e(TAG, "ARCore is not supported on this device, ArCoreApk.checkAvailability() returned " + availability);
+        mActivity.finish();
         return false;
     }
     return true;
@@ -489,6 +492,12 @@ public class ARCoreCamera implements ICamera {
         mCameraCalibration.depthCameraIntrinsic = mCameraCalibration.colorCameraIntrinsic;
       }
       mCameraCalibration.setValid();
+
+      //get pose from ARCore
+      synchronized (mLock) {
+        Camera camera = frame.getCamera();
+        mPose = camera.getPose();
+      }
 
       //get light estimation from ARCore
       mPixelIntensity = frame.getLightEstimate().getPixelIntensity();

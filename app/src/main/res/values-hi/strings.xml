@@ -1,12 +1,9 @@
 <resources>
-    <string name="app_name">सीजीएम स्कैनर</string>
-    <string name="app_name_long">बाल विकास मॉनिटर स्कैनर ऐप</string>
+    <string name="app_name">CGM Scanner</string>
+    <string name="app_name_long">Child Growth Monitor Scanner App</string>
 
     <string name="permission_camera">कैमरा अनुमति की आवश्यकता है!</string>
     <string name="loading">लोडिंग…</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">हैलो रिक्त खंड</string>
 
     <string name="validate_user">कृपया उपयोगकर्ता का नाम दर्ज करें</string>
     <string name="validate_password">कृपया पासवर्ड दर्ज करें</string>
@@ -191,10 +188,6 @@
         <item>@string/selector_scan</item>
     </string-array>
 
-    <string name="exception_tango_error">टैंगो अपवाद! पुनः प्रयास करें!</string>
-    <string name="exception_tango_invalid">टैंगो अवैध अपवाद! पुनः प्रयास करें!</string>
-    <string name="exception_out_of_date">टैंगो कोर ऐप अपडेट करें!</string>
-
     <string name="mode_standing">खड़े होना</string>
     <string name="mode_lying">लेटना</string>
 
@@ -239,33 +232,34 @@
     <string name="login">लॉग इन करें</string>
     <string name="no_scans">कोई स्कैन नहीं :/</string>
     <string name="add_scans">स्कैनिंग शुरू करने के लिए, [+] बटन टैप करें</string>
-    <string name="sam_wfa_title">Child is severely under weight</string>
-    <string name="sam_wfa_message">Please go to the nearest Malnutrition center/ Nutrition Rehabilitation center</string>
-    <string name="mam_wfa_title">Child is moderately under weight</string>
-    <string name="mam_wfa_message">Please go to Anganwadi center or Anganwadi Worker</string>
-    <string name="sam_acfa_title">Severly Malnourished</string>
-    <string name="sam_acfa_message">Please go to the nearest Malnutrition center/Nutritional Rehabilitation center</string>
-    <string name="mam_acfa_title">Moderately Malnourished</string>
-    <string name="mam_acfa_message">Please look for ASHA or AWW at your nearest health center</string>
-    <string name="mam_wfh_title">Moderately wasted</string>
-    <string name="sam_wfh_title">Severely wasted</string>
-    <string name="sam_wfh_message">Please go to the nearest Malnutrition center or Nutritional rehabilitation center</string>
-    <string name="mam_wfh_message">Please see your AWW</string>
-    <string name="sam_hfa_title">Follow-up Examination</string>
-    <string name="sam_hfa_message">Contact a local doctor or health officer</string>
-    <string name="mam_hfa_title">Follow-up Examination</string>
+    <string name="sam_wfa_title">बच्चा गंभीर रूप से कम वजन का है</string>
+    <string name="sam_wfa_message">कृपया निकटतम कुपोषण केंद्र / पोषण पुनर्वास केंद्र पर जाएं</string>
+    <string name="mam_wfa_title">बच्चा मामूली रूप से कम वजन का है</string>
+    <string name="mam_wfa_message">कृपया आंगनवाड़ी केंद्र या आंगनवाड़ी कार्यकर्ता के पास जाएं</string>
+    <string name="sam_acfa_title">गंभीर रूप से कुपोषित</string>
+    <string name="sam_acfa_message">कृपया निकटतम कुपोषण केंद्र / पोषण पुनर्वास केंद्र पर जाएं</string>
+    <string name="mam_acfa_title">मामूली रूप से कुपोषित</string>
+    <string name="mam_acfa_message">कृपया अपने नजदीकी स्वास्थ्य केंद्र में आशा या आवा देखें</string>
+    <string name="mam_wfh_title">ऊंचाई के लिए मध्यम कम वजन</string>
+    <string name="sam_wfh_title">ऊंचाई के लिए गंभीर रूप से कम वजन</string>
+    <string name="sam_wfh_message">कृपया निकटतम कुपोषण केंद्र या पोषण पुनर्वास केंद्र पर जाएं</string>
+    <string name="mam_wfh_message">कृपया अपना आंगनवाड़ी देखें</string>
+    <string name="sam_hfa_title">अनुवर्ती परीक्षा</string>
+    <string name="sam_hfa_message">किसी स्थानीय डॉक्टर या स्वास्थ्य अधिकारी से संपर्क करें</string>
+    <string name="mam_hfa_title">अनुवर्ती परीक्षा</string>
     <string name="mam_hfa_message">Contact a local doctor or health officer</string>
-    <string name="label_wait">Please wait for a moment ...</string>
-    <string name="btn_retake">RE-TAKE</string>
-    <string name="btn_tutorial">TUTORIAL</string>
-    <string name="scan_feedback">Scan Feedback</string>
-    <string name="front_scan">01. Front Scan</string>
-    <string name="side_scan">02. 360\' Scan</string>
-    <string name="back_scan">03. Back Scan</string>
-    <string name="login_microsoft">Sign In with Microsoft</string>
-    <string name="backup">Backup</string>
-    <string name="last_backup_date">Last Backup Date</string>
-    <string name="backup_now">Backup Now</string>
+    <string name="label_wait">कृप्या कुछ क्षण प्रतीक्षा करें…</string>
+    <string name="btn_retake">फिर से देनी</string>
+    <string name="btn_tutorial">ट्यूटोरियल</string>
+    <string name="scan_feedback">स्कैन प्रतिक्रिया</string>
+    <string name="front_scan">01. सामने स्कैन</string>
+    <string name="side_scan">02. 360\' स्कैन</string>
+    <string name="back_scan">03. बैक स्कैन</string>
+    <string name="login_microsoft">Microsoft के साथ साइन इन करें</string>
+    <string name="backup">बैकअप</string>
+    <string name="last_backup_date">अंतिम बैकअप तिथि</string>
+    <string name="backup_now">अब समर्थन देना</string>
+    <string name="no_backups">कोई बैकअप नहीं</string>
 
     <string name="test_qa_environment">परीक्षण/क्यूए वातावरण</string>
     <string name="profile_result_title">परिणाम प्राप्त करने के लिए समय को मापें</string>
@@ -280,12 +274,40 @@
     <string name="profile_performance_color_size">अंतिम स्कैन रंग डेटा आकार</string>
     <string name="profile_performance_depth_size">अंतिम स्कैन गहराई डेटा आकार</string>
 
-    <string name="label_overview">Overview</string>
-    <string name="label_upload_speed">Upload Speed : </string>
-    <string name="label_upload_expect">"Expected Time : "</string>
-    <string name="label_total_size">"Total Size : "</string>
-    <string name="label_uploaded_size">"Uploaded Size : "</string>
-    <string name="menuUploadManager">Upload Manager</string>
-    <string name="label_upload_status">Upload Status</string>
-    <string name="abbr_qr">QR code</string>
+    <string name="label_overview">अवलोकन</string>
+    <string name="label_upload_speed">अपलोड गति : </string>
+    <string name="label_upload_expect">अपेक्षित समय : </string>
+    <string name="label_total_size">कुल आकार : </string>
+    <string name="label_uploaded_size">अपलोड किया गया आकार : </string>
+    <string name="menuUploadManager">प्रबंधक को अपलोड करें</string>
+    <string name="label_upload_status">अपलोड स्थिति</string>
+    <string name="abbr_qr">क्यूआर कोड</string>
+    <string name="qr_not_readable">क्यूआर कोड पठनीय नहीं है</string>
+    <string name="search_by_qr">क्यूआर द्वारा खोजें</string>
+    <string name="scan_qr_code_desc">प्रोफ़ाइल खोजने के लिए सहमति फ़ॉर्म में QR कोड स्कैन करें</string>
+    <string name="address_parse_error">स्थान से पते को पार्स नहीं किया जा सका</string>
+    <string name="address_error">अनुप्रयोग डिवाइस स्थान प्राप्त नहीं कर सकता</string>
+    <string name="person_not_defined">व्यक्ति को परिभाषित नहीं किया गया था</string>
+    <string name="storage_permission_needed">भंडारण अनुमति की आवश्यकता!</string>
+    <string name="older_3_months">हाथ की परिधि की तुलना करने के लिए बच्चे को 3 महीने से अधिक उम्र का होना चाहिए</string>
+
+    <string name="login_error_parse">टोकन पार्स असफल</string>
+    <string name="login_error_backend">अपना बैकएंड नहीं ढूंढ सका</string>
+    <string name="login_error_invalid">उपयोगकर्ता ईमेल प्राप्त नहीं कर सका, कृपया पुनः प्रयास करें</string>
+    <string name="login_error_nobackend">बैकेंड खाता अमान्य है</string>
+
+    <string name="scan_quality">स्कैन गुणवत्ता : </string>
+    <string name="score_light">लाइट स्कोर : </string>
+    <string name="score_duration">अवधि स्कोर : </string>
+    <string name="score_duration_short">अवधि बहुत कम थी</string>
+    <string name="score_duration_long">अवधि बहुत लंबी थी</string>
+
+    <string name="upload_completed">अपलोड पूर्ण</string>
+    <string name="less_than_minute">1 मिनट से भी कम</string>
+    <string name="minutes">मिनट</string>
+    <string name="hours">घंटे</string>
+    <string name="days">दिन</string>
+
+    <string name="result_generation_at">परिणाम पीढ़ी पर</string>
+    <string name="result_for">इसके लिए परिणाम</string>
 </resources>

@@ -285,7 +285,7 @@ public class ConsentScanActivity extends AppCompatActivity {
 
                 runOnUiThread(()->{
                     ConfirmDialog confirmDialog = new ConfirmDialog(ConsentScanActivity.this);
-                    String message = getResources().getString(R.string.message_legal) + "\n" + "Current QR code is " + rawResult.getText();
+                    String message = getResources().getString(R.string.message_legal) + "\n" + getString(R.string.abbr_qr) + rawResult.getText();
                     confirmDialog.setMessage(message);
                     confirmDialog.show();
 
@@ -295,7 +295,7 @@ public class ConsentScanActivity extends AppCompatActivity {
                 e.printStackTrace();
                 Log.e("QR Result - ", "QR code is not readable");
                 runOnUiThread(() -> {
-                    txtAlert.setText("QR Code is not readable");
+                    txtAlert.setText(R.string.qr_not_readable);
                     txtAlert.setVisibility(View.VISIBLE);
                     btnContinue.setVisibility(View.GONE);
                 });

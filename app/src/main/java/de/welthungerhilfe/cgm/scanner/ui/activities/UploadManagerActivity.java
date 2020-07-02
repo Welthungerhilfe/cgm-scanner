@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -124,7 +125,7 @@ public class UploadManagerActivity extends AppCompatActivity implements Runnable
             running = false;
             previousUploadSize = 0;
             txtUploadSpeed.setText("");
-            txtExpectTime.setText("Upload Completed");
+            txtExpectTime.setText(R.string.upload_completed);
         } else {
             running = true;
         }
@@ -150,23 +151,23 @@ public class UploadManagerActivity extends AppCompatActivity implements Runnable
                         speed /= secSpeedQueue.size();
 
                         if (speed / 1024 / 1024 > 1)
-                            txtUploadSpeed.setText(String.format("%.2fMB/S", speed / 1024 / 1024));
+                            txtUploadSpeed.setText(String.format(Locale.US, "%.2fMB/S", speed / 1024 / 1024));
                         else if (speed / 1024 > 1)
-                            txtUploadSpeed.setText(String.format("%dKB/S", (int) (speed / 1024)));
+                            txtUploadSpeed.setText(String.format(Locale.US, "%dKB/S", (int) (speed / 1024)));
                         else
-                            txtUploadSpeed.setText(String.format("%dB/S", (int) (speed)));
+                            txtUploadSpeed.setText(String.format(Locale.US, "%dB/S", (int) (speed)));
 
                         if (speed / 1024 > 1) {
                             double time = (totalSize - uploadedSize) / speed;
 
                             if (time < 60)
-                                txtExpectTime.setText("less than 1 minute");
+                                txtExpectTime.setText(R.string.less_than_minute);
                             else if (time < 60 * 60)
-                                txtExpectTime.setText(String.format("%d minutes", (int) (time / 60)));
+                                txtExpectTime.setText(String.format(Locale.US, "%d " + getString(R.string.minutes), (int) (time / 60)));
                             else if (time < 60 * 60 * 24)
-                                txtExpectTime.setText(String.format("%d hours", (int) (time / 60 / 60)));
+                                txtExpectTime.setText(String.format(Locale.US, "%d " + getString(R.string.hours), (int) (time / 60 / 60)));
                             else
-                                txtExpectTime.setText(String.format("%d days", (int) (time / 60 / 60 / 24)));
+                                txtExpectTime.setText(String.format(Locale.US, "%d " + getString(R.string.days), (int) (time / 60 / 60 / 24)));
                         }
                     }
                     previousUploadSize = uploadedSize;

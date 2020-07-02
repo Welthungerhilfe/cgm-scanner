@@ -63,6 +63,7 @@ public class Measure extends CsvExportableModel implements Serializable {
     private boolean artifact_synced;
     private long uploaded_at;
     private long resulted_at;
+    private long received_at;
 
     @Embedded
     private Loc location;
@@ -244,14 +245,22 @@ public class Measure extends CsvExportableModel implements Serializable {
         this.resulted_at = resulted_at;
     }
 
+    public long getReceived_at() {
+        return received_at;
+    }
+
+    public void setReceived_at(long received_at) {
+        this.received_at = received_at;
+    }
+
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d",id,personId,date,type,age,height,weight,
-                muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at);
+        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d,%d",id,personId,date,type,age,height,weight,
+                muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at";
+        return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at";
     }
 }

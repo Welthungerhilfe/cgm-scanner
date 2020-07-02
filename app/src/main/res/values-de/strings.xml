@@ -5,9 +5,6 @@
     <string name="permission_camera">Kamerazugriff benötigt!</string>
     <string name="loading">laden…</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
     <string name="validate_user">Bitte Benutzernamen eingeben</string>
     <string name="validate_password">Bitte Passwort eingeben</string>
 
@@ -28,16 +25,16 @@
     <string name="cancel">Abbrechen</string>
     <string name="back">Zurück</string>
     <string name="next">Speichern</string>
-    <string name="delete">Delete</string>
-    <string name="by">by</string>
-    <string name="retake">Retake</string>
-    <string name="label_continue">Continue</string>
+    <string name="delete">Löschen</string>
+    <string name="by">von</string>
+    <string name="retake">Wiederholen</string>
+    <string name="label_continue">Fortsetzen</string>
 
     <string name="about">Über</string>
     <string name="version">Version</string>
     <string name="uuid">UUID</string>
-    <string name="account">Account</string>
-    <string name="azure_account">Azure Account</string>
+    <string name="account">Konto</string>
+    <string name="azure_account">Azure Konto</string>
     <string name="language">Sprache</string>
 
     <string name="lang_english">English</string>
@@ -51,18 +48,18 @@
     <string name="last_scans">letzte scans (%1$d days)</string>
     <string name="label_location">Ort</string>
     <string name="last_location_error">Kein Ort nicht verfügar</string>
-    <string name="sort_date">old person on top</string>
-    <string name="sort_location">nearest person on top</string>
-    <string name="wasting">Wasting</string>
-    <string name="wasting_weight_height">schlechteste Gewicht/Größen-Verhältnis oben</string>
-    <string name="stunting">Stunting</string>
-    <string name="stunting_height_age">schlechtestes Größen/Alter-Verhältnis oben</string>
+    <string name="sort_date">alte Person an der Spitze</string>
+    <string name="sort_location">nächste Person oben</string>
+    <string name="wasting">Vergeudung</string>
+    <string name="wasting_weight_height">niedrigste Gewicht/Größen-Verhältnis oben</string>
+    <string name="stunting">Verkümmerung</string>
+    <string name="stunting_height_age">niedrigste Größen/Alter-Verhältnis oben</string>
     <string name="no_filter">Ohne Filter</string>
     <string name="clear_filters">Filter zurücksetzen</string>
     <string name="no_persons">KEINE PERSONEN REGISTRIERT</string>
     <string name="circuit">Umkreis</string>
-    <string name="own_data">Only own data</string>
-    <string name="created_by_self">show only children created by myself</string>
+    <string name="own_data">Nur eigene Daten</string>
+    <string name="created_by_self">zeige nur von mir eingetragene Kinder</string>
 
     <string name="manual_measure">manuelle Messung</string>
     <string name="machine_measure">Scan</string>
@@ -74,16 +71,16 @@
     <string name="measure_head">06 Kopfumfang</string>
     <string name="measure_oedema">Ödem</string>
 
-    <string name="start_scan">Start Scan</string>
-    <string name="retake_scan">Retake Scan</string>
-    <string name="complete_scan">Complete Scan</string>
+    <string name="start_scan">Scan starten</string>
+    <string name="retake_scan">Scan wiederholen</string>
+    <string name="complete_scan">Scan abschließen</string>
     <string name="axis_y">Y Achse</string>
     <string name="axis_x">X Achse</string>
     <string name="username">Benutzername</string>
     <string name="age_estimate">geschätztes Alter</string>
     <string name="starting">Starten…</string>
 
-    <string name="front_view_01">01. Front</string>
+    <string name="front_view_01">01. Vorne</string>
     <string name="lateral_view_02">02. 360\'</string>
     <string name="back_view_03">03. Rücken</string>
     <string name="help_front_view_2">Kind im Rahmen platzieren. Scan von vorne.</string>
@@ -105,9 +102,9 @@
 
     <string name="tooltip_kg">Werte in Kilogramm</string>
     <string name="tooltip_decimal">mindestens eine Nachkommastelle</string>
-    <string name="tooltip_kg_precision">at least three digit after the decimal point</string>
+    <string name="tooltip_kg_precision">mindestens dreistellig nach dem Dezimalpunkt</string>
     <string name="tooltip_weight_ex">z.B. 12.595</string>
-    <string name="tooltip_cm">value in centimeters</string>
+    <string name="tooltip_cm">Wert in Zentimetern</string>
     <string name="tooltip_precision">Millimeter angeben</string>
     <string name="tooltip_height_ex">z.B. 95.6</string>
     <string name="tooltip_name">Namen eingeben</string>
@@ -115,12 +112,12 @@
     <string name="tooltip_birthday">Geburtstag eingeben</string>
     <string name="tooltip_guardian">Erziehungsberechtigte/n eingeben</string>
     <string name="tooltipe_sex">Geschlecht auswählen</string>
-    <string name="tooltipe_height_min">height should be bigger than 45cm</string>
-    <string name="tooltipe_height_max">height should be less than 140cm</string>
-    <string name="tooltipe_weight_min">weight should be bigger than 2kg</string>
-    <string name="tooltipe_weight_max">weight should be less than 30kg</string>
-    <string name="tooltipe_muac_min">muac should be bigger than 9cm</string>
-    <string name="tooltipe_muac_max">muac should be less than 22cm</string>
+    <string name="tooltipe_height_min">Höhe sollte größer als 45cm sein</string>
+    <string name="tooltipe_height_max">Höhe sollte weniger als 140cm betragen</string>
+    <string name="tooltipe_weight_min">Gewicht sollte größer als 2kg sein</string>
+    <string name="tooltipe_weight_max">Gewicht sollte weniger als 30kg betragen</string>
+    <string name="tooltipe_muac_min">Muac sollte größer als 9cm sein</string>
+    <string name="tooltipe_muac_max">Muac sollte weniger als 22cm sein</string>
 
     <string name="baby_full_body_front_scan_text">1/3. Vorne</string>
     <string name="baby_left_right_scan_text">2/3. Rundum 360\'</string>
@@ -128,24 +125,24 @@
     <string name="empty_string"/>
     <!-- drawer -->
     <string name="drawer_open">Öffnen</string>
-    <string name="drawer_close">Schliessen</string>
+    <string name="drawer_close">Schließen</string>
     <string name="progress_uploading">Upload Fortschritt</string>
     <string name="upload_success">Upload erfolgreich</string>
     <string name="upload_failure">Upload fehlgeschlagen</string>
 
     <string name="error_network">Offline. Bitte Netzwerkverbindung prüfen.</string>
     <string name="error_login">Login fehlgeschlagen</string>
-    <string name="error_person_first">Bitte zuerst Registrierung der Person abschliessen.</string>
-    <string name="error_location">Could not find matching location.</string>
+    <string name="error_person_first">Bitte zuerst Registrierung der Person abschließen.</string>
+    <string name="error_location">Es konnte kein passender Ort gefunden werden.</string>
 
-    <string name="delete_measure">Do you really want to delete this measure data?</string>
-    <string name="delete_person">Do you really want to delete this person data?</string>
+    <string name="delete_measure">Möchten Sie diese Messdaten wirklich löschen?</string>
+    <string name="delete_person">Möchten Sie diese Personendaten wirklich löschen?</string>
 
-    <string name="field_concealed">conceal</string>
+    <string name="field_concealed">verdecken</string>
 
-    <string name="permission_delete">Sorry, You don\'t have the rights to delete data</string>
-    <string name="permission_edit">Sorry, You don\'t have the rights to edit data</string>
-    <string name="permission_expired">Sorry, Time to allow editing is expired.</string>
+    <string name="permission_delete">Entschuldigung, Sie haben nicht das Recht, Daten zu löschen</string>
+    <string name="permission_edit">Entschuldigung, Sie haben keine Rechte zum Bearbeiten von Daten</string>
+    <string name="permission_expired">Die Zeit zum Zulassen der Bearbeitung ist leider abgelaufen.</string>
 
     <!-- Sync Adapter -->
     <string name="account_type">de.welthungerhilfe.cgm.scanner</string>
@@ -156,13 +153,13 @@
     <string name="tab_growth">WACHSTUM</string>
 
     <string name="title_scans">Scans-Scheduled</string>
-    <string name="title_image_view">Image View</string>
-    <string name="title_fast_uploading">Fast Uploading</string>
+    <string name="title_image_view">Bildansicht</string>
+    <string name="title_fast_uploading">Schnelles Hochladen</string>
     <string name="title_settings">Einstellungen</string>
     <string name="title_add_measure">Messung hinzufügen</string>
 
     <string name="content_image">Einverständniserklärung</string>
-    <string name="message_legal">Please make sure to take a photo of the consent form from the parents to avoid legal issues</string>
+    <string name="message_legal">Bitte machen Sie ein Foto des Einwilligungsformulars der Eltern, um rechtliche Probleme zu vermeiden</string>
 
     <string name="axis_age">Alter</string>
     <string name="axis_height">Größe</string>
@@ -191,86 +188,83 @@
         <item>@string/selector_scan</item>
     </string-array>
 
-    <string name="exception_tango_error">"Tango exception! Try again!"</string>
-    <string name="exception_tango_invalid">"Tango invalid exception! Try again!"</string>
-    <string name="exception_out_of_date">"Please update Tango Core App!"</string>
+    <string name="mode_standing">Aufstehend</string>
+    <string name="mode_lying">Liegend</string>
 
-    <string name="mode_standing">Standing up</string>
-    <string name="mode_lying">Lying down</string>
-
-    <string name="capture_inside">Capture the child inside of outline</string>
-    <string name="tutorial11">1-1. Scan the QR code to create or find the child\'s profile</string>
-    <string name="tutorial12">1-2. Fill in their personal details if the child has not been scanned before</string>
-    <string name="next_tutorial">next</string>
-    <string name="tutorial1">How do I create a new profile for the child?</string>
-    <string name="tutorial2">How do I scan a child that is standing up?</string>
-    <string name="tutorial21">2-1. Chose \"Standing up\" mode before starting to scan child</string>
-    <string name="tutorial22">2-2. Take three 5 second scans, from a front view, a back view and a 360\' view</string>
-    <string name="tutorial3">How do I scan a child that is lying down?</string>
-    <string name="tutorial31">3-1. Choose \"Lying down\" mode before starting to scan the child</string>
-    <string name="tutorial32">3-2. Take three 5 second scans, from a front view, a back view and from left side to right side</string>
-    <string name="tutorial4">How do I view the results of a scan?</string>
-    <string name="tutorial41">4-1. Visualise the results of the scan measurements on different graphs</string>
-    <string name="tutorial42">4-2. Quickly and easily identify whether the child is likely to be malnourished</string>
-    <string name="tutorial5">You can refer to the tutorial from <u color="#FF0000">Menu</u> any time!</string>
-    <string name="standup">Try to keep the child against a clear background and keep the whole child within the camera view</string>
-    <string name="lyedown">Try to keep the child against a clear background and keep the whole child within the camera view</string>
-    <string name="done">Done</string>
-    <string name="congratulation">Congratulations!!</string>
-    <string name="finish_tutorial">You finished CGM Scanner Tutorial</string>
-    <string name="get_start">Get Started</string>
+    <string name="capture_inside">Erfassen Sie das Kind innerhalb der Kontur</string>
+    <string name="tutorial11">1-1. Scannen Sie den QR-Code, um das Profil des Kindes zu erstellen oder zu finden</string>
+    <string name="tutorial12">1-2. Geben Sie ihre persönlichen Daten ein, wenn das Kind noch nicht gescannt wurde</string>
+    <string name="next_tutorial">nächste</string>
+    <string name="tutorial1">Wie erstelle ich ein neues Profil für das Kind?</string>
+    <string name="tutorial2">Wie scanne ich ein Kind, das aufsteht?</string>
+    <string name="tutorial21">2-1. Wählen Sie den Modus \"Aufstehend\", bevor Sie mit dem Scannen des Kindes beginnen</string>
+    <string name="tutorial22">2-2. Machen Sie drei 5-Sekunden-Scans aus einer Vorderansicht, einer Rückansicht und einer 360\' Ansicht</string>
+    <string name="tutorial3">Wie scanne ich ein liegendes Kind?</string>
+    <string name="tutorial31">3-1. Wählen Sie den Modus \"Liegend\", bevor Sie mit dem Scannen des Kindes beginnen</string>
+    <string name="tutorial32">3-2. Machen Sie drei 5-Sekunden-Scans von vorne, von hinten und von links nach rechts</string>
+    <string name="tutorial4">Wie kann ich die Ergebnisse eines Scans anzeigen?</string>
+    <string name="tutorial41">4-1. Visualisieren Sie die Ergebnisse der Scan-Messungen in verschiedenen Diagrammen</string>
+    <string name="tutorial42">4-2. Stellen Sie schnell und einfach fest, ob das Kind wahrscheinlich unterernährt ist</string>
+    <string name="tutorial5">Sie können das Tutorial jederzeit über <u color="#FF0000">Menü</u> aufrufen!</string>
+    <string name="standup">Versuchen Sie, das Kind vor einem klaren Hintergrund zu halten und das ganze Kind in der Kameraansicht zu halten</string>
+    <string name="lyedown">Versuchen Sie, das Kind vor einem klaren Hintergrund zu halten und das ganze Kind in der Kameraansicht zu halten</string>
+    <string name="done">Erledigt</string>
+    <string name="congratulation">Herzliche Glückwünsche!!</string>
+    <string name="finish_tutorial">Sie haben das CGM Scanner Tutorial beendet</string>
+    <string name="get_start">Loslegen</string>
     <string name="menuScans">Scans</string>
-    <string name="menuTutorial">Tutorial</string>
-    <string name="menuHelp">Help</string>
-    <string name="menuSettings">Settings</string>
-    <string name="menuFastUpload">Fast Upload</string>
-    <string name="menuLogout">Logout</string>
+    <string name="menuTutorial">Tutorenkurs</string>
+    <string name="menuHelp">Hilfe</string>
+    <string name="menuSettings">Einstellungen</string>
+    <string name="menuFastUpload">Schnelles Hochladen</string>
+    <string name="menuLogout">Ausloggen</string>
     <string name="performance_measurement">Leistungsmessung</string>
-    <string name="remote_config">Remote Config</string>
-    <string name="remote_debug">Debug</string>
-    <string name="remote_sync_period">Sync Period</string>
-    <string name="remote_allow_delete">Allow Delete</string>
-    <string name="remote_allow_edit">Allow Edit</string>
-    <string name="remote_edit_time">Time To Allow Editing</string>
-    <string name="remote_measure_visibility">Measure Visibility</string>
-    <string name="menu_qr">QR Search</string>
-    <string name="menu_search">Search</string>
-    <string name="menu_filter">Sort and Filter</string>
+    <string name="remote_config">Remote-Konfiguration</string>
+    <string name="remote_debug">Debuggen</string>
+    <string name="remote_sync_period">Synchronisierungszeitraum</string>
+    <string name="remote_allow_delete">Löschen zulassen</string>
+    <string name="remote_allow_edit">Bearbeiten zulassen</string>
+    <string name="remote_edit_time">Zeit zum Bearbeiten</string>
+    <string name="remote_measure_visibility">Sichtbarkeit messen</string>
+    <string name="menu_qr">QR Suchen</string>
+    <string name="menu_search">Suchen</string>
+    <string name="menu_filter">Sortierung und Filter</string>
     <string name="login">Login</string>
-    <string name="no_scans">No Scans :/</string>
-    <string name="add_scans">To start scanning, tap [+] button</string>
-    <string name="sam_wfa_title">Child is severely under weight</string>
-    <string name="sam_wfa_message">Please go to the nearest Malnutrition center/ Nutrition Rehabilitation center</string>
-    <string name="mam_wfa_title">Child is moderately under weight</string>
-    <string name="mam_wfa_message">Please go to Anganwadi center or Anganwadi Worker</string>
-    <string name="sam_acfa_title">Severly Malnourished</string>
-    <string name="sam_acfa_message">Please go to the nearest Malnutrition center/Nutritional Rehabilitation center</string>
-    <string name="mam_acfa_title">Moderately Malnourished</string>
-    <string name="mam_acfa_message">Please look for ASHA or AWW at your nearest health center</string>
-    <string name="mam_wfh_title">Moderately wasted</string>
-    <string name="sam_wfh_title">Severely wasted</string>
-    <string name="sam_wfh_message">Please go to the nearest Malnutrition center or Nutritional rehabilitation center</string>
-    <string name="mam_wfh_message">Please see your AWW</string>
-    <string name="sam_hfa_title">Follow-up Examination</string>
-    <string name="sam_hfa_message">Contact a local doctor or health officer</string>
-    <string name="mam_hfa_title">Follow-up Examination</string>
-    <string name="mam_hfa_message">Contact a local doctor or health officer</string>
-    <string name="label_wait">Please wait for a moment ...</string>
+    <string name="no_scans">Keine Scans :/</string>
+    <string name="add_scans">Tippen Sie zum Starten des Scannens auf die Schaltfläche [+]</string>
+    <string name="sam_wfa_title">Kind ist stark untergewichtig</string>
+    <string name="sam_wfa_message">Bitte gehen Sie zum nächsten Unterernährungszentrum / Ernährungsrehabilitationszentrum</string>
+    <string name="mam_wfa_title">Kind ist mäßig untergewichtig</string>
+    <string name="mam_wfa_message">Bitte gehen Sie zum Anganwadi Center oder zum Anganwadi Worker</string>
+    <string name="sam_acfa_title">Stark unterernährt</string>
+    <string name="sam_acfa_message">Bitte gehen Sie zum nächsten Unterernährungszentrum / Ernährungsrehabilitationszentrum</string>
+    <string name="mam_acfa_title">Mäßig unterernährt</string>
+    <string name="mam_acfa_message">Bitte suchen Sie ASHA oder AWW in Ihrem nächsten Gesundheitszentrum</string>
+    <string name="mam_wfh_title">Mäßig verschwendet</string>
+    <string name="sam_wfh_title">Stark verschwendet</string>
+    <string name="sam_wfh_message">Bitte gehen Sie zum nächsten Unterernährungszentrum oder Ernährungsrehabilitationszentrum</string>
+    <string name="mam_wfh_message">Bitte sehen Sie Ihre AWW</string>
+    <string name="sam_hfa_title">Nachuntersuchung</string>
+    <string name="sam_hfa_message">Wenden Sie sich an einen örtlichen Arzt oder Gesundheitsbeauftragten</string>
+    <string name="mam_hfa_title">Nachuntersuchung</string>
+    <string name="mam_hfa_message">Wenden Sie sich an einen örtlichen Arzt oder Gesundheitsbeauftragten</string>
+    <string name="label_wait">Einen Moment, bitte…</string>
     <string name="btn_retake">RE-TAKE</string>
     <string name="btn_tutorial">TUTORIAL</string>
     <string name="scan_feedback">Scan Feedback</string>
-    <string name="front_scan">01. Front Scan</string>
+    <string name="front_scan">01. Vorne Scan</string>
     <string name="side_scan">02. 360\' Scan</string>
-    <string name="back_scan">03. Back Scan</string>
-    <string name="login_microsoft">Sign In with Microsoft</string>
+    <string name="back_scan">03. Rücken Scan</string>
+    <string name="login_microsoft">Melden Sie sich bei Microsoft an</string>
     <string name="backup">Backup</string>
-    <string name="last_backup_date">Last Backup Date</string>
-    <string name="backup_now">Backup Now</string>
+    <string name="last_backup_date">Letztes Sicherungsdatum</string>
+    <string name="backup_now">Jetzt sichern</string>
+    <string name="no_backups">Keine Backups</string>
 
     <string name="test_qa_environment">Test/QA Umgebung</string>
     <string name="profile_result_title">Messen Sie die Zeit, um das Ergebnis zu erhalten</string>
     <string name="profile_result_timestamp_scan">Letzter Scan abgeschlossen</string>
-    <string name="profile_result_timestamp_start">Start des letzten Scan-Uploads</string>
+    <string name="profile_result_timestamp_start">Letzter Scan-Upload startet</string>
     <string name="profile_result_timestamp_end">Letzter Scan-Upload beendet</string>
     <string name="profile_result_timestamp_receive">Letztes Scanergebnis empfangen</string>
     <string name="profile_result_timestamp_average">Die letzten 10 Scans haben eine durchschnittliche Prozesszeit</string>
@@ -280,12 +274,40 @@
     <string name="profile_performance_color_size">Größe der letzten Scan-Farbdaten</string>
     <string name="profile_performance_depth_size">Größe der letzten Scan-Tiefedaten</string>
 
-    <string name="label_overview">Overview</string>
-    <string name="label_upload_speed">Upload Speed : </string>
-    <string name="label_upload_expect">"Expected Time : "</string>
-    <string name="label_total_size">"Total Size : "</string>
-    <string name="label_uploaded_size">"Uploaded Size : "</string>
-    <string name="menuUploadManager">Upload Manager</string>
-    <string name="label_upload_status">Upload Status</string>
-    <string name="abbr_qr">QR code</string>
+    <string name="label_overview">Überblick</string>
+    <string name="label_upload_speed">Upload-Geschwindigkeit : </string>
+    <string name="label_upload_expect">Erwartete Zeit : </string>
+    <string name="label_total_size">Gesamtgröße : </string>
+    <string name="label_uploaded_size">Hochgeladene Größe : </string>
+    <string name="menuUploadManager">Manager hochladen</string>
+    <string name="label_upload_status">Upload-Status</string>
+    <string name="abbr_qr">QR-Code</string>
+    <string name="qr_not_readable">QR-Code ist nicht lesbar</string>
+    <string name="search_by_qr">Suche mit QR</string>
+    <string name="scan_qr_code_desc">Scannen Sie den QR-Code im Einverständnisformular, um ein Profil zu durchsuchen</string>
+    <string name="address_parse_error">Adresse konnte nicht vom Standort analysiert werden</string>
+    <string name="address_error">App kann Gerätestandort nicht abrufen</string>
+    <string name="person_not_defined">Person wurde nicht definiert</string>
+    <string name="storage_permission_needed">Speichererlaubnis erforderlich!</string>
+    <string name="older_3_months">Das Kind muss älter als 3 Monate sein, um den Armumfang vergleichen zu können</string>
+
+    <string name="login_error_parse">Token-Analyse fehlgeschlagen</string>
+    <string name="login_error_backend">Konnte Ihr Backend nicht finden</string>
+    <string name="login_error_invalid">Benutzer-E-Mail konnte nicht abgerufen werden. Bitte versuchen Sie es erneut</string>
+    <string name="login_error_nobackend">Backend-Konto ist ungültig</string>
+
+    <string name="scan_quality">Scanqualität : </string>
+    <string name="score_light">Licht Punktzahl : </string>
+    <string name="score_duration">Dauer Punktzahl : </string>
+    <string name="score_duration_short">Die Dauer war zu kurz</string>
+    <string name="score_duration_long">Die Dauer war zu lang</string>
+
+    <string name="upload_completed">Upload abgeschlossen</string>
+    <string name="less_than_minute">weniger als 1 Minute</string>
+    <string name="minutes">Minuten</string>
+    <string name="hours">Stunden</string>
+    <string name="days">Tage</string>
+
+    <string name="result_generation_at">Ergebnisgenerierung bei</string>
+    <string name="result_for">Resultat für</string>
 </resources>
