@@ -7,8 +7,8 @@ android {
         minSdkVersion 23
         targetSdkVersion 28
         versionCode 300
-        versionName "3.0.0-rc2"
-        manifestPlaceholders = [arCameraRequired:"false", arcoreValue:"optional", tangoRequired:"false"]
+        versionName "3.0.0"
+        manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", tangoRequired:"false"]
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
@@ -42,12 +42,12 @@ android {
         arcore {
             dimension "platform"
             minSdkVersion 28
-            manifestPlaceholders = [arCameraRequired:"true", arcoreValue:"required", tangoRequired:"false"]
+            manifestPlaceholders = [arCameraRequired:"true", depthCameraRequired:"true", arcoreValue:"required", tangoRequired:"false"]
         }
         tango {
             dimension "platform"
             minSdkVersion 23
-            manifestPlaceholders = [arCameraRequired:"false", arcoreValue:"optional", tangoRequired:"true"]
+            manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", tangoRequired:"true"]
         }
     }
     sourceSets {
