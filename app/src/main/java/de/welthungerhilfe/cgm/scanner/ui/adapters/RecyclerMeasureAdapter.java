@@ -209,11 +209,9 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         if (config.isMeasure_visibility()) {
             holder.txtHeight.setText(String.format("%.2f%s", measure.getHeight(), context.getString(R.string.unit_cm)));
             holder.txtWeight.setText(String.format("%.3f%s", measure.getWeight(), context.getString(R.string.unit_kg)));
-            holder.txtArm.setText(String.format("%.2f%s", measure.getMuac(), context.getString(R.string.unit_cm)));
         } else {
             holder.txtHeight.setText(R.string.field_concealed);
             holder.txtWeight.setText(R.string.field_concealed);
-            holder.txtArm.setText(R.string.field_concealed);
         }
 
         if (listener != null) {
@@ -272,7 +270,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         TextView txtAuthor;
         TextView txtHeight;
         TextView txtWeight;
-        TextView txtArm;
         ProgressBar progressUpload;
         AppCompatRatingBar rateOverallScore;
 
@@ -285,7 +282,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             txtAuthor = itemView.findViewById(R.id.txtAuthor);
             txtHeight = itemView.findViewById(R.id.txtHeight);
             txtWeight = itemView.findViewById(R.id.txtWeight);
-            txtArm = itemView.findViewById(R.id.txtArm);
             rateOverallScore = itemView.findViewById(R.id.rateOverallScore);
             progressUpload = itemView.findViewById(R.id.progressUpload);
         }
