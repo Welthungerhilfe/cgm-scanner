@@ -71,9 +71,12 @@ public class PersonRepository {
             whereClause += " AND STRFTIME('%Y-%m-%d', DATETIME(created/1000, 'unixepoch'))=DATE('now')";
         }
 
+        /*
         if (filter.isOwn()) {
             whereClause += String.format(" AND createdBy=%s ", Objects.requireNonNull(session.getUserEmail()));
         }
+         */
+        whereClause += String.format(" AND createdBy LIKE '%s' ", Objects.requireNonNull(session.getUserEmail()));
 
         /*
         if (filter.isLocation()) {
