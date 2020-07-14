@@ -331,7 +331,7 @@ public class ARCoreCamera implements ICamera {
           if ((resolution.getWidth() == 640) && (resolution.getHeight() == 480)) {
             rank += 1;
           }
-          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.DO_NOT_USE) {
+          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.REQUIRE_AND_USE) {
             rank += 2;
           }
 
