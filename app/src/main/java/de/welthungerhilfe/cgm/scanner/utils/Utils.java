@@ -23,10 +23,13 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
+import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -38,6 +41,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
@@ -270,5 +274,31 @@ public class Utils {
         int b = Color.blue(color);
         newColor = Color.argb(alpha, r, g, b);
         return newColor;
+    }
+
+    public static String getAddress(Context context, Loc location) {
+        if (location != null) {
+            Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+            List<Address> addresses = null;
+
+            try {
+                addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(),1);
+            } catch (Exception ioException) {
+                Log.e("", "Error in getting address for the location");
+            }
+
+            if (addresses == null || addresses.size() == 0) {
+                return "";
+            } else {
+                Address address = addresses.get(0);
+                StringBuilder sb = new StringBuilder();
+
+                for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
+                    sb.append(address.getAddressLine(i));
+
+                return sb.toString();
+            }
+        }
+        return "";
     }
 }

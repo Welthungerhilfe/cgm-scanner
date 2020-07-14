@@ -27,7 +27,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
@@ -37,31 +36,26 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
-import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
-import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
+import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.GrowthDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasuresDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 /**
  * Created by Emerald on 2/19/2018.
  */
 
 public class CreateDataActivity extends BaseActivity {
-    private final String TAG = CreateDataActivity.class.getSimpleName();
-    private final int PERMISSION_STORAGE = 0x001;
+
     private final int PERMISSION_LOCATION = 0x002;
 
     public String qrCode;
@@ -76,18 +70,6 @@ public class CreateDataActivity extends BaseActivity {
     ViewPager viewpager;
 
     public Loc location = null;
-
-    private AddressReceiver receiver = new AddressReceiver(new Handler()) {
-        @Override
-        public void onAddressDetected(String result) {
-            location.setAddress(result);
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            super.onReceiveResult(resultCode, resultData);
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,11 +88,6 @@ public class CreateDataActivity extends BaseActivity {
         viewModel.getCurrentTab().observe(this, tab -> {
             viewpager.setCurrentItem(tab);
         });
-    }
-
-    public void onDestroy() {
-        super.onDestroy();
-        EventBus.getDefault().unregister(this);
     }
 
     private void setupActionBar() {
@@ -176,11 +153,7 @@ public class CreateDataActivity extends BaseActivity {
                     location = new Loc();
                     location.setLatitude(loc.getLatitude());
                     location.setLongitude(loc.getLongitude());
-
-                    Intent intent = new Intent(this, AddressService.class);
-                    intent.putExtra("add_receiver", receiver);
-                    intent.putExtra("add_location", loc);
-                    startService(intent);
+                    location.setAddress(Utils.getAddress(this, location));
                 }
             }
         }
@@ -192,9 +165,5 @@ public class CreateDataActivity extends BaseActivity {
             if (grantResults.length > 0 && grantResults[0] >= 0)
                 getCurrentLocation();
         }
-    }
-
-    public void onBackPressed() {
-        finish();
     }
 }

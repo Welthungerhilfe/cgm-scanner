@@ -179,9 +179,6 @@
         <service android:name=".helper.service.MemoryMonitorService"
             android:exported="false" />
 
-        <service android:name=".helper.service.AddressService"
-            android:exported="false"/>
-
         <service android:name=".helper.service.DeviceService"
             android:exported="false"/>
 
@@ -219,6 +216,10 @@
             android:name=".helper.InternalStorageContentProvider"
             android:authorities="de.welthungerhilfe.cgm.scanner"
             android:exported="false"/>
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
     </application>
 
 </manifest>

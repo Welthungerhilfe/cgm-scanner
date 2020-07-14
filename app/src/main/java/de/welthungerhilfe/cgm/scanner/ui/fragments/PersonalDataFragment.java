@@ -45,6 +45,7 @@ import java.util.Date;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
@@ -55,8 +56,6 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, TextWatcher {
-
-    private final int REQUEST_LOCATION = 0x1000;
 
     public Context context;
     private SessionManager session;
@@ -145,6 +144,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void initUI() {
+        Loc location = ((CreateDataActivity)getActivity()).location;
+        if (location != null) {
+            editLocation.setText(location.getAddress());
+        }
+
         if (person == null)
             return;
 
