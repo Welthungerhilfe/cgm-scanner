@@ -16,7 +16,6 @@ import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -67,9 +66,9 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
@@ -78,8 +77,6 @@ import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ICamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoCamera;
-import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
-import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.utils.ARCoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
@@ -307,19 +304,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
         new SaveMeasureTask(ScanModeActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
-
-    private AddressReceiver receiver = new AddressReceiver(new Handler()) {
-        @Override
-        public void onAddressDetected(String result) {
-            location.setAddress(result);
-            measure.setLocation(location);
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            super.onReceiveResult(resultCode, resultData);
-        }
-    };
 
     private static final String TAG = ScanModeActivity.class.getSimpleName();
 
@@ -743,11 +727,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                     location.setLatitude(loc.getLatitude());
                     location.setLongitude(loc.getLongitude());
-
-                    Intent intent = new Intent(this, AddressService.class);
-                    intent.putExtra("add_receiver", receiver);
-                    intent.putExtra("add_location", loc);
-                    startService(intent);
+                    location.setAddress(Utils.getAddress(this, location));
+                    measure.setLocation(location);
                 }
             }
         }

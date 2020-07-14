@@ -34,13 +34,11 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -50,9 +48,6 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.util.List;
@@ -62,7 +57,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.helper.events.LocationResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 
 /**
@@ -73,10 +67,7 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
     public static final String EXTRA_LOCATION = "extra_location";
     public static final String KEY_TRANSITION = "key_transition";
 
-    private final int PERMISSION_LOCATION = 0x1001;
     private final int REQUEST_LOCATION = 0x1002;
-
-    private Marker marker = null;
 
     @BindView(R.id.editAddress)
     EditText editAddress;
@@ -86,7 +77,6 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
 
     @OnClick(R.id.lytConfirm)
     void onConfirm(LinearLayout lytConfirm) {
-        EventBus.getDefault().post(new LocationResult(location));
         onBackPressed();
     }
 
@@ -262,7 +252,6 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == REQUEST_LOCATION) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
             } else {
                 googleMap.getUiSettings().setMyLocationButtonEnabled(false);
                 googleMap.setMyLocationEnabled(true);
