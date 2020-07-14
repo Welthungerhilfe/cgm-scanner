@@ -219,6 +219,10 @@
             android:name=".helper.InternalStorageContentProvider"
             android:authorities="de.welthungerhilfe.cgm.scanner"
             android:exported="false"/>
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
     </application>
 
 </manifest>
