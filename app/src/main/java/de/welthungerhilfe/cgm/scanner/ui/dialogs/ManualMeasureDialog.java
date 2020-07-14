@@ -143,8 +143,8 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     private Measure measure;
     private Loc location;
 
-    private OnManualMeasureListener measureListener;
-    private OnCloseListener closeListener;
+    private ManualMeasureListener measureListener;
+    private CloseListener closeListener;
 
     public ManualMeasureDialog(@NonNull Context context) {
         super(context);
@@ -214,11 +214,11 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         location = measure.getLocation();
     }
 
-    public void setManualMeasureListener(OnManualMeasureListener listener) {
+    public void setManualMeasureListener(ManualMeasureListener listener) {
         measureListener = listener;
     }
 
-    public void setCloseListener(OnCloseListener listener) {
+    public void setCloseListener(CloseListener listener) {
         closeListener = listener;
     }
 
@@ -281,15 +281,22 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.editManualLocation) {
-            LocationDetectActivity.navigate((AppCompatActivity) mContext, editManualLocation, location);
+            LocationDetectActivity.navigate((AppCompatActivity) mContext, editManualLocation, location, location -> {
+                ManualMeasureDialog.this.location = location;
+                editManualLocation.setText(location.getAddress());
+            });
         }
     }
 
-    public interface OnManualMeasureListener {
+    public interface ManualMeasureListener {
         void onManualMeasure(String id, double height, double weight, double muac, double headCircumference, Loc location, boolean oedema);
     }
 
-    public interface OnCloseListener {
+    public interface CloseListener {
         void onClose(boolean result);
+    }
+
+    public interface LocationListener {
+        void onConfirm(Loc location);
     }
 }

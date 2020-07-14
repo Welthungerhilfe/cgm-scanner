@@ -58,6 +58,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
 
 /**
  * Created by Emerald on 2/20/2018.
@@ -77,6 +78,12 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
 
     @OnClick(R.id.lytConfirm)
     void onConfirm(LinearLayout lytConfirm) {
+        if (listener != null) {
+            if (location != null) {
+                listener.onConfirm(location);
+            }
+            listener = null;
+        }
         onBackPressed();
     }
 
@@ -98,8 +105,11 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
     }
 
     private Loc location;
+    private static ManualMeasureDialog.LocationListener listener;
 
-    public static void navigate(AppCompatActivity activity, View viewAddress, Loc location) {
+    public static void navigate(AppCompatActivity activity, View viewAddress, Loc location, ManualMeasureDialog.LocationListener listener) {
+        LocationDetectActivity.listener = listener;
+
         Intent intent = new Intent(activity, LocationDetectActivity.class);
         intent.putExtra(EXTRA_LOCATION, location);
         ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, viewAddress, KEY_TRANSITION);
