@@ -77,7 +77,7 @@ public class SessionManager {
     }
 
     public String getUserEmail() {
-        return pref.getString(KEY_USER_EMAIL, null);
+        return pref.getString(KEY_USER_EMAIL, "");
     }
 
     public void setLanguage(String code) {
