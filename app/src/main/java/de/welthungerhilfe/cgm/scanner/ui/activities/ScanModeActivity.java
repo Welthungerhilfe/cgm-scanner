@@ -799,6 +799,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         SaveMeasureTask(Activity act) {
             activity = act;
+
+            if (!AppController.getInstance().isUploadRunning()) {
+                startService(new Intent(getApplicationContext(), UploadService.class));
+            }
         }
 
         @Override
@@ -862,10 +866,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
 
         public void onPostExecute(Void result) {
-            if (!AppController.getInstance().isUploadRunning()) {
-                startService(new Intent(ScanModeActivity.this, UploadService.class));
+            try {
+                UploadService.forceResume();
+                activity.finish();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            activity.finish();
         }
     }
 

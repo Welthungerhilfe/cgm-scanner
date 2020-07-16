@@ -41,6 +41,7 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOAD_ERROR;
 public class UploadService extends Service implements OnFileLogsLoad {
     private List<String> pendingArtefacts;
     private static int remainingCount = 0;
+    private static UploadService service = null;
 
     private FileLogRepository repository;
 
@@ -49,7 +50,13 @@ public class UploadService extends Service implements OnFileLogsLoad {
     private final Object lock = new Object();
     private ExecutorService executor;
 
+    public static void forceResume() {
+        service.loadQueueFileLogs();
+    }
+
     public void onCreate() {
+        service = this;
+
         repository = FileLogRepository.getInstance(getApplicationContext());
 
         pendingArtefacts = new ArrayList<>();

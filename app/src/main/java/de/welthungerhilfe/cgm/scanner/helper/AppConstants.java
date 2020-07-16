@@ -24,7 +24,7 @@ package de.welthungerhilfe.cgm.scanner.helper;
  */
 
 public class AppConstants {
-    public static final int MAX_IMAGE_SIZE = 800;
+    public static final int MAX_IMAGE_SIZE = 512;
 
     public static final String ACTION_RESULT_GENERATED = "de.welthungerhilfe.cgm.scanner.action.ACTION_RESULT_GENERATED";
 

@@ -46,7 +46,6 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
@@ -99,7 +98,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         });
         viewModel.getLastMeasureLiveData().observe(getViewLifecycleOwner(), measure -> {
             if (measure != null)
-                showLastLocation(measure);
+                setLocation(measure.getLocation());
         });
     }
 
@@ -144,10 +143,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void initUI() {
-        Loc location = ((CreateDataActivity)getActivity()).location;
-        if (location != null) {
-            editLocation.setText(location.getAddress());
-        }
+        setLocation(((CreateDataActivity)getActivity()).location);
 
         if (person == null)
             return;
@@ -168,9 +164,13 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         checkAge.setChecked(person.isAgeEstimated());
     }
 
-    private void showLastLocation(Measure measure) {
-        if (measure.getLocation() != null)
-            editLocation.setText(measure.getLocation().getAddress());
+    public void setLocation(Loc location) {
+        if (location != null) {
+            String address = location.getAddress();
+            if ((address != null) && (address.length() > 0)) {
+                editLocation.setText(address);
+            }
+        }
     }
 
     public boolean validate() {

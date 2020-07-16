@@ -69,6 +69,10 @@ public class CreateDataActivity extends BaseActivity {
     @BindView(R.id.viewpager)
     ViewPager viewpager;
 
+    PersonalDataFragment personalFragment;
+    MeasuresDataFragment measureFragment;
+    GrowthDataFragment growthFragment;
+
     public Loc location = null;
 
     @Override
@@ -101,9 +105,9 @@ public class CreateDataActivity extends BaseActivity {
     }
 
     private void initFragments() {
-        PersonalDataFragment personalFragment = PersonalDataFragment.getInstance(qrCode);
-        MeasuresDataFragment measureFragment = MeasuresDataFragment.getInstance(qrCode);
-        GrowthDataFragment growthFragment = GrowthDataFragment.getInstance(qrCode);
+        personalFragment = PersonalDataFragment.getInstance(qrCode);
+        measureFragment = MeasuresDataFragment.getInstance(qrCode);
+        growthFragment = GrowthDataFragment.getInstance(qrCode);
 
         FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
         adapter.addFragment(personalFragment, getResources().getString(R.string.tab_personal));
@@ -154,6 +158,10 @@ public class CreateDataActivity extends BaseActivity {
                     location.setLatitude(loc.getLatitude());
                     location.setLongitude(loc.getLongitude());
                     location.setAddress(Utils.getAddress(this, location));
+
+                    if (personalFragment != null) {
+                        personalFragment.setLocation(location);
+                    }
                 }
             }
         }
