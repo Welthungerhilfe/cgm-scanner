@@ -75,9 +75,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        if (!AppController.getInstance().isUploadRunning()) {
-            getContext().startService(new Intent(getContext(), UploadService.class));
-        }
+        UploadService.forceResume();
 
         startSyncing();
     }
@@ -109,6 +107,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     public static void startPeriodicSync(Account newAccount, Context context) {
+
+        if (!AppController.getInstance().isUploadRunning()) {
+            context.startService(new Intent(context, UploadService.class));
+        }
 
         configurePeriodicSync(newAccount, context);
 

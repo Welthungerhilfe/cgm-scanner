@@ -51,7 +51,9 @@ public class UploadService extends Service implements OnFileLogsLoad {
     private ExecutorService executor;
 
     public static void forceResume() {
-        service.loadQueueFileLogs();
+        if (service != null) {
+            service.loadQueueFileLogs();
+        }
     }
 
     public void onCreate() {
