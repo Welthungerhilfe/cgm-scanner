@@ -135,7 +135,7 @@ public class ARCoreCamera implements ICamera {
   private ImageView mColorCameraPreview;
   private GLSurfaceView mGLSurfaceView;
   private ArrayList<Camera2DataListener> mListeners;
-  private HashMap<Long, Bitmap> mCache;
+  private final HashMap<Long, Bitmap> mCache;
   private CameraCalibration mCameraCalibration;
   private int mFrameIndex;
   private float mPixelIntensity;
@@ -227,7 +227,9 @@ public class ARCoreCamera implements ICamera {
     scriptYuvToRgb.forEach(allocationRgb);
     allocationRgb.copyTo(bitmap);
 
-    mCache.put(image.getTimestamp(), bitmap);
+    synchronized (mCache) {
+      mCache.put(image.getTimestamp(), bitmap);
+    }
     allocationYuv.destroy();
     allocationRgb.destroy();
     rs.destroy();
@@ -255,25 +257,30 @@ public class ARCoreCamera implements ICamera {
       pose = mPose;
     }
 
-    if (!mCache.isEmpty()) {
-      Bitmap bitmap = null;
-      long bestDiff = Long.MAX_VALUE;
-      for (Long timestamp : mCache.keySet()) {
-        long diff = Math.abs(image.getTimestamp() - timestamp) / 1000; //in microseconds
-        if (bestDiff > diff) {
-          bestDiff = diff;
-          bitmap = mCache.get(timestamp);
+    Bitmap bitmap = null;
+    long bestDiff = Long.MAX_VALUE;
+
+    synchronized (mCache) {
+      if (!mCache.isEmpty()) {
+        for (Long timestamp : mCache.keySet()) {
+          long diff = Math.abs(image.getTimestamp() - timestamp) / 1000; //in microseconds
+          if (bestDiff > diff) {
+            bestDiff = diff;
+            bitmap = mCache.get(timestamp);
+          }
         }
       }
+    }
 
-      if (bitmap != null && bestDiff < 50000) {
-        for (Camera2DataListener listener : mListeners) {
-          listener.onDepthDataReceived(image, pose, mFrameIndex);
-        }
-        for (Camera2DataListener listener : mListeners) {
-          listener.onColorDataReceived(bitmap, mFrameIndex);
-        }
+    if (bitmap != null && bestDiff < 50000) {
+      for (Camera2DataListener listener : mListeners) {
+        listener.onDepthDataReceived(image, pose, mFrameIndex);
+      }
+      for (Camera2DataListener listener : mListeners) {
+        listener.onColorDataReceived(bitmap, mFrameIndex);
+      }
 
+      synchronized (mCache) {
         mCache.clear();
         mFrameIndex++;
       }
