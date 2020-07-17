@@ -139,7 +139,7 @@ public class DateEditText extends TextInputEditText {
             //fill the missing numbers
             input = input.replaceAll("DD", "01");
             input = input.replaceAll("MM", "01");
-            input = input.replaceAll("YY", "20");
+            input = input.replaceAll("YY", "00");
             input = input.replaceAll("D", "1");
             input = input.replaceAll("M", "1");
             int index = input.indexOf('Y');
@@ -178,6 +178,11 @@ public class DateEditText extends TextInputEditText {
 
             //reset if the fixed date is different
             if (output.toString().compareTo(text.toString()) != 0) {
+                setText(format.toUpperCase());
+            }
+
+            //reset if the date is from the future
+            else if (timestamp > System.currentTimeMillis()) {
                 setText(format.toUpperCase());
             }
         }
