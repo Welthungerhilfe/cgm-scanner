@@ -51,7 +51,13 @@ public class UploadService extends Service implements OnFileLogsLoad {
     private ExecutorService executor;
 
     public static void forceResume() {
-        service.loadQueueFileLogs();
+        if (service != null) {
+            synchronized (service.lock) {
+                if (remainingCount <= 0) {
+                    service.loadQueueFileLogs();
+                }
+            }
+        }
     }
 
     public void onCreate() {
@@ -105,7 +111,9 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     @Override
     public void onFileLogsLoaded(List<FileLog> list) {
-        remainingCount = list.size();
+        synchronized (lock) {
+            remainingCount = list.size();
+        }
         Log.e("UploadService", String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
 
         Context c = getApplicationContext();
