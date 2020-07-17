@@ -78,6 +78,7 @@ import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ICamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoCamera;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.utils.ARCoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.utils.MD5;
@@ -812,54 +813,56 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             waitUntilFinished();
             measureRepository.insertMeasure(measure);
 
-            try {
-                CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
-                CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
-
+            synchronized (SyncAdapter.getLock()) {
                 try {
-                    if (!measure.isArtifact_synced()) {
-                        CloudQueue measureArtifactsQueue = queueClient.getQueueReference("artifact-list");
-                        measureArtifactsQueue.createIfNotExists();
+                    CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                    CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
 
-                        long totalNumbers  = fileLogRepository.getTotalArtifactCountForMeasure(measure.getId());
-                        final int size = 50;
-                        int offset = 0;
+                    try {
+                        if (!measure.isArtifact_synced()) {
+                            CloudQueue measureArtifactsQueue = queueClient.getQueueReference("artifact-list");
+                            measureArtifactsQueue.createIfNotExists();
 
-                        while (offset + 1 < totalNumbers) {
-                            List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(measure.getId(), offset, size);
+                            long totalNumbers  = fileLogRepository.getTotalArtifactCountForMeasure(measure.getId());
+                            final int size = 50;
+                            int offset = 0;
 
-                            ArtifactList artifactList = new ArtifactList();
-                            artifactList.setMeasure_id(measure.getId());
-                            artifactList.setStart(offset + 1);
-                            artifactList.setEnd(offset + measureArtifacts.size());
-                            artifactList.setArtifacts(measureArtifacts);
-                            artifactList.setTotal(totalNumbers);
+                            while (offset + 1 < totalNumbers) {
+                                List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(measure.getId(), offset, size);
 
-                            offset += measureArtifacts.size();
+                                ArtifactList artifactList = new ArtifactList();
+                                artifactList.setMeasure_id(measure.getId());
+                                artifactList.setStart(offset + 1);
+                                artifactList.setEnd(offset + measureArtifacts.size());
+                                artifactList.setArtifacts(measureArtifacts);
+                                artifactList.setTotal(totalNumbers);
 
-                            CloudQueueMessage measureArtifactsMessage = new CloudQueueMessage(measure.getId());
-                            measureArtifactsMessage.setMessageContent(gson.toJson(artifactList));
-                            measureArtifactsQueue.addMessage(measureArtifactsMessage);
+                                offset += measureArtifacts.size();
+
+                                CloudQueueMessage measureArtifactsMessage = new CloudQueueMessage(measure.getId());
+                                measureArtifactsMessage.setMessageContent(gson.toJson(artifactList));
+                                measureArtifactsQueue.addMessage(measureArtifactsMessage);
+                            }
+
+                            measure.setArtifact_synced(true);
+                            measure.setUploaded_at(System.currentTimeMillis());
                         }
 
-                        measure.setArtifact_synced(true);
-                        measure.setUploaded_at(System.currentTimeMillis());
+                        CloudQueue measureQueue = queueClient.getQueueReference("measure");
+                        measureQueue.createIfNotExists();
+
+                        CloudQueueMessage message = new CloudQueueMessage(measure.getId());
+                        message.setMessageContent(gson.toJson(measure));
+                        measureQueue.addMessage(message);
+
+                        measure.setTimestamp(session.getSyncTimestamp());
+                        measureRepository.updateMeasure(measure);
+                    } catch (StorageException e) {
+                        e.printStackTrace();
                     }
-
-                    CloudQueue measureQueue = queueClient.getQueueReference("measure");
-                    measureQueue.createIfNotExists();
-
-                    CloudQueueMessage message = new CloudQueueMessage(measure.getId());
-                    message.setMessageContent(gson.toJson(measure));
-                    measureQueue.addMessage(message);
-
-                    measure.setTimestamp(session.getSyncTimestamp());
-                    measureRepository.updateMeasure(measure);
-                } catch (StorageException e) {
+                } catch (URISyntaxException | InvalidKeyException e) {
                     e.printStackTrace();
                 }
-            } catch (URISyntaxException | InvalidKeyException e) {
-                e.printStackTrace();
             }
 
             return null;

@@ -28,6 +28,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -80,8 +81,10 @@ public class UploadService extends Service implements OnFileLogsLoad {
     public int onStartCommand(final Intent intent, int flags, int startId) {
         if (remainingCount <= 0) {
             try {
-                CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
-                blobClient = storageAccount.createCloudBlobClient();
+                synchronized (SyncAdapter.getLock()) {
+                    CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                    blobClient = storageAccount.createCloudBlobClient();
+                }
 
                 loadQueueFileLogs();
 
