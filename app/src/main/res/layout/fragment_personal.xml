@@ -161,12 +161,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <android.support.design.widget.TextInputEditText
+                <de.welthungerhilfe.cgm.scanner.ui.views.DateEditText
                     android:id="@+id/editBirth"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:editable="false"
-                    android:focusable="false"
                     android:hint="@string/birth"
                     android:singleLine="true" />
 

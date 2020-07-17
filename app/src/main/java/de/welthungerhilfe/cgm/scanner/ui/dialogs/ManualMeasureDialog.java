@@ -46,6 +46,7 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
 import de.welthungerhilfe.cgm.scanner.ui.views.UnitEditText;
+import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 /**
@@ -161,7 +162,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
         ButterKnife.bind(this);
 
-        editManualDate.setText(Utils.beautifyDate(System.currentTimeMillis()));
+        editManualDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, System.currentTimeMillis()));
         if (location != null)
             editManualLocation.setText(location.getAddress());
         editManualLocation.setOnClickListener(this);
@@ -201,7 +202,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
             txtTitle.setText(R.string.machine_measure);
         }
 
-        editManualDate.setText(Utils.beautifyDate(measure.getDate()));
+        editManualDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, measure.getDate()));
         if (measure.getLocation() != null)
             editManualLocation.setText(measure.getLocation().getAddress());
         editManualHeight.setText(String.valueOf(measure.getHeight()));
