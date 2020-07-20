@@ -16,7 +16,7 @@ import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 
 public class ResultGenerationReceiver extends BroadcastReceiver {
     private static final String CHANNEL_ID = "CGM_Result_Generation_Notification";
@@ -60,7 +60,7 @@ public class ResultGenerationReceiver extends BroadcastReceiver {
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .setOngoing(false);
 
-        notificationBuilder.setContentTitle(String.format(context.getString(R.string.result_generation_at) + " %s", Utils.beautifyDate(timestamp)));
+        notificationBuilder.setContentTitle(String.format(context.getString(R.string.result_generation_at) + " %s", DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE, timestamp)));
         notificationBuilder.setContentText(String.format(Locale.US, "%s " + context.getString(R.string.result_for) + " %s : %.2f%s", type, qrCode, value, type.equals("weight") ? "kg" : "cm"));
 
         int notificationID = Integer.parseInt(new SimpleDateFormat("ddHHmmss",  Locale.US).format(new Date()));

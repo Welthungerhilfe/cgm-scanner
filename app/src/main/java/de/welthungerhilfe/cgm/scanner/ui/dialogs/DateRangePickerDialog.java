@@ -34,6 +34,7 @@ import com.appeaser.sublimepickerlibrary.helpers.SublimeOptions;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 
 import java.util.Calendar;
+import java.util.Date;
 
 import de.welthungerhilfe.cgm.scanner.R;
 
@@ -61,6 +62,7 @@ public class DateRangePickerDialog extends DialogFragment {
     };
 
     Callback mCallback;
+    Date mDate;
 
     @Nullable
     @Override
@@ -73,13 +75,20 @@ public class DateRangePickerDialog extends DialogFragment {
         options.setDateRange(0, System.currentTimeMillis());
 
         Calendar startCal = Calendar.getInstance();
-        startCal.add(Calendar.DAY_OF_YEAR, 5);
-        Calendar endCal = Calendar.getInstance();
-        options.setDateParams(startCal, endCal);
+        if (mDate != null) {
+            startCal.setTime(mDate);
+        } else {
+            startCal.add(Calendar.DAY_OF_YEAR, 5);
+        }
+        options.setDateParams(startCal, startCal);
 
         mSublimePicker.initializePicker(options, mListener);
 
         return mSublimePicker;
+    }
+
+    public void setDate(Date date) {
+        mDate = date;
     }
 
     public void setCallback(Callback callback) {

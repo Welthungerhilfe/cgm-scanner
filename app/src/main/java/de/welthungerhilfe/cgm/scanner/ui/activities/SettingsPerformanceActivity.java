@@ -188,10 +188,10 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
                     txtProfileDepthSize.setText(DataFormat.filesize(this, profileDepthSize));
                     txtProfileColorTime.setText(DataFormat.time(this, profileColorTime));
                     txtProfileDepthTime.setText(DataFormat.time(this, profileDepthTime));
-                    txtResultScan.setText(DataFormat.timestamp(this, resultScan));
-                    txtResultStart.setText(DataFormat.timestamp(this, resultStart));
-                    txtResultEnd.setText(DataFormat.timestamp(this, resultEnd));
-                    txtResultReceive.setText(DataFormat.timestamp(this, resultReceive));
+                    txtResultScan.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultScan));
+                    txtResultStart.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultStart));
+                    txtResultEnd.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultEnd));
+                    txtResultReceive.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultReceive));
                     txtResultAverage.setText(DataFormat.time(this, resultAverage));
                 }
             });

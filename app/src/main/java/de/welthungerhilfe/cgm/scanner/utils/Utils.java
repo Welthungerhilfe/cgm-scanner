@@ -20,7 +20,6 @@ package de.welthungerhilfe.cgm.scanner.utils;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Address;
@@ -36,11 +35,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -138,11 +134,6 @@ public class Utils {
         return calendar.getTimeInMillis();
     }
 
-    public static boolean checkPermission (Context context, String permission) {
-        int res = context.checkCallingOrSelfPermission(permission);
-        return (res == PackageManager.PERMISSION_GRANTED);
-    }
-
     public static String getNameFromEmail(String email) {
         if (email == null)
             return "unknown";
@@ -150,56 +141,6 @@ public class Utils {
             String[] arr = email.split("@");
             return arr[0];
         }
-    }
-
-    public static String beautifyDate(long timestamp) {
-        Date date = new Date(timestamp);
-
-        return beautifyDate(date);
-    }
-
-    public static String beautifyHourMinute(long timestamp) {
-        Date date = new Date(timestamp);
-
-        return beautifyHourMinute(date);
-    }
-
-    public static String beautifyDate(Date date) {
-        SimpleDateFormat formatter = null;
-        formatter = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
-
-        String res = formatter.format(date);
-
-        return res;
-    }
-
-    public static String beautifyDateTime(Date date) {
-        SimpleDateFormat formatter = null;
-        formatter = new SimpleDateFormat("MM/dd/yyyy H:mm:ss", Locale.getDefault());
-
-        String res = formatter.format(date);
-
-        return res;
-    }
-
-    public static String beautifyHourMinute(Date date) {
-        SimpleDateFormat formatter = null;
-        formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-
-        String res = formatter.format(date);
-
-        return res;
-    }
-
-    public static Date stringToDate(String dt) {
-        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
-        try {
-            Date date = format.parse(dt);
-            return date;
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     public static double distanceBetweenLocs(Loc l1, Loc l2) {
