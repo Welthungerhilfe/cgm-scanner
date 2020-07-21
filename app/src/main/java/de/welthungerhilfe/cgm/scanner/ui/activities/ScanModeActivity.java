@@ -35,6 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.ar.core.Pose;
+import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 import com.google.gson.Gson;
@@ -479,7 +480,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         mPointCloudSaveFolder = new File(mScanArtefactsOutputFolder, "pc");
         mRgbSaveFolder = new File(mScanArtefactsOutputFolder,"rgb");
 
-        if(!isTangoDevice() && !mDepthmapSaveFolder.exists()) {
+        if(!mDepthmapSaveFolder.exists()) {
             boolean created = mDepthmapSaveFolder.mkdirs();
             if (created) {
                 Log.i(TAG, "Folder: \"" + mDepthmapSaveFolder + "\" created\n");
@@ -506,8 +507,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             }
         }
 
-        if (!isTangoDevice())
-            Log.v(TAG,"mDepthmapSaveFolder: "+mDepthmapSaveFolder);
+        Log.v(TAG,"mDepthmapSaveFolder: "+mDepthmapSaveFolder);
         Log.v(TAG,"mPointCloudSaveFolder: "+mPointCloudSaveFolder);
         Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
     }
@@ -1118,7 +1118,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    public void onTangoDepthData(TangoPointCloudData pointCloudData, String pose) {
+    public void onTangoDepthData(TangoPointCloudData pointCloudData, double[] pose, TangoCameraIntrinsics calibration) {
         // Saving the frame or not, depending on the current mode.
         if ( mIsRecording ) {
             long profile = System.currentTimeMillis();
@@ -1131,8 +1131,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             updateScanningProgress(numPoints, 1);
             progressBar.setProgress(mProgress);
 
+            String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
+                    "_" + String.format(Locale.US, "%03d", mNumberOfFilesWritten);
             String pointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
-                    "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten++);
+                    "_" + String.format(Locale.US, "%03d", mNumberOfFilesWritten++);
 
             int scanStep = SCAN_STEP;
             new Thread(() -> {
@@ -1149,23 +1151,54 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             }).start();
 
             Runnable thread = () -> {
-                File artifactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + pointCloudFilename +".pcd");
-                TangoUtils.writePointCloudToPcdFile(buffer, numPoints, timestamp, pose, artifactFile);
 
-                if (artifactFile.exists()) {
-                    mDepthSize += artifactFile.length();
+                //write depthmap
+                ARCoreUtils.Depthmap depthmap = TangoUtils.extractDepthmap(buffer, numPoints, pose, timestamp, calibration);
+                File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
+                ARCoreUtils.writeDepthmap(depthmap, artifactFile);
+
+                //write pointcloud
+                buffer.rewind();
+                File artifactFilePCD = new File(mPointCloudSaveFolder.getPath() + File.separator + pointCloudFilename +".pcd");
+                TangoUtils.writePointCloudToPcdFile(buffer, numPoints, timestamp, pose, artifactFilePCD);
+
+                //profile process
+                if (artifactFile.exists() && artifactFilePCD.exists()) {
+                    mDepthSize += artifactFile.length() + artifactFilePCD.length();
                     mDepthTime += System.currentTimeMillis() - profile;
                     if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
                         LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_SIZE, mDepthSize);
                         LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_TIME, mDepthTime);
                     }
+                }
 
+                //upload depthmap
+                if (artifactFile.exists()) {
                     FileLog log = new FileLog();
-                    log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
-                    log.setType("pcd");
+                    log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
+                    log.setType("depth");
                     log.setPath(artifactFile.getPath());
                     log.setHashValue(MD5.getMD5(artifactFile.getPath()));
                     log.setFileSize(artifactFile.length());
+                    log.setUploadDate(0);
+                    log.setDeleted(false);
+                    log.setQrCode(person.getQrcode());
+                    log.setCreateDate(mNowTime);
+                    log.setCreatedBy(session.getUserEmail());
+                    log.setAge(age);
+                    log.setSchema_version(CgmDatabase.version);
+                    log.setMeasureId(measure.getId());
+                    fileLogRepository.insertFileLog(log);
+                }
+
+                //upload pointcloud
+                if (artifactFilePCD.exists()) {
+                    FileLog log = new FileLog();
+                    log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
+                    log.setType("pcd");
+                    log.setPath(artifactFilePCD.getPath());
+                    log.setHashValue(MD5.getMD5(artifactFilePCD.getPath()));
+                    log.setFileSize(artifactFilePCD.length());
                     log.setUploadDate(0);
                     log.setDeleted(false);
                     log.setQrCode(person.getQrcode());
