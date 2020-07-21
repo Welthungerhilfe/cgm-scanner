@@ -46,7 +46,7 @@ public class ARCoreUtils {
         float[] rotation;
         long timestamp;
 
-        private Depthmap(int width, int height) {
+        Depthmap(int width, int height) {
             this.width = width;
             this.height = height;
 
