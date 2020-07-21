@@ -907,14 +907,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
                 currentImgFilename = currentImgFilename.replace('/', '_');
                 File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
-                try {
-                    FileOutputStream fileOutputStream = new FileOutputStream(artifactFile);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 75, fileOutputStream);
-                    fileOutputStream.flush();
-                    fileOutputStream.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                BitmapUtils.writeBitmapToFile(bitmap, artifactFile);
 
                 //upload RGB data
                 if (artifactFile.exists()) {
@@ -1090,8 +1083,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         Runnable thread = () -> {
             long profile = System.currentTimeMillis();
-            BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
-            File artifactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
+            File artifactFile = new File(mRgbSaveFolder.getPath(), currentImgFilename);
+            BitmapUtils.writeImageToFile(currentTangoImageBuffer, artifactFile);
 
             if (artifactFile.exists()) {
                 mColorSize += artifactFile.length();

@@ -332,14 +332,19 @@ public class ARCoreCamera implements ICamera {
       CameraConfig selectedConfig = null;
       for (CameraConfig cameraConfig : mSession.getSupportedCameraConfigs()) {
         if (cameraConfig.getFacingDirection() == CameraConfig.FacingDirection.BACK) {
+          Size resolution = cameraConfig.getImageSize();
+          int w = resolution.getWidth();
+          int h = resolution.getHeight();
 
           int rank = 0;
-          Size resolution = cameraConfig.getImageSize();
-          if ((resolution.getWidth() == 640) && (resolution.getHeight() == 480)) {
+          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.REQUIRE_AND_USE) {
             rank += 1;
           }
-          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.REQUIRE_AND_USE) {
+          if ((w > 1024) && (h > 1024)) {
             rank += 2;
+          }
+          if (Math.abs(mDepthWidth / (float)mDepthHeight - w / (float)h) < 0.0001f) {
+            rank += 4;
           }
 
           if (selectedRank < rank) {
