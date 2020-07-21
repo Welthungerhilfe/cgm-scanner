@@ -1,7 +1,5 @@
 package de.welthungerhilfe.cgm.scanner.utils;
 
-import android.util.Log;
-
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 
