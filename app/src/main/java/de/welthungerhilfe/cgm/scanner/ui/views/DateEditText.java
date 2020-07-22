@@ -137,11 +137,9 @@ public class DateEditText extends TextInputEditText {
         if (input.length() == format.length()) {
 
             //fill the missing numbers
-            input = input.replaceAll("DD", "01");
-            input = input.replaceAll("MM", "01");
+            input = input.replaceAll("YYYY", "2000");
+            input = input.replaceAll("YYY", "000");
             input = input.replaceAll("YY", "00");
-            input = input.replaceAll("D", "1");
-            input = input.replaceAll("M", "1");
             int index = input.indexOf('Y');
             if (index > 0) {
                 char c = getText().charAt(index - 1);
@@ -158,6 +156,22 @@ public class DateEditText extends TextInputEditText {
 
                 }
             }
+            input = input.replaceAll("MM", "12");
+            index = input.indexOf('M');
+            if (index > 0) {
+                char c = getText().charAt(index - 1);
+                switch (c) {
+                    case '0':
+                        input = input.replaceAll("M", "1");
+                        break;
+                    default:
+                        input = input.replaceAll("M", "2");
+                        break;
+
+                }
+            }
+            input = input.replaceAll("DD", "01");
+            input = input.replaceAll("D", "1");
 
             //get checked date
             long timestamp = DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, input);

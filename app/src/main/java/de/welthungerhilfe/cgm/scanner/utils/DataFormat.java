@@ -86,7 +86,7 @@ public class DataFormat {
 
     public static String getDateFormat(Context context) {
         char s = getDateSeparator(context);
-        return "dd" + s + "MM" + s + "yy";
+        return "dd" + s + "MM" + s + "yyyy";
     }
 
     public static char getDateSeparator(Context context) {
