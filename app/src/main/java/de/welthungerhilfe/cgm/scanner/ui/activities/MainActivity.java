@@ -55,7 +55,6 @@ import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicke
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 
-import java.io.File;
 import java.util.Calendar;
 import java.util.List;
 
@@ -75,11 +74,6 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.ui.views.SwipeView;
-
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_DATE;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_LOCATION;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_STUNTING;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_WASTING;
 
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
     private final int REQUEST_LOCATION = 0x1000;
@@ -329,16 +323,16 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                             viewModel.setFilterNo();
                             break;
                         case R.id.rytSortDate:
-                            viewModel.setSortType(SORT_DATE);
+                            viewModel.setSortType(AppConstants.SORT_DATE);
                             break;
                         case R.id.rytSortLocation:
-                            viewModel.setSortType(SORT_LOCATION);
+                            viewModel.setSortType(AppConstants.SORT_LOCATION);
                             break;
                         case R.id.rytSortWasting:
-                            viewModel.setSortType(SORT_WASTING);
+                            viewModel.setSortType(AppConstants.SORT_WASTING);
                             break;
                         case R.id.rytSortStunting:
-                            viewModel.setSortType(SORT_STUNTING);
+                            viewModel.setSortType(AppConstants.SORT_STUNTING);
                             break;
                     }
 
@@ -358,10 +352,10 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
             //sort check icon
             int sort = filter.getSortType();
-            view.findViewById(R.id.imgSortDate).setVisibility(sort == SORT_DATE ? View.VISIBLE : View.INVISIBLE);
-            view.findViewById(R.id.imgSortLocation).setVisibility(sort == SORT_LOCATION ? View.VISIBLE : View.INVISIBLE);
-            view.findViewById(R.id.imgSortWasting).setVisibility(sort == SORT_WASTING ? View.VISIBLE : View.INVISIBLE);
-            view.findViewById(R.id.imgSortStunting).setVisibility(sort == SORT_STUNTING ? View.VISIBLE : View.INVISIBLE);
+            view.findViewById(R.id.imgSortDate).setVisibility(sort == AppConstants.SORT_DATE ? View.VISIBLE : View.INVISIBLE);
+            view.findViewById(R.id.imgSortLocation).setVisibility(sort == AppConstants.SORT_LOCATION ? View.VISIBLE : View.INVISIBLE);
+            view.findViewById(R.id.imgSortWasting).setVisibility(sort == AppConstants.SORT_WASTING ? View.VISIBLE : View.INVISIBLE);
+            view.findViewById(R.id.imgSortStunting).setVisibility(sort == AppConstants.SORT_STUNTING ? View.VISIBLE : View.INVISIBLE);
 
             //set date info
             if (filter.isDate()) {
@@ -484,5 +478,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
         intent.putExtra(AppConstants.EXTRA_QR, person.getQrcode());
         startActivity(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        adapterData.clear();
+        viewModel.setFilterOwn();
     }
 }
