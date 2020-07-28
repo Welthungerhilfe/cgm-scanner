@@ -1,16 +1,16 @@
 package de.welthungerhilfe.cgm.scanner.datasource.models;
 
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.ForeignKey;
-import android.arch.persistence.room.PrimaryKey;
-import android.support.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.PrimaryKey;
+import androidx.annotation.NonNull;
 
 import java.io.Serializable;
 import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.datasource.repository.CsvExportableModel;
 
-import static android.arch.persistence.room.ForeignKey.CASCADE;
+import static androidx.room.ForeignKey.CASCADE;
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_ARTIFACT_RESULT;
 
 @Entity(tableName = TABLE_ARTIFACT_RESULT)

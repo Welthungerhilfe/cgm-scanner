@@ -21,8 +21,8 @@ package de.welthungerhilfe.cgm.scanner.ui.dialogs;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.AppCompatCheckBox;
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatCheckBox;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;

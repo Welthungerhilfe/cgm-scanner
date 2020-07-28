@@ -3,12 +3,11 @@ package de.welthungerhilfe.cgm.scanner.ui.views;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import de.welthungerhilfe.cgm.scanner.R;
 

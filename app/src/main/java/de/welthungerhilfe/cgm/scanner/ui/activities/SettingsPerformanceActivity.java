@@ -20,9 +20,9 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.support.v7.widget.SwitchCompat;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
 import android.widget.TextView;

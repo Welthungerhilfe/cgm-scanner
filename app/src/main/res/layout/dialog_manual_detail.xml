@@ -140,7 +140,7 @@
         android:textColor="@color/colorBlack"
         android:hint="@string/measure_muac"/>
 
-    <android.support.v7.widget.AppCompatCheckBox
+    <androidx.appcompat.widget.AppCompatCheckBox
         android:id="@+id/checkManualOedema"
         android:layout_width="match_parent"
         android:layout_height="38dp"
