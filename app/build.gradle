@@ -88,6 +88,12 @@ dependencies {
     annotationProcessor 'androidx.room:room-compiler:2.2.5' //database syntax compiler
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.4' //database debugging
 
+    // Tests
+    testImplementation 'junit:junit:4.12' //java unit test
+    testImplementation 'org.mockito:mockito-core:2.19.0' //app mocking
+    androidTestImplementation 'androidx.room:room-testing:2.2.5' //database testing
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1' //extended java unit test functionality
+
     // UI items
     implementation 'com.balysv:material-ripple:1.0.2' //custom tab (e.g.in scan mode)
     implementation 'com.appeaser.sublimepickerlibrary:sublimepickerlibrary:2.1.1' //date selector
