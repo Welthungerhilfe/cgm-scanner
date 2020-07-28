@@ -1,6 +1,6 @@
 package de.welthungerhilfe.cgm.scanner.datasource.models;
 
-import android.arch.persistence.room.ColumnInfo;
+import androidx.room.ColumnInfo;
 
 public class UploadStatus {
     @ColumnInfo(name = "total")

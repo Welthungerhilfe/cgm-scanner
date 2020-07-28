@@ -95,7 +95,7 @@
                     android:layout_marginEnd="@dimen/activity_group_margin"
                     android:textSize="20sp"/>
 
-                <android.support.v7.widget.AppCompatRatingBar
+                <androidx.appcompat.widget.AppCompatRatingBar
                     android:id="@+id/rateOverallScore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

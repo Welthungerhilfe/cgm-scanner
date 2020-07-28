@@ -22,25 +22,25 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.fragment.app.DialogFragment;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -76,7 +76,6 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.ui.views.SwipeView;
 
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.ACTION_RESULT_GENERATED;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_DATE;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_LOCATION;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_STUNTING;
@@ -84,9 +83,6 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_WASTING;
 
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
     private final int REQUEST_LOCATION = 0x1000;
-    private final int REQUEST_CAMERA = 0x1001;
-
-    private File mFileTemp;
 
     private PersonListViewModel viewModel;
 
@@ -164,7 +160,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         startService(new Intent(this, DeviceService.class));
     }
 
+    @Override
     public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
         if (adapterData != null)
             adapterData.notifyDataSetChanged();
     }
@@ -472,6 +470,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     @Override
     public void onActivityResult(int reqCode, int resCode, Intent result) {
+        super.onActivityResult(reqCode, resCode, result);
         if (reqCode == REQUEST_LOCATION && resCode == Activity.RESULT_OK) {
             int radius = result.getIntExtra(AppConstants.EXTRA_RADIUS, 0);
 

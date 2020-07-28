@@ -1,6 +1,6 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
-import android.arch.lifecycle.LiveData;
+import androidx.lifecycle.LiveData;
 import android.content.Context;
 
 import java.util.List;

@@ -1,7 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.persistence.db.SimpleSQLiteQuery;
+import androidx.lifecycle.LiveData;
+import androidx.sqlite.db.SimpleSQLiteQuery;
 import android.content.Context;
 
 import java.util.List;
@@ -9,7 +9,6 @@ import java.util.Locale;
 import java.util.Objects;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
-import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.PersonFilter;

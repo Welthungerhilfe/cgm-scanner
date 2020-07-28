@@ -2,18 +2,11 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
@@ -34,12 +27,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -47,7 +39,6 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,13 +49,10 @@ import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 
-import org.w3c.dom.Text;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -84,8 +72,6 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
-import de.welthungerhilfe.cgm.scanner.ui.views.AutoFitTextureView;
-import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.utils.MD5;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
