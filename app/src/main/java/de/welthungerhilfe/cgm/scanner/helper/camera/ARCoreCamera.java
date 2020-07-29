@@ -474,13 +474,6 @@ public class ARCoreCamera implements ICamera {
     return mCameraCalibration;
   }
 
-  public float getDepthSensorDensity() {
-    float output = 240 * 180;
-    output /= (float)mDepthWidth;
-    output /= (float)mDepthHeight;
-    return output;
-  }
-
   public float getLightIntensity() {
     return mPixelIntensity;
   }

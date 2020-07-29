@@ -164,6 +164,7 @@ public class BitmapUtils {
 
     public static void writeImageToFile(TangoImageBuffer currentTangoImageBuffer, File file) {
 
+        currentTangoImageBuffer = TangoUtils.copyImageBuffer(currentTangoImageBuffer);
         int currentImgWidth = currentTangoImageBuffer.width;
         int currentImgHeight = currentTangoImageBuffer.height;
         byte[] YuvImageByteArray = currentTangoImageBuffer.data.array();
