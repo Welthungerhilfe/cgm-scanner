@@ -3,18 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="de.welthungerhilfe.cgm.scanner">
 
-    <!-- To auto-complete the email text field in the login form with the user's emails -->
-    <!--uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.READ_PROFILE" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" /-->
-
-
-
-    <!-- for Tango Scanner Functionality -->
+    <!-- for AR functionality -->
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Storage access -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <!-- Location access -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 

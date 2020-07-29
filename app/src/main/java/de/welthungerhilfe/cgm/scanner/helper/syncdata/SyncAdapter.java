@@ -11,6 +11,7 @@ import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -147,11 +148,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             retrievedMessages = measureResultQueue.retrieveMessages(30);
                             Gson gson = new Gson();
 
+                            Log.d("SyncAdapter", "updating");
                             while (retrievedMessages.iterator().hasNext()) {
                                 CloudQueueMessage message = retrievedMessages.iterator().next();
 
                                 try {
-                                    MeasureResult result = gson.fromJson(message.getMessageContentAsString(), MeasureResult.class);
+                                    String messageStr = message.getMessageContentAsString();
+                                    Log.d("SyncAdapter", messageStr);
+                                    MeasureResult result = gson.fromJson(messageStr, MeasureResult.class);
 
                                     float keyMaxConfident = measureResultRepository.getConfidence(result.getMeasure_id(), result.getKey());
                                     if (result.getConfidence_value() > keyMaxConfident) {
@@ -172,6 +176,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                                 measure.setReceived_at(System.currentTimeMillis());
                                                 measureRepository.updateMeasure(measure);
 
+                                                if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
+                                                    onResultReceived(result);
+                                                }
+
                                                 Intent intent = new Intent();
                                                 intent.setAction(ACTION_RESULT_GENERATED);
                                                 intent.putExtra("qr_code", measure.getQrCode());
@@ -189,10 +197,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                                             Measure measure = measureRepository.getMeasureById(result.getMeasure_id());
                                             if (measure != null) {
-                                                measure.setWeight(result.getFloat_value());
+                                                measure.setHeight(result.getFloat_value());
                                                 measure.setResulted_at(timestamp);
                                                 measure.setReceived_at(System.currentTimeMillis());
                                                 measureRepository.updateMeasure(measure);
+
+                                                if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
+                                                    onResultReceived(result);
+                                                }
 
                                                 Intent intent = new Intent();
                                                 intent.setAction(ACTION_RESULT_GENERATED);
@@ -200,14 +212,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                                 intent.putExtra("height", measure.getHeight());
                                                 intent.putExtra("received_at", measure.getReceived_at());
                                                 getContext().sendBroadcast(intent);
-                                            }
-                                        }
-                                    }
-
-                                    if (result.getKey().contains("height") && result.getKey().contains("weight")) {
-                                        if (result.getConfidence_value() >= measureResultRepository.getMaxConfidence(result.getMeasure_id(), "weight%")) {
-                                            if (result.getConfidence_value() >= measureResultRepository.getMaxConfidence(result.getMeasure_id(), "height%")) {
-                                                onResultReceived(result);
                                             }
                                         }
                                     }

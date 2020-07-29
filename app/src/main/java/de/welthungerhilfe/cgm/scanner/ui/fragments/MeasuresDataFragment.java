@@ -95,6 +95,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         config = session.getRemoteConfig();
     }
 
+    @Override
     public void onActivityCreated(Bundle instance) {
         super.onActivityCreated(instance);
 
@@ -108,6 +109,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         });
     }
 
+    @Override
     public void onResume() {
         super.onResume();
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);

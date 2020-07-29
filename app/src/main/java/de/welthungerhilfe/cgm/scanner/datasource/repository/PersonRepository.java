@@ -65,13 +65,11 @@ public class PersonRepository {
         String limitClause = String.format(Locale.US, "LIMIT %d OFFSET %d", PAGE_SIZE, filter.getPage() * PAGE_SIZE);
 
         if (filter.isDate()) {
-            whereClause += String.format(Locale.US, " AND created<=%d AND created>=%d ", filter.getToDate(), filter.getFromDate());
-        } else {
-            whereClause += " AND STRFTIME('%Y-%m-%d', DATETIME(created/1000, 'unixepoch'))=DATE('now')";
+            whereClause += String.format(Locale.US, " AND created<=%d AND created>=%d", filter.getToDate(), filter.getFromDate());
         }
 
         if (filter.isOwn()) {
-            whereClause += String.format(" AND createdBy LIKE '%s' ", Objects.requireNonNull(session.getUserEmail()));
+            whereClause += String.format(" AND createdBy LIKE '%s'", Objects.requireNonNull(session.getUserEmail()));
         }
 
         if (filter.isLocation()) {
