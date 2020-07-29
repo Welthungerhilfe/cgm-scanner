@@ -70,19 +70,14 @@ public class PersonRepository {
             whereClause += " AND STRFTIME('%Y-%m-%d', DATETIME(created/1000, 'unixepoch'))=DATE('now')";
         }
 
-        /*
         if (filter.isOwn()) {
-            whereClause += String.format(" AND createdBy=%s ", Objects.requireNonNull(session.getUserEmail()));
+            whereClause += String.format(" AND createdBy LIKE '%s' ", Objects.requireNonNull(session.getUserEmail()));
         }
-         */
-        whereClause += String.format(" AND createdBy LIKE '%s' ", Objects.requireNonNull(session.getUserEmail()));
 
-        /*
         if (filter.isLocation()) {
             selectClause += String.format(", (6371*acos(cos(radians(%.8f))*cos(radians(lat))* cos(radians(lng)-radians(%.8f))+sin(radians(%.8f))*sin(radians(lat)))) AS distance", filter.getFromLOC().getLatitude(), filter.getFromLOC().getLongitude(), filter.getFromLOC().getLatitude());
             whereClause += String.format(" AND distance<=%d", filter.getRadius());
         }
-        */
 
         if (filter.isQuery()) {
             whereClause += String.format(" AND (name LIKE \"%%%s%%\" OR surname LIKE \"%%%s%%\")", filter.getQuery(), filter.getQuery());
