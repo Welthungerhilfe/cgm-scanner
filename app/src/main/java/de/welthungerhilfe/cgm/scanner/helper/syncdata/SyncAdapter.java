@@ -172,6 +172,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                                 measure.setReceived_at(System.currentTimeMillis());
                                                 measureRepository.updateMeasure(measure);
 
+                                                if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
+                                                    onResultReceived(result);
+                                                }
+
                                                 Intent intent = new Intent();
                                                 intent.setAction(ACTION_RESULT_GENERATED);
                                                 intent.putExtra("qr_code", measure.getQrCode());
@@ -189,10 +193,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                                             Measure measure = measureRepository.getMeasureById(result.getMeasure_id());
                                             if (measure != null) {
-                                                measure.setWeight(result.getFloat_value());
+                                                measure.setHeight(result.getFloat_value());
                                                 measure.setResulted_at(timestamp);
                                                 measure.setReceived_at(System.currentTimeMillis());
                                                 measureRepository.updateMeasure(measure);
+
+                                                if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
+                                                    onResultReceived(result);
+                                                }
 
                                                 Intent intent = new Intent();
                                                 intent.setAction(ACTION_RESULT_GENERATED);
@@ -200,14 +208,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                                 intent.putExtra("height", measure.getHeight());
                                                 intent.putExtra("received_at", measure.getReceived_at());
                                                 getContext().sendBroadcast(intent);
-                                            }
-                                        }
-                                    }
-
-                                    if (result.getKey().contains("height") && result.getKey().contains("weight")) {
-                                        if (result.getConfidence_value() >= measureResultRepository.getMaxConfidence(result.getMeasure_id(), "weight%")) {
-                                            if (result.getConfidence_value() >= measureResultRepository.getMaxConfidence(result.getMeasure_id(), "height%")) {
-                                                onResultReceived(result);
                                             }
                                         }
                                     }
