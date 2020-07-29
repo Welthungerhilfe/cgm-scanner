@@ -11,6 +11,7 @@ import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -147,11 +148,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             retrievedMessages = measureResultQueue.retrieveMessages(30);
                             Gson gson = new Gson();
 
+                            Log.d("SyncAdapter", "updating");
                             while (retrievedMessages.iterator().hasNext()) {
                                 CloudQueueMessage message = retrievedMessages.iterator().next();
 
                                 try {
-                                    MeasureResult result = gson.fromJson(message.getMessageContentAsString(), MeasureResult.class);
+                                    String messageStr = message.getMessageContentAsString();
+                                    Log.d("SyncAdapter", messageStr);
+                                    MeasureResult result = gson.fromJson(messageStr, MeasureResult.class);
 
                                     float keyMaxConfident = measureResultRepository.getConfidence(result.getMeasure_id(), result.getKey());
                                     if (result.getConfidence_value() > keyMaxConfident) {
