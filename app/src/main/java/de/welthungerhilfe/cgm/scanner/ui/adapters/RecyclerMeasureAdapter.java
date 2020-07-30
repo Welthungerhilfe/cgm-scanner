@@ -216,8 +216,14 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
             holder.txtHeight.setText(String.format("%.2f%s", measure.getHeight(), context.getString(R.string.unit_cm)));
             holder.txtWeight.setText(String.format("%.3f%s", measure.getWeight(), context.getString(R.string.unit_kg)));
-            setConfidence(holder.txtHeight, holder.txtHeightConfidence, heightConfidence);
-            setConfidence(holder.txtWeight, holder.txtWeightConfidence, weightConfidence);
+
+            if (measure.getType().compareTo(AppConstants.VAL_MEASURE_AUTO) == 0) {
+                setConfidence(holder.txtHeight, holder.txtHeightConfidence, heightConfidence);
+                setConfidence(holder.txtWeight, holder.txtWeightConfidence, weightConfidence);
+            } else {
+                holder.txtHeightConfidence.setVisibility(View.GONE);
+                holder.txtWeightConfidence.setVisibility(View.GONE);
+            }
         } else {
             holder.txtHeight.setText(R.string.field_concealed);
             holder.txtWeight.setText(R.string.field_concealed);
