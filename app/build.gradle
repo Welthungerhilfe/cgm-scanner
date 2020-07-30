@@ -49,6 +49,11 @@ android {
             minSdkVersion 23
             manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", tangoRequired:"true"]
         }
+        nonar {
+            dimension "platform"
+            minSdkVersion 28
+            manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", tangoRequired:"false"]
+        }
     }
     sourceSets {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
