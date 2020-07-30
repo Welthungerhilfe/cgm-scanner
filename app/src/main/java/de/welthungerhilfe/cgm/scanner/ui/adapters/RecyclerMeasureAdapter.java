@@ -217,12 +217,12 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.txtHeight.setText(String.format("%.2f%s", measure.getHeight(), context.getString(R.string.unit_cm)));
             holder.txtWeight.setText(String.format("%.3f%s", measure.getWeight(), context.getString(R.string.unit_kg)));
 
-            if (measure.getType().compareTo(AppConstants.VAL_MEASURE_AUTO) == 0) {
-                setConfidence(holder.txtHeight, holder.txtHeightConfidence, heightConfidence);
-                setConfidence(holder.txtWeight, holder.txtWeightConfidence, weightConfidence);
-            } else {
+            if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
                 holder.txtHeightConfidence.setVisibility(View.GONE);
                 holder.txtWeightConfidence.setVisibility(View.GONE);
+            } else {
+                setConfidence(holder.txtHeight, holder.txtHeightConfidence, heightConfidence);
+                setConfidence(holder.txtWeight, holder.txtWeightConfidence, weightConfidence);
             }
         } else {
             holder.txtHeight.setText(R.string.field_concealed);
@@ -283,7 +283,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         GradientDrawable drawable = (GradientDrawable) percentage.getBackground();
 
         if (value >= AppConstants.MIN_CONFIDENCE) {
-            drawable.setColor(Color.GREEN);
+            drawable.setColor(text.getResources().getColor(R.color.colorPrimary));
             text.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
         } else {
             drawable.setColor(Color.RED);
