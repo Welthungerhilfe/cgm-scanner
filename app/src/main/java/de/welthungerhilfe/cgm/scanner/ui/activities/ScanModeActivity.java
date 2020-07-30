@@ -512,13 +512,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
     }
 
-    private void updateScanningProgress(int numPoints, float density) {
-        float minPointsToCompleteScan = 199500.0f;
-        float maxProgressPerframe = Math.min(numPoints, minPointsToCompleteScan * density);
-        float progressToAddFloat = maxProgressPerframe / minPointsToCompleteScan;
-        progressToAddFloat = progressToAddFloat*100;
+    private void updateScanningProgress() {
+        float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 24 : 8) - 1;
+        float progressToAddFloat = 100.0f / cloudsToFinishScan;
         int progressToAdd = (int) progressToAddFloat;
-        Log.d(TAG, "numPoints: "+numPoints+" float: "+progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
+        Log.d(TAG, progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
         if (mProgress+progressToAdd > 100) {
             mProgress = 100;
             runOnUiThread(() -> fab.setImageResource(R.drawable.done));
@@ -981,7 +979,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             long profile = System.currentTimeMillis();
             ARCoreUtils.Depthmap depthmap = ARCoreUtils.extractDepthmap(image, pose);
             long timestamp = depthmap.getTimestamp();
-            float density = ((ARCoreCamera)mCameraInstance).getDepthSensorDensity();
             float lightIntensity = ((ARCoreCamera)mCameraInstance).getLightIntensity() * 2.0f;
             float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
             float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
@@ -992,7 +989,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             String pointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".pcd";
             mNumberOfFilesWritten++;
 
-            updateScanningProgress(depthmap.getCount(), density);
+            updateScanningProgress();
             progressBar.setProgress(mProgress);
 
             int scanStep = SCAN_STEP;
@@ -1078,13 +1075,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
-        TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
-        String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + currentTangoImageBuffer.timestamp + ".jpg";
+        String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + tangoImageBuffer.timestamp + ".jpg";
+        File artifactFile = new File(mRgbSaveFolder.getPath(), currentImgFilename);
+        BitmapUtils.writeImageToFile(tangoImageBuffer, artifactFile);
 
         Runnable thread = () -> {
             long profile = System.currentTimeMillis();
-            File artifactFile = new File(mRgbSaveFolder.getPath(), currentImgFilename);
-            BitmapUtils.writeImageToFile(currentTangoImageBuffer, artifactFile);
 
             if (artifactFile.exists()) {
                 mColorSize += artifactFile.length();
@@ -1128,7 +1124,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             buffer.order(ByteOrder.LITTLE_ENDIAN);
             buffer.asFloatBuffer().put(pointCloudData.points);
 
-            updateScanningProgress(numPoints, 1);
+            updateScanningProgress();
             progressBar.setProgress(mProgress);
 
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
