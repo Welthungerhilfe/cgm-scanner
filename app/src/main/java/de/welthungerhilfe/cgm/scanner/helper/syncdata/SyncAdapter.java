@@ -172,6 +172,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                             Measure measure = measureRepository.getMeasureById(result.getMeasure_id());
                                             if (measure != null) {
                                                 measure.setWeight(result.getFloat_value());
+                                                measure.setWeightConfidence(result.getConfidence_value());
                                                 measure.setResulted_at(timestamp);
                                                 measure.setReceived_at(System.currentTimeMillis());
                                                 measureRepository.updateMeasure(measure);
@@ -198,6 +199,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                             Measure measure = measureRepository.getMeasureById(result.getMeasure_id());
                                             if (measure != null) {
                                                 measure.setHeight(result.getFloat_value());
+                                                measure.setHeightConfidence(result.getConfidence_value());
                                                 measure.setResulted_at(timestamp);
                                                 measure.setReceived_at(System.currentTimeMillis());
                                                 measureRepository.updateMeasure(measure);
