@@ -127,4 +127,6 @@ public class AppConstants {
     public static final int SORT_LOCATION = 1;
     public static final int SORT_WASTING = 2;
     public static final int SORT_STUNTING = 3;
+
+    public static final int MIN_CONFIDENCE = 98;
 }

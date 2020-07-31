@@ -82,8 +82,19 @@
                     android:textSize="20sp" />
 
                 <TextView
+                    android:id="@+id/txtHeightConfidence"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingStart="@dimen/activity_group_margin"
+                    android:paddingEnd="@dimen/activity_group_margin"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="20sp"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/activity_group_margin"
                     android:layout_marginEnd="@dimen/activity_section_margin"
                     android:text="@string/abbr_weight"
                     android:textSize="20sp"/>
@@ -95,17 +106,28 @@
                     android:layout_marginEnd="@dimen/activity_group_margin"
                     android:textSize="20sp"/>
 
-                <androidx.appcompat.widget.AppCompatRatingBar
-                    android:id="@+id/rateOverallScore"
+                <TextView
+                    android:id="@+id/txtWeightConfidence"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:layout_gravity="center_vertical"
-                    style="@style/CustomRatingBar"
-                    android:isIndicator="true"/>
+                    android:paddingStart="@dimen/activity_group_margin"
+                    android:paddingEnd="@dimen/activity_group_margin"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="20sp"
+                    android:visibility="gone"/>
 
             </LinearLayout>
+
+            <androidx.appcompat.widget.AppCompatRatingBar
+                android:id="@+id/rateOverallScore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_gravity="center_vertical"
+                style="@style/CustomRatingBar"
+                android:isIndicator="true"
+                android:visibility="gone"/>
 
             <ProgressBar
                 android:id="@+id/progressUpload"
