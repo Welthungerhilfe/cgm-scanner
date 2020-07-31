@@ -126,7 +126,8 @@
                 android:focusable="true"
                 android:layout_gravity="center_vertical"
                 style="@style/CustomRatingBar"
-                android:isIndicator="true"/>
+                android:isIndicator="true"
+                android:visibility="gone"/>
 
             <ProgressBar
                 android:id="@+id/progressUpload"
