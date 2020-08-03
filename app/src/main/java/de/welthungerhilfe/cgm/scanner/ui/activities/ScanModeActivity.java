@@ -543,6 +543,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     public void goToNextStep() {
         closeScan();
 
+        if (SCAN_STEP == SCAN_STANDING_FRONT || SCAN_STEP == SCAN_LYING_FRONT) {
+            btnScanStep1.setVisibility(View.GONE);
+        } else if (SCAN_STEP == SCAN_STANDING_SIDE || SCAN_STEP == SCAN_LYING_SIDE) {
+            btnScanStep2.setVisibility(View.GONE);
+        } else if (SCAN_STEP == SCAN_STANDING_BACK || SCAN_STEP == SCAN_LYING_BACK) {
+            btnScanStep3.setVisibility(View.GONE);
+        }
         getScanQuality(measure.getId(),SCAN_STEP);
     }
 
@@ -619,6 +626,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             @Override
             protected Boolean doInBackground(Void... voids) {
+
+                if (!isTangoDevice()) {
+                    waitUntilFinished();
+                }
                 averagePointCount = artifactResultRepository.getAveragePointCount(measureId, scanStep);
                 pointCloudCount = artifactResultRepository.getPointCloudCount(measureId, scanStep);
 
