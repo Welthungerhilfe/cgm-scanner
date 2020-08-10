@@ -294,6 +294,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         measure.setTimestamp(Utils.getUniversalTimestamp());
         measure.setQrCode(person.getQrcode());
         measure.setSchema_version(CgmDatabase.version);
+        measure.setScannedBy(session.getDevice());
 
         progressDialog.show();
 

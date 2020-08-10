@@ -35,7 +35,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public abstract ArtifactResultDao artifactResultDao();
     public abstract MeasureResultDao measureResultDao();
 
-    public static final int version = 9;
+    public static final int version = 10;
 
     public static final String DATABASE = "offline_db";
 
@@ -127,11 +127,18 @@ public abstract class CgmDatabase extends RoomDatabase {
         }
     };
 
+    public static final Migration MIGRATION_9_10 = new Migration(9, 10) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE measures ADD COLUMN scannedBy TEXT;");
+        }
+    };
+
     public static CgmDatabase getInstance(Context context) {
         synchronized (sLock) {
             if (instance == null) {
                 instance = Room.databaseBuilder(context.getApplicationContext(), CgmDatabase.class, DATABASE)
-                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_4, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
+                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_4, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
                         .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
                         .build();
             }
