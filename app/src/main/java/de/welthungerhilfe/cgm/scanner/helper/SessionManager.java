@@ -21,6 +21,7 @@ package de.welthungerhilfe.cgm.scanner.helper;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 
 import com.google.gson.Gson;
 
@@ -113,6 +114,10 @@ public class SessionManager {
             output = AppConstants.LANG_ENGLISH;
         }
         return output;
+    }
+
+    public String getDevice() {
+        return Build.BRAND + " " + Build.MODEL;
     }
 
     public void setLocation(Loc location) {
