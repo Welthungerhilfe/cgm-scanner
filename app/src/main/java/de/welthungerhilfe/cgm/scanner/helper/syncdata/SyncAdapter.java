@@ -96,7 +96,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         if (syncTask != null) {
             syncTask.cancel(false);
         }
-        syncTask = new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        syncTask = new SyncTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
     }
 
     private static void syncImmediately(Account account, Context context) {
