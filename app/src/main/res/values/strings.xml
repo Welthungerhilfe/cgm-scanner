@@ -230,7 +230,7 @@
     <string name="menu_search">Search</string>
     <string name="menu_filter">Sort and Filter</string>
     <string name="login">Login</string>
-    <string name="no_scans">No scans yet today</string>
+    <string name="no_scans">No scans</string>
     <string name="add_scans">To start scanning, tap [+] button</string>
     <string name="sam_wfa_title">Child is severely under weight</string>
     <string name="sam_wfa_message">Please go to the nearest Malnutrition center / Nutrition Rehabilitation center</string>
