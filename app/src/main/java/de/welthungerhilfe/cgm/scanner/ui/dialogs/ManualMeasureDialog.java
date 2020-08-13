@@ -22,9 +22,9 @@ package de.welthungerhilfe.cgm.scanner.ui.dialogs;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatCheckBox;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatCheckBox;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -34,31 +34,26 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
 import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
-import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.events.LocationResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
+import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
 import de.welthungerhilfe.cgm.scanner.ui.views.UnitEditText;
+import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 /**
  * Created by Emerald on 2/23/2018.
  */
 
 public class ManualMeasureDialog extends Dialog implements View.OnClickListener {
-    private final int REQUEST_LOCATION = 0x1000;
 
     @BindView(R.id.imgType)
     ImageView imgType;
@@ -147,10 +142,10 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
     private Context mContext;
     private Measure measure;
-    private Loc location = null;
+    private Loc location;
 
-    private OnManualMeasureListener measureListener;
-    private OnCloseListener closeListener;
+    private ManualMeasureListener measureListener;
+    private CloseListener closeListener;
 
     public ManualMeasureDialog(@NonNull Context context) {
         super(context);
@@ -167,14 +162,13 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
         ButterKnife.bind(this);
 
-        editManualDate.setText(Utils.beautifyDate(System.currentTimeMillis()));
+        editManualDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, System.currentTimeMillis()));
         if (location != null)
             editManualLocation.setText(location.getAddress());
         editManualLocation.setOnClickListener(this);
     }
 
     public void show() {
-        EventBus.getDefault().register(this);
         super.show();
 
         if (closeListener != null)
@@ -182,8 +176,6 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     }
 
     public void dismiss() {
-        EventBus.getDefault().unregister(this);
-
         editManualHeight.setText("");
         editManualWeight.setText("");
         editManualMuac.setText("");
@@ -193,12 +185,6 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
         if (closeListener != null)
             closeListener.onClose(false);
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(LocationResult event) {
-        location = event.getLocationResult();
-        editManualLocation.setText(location.getAddress());
     }
 
     public void setMeasure(Measure measure) {
@@ -216,7 +202,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
             txtTitle.setText(R.string.machine_measure);
         }
 
-        editManualDate.setText(Utils.beautifyDate(measure.getDate()));
+        editManualDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, measure.getDate()));
         if (measure.getLocation() != null)
             editManualLocation.setText(measure.getLocation().getAddress());
         editManualHeight.setText(String.valueOf(measure.getHeight()));
@@ -229,11 +215,11 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         location = measure.getLocation();
     }
 
-    public void setManualMeasureListener(OnManualMeasureListener listener) {
+    public void setManualMeasureListener(ManualMeasureListener listener) {
         measureListener = listener;
     }
 
-    public void setCloseListener(OnCloseListener listener) {
+    public void setCloseListener(CloseListener listener) {
         closeListener = listener;
     }
 
@@ -295,18 +281,23 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.editManualLocation:
-                LocationDetectActivity.navigate((AppCompatActivity) mContext, editManualLocation, location);
-                break;
+        if (v.getId() == R.id.editManualLocation) {
+            LocationDetectActivity.navigate((AppCompatActivity) mContext, editManualLocation, location, location -> {
+                ManualMeasureDialog.this.location = location;
+                editManualLocation.setText(location.getAddress());
+            });
         }
     }
 
-    public interface OnManualMeasureListener {
+    public interface ManualMeasureListener {
         void onManualMeasure(String id, double height, double weight, double muac, double headCircumference, Loc location, boolean oedema);
     }
 
-    public interface OnCloseListener {
+    public interface CloseListener {
         void onClose(boolean result);
+    }
+
+    public interface LocationListener {
+        void onConfirm(Loc location);
     }
 }

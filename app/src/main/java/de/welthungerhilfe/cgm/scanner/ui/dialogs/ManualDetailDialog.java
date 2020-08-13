@@ -21,8 +21,8 @@ package de.welthungerhilfe.cgm.scanner.ui.dialogs;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.AppCompatCheckBox;
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatCheckBox;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
@@ -35,14 +35,13 @@ import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 
 /**
  * Created by Emerald on 2/23/2018.
  */
 
 public class ManualDetailDialog extends Dialog {
-    private final int REQUEST_LOCATION = 0x1000;
 
     @BindView(R.id.imgType)
     ImageView imgType;
@@ -100,7 +99,7 @@ public class ManualDetailDialog extends Dialog {
             txtTitle.setText(R.string.machine_measure);
         }
 
-        txtManualDate.setText(Utils.beautifyDate(measure.getDate()));
+        txtManualDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, measure.getDate()));
         if (measure.getLocation() != null)
             txtManualLocation.setText(measure.getLocation().getAddress());
         else

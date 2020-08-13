@@ -5,22 +5,22 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <android.support.design.widget.AppBarLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
-    </android.support.design.widget.AppBarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
-    <android.support.v4.widget.NestedScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -287,7 +287,7 @@
                                 android:textColor="@color/colorBlack"
                                 android:textSize="18sp" />
 
-                            <android.support.v7.widget.AppCompatRadioButton
+                            <androidx.appcompat.widget.AppCompatRadioButton
                                 android:id="@+id/radioEnglish"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" />
@@ -325,7 +325,7 @@
                                 android:textColor="@color/colorBlack"
                                 android:textSize="18sp" />
 
-                            <android.support.v7.widget.AppCompatRadioButton
+                            <androidx.appcompat.widget.AppCompatRadioButton
                                 android:id="@+id/radioGerman"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" />
@@ -363,7 +363,7 @@
                                 android:textColor="@color/colorBlack"
                                 android:textSize="18sp" />
 
-                            <android.support.v7.widget.AppCompatRadioButton
+                            <androidx.appcompat.widget.AppCompatRadioButton
                                 android:id="@+id/radioHindi"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" />
@@ -451,6 +451,6 @@
 
         </LinearLayout>
 
-    </android.support.v4.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>

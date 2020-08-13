@@ -21,8 +21,11 @@ package de.welthungerhilfe.cgm.scanner.helper;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 
 import com.google.gson.Gson;
+
+import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
@@ -77,7 +80,7 @@ public class SessionManager {
     }
 
     public String getUserEmail() {
-        return pref.getString(KEY_USER_EMAIL, null);
+        return pref.getString(KEY_USER_EMAIL, "");
     }
 
     public void setLanguage(String code) {
@@ -87,7 +90,34 @@ public class SessionManager {
     }
 
     public String getLanguage() {
-        return pref.getString(KEY_LANGUAGE, "en");
+        String current = getCurrentLanguage();
+        String setting = pref.getString(KEY_LANGUAGE, null);
+        if (setting == null) {
+            setLanguage(current);
+            return current;
+        }
+        return setting;
+    }
+
+    private String getCurrentLanguage() {
+        boolean supported = false;
+        String output = Locale.getDefault().getLanguage();
+        if (output.length() > 2) {
+            output = output.substring(0, 2);
+        }
+        for (String lang : AppConstants.SUPPORTED_LANGUAGES) {
+            if (lang.compareTo(output) == 0) {
+                supported = true;
+            }
+        }
+        if (!supported) {
+            output = AppConstants.LANG_ENGLISH;
+        }
+        return output;
+    }
+
+    public String getDevice() {
+        return Build.BRAND + " " + Build.MODEL;
     }
 
     public void setLocation(Loc location) {

@@ -22,25 +22,25 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.fragment.app.DialogFragment;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -55,7 +55,6 @@ import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicke
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 
-import java.io.File;
 import java.util.Calendar;
 import java.util.List;
 
@@ -76,17 +75,8 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.ui.views.SwipeView;
 
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.ACTION_RESULT_GENERATED;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_DATE;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_LOCATION;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_STUNTING;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_WASTING;
-
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
     private final int REQUEST_LOCATION = 0x1000;
-    private final int REQUEST_CAMERA = 0x1001;
-
-    private File mFileTemp;
 
     private PersonListViewModel viewModel;
 
@@ -164,7 +154,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         startService(new Intent(this, DeviceService.class));
     }
 
+    @Override
     public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
         if (adapterData != null)
             adapterData.notifyDataSetChanged();
     }
@@ -331,16 +323,16 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                             viewModel.setFilterNo();
                             break;
                         case R.id.rytSortDate:
-                            viewModel.setSortType(SORT_DATE);
+                            viewModel.setSortType(AppConstants.SORT_DATE);
                             break;
                         case R.id.rytSortLocation:
-                            viewModel.setSortType(SORT_LOCATION);
+                            viewModel.setSortType(AppConstants.SORT_LOCATION);
                             break;
                         case R.id.rytSortWasting:
-                            viewModel.setSortType(SORT_WASTING);
+                            viewModel.setSortType(AppConstants.SORT_WASTING);
                             break;
                         case R.id.rytSortStunting:
-                            viewModel.setSortType(SORT_STUNTING);
+                            viewModel.setSortType(AppConstants.SORT_STUNTING);
                             break;
                     }
 
@@ -360,10 +352,10 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
             //sort check icon
             int sort = filter.getSortType();
-            view.findViewById(R.id.imgSortDate).setVisibility(sort == SORT_DATE ? View.VISIBLE : View.INVISIBLE);
-            view.findViewById(R.id.imgSortLocation).setVisibility(sort == SORT_LOCATION ? View.VISIBLE : View.INVISIBLE);
-            view.findViewById(R.id.imgSortWasting).setVisibility(sort == SORT_WASTING ? View.VISIBLE : View.INVISIBLE);
-            view.findViewById(R.id.imgSortStunting).setVisibility(sort == SORT_STUNTING ? View.VISIBLE : View.INVISIBLE);
+            view.findViewById(R.id.imgSortDate).setVisibility(sort == AppConstants.SORT_DATE ? View.VISIBLE : View.INVISIBLE);
+            view.findViewById(R.id.imgSortLocation).setVisibility(sort == AppConstants.SORT_LOCATION ? View.VISIBLE : View.INVISIBLE);
+            view.findViewById(R.id.imgSortWasting).setVisibility(sort == AppConstants.SORT_WASTING ? View.VISIBLE : View.INVISIBLE);
+            view.findViewById(R.id.imgSortStunting).setVisibility(sort == AppConstants.SORT_STUNTING ? View.VISIBLE : View.INVISIBLE);
 
             //set date info
             if (filter.isDate()) {
@@ -472,6 +464,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     @Override
     public void onActivityResult(int reqCode, int resCode, Intent result) {
+        super.onActivityResult(reqCode, resCode, result);
         if (reqCode == REQUEST_LOCATION && resCode == Activity.RESULT_OK) {
             int radius = result.getIntExtra(AppConstants.EXTRA_RADIUS, 0);
 
@@ -485,5 +478,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
         intent.putExtra(AppConstants.EXTRA_QR, person.getQrcode());
         startActivity(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        adapterData.clear();
+        viewModel.setFilterOwn();
     }
 }

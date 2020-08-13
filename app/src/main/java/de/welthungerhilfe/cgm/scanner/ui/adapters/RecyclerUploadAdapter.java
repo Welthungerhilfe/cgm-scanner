@@ -19,22 +19,14 @@
 
 package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
-import android.annotation.SuppressLint;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.Observer;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -44,12 +36,10 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerUploadAdapter extends RecyclerView.Adapter<RecyclerUploadAdapter.ViewHolder> {
@@ -95,7 +85,7 @@ public class RecyclerUploadAdapter extends RecyclerView.Adapter<RecyclerUploadAd
         };
         artifactRepository.getMeasureUploadProgress(measureId).observeForever(statusObserver);
 
-        holder.txtDate.setText(Utils.beautifyHourMinute(measure.getDate()));
+        holder.txtDate.setText(DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE_AND_TIME, measure.getDate()));
         holder.txtAuthor.setText(Utils.getNameFromEmail(measure.getCreatedBy()));
         holder.txtQr.setText(measure.getQrCode());
     }

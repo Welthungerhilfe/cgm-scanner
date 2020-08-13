@@ -24,7 +24,8 @@ package de.welthungerhilfe.cgm.scanner.helper;
  */
 
 public class AppConstants {
-    public static final int MAX_IMAGE_SIZE = 800;
+
+    public static final int MAX_IMAGE_SIZE = 512;
 
     public static final String ACTION_RESULT_GENERATED = "de.welthungerhilfe.cgm.scanner.action.ACTION_RESULT_GENERATED";
 
@@ -58,6 +59,12 @@ public class AppConstants {
     public static final String LANG_ENGLISH = "en";
     public static final String LANG_GERMAN = "de";
     public static final String LANG_HINDI = "hi";
+
+    public static final String[] SUPPORTED_LANGUAGES = {
+            LANG_ENGLISH,
+            LANG_GERMAN,
+            LANG_HINDI
+    };
 
     public static final String EXTRA_QR = "extra_qr";
     public static final String EXTRA_QR_BITMAP = "extra_qr_bitmap";
@@ -127,4 +134,6 @@ public class AppConstants {
     public static final int SORT_LOCATION = 1;
     public static final int SORT_WASTING = 2;
     public static final int SORT_STUNTING = 3;
+
+    public static final int MIN_CONFIDENCE = 100;
 }

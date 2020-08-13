@@ -3,18 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="de.welthungerhilfe.cgm.scanner">
 
-    <!-- To auto-complete the email text field in the login form with the user's emails -->
-    <!--uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.READ_PROFILE" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" /-->
-
-
-
-    <!-- for Tango Scanner Functionality -->
+    <!-- for AR functionality -->
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Storage access -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <!-- Location access -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -52,6 +48,7 @@
         android:windowSoftInputMode="adjustResize"
         android:theme="@style/AppTheme.NoActionBar"
         android:extractNativeLibs="true"
+        android:requestLegacyExternalStorage="true"
         tools:replace="android:allowBackup">
 
 		<uses-library
@@ -179,9 +176,6 @@
         <service android:name=".helper.service.MemoryMonitorService"
             android:exported="false" />
 
-        <service android:name=".helper.service.AddressService"
-            android:exported="false"/>
-
         <service android:name=".helper.service.DeviceService"
             android:exported="false"/>
 
@@ -219,6 +213,10 @@
             android:name=".helper.InternalStorageContentProvider"
             android:authorities="de.welthungerhilfe.cgm.scanner"
             android:exported="false"/>
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
     </application>
 
 </manifest>

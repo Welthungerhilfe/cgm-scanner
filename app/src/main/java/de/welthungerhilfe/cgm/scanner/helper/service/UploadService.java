@@ -4,7 +4,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
@@ -28,6 +28,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -41,6 +42,7 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOAD_ERROR;
 public class UploadService extends Service implements OnFileLogsLoad {
     private List<String> pendingArtefacts;
     private static int remainingCount = 0;
+    private static UploadService service = null;
 
     private FileLogRepository repository;
 
@@ -49,7 +51,19 @@ public class UploadService extends Service implements OnFileLogsLoad {
     private final Object lock = new Object();
     private ExecutorService executor;
 
+    public static void forceResume() {
+        if (service != null) {
+            synchronized (service.lock) {
+                if (remainingCount <= 0) {
+                    service.loadQueueFileLogs();
+                }
+            }
+        }
+    }
+
     public void onCreate() {
+        service = this;
+
         repository = FileLogRepository.getInstance(getApplicationContext());
 
         pendingArtefacts = new ArrayList<>();
@@ -67,8 +81,10 @@ public class UploadService extends Service implements OnFileLogsLoad {
     public int onStartCommand(final Intent intent, int flags, int startId) {
         if (remainingCount <= 0) {
             try {
-                CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
-                blobClient = storageAccount.createCloudBlobClient();
+                synchronized (SyncAdapter.getLock()) {
+                    CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                    blobClient = storageAccount.createCloudBlobClient();
+                }
 
                 loadQueueFileLogs();
 
@@ -98,7 +114,9 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     @Override
     public void onFileLogsLoaded(List<FileLog> list) {
-        remainingCount = list.size();
+        synchronized (lock) {
+            remainingCount = list.size();
+        }
         Log.e("UploadService", String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
 
         Context c = getApplicationContext();

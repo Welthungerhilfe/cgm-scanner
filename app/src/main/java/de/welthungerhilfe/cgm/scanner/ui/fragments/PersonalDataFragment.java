@@ -19,19 +19,21 @@
 
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
+import android.app.Activity;
 import android.app.DialogFragment;
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.AppCompatCheckBox;
-import android.support.v7.widget.AppCompatRadioButton;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.fragment.app.Fragment;
+import androidx.appcompat.widget.AppCompatCheckBox;
+import androidx.appcompat.widget.AppCompatRadioButton;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -45,18 +47,18 @@ import java.util.Date;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
+import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.ui.views.DateEditText;
+import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, TextWatcher {
-
-    private final int REQUEST_LOCATION = 0x1000;
+public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, DateEditText.DateInputListener, TextWatcher {
 
     public Context context;
     private SessionManager session;
@@ -65,7 +67,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     private AppCompatCheckBox checkAge;
 
-    private EditText editName, editPrename, editLocation, editBirth, editGuardian;
+    private DateEditText editBirth;
+    private EditText editName, editPrename, editLocation, editGuardian;
 
     private AppCompatRadioButton radioFemale, radioMale;
 
@@ -100,7 +103,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         });
         viewModel.getLastMeasureLiveData().observe(getViewLifecycleOwner(), measure -> {
             if (measure != null)
-                showLastLocation(measure);
+                setLocation(measure.getLocation());
         });
     }
 
@@ -118,7 +121,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         checkAge = view.findViewById(R.id.checkAge);
 
         txtDate = view.findViewById(R.id.txtDate);
-        txtDate.setText(Utils.beautifyDate(new Date()));
+        txtDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, System.currentTimeMillis()));
 
         editName = view.findViewById(R.id.editName);
         editName.addTextChangedListener(this);
@@ -129,8 +132,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         editLocation = view.findViewById(R.id.editLocation);
 
         editBirth = view.findViewById(R.id.editBirth);
-        editBirth.addTextChangedListener(this);
-        editBirth.setOnClickListener(this);
+        editBirth.setOnDateInputListener(this);
 
         editGuardian = view.findViewById(R.id.editGuardian);
         editGuardian.addTextChangedListener(this);
@@ -145,14 +147,16 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void initUI() {
+        setLocation(((CreateDataActivity)getActivity()).location);
+
         if (person == null)
             return;
 
-        txtDate.setText(Utils.beautifyDate(person.getCreated()));
+        txtDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getCreated()));
 
         editName.setText(person.getName());
         editPrename.setText(person.getSurname());
-        editBirth.setText(Utils.beautifyDate(person.getBirthday()));
+        editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getBirthday()));
         editGuardian.setText(person.getGuardian());
 
         if (person.getSex().equals(AppConstants.VAL_SEX_FEMALE)) {
@@ -164,9 +168,13 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         checkAge.setChecked(person.isAgeEstimated());
     }
 
-    private void showLastLocation(Measure measure) {
-        if (measure.getLocation() != null)
-            editLocation.setText(measure.getLocation().getAddress());
+    public void setLocation(Loc location) {
+        if (location != null) {
+            String address = location.getAddress();
+            if ((address != null) && (address.length() > 0)) {
+                editLocation.setText(address);
+            }
+        }
     }
 
     public boolean validate() {
@@ -216,19 +224,14 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.editBirth:
-                DateRangePickerDialog pickerDialog = new DateRangePickerDialog();
-                pickerDialog.setCallback(this);
-                pickerDialog.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
-                pickerDialog.show(getActivity().getFragmentManager(), "DATE_RANGE_PICKER");
-
-                break;
             case R.id.imgBirth:
+                long timestamp = DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, editBirth.getText().toString());
+
                 DateRangePickerDialog dateRangePicker = new DateRangePickerDialog();
+                dateRangePicker.setDate(new Date(timestamp));
                 dateRangePicker.setCallback(this);
                 dateRangePicker.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
                 dateRangePicker.show(getActivity().getFragmentManager(), "DATE_RANGE_PICKER");
-
                 break;
             case R.id.btnNext:
                 if (validate()) {
@@ -273,7 +276,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     @Override
     public void onDateTimeRecurrenceSet(SelectedDate selectedDate, int hourOfDay, int minute, SublimeRecurrencePicker.RecurrenceOption recurrenceOption, String recurrenceRule) {
         birthday = selectedDate.getStartDate().getTimeInMillis();
-        editBirth.setText(Utils.beautifyDate(selectedDate.getStartDate().getTimeInMillis()));
+        editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, birthday));
     }
 
     @Override
@@ -288,12 +291,30 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
     @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    public void onDateEntered(String value) {
+        InputMethodManager ime = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+        ime.hideSoftInputFromWindow(editBirth.getWindowToken(), 0);
 
+        birthday = DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, value);
+        editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, birthday));
+        editBirth.clearFocus();
+        PersonalDataFragment.this.onTextChanged();
     }
 
     @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
+    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+    }
+
+    @Override
+    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        PersonalDataFragment.this.onTextChanged();
+    }
+
+    @Override
+    public void afterTextChanged(Editable editable) {
+    }
+
+    private void onTextChanged() {
         String name = editName.getText().toString();
         String prename = editPrename.getText().toString();
         String birth = editBirth.getText().toString();
@@ -306,10 +327,5 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             btnNext.setTextColor(getResources().getColor(R.color.colorGreyDark));
             btnNext.setBackground(getResources().getDrawable(R.drawable.button_grey_round));
         }
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
-
     }
 }

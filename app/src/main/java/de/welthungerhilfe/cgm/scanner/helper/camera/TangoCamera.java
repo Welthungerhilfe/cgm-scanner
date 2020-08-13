@@ -50,7 +50,7 @@ public class TangoCamera implements ICamera {
     public interface TangoCameraListener {
         void onTangoColorData(TangoImageBuffer tangoImageBuffer);
 
-        void onTangoDepthData(TangoPointCloudData pointCloudData, String pose);
+        void onTangoDepthData(TangoPointCloudData pointCloudData, double[] pose, TangoCameraIntrinsics calibration);
     }
 
     //constants
@@ -66,7 +66,7 @@ public class TangoCamera implements ICamera {
     private int mDisplayRotation = Surface.ROTATION_0;
     private Semaphore mutex_on_mIsRecording;
     private AtomicBoolean mIsFrameAvailableTangoThread;
-    private String mPose;
+    private double[] mPose;
 
     //App integration objects
     private Activity mActivity;
@@ -80,7 +80,7 @@ public class TangoCamera implements ICamera {
 
         mIsConnected = false;
         mIsFrameAvailableTangoThread = new AtomicBoolean(false);
-        mPose = "0 0 0 1 0 0 0";
+        mPose = new double[]{0, 0, 0, 1, 0, 0, 0};
     }
 
     @Override
@@ -236,22 +236,19 @@ public class TangoCamera implements ICamera {
                         e.printStackTrace();
                         Crashes.trackError(e);
                     }
-                    mPose = "";
-                    mPose += pose.rotation[0] + " ";
-                    mPose += pose.rotation[1] + " ";
-                    mPose += pose.rotation[2] + " ";
-                    mPose += pose.rotation[3] + " ";
-                    mPose += pose.translation[0] + " ";
-                    mPose += pose.translation[1] + " ";
-                    mPose += pose.translation[2];
+                    mPose[0] = pose.rotation[0];
+                    mPose[1] = pose.rotation[1];
+                    mPose[2] = pose.rotation[2];
+                    mPose[3] = pose.rotation[3];
+                    mPose[4] = pose.translation[0];
+                    mPose[5] = pose.translation[1];
+                    mPose[6] = pose.translation[2];
                     mutex_on_mIsRecording.release();
                 }
             }
 
             @Override
             public void onPointCloudAvailable(TangoPointCloudData pointCloudData) throws TangoErrorException {
-                // set to true for next RGB image to be written
-                // TODO remove when not necessary anymore (performance/video capture)
                 mPointCloudAvailable = true;
 
                 try {
@@ -260,8 +257,9 @@ public class TangoCamera implements ICamera {
                     e.printStackTrace();
                     Crashes.trackError(e);
                 }
+                TangoCameraIntrinsics calibration = mTango.getCameraIntrinsics(TangoCameraIntrinsics.TANGO_CAMERA_DEPTH);
                 for (TangoCameraListener listener : mListeners) {
-                    listener.onTangoDepthData(pointCloudData, mPose);
+                    listener.onTangoDepthData(pointCloudData, mPose, calibration);
                 }
                 mutex_on_mIsRecording.release();
             }

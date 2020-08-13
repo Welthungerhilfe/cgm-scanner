@@ -1,17 +1,12 @@
 package de.welthungerhilfe.cgm.scanner.utils;
 
-import android.net.Uri;
-
-import com.google.atap.tangoservice.TangoPointCloudData;
+import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Locale;
 
 /**
@@ -34,57 +29,56 @@ import java.util.Locale;
  */
 public class TangoUtils {
 
-    // This function writes the XYZ points to .vtk files in binary
-    public static Uri writePointCloudToVtkFile(TangoPointCloudData pointCloudData, File pointCloudSaveFolder, String pointCloudFilename) {
-
-        ByteBuffer myBuffer = ByteBuffer.allocate(pointCloudData.numPoints * 4 * 4);
-        myBuffer.order(ByteOrder.LITTLE_ENDIAN);
-
-        myBuffer.asFloatBuffer().put(pointCloudData.points);
-
-        File file = new File(pointCloudSaveFolder, pointCloudFilename+".vtk");
-
-        try {
-
-            DataOutputStream out = new DataOutputStream(new BufferedOutputStream(
-                    new FileOutputStream(file)));
-            float confidence;
-
-            out.write(("# vtk DataFile Version 3.0\n" +
-                    "vtk output\n" +
-                    "BINARY\n" +
-                    "DATASET POLYDATA\n" +
-                    "POINTS " + pointCloudData.numPoints + " float\n").getBytes());
-
-            for (int i = 0; i < pointCloudData.numPoints; i++) {
-
-                out.writeFloat(myBuffer.getFloat(4 * i * 4));
-                out.writeFloat(myBuffer.getFloat((4 * i + 1) * 4));
-                out.writeFloat(myBuffer.getFloat((4 * i + 2) * 4));
-                confidence = myBuffer.getFloat((4 * i + 3) * 4);
-            }
-
-            out.write(("\nVERTICES 1 " + String.valueOf(pointCloudData.numPoints + 1) + "\n").getBytes());
-            out.writeInt(pointCloudData.numPoints);
-            for (int i = 0; i < pointCloudData.numPoints; i++) {
-                out.writeInt(i);
-            }
-
-            out.write(("\nFIELD FieldData 1\n" + "timestamp 1 1 float\n").getBytes());
-            out.writeFloat((float) pointCloudData.timestamp);
-
-            out.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Uri.fromFile(file);
+    public static TangoImageBuffer copyImageBuffer(TangoImageBuffer imageBuffer) {
+        ByteBuffer clone = ByteBuffer.allocateDirect(imageBuffer.data.capacity());
+        imageBuffer.data.rewind();
+        clone.put(imageBuffer.data);
+        imageBuffer.data.rewind();
+        clone.flip();
+        return new TangoImageBuffer(imageBuffer.width, imageBuffer.height,
+                imageBuffer.stride, imageBuffer.frameNumber,
+                imageBuffer.timestamp, imageBuffer.format, clone);
     }
 
-    // This function writes the XYZC points to .pcd files in binary
-    public static Uri writePointCloudToPcdFile(ByteBuffer buffer, int numPoints, double timestamp, String pose, File file) {
+    public static ARCoreUtils.Depthmap extractDepthmap(ByteBuffer buffer, int numPoints, double[] pose, double timestamp, TangoCameraIntrinsics calibration) {
+        int width = 180;
+        int height = 135;
+
+        ARCoreUtils.Depthmap depthmap = new ARCoreUtils.Depthmap(width, height);
+        depthmap.position = new float[] {(float) pose[4], (float) pose[5], (float) pose[6]};
+        depthmap.rotation = new float[] {(float) pose[0], (float) pose[1], (float) pose[2], (float) pose[3]};
+        depthmap.timestamp = (long) timestamp;
+        for (int i = 0; i < numPoints; i++) {
+            float px = buffer.getFloat();
+            float py = buffer.getFloat();
+            float pz = buffer.getFloat();
+            float pc = buffer.getFloat();
+            double tx = px * calibration.fx / pz + calibration.cx;
+            double ty = py * calibration.fy / pz + calibration.cy;
+            int x = width - (int)(width * tx / (double)calibration.width) - 1;
+            int y = height - (int)(height * ty / (double)calibration.height) - 1;
+            if (x >= 0 && y >= 0 && x < width && y < height) {
+                depthmap.confidence[y * width + x] = (byte) (7 * pc);
+                depthmap.depth[y * width + x] = (short) (pz * 1000);
+            }
+        }
+
+        return depthmap;
+    }
+
+
+    public static void writePointCloudToPcdFile(ByteBuffer buffer, int numPoints, double timestamp, double[] pose, File file) {
 
         try {
+            String p = "";
+            p += pose[0] + " ";
+            p += pose[1] + " ";
+            p += pose[2] + " ";
+            p += pose[3] + " ";
+            p += pose[4] + " ";
+            p += pose[5] + " ";
+            p += pose[6];
+
             FileOutputStream out = new FileOutputStream(file);
             out.write(("# timestamp 1 1 float "+timestamp+"\n").getBytes());
             out.write(("# .PCD v.7 - Point Cloud Data file format\n" +
@@ -95,14 +89,14 @@ public class TangoUtils {
                     "COUNT 1 1 1 1\n" +
                     "WIDTH " + numPoints + "\n"+
                     "HEIGHT 1\n" +
-                    "VIEWPOINT " + pose + "\n" +
+                    "VIEWPOINT " + p + "\n" +
                     "POINTS " + numPoints + "\n" +
                     "DATA ascii\n").getBytes());
 
             StringBuilder output = new StringBuilder();
             for (int i = 0; i < numPoints; i++) {
-                float pcx =  buffer.getFloat();
-                float pcy =  buffer.getFloat();
+                float pcx = buffer.getFloat();
+                float pcy = buffer.getFloat();
                 float pcz = buffer.getFloat();
                 float pcc = buffer.getFloat();
                 output.append(String.format(Locale.US, "%f %f %f %f\n", pcx, pcy, pcz, pcc));
@@ -113,18 +107,5 @@ public class TangoUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return Uri.fromFile(file);
-    }
-
-
-    public static TangoImageBuffer copyImageBuffer(TangoImageBuffer imageBuffer) {
-        ByteBuffer clone = ByteBuffer.allocateDirect(imageBuffer.data.capacity());
-        imageBuffer.data.rewind();
-        clone.put(imageBuffer.data);
-        imageBuffer.data.rewind();
-        clone.flip();
-        return new TangoImageBuffer(imageBuffer.width, imageBuffer.height,
-                imageBuffer.stride, imageBuffer.frameNumber,
-                imageBuffer.timestamp, imageBuffer.format, clone);
     }
 }

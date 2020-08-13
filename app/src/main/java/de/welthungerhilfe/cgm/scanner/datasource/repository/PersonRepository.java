@@ -1,7 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.persistence.db.SimpleSQLiteQuery;
+import androidx.lifecycle.LiveData;
+import androidx.sqlite.db.SimpleSQLiteQuery;
 import android.content.Context;
 
 import java.util.List;
@@ -9,7 +9,6 @@ import java.util.Locale;
 import java.util.Objects;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
-import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.PersonFilter;
@@ -66,21 +65,17 @@ public class PersonRepository {
         String limitClause = String.format(Locale.US, "LIMIT %d OFFSET %d", PAGE_SIZE, filter.getPage() * PAGE_SIZE);
 
         if (filter.isDate()) {
-            whereClause += String.format(Locale.US, " AND created<=%d AND created>=%d ", filter.getToDate(), filter.getFromDate());
-        } else {
-            whereClause += " AND STRFTIME('%Y-%m-%d', DATETIME(created/1000, 'unixepoch'))=DATE('now')";
+            whereClause += String.format(Locale.US, " AND created<=%d AND created>=%d", filter.getToDate(), filter.getFromDate());
         }
 
         if (filter.isOwn()) {
-            whereClause += String.format(" AND createdBy=%s ", Objects.requireNonNull(session.getUserEmail()));
+            whereClause += String.format(" AND createdBy LIKE '%s'", Objects.requireNonNull(session.getUserEmail()));
         }
 
-        /*
         if (filter.isLocation()) {
             selectClause += String.format(", (6371*acos(cos(radians(%.8f))*cos(radians(lat))* cos(radians(lng)-radians(%.8f))+sin(radians(%.8f))*sin(radians(lat)))) AS distance", filter.getFromLOC().getLatitude(), filter.getFromLOC().getLongitude(), filter.getFromLOC().getLatitude());
             whereClause += String.format(" AND distance<=%d", filter.getRadius());
         }
-        */
 
         if (filter.isQuery()) {
             whereClause += String.format(" AND (name LIKE \"%%%s%%\" OR surname LIKE \"%%%s%%\")", filter.getQuery(), filter.getQuery());

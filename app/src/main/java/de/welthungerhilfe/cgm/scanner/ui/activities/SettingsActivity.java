@@ -9,9 +9,9 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.support.v7.widget.AppCompatRadioButton;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.AppCompatRadioButton;
+import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -48,6 +48,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureResultReposit
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class SettingsActivity extends BaseActivity {
@@ -180,8 +181,7 @@ public class SettingsActivity extends BaseActivity {
         }
 
         if (session.getBackupTimestamp() == 0) txtSettingBackupDate.setText(R.string.no_backups);
-        else txtSettingBackupDate.setText(Utils.beautifyDate(session.getBackupTimestamp()));
-
+        else txtSettingBackupDate.setText(DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, session.getBackupTimestamp()));
 
         findViewById(R.id.btnBackupNow).setOnClickListener(view -> {
             progressDialog.show();
@@ -329,7 +329,7 @@ public class SettingsActivity extends BaseActivity {
 
                 public void onPostExecute(Void result) {
                     session.setBackupTimestamp(timestamp);
-                    txtSettingBackupDate.setText(Utils.beautifyDate(timestamp));
+                    txtSettingBackupDate.setText(DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, timestamp));
                     progressDialog.dismiss();
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

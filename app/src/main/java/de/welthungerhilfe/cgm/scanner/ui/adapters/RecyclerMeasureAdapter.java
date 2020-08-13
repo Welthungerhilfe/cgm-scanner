@@ -20,13 +20,16 @@
 package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
 import android.annotation.SuppressLint;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.Observer;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.AppCompatRatingBar;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatRatingBar;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -50,6 +53,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultReposi
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasureAdapter.ViewHolder> {
@@ -203,17 +207,28 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.rytItem.setBackgroundResource(R.color.colorWhite);
         }
 
-        holder.txtDate.setText(Utils.beautifyHourMinute(measure.getDate()));
+        holder.txtDate.setText(DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE_AND_TIME, measure.getDate()));
         holder.txtAuthor.setText(Utils.getNameFromEmail(measure.getCreatedBy()));
 
         if (config.isMeasure_visibility()) {
+            int heightConfidence = (int)(measure.getHeightConfidence() * 100);
+            int weightConfidence = (int)(measure.getWeightConfidence() * 100);
+
             holder.txtHeight.setText(String.format("%.2f%s", measure.getHeight(), context.getString(R.string.unit_cm)));
             holder.txtWeight.setText(String.format("%.3f%s", measure.getWeight(), context.getString(R.string.unit_kg)));
-            holder.txtArm.setText(String.format("%.2f%s", measure.getMuac(), context.getString(R.string.unit_cm)));
+
+            if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
+                holder.txtHeightConfidence.setVisibility(View.GONE);
+                holder.txtWeightConfidence.setVisibility(View.GONE);
+            } else {
+                setConfidence(holder.txtHeight, holder.txtHeightConfidence, heightConfidence);
+                setConfidence(holder.txtWeight, holder.txtWeightConfidence, weightConfidence);
+            }
         } else {
             holder.txtHeight.setText(R.string.field_concealed);
             holder.txtWeight.setText(R.string.field_concealed);
-            holder.txtArm.setText(R.string.field_concealed);
+            holder.txtHeightConfidence.setVisibility(View.GONE);
+            holder.txtWeightConfidence.setVisibility(View.GONE);
         }
 
         if (listener != null) {
@@ -263,6 +278,22 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         notifyItemRemoved(index);
     }
 
+    private void setConfidence(TextView text, TextView percentage, int value) {
+        percentage.setBackgroundResource(R.drawable.tags_rounded_corners);
+        GradientDrawable drawable = (GradientDrawable) percentage.getBackground();
+
+        if (value >= AppConstants.MIN_CONFIDENCE) {
+            drawable.setColor(text.getResources().getColor(R.color.colorPrimary));
+            text.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
+        } else {
+            drawable.setColor(Color.RED);
+            text.setPaintFlags(Paint.ANTI_ALIAS_FLAG | Paint.STRIKE_THRU_TEXT_FLAG);
+        }
+
+        percentage.setText(value + "%");
+        percentage.setVisibility(View.VISIBLE);
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         RelativeLayout rytItem;
 
@@ -271,8 +302,9 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         TextView txtDate;
         TextView txtAuthor;
         TextView txtHeight;
+        TextView txtHeightConfidence;
         TextView txtWeight;
-        TextView txtArm;
+        TextView txtWeightConfidence;
         ProgressBar progressUpload;
         AppCompatRatingBar rateOverallScore;
 
@@ -284,8 +316,9 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             txtDate = itemView.findViewById(R.id.txtDate);
             txtAuthor = itemView.findViewById(R.id.txtAuthor);
             txtHeight = itemView.findViewById(R.id.txtHeight);
+            txtHeightConfidence = itemView.findViewById(R.id.txtHeightConfidence);
             txtWeight = itemView.findViewById(R.id.txtWeight);
-            txtArm = itemView.findViewById(R.id.txtArm);
+            txtWeightConfidence = itemView.findViewById(R.id.txtWeightConfidence);
             rateOverallScore = itemView.findViewById(R.id.rateOverallScore);
             progressUpload = itemView.findViewById(R.id.progressUpload);
         }

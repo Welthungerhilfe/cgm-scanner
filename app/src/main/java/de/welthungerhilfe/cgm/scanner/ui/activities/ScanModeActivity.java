@@ -16,13 +16,12 @@ import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.core.app.ActivityCompat;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.ar.core.Pose;
+import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 import com.google.gson.Gson;
@@ -67,9 +67,9 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
@@ -78,9 +78,8 @@ import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ICamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoCamera;
-import de.welthungerhilfe.cgm.scanner.helper.receiver.AddressReceiver;
-import de.welthungerhilfe.cgm.scanner.helper.service.AddressService;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.utils.ARCoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.utils.MD5;
@@ -295,6 +294,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         measure.setTimestamp(Utils.getUniversalTimestamp());
         measure.setQrCode(person.getQrcode());
         measure.setSchema_version(CgmDatabase.version);
+        measure.setScannedBy(session.getDevice());
 
         progressDialog.show();
 
@@ -307,19 +307,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
         new SaveMeasureTask(ScanModeActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
-
-    private AddressReceiver receiver = new AddressReceiver(new Handler()) {
-        @Override
-        public void onAddressDetected(String result) {
-            location.setAddress(result);
-            measure.setLocation(location);
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            super.onReceiveResult(resultCode, resultData);
-        }
-    };
 
     private static final String TAG = ScanModeActivity.class.getSimpleName();
 
@@ -494,7 +481,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         mPointCloudSaveFolder = new File(mScanArtefactsOutputFolder, "pc");
         mRgbSaveFolder = new File(mScanArtefactsOutputFolder,"rgb");
 
-        if(!isTangoDevice() && !mDepthmapSaveFolder.exists()) {
+        if(!mDepthmapSaveFolder.exists()) {
             boolean created = mDepthmapSaveFolder.mkdirs();
             if (created) {
                 Log.i(TAG, "Folder: \"" + mDepthmapSaveFolder + "\" created\n");
@@ -521,19 +508,16 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             }
         }
 
-        if (!isTangoDevice())
-            Log.v(TAG,"mDepthmapSaveFolder: "+mDepthmapSaveFolder);
+        Log.v(TAG,"mDepthmapSaveFolder: "+mDepthmapSaveFolder);
         Log.v(TAG,"mPointCloudSaveFolder: "+mPointCloudSaveFolder);
         Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
     }
 
-    private void updateScanningProgress(int numPoints, float density) {
-        float minPointsToCompleteScan = 199500.0f;
-        float maxProgressPerframe = Math.min(numPoints, minPointsToCompleteScan * density);
-        float progressToAddFloat = maxProgressPerframe / minPointsToCompleteScan;
-        progressToAddFloat = progressToAddFloat*100;
+    private void updateScanningProgress() {
+        float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 24 : 8) - 1;
+        float progressToAddFloat = 100.0f / cloudsToFinishScan;
         int progressToAdd = (int) progressToAddFloat;
-        Log.d(TAG, "numPoints: "+numPoints+" float: "+progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
+        Log.d(TAG, progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
         if (mProgress+progressToAdd > 100) {
             mProgress = 100;
             runOnUiThread(() -> fab.setImageResource(R.drawable.done));
@@ -560,6 +544,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     public void goToNextStep() {
         closeScan();
 
+        if (SCAN_STEP == SCAN_STANDING_FRONT || SCAN_STEP == SCAN_LYING_FRONT) {
+            btnScanStep1.setVisibility(View.GONE);
+        } else if (SCAN_STEP == SCAN_STANDING_SIDE || SCAN_STEP == SCAN_LYING_SIDE) {
+            btnScanStep2.setVisibility(View.GONE);
+        } else if (SCAN_STEP == SCAN_STANDING_BACK || SCAN_STEP == SCAN_LYING_BACK) {
+            btnScanStep3.setVisibility(View.GONE);
+        }
         getScanQuality(measure.getId(),SCAN_STEP);
     }
 
@@ -636,6 +627,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             @Override
             protected Boolean doInBackground(Void... voids) {
+
+                if (!isTangoDevice()) {
+                    waitUntilFinished();
+                }
                 averagePointCount = artifactResultRepository.getAveragePointCount(measureId, scanStep);
                 pointCloudCount = artifactResultRepository.getPointCloudCount(measureId, scanStep);
 
@@ -743,11 +738,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                     location.setLatitude(loc.getLatitude());
                     location.setLongitude(loc.getLongitude());
-
-                    Intent intent = new Intent(this, AddressService.class);
-                    intent.putExtra("add_receiver", receiver);
-                    intent.putExtra("add_location", loc);
-                    startService(intent);
+                    location.setAddress(Utils.getAddress(this, location));
+                    measure.setLocation(location);
                 }
             }
         }
@@ -818,6 +810,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         SaveMeasureTask(Activity act) {
             activity = act;
+
+            if (!AppController.getInstance().isUploadRunning()) {
+                startService(new Intent(getApplicationContext(), UploadService.class));
+            }
         }
 
         @Override
@@ -827,64 +823,68 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             waitUntilFinished();
             measureRepository.insertMeasure(measure);
 
-            try {
-                CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
-                CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
-
+            synchronized (SyncAdapter.getLock()) {
                 try {
-                    if (!measure.isArtifact_synced()) {
-                        CloudQueue measureArtifactsQueue = queueClient.getQueueReference("artifact-list");
-                        measureArtifactsQueue.createIfNotExists();
+                    CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                    CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
 
-                        long totalNumbers  = fileLogRepository.getTotalArtifactCountForMeasure(measure.getId());
-                        final int size = 50;
-                        int offset = 0;
+                    try {
+                        if (!measure.isArtifact_synced()) {
+                            CloudQueue measureArtifactsQueue = queueClient.getQueueReference("artifact-list");
+                            measureArtifactsQueue.createIfNotExists();
 
-                        while (offset + 1 < totalNumbers) {
-                            List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(measure.getId(), offset, size);
+                            long totalNumbers  = fileLogRepository.getTotalArtifactCountForMeasure(measure.getId());
+                            final int size = 50;
+                            int offset = 0;
 
-                            ArtifactList artifactList = new ArtifactList();
-                            artifactList.setMeasure_id(measure.getId());
-                            artifactList.setStart(offset + 1);
-                            artifactList.setEnd(offset + measureArtifacts.size());
-                            artifactList.setArtifacts(measureArtifacts);
-                            artifactList.setTotal(totalNumbers);
+                            while (offset + 1 < totalNumbers) {
+                                List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(measure.getId(), offset, size);
 
-                            offset += measureArtifacts.size();
+                                ArtifactList artifactList = new ArtifactList();
+                                artifactList.setMeasure_id(measure.getId());
+                                artifactList.setStart(offset + 1);
+                                artifactList.setEnd(offset + measureArtifacts.size());
+                                artifactList.setArtifacts(measureArtifacts);
+                                artifactList.setTotal(totalNumbers);
 
-                            CloudQueueMessage measureArtifactsMessage = new CloudQueueMessage(measure.getId());
-                            measureArtifactsMessage.setMessageContent(gson.toJson(artifactList));
-                            measureArtifactsQueue.addMessage(measureArtifactsMessage);
+                                offset += measureArtifacts.size();
+
+                                CloudQueueMessage measureArtifactsMessage = new CloudQueueMessage(measure.getId());
+                                measureArtifactsMessage.setMessageContent(gson.toJson(artifactList));
+                                measureArtifactsQueue.addMessage(measureArtifactsMessage);
+                            }
+
+                            measure.setArtifact_synced(true);
+                            measure.setUploaded_at(System.currentTimeMillis());
                         }
 
-                        measure.setArtifact_synced(true);
-                        measure.setUploaded_at(System.currentTimeMillis());
+                        CloudQueue measureQueue = queueClient.getQueueReference("measure");
+                        measureQueue.createIfNotExists();
+
+                        CloudQueueMessage message = new CloudQueueMessage(measure.getId());
+                        message.setMessageContent(gson.toJson(measure));
+                        measureQueue.addMessage(message);
+
+                        measure.setTimestamp(session.getSyncTimestamp());
+                        measureRepository.updateMeasure(measure);
+                    } catch (StorageException e) {
+                        e.printStackTrace();
                     }
-
-                    CloudQueue measureQueue = queueClient.getQueueReference("measure");
-                    measureQueue.createIfNotExists();
-
-                    CloudQueueMessage message = new CloudQueueMessage(measure.getId());
-                    message.setMessageContent(gson.toJson(measure));
-                    measureQueue.addMessage(message);
-
-                    measure.setTimestamp(session.getSyncTimestamp());
-                    measureRepository.updateMeasure(measure);
-                } catch (StorageException e) {
+                } catch (URISyntaxException | InvalidKeyException e) {
                     e.printStackTrace();
                 }
-            } catch (URISyntaxException | InvalidKeyException e) {
-                e.printStackTrace();
             }
 
             return null;
         }
 
         public void onPostExecute(Void result) {
-            if (!AppController.getInstance().isUploadRunning()) {
-                startService(new Intent(ScanModeActivity.this, UploadService.class));
+            try {
+                UploadService.forceResume();
+                activity.finish();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            activity.finish();
         }
     }
 
@@ -917,14 +917,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
                 currentImgFilename = currentImgFilename.replace('/', '_');
                 File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
-                try {
-                    FileOutputStream fileOutputStream = new FileOutputStream(artifactFile);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 75, fileOutputStream);
-                    fileOutputStream.flush();
-                    fileOutputStream.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                BitmapUtils.writeBitmapToFile(bitmap, artifactFile);
 
                 //upload RGB data
                 if (artifactFile.exists()) {
@@ -998,7 +991,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             long profile = System.currentTimeMillis();
             ARCoreUtils.Depthmap depthmap = ARCoreUtils.extractDepthmap(image, pose);
             long timestamp = depthmap.getTimestamp();
-            float density = ((ARCoreCamera)mCameraInstance).getDepthSensorDensity();
             float lightIntensity = ((ARCoreCamera)mCameraInstance).getLightIntensity() * 2.0f;
             float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
             float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
@@ -1009,7 +1001,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             String pointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".pcd";
             mNumberOfFilesWritten++;
 
-            updateScanningProgress(depthmap.getCount(), density);
+            updateScanningProgress();
             progressBar.setProgress(mProgress);
 
             int scanStep = SCAN_STEP;
@@ -1095,13 +1087,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
-        TangoImageBuffer currentTangoImageBuffer = TangoUtils.copyImageBuffer(tangoImageBuffer);
-        String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + currentTangoImageBuffer.timestamp + ".jpg";
+        String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + tangoImageBuffer.timestamp + ".jpg";
+        File artifactFile = new File(mRgbSaveFolder.getPath(), currentImgFilename);
+        BitmapUtils.writeImageToFile(tangoImageBuffer, artifactFile);
 
         Runnable thread = () -> {
             long profile = System.currentTimeMillis();
-            BitmapUtils.writeImageToFile(currentTangoImageBuffer, mRgbSaveFolder, currentImgFilename);
-            File artifactFile = new File(mRgbSaveFolder.getPath() + File.separator + currentImgFilename);
 
             if (artifactFile.exists()) {
                 mColorSize += artifactFile.length();
@@ -1135,7 +1126,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    public void onTangoDepthData(TangoPointCloudData pointCloudData, String pose) {
+    public void onTangoDepthData(TangoPointCloudData pointCloudData, double[] pose, TangoCameraIntrinsics calibration) {
         // Saving the frame or not, depending on the current mode.
         if ( mIsRecording ) {
             long profile = System.currentTimeMillis();
@@ -1145,11 +1136,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             buffer.order(ByteOrder.LITTLE_ENDIAN);
             buffer.asFloatBuffer().put(pointCloudData.points);
 
-            updateScanningProgress(numPoints, 1);
+            updateScanningProgress();
             progressBar.setProgress(mProgress);
 
+            String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
+                    "_" + String.format(Locale.US, "%03d", mNumberOfFilesWritten);
             String pointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
-                    "_" + String.format(Locale.getDefault(), "%03d", mNumberOfFilesWritten++);
+                    "_" + String.format(Locale.US, "%03d", mNumberOfFilesWritten++);
 
             int scanStep = SCAN_STEP;
             new Thread(() -> {
@@ -1166,23 +1159,54 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             }).start();
 
             Runnable thread = () -> {
-                File artifactFile = new File(mPointCloudSaveFolder.getPath() + File.separator + pointCloudFilename +".pcd");
-                TangoUtils.writePointCloudToPcdFile(buffer, numPoints, timestamp, pose, artifactFile);
 
-                if (artifactFile.exists()) {
-                    mDepthSize += artifactFile.length();
+                //write depthmap
+                ARCoreUtils.Depthmap depthmap = TangoUtils.extractDepthmap(buffer, numPoints, pose, timestamp, calibration);
+                File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
+                ARCoreUtils.writeDepthmap(depthmap, artifactFile);
+
+                //write pointcloud
+                buffer.rewind();
+                File artifactFilePCD = new File(mPointCloudSaveFolder.getPath() + File.separator + pointCloudFilename +".pcd");
+                TangoUtils.writePointCloudToPcdFile(buffer, numPoints, timestamp, pose, artifactFilePCD);
+
+                //profile process
+                if (artifactFile.exists() && artifactFilePCD.exists()) {
+                    mDepthSize += artifactFile.length() + artifactFilePCD.length();
                     mDepthTime += System.currentTimeMillis() - profile;
                     if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
                         LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_SIZE, mDepthSize);
                         LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_TIME, mDepthTime);
                     }
+                }
 
+                //upload depthmap
+                if (artifactFile.exists()) {
                     FileLog log = new FileLog();
-                    log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
-                    log.setType("pcd");
+                    log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
+                    log.setType("depth");
                     log.setPath(artifactFile.getPath());
                     log.setHashValue(MD5.getMD5(artifactFile.getPath()));
                     log.setFileSize(artifactFile.length());
+                    log.setUploadDate(0);
+                    log.setDeleted(false);
+                    log.setQrCode(person.getQrcode());
+                    log.setCreateDate(mNowTime);
+                    log.setCreatedBy(session.getUserEmail());
+                    log.setAge(age);
+                    log.setSchema_version(CgmDatabase.version);
+                    log.setMeasureId(measure.getId());
+                    fileLogRepository.insertFileLog(log);
+                }
+
+                //upload pointcloud
+                if (artifactFilePCD.exists()) {
+                    FileLog log = new FileLog();
+                    log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
+                    log.setType("pcd");
+                    log.setPath(artifactFilePCD.getPath());
+                    log.setHashValue(MD5.getMD5(artifactFilePCD.getPath()));
+                    log.setFileSize(artifactFilePCD.length());
                     log.setUploadDate(0);
                     log.setDeleted(false);
                     log.setQrCode(person.getQrcode());
