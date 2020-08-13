@@ -116,8 +116,9 @@
     <string name="tooltipe_height_max">Das Kind sollte kleiner als 140cm sein -ODER- Die Größe des Kindes sollte weniger als 140cm betragen</string>
     <string name="tooltipe_weight_min">Gewicht sollte größer als 2kg sein</string>
     <string name="tooltipe_weight_max">Gewicht sollte weniger als 30kg betragen</string>
-    <string name="tooltipe_muac_min">Muac sollte größer als 9cm sein</string>
-    <string name="tooltipe_muac_max">Muac sollte kleiner als 22cm sein</string>
+
+    <string name="tooltipe_muac_min">MUAC sollte größer als 9cm sein</string>
+    <string name="tooltipe_muac_max">MUAC sollte kleiner als 22cm sein</string>
 
     <string name="baby_full_body_front_scan_text">1/3. Vorne</string>
     <string name="baby_left_right_scan_text">2/3. Rundum 360\'</string>
@@ -209,11 +210,12 @@
     <string name="standup">Stellen Sie sicher, dass der gesamte Körper des Kindes in der Kameransicht zu sehen ist und dass die Aufnahme vor einem klaren Hintergrund durchgeführt</string>
     <string name="lyedown">Stellen Sie sicher, dass der gesamte Körper des Kindes in der Kameransicht zu sehen ist und dass die Aufnahme vor einem klaren Hintergrund durchgeführt</string>
     <string name="done">Erledigt</string>
-    <string name="congratulation">Herzlichen Glückwunsch!!</string>
-    <string name="finish_tutorial">Sie haben das CGM Scanner Tutorial abgeschlossen</string>
-    <string name="get_start">Loslegen</string>
+    <string name="congratulation">Herzliche Glückwünsche!</string>
+    <string name="finish_tutorial">Sie haben das CGM Scanner Tutorial beendet</string>
+    <string name="get_start">Los geht\'s</string>
+
     <string name="menuScans">Scans</string>
-    <string name="menuTutorial">Tutorenkurs</string>
+    <string name="menuTutorial">Tutorial</string>
     <string name="menuHelp">Hilfe</string>
     <string name="menuSettings">Einstellungen</string>
     <string name="menuFastUpload">Schnelles Hochladen</string>
@@ -309,5 +311,5 @@
     <string name="days">Tage</string>
 
     <string name="result_generation_at">Ergebnisgenerierung bei</string>
-    <string name="result_for">Resultat für</string>
+    <string name="result_for">Ergebnis für</string>
 </resources>
