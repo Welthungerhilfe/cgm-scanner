@@ -116,8 +116,8 @@
     <string name="tooltipe_height_max">Höhe sollte weniger als 140cm betragen</string>
     <string name="tooltipe_weight_min">Gewicht sollte größer als 2kg sein</string>
     <string name="tooltipe_weight_max">Gewicht sollte weniger als 30kg betragen</string>
-    <string name="tooltipe_muac_min">Muac sollte größer als 9cm sein</string>
-    <string name="tooltipe_muac_max">Muac sollte weniger als 22cm sein</string>
+    <string name="tooltipe_muac_min">MUAC sollte größer als 9cm sein</string>
+    <string name="tooltipe_muac_max">MUAC sollte kleiner als 22cm sein</string>
 
     <string name="baby_full_body_front_scan_text">1/3. Vorne</string>
     <string name="baby_left_right_scan_text">2/3. Rundum 360\'</string>
@@ -209,11 +209,11 @@
     <string name="standup">Versuchen Sie, das Kind vor einem klaren Hintergrund zu halten und das ganze Kind in der Kameraansicht zu halten</string>
     <string name="lyedown">Versuchen Sie, das Kind vor einem klaren Hintergrund zu halten und das ganze Kind in der Kameraansicht zu halten</string>
     <string name="done">Erledigt</string>
-    <string name="congratulation">Herzliche Glückwünsche!!</string>
+    <string name="congratulation">Herzliche Glückwünsche!</string>
     <string name="finish_tutorial">Sie haben das CGM Scanner Tutorial beendet</string>
-    <string name="get_start">Loslegen</string>
+    <string name="get_start">Los geht\'s</string>
     <string name="menuScans">Scans</string>
-    <string name="menuTutorial">Tutorenkurs</string>
+    <string name="menuTutorial">Tutorial</string>
     <string name="menuHelp">Hilfe</string>
     <string name="menuSettings">Einstellungen</string>
     <string name="menuFastUpload">Schnelles Hochladen</string>
@@ -230,7 +230,7 @@
     <string name="menu_search">Suchen</string>
     <string name="menu_filter">Sortierung und Filter</string>
     <string name="login">Login</string>
-    <string name="no_scans">Keine Scans :/</string>
+    <string name="no_scans">Keine Scans</string>
     <string name="add_scans">Tippen Sie zum Starten des Scannens auf die Schaltfläche [+]</string>
     <string name="sam_wfa_title">Kind ist stark untergewichtig</string>
     <string name="sam_wfa_message">Bitte gehen Sie zum nächsten Unterernährungszentrum / Ernährungsrehabilitationszentrum</string>
@@ -309,5 +309,5 @@
     <string name="days">Tage</string>
 
     <string name="result_generation_at">Ergebnisgenerierung bei</string>
-    <string name="result_for">Resultat für</string>
+    <string name="result_for">Ergebnis für</string>
 </resources>
