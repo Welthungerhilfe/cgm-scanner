@@ -272,9 +272,10 @@ public class Measure extends CsvExportableModel implements Serializable {
         this.received_at = received_at;
     }
 
+    @NonNull
     public String getScannedBy() { return scannedBy; }
 
-    public void setScannedBy(String scannedBy) { this.scannedBy = scannedBy; }
+    public void setScannedBy(@NonNull String scannedBy) { this.scannedBy = scannedBy; }
 
     @Override
     public String getCsvFormattedString() {
