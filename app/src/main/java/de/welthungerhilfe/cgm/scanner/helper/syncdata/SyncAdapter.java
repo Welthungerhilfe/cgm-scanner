@@ -25,6 +25,7 @@ import com.microsoft.azure.storage.queue.CloudQueueMessage;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
@@ -90,13 +91,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private synchronized void startSyncing() {
-        prevTimestamp = session.getSyncTimestamp();
-        currentTimestamp = System.currentTimeMillis();
+        if (syncTask == null) {
+            prevTimestamp = session.getSyncTimestamp();
+            currentTimestamp = System.currentTimeMillis();
 
-        if (syncTask != null) {
-            syncTask.cancel(false);
+            syncTask = new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
-        syncTask = new SyncTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
     }
 
     private static void syncImmediately(Account account, Context context) {
@@ -137,6 +137,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            Log.d("SyncAdapter", "start updating");
             synchronized (getLock()) {
                 try {
                     CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
@@ -153,6 +154,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             }
 
+            Log.d("SyncAdapter", "end updating");
+            syncTask = null;
             return null;
         }
 
@@ -167,9 +170,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     retrievedMessages = measureResultQueue.retrieveMessages(30);
                     Gson gson = new Gson();
 
-                    Log.d("SyncAdapter", "updating");
-                    while (retrievedMessages.iterator().hasNext()) {
-                        CloudQueueMessage message = retrievedMessages.iterator().next();
+                    Iterator<CloudQueueMessage> iterator = retrievedMessages.iterator();
+                    if (iterator.hasNext()) {
+                        Log.d("SyncAdapter", "has at least one message");
+                    }
+                    while (iterator.hasNext()) {
+                        CloudQueueMessage message = iterator.next();
 
                         try {
                             String messageStr = message.getMessageContentAsString();

@@ -30,7 +30,7 @@ public class AppConstants {
     public static final String ACTION_RESULT_GENERATED = "de.welthungerhilfe.cgm.scanner.action.ACTION_RESULT_GENERATED";
 
     public static final long SYNC_INTERVAL = 60 * 5;
-    public static final long SYNC_FLEXTIME = SYNC_INTERVAL / 3;
+    public static final long SYNC_FLEXTIME = SYNC_INTERVAL;
     public static final long LOG_MONITOR_INTERVAL = 10 * 1000; // 10 seconds
     public static final long MEMORY_MONITOR_INTERVAL = 60 * 1000; // 60 seconds
     public static final long HEALTH_INTERVAL = 60 * 60 * 1000; // 1 hour
