@@ -22,7 +22,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 
-@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class, MeasureResult.class, Device.class}, version = 9)
+@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class, MeasureResult.class, Device.class}, version = 10)
 public abstract class CgmDatabase extends RoomDatabase {
     private static final Object sLock = new Object();
 
@@ -122,8 +122,8 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final Migration MIGRATION_8_9 = new Migration(8, 9) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE measures ADD COLUMN heightConfidence INTEGER NOT NULL DEFAULT 0;");
-            database.execSQL("ALTER TABLE measures ADD COLUMN weightConfidence INTEGER NOT NULL DEFAULT 0;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN heightConfidence REAL NOT NULL DEFAULT 0;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN weightConfidence REAL NOT NULL DEFAULT 0;");
         }
     };
 
