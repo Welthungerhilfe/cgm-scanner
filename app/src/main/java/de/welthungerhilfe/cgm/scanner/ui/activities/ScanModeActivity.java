@@ -52,6 +52,7 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.InvalidKeyException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -321,6 +322,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private MeasureRepository measureRepository;
     private FileLogRepository fileLogRepository;
     private ArtifactResultRepository artifactResultRepository;
+    private ArrayList<ArtifactResult> artifacts;
+    private ArrayList<FileLog> files;
 
     private SessionManager session;
 
@@ -427,6 +430,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         measureRepository = MeasureRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
         artifactResultRepository = ArtifactResultRepository.getInstance(this);
+        artifacts = new ArrayList<>();
+        files = new ArrayList<>();
 
         setupToolbar();
 
@@ -630,6 +635,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 if (!isTangoDevice()) {
                     waitUntilFinished();
+                }
+                for (ArtifactResult ar : artifacts) {
+                    artifactResultRepository.insertArtifactResult(ar);
+                }
+                for (FileLog log : files) {
+                    fileLogRepository.insertFileLog(log);
                 }
                 averagePointCount = artifactResultRepository.getAveragePointCount(measureId, scanStep);
                 pointCloudCount = artifactResultRepository.getPointCloudCount(measureId, scanStep);
@@ -943,7 +954,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
 
-                    fileLogRepository.insertFileLog(log);
+                    synchronized (files) {
+                        files.add(log);
+                    }
                 }
 
                 //write and upload calibration
@@ -971,7 +984,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                             log.setSchema_version(CgmDatabase.version);
                             log.setMeasureId(measure.getId());
 
-                            fileLogRepository.insertFileLog(log);
+                            synchronized (files) {
+                                files.add(log);
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -1004,18 +1019,15 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             updateScanningProgress();
             progressBar.setProgress(mProgress);
 
-            int scanStep = SCAN_STEP;
-            new Thread(() -> {
-                ArtifactResult ar = new ArtifactResult();
-                ar.setConfidence_value(String.valueOf(100 - Artifact_Confidence_penalty));
-                ar.setArtifact_id(AppController.getInstance().getPersonId());
-                ar.setKey(scanStep);
-                ar.setMeasure_id(measure.getId());
-                ar.setMisc("");
-                ar.setType("PCD_POINTS_v0.2");
-                ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
-                artifactResultRepository.insertArtifactResult(ar);
-            }).start();
+            ArtifactResult ar = new ArtifactResult();
+            ar.setConfidence_value(String.valueOf(100 - Artifact_Confidence_penalty));
+            ar.setArtifact_id(AppController.getInstance().getPersonId());
+            ar.setKey(SCAN_STEP);
+            ar.setMeasure_id(measure.getId());
+            ar.setMisc("");
+            ar.setType("PCD_POINTS_v0.2");
+            ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
+            artifacts.add(ar);
 
             Runnable thread = () -> {
 
@@ -1053,7 +1065,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
-                    fileLogRepository.insertFileLog(log);
+
+                    synchronized (files) {
+                        files.add(log);
+                    }
                 }
 
                 //upload pointcloud
@@ -1072,7 +1087,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
-                    fileLogRepository.insertFileLog(log);
+
+                    synchronized (files) {
+                        files.add(log);
+                    }
                 }
                 onThreadChange(-1);
             };
@@ -1117,7 +1135,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setSchema_version(CgmDatabase.version);
                 log.setMeasureId(measure.getId());
 
-                fileLogRepository.insertFileLog(log);
+                synchronized (files) {
+                    files.add(log);
+                }
             }
             onThreadChange(-1);
         };
@@ -1144,19 +1164,16 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             String pointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
                     "_" + String.format(Locale.US, "%03d", mNumberOfFilesWritten++);
 
-            int scanStep = SCAN_STEP;
-            new Thread(() -> {
-                ArtifactResult ar=new ArtifactResult();
-                double Artifact_Lighting_penalty=Math.abs((double) numPoints/38000-1.0)*100*3;
-                ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
-                ar.setArtifact_id(AppController.getInstance().getPersonId());
-                ar.setKey(scanStep);
-                ar.setMeasure_id(measure.getId());
-                ar.setMisc("");
-                ar.setType("PCD_POINTS_v0.2");
-                ar.setReal(numPoints);
-                artifactResultRepository.insertArtifactResult(ar);
-            }).start();
+            ArtifactResult ar=new ArtifactResult();
+            double Artifact_Lighting_penalty=Math.abs((double) numPoints/38000-1.0)*100*3;
+            ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
+            ar.setArtifact_id(AppController.getInstance().getPersonId());
+            ar.setKey(SCAN_STEP);
+            ar.setMeasure_id(measure.getId());
+            ar.setMisc("");
+            ar.setType("PCD_POINTS_v0.2");
+            ar.setReal(numPoints);
+            artifacts.add(ar);
 
             Runnable thread = () -> {
 
@@ -1196,7 +1213,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
-                    fileLogRepository.insertFileLog(log);
+
+                    synchronized (files) {
+                        files.add(log);
+                    }
                 }
 
                 //upload pointcloud
@@ -1215,9 +1235,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
-                    fileLogRepository.insertFileLog(log);
 
-                    Log.e("numbs", String.valueOf(mNumberOfFilesWritten));
+                    synchronized (files) {
+                        files.add(log);
+                    }
                 }
                 onThreadChange(-1);
             };
