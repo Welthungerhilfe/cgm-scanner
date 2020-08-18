@@ -273,6 +273,7 @@
     <string name="profile_performance_depth_time">गहराई फ्रेम को संसाधित करने का समय</string>
     <string name="profile_performance_color_size">अंतिम स्कैन रंग डेटा आकार</string>
     <string name="profile_performance_depth_size">अंतिम स्कैन गहराई डेटा आकार</string>
+    <string name="show_depth_data">गहराई डेटा दिखाएं</string>
 
     <string name="label_overview">अवलोकन</string>
     <string name="label_upload_speed">अपलोड गति : </string>

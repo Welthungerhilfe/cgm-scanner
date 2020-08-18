@@ -14,7 +14,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.media.Image;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -633,7 +632,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             @Override
             protected Boolean doInBackground(Void... voids) {
 
-                if (!isTangoDevice()) {
+                if (!session.isTangoDevice()) {
                     waitUntilFinished();
                 }
                 for (ArtifactResult ar : artifacts) {
@@ -901,18 +900,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private ICamera getCamera() {
         if (mCameraInstance == null) {
-            if (isTangoDevice()) {
+            if (session.isTangoDevice()) {
                 mCameraInstance = new TangoCamera(this);
             } else {
                 mCameraInstance = new ARCoreCamera(this);
             }
         }
         return mCameraInstance;
-    }
-
-    private boolean isTangoDevice() {
-        //Note: the compatibility is checked by AndroidManifest
-        return Build.VERSION.SDK_INT <= 24;
     }
 
     @Override
