@@ -273,6 +273,7 @@
     <string name="profile_performance_depth_time">Time to process depth frame</string>
     <string name="profile_performance_color_size">Last scan color data size</string>
     <string name="profile_performance_depth_size">Last scan depth data size</string>
+    <string name="show_depth_data">Show depth data</string>
 
     <string name="label_overview">Overview</string>
     <string name="label_upload_speed">Upload Speed : </string>

@@ -275,6 +275,7 @@
     <string name="profile_performance_depth_time">Zeit, den Tiefrahmen zu verarbeiten</string>
     <string name="profile_performance_color_size">Größe der letzten Scan-Farbdaten</string>
     <string name="profile_performance_depth_size">Größe der letzten Scan-Tiefendaten</string>
+    <string name="show_depth_data">Tiefendaten anzeigen</string>
 
     <string name="label_overview">Überblick</string>
     <string name="label_upload_speed">Upload-Geschwindigkeit : </string>

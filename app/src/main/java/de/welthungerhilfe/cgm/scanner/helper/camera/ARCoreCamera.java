@@ -67,11 +67,11 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 
 public class ARCoreCamera implements ICamera {
-
-  private static final boolean DEPTH_VISUALISATION_ENABLED = false;
 
   public static class CameraCalibration {
     private float[] colorCameraIntrinsic;
@@ -144,6 +144,7 @@ public class ARCoreCamera implements ICamera {
   private CameraCalibration mCameraCalibration;
   private int mFrameIndex;
   private float mPixelIntensity;
+  private boolean mShowDepth;
 
   public ARCoreCamera(Activity activity) {
     mActivity = activity;
@@ -154,6 +155,7 @@ public class ARCoreCamera implements ICamera {
     mLock = new Object();
     mFrameIndex = 1;
     mPixelIntensity = 0;
+    mShowDepth = LocalPersistency.getBoolean(activity, SettingsActivity.KEY_SHOW_DEPTH);
   }
 
   public void addListener(Object listener) {
@@ -263,7 +265,7 @@ public class ARCoreCamera implements ICamera {
       Log.w(TAG, "onImageAvailable: Skipping null image.");
       return;
     }
-    if (DEPTH_VISUALISATION_ENABLED) {
+    if (mShowDepth) {
       mDepthCameraPreview.setImageBitmap(getDepthPreview(image));
     }
 

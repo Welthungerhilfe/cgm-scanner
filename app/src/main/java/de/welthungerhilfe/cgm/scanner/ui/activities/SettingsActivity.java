@@ -11,11 +11,15 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.AppCompatRadioButton;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.balysv.materialripple.MaterialRippleLayout;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,6 +40,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -52,6 +57,8 @@ import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class SettingsActivity extends BaseActivity {
+
+    public static final String KEY_SHOW_DEPTH = "KEY_SHOW_DEPTH";
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -76,6 +83,10 @@ public class SettingsActivity extends BaseActivity {
 
     @BindView(R.id.testQAlayout)
     LinearLayout layoutTestQA;
+    @BindView(R.id.show_depth_data)
+    SwitchCompat switchShowDepth;
+    @BindView(R.id.show_depth_data_layout)
+    MaterialRippleLayout layoutShowDepth;
 
     @OnClick(R.id.submenu_performance_measurement)
     void openPerformanceMeasurement(View view) {
@@ -149,6 +160,12 @@ public class SettingsActivity extends BaseActivity {
         layoutTestQA.setVisibility(showQA ? View.VISIBLE : View.GONE);
 
         txtSettingUuid.setText(Utils.getAndroidID(getContentResolver()));
+        if (session.isTangoDevice()) {
+            layoutShowDepth.setVisibility(View.GONE);
+        } else {
+            switchShowDepth.setChecked(LocalPersistency.getBoolean(this, KEY_SHOW_DEPTH));
+            switchShowDepth.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_SHOW_DEPTH, value));
+        }
 
         try {
             txtSettingVersion.setText(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
