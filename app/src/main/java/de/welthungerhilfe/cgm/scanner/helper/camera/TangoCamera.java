@@ -202,7 +202,6 @@ public class TangoCamera implements ICamera {
 
                     setDisplayRotation();
                 } catch (Exception e) {
-                    Log.e(TAG, e.getMessage());
                     Crashes.trackError(e);
                 }
             }
