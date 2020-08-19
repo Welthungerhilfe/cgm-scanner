@@ -35,8 +35,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -61,7 +59,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
     private OnMeasureSelectListener listener;
     private OnMeasureFeedbackListener feedbackListener;
     private List<Measure> measureList;
-    private int lastPosition = -1;
 
     private FileLogRepository artifactRepository;
     private ArtifactResultRepository artifactResultRepository;
@@ -245,30 +242,8 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         return measureList.get(position);
     }
 
-    private void setAnimation(View viewToAnimate, int position) {
-        if (position > lastPosition) {
-            Animation animation = AnimationUtils.loadAnimation(context, R.anim.slide_in_bottom);
-            viewToAnimate.startAnimation(animation);
-            lastPosition = position;
-        }
-    }
-
-    public void changeManualVisibility() {
-        notifyDataSetChanged();
-    }
-
     public void resetData(List<Measure> measureList) {
         this.measureList = measureList;
-        notifyDataSetChanged();
-    }
-
-    public void addMeasure(Measure measure) {
-        measureList.add(0, measure);
-        notifyItemInserted(0);
-    }
-
-    public void addMeasures(List<Measure> measures) {
-        measureList.addAll(0, measures);
         notifyDataSetChanged();
     }
 

@@ -20,28 +20,25 @@ package de.welthungerhilfe.cgm.scanner.utils;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.provider.Settings;
+import android.util.Base64;
 import android.util.Log;
 
-import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
-import java.util.UUID;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 
@@ -56,6 +53,28 @@ public class Utils {
             value /= values.size();
         }
         return value;
+    }
+    public static String getMD5(String filePath) {
+        String base64Digest = "";
+        try {
+            InputStream input = new FileInputStream(filePath);
+            byte[] buffer = new byte[1024];
+            MessageDigest md5Hash = MessageDigest.getInstance("MD5");
+            int numRead = 0;
+            while (numRead != -1) {
+                numRead = input.read(buffer);
+                if (numRead > 0) {
+                    md5Hash.update(buffer, 0, numRead);
+                }
+            }
+            input.close();
+            byte[] md5Bytes = md5Hash.digest();
+            base64Digest = Base64.encodeToString(md5Bytes, Base64.DEFAULT);
+
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        return base64Digest;
     }
 
     public static void overrideFont(Context context, String defaultFontNameToOverride, String customFontFileNameInAssets) {
@@ -100,20 +119,8 @@ public class Utils {
         return 0;
     }
 
-    public static boolean isNetworkConnectionAvailable(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = cm.getActiveNetworkInfo();
-        if (info == null) return false;
-        NetworkInfo.State network = info.getState();
-        return (network == NetworkInfo.State.CONNECTED || network == NetworkInfo.State.CONNECTING);
-    }
-
     public static String getAndroidID(ContentResolver resolver) {
         return Settings.Secure.getString(resolver, Settings.Secure.ANDROID_ID);
-    }
-
-    public static String getUUID() {
-        return UUID.randomUUID().toString();
     }
 
     public static String getSaltString(int length) {
@@ -155,16 +162,6 @@ public class Utils {
         return loc1.distanceTo(loc2);
     }
 
-    public static boolean checkDouble(String number) {
-        try {
-            Integer.parseInt(number);
-
-            return false;
-        } catch (NumberFormatException ex) {
-            return true;
-        }
-    }
-
     public static int checkDoubleDecimals(String number) {
         int integerPlaces = number.indexOf('.');
 
@@ -176,45 +173,8 @@ public class Utils {
         return decimalPlaces;
     }
 
-    public static byte[] readFile(File file) {
-        int size = (int) file.length();
-        byte[] bytes = new byte[size];
-        try {
-            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
-            buf.read(bytes, 0, bytes.length);
-            buf.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return  null;
-        }
-
-        return bytes;
-    }
-
     public static float interpolate(final float a, final float b, final float proportion) {
         return (a + ((b - a) * proportion));
-    }
-
-    public static int interpolateColor(final int a, final int b, final float proportion) {
-        final float[] hsva = new float[3];
-        final float[] hsvb = new float[3];
-        Color.colorToHSV(a, hsva);
-        Color.colorToHSV(b, hsvb);
-        for (int i = 0; i < 3; i++) {
-            hsvb[i] = interpolate(hsva[i], hsvb[i], proportion);
-        }
-
-        return Color.HSVToColor(hsvb);
-    }
-
-    public static int getColorWithAlpha(int color, float ratio) {
-        int newColor = 0;
-        int alpha = Math.round(Color.alpha(color) * ratio);
-        int r = Color.red(color);
-        int g = Color.green(color);
-        int b = Color.blue(color);
-        newColor = Color.argb(alpha, r, g, b);
-        return newColor;
     }
 
     public static String getAddress(Context context, Loc location) {

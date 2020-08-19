@@ -28,7 +28,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import android.view.View;
 import android.widget.ImageView;
 
 @SuppressLint("AppCompatCustomView")
@@ -129,11 +128,7 @@ public class ZoomImageView extends ImageView {
 			}
         });
 	}
-	
-	public void setMaxZoom(float x) {
-	    maxScale = x;
-	}
-	
+
 	private class ScaleListener extends	ScaleGestureDetector.SimpleOnScaleGestureListener {
 	    @Override
 	    public boolean onScaleBegin(ScaleGestureDetector detector) {

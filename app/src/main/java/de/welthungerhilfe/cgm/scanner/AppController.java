@@ -34,7 +34,6 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 
 public class AppController extends Application {
-    public static final String TAG = AppController.class.getSimpleName();
 
     private static AppController mInstance;
 

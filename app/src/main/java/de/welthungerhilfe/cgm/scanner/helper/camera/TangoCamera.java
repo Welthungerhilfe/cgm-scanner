@@ -41,7 +41,6 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.helper.tango.CameraSurfaceRenderer;
 
 import static com.projecttango.tangosupport.TangoSupport.initialize;
 
@@ -71,7 +70,7 @@ public class TangoCamera implements ICamera {
     //App integration objects
     private Activity mActivity;
     private GLSurfaceView mCameraSurfaceView;
-    private CameraSurfaceRenderer mRenderer;
+    private TangoCameraRenderer mRenderer;
     private ArrayList<TangoCameraListener> mListeners;
 
     public TangoCamera(Activity activity) {
@@ -97,7 +96,7 @@ public class TangoCamera implements ICamera {
     public void onCreate() {
         mCameraSurfaceView = mActivity.findViewById(R.id.surfaceview);
         mCameraSurfaceView.setEGLContextClientVersion(2);
-        mRenderer = new CameraSurfaceRenderer(new CameraSurfaceRenderer.RenderCallback() {
+        mRenderer = new TangoCameraRenderer(new TangoCameraRenderer.RenderCallback() {
 
             @Override
             public void preRender() {
