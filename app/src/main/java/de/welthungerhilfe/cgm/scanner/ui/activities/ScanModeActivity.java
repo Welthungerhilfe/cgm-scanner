@@ -814,10 +814,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         SaveMeasureTask(Activity act) {
             activity = act;
-
-            if (!AppController.getInstance().isUploadRunning()) {
-                startService(new Intent(getApplicationContext(), UploadService.class));
-            }
         }
 
         @Override
@@ -832,6 +828,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 artifactResultRepository.insertArtifactResult(ar);
             }
             measureRepository.insertMeasure(measure);
+            runOnUiThread(() -> {
+                if (!AppController.getInstance().isUploadRunning()) {
+                    startService(new Intent(getApplicationContext(), UploadService.class));
+                }
+            });
 
             synchronized (SyncAdapter.getLock()) {
                 try {
