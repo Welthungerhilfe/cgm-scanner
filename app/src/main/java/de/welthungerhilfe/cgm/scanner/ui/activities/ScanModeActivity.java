@@ -555,7 +555,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         } else if (SCAN_STEP == SCAN_STANDING_BACK || SCAN_STEP == SCAN_LYING_BACK) {
             btnScanStep3.setVisibility(View.GONE);
         }
-        getScanQuality(measure.getId(),SCAN_STEP);
+        getScanQuality(SCAN_STEP);
     }
 
     private void showCompleteButton() {
@@ -624,26 +624,20 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @SuppressLint("StaticFieldLeak")
-    private void getScanQuality(String measureId, int scanStep) {
+    private void getScanQuality(int scanStep) {
         new AsyncTask<Void, Void, Boolean>() {
             private double averagePointCount = 0;
             private int pointCloudCount = 0;
 
             @Override
             protected Boolean doInBackground(Void... voids) {
-
-                if (!session.isTangoDevice()) {
-                    waitUntilFinished();
-                }
                 for (ArtifactResult ar : artifacts) {
-                    artifactResultRepository.insertArtifactResult(ar);
+                    if (ar.getKey() == SCAN_STEP) {
+                        averagePointCount += ar.getReal();
+                        pointCloudCount++;
+                    }
                 }
-                for (FileLog log : files) {
-                    fileLogRepository.insertFileLog(log);
-                }
-                averagePointCount = artifactResultRepository.getAveragePointCount(measureId, scanStep);
-                pointCloudCount = artifactResultRepository.getPointCloudCount(measureId, scanStep);
-
+                averagePointCount /= Math.max(pointCloudCount, 1);
                 return true;
             }
 
@@ -831,6 +825,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             Gson gson = new Gson();
 
             waitUntilFinished();
+            for (FileLog log : files) {
+                fileLogRepository.insertFileLog(log);
+            }
+            for (ArtifactResult ar : artifacts) {
+                artifactResultRepository.insertArtifactResult(ar);
+            }
             measureRepository.insertMeasure(measure);
 
             synchronized (SyncAdapter.getLock()) {
