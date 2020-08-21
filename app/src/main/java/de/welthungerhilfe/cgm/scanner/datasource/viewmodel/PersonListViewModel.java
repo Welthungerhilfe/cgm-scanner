@@ -100,24 +100,6 @@ public class PersonListViewModel extends AndroidViewModel {
         filterLiveData.setValue(filter);
     }
 
-    public void clearFilterQuery() {
-        filter.setPage(0);
-        filter.clearFilterQuery();
-        filterLiveData.setValue(filter);
-    }
-
-    public void clearFilterDate() {
-        filter.setPage(0);
-        filter.clearFilterDate();
-        filterLiveData.setValue(filter);
-    }
-
-    public void clearFilterLocation() {
-        filter.setPage(0);
-        filter.clearFilterLocation();
-        filterLiveData.setValue(filter);
-    }
-
     public void updatePerson(Person person) {
         repository.updatePerson(person);
     }

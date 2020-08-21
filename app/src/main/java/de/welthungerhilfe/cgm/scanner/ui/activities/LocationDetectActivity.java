@@ -224,8 +224,6 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
     }
 
     private void getAddressFromLocation(LatLng latLng) {
-        //new AddressTask(location.getLatitude(), location.getLongitude(), this).execute();
-
         runOnUiThread(() -> {
             Geocoder geocoder = new Geocoder(LocationDetectActivity.this, Locale.getDefault());
             String result = null;

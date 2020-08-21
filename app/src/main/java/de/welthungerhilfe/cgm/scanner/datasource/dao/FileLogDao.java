@@ -2,7 +2,6 @@ package de.welthungerhilfe.cgm.scanner.datasource.dao;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
@@ -23,14 +22,8 @@ public interface FileLogDao {
     @Update(onConflict = REPLACE)
     void updateFileLog(FileLog log);
 
-    @Delete
-    void deleteFileLog(FileLog log);
-
     @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE deleted=0 LIMIT 15")
     List<FileLog> loadQueuedData();
-
-    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE createDate>:timestamp")
-    List<FileLog> getSyncableData(long timestamp);
 
     @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE deleted=0")
     long getArtifactCount();
@@ -46,12 +39,6 @@ public interface FileLogDao {
 
     @Query("SELECT SUM(fileSize)/1024/1024 FROM " + TABLE_FILE_LOG)
     double getTotalArtifactFileSize();
-
-    @Query("SELECT SUM(fileSize)/1024/1024 FROM " + TABLE_FILE_LOG + " WHERE measureId=:measureId")
-    double getMeasureArtifactSize(String measureId);
-
-    @Query("SELECT SUM(fileSize)/1024/1024 FROM " + TABLE_FILE_LOG + " WHERE measureId=:measureId AND deleted=1")
-    double getMeasureArtifactUploadedSize(String measureId);
 
     @Query("SELECT * FROM " + TABLE_FILE_LOG)
     List<FileLog> getAll();

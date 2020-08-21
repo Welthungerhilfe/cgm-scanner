@@ -57,7 +57,6 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //qrScanView = new QRScanView(this);
         setContentView(R.layout.activity_scan_qr);
         ButterKnife.bind(this);
 

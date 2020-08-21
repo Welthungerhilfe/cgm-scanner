@@ -1,6 +1,5 @@
 package de.welthungerhilfe.cgm.scanner.datasource.dao;
 
-import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -16,12 +15,6 @@ import static androidx.room.OnConflictStrategy.REPLACE;
 public interface MeasureResultDao {
     @Insert(onConflict = REPLACE)
     void insertMeasureResult(MeasureResult result);
-
-    @Query("SELECT * FROM " + CgmDatabase.TABLE_MEASURE_RESULT + " WHERE measure_id=:measure_id")
-    MeasureResult getMeasureResultById(String measure_id);
-
-    @Query("SELECT * FROM " + CgmDatabase.TABLE_MEASURE_RESULT)
-    LiveData<List<MeasureResult>> getMeasureResults();
 
     @Query("SELECT MAX(confidence_value) FROM " + CgmDatabase.TABLE_MEASURE_RESULT + " WHERE measure_id=:id AND `key` LIKE :key")
     float getConfidence(String id, String key);
