@@ -161,7 +161,7 @@
     <string name="content_image">सामग्री फोटो </string>
     <string name="message_legal">कानूनी मुद्दों से बचने के लिए कृपया माता-पिता से सहमति फॉर्म की एक फोटो लेना सुनिश्चित करें</string>
 
-    <string name="axis_age">उम्र</string>
+    <string name="axis_age">महीनों में उम्र</string>
     <string name="axis_height">ऊंचाई</string>
     <string name="axis_weight">वजन</string>
     <string name="axis_head">सिर परिधि सेमी में</string>
