@@ -242,12 +242,10 @@ public class GrowthDataFragment extends Fragment {
 
                 if ((chartType == 0 || chartType == 1 ) && lastMeasure != null && rule == lastMeasure.getAge()) {
                     median = Double.parseDouble(arr[2]);
-                    coefficient = Double.parseDouble(arr[3]);
-                    standard = median * coefficient;
+                    standard = Double.parseDouble(arr[7]);
                 } else if (chartType == 2 && lastMeasure != null && rule == lastMeasure.getHeight()) {
                     median = Double.parseDouble(arr[2]);
-                    coefficient = Double.parseDouble(arr[3]);
-                    standard = median * coefficient;
+                    standard = Double.parseDouble(arr[7]);
                 }
 
                 SD3neg.add(new Entry(rule, Float.parseFloat(arr[4])));
