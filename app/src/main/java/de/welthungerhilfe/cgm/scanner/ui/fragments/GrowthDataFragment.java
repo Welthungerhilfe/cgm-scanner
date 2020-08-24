@@ -134,7 +134,6 @@ public class GrowthDataFragment extends Fragment {
         txtNotifTitle = view.findViewById(R.id.txtNotifTitle);
         txtNotifMessage = view.findViewById(R.id.txtNotifMessage);
 
-        //chartGrowth = view.findViewById(R.id.chartGrowth);
         mChart = view.findViewById(R.id.chart1);
         MaterialSpinner dropChart = view.findViewById(R.id.dropChart);
 
@@ -146,8 +145,6 @@ public class GrowthDataFragment extends Fragment {
         });
 
         initChart();
-        //setChartData();
-
         return view;
     }
 
@@ -179,12 +176,6 @@ public class GrowthDataFragment extends Fragment {
         mChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         mChart.getXAxis().setDrawGridLines(true);
         mChart.getXAxis().setValueFormatter(new MyAxisValueFormatter());
-        /*
-        mChart.getXAxis().setGranularity(1.0f);
-        mChart.getXAxis().setGranularityEnabled(true);
-        */
-
-        //setData();
     }
 
     private class MyAxisValueFormatter implements IAxisValueFormatter{
@@ -430,7 +421,6 @@ public class GrowthDataFragment extends Fragment {
 
 
         mChart.setData(new LineData(dataSets));
-        //mChart.invalidate();
         mChart.animateX(3000);
     }
 

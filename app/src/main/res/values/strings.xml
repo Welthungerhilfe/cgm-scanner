@@ -8,7 +8,7 @@
     <string name="validate_user">Please input user name</string>
     <string name="validate_password">Please input password</string>
     
-    <string name="label_login">Please log-in:</string>
+    <string name="label_login">Please Log In:</string>
     <string name="user">Username</string>
     <string name="password">Password</string>
     <string name="name">family name</string>
@@ -112,12 +112,12 @@
     <string name="tooltip_birthday">Please input birthday</string>
     <string name="tooltip_guardian">Please input guardian</string>
     <string name="tooltipe_sex">Please select sex</string>
-    <string name="tooltipe_height_min">height should be bigger than 45cm</string>
+    <string name="tooltipe_height_min">height should be more than 45cm</string>
     <string name="tooltipe_height_max">height should be less than 140cm</string>
-    <string name="tooltipe_weight_min">weight should be bigger than 2kg</string>
+    <string name="tooltipe_weight_min">weight should be more than 2kg</string>
     <string name="tooltipe_weight_max">weight should be less than 30kg</string>
-    <string name="tooltipe_muac_min">muac should be bigger than 9cm</string>
-    <string name="tooltipe_muac_max">muac should be less than 22cm</string>
+    <string name="tooltipe_muac_min">MUAC should be more than 9cm</string>
+    <string name="tooltipe_muac_max">MUAC should be less than 22cm</string>
 
     <string name="baby_full_body_front_scan_text">1/3. Front</string>
     <string name="baby_left_right_scan_text">2/3. all around 360\'</string>
@@ -131,7 +131,7 @@
     <string name="upload_failure">upload failure</string>
 
     <string name="error_network">Please check your network status. You are offline now.</string>
-    <string name="error_login">Login Failed</string>
+    <string name="error_login">Login failed</string>
     <string name="error_person_first">Please register person first</string>
     <string name="error_location">Could not find matching location.</string>
 
@@ -140,9 +140,9 @@
 
     <string name="field_concealed">conceal</string>
 
-    <string name="permission_delete">Sorry, You don\'t have the rights to delete data</string>
-    <string name="permission_edit">Sorry, You don\'t have the rights to edit data</string>
-    <string name="permission_expired">Sorry, Time to allow editing is expired.</string>
+    <string name="permission_delete">Sorry, you don\'t have permission to delete data</string>
+    <string name="permission_edit">Sorry, you don\'t have permission to edit data</string>
+    <string name="permission_expired">Sorry, time to allow editing is expired.</string>
 
     <!-- Sync Adapter -->
     <string name="account_type">de.welthungerhilfe.cgm.scanner</string>
@@ -209,7 +209,7 @@
     <string name="standup">Try to keep the child against a clear background and keep the whole child within the camera view</string>
     <string name="lyedown">Try to keep the child against a clear background and keep the whole child within the camera view</string>
     <string name="done">Done</string>
-    <string name="congratulation">Congratulations!!</string>
+    <string name="congratulation">Congratulations!</string>
     <string name="finish_tutorial">You finished CGM Scanner Tutorial</string>
     <string name="get_start">Get Started</string>
     <string name="menuScans">Scans</string>
@@ -230,7 +230,7 @@
     <string name="menu_search">Search</string>
     <string name="menu_filter">Sort and Filter</string>
     <string name="login">Login</string>
-    <string name="no_scans">No scans yet today</string>
+    <string name="no_scans">No scans</string>
     <string name="add_scans">To start scanning, tap [+] button</string>
     <string name="sam_wfa_title">Child is severely under weight</string>
     <string name="sam_wfa_message">Please go to the nearest Malnutrition center / Nutrition Rehabilitation center</string>
@@ -273,6 +273,7 @@
     <string name="profile_performance_depth_time">Time to process depth frame</string>
     <string name="profile_performance_color_size">Last scan color data size</string>
     <string name="profile_performance_depth_size">Last scan depth data size</string>
+    <string name="show_depth_data">Show depth data</string>
 
     <string name="label_overview">Overview</string>
     <string name="label_upload_speed">Upload Speed : </string>

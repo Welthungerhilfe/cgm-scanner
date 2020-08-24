@@ -46,7 +46,7 @@ public class DataFormat {
 
     public static String time(Context context, long milliSeconds) {
         if (milliSeconds >= 3600000) {
-            return String.format(getCurrentLocale(context), "%.1fh", milliSeconds / 3600000);
+            return String.format(getCurrentLocale(context), "%.1fh", milliSeconds / 3600000.0f);
         } else if (milliSeconds >= 60000) {
             return String.format(getCurrentLocale(context), "%.1fmin", milliSeconds / 60000.0f);
         } else if (milliSeconds >= 1000) {

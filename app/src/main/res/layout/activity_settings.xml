@@ -447,6 +447,39 @@
 
                 </com.balysv.materialripple.MaterialRippleLayout>
 
+                <com.balysv.materialripple.MaterialRippleLayout
+                    android:id="@+id/show_depth_data_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:layout_marginTop="@dimen/activity_group_margin"
+                    android:paddingLeft="@dimen/activity_horizontal_margin"
+                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    app:mrl_rippleOverlay="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
+                            android:text="@string/show_depth_data"
+                            android:textColor="@color/colorBlack"
+                            android:textSize="18sp" />
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/show_depth_data"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                    </LinearLayout>
+                </com.balysv.materialripple.MaterialRippleLayout>
+
             </LinearLayout>
 
         </LinearLayout>

@@ -48,6 +48,7 @@
         android:windowSoftInputMode="adjustResize"
         android:theme="@style/AppTheme.NoActionBar"
         android:extractNativeLibs="true"
+        android:requestLegacyExternalStorage="true"
         tools:replace="android:allowBackup">
 
 		<uses-library

@@ -10,11 +10,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
-import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreCamera;
 
 /**
  * Child Growth Monitor - quick and accurate data on malnutrition
@@ -153,58 +150,6 @@ public class ARCoreUtils {
             zip.write(data, 0, data.length);
             zip.flush();
             zip.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    // This function writes the XYZC points to .pcd files in binary
-    public static void writeDepthmapToPcdFile(Depthmap depthmap, ARCoreCamera.CameraCalibration calibration,
-                                             long timestamp, File pointCloudSaveFolder, String pointCloudFilename) {
-
-        File file = new File(pointCloudSaveFolder, pointCloudFilename);
-
-        try {
-            int count = 0;
-            float fx = calibration.getIntrinsic(false)[0] * (float)depthmap.getWidth();
-            float fy = calibration.getIntrinsic(false)[1] * (float)depthmap.getHeight();
-            float cx = calibration.getIntrinsic(false)[2] * (float)depthmap.getWidth();
-            float cy = calibration.getIntrinsic(false)[3] * (float)depthmap.getHeight();
-            float stepx = Math.max(depthmap.getWidth() / 240.0f, 1.0f);
-            float stepy = Math.max(depthmap.getHeight() / 180.0f, 1.0f);
-            StringBuilder output = new StringBuilder();
-            for (float y = 0; y < depthmap.getHeight(); y += stepy) {
-                for (float x = 0; x < depthmap.getWidth(); x += stepx) {
-                    float confidence = depthmap.getConfidence((int)x, (int)y);
-                    float depth = depthmap.getDepth((int)x, (int)y);
-                    if (depth > 0) {
-                        float pcx =-(x - cx) * depth / fx;
-                        float pcy = (y - cy) * depth / fy;
-                        output.append(String.format(Locale.US, "%f %f %f %f\n", pcx, pcy, depth, confidence));
-                        count++;
-                    }
-                }
-            }
-
-            String header = "# timestamp 1 1 float " + timestamp + "\n" +
-                    "# .PCD v.7 - Point Cloud Data file format\n" +
-                    "VERSION .7\n" +
-                    "FIELDS x y z c\n" +
-                    "SIZE 4 4 4 4\n" +
-                    "TYPE F F F F\n" +
-                    "COUNT 1 1 1 1\n" +
-                    "WIDTH " + count + "\n" +
-                    "HEIGHT 1\n" +
-                    "VIEWPOINT " + depthmap.getPose(" ") + "\n" +
-                    "POINTS " + count + "\n" +
-                    "DATA ascii\n";
-
-            FileOutputStream out = new FileOutputStream(file);
-            out.write(header.getBytes());
-            out.write(output.toString().getBytes());
-            out.close();
-
         } catch (IOException e) {
             e.printStackTrace();
         }

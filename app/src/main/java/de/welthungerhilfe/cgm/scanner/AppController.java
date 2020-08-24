@@ -25,6 +25,7 @@ import android.os.Environment;
 import android.os.StrictMode;
 
 import java.io.File;
+import java.io.IOException;
 
 import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
@@ -33,7 +34,6 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 
 public class AppController extends Application {
-    public static final String TAG = AppController.class.getSimpleName();
 
     private static AppController mInstance;
 
@@ -98,6 +98,15 @@ public class AppController extends Application {
             mExtFileDir = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name_long));
         } else {
             mExtFileDir = getApplicationContext().getFilesDir();
+        }
+
+        File nomedia = new File(mExtFileDir, ".nomedia");
+        if (!nomedia.exists()) {
+            try {
+                nomedia.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         return mExtFileDir;

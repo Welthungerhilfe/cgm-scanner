@@ -1,8 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.utils;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
-
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_DATE;
+import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 
 public class PersonFilter {
     private boolean isQuery;
@@ -28,7 +27,7 @@ public class PersonFilter {
         isDate = false;
         isLocation = false;
 
-        sortType = SORT_DATE;
+        sortType = AppConstants.SORT_DATE;
 
         page = 0;
 

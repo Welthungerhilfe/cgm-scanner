@@ -1,5 +1,9 @@
 package de.welthungerhilfe.cgm.scanner.utils;
 
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
+
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 
@@ -7,7 +11,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Locale;
 
 /**
  * Child Growth Monitor - quick and accurate data on malnutrition
@@ -66,44 +69,17 @@ public class TangoUtils {
         return depthmap;
     }
 
+    public static void writeImageToFile(TangoImageBuffer currentTangoImageBuffer, File file) {
 
-    public static void writePointCloudToPcdFile(ByteBuffer buffer, int numPoints, double timestamp, double[] pose, File file) {
+        currentTangoImageBuffer = TangoUtils.copyImageBuffer(currentTangoImageBuffer);
+        int currentImgWidth = currentTangoImageBuffer.width;
+        int currentImgHeight = currentTangoImageBuffer.height;
+        byte[] YuvImageByteArray = currentTangoImageBuffer.data.array();
 
-        try {
-            String p = "";
-            p += pose[0] + " ";
-            p += pose[1] + " ";
-            p += pose[2] + " ";
-            p += pose[3] + " ";
-            p += pose[4] + " ";
-            p += pose[5] + " ";
-            p += pose[6];
-
-            FileOutputStream out = new FileOutputStream(file);
-            out.write(("# timestamp 1 1 float "+timestamp+"\n").getBytes());
-            out.write(("# .PCD v.7 - Point Cloud Data file format\n" +
-                    "VERSION .7\n" +
-                    "FIELDS x y z c\n" +
-                    "SIZE 4 4 4 4\n" +
-                    "TYPE F F F F\n" +
-                    "COUNT 1 1 1 1\n" +
-                    "WIDTH " + numPoints + "\n"+
-                    "HEIGHT 1\n" +
-                    "VIEWPOINT " + p + "\n" +
-                    "POINTS " + numPoints + "\n" +
-                    "DATA ascii\n").getBytes());
-
-            StringBuilder output = new StringBuilder();
-            for (int i = 0; i < numPoints; i++) {
-                float pcx = buffer.getFloat();
-                float pcy = buffer.getFloat();
-                float pcz = buffer.getFloat();
-                float pcc = buffer.getFloat();
-                output.append(String.format(Locale.US, "%f %f %f %f\n", pcx, pcy, pcz, pcc));
-            }
-            out.write(output.toString().getBytes());
-            out.close();
-
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            YuvImage yuvImage = new YuvImage(YuvImageByteArray, ImageFormat.NV21, currentImgWidth, currentImgHeight, null);
+            yuvImage.compressToJpeg(new Rect(0, 0, currentImgWidth, currentImgHeight), BitmapUtils.JPG_COMPRESSION, out);
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

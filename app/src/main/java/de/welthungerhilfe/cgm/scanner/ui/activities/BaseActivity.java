@@ -37,7 +37,6 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
         }
     }
 
-    private boolean running = false;
     private Merlin merlin;
     private SessionManager session;
 
@@ -50,19 +49,12 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
     @Override
     public void onStart() {
         super.onStart();
-        running = true;
 
         session = new SessionManager(this);
 
         merlin = new Merlin.Builder().withConnectableCallbacks().withDisconnectableCallbacks().build(this);
         merlin.registerConnectable(this);
         merlin.registerDisconnectable(this);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        running = false;
     }
 
     @Override

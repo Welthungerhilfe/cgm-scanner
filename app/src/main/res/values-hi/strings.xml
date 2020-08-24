@@ -230,7 +230,7 @@
     <string name="menu_search">खोजे </string>
     <string name="menu_filter">सॉर्ट करें और फ़िल्टर करें</string>
     <string name="login">लॉग इन करें</string>
-    <string name="no_scans">कोई स्कैन नहीं :/</string>
+    <string name="no_scans">कोई स्कैन नहीं</string>
     <string name="add_scans">स्कैनिंग शुरू करने के लिए, [+] बटन टैप करें</string>
     <string name="sam_wfa_title">बच्चा गंभीर रूप से कम वजन का है</string>
     <string name="sam_wfa_message">कृपया निकटतम कुपोषण केंद्र / पोषण पुनर्वास केंद्र पर जाएं</string>
@@ -273,6 +273,7 @@
     <string name="profile_performance_depth_time">गहराई फ्रेम को संसाधित करने का समय</string>
     <string name="profile_performance_color_size">अंतिम स्कैन रंग डेटा आकार</string>
     <string name="profile_performance_depth_size">अंतिम स्कैन गहराई डेटा आकार</string>
+    <string name="show_depth_data">गहराई डेटा दिखाएं</string>
 
     <string name="label_overview">अवलोकन</string>
     <string name="label_upload_speed">अपलोड गति : </string>

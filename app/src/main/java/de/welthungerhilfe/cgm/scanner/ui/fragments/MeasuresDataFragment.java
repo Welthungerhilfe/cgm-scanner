@@ -37,8 +37,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
-//import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
-
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 
