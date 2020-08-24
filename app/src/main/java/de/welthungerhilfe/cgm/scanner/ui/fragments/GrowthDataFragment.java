@@ -36,11 +36,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.common.collect.Iterables;
@@ -172,6 +175,16 @@ public class GrowthDataFragment extends Fragment {
         mChart.getXAxis().setDrawAxisLine(true);
         mChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         mChart.getXAxis().setDrawGridLines(true);
+        mChart.getXAxis().setValueFormatter(new MyAxisValueFormatter());
+    }
+
+    private class MyAxisValueFormatter implements IAxisValueFormatter{
+
+        @Override
+        public String getFormattedValue(float value, AxisBase axis) {
+            axis.setLabelCount(6,true);
+            return value+"";
+        }
     }
 
     @SuppressLint("DefaultLocale")
@@ -192,11 +205,11 @@ public class GrowthDataFragment extends Fragment {
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
 
         // ------------------------- Line for ruler values ---------------------------------- //
-        ArrayList<Entry> p3 = new ArrayList<>();
-        ArrayList<Entry> p15 = new ArrayList<>();
-        ArrayList<Entry> p50 = new ArrayList<>();
-        ArrayList<Entry> p85 = new ArrayList<>();
-        ArrayList<Entry> p97 = new ArrayList<>();
+        ArrayList<Entry> SD3neg = new ArrayList<>();
+        ArrayList<Entry> SD2neg = new ArrayList<>();
+        ArrayList<Entry> SD0 = new ArrayList<>();
+        ArrayList<Entry> SD2 = new ArrayList<>();
+        ArrayList<Entry> SD3 = new ArrayList<>();
 
         double zScore = 100, median = 100, standard = 100, coefficient = 100;
 
@@ -220,27 +233,25 @@ public class GrowthDataFragment extends Fragment {
 
                 if ((chartType == 0 || chartType == 1 ) && lastMeasure != null && rule == lastMeasure.getAge()) {
                     median = Double.parseDouble(arr[2]);
-                    coefficient = Double.parseDouble(arr[3]);
-                    standard = median * coefficient;
+                    standard = Double.parseDouble(arr[7]);
                 } else if (chartType == 2 && lastMeasure != null && rule == lastMeasure.getHeight()) {
                     median = Double.parseDouble(arr[2]);
-                    coefficient = Double.parseDouble(arr[3]);
-                    standard = median * coefficient;
+                    standard = Double.parseDouble(arr[7]);
                 }
 
-                p3.add(new Entry(rule, Float.parseFloat(arr[6])));
-                p15.add(new Entry(rule, Float.parseFloat(arr[9])));
-                p50.add(new Entry(rule, Float.parseFloat(arr[11])));
-                p85.add(new Entry(rule, Float.parseFloat(arr[13])));
-                p97.add(new Entry(rule, Float.parseFloat(arr[16])));
+                SD3neg.add(new Entry(rule, Float.parseFloat(arr[4])));
+                SD2neg.add(new Entry(rule, Float.parseFloat(arr[5])));
+                SD0.add(new Entry(rule, Float.parseFloat(arr[7])));
+                SD2.add(new Entry(rule, Float.parseFloat(arr[9])));
+                SD3.add(new Entry(rule, Float.parseFloat(arr[10])));
             }
             reader.close();
 
-            dataSets.add(createDataSet(p3, "3rd", Color.rgb(212, 53, 62), 1.5f, false));
-            dataSets.add(createDataSet(p15, "15th", Color.rgb(230, 122, 58), 1.5f, false));
-            dataSets.add(createDataSet(p50, "50th", Color.rgb(55, 129, 69), 1.5f, false));
-            dataSets.add(createDataSet(p85, "85th", Color.rgb(230, 122, 58), 1.5f, false));
-            dataSets.add(createDataSet(p97, "97th", Color.rgb(212, 53, 62), 1.5f, false));
+            dataSets.add(createDataSet(SD3neg, "-3", Color.rgb(212, 53, 62), 1.5f, false));
+            dataSets.add(createDataSet(SD2neg, "-2", Color.rgb(230, 122, 58), 1.5f, false));
+            dataSets.add(createDataSet(SD0, "0", Color.rgb(55, 129, 69), 1.5f, false));
+            dataSets.add(createDataSet(SD2, "+2", Color.rgb(230, 122, 58), 1.5f, false));
+            dataSets.add(createDataSet(SD3, "+3", Color.rgb(212, 53, 62), 1.5f, false));
 
 
         } catch (IOException e) {
@@ -343,11 +354,11 @@ public class GrowthDataFragment extends Fragment {
             float x = 0, y = 0;
             switch (chartType) {
                 case 0:
-                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
+                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 / 30;
                     y = (float) measure.getWeight();
                     break;
                 case 1:
-                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
+                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 / 30;
                     y = (float) measure.getHeight();
                     break;
                 case 2:
@@ -356,7 +367,7 @@ public class GrowthDataFragment extends Fragment {
                     y = (float) measure.getWeight();
                     break;
                 case 3:
-                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
+                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 /30;
                     y = (float) measure.getMuac();
                     break;
             }
@@ -365,28 +376,28 @@ public class GrowthDataFragment extends Fragment {
                 continue;
 
             final float fX = x;
-            Entry v3 = Iterables.tryFind(p3, input -> input.getX() == fX).orNull();
+            Entry v3neg = Iterables.tryFind(SD3neg, input -> input.getX() == fX).orNull();
             try {
                 ArrayList<Entry> entry = new ArrayList<>();
                 entry.add(new Entry(x, y));
 
-                if (y <= v3.getY()) {
+                if (y <= v3neg.getY()) {
                     dataSets.add(createDataSet(entry, "", Color.rgb(212, 53, 62), 5f, true));
                 } else {
-                    Entry v15 = Iterables.tryFind(p15, input -> input.getX() == fX).orNull();
-                    if (y <= v15.getY()) {
+                    Entry v2neg = Iterables.tryFind(SD2neg, input -> input.getX() == fX).orNull();
+                    if (y <= v2neg.getY()) {
                         dataSets.add(createDataSet(entry, "", Color.rgb(230, 122, 58), 5f, true));
                     } else {
-                        Entry v50 = Iterables.tryFind(p50, input -> input.getX() == fX).orNull();
-                        if (y <= v50.getY()) {
+                        Entry v0 = Iterables.tryFind(SD0, input -> input.getX() == fX).orNull();
+                        if (y <= v0.getY()) {
                             dataSets.add(createDataSet(entry, "", Color.rgb(55, 129, 69), 5f, true));
                         } else {
-                            Entry v85 = Iterables.tryFind(p85, input -> input.getX() == fX).orNull();
-                            if (y <= v85.getY()) {
+                            Entry v2 = Iterables.tryFind(SD2, input -> input.getX() == fX).orNull();
+                            if (y <= v2.getY()) {
                                 dataSets.add(createDataSet(entry, "", Color.rgb(230, 122, 58), 5f, true));
                             } else {
-                                Entry v97 = Iterables.tryFind(p97, input -> input.getX() == fX).orNull();
-                                if (y <= v97.getY()) {
+                                Entry v3 = Iterables.tryFind(SD3, input -> input.getX() == fX).orNull();
+                                if (y <= v3.getY()) {
                                     dataSets.add(createDataSet(entry, "", Color.rgb(212, 53, 62), 5f, true));
                                 } else {
                                     dataSets.add(createDataSet(entry, "", Color.rgb(0, 0, 0), 5f, true));

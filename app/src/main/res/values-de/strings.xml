@@ -162,7 +162,7 @@
     <string name="content_image">Einverständniserklärung</string>
     <string name="message_legal">Bitte machen Sie ein Foto des Einwilligungsformulars der Eltern, um rechtliche Komplikationen zu vermeiden</string>
 
-    <string name="axis_age">Alter</string>
+    <string name="axis_age">Alter in Monaten</string>
     <string name="axis_height">Größe</string>
     <string name="axis_weight">Gewicht</string>
     <string name="axis_head">Kopfumfang in cm</string>
