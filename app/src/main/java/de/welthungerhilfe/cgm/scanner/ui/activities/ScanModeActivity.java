@@ -323,7 +323,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private File mScanArtefactsOutputFolder;
     private File mDepthmapSaveFolder;
-    private File mPointCloudSaveFolder;
     private File mRgbSaveFolder;
 
     private boolean mIsRecording;
@@ -470,7 +469,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         Log.e("Root Directory", extFileDir.getParent());
         mScanArtefactsOutputFolder = new File(extFileDir,person.getQrcode() + "/measurements/" + mNowTimeString + "/");
         mDepthmapSaveFolder = new File(mScanArtefactsOutputFolder,"depth");
-        mPointCloudSaveFolder = new File(mScanArtefactsOutputFolder, "pc");
         mRgbSaveFolder = new File(mScanArtefactsOutputFolder,"rgb");
 
         if(!mDepthmapSaveFolder.exists()) {
@@ -479,15 +477,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 Log.i(TAG, "Folder: \"" + mDepthmapSaveFolder + "\" created\n");
             } else {
                 Log.e(TAG,"Folder: \"" + mDepthmapSaveFolder + "\" could not be created!\n");
-            }
-        }
-
-        if(!mPointCloudSaveFolder.exists()) {
-            boolean created = mPointCloudSaveFolder.mkdirs();
-            if (created) {
-                Log.i(TAG, "Folder: \"" + mPointCloudSaveFolder + "\" created\n");
-            } else {
-                Log.e(TAG,"Folder: \"" + mPointCloudSaveFolder + "\" could not be created!\n");
             }
         }
 
@@ -501,7 +490,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
 
         Log.v(TAG,"mDepthmapSaveFolder: "+mDepthmapSaveFolder);
-        Log.v(TAG,"mPointCloudSaveFolder: "+mPointCloudSaveFolder);
         Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
     }
 
@@ -975,7 +963,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             ARCoreCamera.CameraCalibration calibration = ((ARCoreCamera)mCameraInstance).getCalibration();
 
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
-            String pointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".pcd";
             mNumberOfFilesWritten++;
 
             updateScanningProgress();
@@ -987,7 +974,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             ar.setKey(SCAN_STEP);
             ar.setMeasure_id(measure.getId());
             ar.setMisc("");
-            ar.setType("PCD_POINTS_v0.2");
+            ar.setType("DEPTHMAP_v0.1");
             ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
             artifacts.add(ar);
 
@@ -997,13 +984,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                 ARCoreUtils.writeDepthmap(depthmap, artifactFile);
 
-                //write pointcloud
-                File artifactFilePCD = new File(mPointCloudSaveFolder.getPath(), pointCloudFilename);
-                ARCoreUtils.writeDepthmapToPcdFile(depthmap, calibration, timestamp, mPointCloudSaveFolder, pointCloudFilename);
-
                 //profile process
-                if (artifactFile.exists() && artifactFilePCD.exists()) {
-                    mDepthSize += artifactFile.length() + artifactFilePCD.length();
+                if (artifactFile.exists()) {
+                    mDepthSize += artifactFile.length();
                     mDepthTime += System.currentTimeMillis() - profile;
                     if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
                         LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_SIZE, mDepthSize);
@@ -1019,28 +1002,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setPath(artifactFile.getPath());
                     log.setHashValue(Utils.getMD5(artifactFile.getPath()));
                     log.setFileSize(artifactFile.length());
-                    log.setUploadDate(0);
-                    log.setDeleted(false);
-                    log.setQrCode(person.getQrcode());
-                    log.setCreateDate(mNowTime);
-                    log.setCreatedBy(session.getUserEmail());
-                    log.setAge(age);
-                    log.setSchema_version(CgmDatabase.version);
-                    log.setMeasureId(measure.getId());
-
-                    synchronized (files) {
-                        files.add(log);
-                    }
-                }
-
-                //upload pointcloud
-                if (artifactFilePCD.exists()) {
-                    FileLog log = new FileLog();
-                    log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
-                    log.setType("pcd");
-                    log.setPath(artifactFilePCD.getPath());
-                    log.setHashValue(Utils.getMD5(artifactFilePCD.getPath()));
-                    log.setFileSize(artifactFilePCD.length());
                     log.setUploadDate(0);
                     log.setDeleted(false);
                     log.setQrCode(person.getQrcode());
@@ -1122,8 +1083,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             progressBar.setProgress(mProgress);
 
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
-                    "_" + String.format(Locale.US, "%03d", mNumberOfFilesWritten);
-            String pointCloudFilename = "pcd_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
                     "_" + String.format(Locale.US, "%03d", mNumberOfFilesWritten++);
 
             ArtifactResult ar=new ArtifactResult();
@@ -1133,7 +1092,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             ar.setKey(SCAN_STEP);
             ar.setMeasure_id(measure.getId());
             ar.setMisc("");
-            ar.setType("PCD_POINTS_v0.2");
+            ar.setType("DEPTHMAP_v0.1");
             ar.setReal(numPoints);
             artifacts.add(ar);
 
@@ -1144,14 +1103,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                 ARCoreUtils.writeDepthmap(depthmap, artifactFile);
 
-                //write pointcloud
-                buffer.rewind();
-                File artifactFilePCD = new File(mPointCloudSaveFolder.getPath() + File.separator + pointCloudFilename +".pcd");
-                TangoUtils.writePointCloudToPcdFile(buffer, numPoints, timestamp, pose, artifactFilePCD);
-
                 //profile process
-                if (artifactFile.exists() && artifactFilePCD.exists()) {
-                    mDepthSize += artifactFile.length() + artifactFilePCD.length();
+                if (artifactFile.exists()) {
+                    mDepthSize += artifactFile.length();
                     mDepthTime += System.currentTimeMillis() - profile;
                     if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
                         LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_SIZE, mDepthSize);
@@ -1167,28 +1121,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setPath(artifactFile.getPath());
                     log.setHashValue(Utils.getMD5(artifactFile.getPath()));
                     log.setFileSize(artifactFile.length());
-                    log.setUploadDate(0);
-                    log.setDeleted(false);
-                    log.setQrCode(person.getQrcode());
-                    log.setCreateDate(mNowTime);
-                    log.setCreatedBy(session.getUserEmail());
-                    log.setAge(age);
-                    log.setSchema_version(CgmDatabase.version);
-                    log.setMeasureId(measure.getId());
-
-                    synchronized (files) {
-                        files.add(log);
-                    }
-                }
-
-                //upload pointcloud
-                if (artifactFilePCD.exists()) {
-                    FileLog log = new FileLog();
-                    log.setId(AppController.getInstance().getArtifactId("scan-pcd", mNowTime));
-                    log.setType("pcd");
-                    log.setPath(artifactFilePCD.getPath());
-                    log.setHashValue(Utils.getMD5(artifactFilePCD.getPath()));
-                    log.setFileSize(artifactFilePCD.length());
                     log.setUploadDate(0);
                     log.setDeleted(false);
                     log.setQrCode(person.getQrcode());
