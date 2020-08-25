@@ -75,13 +75,14 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreCamera;
+import de.welthungerhilfe.cgm.scanner.helper.camera.CameraCalibration;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ICamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoCamera;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
-import de.welthungerhilfe.cgm.scanner.utils.ARCoreUtils;
+import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
-import de.welthungerhilfe.cgm.scanner.utils.TangoUtils;
+import de.welthungerhilfe.cgm.scanner.helper.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener, ARCoreCamera.Camera2DataListener, TangoCamera.TangoCameraListener {
@@ -870,7 +871,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         if (mIsRecording && (frameIndex % 10 == 0)) {
 
             long profile = System.currentTimeMillis();
-            ARCoreCamera.CameraCalibration calibration = ((ARCoreCamera)mCameraInstance).getCalibration();
+            CameraCalibration calibration = ((ARCoreCamera)mCameraInstance).getCalibration();
 
             Runnable thread = () -> {
 
@@ -960,7 +961,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
             float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
             double Artifact_Confidence_penalty = Math.abs((double) depthmap.getCount()/38000-1.0)*100*3;
-            ARCoreCamera.CameraCalibration calibration = ((ARCoreCamera)mCameraInstance).getCalibration();
+            CameraCalibration calibration = ((ARCoreCamera)mCameraInstance).getCalibration();
 
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
             mNumberOfFilesWritten++;
@@ -1069,7 +1070,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    public void onTangoDepthData(TangoPointCloudData pointCloudData, double[] pose, TangoCameraIntrinsics calibration) {
+    public void onTangoDepthData(TangoPointCloudData pointCloudData, double[] pose, TangoCameraIntrinsics[] calibration) {
         // Saving the frame or not, depending on the current mode.
         if ( mIsRecording ) {
             long profile = System.currentTimeMillis();
@@ -1099,7 +1100,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             Runnable thread = () -> {
 
                 //write depthmap
-                ARCoreUtils.Depthmap depthmap = TangoUtils.extractDepthmap(buffer, numPoints, pose, timestamp, calibration);
+                ARCoreUtils.Depthmap depthmap = TangoUtils.extractDepthmap(buffer, numPoints, pose, timestamp, calibration[1]);
                 File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                 ARCoreUtils.writeDepthmap(depthmap, artifactFile);
 
@@ -1132,6 +1133,34 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                     synchronized (files) {
                         files.add(log);
+                    }
+                }
+
+
+                //write and upload calibration
+                artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
+                if (!artifactFile.exists()) {
+                    TangoUtils.writeCalibrationFile(artifactFile, calibration);
+
+                    if (artifactFile.exists()) {
+                        FileLog log = new FileLog();
+                        log.setId(AppController.getInstance().getArtifactId("camera-calibration", mNowTime));
+                        log.setType("calibration");
+                        log.setPath(artifactFile.getPath());
+                        log.setHashValue(Utils.getMD5(artifactFile.getPath()));
+                        log.setFileSize(artifactFile.length());
+                        log.setUploadDate(0);
+                        log.setDeleted(false);
+                        log.setQrCode(person.getQrcode());
+                        log.setCreateDate(mNowTime);
+                        log.setCreatedBy(session.getUserEmail());
+                        log.setAge(age);
+                        log.setSchema_version(CgmDatabase.version);
+                        log.setMeasureId(measure.getId());
+
+                        synchronized (files) {
+                            files.add(log);
+                        }
                     }
                 }
                 onThreadChange(-1);

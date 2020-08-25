@@ -1,4 +1,4 @@
-package de.welthungerhilfe.cgm.scanner.utils;
+package de.welthungerhilfe.cgm.scanner.helper.camera;
 
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 
 /**
  * Child Growth Monitor - quick and accurate data on malnutrition
@@ -67,6 +69,28 @@ public class TangoUtils {
         }
 
         return depthmap;
+    }
+
+    public static void writeCalibrationFile(File file, TangoCameraIntrinsics[] calibration) {
+        CameraCalibration c = new CameraCalibration();
+        c.colorCameraIntrinsic[0] = (float)calibration[0].fx / (float)calibration[0].width;
+        c.colorCameraIntrinsic[1] = (float)calibration[0].fy / (float)calibration[0].height;
+        c.colorCameraIntrinsic[2] = (float)calibration[0].cx / (float)calibration[0].width;
+        c.colorCameraIntrinsic[3] = (float)calibration[0].cy / (float)calibration[0].height;
+
+        c.colorCameraIntrinsic[0] = (float)calibration[1].fx / (float)calibration[1].width;
+        c.colorCameraIntrinsic[1] = (float)calibration[1].fy / (float)calibration[1].height;
+        c.colorCameraIntrinsic[2] = (float)calibration[1].cx / (float)calibration[1].width;
+        c.colorCameraIntrinsic[3] = (float)calibration[1].cy / (float)calibration[1].height;
+
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(file.getAbsolutePath());
+            fileOutputStream.write(c.toString().getBytes());
+            fileOutputStream.flush();
+            fileOutputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void writeImageToFile(TangoImageBuffer currentTangoImageBuffer, File file) {

@@ -1,4 +1,4 @@
-package de.welthungerhilfe.cgm.scanner.utils;
+package de.welthungerhilfe.cgm.scanner.helper.camera;
 
 import android.media.Image;
 
