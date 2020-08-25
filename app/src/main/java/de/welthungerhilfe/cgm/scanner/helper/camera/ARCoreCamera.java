@@ -73,45 +73,6 @@ import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 
 public class ARCoreCamera implements ICamera {
 
-  public static class CameraCalibration {
-    private float[] colorCameraIntrinsic;
-    private float[] depthCameraIntrinsic;
-    private float[] depthCameraTranslation;
-    private boolean valid;
-
-    private CameraCalibration() {
-      colorCameraIntrinsic = new float[4];
-      depthCameraIntrinsic = new float[4];
-      depthCameraTranslation = new float[3];
-      valid = false;
-    }
-
-    public float[] getIntrinsic(boolean rgbCamera) {
-      return rgbCamera ? colorCameraIntrinsic : depthCameraIntrinsic;
-    }
-
-    public boolean isValid() {
-      return valid;
-    }
-
-    private void setValid() {
-      valid = true;
-    }
-
-    @Override
-    public String toString() {
-      String output = "";
-      output += "Color camera intrinsic:\n";
-      output += colorCameraIntrinsic[0] + " " + colorCameraIntrinsic[1] + " " + colorCameraIntrinsic[2] + " " + colorCameraIntrinsic[3] + "\n";
-      output += "Depth camera intrinsic:\n";
-      output += depthCameraIntrinsic[0] + " " + depthCameraIntrinsic[1] + " " + depthCameraIntrinsic[2] + " " + depthCameraIntrinsic[3] + "\n";
-      output += "Depth camera position:\n";
-      output += depthCameraTranslation[0] + " " + depthCameraTranslation[1] + " " + depthCameraTranslation[2] + "\n";
-      return output;
-    }
-  }
-
-
   public interface Camera2DataListener
   {
     void onColorDataReceived(Bitmap bitmap, int frameIndex);

@@ -35,6 +35,7 @@ import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 import com.microsoft.appcenter.crashes.Crashes;
+import com.projecttango.tangosupport.TangoSupport;
 
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
@@ -42,14 +43,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.welthungerhilfe.cgm.scanner.R;
 
-import static com.projecttango.tangosupport.TangoSupport.initialize;
-
 public class TangoCamera implements ICamera {
 
     public interface TangoCameraListener {
         void onTangoColorData(TangoImageBuffer tangoImageBuffer);
 
-        void onTangoDepthData(TangoPointCloudData pointCloudData, double[] pose, TangoCameraIntrinsics calibration);
+        void onTangoDepthData(TangoPointCloudData pointCloudData, double[] pose, TangoCameraIntrinsics[] calibration);
     }
 
     //constants
@@ -196,7 +195,7 @@ public class TangoCamera implements ICamera {
                     mConfig = setupTangoConfig(mTango);
                     mTango.connect(mConfig);
                     startupTango();
-                    initialize(mTango);
+                    TangoSupport.initialize(mTango);
                     mIsConnected = true;
 
                     setDisplayRotation();
@@ -255,7 +254,10 @@ public class TangoCamera implements ICamera {
                     e.printStackTrace();
                     Crashes.trackError(e);
                 }
-                TangoCameraIntrinsics calibration = mTango.getCameraIntrinsics(TangoCameraIntrinsics.TANGO_CAMERA_DEPTH);
+                TangoCameraIntrinsics[] calibration = {
+                        mTango.getCameraIntrinsics(TangoCameraIntrinsics.TANGO_CAMERA_COLOR),
+                        mTango.getCameraIntrinsics(TangoCameraIntrinsics.TANGO_CAMERA_DEPTH)
+                };
                 for (TangoCameraListener listener : mListeners) {
                     listener.onTangoDepthData(pointCloudData, mPose, calibration);
                 }
