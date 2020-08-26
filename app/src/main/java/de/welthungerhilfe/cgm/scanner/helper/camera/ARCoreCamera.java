@@ -526,7 +526,7 @@ public class ARCoreCamera implements ICamera {
       }
 
       //get light estimation from ARCore
-      mPixelIntensity = frame.getLightEstimate().getPixelIntensity();
+      mPixelIntensity = frame.getLightEstimate().getPixelIntensity() * 2.0f;
 
       //process camera data
       onProcessColorData(frame.acquireCameraImage());
