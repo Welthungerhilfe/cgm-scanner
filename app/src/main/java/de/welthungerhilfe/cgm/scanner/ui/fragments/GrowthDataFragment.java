@@ -43,7 +43,6 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.common.collect.Iterables;
@@ -62,6 +61,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class GrowthDataFragment extends Fragment {
     private Context context;
@@ -226,24 +226,24 @@ public class GrowthDataFragment extends Fragment {
                 String[] arr = mLine.split("\t");
                 float rule;
                 try {
-                    rule = Float.parseFloat(arr[0]);
+                    rule = Utils.parseFloat(arr[0]);
                 } catch (Exception e) {
                     continue;
                 }
 
                 if ((chartType == 0 || chartType == 1 ) && lastMeasure != null && rule == lastMeasure.getAge()) {
-                    median = Double.parseDouble(arr[2]);
-                    standard = Double.parseDouble(arr[7]);
+                    median = Utils.parseDouble(arr[2]);
+                    standard = Utils.parseDouble(arr[7]);
                 } else if (chartType == 2 && lastMeasure != null && rule == lastMeasure.getHeight()) {
-                    median = Double.parseDouble(arr[2]);
-                    standard = Double.parseDouble(arr[7]);
+                    median = Utils.parseDouble(arr[2]);
+                    standard = Utils.parseDouble(arr[7]);
                 }
 
-                SD3neg.add(new Entry(rule, Float.parseFloat(arr[4])));
-                SD2neg.add(new Entry(rule, Float.parseFloat(arr[5])));
-                SD0.add(new Entry(rule, Float.parseFloat(arr[7])));
-                SD2.add(new Entry(rule, Float.parseFloat(arr[9])));
-                SD3.add(new Entry(rule, Float.parseFloat(arr[10])));
+                SD3neg.add(new Entry(rule, Utils.parseFloat(arr[4])));
+                SD2neg.add(new Entry(rule, Utils.parseFloat(arr[5])));
+                SD0.add(new Entry(rule, Utils.parseFloat(arr[7])));
+                SD2.add(new Entry(rule, Utils.parseFloat(arr[9])));
+                SD3.add(new Entry(rule, Utils.parseFloat(arr[10])));
             }
             reader.close();
 
@@ -363,7 +363,7 @@ public class GrowthDataFragment extends Fragment {
                     break;
                 case 2:
                     DecimalFormat decimalFormat = new DecimalFormat("#.#");
-                    x = Float.parseFloat(decimalFormat.format(measure.getHeight()));
+                    x = Utils.parseFloat(decimalFormat.format(measure.getHeight()));
                     y = (float) measure.getWeight();
                     break;
                 case 3:

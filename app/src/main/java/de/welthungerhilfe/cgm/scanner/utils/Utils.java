@@ -89,6 +89,26 @@ public class Utils {
         }
     }
 
+    public static double parseDouble(String value) {
+        value = value.replace(',', '.');
+        try {
+            return Double.parseDouble(value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public static float parseFloat(String value) {
+        value = value.replace(',', '.');
+        try {
+            return Float.parseFloat(value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public static double readUsage() {
         try {
             RandomAccessFile reader = new RandomAccessFile("/proc/stat", "r");
@@ -150,31 +170,14 @@ public class Utils {
         }
     }
 
-    public static double distanceBetweenLocs(Loc l1, Loc l2) {
-        Location loc1 = new Location("");
-        loc1.setLatitude(l1.getLatitude());
-        loc1.setLongitude(l1.getLongitude());
-
-        Location loc2 = new Location("");
-        loc2.setLatitude(l2.getLatitude());
-        loc2.setLongitude(l2.getLongitude());
-
-        return loc1.distanceTo(loc2);
-    }
-
     public static int checkDoubleDecimals(String number) {
+        number = number.replace(',', '.');
         int integerPlaces = number.indexOf('.');
 
         if (integerPlaces < 0)
             return 0;
 
-        int decimalPlaces = number.length() - integerPlaces - 1;
-
-        return decimalPlaces;
-    }
-
-    public static float interpolate(final float a, final float b, final float proportion) {
-        return (a + ((b - a) * proportion));
+        return number.length() - integerPlaces - 1;
     }
 
     public static String getAddress(Context context, Loc location) {

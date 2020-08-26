@@ -29,6 +29,7 @@ import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 /**
  * Created by Emerald on 2/21/2018.
@@ -127,8 +128,8 @@ public class SessionManager {
 
     public Loc getLocation() {
         Loc location = new Loc();
-        location.setLatitude(Double.parseDouble(pref.getString(KEY_USER_LOCATION_LATITUDE, "0")));
-        location.setLongitude(Double.parseDouble(pref.getString(KEY_USER_LOCATION_LONGITUDE, "0")));
+        location.setLatitude(Utils.parseDouble(pref.getString(KEY_USER_LOCATION_LATITUDE, "0")));
+        location.setLongitude(Utils.parseDouble(pref.getString(KEY_USER_LOCATION_LONGITUDE, "0")));
         location.setAddress(pref.getString(KEY_USER_LOCATION_ADDRESS, ""));
 
         return location;
