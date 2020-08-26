@@ -34,6 +34,37 @@ import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
  */
 public class TangoUtils {
 
+    public static float getPixelIntensity(TangoImageBuffer imageBuffer) {
+        float intensity = 0.5f;
+        byte[] array = TangoUtils.copyImageBuffer(imageBuffer).data.array();
+        int width = imageBuffer.width;
+        int height = imageBuffer.height;
+        for (int x = 0; x < width; x += width / 20) {
+            for (int y = 0; y < height; y += height / 20) {
+                int UVIndex = width * height + 2 * (x / 2) + (y / 2) * width;
+                int Y = array[y * width + x] & 0xff;
+                float U = (float)(array[UVIndex] & 0xff) - 128.0f;
+                float V = (float)(array[UVIndex + 1] & 0xff) - 128.0f;
+
+                //do the YUV -> RGB conversion
+                float Yf = 1.164f*((float)Y) - 16.0f;
+                int R = (int)(Yf + 1.596f*V);
+                int G = (int)(Yf - 0.813f*V - 0.391f*U);
+                int B = (int)(Yf            + 2.018f*U);
+
+                //clip rgb values to 0-255
+                R = Math.min(Math.max(R, 0), 255);
+                G = Math.min(Math.max(G, 0), 255);
+                B = Math.min(Math.max(B, 0), 255);
+
+                //update pixel intensity
+                int highest = Math.max(Math.max(R, G), B);
+                intensity = intensity * 0.95f + (highest / 255.0f) * 0.05f;
+            }
+        }
+        return intensity * 1.5f;
+    }
+
     public static TangoImageBuffer copyImageBuffer(TangoImageBuffer imageBuffer) {
         ByteBuffer clone = ByteBuffer.allocateDirect(imageBuffer.data.capacity());
         imageBuffer.data.rewind();

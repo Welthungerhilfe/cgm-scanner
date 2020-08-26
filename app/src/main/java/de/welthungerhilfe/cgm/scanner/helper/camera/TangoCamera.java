@@ -173,7 +173,6 @@ public class TangoCamera implements ICamera {
                 mTango.disconnect();
                 mIsConnected = false;
             } catch (TangoErrorException e) {
-                Log.e(TAG, e.getMessage());
                 Crashes.trackError(e);
             }
         }

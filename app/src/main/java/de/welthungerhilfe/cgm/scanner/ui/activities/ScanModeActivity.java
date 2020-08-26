@@ -331,6 +331,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private long mNowTime;
     private String mNowTimeString;
+    private float mPixelIntensity;
 
     private long mColorSize;
     private long mColorTime;
@@ -956,12 +957,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             long profile = System.currentTimeMillis();
             ARCoreUtils.Depthmap depthmap = ARCoreUtils.extractDepthmap(image, pose);
-            long timestamp = depthmap.getTimestamp();
-            float lightIntensity = ((ARCoreCamera)mCameraInstance).getLightIntensity() * 2.0f;
+            float lightIntensity = ((ARCoreCamera)mCameraInstance).getLightIntensity();
             float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
             float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
             double Artifact_Confidence_penalty = Math.abs((double) depthmap.getCount()/38000-1.0)*100*3;
-            CameraCalibration calibration = ((ARCoreCamera)mCameraInstance).getCalibration();
 
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
             mNumberOfFilesWritten++;
@@ -1029,6 +1028,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
+        mPixelIntensity = TangoUtils.getPixelIntensity(tangoImageBuffer);
+
         String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + tangoImageBuffer.timestamp + ".jpg";
         File artifactFile = new File(mRgbSaveFolder.getPath(), currentImgFilename);
         TangoUtils.writeImageToFile(tangoImageBuffer, artifactFile);
@@ -1083,18 +1084,22 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             updateScanningProgress();
             progressBar.setProgress(mProgress);
 
+            float lightIntensity = mPixelIntensity;
+            float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
+            float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
+            double Artifact_Lighting_penalty=Math.abs((double) numPoints/38000-1.0)*100*3;
+
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
                     "_" + String.format(Locale.US, "%03d", mNumberOfFilesWritten++);
 
             ArtifactResult ar=new ArtifactResult();
-            double Artifact_Lighting_penalty=Math.abs((double) numPoints/38000-1.0)*100*3;
             ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
             ar.setArtifact_id(AppController.getInstance().getPersonId());
             ar.setKey(SCAN_STEP);
             ar.setMeasure_id(measure.getId());
             ar.setMisc("");
             ar.setType("DEPTHMAP_v0.1");
-            ar.setReal(numPoints);
+            ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
             artifacts.add(ar);
 
             Runnable thread = () -> {
