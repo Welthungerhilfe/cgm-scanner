@@ -26,6 +26,7 @@ import com.novoda.merlin.Merlin;
 import com.novoda.merlin.registerable.connection.Connectable;
 import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
+import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 
 public class BaseActivity extends AppCompatActivity implements Connectable, Disconnectable {
@@ -43,7 +44,8 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
 
-        Thread.currentThread().setDefaultUncaughtExceptionHandler(new ExceptionHandler());
+        LanguageHelper.onAttach(this);
+        Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
     }
 
     @Override
