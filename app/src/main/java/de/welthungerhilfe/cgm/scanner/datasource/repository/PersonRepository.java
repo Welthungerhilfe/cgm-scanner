@@ -57,17 +57,17 @@ public class PersonRepository {
 
     public LiveData<List<Person>> getAvailablePersons(PersonFilter filter) {
         String selectClause = "*";
-        String whereClause = "deleted=0";
-        String orderByClause = "created DESC";
+        String whereClause = "p.deleted=0";
+        String orderByClause = "p.created DESC";
         int PAGE_SIZE = 30;
         String limitClause = String.format(Locale.US, "LIMIT %d OFFSET %d", PAGE_SIZE, filter.getPage() * PAGE_SIZE);
 
         if (filter.isDate()) {
-            whereClause += String.format(Locale.US, " AND created<=%d AND created>=%d", filter.getToDate(), filter.getFromDate());
+            whereClause += String.format(Locale.US, " AND p.created<=%d AND p.created>=%d", filter.getToDate(), filter.getFromDate());
         }
 
         if (filter.isOwn()) {
-            whereClause += String.format(" AND createdBy LIKE '%s'", Objects.requireNonNull(session.getUserEmail()));
+            whereClause += String.format(" AND p.createdBy LIKE '%s'", Objects.requireNonNull(session.getUserEmail()));
         }
 
         if (filter.isLocation()) {
@@ -89,16 +89,16 @@ public class PersonRepository {
             double minlon = center.getLongitude() - fx * f;
             double minlat = center.getLatitude() - fy * f;
 
-            whereClause += String.format(Locale.US, " AND longitude>=%f AND longitude<=%f AND latitude>=%f AND latitude<=%f", minlon, maxlon, minlat, maxlat);
+            whereClause += String.format(Locale.US, " AND p.longitude>=%f AND p.longitude<=%f AND p.latitude>=%f AND p.latitude<=%f", minlon, maxlon, minlat, maxlat);
         }
 
         if (filter.isQuery()) {
-            whereClause += String.format(" AND (name LIKE \"%%%s%%\" OR surname LIKE \"%%%s%%\")", filter.getQuery(), filter.getQuery());
+            whereClause += String.format(" AND (p.name LIKE \"%%%s%%\" OR p.surname LIKE \"%%%s%%\")", filter.getQuery(), filter.getQuery());
         }
 
         switch (filter.getSortType()) {
             case AppConstants.SORT_DATE:
-                orderByClause = "created ASC";
+                orderByClause = "p.created ASC";
                 break;
             case AppConstants.SORT_LOCATION:
                 Loc loc = filter.getFromLOC();
@@ -106,17 +106,21 @@ public class PersonRepository {
                     double lat = filter.getFromLOC().getLatitude();
                     double lon = filter.getFromLOC().getLongitude();
                     orderByClause = "distance ASC";
-                    selectClause += String.format(Locale.US, ", ((latitude-%.8f)*(latitude-%.8f)+(longitude-%.8f)*(longitude-%.8f)) AS distance", lat, lat, lon, lon);
-                    whereClause += " AND latitude!=0 AND longitude!=0";
+                    selectClause += String.format(Locale.US, ", ((p.latitude-%.8f)*(p.latitude-%.8f)+(p.longitude-%.8f)*(p.longitude-%.8f)) AS distance", lat, lat, lon, lon);
+                    whereClause += " AND p.latitude!=0 AND p.longitude!=0";
                 }
                 break;
             case AppConstants.SORT_WASTING:
+                orderByClause = "w/h ASC";
+                selectClause += String.format(Locale.US, ", (SELECT m.weight FROM %s m WHERE m.weight>0 AND m.personId=p.id ORDER BY m.timestamp DESC LIMIT 1) AS w", CgmDatabase.TABLE_MEASURE);
+                selectClause += String.format(Locale.US, ", (SELECT m.height FROM %s m WHERE m.height>0 AND m.personId=p.id ORDER BY m.timestamp DESC LIMIT 1) AS h", CgmDatabase.TABLE_MEASURE);
+                whereClause += " AND w>0 AND h>0";
                 break;
             case AppConstants.SORT_STUNTING:
                 break;
         }
 
-        String query = String.format("SELECT %s FROM %s WHERE %s ORDER BY %s %s", selectClause, CgmDatabase.TABLE_PERSON, whereClause, orderByClause, limitClause);
+        String query = String.format("SELECT %s FROM %s p WHERE %s ORDER BY %s %s", selectClause, CgmDatabase.TABLE_PERSON, whereClause, orderByClause, limitClause);
         return database.personDao().getResultPerson(new SimpleSQLiteQuery(query));
     }
 
