@@ -3,6 +3,7 @@ package de.welthungerhilfe.cgm.scanner.datasource.repository;
 import androidx.lifecycle.LiveData;
 import androidx.sqlite.db.SimpleSQLiteQuery;
 import android.content.Context;
+import android.location.Location;
 
 import java.util.List;
 import java.util.Locale;
@@ -73,8 +74,25 @@ public class PersonRepository {
         }
 
         if (filter.isLocation()) {
-            selectClause += String.format(", (6371*acos(cos(radians(%.8f))*cos(radians(lat))* cos(radians(lng)-radians(%.8f))+sin(radians(%.8f))*sin(radians(lat)))) AS distance", filter.getFromLOC().getLatitude(), filter.getFromLOC().getLongitude(), filter.getFromLOC().getLatitude());
-            whereClause += String.format(" AND distance<=%d", filter.getRadius());
+            double f = 0.1;
+            double radius = filter.getRadius() * 1000;
+            Location center = new Location("search center");
+            center.setLatitude(filter.getFromLOC().getLatitude());
+            center.setLongitude(filter.getFromLOC().getLongitude());
+            Location east = new Location("search east");
+            east.setLatitude(filter.getFromLOC().getLatitude());
+            east.setLongitude(filter.getFromLOC().getLongitude() + f);
+            Location north = new Location("search north");
+            north.setLatitude(filter.getFromLOC().getLatitude() + f);
+            north.setLongitude(filter.getFromLOC().getLongitude());
+            double fx = radius / center.distanceTo(east);
+            double fy = radius / center.distanceTo(north);
+            double maxlon = center.getLongitude() + fx * f;
+            double maxlat = center.getLatitude() + fy * f;
+            double minlon = center.getLongitude() - fx * f;
+            double minlat = center.getLatitude() - fy * f;
+
+            whereClause += String.format(Locale.US, " AND longitude>=%f AND longitude<=%f AND latitude>=%f AND latitude<=%f", minlon, maxlon, minlat, maxlat);
         }
 
         if (filter.isQuery()) {
