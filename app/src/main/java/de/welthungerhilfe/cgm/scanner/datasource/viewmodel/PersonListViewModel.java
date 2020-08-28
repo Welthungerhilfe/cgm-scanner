@@ -90,7 +90,11 @@ public class PersonListViewModel extends AndroidViewModel {
 
     public void setFilterQuery(String query) {
         filter.setPage(0);
-        filter.setFilterQuery(query);
+        if (query.length() > 0) {
+            filter.setFilterQuery(query);
+        } else {
+            filter.clearFilterQuery();
+        }
         filterLiveData.setValue(filter);
     }
 

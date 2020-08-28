@@ -232,13 +232,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                adapterData.clear();
-                viewModel.setFilterQuery(query);
                 return false;
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
+            public boolean onQueryTextChange(String query) {
+                adapterData.clear();
+                viewModel.setFilterQuery(query);
                 return false;
             }
         });
