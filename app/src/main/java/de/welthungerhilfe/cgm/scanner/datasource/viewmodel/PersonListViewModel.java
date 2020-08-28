@@ -60,6 +60,7 @@ public class PersonListViewModel extends AndroidViewModel {
     }
 
     public void setSortType(int sortType) {
+        filter.setPage(0);
         filter.setSortType(sortType);
         filterLiveData.setValue(filter);
     }
@@ -95,6 +96,12 @@ public class PersonListViewModel extends AndroidViewModel {
         } else {
             filter.clearFilterQuery();
         }
+        filterLiveData.setValue(filter);
+    }
+
+    public void setLocation(Loc location) {
+        filter.setPage(0);
+        filter.setLocation(location);
         filterLiveData.setValue(filter);
     }
 

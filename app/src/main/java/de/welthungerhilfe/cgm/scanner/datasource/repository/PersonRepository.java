@@ -10,15 +10,12 @@ import java.util.Locale;
 import java.util.Objects;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.PersonFilter;
 
-import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_PERSON;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_DATE;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_LOCATION;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_STUNTING;
-import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SORT_WASTING;
 
 public class PersonRepository {
     private static PersonRepository instance;
@@ -100,18 +97,26 @@ public class PersonRepository {
         }
 
         switch (filter.getSortType()) {
-            case SORT_DATE:
-                orderByClause = "created DESC";
+            case AppConstants.SORT_DATE:
+                orderByClause = "created ASC";
                 break;
-            case SORT_LOCATION:
+            case AppConstants.SORT_LOCATION:
+                Loc loc = filter.getFromLOC();
+                if (loc != null) {
+                    double lat = filter.getFromLOC().getLatitude();
+                    double lon = filter.getFromLOC().getLongitude();
+                    orderByClause = "distance ASC";
+                    selectClause += String.format(Locale.US, ", ((latitude-%.8f)*(latitude-%.8f)+(longitude-%.8f)*(longitude-%.8f)) AS distance", lat, lat, lon, lon);
+                    whereClause += " AND latitude!=0 AND longitude!=0";
+                }
                 break;
-            case SORT_WASTING:
+            case AppConstants.SORT_WASTING:
                 break;
-            case SORT_STUNTING:
+            case AppConstants.SORT_STUNTING:
                 break;
         }
 
-        String query = String.format("SELECT %s FROM %s WHERE %s ORDER BY %s %s", selectClause, TABLE_PERSON, whereClause, orderByClause, limitClause);
+        String query = String.format("SELECT %s FROM %s WHERE %s ORDER BY %s %s", selectClause, CgmDatabase.TABLE_PERSON, whereClause, orderByClause, limitClause);
         return database.personDao().getResultPerson(new SimpleSQLiteQuery(query));
     }
 

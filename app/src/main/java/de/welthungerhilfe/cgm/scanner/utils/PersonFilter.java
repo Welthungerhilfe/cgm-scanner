@@ -120,6 +120,10 @@ public class PersonFilter {
         this.radius = radius;
     }
 
+    public void setLocation(Loc fromLOC) {
+        this.fromLOC = fromLOC;
+    }
+
     public String getQuery() {
         return query;
     }
