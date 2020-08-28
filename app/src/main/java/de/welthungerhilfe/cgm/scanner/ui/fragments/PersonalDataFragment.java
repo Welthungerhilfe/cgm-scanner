@@ -23,6 +23,8 @@ import android.app.Activity;
 import android.app.DialogFragment;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.fragment.app.Fragment;
@@ -43,6 +45,7 @@ import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 
 import java.util.Date;
+import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -76,6 +79,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private long birthday = 0;
 
     private CreateDataViewModel viewModel;
+    private Loc location;
     private String qrCode;
     private Person person;
 
@@ -147,10 +151,12 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void initUI() {
-        setLocation(((CreateDataActivity)getActivity()).location);
-
-        if (person == null)
+        if (person == null) {
+            setLocation(((CreateDataActivity)getActivity()).location);
             return;
+        } else {
+            setLocation(person.getLastLocation());
+        }
 
         txtDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getCreated()));
 
@@ -158,6 +164,34 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         editPrename.setText(person.getSurname());
         editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getBirthday()));
         editGuardian.setText(person.getGuardian());
+        editLocation.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                new Thread(() -> {
+                    Geocoder geocoder = new Geocoder(getContext());
+                    try {
+                        List<Address> addresses = geocoder.getFromLocationName(editLocation.getText().toString(), 1);
+                        if(addresses.size() > 0) {
+                            Loc l = new Loc();
+                            l.setLatitude(addresses.get(0).getLatitude());
+                            l.setLongitude(addresses.get(0).getLongitude());
+                            l.setAddress(editLocation.getText().toString());
+                            getActivity().runOnUiThread(() -> setLocation(l));
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+            }
+        });
 
         if (person.getSex().equals(AppConstants.VAL_SEX_FEMALE)) {
             radioFemale.setChecked(true);
@@ -168,12 +202,15 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         checkAge.setChecked(person.isAgeEstimated());
     }
 
-    public void setLocation(Loc location) {
-        if (location != null) {
-            String address = location.getAddress();
+    public void setLocation(Loc loc) {
+        if (loc != null) {
+            String address = loc.getAddress();
             if ((address != null) && (address.length() > 0)) {
-                editLocation.setText(address);
+                if (editLocation.getText().toString().compareTo(address) != 0) {
+                    editLocation.setText(address);
+                }
             }
+            location = loc;
         }
     }
 
@@ -259,6 +296,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setCreated(System.currentTimeMillis());
                     person.setCreatedBy(session.getUserEmail());
                     person.setSchema_version(CgmDatabase.version);
+
+                    if (location != null) {
+                        person.setLastLocation(location);
+                    }
 
                     viewModel.savePerson(person);
                 }
