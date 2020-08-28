@@ -6,7 +6,6 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBar;
@@ -15,7 +14,6 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -104,17 +102,17 @@ public class SettingsActivity extends BaseActivity {
 
     @OnClick(R.id.lytLangEnglish)
     void onEnglish(LinearLayout lytLangEnglish) {
-        changeLanguage("en");
+        changeLanguage(AppConstants.LANG_ENGLISH);
     }
 
     @OnClick(R.id.lytLangGerman)
     void onGerman(LinearLayout lytLangGerman) {
-        changeLanguage("de");
+        changeLanguage(AppConstants.LANG_GERMAN);
     }
 
     @OnClick(R.id.lytLangHindi)
     void onHindi(LinearLayout lytLangHindi) {
-        changeLanguage("hi");
+        changeLanguage(AppConstants.LANG_HINDI);
     }
 
     private SessionManager session;
@@ -196,6 +194,9 @@ public class SettingsActivity extends BaseActivity {
                 radioHindi.setChecked(true);
                 break;
         }
+        radioEnglish.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_ENGLISH));
+        radioGerman.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_GERMAN));
+        radioHindi.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_HINDI));
 
         if (session.getBackupTimestamp() == 0) txtSettingBackupDate.setText(R.string.no_backups);
         else txtSettingBackupDate.setText(DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, session.getBackupTimestamp()));
@@ -354,12 +355,6 @@ public class SettingsActivity extends BaseActivity {
     }
 
     private void changeLanguage(String code) {
-        Locale locale = new Locale(code);
-        Locale.setDefault(locale);
-        Configuration config = new Configuration();
-        config.locale = locale;
-        getResources().updateConfiguration(config, getBaseContext().getResources().getDisplayMetrics());
-
         session.setLanguage(code);
 
         Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage( getBaseContext().getPackageName() );
