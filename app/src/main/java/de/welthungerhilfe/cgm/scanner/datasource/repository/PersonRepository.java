@@ -117,6 +117,10 @@ public class PersonRepository {
                 whereClause += " AND w>0 AND h>0";
                 break;
             case AppConstants.SORT_STUNTING:
+                orderByClause = "h/age ASC";
+                selectClause += String.format(Locale.US, ", (%d - birthday) / 1000 / 60 / 60 / 24 / 365 AS age", System.currentTimeMillis());
+                selectClause += String.format(Locale.US, ", (SELECT m.height FROM %s m WHERE m.height>0 AND m.personId=p.id ORDER BY m.timestamp DESC LIMIT 1) AS h", CgmDatabase.TABLE_MEASURE);
+                whereClause += " AND age>0 AND h>0";
                 break;
         }
 
