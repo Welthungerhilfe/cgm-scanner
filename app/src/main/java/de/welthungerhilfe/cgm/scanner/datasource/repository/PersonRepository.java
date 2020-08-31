@@ -93,7 +93,7 @@ public class PersonRepository {
         }
 
         if (filter.isQuery()) {
-            whereClause += String.format(" AND (p.name LIKE \"%%%s%%\" OR p.surname LIKE \"%%%s%%\")", filter.getQuery(), filter.getQuery());
+            whereClause += String.format(" AND (p.name LIKE \"%%%s%%\" OR p.qrcode LIKE \"%%%s%%\" OR p.surname LIKE \"%%%s%%\")", filter.getQuery(), filter.getQuery(), filter.getQuery());
         }
 
         switch (filter.getSortType()) {
