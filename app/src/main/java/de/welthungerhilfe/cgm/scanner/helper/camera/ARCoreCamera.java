@@ -73,13 +73,6 @@ import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 
 public class ARCoreCamera implements ICamera {
 
-  public interface Camera2DataListener
-  {
-    void onColorDataReceived(Bitmap bitmap, int frameIndex);
-
-    void onDepthDataReceived(Image image, Pose pose, int frameIndex);
-  }
-
   private static final String TAG = ARCoreCamera.class.getSimpleName();
 
   //Camera2 API
@@ -100,7 +93,7 @@ public class ARCoreCamera implements ICamera {
   private ImageView mColorCameraPreview;
   private ImageView mDepthCameraPreview;
   private GLSurfaceView mGLSurfaceView;
-  private ArrayList<Camera2DataListener> mListeners;
+  private ArrayList<ARCoreUtils.Camera2DataListener> mListeners;
   private final HashMap<Long, Bitmap> mCache;
   private CameraCalibration mCameraCalibration;
   private int mFrameIndex;
@@ -120,7 +113,7 @@ public class ARCoreCamera implements ICamera {
   }
 
   public void addListener(Object listener) {
-    mListeners.add((Camera2DataListener) listener);
+    mListeners.add((ARCoreUtils.Camera2DataListener) listener);
   }
 
   public void removeListener(Object listener) {
@@ -227,7 +220,7 @@ public class ARCoreCamera implements ICamera {
       return;
     }
     if (mShowDepth) {
-      mDepthCameraPreview.setImageBitmap(getDepthPreview(image));
+      mDepthCameraPreview.setImageBitmap(ARCoreUtils.getDepthPreview(image, false));
     }
 
     Pose pose;
@@ -251,10 +244,10 @@ public class ARCoreCamera implements ICamera {
     }
 
     if (bitmap != null && bestDiff < 50000) {
-      for (Camera2DataListener listener : mListeners) {
+      for (ARCoreUtils.Camera2DataListener listener : mListeners) {
         listener.onDepthDataReceived(image, pose, mFrameIndex);
       }
-      for (Camera2DataListener listener : mListeners) {
+      for (ARCoreUtils.Camera2DataListener listener : mListeners) {
         listener.onColorDataReceived(bitmap, mFrameIndex);
       }
 
@@ -264,49 +257,6 @@ public class ARCoreCamera implements ICamera {
       }
     }
     image.close();
-  }
-
-  private Bitmap getDepthPreview(Image image) {
-    Image.Plane plane = image.getPlanes()[0];
-    ByteBuffer buffer = plane.getBuffer();
-    ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
-
-    ArrayList<Short> pixel = new ArrayList<>();
-    while (shortDepthBuffer.hasRemaining()) {
-      pixel.add(shortDepthBuffer.get());
-    }
-    int stride = plane.getRowStride();
-    int width = image.getWidth();
-    int height = image.getHeight();
-
-    float[][] depth = new float[width][height];
-    for (int y = 0; y < height; y++) {
-      for (int x = 0; x < width; x++) {
-        int depthSample = pixel.get((y / 2) * stride + x);
-        int depthRange = depthSample & 0x1FFF;
-        if ((x < 1) || (y < 1) || (x >= width - 1) || (y >= height - 1)) {
-          depthRange = 0;
-        }
-        depth[x][y] = depthRange;
-      }
-    }
-
-    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-    for (int y = 1; y < height - 1; y++) {
-      for (int x = 1; x < width - 1; x++) {
-
-        float mx = depth[x][y] - depth[x - 1][y];
-        float px = depth[x][y] - depth[x + 1][y];
-        float my = depth[x][y] - depth[x][y - 1];
-        float py = depth[x][y] - depth[x][y + 1];
-        float value = Math.abs(mx) + Math.abs(px) + Math.abs(my) + Math.abs(py);
-        int r = (int) Math.max(0, Math.min(1.0f * value, 255));
-        int g = (int) Math.max(0, Math.min(2.0f * value, 255));
-        int b = (int) Math.max(0, Math.min(3.0f * value, 255));
-        bitmap.setPixel(x, y, Color.argb(128, r, g, b));
-      }
-    }
-    return bitmap;
   }
 
   private void closeCamera() {
@@ -491,10 +441,12 @@ public class ARCoreCamera implements ICamera {
     return true;
   }
 
+  @Override
   public CameraCalibration getCalibration() {
     return mCameraCalibration;
   }
 
+  @Override
   public float getLightIntensity() {
     return mPixelIntensity;
   }

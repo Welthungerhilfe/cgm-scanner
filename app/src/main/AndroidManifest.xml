@@ -57,6 +57,9 @@
         <meta-data
             android:name="com.google.ar.core"
             android:value="${arcoreValue}" />
+        <meta-data
+            android:name="com.huawei.ar.engine"
+            android:value="${arengineValue}" />
 
         <meta-data
             android:name="com.google.android.gms.version"

@@ -26,4 +26,7 @@ public interface ICamera {
     void onCreate();
     void onResume();
     void onPause();
+
+    CameraCalibration getCalibration();
+    float getLightIntensity();
 }

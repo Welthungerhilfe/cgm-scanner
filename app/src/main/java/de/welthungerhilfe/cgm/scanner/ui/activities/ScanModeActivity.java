@@ -75,6 +75,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreCamera;
+import de.welthungerhilfe.cgm.scanner.helper.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.CameraCalibration;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ICamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoCamera;
@@ -85,7 +86,7 @@ import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener, ARCoreCamera.Camera2DataListener, TangoCamera.TangoCameraListener {
+public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener, ARCoreUtils.Camera2DataListener, TangoCamera.TangoCameraListener {
     private final int PERMISSION_LOCATION = 0x0001;
     private final int PERMISSION_CAMERA = 0x0002;
     private final int PERMISSION_STORAGE = 0x0002;
@@ -860,6 +861,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         if (mCameraInstance == null) {
             if (session.isTangoDevice()) {
                 mCameraInstance = new TangoCamera(this);
+            } else if (ARCoreUtils.shouldUseAREngine()) {
+                mCameraInstance = new AREngineCamera(this);
             } else {
                 mCameraInstance = new ARCoreCamera(this);
             }
@@ -872,7 +875,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         if (mIsRecording && (frameIndex % 10 == 0)) {
 
             long profile = System.currentTimeMillis();
-            CameraCalibration calibration = ((ARCoreCamera)mCameraInstance).getCalibration();
+            CameraCalibration calibration = mCameraInstance.getCalibration();
 
             Runnable thread = () -> {
 
@@ -956,8 +959,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         if (mIsRecording && (frameIndex % 10 == 0)) {
 
             long profile = System.currentTimeMillis();
-            ARCoreUtils.Depthmap depthmap = ARCoreUtils.extractDepthmap(image, pose);
-            float lightIntensity = ((ARCoreCamera)mCameraInstance).getLightIntensity();
+            ARCoreUtils.Depthmap depthmap = ARCoreUtils.extractDepthmap(image, pose, mCameraInstance instanceof AREngineCamera);
+            float lightIntensity = mCameraInstance.getLightIntensity();
             float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
             float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
             double Artifact_Confidence_penalty = Math.abs((double) depthmap.getCount()/38000-1.0)*100*3;
