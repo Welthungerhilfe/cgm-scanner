@@ -178,6 +178,16 @@ public class TangoCamera implements ICamera {
         }
     }
 
+    @Override
+    public CameraCalibration getCalibration() {
+        return null;
+    }
+
+    @Override
+    public float getLightIntensity() {
+        return 0;
+    }
+
     private void startTango() {
         if (mTango != null) {
             return;

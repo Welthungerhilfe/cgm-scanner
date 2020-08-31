@@ -1,6 +1,9 @@
 package de.welthungerhilfe.cgm.scanner.helper.camera;
 
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.Image;
+import android.os.Build;
 
 import com.google.ar.core.Pose;
 
@@ -8,10 +11,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
 
 /**
  * Child Growth Monitor - quick and accurate data on malnutrition
@@ -32,6 +37,13 @@ import java.util.zip.ZipOutputStream;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 public class ARCoreUtils {
+
+    public interface Camera2DataListener
+    {
+        void onColorDataReceived(Bitmap bitmap, int frameIndex);
+
+        void onDepthDataReceived(Image image, Pose pose, int frameIndex);
+    }
 
     public static class Depthmap {
         byte[] confidence;
@@ -54,10 +66,6 @@ public class ARCoreUtils {
             rotation = new float[] {0, 0, 0, 1};
         }
 
-        private float getConfidence(int x, int y) {
-            return confidence[y * width + x] / 7.0f;
-        }
-
         public int getCount() {
             return count;
         }
@@ -74,10 +82,6 @@ public class ARCoreUtils {
                 }
             }
             return output;
-        }
-
-        private float getDepth(int x, int y) {
-            return depth[y * width + x] * 0.001f;
         }
 
         public String getPose(String separator) {
@@ -103,9 +107,12 @@ public class ARCoreUtils {
         public long getTimestamp() { return timestamp; }
     }
 
-    public static Depthmap extractDepthmap(Image image, Pose pose) {
+    public static Depthmap extractDepthmap(Image image, Pose pose, boolean reorder) {
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
+        if (reorder) {
+            buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
+        }
         ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
 
         ArrayList<Short> pixel = new ArrayList<>();
@@ -137,6 +144,57 @@ public class ARCoreUtils {
             }
         }
         return depthmap;
+    }
+
+    public static Bitmap getDepthPreview(Image image, boolean reorder) {
+        Image.Plane plane = image.getPlanes()[0];
+        ByteBuffer buffer = plane.getBuffer();
+        if (reorder) {
+            buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
+        }
+        ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
+
+        ArrayList<Integer> pixel = new ArrayList<>();
+        while (shortDepthBuffer.hasRemaining()) {
+            pixel.add((int) shortDepthBuffer.get());
+        }
+        int stride = plane.getRowStride();
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        float[][] depth = new float[width][height];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int depthSample = pixel.get((y / 2) * stride + x);
+                int depthRange = depthSample & 0x1FFF;
+                if ((x < 1) || (y < 1) || (x >= width - 1) || (y >= height - 1)) {
+                    depthRange = 0;
+                }
+                depth[x][y] = depthRange;
+            }
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        for (int y = 1; y < height - 1; y++) {
+            for (int x = 1; x < width - 1; x++) {
+
+                float mx = depth[x][y] - depth[x - 1][y];
+                float px = depth[x][y] - depth[x + 1][y];
+                float my = depth[x][y] - depth[x][y - 1];
+                float py = depth[x][y] - depth[x][y + 1];
+                float value = Math.abs(mx) + Math.abs(px) + Math.abs(my) + Math.abs(py);
+                int r = (int) Math.max(0, Math.min(1.0f * value, 255));
+                int g = (int) Math.max(0, Math.min(2.0f * value, 255));
+                int b = (int) Math.max(0, Math.min(3.0f * value, 255));
+                bitmap.setPixel(x, y, Color.argb(128, r, g, b));
+            }
+        }
+        return bitmap;
+    }
+
+    public static boolean shouldUseAREngine() {
+        String manufacturer = Build.MANUFACTURER.toUpperCase();
+        return manufacturer.startsWith("HONOR") || manufacturer.startsWith("HUAWEI");
     }
 
     public static void writeDepthmap(Depthmap depthmap, File file) {
