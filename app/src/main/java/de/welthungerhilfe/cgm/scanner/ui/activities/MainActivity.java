@@ -63,6 +63,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
 import de.welthungerhilfe.cgm.scanner.helper.service.DeviceService;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
@@ -232,13 +233,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                adapterData.clear();
-                viewModel.setFilterQuery(query);
                 return false;
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
+            public boolean onQueryTextChange(String query) {
+                adapterData.clear();
+                viewModel.setFilterQuery(query);
                 return false;
             }
         });
@@ -323,15 +324,23 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                             viewModel.setFilterNo();
                             break;
                         case R.id.rytSortDate:
+                            adapterData.clear();
                             viewModel.setSortType(AppConstants.SORT_DATE);
                             break;
                         case R.id.rytSortLocation:
-                            viewModel.setSortType(AppConstants.SORT_LOCATION);
+                            adapterData.clear();
+                            Loc loc = Utils.getLastKnownLocation(this);
+                            if (loc != null) {
+                                viewModel.setLocation(loc);
+                                viewModel.setSortType(AppConstants.SORT_LOCATION);
+                            }
                             break;
                         case R.id.rytSortWasting:
+                            adapterData.clear();
                             viewModel.setSortType(AppConstants.SORT_WASTING);
                             break;
                         case R.id.rytSortStunting:
+                            adapterData.clear();
                             viewModel.setSortType(AppConstants.SORT_STUNTING);
                             break;
                     }
@@ -485,5 +494,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         super.onResume();
         adapterData.clear();
         viewModel.setFilterOwn();
+        viewModel.setSortType(AppConstants.SORT_DATE);
     }
 }

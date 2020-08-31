@@ -18,15 +18,20 @@
 
 package de.welthungerhilfe.cgm.scanner.utils;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
 import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
+
+import androidx.core.app.ActivityCompat;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -204,5 +209,39 @@ public class Utils {
             }
         }
         return "";
+    }
+
+    public static Loc getLastKnownLocation(Context context) {
+        boolean coarse = ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
+        boolean fine = ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED;
+        if (fine || coarse) {
+            return null;
+        }
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        if (locationManager == null) {
+            return null;
+        }
+
+        List<String> providers = locationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            Location l = locationManager.getLastKnownLocation(provider);
+            if (l == null) {
+                continue;
+            }
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                // Found best last known location:
+                bestLocation = l;
+            }
+        }
+
+        if (bestLocation == null) {
+            return null;
+        }
+
+        Loc loc = new Loc();
+        loc.setLatitude(bestLocation.getLatitude());
+        loc.setLongitude(bestLocation.getLongitude());
+        return loc;
     }
 }
