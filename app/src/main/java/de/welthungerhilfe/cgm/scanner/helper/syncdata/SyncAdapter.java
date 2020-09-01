@@ -12,6 +12,7 @@ import android.content.SyncResult;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -25,6 +26,7 @@ import com.microsoft.azure.storage.queue.CloudQueueMessage;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -160,8 +162,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         private void processMeasureResultQueue(CloudQueueClient queueClient) throws URISyntaxException {
-            Measure heightNotification = null;
-            Measure weightNotification = null;
+            HashMap<String, Pair<Float, Long>> heightNotification = new HashMap<>();
+            HashMap<String, Pair<Float, Long>> weightNotification = new HashMap<>();
 
             try {
                 CloudQueue measureResultQueue = queueClient.getQueueReference(Utils.getAndroidID(getContext().getContentResolver()) + "-measure-result");
@@ -190,6 +192,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 measureResultRepository.insertMeasureResult(result);
                             }
 
+                            Pair<Float, Long> value = new Pair<>(result.getFloat_value(), System.currentTimeMillis());
                             if (result.getKey().contains("weight")) {
                                 float fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "weight%");
 
@@ -209,12 +212,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                             onResultReceived(result);
                                         }
 
-                                        weightNotification = measure;
+                                        weightNotification.remove(result.getMeasure_id());
+                                        weightNotification.put(result.getMeasure_id(), value);
                                     }
-                                } else if (weightNotification == null) {
-                                    weightNotification = measureRepository.getMeasureById(result.getMeasure_id());
-                                    weightNotification.setWeight(result.getFloat_value());
-                                    weightNotification.setReceived_at(System.currentTimeMillis());
+                                } else if (!weightNotification.containsKey(result.getMeasure_id())) {
+                                    weightNotification.put(result.getMeasure_id(), value);
                                 }
                             } else if (result.getKey().contains("height")) {
                                 float fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "height%");
@@ -235,12 +237,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                             onResultReceived(result);
                                         }
 
-                                        heightNotification = measure;
+                                        heightNotification.remove(result.getMeasure_id());
+                                        heightNotification.put(result.getMeasure_id(), value);
                                     }
-                                } else if (heightNotification == null) {
-                                    heightNotification = measureRepository.getMeasureById(result.getMeasure_id());
-                                    heightNotification.setHeight(result.getFloat_value());
-                                    heightNotification.setReceived_at(System.currentTimeMillis());
+                                } else if (!heightNotification.containsKey(result.getMeasure_id())) {
+                                    heightNotification.put(result.getMeasure_id(), value);
                                 }
                             }
                         } catch (JsonSyntaxException e) {
@@ -254,21 +255,27 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 e.printStackTrace();
             }
 
-            if (heightNotification != null) {
-                Intent intent = new Intent();
-                intent.setAction(ACTION_RESULT_GENERATED);
-                intent.putExtra("qr_code", heightNotification.getQrCode());
-                intent.putExtra("height", heightNotification.getHeight());
-                intent.putExtra("received_at", heightNotification.getReceived_at());
-                getContext().sendBroadcast(intent);
+            for (String qrcode : heightNotification.keySet()) {
+                Pair<Float, Long> value = heightNotification.get(qrcode);
+                if (value != null) {
+                    Intent intent = new Intent();
+                    intent.setAction(ACTION_RESULT_GENERATED);
+                    intent.putExtra("qr_code", qrcode);
+                    intent.putExtra("height", value.first);
+                    intent.putExtra("received_at", value.second);
+                    getContext().sendBroadcast(intent);
+                }
             }
-            if (weightNotification != null) {
-                Intent intent = new Intent();
-                intent.setAction(ACTION_RESULT_GENERATED);
-                intent.putExtra("qr_code", weightNotification.getQrCode());
-                intent.putExtra("weight", weightNotification.getWeight());
-                intent.putExtra("received_at", weightNotification.getReceived_at());
-                getContext().sendBroadcast(intent);
+            for (String qrcode : weightNotification.keySet()) {
+                Pair<Float, Long> value = weightNotification.get(qrcode);
+                if (value != null) {
+                    Intent intent = new Intent();
+                    intent.setAction(ACTION_RESULT_GENERATED);
+                    intent.putExtra("qr_code", qrcode);
+                    intent.putExtra("weight", value.first);
+                    intent.putExtra("received_at", value.second);
+                    getContext().sendBroadcast(intent);
+                }
             }
         }
 
