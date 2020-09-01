@@ -2,7 +2,6 @@ package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
 import android.annotation.SuppressLint;
 import androidx.lifecycle.LiveData;
-import androidx.room.Query;
 import android.content.Context;
 import android.os.AsyncTask;
 
@@ -52,10 +51,6 @@ public class FileLogRepository {
         database.fileLogDao().updateFileLog(log);
     }
 
-    public List<FileLog> getSyncableLog(long timestamp) {
-        return database.fileLogDao().getSyncableData(timestamp);
-    }
-
     public long getArtifactCount() {
         return database.fileLogDao().getArtifactCount();
     }
@@ -74,14 +69,6 @@ public class FileLogRepository {
 
     public double getTotalArtifactFileSize() {
         return database.fileLogDao().getTotalArtifactFileSize();
-    }
-
-    public double getMeasureArtifactSize(String measureId) {
-        return database.fileLogDao().getMeasureArtifactSize(measureId);
-    }
-
-    public double getMeasureArtifactUploadedSize(String measureId) {
-        return database.fileLogDao().getMeasureArtifactUploadedSize(measureId);
     }
 
     public List<FileLog> getAll() {

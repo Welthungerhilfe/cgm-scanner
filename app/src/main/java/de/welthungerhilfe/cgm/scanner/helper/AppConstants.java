@@ -24,23 +24,17 @@ package de.welthungerhilfe.cgm.scanner.helper;
  */
 
 public class AppConstants {
+
     public static final int MAX_IMAGE_SIZE = 512;
 
     public static final String ACTION_RESULT_GENERATED = "de.welthungerhilfe.cgm.scanner.action.ACTION_RESULT_GENERATED";
 
     public static final long SYNC_INTERVAL = 60 * 5;
-    public static final long SYNC_FLEXTIME = SYNC_INTERVAL / 3;
-    public static final long LOG_MONITOR_INTERVAL = 10 * 1000; // 10 seconds
+    public static final long SYNC_FLEXTIME = SYNC_INTERVAL;
     public static final long MEMORY_MONITOR_INTERVAL = 60 * 1000; // 60 seconds
     public static final long HEALTH_INTERVAL = 60 * 60 * 1000; // 1 hour
 
     public static final int MULTI_UPLOAD_BUNCH = 5;
-
-    public static final int PAGE_SIZE = 30;
-
-    public static final String GOOGLE_GEO_URL = "https://maps.googleapis.com/maps/api/geocode/json";
-    //public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor.appspot.com";
-    //public static final String STORAGE_ROOT_URL = "gs://child-growth-monitor-dev.appspot.com";
 
     public static final String LOCAL_CONSENT_URL = "/{qrcode}/consent/{scantimestamp}/consent/";
     public static final String STORAGE_CONSENT_URL = "qrcode/{qrcode}/consent/{scantimestamp}/";
@@ -59,34 +53,23 @@ public class AppConstants {
     public static final String LANG_GERMAN = "de";
     public static final String LANG_HINDI = "hi";
 
+    public static final String[] SUPPORTED_LANGUAGES = {
+            LANG_ENGLISH,
+            LANG_GERMAN,
+            LANG_HINDI
+    };
+
     public static final String EXTRA_QR = "extra_qr";
     public static final String EXTRA_QR_BITMAP = "extra_qr_bitmap";
     public static final String EXTRA_QR_URL = "extra_qr_url";
-    public static final String EXTRA_LOCATION = "extra_location";
     public static final String EXTRA_RADIUS = "extra_radius";
-    public static final String EXTRA_PERSON_LIST = "extra_person_list";
     public static final String EXTRA_PERSON = "extra_person";
     public static final String EXTRA_MEASURE = "extra_measure";
-    public static final String EXTRA_SCANTIMESTAMP = "extra_scantimestamp";
-    public static final String EXTRA_SCANARTEFACT_SUBFOLDER = "extra_scanartefact_subfolder";
-    public static final String EXTRA_ARTEFACT = "extra_artefact";
     public static final String EXTRA_TUTORIAL_AGAIN = "extra_tutorial_again";
-    public static final String EXTRA_RESULT_ID = "extra_result_id";
-    public static final String EXTRA_RESULT_HEIGHT = "extra_result_height";
-    public static final String EXTRA_RESULT_WEIGHT = "extra_result_weight";
-    public static final String EXTRA_RESULT_MUAC = "extra_result_muac";
-    public static final String EXTRA_RESULT_HEAD = "extra_result_head";
 
     public static final String PARAM_AUTHTOKEN_TYPE = "authtoken_type";
     public static final String PARAM_AUTH_NAME = "auth_name";
     public static final String PARAM_AUTH_CONFIRM = "auth_confirm";
-
-    public static final String CONFIG_MEASURE_VISIBILITY = "measure_visibility";
-    public static final String CONFIG_TIME_TO_ALLOW_EDITING = "time_to_allow_editing";
-    public static final String CONFIG_ADMINS = "admins";
-    public static final String CONFIG_ALLOW_EDIT = "allow_edit";
-    public static final String CONFIG_ALLOW_DELETE = "allow_delete";
-    public static final String CONFIG_DEBUG = "debug";
 
     public static final String AUTHTOKEN_TYPE = "de.welthungerhilfe.cgm.scanner";
     public static final String ACCOUNT_TYPE = "de.welthungerhilfe.cgm.scanner";
@@ -102,24 +85,8 @@ public class AppConstants {
     public static final int SCAN_LYING_SIDE = 201;
     public static final int SCAN_LYING_BACK = 202;
 
-    // Workflow
-    public static final int CHOOSE_BABY_OR_INFANT = 0;
-    public static final int LYING_BABY_SCAN = 100;
-    public static final int BABY_FULL_BODY_FRONT_ONBOARDING = 101;
-    public static final int BABY_FULL_BODY_FRONT_SCAN = 102;
-    public static final int BABY_FULL_BODY_FRONT_RECORDING = 103;
-    public static final int BABY_LEFT_RIGHT_ONBOARDING = 104;
-    public static final int BABY_LEFT_RIGHT_SCAN = 105;
-    public static final int BABY_LEFT_RIGHT_RECORDING = 106;
-    public static final int BABY_FULL_BODY_BACK_ONBOARDING = 107;
-    public static final int BABY_FULL_BODY_BACK_SCAN = 108;
-    public static final int BABY_FULL_BODY_BACK_RECORDING = 109;
-    public static final int STANDING_INFANT_SCAN = 200;
-
     public static final int UPLOADED = 201;
     public static final int UPLOADED_DELETED = 202;
-    public static final int NO_NETWORK = 301;
-    public static final int DIFF_HASH = 302;
     public static final int UPLOAD_ERROR = 400;
     public static final int FILE_NOT_FOUND = 404;
 
@@ -127,4 +94,6 @@ public class AppConstants {
     public static final int SORT_LOCATION = 1;
     public static final int SORT_WASTING = 2;
     public static final int SORT_STUNTING = 3;
+
+    public static final int MIN_CONFIDENCE = 100;
 }

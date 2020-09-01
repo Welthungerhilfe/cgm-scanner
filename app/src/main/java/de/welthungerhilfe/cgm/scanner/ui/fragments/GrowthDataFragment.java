@@ -27,6 +27,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -134,7 +135,6 @@ public class GrowthDataFragment extends Fragment {
         txtNotifTitle = view.findViewById(R.id.txtNotifTitle);
         txtNotifMessage = view.findViewById(R.id.txtNotifMessage);
 
-        //chartGrowth = view.findViewById(R.id.chartGrowth);
         mChart = view.findViewById(R.id.chart1);
         MaterialSpinner dropChart = view.findViewById(R.id.dropChart);
 
@@ -146,8 +146,6 @@ public class GrowthDataFragment extends Fragment {
         });
 
         initChart();
-        //setChartData();
-
         return view;
     }
 
@@ -220,7 +218,7 @@ public class GrowthDataFragment extends Fragment {
         ArrayList<Entry> SD2 = new ArrayList<>();
         ArrayList<Entry> SD3 = new ArrayList<>();
 
-        double zScore = 100, median = 100, standard = 100, coefficient = 100;
+        double zScore = 100, median = 10, skew = 10, coefficient = 10;
 
         try {
             BufferedReader reader;
@@ -239,13 +237,18 @@ public class GrowthDataFragment extends Fragment {
                 } catch (Exception e) {
                     continue;
                 }
-
-                if ((chartType == 0 || chartType == 1 ) && lastMeasure != null && rule == lastMeasure.getAge()) {
+                if(lastMeasure!= null)
+                Log.d("try", String.valueOf((lastMeasure.getAge())));
+                else
+                    Log.d("try", String.valueOf(lastMeasure));
+                if ((chartType == 0 || chartType == 1 ) && lastMeasure != null && rule == lastMeasure.getAge() / 30) {
+                    skew=Double.parseDouble(arr[1]);
                     median = Double.parseDouble(arr[2]);
-                    standard = Double.parseDouble(arr[7]);
+                    coefficient = Double.parseDouble(arr[3]);
                 } else if (chartType == 2 && lastMeasure != null && rule == lastMeasure.getHeight()) {
+                    skew = Double.parseDouble(arr[1]);
                     median = Double.parseDouble(arr[2]);
-                    standard = Double.parseDouble(arr[7]);
+                    coefficient = Double.parseDouble(arr[3]);
                 }
 
                 SD3neg.add(new Entry(rule, Float.parseFloat(arr[4])));
@@ -272,24 +275,25 @@ public class GrowthDataFragment extends Fragment {
                 txtXAxis.setText(R.string.axis_age);
                 txtYAxis.setText(R.string.axis_weight);
 
-                if (lastMeasure != null && median != 0 && standard != 0) {
-                    zScore = (lastMeasure.getWeight() - median) / standard;
+                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
+                    zScore=newZscore(lastMeasure.getWeight(),median,skew,coefficient);
+                    Log.d("test", String.valueOf(zScore));
                 }
                 break;
             case 1:
                 txtXAxis.setText(R.string.axis_age);
                 txtYAxis.setText(R.string.axis_height);
 
-                if (lastMeasure != null && median != 0 && standard != 0) {
-                    zScore = (lastMeasure.getHeight() - median) / standard;
+                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
+                    zScore=newZscore(lastMeasure.getHeight(),median,skew,coefficient);
                 }
                 break;
             case 2:
                 txtXAxis.setText(R.string.axis_height);
                 txtYAxis.setText(R.string.axis_weight);
 
-                if (lastMeasure != null && median != 0 && standard != 0) {
-                    zScore = (lastMeasure.getWeight() - median) / standard;
+                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
+                    zScore=newZscore(lastMeasure.getWeight(),median,skew,coefficient);
                 }
                 break;
             case 3:
@@ -430,8 +434,27 @@ public class GrowthDataFragment extends Fragment {
 
 
         mChart.setData(new LineData(dataSets));
-        //mChart.invalidate();
         mChart.animateX(3000);
+    }
+
+    private double newZscore(double value,double median,double skew,double coefficient) {
+        double zscore=(Math.pow(value/median,skew)-1)/(skew*coefficient);
+        double finalZscore=0.0;
+        double SD3pos=median*Math.pow((1+(skew*coefficient*3)),1/skew);
+        double SD3neg=median*Math.pow((1+(skew*coefficient*(-3))),1/skew);
+        double SD23pos=SD3pos-median*Math.pow((1+(skew*coefficient*2)),1/skew);
+        double SD23neg=median*Math.pow((1+(skew*coefficient*(-2))),1/skew)-SD3neg;
+        if(zscore>=-3 && zscore<=3){
+            finalZscore=zscore;
+        }
+        else if(zscore>3){
+            finalZscore=3+((value-SD3pos)/SD23pos);
+        }
+        else{
+            finalZscore=-3+((value-SD3neg)/SD23neg);
+        }
+        return finalZscore;
+
     }
 
     protected LineDataSet createDataSet(ArrayList<Entry> values, String label, int color, float width, boolean circle) {

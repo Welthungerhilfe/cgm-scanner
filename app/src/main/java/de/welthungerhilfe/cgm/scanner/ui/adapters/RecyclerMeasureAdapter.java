@@ -23,6 +23,9 @@ import android.annotation.SuppressLint;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatRatingBar;
@@ -32,8 +35,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -58,7 +59,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
     private OnMeasureSelectListener listener;
     private OnMeasureFeedbackListener feedbackListener;
     private List<Measure> measureList;
-    private int lastPosition = -1;
 
     private FileLogRepository artifactRepository;
     private ArtifactResultRepository artifactResultRepository;
@@ -208,11 +208,24 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         holder.txtAuthor.setText(Utils.getNameFromEmail(measure.getCreatedBy()));
 
         if (config.isMeasure_visibility()) {
+            int heightConfidence = (int)(measure.getHeightConfidence() * 100);
+            int weightConfidence = (int)(measure.getWeightConfidence() * 100);
+
             holder.txtHeight.setText(String.format("%.2f%s", measure.getHeight(), context.getString(R.string.unit_cm)));
             holder.txtWeight.setText(String.format("%.3f%s", measure.getWeight(), context.getString(R.string.unit_kg)));
+
+            if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
+                holder.txtHeightConfidence.setVisibility(View.GONE);
+                holder.txtWeightConfidence.setVisibility(View.GONE);
+            } else {
+                setConfidence(holder.txtHeight, holder.txtHeightConfidence, heightConfidence);
+                setConfidence(holder.txtWeight, holder.txtWeightConfidence, weightConfidence);
+            }
         } else {
             holder.txtHeight.setText(R.string.field_concealed);
             holder.txtWeight.setText(R.string.field_concealed);
+            holder.txtHeightConfidence.setVisibility(View.GONE);
+            holder.txtWeightConfidence.setVisibility(View.GONE);
         }
 
         if (listener != null) {
@@ -229,30 +242,8 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         return measureList.get(position);
     }
 
-    private void setAnimation(View viewToAnimate, int position) {
-        if (position > lastPosition) {
-            Animation animation = AnimationUtils.loadAnimation(context, R.anim.slide_in_bottom);
-            viewToAnimate.startAnimation(animation);
-            lastPosition = position;
-        }
-    }
-
-    public void changeManualVisibility() {
-        notifyDataSetChanged();
-    }
-
     public void resetData(List<Measure> measureList) {
         this.measureList = measureList;
-        notifyDataSetChanged();
-    }
-
-    public void addMeasure(Measure measure) {
-        measureList.add(0, measure);
-        notifyItemInserted(0);
-    }
-
-    public void addMeasures(List<Measure> measures) {
-        measureList.addAll(0, measures);
         notifyDataSetChanged();
     }
 
@@ -260,6 +251,22 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         int index = measureList.indexOf(measure);
         measureList.remove(measure);
         notifyItemRemoved(index);
+    }
+
+    private void setConfidence(TextView text, TextView percentage, int value) {
+        percentage.setBackgroundResource(R.drawable.tags_rounded_corners);
+        GradientDrawable drawable = (GradientDrawable) percentage.getBackground();
+
+        if (value >= AppConstants.MIN_CONFIDENCE) {
+            drawable.setColor(text.getResources().getColor(R.color.colorPrimary));
+            text.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
+        } else {
+            drawable.setColor(Color.RED);
+            text.setPaintFlags(Paint.ANTI_ALIAS_FLAG | Paint.STRIKE_THRU_TEXT_FLAG);
+        }
+
+        percentage.setText(value + "%");
+        percentage.setVisibility(View.VISIBLE);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -270,7 +277,9 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         TextView txtDate;
         TextView txtAuthor;
         TextView txtHeight;
+        TextView txtHeightConfidence;
         TextView txtWeight;
+        TextView txtWeightConfidence;
         ProgressBar progressUpload;
         AppCompatRatingBar rateOverallScore;
 
@@ -282,7 +291,9 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             txtDate = itemView.findViewById(R.id.txtDate);
             txtAuthor = itemView.findViewById(R.id.txtAuthor);
             txtHeight = itemView.findViewById(R.id.txtHeight);
+            txtHeightConfidence = itemView.findViewById(R.id.txtHeightConfidence);
             txtWeight = itemView.findViewById(R.id.txtWeight);
+            txtWeightConfidence = itemView.findViewById(R.id.txtWeightConfidence);
             rateOverallScore = itemView.findViewById(R.id.rateOverallScore);
             progressUpload = itemView.findViewById(R.id.progressUpload);
         }

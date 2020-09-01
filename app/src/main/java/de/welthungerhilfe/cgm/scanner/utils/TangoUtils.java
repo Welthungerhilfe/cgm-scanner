@@ -1,5 +1,9 @@
 package de.welthungerhilfe.cgm.scanner.utils;
 
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
+
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 
@@ -66,6 +70,21 @@ public class TangoUtils {
         return depthmap;
     }
 
+    public static void writeImageToFile(TangoImageBuffer currentTangoImageBuffer, File file) {
+
+        currentTangoImageBuffer = TangoUtils.copyImageBuffer(currentTangoImageBuffer);
+        int currentImgWidth = currentTangoImageBuffer.width;
+        int currentImgHeight = currentTangoImageBuffer.height;
+        byte[] YuvImageByteArray = currentTangoImageBuffer.data.array();
+
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            YuvImage yuvImage = new YuvImage(YuvImageByteArray, ImageFormat.NV21, currentImgWidth, currentImgHeight, null);
+            yuvImage.compressToJpeg(new Rect(0, 0, currentImgWidth, currentImgHeight), BitmapUtils.JPG_COMPRESSION, out);
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void writePointCloudToPcdFile(ByteBuffer buffer, int numPoints, double timestamp, double[] pose, File file) {
 

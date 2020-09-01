@@ -24,6 +24,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -56,6 +57,7 @@ import com.google.ar.core.Session;
 import com.google.ar.core.SharedCamera;
 
 import java.nio.ByteBuffer;
+import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -65,6 +67,8 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 
 public class ARCoreCamera implements ICamera {
@@ -133,12 +137,14 @@ public class ARCoreCamera implements ICamera {
   //App integration objects
   private Activity mActivity;
   private ImageView mColorCameraPreview;
+  private ImageView mDepthCameraPreview;
   private GLSurfaceView mGLSurfaceView;
   private ArrayList<Camera2DataListener> mListeners;
   private final HashMap<Long, Bitmap> mCache;
   private CameraCalibration mCameraCalibration;
   private int mFrameIndex;
   private float mPixelIntensity;
+  private boolean mShowDepth;
 
   public ARCoreCamera(Activity activity) {
     mActivity = activity;
@@ -149,6 +155,7 @@ public class ARCoreCamera implements ICamera {
     mLock = new Object();
     mFrameIndex = 1;
     mPixelIntensity = 0;
+    mShowDepth = LocalPersistency.getBoolean(activity, SettingsActivity.KEY_SHOW_DEPTH);
   }
 
   public void addListener(Object listener) {
@@ -161,8 +168,12 @@ public class ARCoreCamera implements ICamera {
 
   @Override
   public void onCreate() {
+    Bitmap bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+    bitmap.setPixel(0, 0, Color.TRANSPARENT);
     mColorCameraPreview = mActivity.findViewById(R.id.colorCameraPreview);
-    mColorCameraPreview.setImageBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
+    mColorCameraPreview.setImageBitmap(bitmap);
+    mDepthCameraPreview = mActivity.findViewById(R.id.depthCameraPreview);
+    mDepthCameraPreview.setImageBitmap(bitmap);
 
     //setup ARCore cycle
     mGLSurfaceView = mActivity.findViewById(R.id.surfaceview);
@@ -242,6 +253,9 @@ public class ARCoreCamera implements ICamera {
       mColorCameraPreview.setRotation(90);
       mColorCameraPreview.setScaleX(scale);
       mColorCameraPreview.setScaleY(scale);
+      mDepthCameraPreview.setRotation(90);
+      mDepthCameraPreview.setScaleX(scale);
+      mDepthCameraPreview.setScaleY(scale);
     });
     image.close();
   }
@@ -250,6 +264,9 @@ public class ARCoreCamera implements ICamera {
     if (image == null) {
       Log.w(TAG, "onImageAvailable: Skipping null image.");
       return;
+    }
+    if (mShowDepth) {
+      mDepthCameraPreview.setImageBitmap(getDepthPreview(image));
     }
 
     Pose pose;
@@ -286,6 +303,49 @@ public class ARCoreCamera implements ICamera {
       }
     }
     image.close();
+  }
+
+  private Bitmap getDepthPreview(Image image) {
+    Image.Plane plane = image.getPlanes()[0];
+    ByteBuffer buffer = plane.getBuffer();
+    ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
+
+    ArrayList<Short> pixel = new ArrayList<>();
+    while (shortDepthBuffer.hasRemaining()) {
+      pixel.add(shortDepthBuffer.get());
+    }
+    int stride = plane.getRowStride();
+    int width = image.getWidth();
+    int height = image.getHeight();
+
+    float[][] depth = new float[width][height];
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        int depthSample = pixel.get((y / 2) * stride + x);
+        int depthRange = depthSample & 0x1FFF;
+        if ((x < 1) || (y < 1) || (x >= width - 1) || (y >= height - 1)) {
+          depthRange = 0;
+        }
+        depth[x][y] = depthRange;
+      }
+    }
+
+    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    for (int y = 1; y < height - 1; y++) {
+      for (int x = 1; x < width - 1; x++) {
+
+        float mx = depth[x][y] - depth[x - 1][y];
+        float px = depth[x][y] - depth[x + 1][y];
+        float my = depth[x][y] - depth[x][y - 1];
+        float py = depth[x][y] - depth[x][y + 1];
+        float value = Math.abs(mx) + Math.abs(px) + Math.abs(my) + Math.abs(py);
+        int r = (int) Math.max(0, Math.min(1.0f * value, 255));
+        int g = (int) Math.max(0, Math.min(2.0f * value, 255));
+        int b = (int) Math.max(0, Math.min(3.0f * value, 255));
+        bitmap.setPixel(x, y, Color.argb(128, r, g, b));
+      }
+    }
+    return bitmap;
   }
 
   private void closeCamera() {
@@ -393,8 +453,8 @@ public class ARCoreCamera implements ICamera {
     if (Build.MANUFACTURER.toUpperCase().startsWith("SAMSUNG")) {
       //all supported Samsung devices except S10 5G have VGA resolution
       if (!Build.MODEL.startsWith("beyondx")) {
-        mDepthWidth = 640;
-        mDepthHeight = 480;
+        mDepthWidth = 320;
+        mDepthHeight = 240;
       }
     }
 

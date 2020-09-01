@@ -21,8 +21,11 @@ package de.welthungerhilfe.cgm.scanner.helper;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 
 import com.google.gson.Gson;
+
+import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
@@ -32,7 +35,6 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
  */
 
 public class SessionManager {
-    private final String TAG = SessionManager.class.getSimpleName();
     private final String PREF_KEY_USER = "pref_key_user";
 
     private final String KEY_USER_SIGNED = "key_user_signed";
@@ -46,8 +48,6 @@ public class SessionManager {
     private final String KEY_LANGUAGE = "key_language";
     private final String KEY_CONNECTION_TIMESTAMP = "key_connection_timestamp";
     private final String KEY_TUTORIAL = "key_tutorial";
-    private final String KEY_FCM_TOKEN = "key_fcm_token";
-    private final String KEY_FCM_TOKEN_SAVED = "key_fcm_token_saved";
     private final String KEY_REMOTE_CONFIG = "key_remote_config";
     private final String KEY_AZURE_ACCOUNT_NAME = "key_azure_account_name";
     private final String KEY_AZURE_ACCOUNT_KEY = "key_azure_account_key";
@@ -87,7 +87,34 @@ public class SessionManager {
     }
 
     public String getLanguage() {
-        return pref.getString(KEY_LANGUAGE, "en");
+        String current = getCurrentLanguage();
+        String setting = pref.getString(KEY_LANGUAGE, null);
+        if (setting == null) {
+            setLanguage(current);
+            return current;
+        }
+        return setting;
+    }
+
+    private String getCurrentLanguage() {
+        boolean supported = false;
+        String output = Locale.getDefault().getLanguage();
+        if (output.length() > 2) {
+            output = output.substring(0, 2);
+        }
+        for (String lang : AppConstants.SUPPORTED_LANGUAGES) {
+            if (lang.compareTo(output) == 0) {
+                supported = true;
+            }
+        }
+        if (!supported) {
+            output = AppConstants.LANG_ENGLISH;
+        }
+        return output;
+    }
+
+    public String getDevice() {
+        return Build.BRAND + " " + Build.MODEL;
     }
 
     public void setLocation(Loc location) {
@@ -146,26 +173,6 @@ public class SessionManager {
         return pref.getBoolean(KEY_TUTORIAL, false);
     }
 
-    public void setFcmToken(String token) {
-        editor.putString(KEY_FCM_TOKEN, token);
-
-        editor.commit();
-    }
-
-    public String getFcmToken() {
-        return pref.getString(KEY_FCM_TOKEN, null);
-    }
-
-    public void setFcmSaved(boolean saved) {
-        editor.putBoolean(KEY_FCM_TOKEN_SAVED, saved);
-
-        editor.commit();
-    }
-
-    public boolean isFcmSaved() {
-        return pref.getBoolean(KEY_FCM_TOKEN_SAVED, false);
-    }
-
     public void saveRemoteConfig(RemoteConfig config) {
         Gson gson = new Gson();
         editor.putString(KEY_REMOTE_CONFIG, gson.toJson(config));
@@ -214,4 +221,8 @@ public class SessionManager {
         return pref.getString(KEY_AZURE_ACCOUNT_KEY, null);
     }
 
+    public boolean isTangoDevice() {
+        //Note: the compatibility is checked by AndroidManifest
+        return Build.VERSION.SDK_INT <= 24;
+    }
 }

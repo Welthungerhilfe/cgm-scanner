@@ -50,7 +50,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -70,7 +69,6 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 public class LocationSearchActivity extends AppCompatActivity implements OnMapReadyCallback, SeekBar.OnSeekBarChangeListener {
     private final int PERMISSION_LOCATION = 0x1001;
 
-    private ArrayList<Person> personList;
     private Location location = null;
     private SessionManager session;
 
@@ -105,7 +103,6 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
 
         ButterKnife.bind(this);
 
-        personList = new ArrayList<>();
         session = new SessionManager(LocationSearchActivity.this);
 
         mapView.onCreate(saveBundle);
@@ -143,8 +140,6 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
                     }
                 }
                 if (location != null) {
-                    searchNearbyPersons();
-
                     getAddressFromLocation(new LatLng(location.getLatitude(), location.getLongitude()));
 
                     if (googleMap != null)
@@ -155,8 +150,6 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
     }
 
     private void getAddressFromLocation(LatLng latLng) {
-        //new AddressTask(location.getLatitude(), location.getLongitude(), this).execute();
-
         runOnUiThread(() -> {
             Geocoder geocoder = new Geocoder(LocationSearchActivity.this, Locale.getDefault());
             String result = getString(R.string.address_parse_error);
@@ -198,18 +191,6 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
 
         CameraPosition cameraPosition = new CameraPosition.Builder().target(new LatLng(location.getLatitude(), location.getLongitude())).zoom(12).build();
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-    }
-
-    private void putMarkers() {
-        if (googleMap != null) {
-            for (int i = 0; i < personList.size(); i++) {
-                googleMap.addMarker(new MarkerOptions().position(new LatLng(personList.get(i).getLastLocation().getLatitude(), personList.get(i).getLastLocation().getLongitude())));
-            }
-        }
-    }
-
-    private void searchNearbyPersons() {
-
     }
 
     @Override
@@ -263,9 +244,6 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         radius = seekBar.getProgress() == 0 ? 1 : seekBar.getProgress();
-        if (googleMap != null) {
-            searchNearbyPersons();
-        }
     }
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {

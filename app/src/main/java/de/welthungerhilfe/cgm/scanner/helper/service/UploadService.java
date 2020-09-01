@@ -41,7 +41,9 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOAD_ERROR;
 
 public class UploadService extends Service implements OnFileLogsLoad {
     private List<String> pendingArtefacts;
-    private static int remainingCount = 0;
+    private int remainingCount = 0;
+
+    private static boolean running = false;
     private static UploadService service = null;
 
     private FileLogRepository repository;
@@ -54,7 +56,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
     public static void forceResume() {
         if (service != null) {
             synchronized (service.lock) {
-                if (remainingCount <= 0) {
+                if (!running) {
                     service.loadQueueFileLogs();
                 }
             }
@@ -100,6 +102,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
     @Override
     public void onDestroy() {
         Log.e("UploadService", "Stopped");
+        running = false;
 
         if (executor != null) {
             executor.shutdownNow();
@@ -109,6 +112,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     private void loadQueueFileLogs() {
         Log.e("UploadService", "Started");
+        running = true;
+
         repository.loadQueuedData(this);
     }
 

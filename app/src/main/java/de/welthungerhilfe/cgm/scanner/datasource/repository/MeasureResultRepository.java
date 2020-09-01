@@ -1,6 +1,5 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
-import androidx.lifecycle.LiveData;
 import android.content.Context;
 
 import java.util.List;
@@ -25,14 +24,6 @@ public class MeasureResultRepository {
 
     public void insertMeasureResult (MeasureResult result) {
         database.measureResultDao().insertMeasureResult(result);
-    }
-
-    public MeasureResult getMeasureResultById(String measure_id) {
-        return database.measureResultDao().getMeasureResultById(measure_id);
-    }
-
-    public LiveData<List<MeasureResult>> getMeasureResults() {
-        return database.measureResultDao().getMeasureResults();
     }
 
     public float getConfidence(String id, String key) {

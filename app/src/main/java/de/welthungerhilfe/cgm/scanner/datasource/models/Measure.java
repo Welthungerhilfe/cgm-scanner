@@ -64,6 +64,9 @@ public class Measure extends CsvExportableModel implements Serializable {
     private long uploaded_at;
     private long resulted_at;
     private long received_at;
+    private double heightConfidence;
+    private double weightConfidence;
+    private String scannedBy;
 
     @Embedded
     private Loc location;
@@ -113,16 +116,32 @@ public class Measure extends CsvExportableModel implements Serializable {
         return height;
     }
 
+    public double getHeightConfidence() {
+        return heightConfidence;
+    }
+
     public void setHeight(double height) {
         this.height = height;
+    }
+
+    public void setHeightConfidence(double heightConfidence) {
+        this.heightConfidence = heightConfidence;
     }
 
     public double getWeight() {
         return weight;
     }
 
+    public double getWeightConfidence() {
+        return weightConfidence;
+    }
+
     public void setWeight(double weight) {
         this.weight = weight;
+    }
+
+    public void setWeightConfidence(double weightConfidence) {
+        this.weightConfidence = weightConfidence;
     }
 
     public double getMuac() {
@@ -253,14 +272,20 @@ public class Measure extends CsvExportableModel implements Serializable {
         this.received_at = received_at;
     }
 
+    @NonNull
+    public String getScannedBy() { return scannedBy; }
+
+    public void setScannedBy(@NonNull String scannedBy) { this.scannedBy = scannedBy; }
+
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d,%d",id,personId,date,type,age,height,weight,
-                muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at);
+        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d,%d,%f,%f,%s",id,personId,date,type,age,height,weight,
+                muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at,
+                heightConfidence,weightConfidence,scannedBy);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at";
+        return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at,heightConfidence,weightConfidence,scannedBy";
     }
 }

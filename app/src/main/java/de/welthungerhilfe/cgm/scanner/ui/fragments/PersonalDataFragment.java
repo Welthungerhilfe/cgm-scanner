@@ -30,6 +30,7 @@ import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatRadioButton;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -198,11 +199,15 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         } else {
             editPrename.setError(null);
         }
-
         if (birth.isEmpty()) {
             editBirth.setError(getResources().getString(R.string.tooltip_birthday));
             valid = false;
-        } else {
+        }
+        else if (birth.equals("DD-MM-YYYY")){
+            editBirth.setError(getResources().getString(R.string.tooltip_birthday));
+            valid = false;
+        }
+        else {
             editBirth.setError(null);
         }
 

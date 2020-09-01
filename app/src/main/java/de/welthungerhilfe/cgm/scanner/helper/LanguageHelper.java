@@ -10,15 +10,10 @@ import android.os.LocaleList;
 import java.util.Locale;
 
 public class LanguageHelper {
-    private static final String SELECTED_LANGUAGE = "Language.Helper.Selected.Language";
 
     public static Context onAttach(Context context) {
         String lang = getPersistedData(context);
         return setLanguage(context, lang);
-    }
-
-    public static String getLanguage(Context context) {
-        return getPersistedData(context);
     }
 
     public static Context setLanguage(Context context, String language) {
