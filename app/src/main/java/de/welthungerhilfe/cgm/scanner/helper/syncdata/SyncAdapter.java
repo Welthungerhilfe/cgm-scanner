@@ -160,6 +160,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         private void processMeasureResultQueue(CloudQueueClient queueClient) throws URISyntaxException {
+            Measure heightNotification = null;
+            Measure weightNotification = null;
+
             try {
                 CloudQueue measureResultQueue = queueClient.getQueueReference(Utils.getAndroidID(getContext().getContentResolver()) + "-measure-result");
 
@@ -206,13 +209,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                             onResultReceived(result);
                                         }
 
-                                        Intent intent = new Intent();
-                                        intent.setAction(ACTION_RESULT_GENERATED);
-                                        intent.putExtra("qr_code", measure.getQrCode());
-                                        intent.putExtra("weight", measure.getWeight());
-                                        intent.putExtra("received_at", measure.getReceived_at());
-                                        getContext().sendBroadcast(intent);
+                                        weightNotification = measure;
                                     }
+                                } else if (weightNotification == null) {
+                                    weightNotification = measureRepository.getMeasureById(result.getMeasure_id());
+                                    weightNotification.setWeight(result.getFloat_value());
+                                    weightNotification.setReceived_at(System.currentTimeMillis());
                                 }
                             } else if (result.getKey().contains("height")) {
                                 float fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "height%");
@@ -233,13 +235,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                             onResultReceived(result);
                                         }
 
-                                        Intent intent = new Intent();
-                                        intent.setAction(ACTION_RESULT_GENERATED);
-                                        intent.putExtra("qr_code", measure.getQrCode());
-                                        intent.putExtra("height", measure.getHeight());
-                                        intent.putExtra("received_at", measure.getReceived_at());
-                                        getContext().sendBroadcast(intent);
+                                        heightNotification = measure;
                                     }
+                                } else if (heightNotification == null) {
+                                    heightNotification = measureRepository.getMeasureById(result.getMeasure_id());
+                                    heightNotification.setHeight(result.getFloat_value());
+                                    heightNotification.setReceived_at(System.currentTimeMillis());
                                 }
                             }
                         } catch (JsonSyntaxException e) {
@@ -251,6 +252,23 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             } catch (StorageException e) {
                 e.printStackTrace();
+            }
+
+            if (heightNotification != null) {
+                Intent intent = new Intent();
+                intent.setAction(ACTION_RESULT_GENERATED);
+                intent.putExtra("qr_code", heightNotification.getQrCode());
+                intent.putExtra("height", heightNotification.getHeight());
+                intent.putExtra("received_at", heightNotification.getReceived_at());
+                getContext().sendBroadcast(intent);
+            }
+            if (weightNotification != null) {
+                Intent intent = new Intent();
+                intent.setAction(ACTION_RESULT_GENERATED);
+                intent.putExtra("qr_code", weightNotification.getQrCode());
+                intent.putExtra("weight", weightNotification.getWeight());
+                intent.putExtra("received_at", weightNotification.getReceived_at());
+                getContext().sendBroadcast(intent);
             }
         }
 
