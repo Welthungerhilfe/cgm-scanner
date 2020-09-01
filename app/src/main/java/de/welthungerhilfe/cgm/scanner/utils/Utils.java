@@ -99,7 +99,6 @@ public class Utils {
         try {
             return Double.parseDouble(value);
         } catch (Exception e) {
-            e.printStackTrace();
         }
         return 0;
     }
@@ -109,7 +108,6 @@ public class Utils {
         try {
             return Float.parseFloat(value);
         } catch (Exception e) {
-            e.printStackTrace();
         }
         return 0;
     }
