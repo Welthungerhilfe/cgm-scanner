@@ -277,16 +277,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 e.printStackTrace();
             }
 
+            int notificationID = Integer.parseInt(new SimpleDateFormat("ddHHmmss",  Locale.US).format(new Date()));
             for (String id : heightNotification.keySet()) {
                 Pair<Float, Long> value = heightNotification.get(id);
                 if (value != null) {
-                    showNotification(getContext(), getQrCode(id), "height", value.first, value.second);
+                    showNotification(getContext(), notificationID++, getQrCode(id), "height", value.first, value.second);
                 }
             }
             for (String id : weightNotification.keySet()) {
                 Pair<Float, Long> value = weightNotification.get(id);
                 if (value != null) {
-                    showNotification(getContext(), getQrCode(id), "weight", value.first, value.second);
+                    showNotification(getContext(), notificationID++, getQrCode(id), "weight", value.first, value.second);
                 }
             }
         }
@@ -416,7 +417,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
 
-    private void showNotification(Context context, String qrCode, String type, double value, long timestamp) {
+    private void showNotification(Context context, int notificationID, String qrCode, String type, double value, long timestamp) {
         Notification.Builder notificationBuilder;
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -445,7 +446,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         notificationBuilder.setContentTitle(String.format(context.getString(R.string.result_generation_at) + " %s", DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE, timestamp)));
         notificationBuilder.setContentText(String.format(Locale.US, "%s " + context.getString(R.string.result_for) + " %s : %.2f%s", type, qrCode, value, type.equals("weight") ? "kg" : "cm"));
 
-        int notificationID = Integer.parseInt(new SimpleDateFormat("ddHHmmss",  Locale.US).format(new Date()));
         notificationManager.notify(notificationID, notificationBuilder.build());
     }
 }
