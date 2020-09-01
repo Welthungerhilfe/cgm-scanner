@@ -173,6 +173,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             return null;
         }
 
+        private String getQrCode(String measureId) {
+            String qrCode = measureId;
+            try {
+                qrCode = measureRepository.getMeasureById(measureId).getQrCode();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return qrCode;
+        }
+
         private void processMeasureResultQueue(CloudQueueClient queueClient) throws URISyntaxException {
             HashMap<String, Pair<Float, Long>> heightNotification = new HashMap<>();
             HashMap<String, Pair<Float, Long>> weightNotification = new HashMap<>();
@@ -267,16 +277,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 e.printStackTrace();
             }
 
-            for (String qrCode : heightNotification.keySet()) {
-                Pair<Float, Long> value = heightNotification.get(qrCode);
+            for (String id : heightNotification.keySet()) {
+                Pair<Float, Long> value = heightNotification.get(id);
                 if (value != null) {
-                    showNotification(getContext(), qrCode, "height", value.first, value.second);
+                    showNotification(getContext(), getQrCode(id), "height", value.first, value.second);
                 }
             }
-            for (String qrCode : weightNotification.keySet()) {
-                Pair<Float, Long> value = weightNotification.get(qrCode);
+            for (String id : weightNotification.keySet()) {
+                Pair<Float, Long> value = weightNotification.get(id);
                 if (value != null) {
-                    showNotification(getContext(), qrCode, "weight", value.first, value.second);
+                    showNotification(getContext(), getQrCode(id), "weight", value.first, value.second);
                 }
             }
         }
