@@ -779,11 +779,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             Gson gson = new Gson();
 
             waitUntilFinished();
-            for (FileLog log : files) {
-                fileLogRepository.insertFileLog(log);
-            }
             for (ArtifactResult ar : artifacts) {
                 artifactResultRepository.insertArtifactResult(ar);
+            }
+            for (FileLog log : files) {
+                fileLogRepository.insertFileLog(log);
             }
             measureRepository.insertMeasure(measure);
             runOnUiThread(() -> {
