@@ -27,8 +27,6 @@ public class AppConstants {
 
     public static final int MAX_IMAGE_SIZE = 512;
 
-    public static final String ACTION_RESULT_GENERATED = "de.welthungerhilfe.cgm.scanner.action.ACTION_RESULT_GENERATED";
-
     public static final long SYNC_INTERVAL = 60 * 5;
     public static final long SYNC_FLEXTIME = SYNC_INTERVAL;
     public static final long MEMORY_MONITOR_INTERVAL = 60 * 1000; // 60 seconds

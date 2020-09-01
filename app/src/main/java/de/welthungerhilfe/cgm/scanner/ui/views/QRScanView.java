@@ -58,7 +58,7 @@ import me.dm7.barcodescanner.core.DisplayUtils;
 public class QRScanView extends BarcodeScannerView {
     private static final String TAG = QRScanView.class.getSimpleName();
     private MultiFormatReader mMultiFormatReader;
-    public static final List<BarcodeFormat> ALL_FORMATS = new ArrayList();
+    public static final ArrayList<BarcodeFormat> ALL_FORMATS = new ArrayList();
     private List<BarcodeFormat> mFormats;
     private QRScanView.QRScanHandler mResultHandler;
 
