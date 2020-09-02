@@ -135,7 +135,7 @@
     <string name="error_person_first">Please register person first</string>
     <string name="error_location">Could not find matching location.</string>
 
-    <string name="delete_measure">Do you really want to delete this measure data?</string>filters
+    <string name="delete_measure">Do you really want to delete this measure data?</string>
     <string name="delete_person">Do you really want to delete this person data?</string>
 
     <string name="field_concealed">conceal</string>
@@ -246,7 +246,7 @@
     <string name="mam_wfh_message">Please see your AWW</string>
     <string name="sam_hfa_title">Child is Severely Stunted</string>
     <string name="sam_hfa_message">Contact a local doctor or health officer</string>
-    <string name="mam_hfa_title">Child id Moderately Stunted</string>
+    <string name="mam_hfa_title">Child is Moderately Stunted</string>
     <string name="mam_hfa_message">Contact a local doctor or health officer</string>
     <string name="label_wait">Please wait for a moment…</string>
     <string name="btn_retake">RE-TAKE</string>

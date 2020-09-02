@@ -232,9 +232,9 @@
     <string name="sam_wfh_title">ऊंचाई के लिए गंभीर रूप से कम वजन</string>
     <string name="sam_wfh_message">कृपया निकटतम कुपोषण केंद्र या पोषण पुनर्वास केंद्र पर जाएं</string>
     <string name="mam_wfh_message">कृपया अपना आंगनवाड़ी देखें</string>
-    <string name="sam_hfa_title">अनुवर्ती परीक्षा</string>
+    <string name="sam_hfa_title">बच्चा गंभीर रूप से स्टंट है</string>
     <string name="sam_hfa_message">किसी स्थानीय डॉक्टर या स्वास्थ्य अधिकारी से संपर्क करें</string>
-    <string name="mam_hfa_title">अनुवर्ती परीक्षा</string>
+    <string name="mam_hfa_title">बाल मध्यम रूप से स्टंट है</string>
     <string name="mam_hfa_message">Contact a local doctor or health officer</string>
     <string name="label_wait">कृप्या कुछ क्षण प्रतीक्षा करें…</string>
     <string name="btn_retake">फिर से देनी</string>
@@ -279,7 +279,7 @@
     <string name="person_not_defined">व्यक्ति को परिभाषित नहीं किया गया था</string>
     <string name="storage_permission_needed">भंडारण अनुमति की आवश्यकता!</string>
     <string name="older_3_months">हाथ की परिधि की तुलना करने के लिए बच्चे को 3 महीने से अधिक उम्र का होना चाहिए</string>
-    <string name="investigation">Investigation of arm circumference with age is under process</string>
+    <string name="investigation">आयु के साथ हाथ की परिधि की जांच प्रक्रियाधीन है</string>
 
 
     <string name="login_error_parse">टोकन पार्स असफल</string>
