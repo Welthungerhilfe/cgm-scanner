@@ -19,8 +19,10 @@
 package de.welthungerhilfe.cgm.scanner.utils;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.location.Address;
@@ -32,6 +34,11 @@ import android.util.Base64;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
+
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -241,5 +248,33 @@ public class Utils {
         loc.setLatitude(bestLocation.getLatitude());
         loc.setLongitude(bestLocation.getLongitude());
         return loc;
+    }
+
+    public static boolean isLocationEnabled(Activity activity) {
+        return false;
+    }
+
+    public static void openLocationSettings(Activity activity, int resultCode) {
+        LocationRequest locationRequest = LocationRequest.create()
+                .setInterval(60 * 1000)
+                .setFastestInterval(1000)
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+
+        LocationServices
+                .getSettingsClient(activity)
+                .checkLocationSettings(builder.build())
+                .addOnFailureListener(activity, ex -> {
+                    if (ex instanceof ResolvableApiException) {
+                        try {
+                            ResolvableApiException resolvable = (ResolvableApiException) ex;
+                            resolvable.startResolutionForResult(activity, resultCode);
+                        } catch (IntentSender.SendIntentException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
     }
 }

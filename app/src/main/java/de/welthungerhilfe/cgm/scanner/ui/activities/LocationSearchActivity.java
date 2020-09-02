@@ -61,6 +61,7 @@ import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 /**
  * Created by Emerald on 2/20/2018.
@@ -120,6 +121,8 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
     private void getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, PERMISSION_LOCATION);
+        } else if (!Utils.isLocationEnabled(this)) {
+            Utils.openLocationSettings(this, PERMISSION_LOCATION);
         } else {
             LocationManager lm = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
@@ -248,11 +251,7 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSION_LOCATION) {
-            if (grantResults.length > 0 && grantResults[0] >= 0) {
-                getCurrentLocation();
-            } else {
-                Toast.makeText(LocationSearchActivity.this, R.string.address_error, Toast.LENGTH_LONG).show();
-            }
+            getCurrentLocation();
         }
     }
 }

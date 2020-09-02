@@ -109,6 +109,7 @@ dependencies {
     implementation 'com.balysv:material-ripple:1.0.2' //custom tab (e.g.in scan mode)
     implementation 'com.appeaser.sublimepickerlibrary:sublimepickerlibrary:2.1.1' //date selector
     implementation 'com.orhanobut:dialogplus:1.11@aar' //filter popup (scans tab)
+    implementation 'com.google.android.gms:play-services-location:17.0.0' //google location
     implementation 'com.google.android.gms:play-services-maps:17.0.0' //google maps
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3' //growth chart graph
     implementation 'com.jaredrummler:material-spinner:1.2.4' //growth chart type selector
