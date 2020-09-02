@@ -281,6 +281,8 @@
     <string name="person_not_defined">Zu dieser Person existiert kein Profil</string>
     <string name="storage_permission_needed">Speichererlaubnis erforderlich!</string>
     <string name="older_3_months">Das Kind muss älter als 3 Monate sein, um den Armumfang vergleichen zu können</string>
+    <string name="investigation">Investigation of arm circumference with age is under process</string>
+
 
     <string name="login_error_parse">Token-Analyse fehlgeschlagen</string>
     <string name="login_error_backend">Konnte Ihr Backend nicht finden</string>

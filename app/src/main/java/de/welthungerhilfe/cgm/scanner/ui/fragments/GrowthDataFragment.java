@@ -299,7 +299,7 @@ public class GrowthDataFragment extends Fragment {
 
         txtZScore.setText(String.format(Locale.getDefault(), "( z-score : %.2f )", zScore));
 
-        if (zScore <= -3) { // SAM
+        if (zScore < -3) { // SAM
             switch (chartType) {
                 case 0: // weight for age
                     txtNotifTitle.setText(R.string.sam_wfa_title);
@@ -321,7 +321,7 @@ public class GrowthDataFragment extends Fragment {
 
             lytNotif.setBackgroundResource(R.color.colorRed);
             lytNotif.setVisibility(View.VISIBLE);
-        } else if (zScore <= -2) { // MAM
+        } else if (zScore < -2 && zScore >=-3) { // MAM
             switch (chartType) {
                 case 0: // weight for age
                     txtNotifTitle.setText(R.string.mam_wfa_title);
@@ -410,7 +410,7 @@ public class GrowthDataFragment extends Fragment {
             } catch (NullPointerException ex) {
                 ex.printStackTrace();
 
-                Toast.makeText(getContext(), R.string.older_3_months, Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), R.string.investigation, Toast.LENGTH_LONG).show();
             }
         }
 
