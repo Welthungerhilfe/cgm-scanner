@@ -22,10 +22,12 @@ public class PersonRepository {
 
     private CgmDatabase database;
     private SessionManager session;
+    private boolean updated;
 
     private PersonRepository(Context context) {
         database = CgmDatabase.getInstance(context);
         session = new SessionManager(context);
+        updated = true;
     }
 
     public static PersonRepository getInstance(Context context) {
@@ -45,10 +47,12 @@ public class PersonRepository {
 
     public void insertPerson(Person person) {
         database.personDao().insertPerson(person);
+        setUpdated(true);
     }
 
     public void updatePerson(Person person) {
         database.personDao().updatePerson(person);
+        setUpdated(true);
     }
 
     public List<Person> getSyncablePerson(long timestamp) {
@@ -138,5 +142,13 @@ public class PersonRepository {
 
     public List<Person> getAll() {
         return database.personDao().getAll();
+    }
+
+    public boolean isUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(boolean updated) {
+        this.updated = updated;
     }
 }

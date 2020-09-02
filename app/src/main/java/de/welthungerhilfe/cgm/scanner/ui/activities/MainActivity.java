@@ -64,6 +64,7 @@ import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
 import de.welthungerhilfe.cgm.scanner.helper.service.DeviceService;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
@@ -371,6 +372,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 int diff = (int) Math.ceil((double) (filter.getToDate() - filter.getFromDate()) / 1000 / 3600 / 24);
                 TextView txtView = view.findViewById(R.id.txtFilterDate);
                 txtView.setText(getResources().getString(R.string.last_days, diff));
+            } else {
+                TextView txtView = view.findViewById(R.id.txtFilterDate);
+                txtView.setText(getResources().getString(R.string.last_days).replace("%1$d", "x"));
             }
 
             //set location info
@@ -422,7 +426,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         start.set(Calendar.MILLISECOND, 0);
         long startDate = start.getTimeInMillis();
 
-        Calendar end = selectedDate.getEndDate();
+        Calendar end = Calendar.getInstance();
+        end.setTimeInMillis(System.currentTimeMillis());
         end.set(Calendar.HOUR_OF_DAY, 23);
         end.set(Calendar.MINUTE, 59);
         end.set(Calendar.SECOND, 59);
@@ -492,8 +497,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     @Override
     protected void onResume() {
         super.onResume();
-        adapterData.clear();
-        viewModel.setFilterOwn();
-        viewModel.setSortType(AppConstants.SORT_DATE);
+        PersonRepository repository = PersonRepository.getInstance(this);
+        if (repository.isUpdated()) {
+            adapterData.clear();
+            viewModel.setFilterOwn();
+            viewModel.setSortType(AppConstants.SORT_DATE);
+            repository.setUpdated(false);
+        }
     }
 }
