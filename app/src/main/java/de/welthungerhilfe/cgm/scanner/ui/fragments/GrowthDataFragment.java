@@ -19,7 +19,6 @@
 
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
-import android.annotation.SuppressLint;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.graphics.Color;
@@ -55,6 +54,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -137,7 +137,7 @@ public class GrowthDataFragment extends Fragment {
         mChart = view.findViewById(R.id.chart1);
         MaterialSpinner dropChart = view.findViewById(R.id.dropChart);
 
-        @SuppressLint("ResourceType") String[] filters = getResources().getStringArray(R.array.filters);
+        String[] filters = getResources().getStringArray(R.array.filters);
         dropChart.setItems(filters);
         dropChart.setOnItemSelectedListener((MaterialSpinner.OnItemSelectedListener<String>) (view1, position, id, item) -> {
             chartType = position;
@@ -187,7 +187,6 @@ public class GrowthDataFragment extends Fragment {
         }
     }
 
-    @SuppressLint("DefaultLocale")
     public void setData() {
         if (person == null || measures == null)
             return;
@@ -211,7 +210,7 @@ public class GrowthDataFragment extends Fragment {
         ArrayList<Entry> SD2 = new ArrayList<>();
         ArrayList<Entry> SD3 = new ArrayList<>();
 
-        double zScore = 100, median = 100, standard = 100, coefficient = 100;
+        double zScore = 100, median = 10, skew = 10, coefficient = 10;
 
         try {
             BufferedReader reader;
@@ -226,17 +225,18 @@ public class GrowthDataFragment extends Fragment {
                 String[] arr = mLine.split("\t");
                 float rule;
                 try {
-                    rule = Utils.parseFloat(arr[0]);
+                    rule = Float.parseFloat(arr[0]);
                 } catch (Exception e) {
                     continue;
                 }
-
-                if ((chartType == 0 || chartType == 1 ) && lastMeasure != null && rule == lastMeasure.getAge()) {
+                if ((chartType == 0 || chartType == 1 ) && lastMeasure != null && rule == lastMeasure.getAge() / 30) {
+                    skew=Utils.parseDouble(arr[1]);
                     median = Utils.parseDouble(arr[2]);
-                    standard = Utils.parseDouble(arr[7]);
+                    coefficient = Utils.parseDouble(arr[3]);
                 } else if (chartType == 2 && lastMeasure != null && rule == lastMeasure.getHeight()) {
+                    skew = Utils.parseDouble(arr[1]);
                     median = Utils.parseDouble(arr[2]);
-                    standard = Utils.parseDouble(arr[7]);
+                    coefficient = Utils.parseDouble(arr[3]);
                 }
 
                 SD3neg.add(new Entry(rule, Utils.parseFloat(arr[4])));
@@ -263,24 +263,24 @@ public class GrowthDataFragment extends Fragment {
                 txtXAxis.setText(R.string.axis_age);
                 txtYAxis.setText(R.string.axis_weight);
 
-                if (lastMeasure != null && median != 0 && standard != 0) {
-                    zScore = (lastMeasure.getWeight() - median) / standard;
+                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
+                    zScore=newZscore(lastMeasure.getWeight(),median,skew,coefficient);
                 }
                 break;
             case 1:
                 txtXAxis.setText(R.string.axis_age);
                 txtYAxis.setText(R.string.axis_height);
 
-                if (lastMeasure != null && median != 0 && standard != 0) {
-                    zScore = (lastMeasure.getHeight() - median) / standard;
+                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
+                    zScore=newZscore(lastMeasure.getHeight(),median,skew,coefficient);
                 }
                 break;
             case 2:
                 txtXAxis.setText(R.string.axis_height);
                 txtYAxis.setText(R.string.axis_weight);
 
-                if (lastMeasure != null && median != 0 && standard != 0) {
-                    zScore = (lastMeasure.getWeight() - median) / standard;
+                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
+                    zScore=newZscore(lastMeasure.getWeight(),median,skew,coefficient);
                 }
                 break;
             case 3:
@@ -297,7 +297,7 @@ public class GrowthDataFragment extends Fragment {
                 break;
         }
 
-        txtZScore.setText(String.format("( z-score : %.2f )", zScore));
+        txtZScore.setText(String.format(Locale.getDefault(), "( z-score : %.2f )", zScore));
 
         if (zScore <= -3) { // SAM
             switch (chartType) {
@@ -422,6 +422,26 @@ public class GrowthDataFragment extends Fragment {
 
         mChart.setData(new LineData(dataSets));
         mChart.animateX(3000);
+    }
+
+    private double newZscore(double value,double median,double skew,double coefficient) {
+        double zscore=(Math.pow(value/median,skew)-1)/(skew*coefficient);
+        double finalZscore=0.0;
+        double SD3pos=median*Math.pow((1+(skew*coefficient*3)),1/skew);
+        double SD3neg=median*Math.pow((1+(skew*coefficient*(-3))),1/skew);
+        double SD23pos=SD3pos-median*Math.pow((1+(skew*coefficient*2)),1/skew);
+        double SD23neg=median*Math.pow((1+(skew*coefficient*(-2))),1/skew)-SD3neg;
+        if(zscore>=-3 && zscore<=3){
+            finalZscore=zscore;
+        }
+        else if(zscore>3){
+            finalZscore=3+((value-SD3pos)/SD23pos);
+        }
+        else{
+            finalZscore=-3+((value-SD3neg)/SD23neg);
+        }
+        return finalZscore;
+
     }
 
     protected LineDataSet createDataSet(ArrayList<Entry> values, String label, int color, float width, boolean circle) {

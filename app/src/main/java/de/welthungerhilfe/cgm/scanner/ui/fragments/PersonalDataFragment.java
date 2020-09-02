@@ -239,6 +239,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         if (birth.isEmpty()) {
             editBirth.setError(getResources().getString(R.string.tooltip_birthday));
             valid = false;
+        } else if (birth.equals("DD-MM-YYYY")){
+            editBirth.setError(getResources().getString(R.string.tooltip_birthday));
+            valid = false;
         } else {
             editBirth.setError(null);
         }

@@ -173,17 +173,16 @@
     <string name="filter_age_arm">4. Arm circumference-for-age</string>
     <string name="filter_age_head">5. Head circumference-for-age</string>
 
-    <string-array name="filters">
+    <string-array name="filters" translatable="false">
         <item>@string/filter_age_weight</item>
         <item>@string/filter_age_height</item>
         <item>@string/filter_height_weight</item>
-        <item>@string/filter_age_arm</item>
     </string-array>
 
     <string name="selector_manual">Add Manual Measure</string>
     <string name="selector_scan">Add Scan Measure</string>
 
-    <string-array name="selector_measure">
+    <string-array name="selector_measure" translatable="false">
         <item>@string/selector_manual</item>
         <item>@string/selector_scan</item>
     </string-array>

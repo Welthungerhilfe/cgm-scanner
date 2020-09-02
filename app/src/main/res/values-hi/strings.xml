@@ -173,20 +173,8 @@
     <string name="filter_age_arm">4 एमयूएसी  / उम</string>
     <string name="filter_age_head">5 शीर्ष परिधि / उम</string>
 
-    <string-array name="filters">
-        <item>@string/filter_age_weight</item>
-        <item>@string/filter_age_height</item>
-        <item>@string/filter_height_weight</item>
-        <item>@string/filter_age_arm</item>
-    </string-array>
-
     <string name="selector_manual">मैन्युअल उपाय जोड़ें</string>
     <string name="selector_scan">स्कैन उपाय जोड़ें</string>
-
-    <string-array name="selector_measure">
-        <item>@string/selector_manual</item>
-        <item>@string/selector_scan</item>
-    </string-array>
 
     <string name="mode_standing">खड़े होना</string>
     <string name="mode_lying">लेटना</string>
