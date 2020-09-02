@@ -77,8 +77,6 @@ public class DateRangePickerDialog extends DialogFragment {
         Calendar startCal = Calendar.getInstance();
         if (mDate != null) {
             startCal.setTime(mDate);
-        } else {
-            startCal.add(Calendar.DAY_OF_YEAR, 5);
         }
         options.setDateParams(startCal, startCal);
 
