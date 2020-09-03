@@ -411,7 +411,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         fab = findViewById(R.id.fab_scan_result);
         fab.setOnClickListener(this);
 
-        findViewById(R.id.btnRetake).setOnClickListener(this);
         findViewById(R.id.imgClose).setOnClickListener(this);
 
         getCamera().onCreate();
@@ -759,9 +758,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case R.id.imgClose:
                 closeScan();
-                break;
-            case R.id.btnRetake:
-                mProgress = 0;
                 break;
         }
     }
