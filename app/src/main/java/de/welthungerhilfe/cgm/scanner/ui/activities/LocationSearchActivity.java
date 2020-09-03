@@ -121,9 +121,10 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
     private void getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, PERMISSION_LOCATION);
-        } else if (!Utils.isLocationEnabled(this)) {
-            Utils.openLocationSettings(this, PERMISSION_LOCATION);
         } else {
+            if (!Utils.isLocationEnabled(this)) {
+                Utils.openLocationSettings(this, PERMISSION_LOCATION);
+            }
             LocationManager lm = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
             boolean isGPSEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
