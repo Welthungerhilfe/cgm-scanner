@@ -42,7 +42,7 @@ android {
         arcore {
             dimension "platform"
             minSdkVersion 28
-            manifestPlaceholders = [arCameraRequired:"true", depthCameraRequired:"true", arcoreValue:"required", arengineValue:"optional", tangoRequired:"false"]
+            manifestPlaceholders = [arCameraRequired:"true", depthCameraRequired:"false", arcoreValue:"required", arengineValue:"optional", tangoRequired:"false"]
         }
         arengine {
             dimension "platform"
