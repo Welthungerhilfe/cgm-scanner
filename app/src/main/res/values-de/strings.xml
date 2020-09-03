@@ -174,20 +174,8 @@
     <string name="filter_age_arm">4. Armumfang / Alter</string>
     <string name="filter_age_head">5. Kopfumfang / Alter</string>
 
-    <string-array name="filters">
-        <item>@string/filter_age_weight</item>
-        <item>@string/filter_age_height</item>
-        <item>@string/filter_height_weight</item>
-        <item>@string/filter_age_arm</item>
-    </string-array>
-
     <string name="selector_manual">Manuelle Messung hinzufügen</string>
     <string name="selector_scan">Scan hinzufügen</string>
-
-    <string-array name="selector_measure">
-        <item>@string/selector_manual</item>
-        <item>@string/selector_scan</item>
-    </string-array>
 
     <string name="mode_standing">Aufstehend</string>
     <string name="mode_lying">Liegend</string>
@@ -248,7 +236,7 @@
     <string name="mam_wfh_message">Bitte sehen Sie Ihre AWW</string>
     <string name="sam_hfa_title">Nachuntersuchung</string>
     <string name="sam_hfa_message">Wenden Sie sich an einen örtlichen Arzt oder Gesundheitsbeauftragten</string>
-    <string name="mam_hfa_title">Nachuntersuchung</string>
+    <string name="mam_hfa_title">Kind ist mäßig verkümmert</string>
     <string name="mam_hfa_message">Wenden Sie sich an einen örtlichen Arzt oder Gesundheitsbeauftragten</string>
     <string name="label_wait">Einen Moment, bitte…</string>
     <string name="btn_retake">RE-TAKE</string>
@@ -293,6 +281,8 @@
     <string name="person_not_defined">Zu dieser Person existiert kein Profil</string>
     <string name="storage_permission_needed">Speichererlaubnis erforderlich!</string>
     <string name="older_3_months">Das Kind muss älter als 3 Monate sein, um den Armumfang vergleichen zu können</string>
+    <string name="investigation">Die Untersuchung des Armumfangs mit dem Alter ist in Bearbeitung</string>
+
 
     <string name="login_error_parse">Token-Analyse fehlgeschlagen</string>
     <string name="login_error_backend">Konnte Ihr Backend nicht finden</string>

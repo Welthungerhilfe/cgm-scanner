@@ -173,7 +173,7 @@
     <string name="filter_age_arm">4. Arm circumference-for-age</string>
     <string name="filter_age_head">5. Head circumference-for-age</string>
 
-    <string-array name="filters">
+    <string-array name="filters" translatable="false">
         <item>@string/filter_age_weight</item>
         <item>@string/filter_age_height</item>
         <item>@string/filter_height_weight</item>
@@ -183,7 +183,7 @@
     <string name="selector_manual">Add Manual Measure</string>
     <string name="selector_scan">Add Scan Measure</string>
 
-    <string-array name="selector_measure">
+    <string-array name="selector_measure" translatable="false">
         <item>@string/selector_manual</item>
         <item>@string/selector_scan</item>
     </string-array>
@@ -240,13 +240,13 @@
     <string name="sam_acfa_message">Please go to the nearest Malnutrition center / Nutritional Rehabilitation center</string>
     <string name="mam_acfa_title">Moderately Malnourished</string>
     <string name="mam_acfa_message">Please look for ASHA or AWW at your nearest health center</string>
-    <string name="mam_wfh_title">Moderately wasted</string>
-    <string name="sam_wfh_title">Severely wasted</string>
+    <string name="mam_wfh_title">Child is Moderately wasted</string>
+    <string name="sam_wfh_title">Child is Severely wasted</string>
     <string name="sam_wfh_message">Please go to the nearest Malnutrition center or Nutritional rehabilitation center</string>
     <string name="mam_wfh_message">Please see your AWW</string>
-    <string name="sam_hfa_title">Follow-up Examination</string>
+    <string name="sam_hfa_title">Child is Severely Stunted</string>
     <string name="sam_hfa_message">Contact a local doctor or health officer</string>
-    <string name="mam_hfa_title">Follow-up Examination</string>
+    <string name="mam_hfa_title">Child is Moderately Stunted</string>
     <string name="mam_hfa_message">Contact a local doctor or health officer</string>
     <string name="label_wait">Please wait for a moment…</string>
     <string name="btn_retake">RE-TAKE</string>
@@ -291,6 +291,7 @@
     <string name="person_not_defined">Person was not defined</string>
     <string name="storage_permission_needed">Storage permission needed!</string>
     <string name="older_3_months">Child needs to be older than 3 month to compare arm circumference</string>
+    <string name="investigation">Investigation of arm circumference with age is under process</string>
 
     <string name="login_error_parse">Token Parse Failed</string>
     <string name="login_error_backend">Couldn\'t find your backend</string>
