@@ -66,8 +66,12 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 public class GrowthDataFragment extends Fragment {
     private Context context;
 
-    private final String[] boys = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
-    private final String[] girls = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
+    private String[] boys = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
+    private String[] girls = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
+
+    private final String[] boys_0_2 = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfl_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
+    private final String[] girls_0_2 = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfl_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
+
 
     private LineChart mChart;
 
@@ -214,6 +218,11 @@ public class GrowthDataFragment extends Fragment {
 
         try {
             BufferedReader reader;
+
+            if(lastMeasure!=null && lastMeasure.getAge() / 30 < 24 && lastMeasure.getHeight()<=110){
+                    boys=boys_0_2;
+                    girls=girls_0_2;
+            }
 
             if (person.getSex().equals("female"))
                 reader = new BufferedReader(new InputStreamReader(context.getAssets().open(girls[chartType]), "UTF-8"));
@@ -409,8 +418,7 @@ public class GrowthDataFragment extends Fragment {
                 entries.add(new Entry(x, y));
             } catch (NullPointerException ex) {
                 ex.printStackTrace();
-
-                Toast.makeText(getContext(), R.string.investigation, Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), R.string.correct_data, Toast.LENGTH_LONG).show();
             }
         }
 

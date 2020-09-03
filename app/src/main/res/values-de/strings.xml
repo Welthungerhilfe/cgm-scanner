@@ -282,6 +282,7 @@
     <string name="storage_permission_needed">Speichererlaubnis erforderlich!</string>
     <string name="older_3_months">Das Kind muss älter als 3 Monate sein, um den Armumfang vergleichen zu können</string>
     <string name="investigation">Die Untersuchung des Armumfangs mit dem Alter ist in Bearbeitung</string>
+    <string name="correct_data">Der Geburtstag sollte nicht TT-MM-JJJJ sein</string>
 
 
     <string name="login_error_parse">Token-Analyse fehlgeschlagen</string>

@@ -177,7 +177,6 @@
         <item>@string/filter_age_weight</item>
         <item>@string/filter_age_height</item>
         <item>@string/filter_height_weight</item>
-        <item>@string/filter_age_arm</item>
     </string-array>
 
     <string name="selector_manual">Add Manual Measure</string>
@@ -292,6 +291,7 @@
     <string name="storage_permission_needed">Storage permission needed!</string>
     <string name="older_3_months">Child needs to be older than 3 month to compare arm circumference</string>
     <string name="investigation">Investigation of arm circumference with age is under process</string>
+    <string name="correct_data">Birth day should not be DD-MM-YYYY</string>
 
     <string name="login_error_parse">Token Parse Failed</string>
     <string name="login_error_backend">Couldn\'t find your backend</string>
