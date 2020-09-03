@@ -68,7 +68,7 @@ public class SessionManager {
     }
 
     public boolean isSigned() {
-        return pref.getBoolean(KEY_USER_SIGNED, false);
+        return pref.getBoolean(KEY_USER_SIGNED, false) && (getAuthToken() != null);
     }
 
     public void setUserEmail(String email) {
