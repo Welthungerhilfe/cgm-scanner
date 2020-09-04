@@ -113,7 +113,7 @@
     <string name="tooltip_guardian">कृपया अभिभावक का इनपुट दें</string>
     <string name="tooltipe_sex">कृपया लिंग का चयन करें</string>
     <string name="tooltipe_height_min">लम्बाई 45cm (सेन्टीमीटर्स) से बड़ी होनी चाहिए </string>
-    <string name="tooltipe_height_max">लम्बाई 140cm (सेन्टीमीटर्स) से कम होनी चाहिए </string>
+    <string name="tooltipe_height_max">लम्बाई 120cm (सेन्टीमीटर्स) से कम होनी चाहिए </string>
     <string name="tooltipe_weight_min">वजन 2kg से ज्यादा होना चाहिये </string>
     <string name="tooltipe_weight_max">वजन 30kg से कम होना चाहिये </string>
     <string name="tooltipe_muac_min">मध्य ऊपरी बांह की परिधि 9cm (सेन्टीमीटर्स) से बड़ी होनी चाहिए</string>
@@ -280,9 +280,6 @@
     <string name="storage_permission_needed">भंडारण अनुमति की आवश्यकता!</string>
     <string name="older_3_months">हाथ की परिधि की तुलना करने के लिए बच्चे को 3 महीने से अधिक उम्र का होना चाहिए</string>
     <string name="investigation">आयु के साथ हाथ की परिधि की जांच प्रक्रियाधीन है</string>
-    <string name="correct_data">जन्म दिन DD-MM-YYYY नहीं होना चाहिए</string>
-
-
 
     <string name="login_error_parse">टोकन पार्स असफल</string>
     <string name="login_error_backend">अपना बैकएंड नहीं ढूंढ सका</string>

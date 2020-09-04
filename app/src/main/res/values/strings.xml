@@ -113,7 +113,7 @@
     <string name="tooltip_guardian">Please input guardian</string>
     <string name="tooltipe_sex">Please select sex</string>
     <string name="tooltipe_height_min">height should be more than 45cm</string>
-    <string name="tooltipe_height_max">height should be less than 140cm</string>
+    <string name="tooltipe_height_max">height should be less than 120cm</string>
     <string name="tooltipe_weight_min">weight should be more than 2kg</string>
     <string name="tooltipe_weight_max">weight should be less than 30kg</string>
     <string name="tooltipe_muac_min">MUAC should be more than 9cm</string>
@@ -291,7 +291,6 @@
     <string name="storage_permission_needed">Storage permission needed!</string>
     <string name="older_3_months">Child needs to be older than 3 month to compare arm circumference</string>
     <string name="investigation">Investigation of arm circumference with age is under process</string>
-    <string name="correct_data">Birth day should not be DD-MM-YYYY</string>
 
     <string name="login_error_parse">Token Parse Failed</string>
     <string name="login_error_backend">Couldn\'t find your backend</string>

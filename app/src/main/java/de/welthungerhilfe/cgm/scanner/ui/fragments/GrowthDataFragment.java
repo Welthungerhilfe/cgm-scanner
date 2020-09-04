@@ -418,7 +418,6 @@ public class GrowthDataFragment extends Fragment {
                 entries.add(new Entry(x, y));
             } catch (NullPointerException ex) {
                 ex.printStackTrace();
-                Toast.makeText(getContext(), R.string.correct_data, Toast.LENGTH_LONG).show();
             }
         }
 
