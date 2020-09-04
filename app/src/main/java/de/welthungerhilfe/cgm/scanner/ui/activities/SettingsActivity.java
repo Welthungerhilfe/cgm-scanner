@@ -6,16 +6,18 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.AppCompatRadioButton;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.balysv.materialripple.MaterialRippleLayout;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,6 +38,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -52,6 +55,8 @@ import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class SettingsActivity extends BaseActivity {
+
+    public static final String KEY_SHOW_DEPTH = "KEY_SHOW_DEPTH";
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -76,6 +81,10 @@ public class SettingsActivity extends BaseActivity {
 
     @BindView(R.id.testQAlayout)
     LinearLayout layoutTestQA;
+    @BindView(R.id.show_depth_data)
+    SwitchCompat switchShowDepth;
+    @BindView(R.id.show_depth_data_layout)
+    MaterialRippleLayout layoutShowDepth;
 
     @OnClick(R.id.submenu_performance_measurement)
     void openPerformanceMeasurement(View view) {
@@ -93,17 +102,17 @@ public class SettingsActivity extends BaseActivity {
 
     @OnClick(R.id.lytLangEnglish)
     void onEnglish(LinearLayout lytLangEnglish) {
-        changeLanguage("en");
+        changeLanguage(AppConstants.LANG_ENGLISH);
     }
 
     @OnClick(R.id.lytLangGerman)
     void onGerman(LinearLayout lytLangGerman) {
-        changeLanguage("de");
+        changeLanguage(AppConstants.LANG_GERMAN);
     }
 
     @OnClick(R.id.lytLangHindi)
     void onHindi(LinearLayout lytLangHindi) {
-        changeLanguage("hi");
+        changeLanguage(AppConstants.LANG_HINDI);
     }
 
     private SessionManager session;
@@ -149,6 +158,12 @@ public class SettingsActivity extends BaseActivity {
         layoutTestQA.setVisibility(showQA ? View.VISIBLE : View.GONE);
 
         txtSettingUuid.setText(Utils.getAndroidID(getContentResolver()));
+        if (session.isTangoDevice()) {
+            layoutShowDepth.setVisibility(View.GONE);
+        } else {
+            switchShowDepth.setChecked(LocalPersistency.getBoolean(this, KEY_SHOW_DEPTH));
+            switchShowDepth.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_SHOW_DEPTH, value));
+        }
 
         try {
             txtSettingVersion.setText(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
@@ -179,6 +194,9 @@ public class SettingsActivity extends BaseActivity {
                 radioHindi.setChecked(true);
                 break;
         }
+        radioEnglish.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_ENGLISH));
+        radioGerman.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_GERMAN));
+        radioHindi.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_HINDI));
 
         if (session.getBackupTimestamp() == 0) txtSettingBackupDate.setText(R.string.no_backups);
         else txtSettingBackupDate.setText(DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, session.getBackupTimestamp()));
@@ -337,12 +355,6 @@ public class SettingsActivity extends BaseActivity {
     }
 
     private void changeLanguage(String code) {
-        Locale locale = new Locale(code);
-        Locale.setDefault(locale);
-        Configuration config = new Configuration();
-        config.locale = locale;
-        getResources().updateConfiguration(config, getBaseContext().getResources().getDisplayMetrics());
-
         session.setLanguage(code);
 
         Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage( getBaseContext().getPackageName() );

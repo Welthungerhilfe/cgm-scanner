@@ -112,8 +112,8 @@
     <string name="tooltip_birthday">Geburtstag eingeben</string>
     <string name="tooltip_guardian">Erziehungsberechtigte/n eingeben</string>
     <string name="tooltipe_sex">Geschlecht auswählen</string>
-    <string name="tooltipe_height_min">Das Kind sollte größer als 45cm sein -ODER- Die Größe (des Kindes) sollte mehr als 45cm betragen</string>
-    <string name="tooltipe_height_max">Das Kind sollte kleiner als 140cm sein -ODER- Die Größe des Kindes sollte weniger als 140cm betragen</string>
+    <string name="tooltipe_height_min">Das Kind sollte größer als 45cm sein</string>
+    <string name="tooltipe_height_max">Das Kind sollte kleiner als 120cm sein</string>
     <string name="tooltipe_weight_min">Gewicht sollte größer als 2kg sein</string>
     <string name="tooltipe_weight_max">Gewicht sollte weniger als 30kg betragen</string>
 
@@ -162,7 +162,7 @@
     <string name="content_image">Einverständniserklärung</string>
     <string name="message_legal">Bitte machen Sie ein Foto des Einwilligungsformulars der Eltern, um rechtliche Komplikationen zu vermeiden</string>
 
-    <string name="axis_age">Alter</string>
+    <string name="axis_age">Alter in Monaten</string>
     <string name="axis_height">Größe</string>
     <string name="axis_weight">Gewicht</string>
     <string name="axis_head">Kopfumfang in cm</string>
@@ -174,20 +174,8 @@
     <string name="filter_age_arm">4. Armumfang / Alter</string>
     <string name="filter_age_head">5. Kopfumfang / Alter</string>
 
-    <string-array name="filters">
-        <item>@string/filter_age_weight</item>
-        <item>@string/filter_age_height</item>
-        <item>@string/filter_height_weight</item>
-        <item>@string/filter_age_arm</item>
-    </string-array>
-
     <string name="selector_manual">Manuelle Messung hinzufügen</string>
     <string name="selector_scan">Scan hinzufügen</string>
-
-    <string-array name="selector_measure">
-        <item>@string/selector_manual</item>
-        <item>@string/selector_scan</item>
-    </string-array>
 
     <string name="mode_standing">Aufstehend</string>
     <string name="mode_lying">Liegend</string>
@@ -248,7 +236,7 @@
     <string name="mam_wfh_message">Bitte sehen Sie Ihre AWW</string>
     <string name="sam_hfa_title">Nachuntersuchung</string>
     <string name="sam_hfa_message">Wenden Sie sich an einen örtlichen Arzt oder Gesundheitsbeauftragten</string>
-    <string name="mam_hfa_title">Nachuntersuchung</string>
+    <string name="mam_hfa_title">Kind ist mäßig verkümmert</string>
     <string name="mam_hfa_message">Wenden Sie sich an einen örtlichen Arzt oder Gesundheitsbeauftragten</string>
     <string name="label_wait">Einen Moment, bitte…</string>
     <string name="btn_retake">RE-TAKE</string>
@@ -275,6 +263,7 @@
     <string name="profile_performance_depth_time">Zeit, den Tiefrahmen zu verarbeiten</string>
     <string name="profile_performance_color_size">Größe der letzten Scan-Farbdaten</string>
     <string name="profile_performance_depth_size">Größe der letzten Scan-Tiefendaten</string>
+    <string name="show_depth_data">Tiefendaten anzeigen</string>
 
     <string name="label_overview">Überblick</string>
     <string name="label_upload_speed">Upload-Geschwindigkeit : </string>
@@ -292,6 +281,7 @@
     <string name="person_not_defined">Zu dieser Person existiert kein Profil</string>
     <string name="storage_permission_needed">Speichererlaubnis erforderlich!</string>
     <string name="older_3_months">Das Kind muss älter als 3 Monate sein, um den Armumfang vergleichen zu können</string>
+    <string name="investigation">Die Untersuchung des Armumfangs mit dem Alter ist in Bearbeitung</string>
 
     <string name="login_error_parse">Token-Analyse fehlgeschlagen</string>
     <string name="login_error_backend">Konnte Ihr Backend nicht finden</string>

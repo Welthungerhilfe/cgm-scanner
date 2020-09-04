@@ -133,6 +133,9 @@ public class CreateDataActivity extends BaseActivity {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, PERMISSION_LOCATION);
         } else {
+            if (!Utils.isLocationEnabled(this)) {
+                Utils.openLocationSettings(this, PERMISSION_LOCATION);
+            }
             LocationManager lm = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
             boolean isGPSEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -170,8 +173,7 @@ public class CreateDataActivity extends BaseActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PERMISSION_LOCATION) {
-            if (grantResults.length > 0 && grantResults[0] >= 0)
-                getCurrentLocation();
+            getCurrentLocation();
         }
     }
 }

@@ -19,7 +19,6 @@
 
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
-import android.annotation.SuppressLint;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.graphics.Color;
@@ -36,11 +35,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.common.collect.Iterables;
@@ -53,18 +54,24 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class GrowthDataFragment extends Fragment {
     private Context context;
 
-    private final String[] boys = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
-    private final String[] girls = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
+    private String[] boys = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
+    private String[] girls = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
+
+    private final String[] boys_0_2 = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfl_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
+    private final String[] girls_0_2 = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfl_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
+
 
     private LineChart mChart;
 
@@ -131,11 +138,10 @@ public class GrowthDataFragment extends Fragment {
         txtNotifTitle = view.findViewById(R.id.txtNotifTitle);
         txtNotifMessage = view.findViewById(R.id.txtNotifMessage);
 
-        //chartGrowth = view.findViewById(R.id.chartGrowth);
         mChart = view.findViewById(R.id.chart1);
         MaterialSpinner dropChart = view.findViewById(R.id.dropChart);
 
-        @SuppressLint("ResourceType") String[] filters = getResources().getStringArray(R.array.filters);
+        String[] filters = getResources().getStringArray(R.array.filters);
         dropChart.setItems(filters);
         dropChart.setOnItemSelectedListener((MaterialSpinner.OnItemSelectedListener<String>) (view1, position, id, item) -> {
             chartType = position;
@@ -143,8 +149,6 @@ public class GrowthDataFragment extends Fragment {
         });
 
         initChart();
-        //setChartData();
-
         return view;
     }
 
@@ -175,15 +179,18 @@ public class GrowthDataFragment extends Fragment {
         mChart.getXAxis().setDrawAxisLine(true);
         mChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         mChart.getXAxis().setDrawGridLines(true);
-        /*
-        mChart.getXAxis().setGranularity(1.0f);
-        mChart.getXAxis().setGranularityEnabled(true);
-        */
-
-        //setData();
+        mChart.getXAxis().setValueFormatter(new MyAxisValueFormatter());
     }
 
-    @SuppressLint("DefaultLocale")
+    private class MyAxisValueFormatter implements IAxisValueFormatter{
+
+        @Override
+        public String getFormattedValue(float value, AxisBase axis) {
+            axis.setLabelCount(6,true);
+            return value+"";
+        }
+    }
+
     public void setData() {
         if (person == null || measures == null)
             return;
@@ -201,16 +208,21 @@ public class GrowthDataFragment extends Fragment {
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
 
         // ------------------------- Line for ruler values ---------------------------------- //
-        ArrayList<Entry> p3 = new ArrayList<>();
-        ArrayList<Entry> p15 = new ArrayList<>();
-        ArrayList<Entry> p50 = new ArrayList<>();
-        ArrayList<Entry> p85 = new ArrayList<>();
-        ArrayList<Entry> p97 = new ArrayList<>();
+        ArrayList<Entry> SD3neg = new ArrayList<>();
+        ArrayList<Entry> SD2neg = new ArrayList<>();
+        ArrayList<Entry> SD0 = new ArrayList<>();
+        ArrayList<Entry> SD2 = new ArrayList<>();
+        ArrayList<Entry> SD3 = new ArrayList<>();
 
-        double zScore = 100, median = 100, standard = 100, coefficient = 100;
+        double zScore = 100, median = 10, skew = 10, coefficient = 10;
 
         try {
             BufferedReader reader;
+
+            if(lastMeasure!=null && lastMeasure.getAge() / 30 < 24 && lastMeasure.getHeight()<=110){
+                    boys=boys_0_2;
+                    girls=girls_0_2;
+            }
 
             if (person.getSex().equals("female"))
                 reader = new BufferedReader(new InputStreamReader(context.getAssets().open(girls[chartType]), "UTF-8"));
@@ -226,30 +238,29 @@ public class GrowthDataFragment extends Fragment {
                 } catch (Exception e) {
                     continue;
                 }
-
-                if ((chartType == 0 || chartType == 1 ) && lastMeasure != null && rule == lastMeasure.getAge()) {
-                    median = Double.parseDouble(arr[2]);
-                    coefficient = Double.parseDouble(arr[3]);
-                    standard = median * coefficient;
+                if ((chartType == 0 || chartType == 1 ) && lastMeasure != null && rule == lastMeasure.getAge() / 30) {
+                    skew=Utils.parseDouble(arr[1]);
+                    median = Utils.parseDouble(arr[2]);
+                    coefficient = Utils.parseDouble(arr[3]);
                 } else if (chartType == 2 && lastMeasure != null && rule == lastMeasure.getHeight()) {
-                    median = Double.parseDouble(arr[2]);
-                    coefficient = Double.parseDouble(arr[3]);
-                    standard = median * coefficient;
+                    skew = Utils.parseDouble(arr[1]);
+                    median = Utils.parseDouble(arr[2]);
+                    coefficient = Utils.parseDouble(arr[3]);
                 }
 
-                p3.add(new Entry(rule, Float.parseFloat(arr[6])));
-                p15.add(new Entry(rule, Float.parseFloat(arr[9])));
-                p50.add(new Entry(rule, Float.parseFloat(arr[11])));
-                p85.add(new Entry(rule, Float.parseFloat(arr[13])));
-                p97.add(new Entry(rule, Float.parseFloat(arr[16])));
+                SD3neg.add(new Entry(rule, Utils.parseFloat(arr[4])));
+                SD2neg.add(new Entry(rule, Utils.parseFloat(arr[5])));
+                SD0.add(new Entry(rule, Utils.parseFloat(arr[7])));
+                SD2.add(new Entry(rule, Utils.parseFloat(arr[9])));
+                SD3.add(new Entry(rule, Utils.parseFloat(arr[10])));
             }
             reader.close();
 
-            dataSets.add(createDataSet(p3, "3rd", Color.rgb(212, 53, 62), 1.5f, false));
-            dataSets.add(createDataSet(p15, "15th", Color.rgb(230, 122, 58), 1.5f, false));
-            dataSets.add(createDataSet(p50, "50th", Color.rgb(55, 129, 69), 1.5f, false));
-            dataSets.add(createDataSet(p85, "85th", Color.rgb(230, 122, 58), 1.5f, false));
-            dataSets.add(createDataSet(p97, "97th", Color.rgb(212, 53, 62), 1.5f, false));
+            dataSets.add(createDataSet(SD3neg, "-3", Color.rgb(212, 53, 62), 1.5f, false));
+            dataSets.add(createDataSet(SD2neg, "-2", Color.rgb(230, 122, 58), 1.5f, false));
+            dataSets.add(createDataSet(SD0, "0", Color.rgb(55, 129, 69), 1.5f, false));
+            dataSets.add(createDataSet(SD2, "+2", Color.rgb(230, 122, 58), 1.5f, false));
+            dataSets.add(createDataSet(SD3, "+3", Color.rgb(212, 53, 62), 1.5f, false));
 
 
         } catch (IOException e) {
@@ -261,24 +272,24 @@ public class GrowthDataFragment extends Fragment {
                 txtXAxis.setText(R.string.axis_age);
                 txtYAxis.setText(R.string.axis_weight);
 
-                if (lastMeasure != null && median != 0 && standard != 0) {
-                    zScore = (lastMeasure.getWeight() - median) / standard;
+                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
+                    zScore=newZscore(lastMeasure.getWeight(),median,skew,coefficient);
                 }
                 break;
             case 1:
                 txtXAxis.setText(R.string.axis_age);
                 txtYAxis.setText(R.string.axis_height);
 
-                if (lastMeasure != null && median != 0 && standard != 0) {
-                    zScore = (lastMeasure.getHeight() - median) / standard;
+                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
+                    zScore=newZscore(lastMeasure.getHeight(),median,skew,coefficient);
                 }
                 break;
             case 2:
                 txtXAxis.setText(R.string.axis_height);
                 txtYAxis.setText(R.string.axis_weight);
 
-                if (lastMeasure != null && median != 0 && standard != 0) {
-                    zScore = (lastMeasure.getWeight() - median) / standard;
+                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
+                    zScore=newZscore(lastMeasure.getWeight(),median,skew,coefficient);
                 }
                 break;
             case 3:
@@ -295,9 +306,9 @@ public class GrowthDataFragment extends Fragment {
                 break;
         }
 
-        txtZScore.setText(String.format("( z-score : %.2f )", zScore));
+        txtZScore.setText(String.format(Locale.getDefault(), "( z-score : %.2f )", zScore));
 
-        if (zScore <= -3) { // SAM
+        if (zScore < -3) { // SAM
             switch (chartType) {
                 case 0: // weight for age
                     txtNotifTitle.setText(R.string.sam_wfa_title);
@@ -319,7 +330,7 @@ public class GrowthDataFragment extends Fragment {
 
             lytNotif.setBackgroundResource(R.color.colorRed);
             lytNotif.setVisibility(View.VISIBLE);
-        } else if (zScore <= -2) { // MAM
+        } else if (zScore < -2 && zScore >=-3) { // MAM
             switch (chartType) {
                 case 0: // weight for age
                     txtNotifTitle.setText(R.string.mam_wfa_title);
@@ -352,20 +363,20 @@ public class GrowthDataFragment extends Fragment {
             float x = 0, y = 0;
             switch (chartType) {
                 case 0:
-                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
+                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 / 30;
                     y = (float) measure.getWeight();
                     break;
                 case 1:
-                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
+                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 / 30;
                     y = (float) measure.getHeight();
                     break;
                 case 2:
                     DecimalFormat decimalFormat = new DecimalFormat("#.#");
-                    x = Float.parseFloat(decimalFormat.format(measure.getHeight()));
+                    x = Utils.parseFloat(decimalFormat.format(measure.getHeight()));
                     y = (float) measure.getWeight();
                     break;
                 case 3:
-                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24;
+                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 /30;
                     y = (float) measure.getMuac();
                     break;
             }
@@ -374,28 +385,28 @@ public class GrowthDataFragment extends Fragment {
                 continue;
 
             final float fX = x;
-            Entry v3 = Iterables.tryFind(p3, input -> input.getX() == fX).orNull();
+            Entry v3neg = Iterables.tryFind(SD3neg, input -> input.getX() == fX).orNull();
             try {
                 ArrayList<Entry> entry = new ArrayList<>();
                 entry.add(new Entry(x, y));
 
-                if (y <= v3.getY()) {
+                if (y <= v3neg.getY()) {
                     dataSets.add(createDataSet(entry, "", Color.rgb(212, 53, 62), 5f, true));
                 } else {
-                    Entry v15 = Iterables.tryFind(p15, input -> input.getX() == fX).orNull();
-                    if (y <= v15.getY()) {
+                    Entry v2neg = Iterables.tryFind(SD2neg, input -> input.getX() == fX).orNull();
+                    if (y <= v2neg.getY()) {
                         dataSets.add(createDataSet(entry, "", Color.rgb(230, 122, 58), 5f, true));
                     } else {
-                        Entry v50 = Iterables.tryFind(p50, input -> input.getX() == fX).orNull();
-                        if (y <= v50.getY()) {
+                        Entry v0 = Iterables.tryFind(SD0, input -> input.getX() == fX).orNull();
+                        if (y <= v0.getY()) {
                             dataSets.add(createDataSet(entry, "", Color.rgb(55, 129, 69), 5f, true));
                         } else {
-                            Entry v85 = Iterables.tryFind(p85, input -> input.getX() == fX).orNull();
-                            if (y <= v85.getY()) {
+                            Entry v2 = Iterables.tryFind(SD2, input -> input.getX() == fX).orNull();
+                            if (y <= v2.getY()) {
                                 dataSets.add(createDataSet(entry, "", Color.rgb(230, 122, 58), 5f, true));
                             } else {
-                                Entry v97 = Iterables.tryFind(p97, input -> input.getX() == fX).orNull();
-                                if (y <= v97.getY()) {
+                                Entry v3 = Iterables.tryFind(SD3, input -> input.getX() == fX).orNull();
+                                if (y <= v3.getY()) {
                                     dataSets.add(createDataSet(entry, "", Color.rgb(212, 53, 62), 5f, true));
                                 } else {
                                     dataSets.add(createDataSet(entry, "", Color.rgb(0, 0, 0), 5f, true));
@@ -407,8 +418,6 @@ public class GrowthDataFragment extends Fragment {
                 entries.add(new Entry(x, y));
             } catch (NullPointerException ex) {
                 ex.printStackTrace();
-
-                Toast.makeText(getContext(), R.string.older_3_months, Toast.LENGTH_LONG).show();
             }
         }
 
@@ -419,8 +428,27 @@ public class GrowthDataFragment extends Fragment {
 
 
         mChart.setData(new LineData(dataSets));
-        //mChart.invalidate();
         mChart.animateX(3000);
+    }
+
+    private double newZscore(double value,double median,double skew,double coefficient) {
+        double zscore=(Math.pow(value/median,skew)-1)/(skew*coefficient);
+        double finalZscore=0.0;
+        double SD3pos=median*Math.pow((1+(skew*coefficient*3)),1/skew);
+        double SD3neg=median*Math.pow((1+(skew*coefficient*(-3))),1/skew);
+        double SD23pos=SD3pos-median*Math.pow((1+(skew*coefficient*2)),1/skew);
+        double SD23neg=median*Math.pow((1+(skew*coefficient*(-2))),1/skew)-SD3neg;
+        if(zscore>=-3 && zscore<=3){
+            finalZscore=zscore;
+        }
+        else if(zscore>3){
+            finalZscore=3+((value-SD3pos)/SD23pos);
+        }
+        else{
+            finalZscore=-3+((value-SD3neg)/SD23neg);
+        }
+        return finalZscore;
+
     }
 
     protected LineDataSet createDataSet(ArrayList<Entry> values, String label, int color, float width, boolean circle) {

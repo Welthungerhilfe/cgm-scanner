@@ -6,7 +6,10 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import androidx.appcompat.widget.AppCompatEditText;
 import android.text.TextPaint;
+import android.text.method.DigitsKeyListener;
 import android.util.AttributeSet;
+
+import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.R;
 
@@ -18,16 +21,19 @@ public class UnitEditText extends AppCompatEditText {
 
     public UnitEditText(Context context) {
         super(context);
+        setLocale();
     }
 
     public UnitEditText(Context context, AttributeSet attrs) {
         super(context, attrs);
         getAttributes(context, attrs, 0);
+        setLocale();
     }
 
     public UnitEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         getAttributes(context, attrs, defStyleAttr);
+        setLocale();
     }
 
     @Override
@@ -59,5 +65,9 @@ public class UnitEditText extends AppCompatEditText {
             unitMargin = a.getDimension(R.styleable.UnitEditText_unitMargin, 0);
         }
         a.recycle();
+    }
+
+    private void setLocale() {
+        setKeyListener(DigitsKeyListener.getInstance("0123456789,."));
     }
 }

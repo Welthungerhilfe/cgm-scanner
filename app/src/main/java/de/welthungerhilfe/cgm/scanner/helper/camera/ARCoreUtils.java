@@ -1,6 +1,9 @@
-package de.welthungerhilfe.cgm.scanner.utils;
+package de.welthungerhilfe.cgm.scanner.helper.camera;
 
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.Image;
+import android.os.Build;
 
 import com.google.ar.core.Pose;
 
@@ -8,13 +11,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreCamera;
 
 /**
  * Child Growth Monitor - quick and accurate data on malnutrition
@@ -35,6 +37,13 @@ import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreCamera;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 public class ARCoreUtils {
+
+    public interface Camera2DataListener
+    {
+        void onColorDataReceived(Bitmap bitmap, int frameIndex);
+
+        void onDepthDataReceived(Image image, Pose pose, int frameIndex);
+    }
 
     public static class Depthmap {
         byte[] confidence;
@@ -57,10 +66,6 @@ public class ARCoreUtils {
             rotation = new float[] {0, 0, 0, 1};
         }
 
-        private float getConfidence(int x, int y) {
-            return confidence[y * width + x] / 7.0f;
-        }
-
         public int getCount() {
             return count;
         }
@@ -77,10 +82,6 @@ public class ARCoreUtils {
                 }
             }
             return output;
-        }
-
-        private float getDepth(int x, int y) {
-            return depth[y * width + x] * 0.001f;
         }
 
         public String getPose(String separator) {
@@ -106,9 +107,12 @@ public class ARCoreUtils {
         public long getTimestamp() { return timestamp; }
     }
 
-    public static Depthmap extractDepthmap(Image image, Pose pose) {
+    public static Depthmap extractDepthmap(Image image, Pose pose, boolean reorder) {
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
+        if (reorder) {
+            buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
+        }
         ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
 
         ArrayList<Short> pixel = new ArrayList<>();
@@ -142,6 +146,57 @@ public class ARCoreUtils {
         return depthmap;
     }
 
+    public static Bitmap getDepthPreview(Image image, boolean reorder) {
+        Image.Plane plane = image.getPlanes()[0];
+        ByteBuffer buffer = plane.getBuffer();
+        if (reorder) {
+            buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
+        }
+        ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
+
+        ArrayList<Integer> pixel = new ArrayList<>();
+        while (shortDepthBuffer.hasRemaining()) {
+            pixel.add((int) shortDepthBuffer.get());
+        }
+        int stride = plane.getRowStride();
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        float[][] depth = new float[width][height];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int depthSample = pixel.get((y / 2) * stride + x);
+                int depthRange = depthSample & 0x1FFF;
+                if ((x < 1) || (y < 1) || (x >= width - 1) || (y >= height - 1)) {
+                    depthRange = 0;
+                }
+                depth[x][y] = depthRange;
+            }
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        for (int y = 1; y < height - 1; y++) {
+            for (int x = 1; x < width - 1; x++) {
+
+                float mx = depth[x][y] - depth[x - 1][y];
+                float px = depth[x][y] - depth[x + 1][y];
+                float my = depth[x][y] - depth[x][y - 1];
+                float py = depth[x][y] - depth[x][y + 1];
+                float value = Math.abs(mx) + Math.abs(px) + Math.abs(my) + Math.abs(py);
+                int r = (int) Math.max(0, Math.min(1.0f * value, 255));
+                int g = (int) Math.max(0, Math.min(2.0f * value, 255));
+                int b = (int) Math.max(0, Math.min(3.0f * value, 255));
+                bitmap.setPixel(x, y, Color.argb(128, r, g, b));
+            }
+        }
+        return bitmap;
+    }
+
+    public static boolean shouldUseAREngine() {
+        String manufacturer = Build.MANUFACTURER.toUpperCase();
+        return manufacturer.startsWith("HONOR") || manufacturer.startsWith("HUAWEI");
+    }
+
     public static void writeDepthmap(Depthmap depthmap, File file) {
         try {
             byte[] data = depthmap.getData();
@@ -153,58 +208,6 @@ public class ARCoreUtils {
             zip.write(data, 0, data.length);
             zip.flush();
             zip.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    // This function writes the XYZC points to .pcd files in binary
-    public static void writeDepthmapToPcdFile(Depthmap depthmap, ARCoreCamera.CameraCalibration calibration,
-                                             long timestamp, File pointCloudSaveFolder, String pointCloudFilename) {
-
-        File file = new File(pointCloudSaveFolder, pointCloudFilename);
-
-        try {
-            int count = 0;
-            float fx = calibration.getIntrinsic(false)[0] * (float)depthmap.getWidth();
-            float fy = calibration.getIntrinsic(false)[1] * (float)depthmap.getHeight();
-            float cx = calibration.getIntrinsic(false)[2] * (float)depthmap.getWidth();
-            float cy = calibration.getIntrinsic(false)[3] * (float)depthmap.getHeight();
-            float stepx = Math.max(depthmap.getWidth() / 240.0f, 1.0f);
-            float stepy = Math.max(depthmap.getHeight() / 180.0f, 1.0f);
-            StringBuilder output = new StringBuilder();
-            for (float y = 0; y < depthmap.getHeight(); y += stepy) {
-                for (float x = 0; x < depthmap.getWidth(); x += stepx) {
-                    float confidence = depthmap.getConfidence((int)x, (int)y);
-                    float depth = depthmap.getDepth((int)x, (int)y);
-                    if (depth > 0) {
-                        float pcx =-(x - cx) * depth / fx;
-                        float pcy = (y - cy) * depth / fy;
-                        output.append(String.format(Locale.US, "%f %f %f %f\n", pcx, pcy, depth, confidence));
-                        count++;
-                    }
-                }
-            }
-
-            String header = "# timestamp 1 1 float " + timestamp + "\n" +
-                    "# .PCD v.7 - Point Cloud Data file format\n" +
-                    "VERSION .7\n" +
-                    "FIELDS x y z c\n" +
-                    "SIZE 4 4 4 4\n" +
-                    "TYPE F F F F\n" +
-                    "COUNT 1 1 1 1\n" +
-                    "WIDTH " + count + "\n" +
-                    "HEIGHT 1\n" +
-                    "VIEWPOINT " + depthmap.getPose(" ") + "\n" +
-                    "POINTS " + count + "\n" +
-                    "DATA ascii\n";
-
-            FileOutputStream out = new FileOutputStream(file);
-            out.write(header.getBytes());
-            out.write(output.toString().getBytes());
-            out.close();
-
         } catch (IOException e) {
             e.printStackTrace();
         }

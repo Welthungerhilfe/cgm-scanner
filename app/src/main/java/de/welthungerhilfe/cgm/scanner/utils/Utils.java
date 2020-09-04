@@ -18,30 +18,39 @@
 
 package de.welthungerhilfe.cgm.scanner.utils;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.graphics.Color;
+import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.location.LocationManager;
 import android.provider.Settings;
+import android.util.Base64;
 import android.util.Log;
 
-import java.io.BufferedInputStream;
-import java.io.File;
+import androidx.core.app.ActivityCompat;
+
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
-import java.util.UUID;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 
@@ -57,6 +66,28 @@ public class Utils {
         }
         return value;
     }
+    public static String getMD5(String filePath) {
+        String base64Digest = "";
+        try {
+            InputStream input = new FileInputStream(filePath);
+            byte[] buffer = new byte[1024];
+            MessageDigest md5Hash = MessageDigest.getInstance("MD5");
+            int numRead = 0;
+            while (numRead != -1) {
+                numRead = input.read(buffer);
+                if (numRead > 0) {
+                    md5Hash.update(buffer, 0, numRead);
+                }
+            }
+            input.close();
+            byte[] md5Bytes = md5Hash.digest();
+            base64Digest = Base64.encodeToString(md5Bytes, Base64.DEFAULT);
+
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        return base64Digest;
+    }
 
     public static void overrideFont(Context context, String defaultFontNameToOverride, String customFontFileNameInAssets) {
         try {
@@ -68,6 +99,24 @@ public class Utils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static double parseDouble(String value) {
+        value = value.replace(',', '.');
+        try {
+            return Double.parseDouble(value);
+        } catch (Exception e) {
+        }
+        return 0;
+    }
+
+    public static float parseFloat(String value) {
+        value = value.replace(',', '.');
+        try {
+            return Float.parseFloat(value);
+        } catch (Exception e) {
+        }
+        return 0;
     }
 
     public static double readUsage() {
@@ -100,20 +149,8 @@ public class Utils {
         return 0;
     }
 
-    public static boolean isNetworkConnectionAvailable(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = cm.getActiveNetworkInfo();
-        if (info == null) return false;
-        NetworkInfo.State network = info.getState();
-        return (network == NetworkInfo.State.CONNECTED || network == NetworkInfo.State.CONNECTING);
-    }
-
     public static String getAndroidID(ContentResolver resolver) {
         return Settings.Secure.getString(resolver, Settings.Secure.ANDROID_ID);
-    }
-
-    public static String getUUID() {
-        return UUID.randomUUID().toString();
     }
 
     public static String getSaltString(int length) {
@@ -143,78 +180,14 @@ public class Utils {
         }
     }
 
-    public static double distanceBetweenLocs(Loc l1, Loc l2) {
-        Location loc1 = new Location("");
-        loc1.setLatitude(l1.getLatitude());
-        loc1.setLongitude(l1.getLongitude());
-
-        Location loc2 = new Location("");
-        loc2.setLatitude(l2.getLatitude());
-        loc2.setLongitude(l2.getLongitude());
-
-        return loc1.distanceTo(loc2);
-    }
-
-    public static boolean checkDouble(String number) {
-        try {
-            Integer.parseInt(number);
-
-            return false;
-        } catch (NumberFormatException ex) {
-            return true;
-        }
-    }
-
     public static int checkDoubleDecimals(String number) {
+        number = number.replace(',', '.');
         int integerPlaces = number.indexOf('.');
 
         if (integerPlaces < 0)
             return 0;
 
-        int decimalPlaces = number.length() - integerPlaces - 1;
-
-        return decimalPlaces;
-    }
-
-    public static byte[] readFile(File file) {
-        int size = (int) file.length();
-        byte[] bytes = new byte[size];
-        try {
-            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
-            buf.read(bytes, 0, bytes.length);
-            buf.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return  null;
-        }
-
-        return bytes;
-    }
-
-    public static float interpolate(final float a, final float b, final float proportion) {
-        return (a + ((b - a) * proportion));
-    }
-
-    public static int interpolateColor(final int a, final int b, final float proportion) {
-        final float[] hsva = new float[3];
-        final float[] hsvb = new float[3];
-        Color.colorToHSV(a, hsva);
-        Color.colorToHSV(b, hsvb);
-        for (int i = 0; i < 3; i++) {
-            hsvb[i] = interpolate(hsva[i], hsvb[i], proportion);
-        }
-
-        return Color.HSVToColor(hsvb);
-    }
-
-    public static int getColorWithAlpha(int color, float ratio) {
-        int newColor = 0;
-        int alpha = Math.round(Color.alpha(color) * ratio);
-        int r = Color.red(color);
-        int g = Color.green(color);
-        int b = Color.blue(color);
-        newColor = Color.argb(alpha, r, g, b);
-        return newColor;
+        return number.length() - integerPlaces - 1;
     }
 
     public static String getAddress(Context context, Loc location) {
@@ -241,5 +214,67 @@ public class Utils {
             }
         }
         return "";
+    }
+
+    public static Loc getLastKnownLocation(Context context) {
+        boolean coarse = ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
+        boolean fine = ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED;
+        if (fine || coarse) {
+            return null;
+        }
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        if (locationManager == null) {
+            return null;
+        }
+
+        List<String> providers = locationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            Location l = locationManager.getLastKnownLocation(provider);
+            if (l == null) {
+                continue;
+            }
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                // Found best last known location:
+                bestLocation = l;
+            }
+        }
+
+        if (bestLocation == null) {
+            return null;
+        }
+
+        Loc loc = new Loc();
+        loc.setLatitude(bestLocation.getLatitude());
+        loc.setLongitude(bestLocation.getLongitude());
+        return loc;
+    }
+
+    public static boolean isLocationEnabled(Activity activity) {
+        return false;
+    }
+
+    public static void openLocationSettings(Activity activity, int resultCode) {
+        LocationRequest locationRequest = LocationRequest.create()
+                .setInterval(60 * 1000)
+                .setFastestInterval(1000)
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+
+        LocationServices
+                .getSettingsClient(activity)
+                .checkLocationSettings(builder.build())
+                .addOnFailureListener(activity, ex -> {
+                    if (ex instanceof ResolvableApiException) {
+                        try {
+                            ResolvableApiException resolvable = (ResolvableApiException) ex;
+                            resolvable.startResolutionForResult(activity, resultCode);
+                        } catch (IntentSender.SendIntentException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
     }
 }

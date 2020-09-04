@@ -192,9 +192,6 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 case "depth":
                     path = AppConstants.STORAGE_DEPTH_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
                     break;
-                case "pcd":
-                    path = AppConstants.STORAGE_PC_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
-                    break;
                 case "rgb":
                     path = AppConstants.STORAGE_RGB_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
                     break;

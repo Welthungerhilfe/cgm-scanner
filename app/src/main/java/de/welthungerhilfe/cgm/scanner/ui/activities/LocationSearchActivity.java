@@ -50,7 +50,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -62,6 +61,7 @@ import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 /**
  * Created by Emerald on 2/20/2018.
@@ -70,7 +70,6 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 public class LocationSearchActivity extends AppCompatActivity implements OnMapReadyCallback, SeekBar.OnSeekBarChangeListener {
     private final int PERMISSION_LOCATION = 0x1001;
 
-    private ArrayList<Person> personList;
     private Location location = null;
     private SessionManager session;
 
@@ -105,7 +104,6 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
 
         ButterKnife.bind(this);
 
-        personList = new ArrayList<>();
         session = new SessionManager(LocationSearchActivity.this);
 
         mapView.onCreate(saveBundle);
@@ -124,6 +122,9 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, PERMISSION_LOCATION);
         } else {
+            if (!Utils.isLocationEnabled(this)) {
+                Utils.openLocationSettings(this, PERMISSION_LOCATION);
+            }
             LocationManager lm = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
             boolean isGPSEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -143,8 +144,6 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
                     }
                 }
                 if (location != null) {
-                    searchNearbyPersons();
-
                     getAddressFromLocation(new LatLng(location.getLatitude(), location.getLongitude()));
 
                     if (googleMap != null)
@@ -155,8 +154,6 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
     }
 
     private void getAddressFromLocation(LatLng latLng) {
-        //new AddressTask(location.getLatitude(), location.getLongitude(), this).execute();
-
         runOnUiThread(() -> {
             Geocoder geocoder = new Geocoder(LocationSearchActivity.this, Locale.getDefault());
             String result = getString(R.string.address_parse_error);
@@ -198,18 +195,6 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
 
         CameraPosition cameraPosition = new CameraPosition.Builder().target(new LatLng(location.getLatitude(), location.getLongitude())).zoom(12).build();
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-    }
-
-    private void putMarkers() {
-        if (googleMap != null) {
-            for (int i = 0; i < personList.size(); i++) {
-                googleMap.addMarker(new MarkerOptions().position(new LatLng(personList.get(i).getLastLocation().getLatitude(), personList.get(i).getLastLocation().getLongitude())));
-            }
-        }
-    }
-
-    private void searchNearbyPersons() {
-
     }
 
     @Override
@@ -263,18 +248,11 @@ public class LocationSearchActivity extends AppCompatActivity implements OnMapRe
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         radius = seekBar.getProgress() == 0 ? 1 : seekBar.getProgress();
-        if (googleMap != null) {
-            searchNearbyPersons();
-        }
     }
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSION_LOCATION) {
-            if (grantResults.length > 0 && grantResults[0] >= 0) {
-                getCurrentLocation();
-            } else {
-                Toast.makeText(LocationSearchActivity.this, R.string.address_error, Toast.LENGTH_LONG).show();
-            }
+            getCurrentLocation();
         }
     }
 }

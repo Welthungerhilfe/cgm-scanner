@@ -100,9 +100,9 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         if (validate() && measureListener != null) {
             measureListener.onManualMeasure(
                     measure != null ? measure.getId() : null,
-                    Double.parseDouble(editManualHeight.getText().toString()),
-                    Double.parseDouble(editManualWeight.getText().toString()),
-                    Double.parseDouble(editManualMuac.getText().toString()),
+                    Utils.parseDouble(editManualHeight.getText().toString()),
+                    Utils.parseDouble(editManualWeight.getText().toString()),
+                    Utils.parseDouble(editManualMuac.getText().toString()),
                     0f,
                     location,
                     oedema
@@ -122,8 +122,6 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     String tooltip_weight_ex;
     @BindString(R.string.tooltip_cm)
     String tooltip_cm;
-    @BindString(R.string.tooltip_precision)
-    String tooltip_precision;
     @BindString(R.string.tooltip_height_ex)
     String tooltip_height_ex;
     @BindString(R.string.tooltipe_height_min)
@@ -234,11 +232,11 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
             editManualHeight.setError(tooltip_cm);
             valid = false;
         } else if (Utils.checkDoubleDecimals(height) != 1) {
-            editManualHeight.setError(tooltip_precision);
+            editManualHeight.setError(tooltip_decimal);
             valid = false;
-        } else if (Double.parseDouble(height) < 45) {
+        } else if (Utils.parseDouble(height) <= 45) {
             editManualHeight.setError(tooltipe_height_min);
-        } else if (Double.parseDouble(height) > 140) {
+        } else if (Utils.parseDouble(height) >= 120) {
             editManualHeight.setError(tooltipe_height_max);
         } else {
             editManualHeight.setError(null);
@@ -250,10 +248,10 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         } else if (Utils.checkDoubleDecimals(weight) != 3) {
             editManualWeight.setError(tooltip_kg_precision);
             valid = false;
-        } else if (Double.parseDouble(weight) < 2) {
+        } else if (Utils.parseDouble(weight) < 2) {
             editManualWeight.setError(tooltipe_weight_min);
             valid = false;
-        } else if (Double.parseDouble(weight) > 30) {
+        } else if (Utils.parseDouble(weight) > 30) {
             editManualWeight.setError(tooltipe_weight_max);
             valid = false;
         } else {
@@ -264,12 +262,12 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
             editManualMuac.setError(tooltip_cm);
             valid = false;
         } else if (Utils.checkDoubleDecimals(muac) != 1) {
-            editManualMuac.setError(tooltip_precision);
+            editManualMuac.setError(tooltip_decimal);
             valid = false;
-        } else if (Double.parseDouble(muac) < 7) {
+        } else if (Utils.parseDouble(muac) < 7) {
             editManualMuac.setError(tooltipe_muac_min);
             valid = false;
-        } else if (Double.parseDouble(muac) > 22) {
+        } else if (Utils.parseDouble(muac) > 22) {
             editManualMuac.setError(tooltipe_muac_max);
             valid = false;
         } else {

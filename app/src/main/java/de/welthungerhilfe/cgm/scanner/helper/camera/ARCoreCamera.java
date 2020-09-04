@@ -67,57 +67,11 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 
 public class ARCoreCamera implements ICamera {
-
-  private static final boolean DEPTH_VISUALISATION_ENABLED = false;
-
-  public static class CameraCalibration {
-    private float[] colorCameraIntrinsic;
-    private float[] depthCameraIntrinsic;
-    private float[] depthCameraTranslation;
-    private boolean valid;
-
-    private CameraCalibration() {
-      colorCameraIntrinsic = new float[4];
-      depthCameraIntrinsic = new float[4];
-      depthCameraTranslation = new float[3];
-      valid = false;
-    }
-
-    public float[] getIntrinsic(boolean rgbCamera) {
-      return rgbCamera ? colorCameraIntrinsic : depthCameraIntrinsic;
-    }
-
-    public boolean isValid() {
-      return valid;
-    }
-
-    private void setValid() {
-      valid = true;
-    }
-
-    @Override
-    public String toString() {
-      String output = "";
-      output += "Color camera intrinsic:\n";
-      output += colorCameraIntrinsic[0] + " " + colorCameraIntrinsic[1] + " " + colorCameraIntrinsic[2] + " " + colorCameraIntrinsic[3] + "\n";
-      output += "Depth camera intrinsic:\n";
-      output += depthCameraIntrinsic[0] + " " + depthCameraIntrinsic[1] + " " + depthCameraIntrinsic[2] + " " + depthCameraIntrinsic[3] + "\n";
-      output += "Depth camera position:\n";
-      output += depthCameraTranslation[0] + " " + depthCameraTranslation[1] + " " + depthCameraTranslation[2] + "\n";
-      return output;
-    }
-  }
-
-
-  public interface Camera2DataListener
-  {
-    void onColorDataReceived(Bitmap bitmap, int frameIndex);
-
-    void onDepthDataReceived(Image image, Pose pose, int frameIndex);
-  }
 
   private static final String TAG = ARCoreCamera.class.getSimpleName();
 
@@ -139,11 +93,12 @@ public class ARCoreCamera implements ICamera {
   private ImageView mColorCameraPreview;
   private ImageView mDepthCameraPreview;
   private GLSurfaceView mGLSurfaceView;
-  private ArrayList<Camera2DataListener> mListeners;
+  private ArrayList<ARCoreUtils.Camera2DataListener> mListeners;
   private final HashMap<Long, Bitmap> mCache;
   private CameraCalibration mCameraCalibration;
   private int mFrameIndex;
   private float mPixelIntensity;
+  private boolean mShowDepth;
 
   public ARCoreCamera(Activity activity) {
     mActivity = activity;
@@ -154,10 +109,11 @@ public class ARCoreCamera implements ICamera {
     mLock = new Object();
     mFrameIndex = 1;
     mPixelIntensity = 0;
+    mShowDepth = LocalPersistency.getBoolean(activity, SettingsActivity.KEY_SHOW_DEPTH);
   }
 
   public void addListener(Object listener) {
-    mListeners.add((Camera2DataListener) listener);
+    mListeners.add((ARCoreUtils.Camera2DataListener) listener);
   }
 
   public void removeListener(Object listener) {
@@ -263,8 +219,8 @@ public class ARCoreCamera implements ICamera {
       Log.w(TAG, "onImageAvailable: Skipping null image.");
       return;
     }
-    if (DEPTH_VISUALISATION_ENABLED) {
-      mDepthCameraPreview.setImageBitmap(getDepthPreview(image));
+    if (mShowDepth) {
+      mDepthCameraPreview.setImageBitmap(ARCoreUtils.getDepthPreview(image, false));
     }
 
     Pose pose;
@@ -288,10 +244,10 @@ public class ARCoreCamera implements ICamera {
     }
 
     if (bitmap != null && bestDiff < 50000) {
-      for (Camera2DataListener listener : mListeners) {
+      for (ARCoreUtils.Camera2DataListener listener : mListeners) {
         listener.onDepthDataReceived(image, pose, mFrameIndex);
       }
-      for (Camera2DataListener listener : mListeners) {
+      for (ARCoreUtils.Camera2DataListener listener : mListeners) {
         listener.onColorDataReceived(bitmap, mFrameIndex);
       }
 
@@ -301,49 +257,6 @@ public class ARCoreCamera implements ICamera {
       }
     }
     image.close();
-  }
-
-  private Bitmap getDepthPreview(Image image) {
-    Image.Plane plane = image.getPlanes()[0];
-    ByteBuffer buffer = plane.getBuffer();
-    ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
-
-    ArrayList<Short> pixel = new ArrayList<>();
-    while (shortDepthBuffer.hasRemaining()) {
-      pixel.add(shortDepthBuffer.get());
-    }
-    int stride = plane.getRowStride();
-    int width = image.getWidth();
-    int height = image.getHeight();
-
-    float[][] depth = new float[width][height];
-    for (int y = 0; y < height; y++) {
-      for (int x = 0; x < width; x++) {
-        int depthSample = pixel.get((y / 2) * stride + x);
-        int depthRange = depthSample & 0x1FFF;
-        if ((x < 1) || (y < 1) || (x >= width - 1) || (y >= height - 1)) {
-          depthRange = 0;
-        }
-        depth[x][y] = depthRange;
-      }
-    }
-
-    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-    for (int y = 1; y < height - 1; y++) {
-      for (int x = 1; x < width - 1; x++) {
-
-        float mx = depth[x][y] - depth[x - 1][y];
-        float px = depth[x][y] - depth[x + 1][y];
-        float my = depth[x][y] - depth[x][y - 1];
-        float py = depth[x][y] - depth[x][y + 1];
-        float value = Math.abs(mx) + Math.abs(px) + Math.abs(my) + Math.abs(py);
-        int r = (int) Math.max(0, Math.min(1.0f * value, 255));
-        int g = (int) Math.max(0, Math.min(2.0f * value, 255));
-        int b = (int) Math.max(0, Math.min(3.0f * value, 255));
-        bitmap.setPixel(x, y, Color.argb(128, r, g, b));
-      }
-    }
-    return bitmap;
   }
 
   private void closeCamera() {
@@ -528,10 +441,12 @@ public class ARCoreCamera implements ICamera {
     return true;
   }
 
+  @Override
   public CameraCalibration getCalibration() {
     return mCameraCalibration;
   }
 
+  @Override
   public float getLightIntensity() {
     return mPixelIntensity;
   }
@@ -563,7 +478,7 @@ public class ARCoreCamera implements ICamera {
       }
 
       //get light estimation from ARCore
-      mPixelIntensity = frame.getLightEstimate().getPixelIntensity();
+      mPixelIntensity = frame.getLightEstimate().getPixelIntensity() * 2.0f;
 
       //process camera data
       onProcessColorData(frame.acquireCameraImage());

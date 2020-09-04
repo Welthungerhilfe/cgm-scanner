@@ -1,4 +1,4 @@
-package de.welthungerhilfe.cgm.scanner.helper.tango;
+package de.welthungerhilfe.cgm.scanner.helper.camera;
 
 /**
  * Child Growth Monitor - quick and accurate data on malnutrition
@@ -41,15 +41,14 @@ import javax.microedition.khronos.opengles.GL10;
  * Do not call any methods here directly from another thread -- use the
  * GLSurfaceView#queueEvent() call.
  */
-public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
-    private static final String TAG = CameraSurfaceRenderer.class.getSimpleName();
+public class TangoCameraRenderer implements GLSurfaceView.Renderer {
+    private static final String TAG = TangoCameraRenderer.class.getSimpleName();
     private static final boolean VERBOSE = false;
 
     private static final int RECORDING_OFF = 0;
     private static final int RECORDING_ON = 1;
     private static final int RECORDING_RESUMED = 2;
 
-    private final float[] mSTMatrix = new float[16];
     private int mTextureId;
 
     private SurfaceTexture mSurfaceTexture;
@@ -58,7 +57,6 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
     private int mFrameCount;
 
     // width/height of the incoming camera preview frames
-    private boolean mIncomingSizeUpdated;
     private int mIncomingWidth;
     private int mIncomingHeight;
 
@@ -107,7 +105,7 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
      * @param callback A small callback to allow the caller to introduce application-specific code to be executed
      */
 
-    public CameraSurfaceRenderer(RenderCallback callback) {
+    public TangoCameraRenderer(RenderCallback callback) {
         mRenderCallback = callback;
 
         mTextureId = INVALID_TEXTURE_ID;
@@ -116,7 +114,6 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
         mRecordingEnabled = false;
         mFrameCount = -1;
 
-        mIncomingSizeUpdated = false;
         mIncomingWidth = mIncomingHeight = -1;
 
         mTextures[0] = 0;
@@ -193,7 +190,6 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
         Log.d(TAG, "setCameraPreviewSize");
         mIncomingWidth = width;
         mIncomingHeight = height;
-        mIncomingSizeUpdated = true;
     }
 
     @Override
@@ -247,12 +243,6 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
             Log.i(TAG, "Drawing before incoming texture size set; skipping");
             return;
         }
-        /*
-        if (mIncomingSizeUpdated) {
-            mFullScreen.getProgram().setTexSize(mIncomingWidth, mIncomingHeight);
-            mIncomingSizeUpdated = false;
-        }
-        */
 
         GLES20.glUseProgram(mProgram);
 

@@ -113,7 +113,7 @@
     <string name="tooltip_guardian">कृपया अभिभावक का इनपुट दें</string>
     <string name="tooltipe_sex">कृपया लिंग का चयन करें</string>
     <string name="tooltipe_height_min">लम्बाई 45cm (सेन्टीमीटर्स) से बड़ी होनी चाहिए </string>
-    <string name="tooltipe_height_max">लम्बाई 140cm (सेन्टीमीटर्स) से कम होनी चाहिए </string>
+    <string name="tooltipe_height_max">लम्बाई 120cm (सेन्टीमीटर्स) से कम होनी चाहिए </string>
     <string name="tooltipe_weight_min">वजन 2kg से ज्यादा होना चाहिये </string>
     <string name="tooltipe_weight_max">वजन 30kg से कम होना चाहिये </string>
     <string name="tooltipe_muac_min">मध्य ऊपरी बांह की परिधि 9cm (सेन्टीमीटर्स) से बड़ी होनी चाहिए</string>
@@ -161,7 +161,7 @@
     <string name="content_image">सामग्री फोटो </string>
     <string name="message_legal">कानूनी मुद्दों से बचने के लिए कृपया माता-पिता से सहमति फॉर्म की एक फोटो लेना सुनिश्चित करें</string>
 
-    <string name="axis_age">उम्र</string>
+    <string name="axis_age">महीनों में उम्र</string>
     <string name="axis_height">ऊंचाई</string>
     <string name="axis_weight">वजन</string>
     <string name="axis_head">सिर परिधि सेमी में</string>
@@ -173,20 +173,8 @@
     <string name="filter_age_arm">4 एमयूएसी  / उम</string>
     <string name="filter_age_head">5 शीर्ष परिधि / उम</string>
 
-    <string-array name="filters">
-        <item>@string/filter_age_weight</item>
-        <item>@string/filter_age_height</item>
-        <item>@string/filter_height_weight</item>
-        <item>@string/filter_age_arm</item>
-    </string-array>
-
     <string name="selector_manual">मैन्युअल उपाय जोड़ें</string>
     <string name="selector_scan">स्कैन उपाय जोड़ें</string>
-
-    <string-array name="selector_measure">
-        <item>@string/selector_manual</item>
-        <item>@string/selector_scan</item>
-    </string-array>
 
     <string name="mode_standing">खड़े होना</string>
     <string name="mode_lying">लेटना</string>
@@ -244,9 +232,9 @@
     <string name="sam_wfh_title">ऊंचाई के लिए गंभीर रूप से कम वजन</string>
     <string name="sam_wfh_message">कृपया निकटतम कुपोषण केंद्र या पोषण पुनर्वास केंद्र पर जाएं</string>
     <string name="mam_wfh_message">कृपया अपना आंगनवाड़ी देखें</string>
-    <string name="sam_hfa_title">अनुवर्ती परीक्षा</string>
+    <string name="sam_hfa_title">बच्चा गंभीर रूप से स्टंट है</string>
     <string name="sam_hfa_message">किसी स्थानीय डॉक्टर या स्वास्थ्य अधिकारी से संपर्क करें</string>
-    <string name="mam_hfa_title">अनुवर्ती परीक्षा</string>
+    <string name="mam_hfa_title">बाल मध्यम रूप से स्टंट है</string>
     <string name="mam_hfa_message">Contact a local doctor or health officer</string>
     <string name="label_wait">कृप्या कुछ क्षण प्रतीक्षा करें…</string>
     <string name="btn_retake">फिर से देनी</string>
@@ -273,6 +261,7 @@
     <string name="profile_performance_depth_time">गहराई फ्रेम को संसाधित करने का समय</string>
     <string name="profile_performance_color_size">अंतिम स्कैन रंग डेटा आकार</string>
     <string name="profile_performance_depth_size">अंतिम स्कैन गहराई डेटा आकार</string>
+    <string name="show_depth_data">गहराई डेटा दिखाएं</string>
 
     <string name="label_overview">अवलोकन</string>
     <string name="label_upload_speed">अपलोड गति : </string>
@@ -290,6 +279,7 @@
     <string name="person_not_defined">व्यक्ति को परिभाषित नहीं किया गया था</string>
     <string name="storage_permission_needed">भंडारण अनुमति की आवश्यकता!</string>
     <string name="older_3_months">हाथ की परिधि की तुलना करने के लिए बच्चे को 3 महीने से अधिक उम्र का होना चाहिए</string>
+    <string name="investigation">आयु के साथ हाथ की परिधि की जांच प्रक्रियाधीन है</string>
 
     <string name="login_error_parse">टोकन पार्स असफल</string>
     <string name="login_error_backend">अपना बैकएंड नहीं ढूंढ सका</string>

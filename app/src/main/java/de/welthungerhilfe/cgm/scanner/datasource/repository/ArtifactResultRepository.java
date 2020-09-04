@@ -29,10 +29,6 @@ public class ArtifactResultRepository {
         database.artifactResultDao().insertArtifact_quality(artifactResult);
     }
 
-    public double getArtifactResult(String measureId, int key) {
-        return database.artifactResultDao().getArtifactResult(measureId, key);
-    }
-
     public double getAveragePointCount(String measureId, int key) {
         return database.artifactResultDao().getAveragePointCount(measureId, key);
     }

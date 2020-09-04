@@ -57,6 +57,9 @@
         <meta-data
             android:name="com.google.ar.core"
             android:value="${arcoreValue}" />
+        <meta-data
+            android:name="com.huawei.ar.engine"
+            android:value="${arengineValue}" />
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -157,17 +160,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
-        </receiver>
-
-        <receiver
-            android:name=".helper.receiver.ResultGenerationReceiver"
-            android:enabled="true"
-            android:process=":remote" >
-
-            <intent-filter>
-                <action android:name="de.welthungerhilfe.cgm.scanner.action.ACTION_RESULT_GENERATED" />
-            </intent-filter>
-
         </receiver>
 
         <service android:name=".helper.service.UploadService"

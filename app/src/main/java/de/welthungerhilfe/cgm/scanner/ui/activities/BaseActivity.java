@@ -26,6 +26,7 @@ import com.novoda.merlin.Merlin;
 import com.novoda.merlin.registerable.connection.Connectable;
 import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
+import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 
 public class BaseActivity extends AppCompatActivity implements Connectable, Disconnectable {
@@ -37,32 +38,25 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
         }
     }
 
-    private boolean running = false;
     private Merlin merlin;
     private SessionManager session;
 
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
 
-        Thread.currentThread().setDefaultUncaughtExceptionHandler(new ExceptionHandler());
+        LanguageHelper.onAttach(this);
+        Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        running = true;
 
         session = new SessionManager(this);
 
         merlin = new Merlin.Builder().withConnectableCallbacks().withDisconnectableCallbacks().build(this);
         merlin.registerConnectable(this);
         merlin.registerDisconnectable(this);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        running = false;
     }
 
     @Override

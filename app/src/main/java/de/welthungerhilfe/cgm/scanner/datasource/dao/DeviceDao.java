@@ -1,7 +1,6 @@
 package de.welthungerhilfe.cgm.scanner.datasource.dao;
 
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
@@ -23,9 +22,6 @@ public interface DeviceDao {
 
     @Update(onConflict = REPLACE)
     void updateDevice(Device device);
-
-    @Delete
-    void deleteDevice(Device device);
 
     @Query("SELECT * FROM " + TABLE_DEVICE)
     List<Device> getAll();

@@ -44,8 +44,6 @@ public class MemoryMonitorService extends Service {
                 if (activityManager != null) {
                     activityManager.getMemoryInfo(mi);
 
-                    //double availableMegs = mi.availMem / 0x100000L;
-                    //double percentAvail = mi.availMem / (double)mi.totalMem * 100.0;
                     memory = ((double)(mi.totalMem - mi.availMem) / mi.totalMem) * 100;
                     Log.e("memory usage:", String.format("%f%% of memory is in usage", memory));
                     Log.e("memory usage:", String.format("available: %d, total: %d", mi.availMem, mi.totalMem));

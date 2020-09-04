@@ -23,16 +23,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
 import android.media.Image;
-
-import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -43,7 +38,7 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 
 public class BitmapUtils {
 
-    private static final int JPG_COMPRESSION = 90;
+    public static final int JPG_COMPRESSION = 90;
 
     public static Bitmap getAcceptableBitmap(Bitmap bmp) {
         float ratio = 0;
@@ -101,11 +96,12 @@ public class BitmapUtils {
         final int           bufferSize = width * height * ImageFormat.getBitsPerPixel(ImageFormat.YUV_420_888) / 8;
         final ByteBuffer    output     = ByteBuffer.allocateDirect(bufferSize);
 
-        int channelOffset = 0;
-        int outputStride = 0;
+        int channelOffset;
+        int outputStride;
 
         for (int planeIndex = 0; planeIndex < 3; planeIndex++) {
             if (planeIndex == 0) {
+                channelOffset = 0;
                 outputStride = 1;
             } else if (planeIndex == 1) {
                 channelOffset = width * height + 1;
@@ -158,23 +154,6 @@ public class BitmapUtils {
             fileOutputStream.flush();
             fileOutputStream.close();
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void writeImageToFile(TangoImageBuffer currentTangoImageBuffer, File file) {
-
-        currentTangoImageBuffer = TangoUtils.copyImageBuffer(currentTangoImageBuffer);
-        int currentImgWidth = currentTangoImageBuffer.width;
-        int currentImgHeight = currentTangoImageBuffer.height;
-        byte[] YuvImageByteArray = currentTangoImageBuffer.data.array();
-
-        try (FileOutputStream out = new FileOutputStream(file)) {
-            YuvImage yuvImage = new YuvImage(YuvImageByteArray, ImageFormat.NV21, currentImgWidth, currentImgHeight, null);
-            yuvImage.compressToJpeg(new Rect(0, 0, currentImgWidth, currentImgHeight), JPG_COMPRESSION, out);
-            out.flush();
-            out.close();
-        } catch (IOException e) {
             e.printStackTrace();
         }
     }

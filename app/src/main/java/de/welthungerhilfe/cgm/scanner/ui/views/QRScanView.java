@@ -58,7 +58,7 @@ import me.dm7.barcodescanner.core.DisplayUtils;
 public class QRScanView extends BarcodeScannerView {
     private static final String TAG = QRScanView.class.getSimpleName();
     private MultiFormatReader mMultiFormatReader;
-    public static final List<BarcodeFormat> ALL_FORMATS = new ArrayList();
+    public static final ArrayList<BarcodeFormat> ALL_FORMATS = new ArrayList();
     private List<BarcodeFormat> mFormats;
     private QRScanView.QRScanHandler mResultHandler;
 
@@ -178,11 +178,6 @@ public class QRScanView extends BarcodeScannerView {
         }
     }
 
-    public void resumeCameraPreview(QRScanView.QRScanHandler resultHandler) {
-        this.mResultHandler = resultHandler;
-        super.resumeCameraPreview();
-    }
-
     public PlanarYUVLuminanceSource buildLuminanceSource(byte[] data, int width, int height) {
         Rect rect = this.getFramingRectInPreview(width, height);
         if(rect == null) {
@@ -200,23 +195,7 @@ public class QRScanView extends BarcodeScannerView {
     }
 
     static {
-        /*
-        ALL_FORMATS.add(BarcodeFormat.UPC_A);
-        ALL_FORMATS.add(BarcodeFormat.UPC_E);
-        ALL_FORMATS.add(BarcodeFormat.EAN_13);
-        ALL_FORMATS.add(BarcodeFormat.EAN_8);
-        ALL_FORMATS.add(BarcodeFormat.RSS_14);
-        ALL_FORMATS.add(BarcodeFormat.CODE_39);
-        ALL_FORMATS.add(BarcodeFormat.CODE_93);
-        ALL_FORMATS.add(BarcodeFormat.CODE_128);
-        ALL_FORMATS.add(BarcodeFormat.ITF);
-        ALL_FORMATS.add(BarcodeFormat.CODABAR);
-        */
         ALL_FORMATS.add(BarcodeFormat.QR_CODE);
-        /*
-        ALL_FORMATS.add(BarcodeFormat.DATA_MATRIX);
-        ALL_FORMATS.add(BarcodeFormat.PDF_417);
-        */
     }
 
     public interface QRScanHandler {

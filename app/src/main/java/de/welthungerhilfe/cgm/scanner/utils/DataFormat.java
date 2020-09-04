@@ -62,8 +62,7 @@ public class DataFormat {
         try {
             SimpleDateFormat parser = new SimpleDateFormat(convertFormat(context, format), Locale.US);;
             return parser.parse(value).getTime();
-        } catch (ParseException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
         }
         return System.currentTimeMillis();
     }
