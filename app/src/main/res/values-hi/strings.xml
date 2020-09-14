@@ -288,9 +288,6 @@
 
     <string name="scan_quality">स्कैन गुणवत्ता : </string>
     <string name="score_light">लाइट स्कोर : </string>
-    <string name="score_duration">अवधि स्कोर : </string>
-    <string name="score_duration_short">अवधि बहुत कम थी</string>
-    <string name="score_duration_long">अवधि बहुत लंबी थी</string>
 
     <string name="upload_completed">अपलोड पूर्ण</string>
     <string name="less_than_minute">1 मिनट से भी कम</string>
