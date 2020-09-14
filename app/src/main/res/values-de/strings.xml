@@ -290,9 +290,6 @@
 
     <string name="scan_quality">Scanqualität : </string>
     <string name="score_light">Belichtung : </string>
-    <string name="score_duration">Dauer : </string>
-    <string name="score_duration_short">Die Dauer war zu kurz</string>
-    <string name="score_duration_long">Die Dauer war zu lang</string>
 
     <string name="upload_completed">Upload abgeschlossen</string>
     <string name="less_than_minute">weniger als 1 Minute</string>
