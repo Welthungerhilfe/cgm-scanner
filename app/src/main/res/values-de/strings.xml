@@ -291,6 +291,7 @@
     <string name="scan_quality">Scanqualität : </string>
     <string name="score_light">Belichtung : </string>
 
+    <string name="upload_over_wifi">Laden Scans nur über WLAN hoch</string>
     <string name="upload_completed">Upload abgeschlossen</string>
     <string name="less_than_minute">weniger als 1 Minute</string>
     <string name="minutes">Minuten</string>

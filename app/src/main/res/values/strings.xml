@@ -300,6 +300,7 @@
     <string name="scan_quality">Scan Quality : </string>
     <string name="score_light">Light Score : </string>
 
+    <string name="upload_over_wifi">Upload scans only over Wi-Fi</string>
     <string name="upload_completed">Upload Completed</string>
     <string name="less_than_minute">less than 1 minute</string>
     <string name="minutes">minutes</string>

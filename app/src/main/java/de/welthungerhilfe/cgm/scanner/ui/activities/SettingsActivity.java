@@ -57,6 +57,7 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 public class SettingsActivity extends BaseActivity {
 
     public static final String KEY_SHOW_DEPTH = "KEY_SHOW_DEPTH";
+    public static final String KEY_UPLOAD_WIFI = "KEY_UPLOAD_WIFI";
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -78,6 +79,10 @@ public class SettingsActivity extends BaseActivity {
 
     @BindView(R.id.txtSettingBackupDate)
     TextView txtSettingBackupDate;
+
+    @BindView(R.id.upload_over_wifi)
+    SwitchCompat switchUploadOverWifi;
+
 
     @BindView(R.id.testQAlayout)
     LinearLayout layoutTestQA;
@@ -164,6 +169,9 @@ public class SettingsActivity extends BaseActivity {
             switchShowDepth.setChecked(LocalPersistency.getBoolean(this, KEY_SHOW_DEPTH));
             switchShowDepth.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_SHOW_DEPTH, value));
         }
+
+        switchUploadOverWifi.setChecked(LocalPersistency.getBoolean(this, KEY_UPLOAD_WIFI));
+        switchUploadOverWifi.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_UPLOAD_WIFI, value));
 
         try {
             txtSettingVersion.setText(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
