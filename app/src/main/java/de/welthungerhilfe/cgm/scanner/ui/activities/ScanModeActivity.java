@@ -738,9 +738,20 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         @Override
         protected Void doInBackground(Void... voids) {
-            Gson gson = new Gson();
 
+            //stop AR
+            getCamera().onPause();
+
+            //check preconditions
+            TextView progressText = progressDialog.findViewById(R.id.wait_message);
+            if (!Utils.isNetworkAvailable(ScanModeActivity.this)) {
+                runOnUiThread(() -> progressText.setText(R.string.error_network));
+            }
             waitUntilFinished();
+            waitUntilOnline();
+            runOnUiThread(() -> progressText.setText(R.string.label_wait));
+
+            //save metadata into DB
             for (ArtifactResult ar : artifacts) {
                 artifactResultRepository.insertArtifactResult(ar);
             }
@@ -748,12 +759,16 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 fileLogRepository.insertFileLog(log);
             }
             measureRepository.insertMeasure(measure);
+
+            //start uploading
             runOnUiThread(() -> {
                 if (!AppController.getInstance().isUploadRunning()) {
                     startService(new Intent(getApplicationContext(), UploadService.class));
                 }
             });
 
+            //update measure metadata
+            Gson gson = new Gson();
             synchronized (SyncAdapter.getLock()) {
                 try {
                     CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
@@ -1163,6 +1178,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             } else {
                 Log.d("ScanModeActivity", "All threads already finished");
             }
+        }
+    }
+
+    private void waitUntilOnline() {
+        while (!Utils.isNetworkAvailable(this)) {
+            Utils.sleep(1000);
         }
     }
 }
