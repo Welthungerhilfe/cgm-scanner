@@ -22,11 +22,6 @@ package de.welthungerhilfe.cgm.scanner.ui.dialogs;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatCheckBox;
-
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
@@ -39,6 +34,11 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatCheckBox;
 
 import butterknife.BindString;
 import butterknife.BindView;
@@ -107,7 +107,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
             if (oedema == false) {
                 final TextView message = new TextView(mContext);
                 final SpannableString s =
-                        new SpannableString(mContext.getText(R.string.link));
+                        new SpannableString(mContext.getText(R.string.edema_link));
                 Linkify.addLinks(s, Linkify.WEB_URLS);
                 message.setText(s);
                 message.setGravity(Gravity.CENTER);

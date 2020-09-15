@@ -321,7 +321,8 @@
 
     <string name="result_generation_at">Result generation at</string>
     <string name="result_for">result for</string>
-    <string name="edema_check">Are you sure the child suffers from Edema?</string>
 
-    <string name="link" translatable="false">How to check for bilateral edema? youtu.be/PgfbMLJgeOU</string>
+    <string name="edema_check">Are you sure the child suffers from Edema?</string>
+    <string name="edema_link">How to check for bilateral edema? youtu.be/hGTyk6CM-5A</string>
+
 </resources>
