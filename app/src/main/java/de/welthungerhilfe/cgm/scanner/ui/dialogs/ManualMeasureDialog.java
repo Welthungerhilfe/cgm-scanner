@@ -226,9 +226,6 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         if (closeListener != null)
             closeListener.onClose(false);
     }
-    public void pause() {
-
-    }
 
     public void setMeasure(Measure measure) {
         this.measure = measure;
