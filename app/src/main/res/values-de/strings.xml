@@ -304,4 +304,9 @@
 
     <string name="result_generation_at">Ergebnisgenerierung bei</string>
     <string name="result_for">Ergebnis für</string>
+
+    <string name="selector_yes" translatable="false">Ja</string>
+    <string name="selector_no" translatable="false">Nein</string>
+
+    <string name="edema_check">Sind Sie sicher, dass das Kind an Ödem leidet?</string>
 </resources>

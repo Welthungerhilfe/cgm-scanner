@@ -23,8 +23,14 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatCheckBox;
+
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -98,19 +104,55 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     @OnClick(R.id.btnOK)
     void OnConfirm(Button btnOK) {
         if (validate() && measureListener != null) {
-            measureListener.onManualMeasure(
-                    measure != null ? measure.getId() : null,
-                    Utils.parseDouble(editManualHeight.getText().toString()),
-                    Utils.parseDouble(editManualWeight.getText().toString()),
-                    Utils.parseDouble(editManualMuac.getText().toString()),
-                    0f,
-                    location,
-                    oedema
-            );
+            if (oedema == false) {
+                final TextView message = new TextView(mContext);
+                final SpannableString s =
+                        new SpannableString(mContext.getText(R.string.link));
+                Linkify.addLinks(s, Linkify.WEB_URLS);
+                message.setText(s);
+                message.setGravity(Gravity.CENTER);
+                message.setMovementMethod(LinkMovementMethod.getInstance());
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                builder.setTitle(R.string.edema_check);
+                builder.setView(message);
+                builder.setItems(R.array.select_edema, (d, which) -> {
+                    if (which == 0) {
+                        oedema=true;
+                        measureListener.onManualMeasure(
+                                measure != null ? measure.getId() : null,
+                                Utils.parseDouble(editManualHeight.getText().toString()),
+                                Utils.parseDouble(editManualWeight.getText().toString()),
+                                Utils.parseDouble(editManualMuac.getText().toString()),
+                                0f,
+                                location,
+                                oedema
+                        );
+                        dismiss();
 
-            dismiss();
+                    } else if (which == 1) {
+                        show();
+                    }
+
+                });
+
+                builder.show();
+            }
+            else{
+                oedema=false;
+                measureListener.onManualMeasure(
+                        measure != null ? measure.getId() : null,
+                        Utils.parseDouble(editManualHeight.getText().toString()),
+                        Utils.parseDouble(editManualWeight.getText().toString()),
+                        Utils.parseDouble(editManualMuac.getText().toString()),
+                        0f,
+                        location,
+                        oedema
+                );
+                dismiss();
+            }
         }
     }
+
 
     @BindString(R.string.tooltip_kg)
     String tooltip_kg;
@@ -183,6 +225,9 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
         if (closeListener != null)
             closeListener.onClose(false);
+    }
+    public void pause() {
+
     }
 
     public void setMeasure(Measure measure) {
