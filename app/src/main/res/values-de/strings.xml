@@ -305,10 +305,10 @@
     <string name="result_generation_at">Ergebnisgenerierung bei</string>
     <string name="result_for">Ergebnis für</string>
 
-    <string name="selector_yes" translatable="false">Ja</string>
-    <string name="selector_no" translatable="false">Nein</string>
+    <string name="selector_yes" >Ja</string>
+    <string name="selector_no" >Nein</string>
 
     <string name="edema_check">Sind Sie sicher, dass das Kind an Ödem leidet?</string>
-    <string name="edema_link">दWie auf bilaterale Ödeme prüfen? youtu.be/hGTyk6CM-5A</string>
+    <string name="edema_link">Wie auf bilaterale Ödeme prüfen? youtu.be/3pQUtOsjjSY?t=85</string>
 
 </resources>
