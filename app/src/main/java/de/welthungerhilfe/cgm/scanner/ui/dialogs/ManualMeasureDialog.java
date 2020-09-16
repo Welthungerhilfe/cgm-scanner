@@ -25,7 +25,7 @@ import android.content.Intent;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
-import android.view.Gravity;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -104,37 +104,32 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     @OnClick(R.id.btnOK)
     void OnConfirm(Button btnOK) {
         if (validate() && measureListener != null) {
-            if (oedema == false) {
+            if (!oedema) {
                 final TextView message = new TextView(mContext);
-                final SpannableString s =
-                        new SpannableString(mContext.getText(R.string.edema_link));
+                final SpannableString s = new SpannableString(mContext.getText(R.string.edema_link));
                 Linkify.addLinks(s, Linkify.WEB_URLS);
+                int p = Utils.spToPx(25, getContext());
+                message.setPadding(p, p, p, p);
                 message.setText(s);
-                message.setGravity(Gravity.CENTER);
+                message.setTextSize(TypedValue.COMPLEX_UNIT_SP,16);
                 message.setMovementMethod(LinkMovementMethod.getInstance());
                 AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                 builder.setTitle(R.string.edema_check);
                 builder.setView(message);
-                builder.setItems(R.array.select_edema, (d, which) -> {
-                    if (which == 0) {
-                        oedema=true;
-                        measureListener.onManualMeasure(
-                                measure != null ? measure.getId() : null,
-                                Utils.parseDouble(editManualHeight.getText().toString()),
-                                Utils.parseDouble(editManualWeight.getText().toString()),
-                                Utils.parseDouble(editManualMuac.getText().toString()),
-                                0f,
-                                location,
-                                oedema
-                        );
-                        dismiss();
-
-                    } else if (which == 1) {
-                        show();
-                    }
-
+                builder.setPositiveButton(R.string.selector_yes, (dialogInterface, i) -> {
+                    oedema=true;
+                    measureListener.onManualMeasure(
+                            measure != null ? measure.getId() : null,
+                            Utils.parseDouble(editManualHeight.getText().toString()),
+                            Utils.parseDouble(editManualWeight.getText().toString()),
+                            Utils.parseDouble(editManualMuac.getText().toString()),
+                            0f,
+                            location,
+                            oedema
+                    );
+                    dismiss();
                 });
-
+                builder.setNegativeButton(R.string.selector_no, (dialogInterface, i) -> show());
                 builder.show();
             }
             else{
@@ -248,9 +243,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         editManualHeight.setText(String.valueOf(measure.getHeight()));
         editManualWeight.setText(String.valueOf(measure.getWeight()));
         editManualMuac.setText(String.valueOf(measure.getMuac()));
-        if (measure.isOedema()) {
-            checkManualOedema.setChecked(measure.isOedema());
-        }
+        checkManualOedema.setChecked(!measure.isOedema());
 
         location = measure.getLocation();
     }
@@ -278,8 +271,10 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
             valid = false;
         } else if (Utils.parseDouble(height) <= 45) {
             editManualHeight.setError(tooltipe_height_min);
+            valid = false;
         } else if (Utils.parseDouble(height) >= 120) {
             editManualHeight.setError(tooltipe_height_max);
+            valid = false;
         } else {
             editManualHeight.setError(null);
         }

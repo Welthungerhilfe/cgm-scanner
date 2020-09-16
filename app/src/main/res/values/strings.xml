@@ -187,13 +187,8 @@
         <item>@string/selector_scan</item>
     </string-array>
 
-    <string name="selector_yes">YES</string>
-    <string name="selector_no">NO</string>
-
-    <string-array name="select_edema" translatable="false">
-        <item>@string/selector_yes</item>
-        <item>@string/selector_no</item>
-    </string-array>
+    <string name="selector_yes">Yes</string>
+    <string name="selector_no">No</string>
 
     <string name="mode_standing">Standing Up</string>
     <string name="mode_lying">Lying Down</string>
@@ -323,6 +318,6 @@
     <string name="result_for">result for</string>
 
     <string name="edema_check">Are you sure the child suffers from Edema?</string>
-    <string name="edema_link">How to check for bilateral edema? youtu.be/3pQUtOsjjSY?t=85</string>
+    <string name="edema_link">How to check for bilateral edema\nyoutu.be/3pQUtOsjjSY?t=85</string>
 
 </resources>
