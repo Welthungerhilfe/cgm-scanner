@@ -34,6 +34,7 @@ import android.net.NetworkInfo;
 import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
+import android.util.TypedValue;
 
 import androidx.core.app.ActivityCompat;
 
@@ -286,6 +287,10 @@ public class Utils {
                         }
                     }
                 });
+    }
+
+    public static int spToPx(float sp, Context context) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, context.getResources().getDisplayMetrics());
     }
 
     public static void sleep(long miliseconds) {
