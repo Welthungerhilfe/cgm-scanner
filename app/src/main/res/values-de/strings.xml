@@ -112,8 +112,8 @@
     <string name="tooltip_birthday">Geburtstag eingeben</string>
     <string name="tooltip_guardian">Erziehungsberechtigte/n eingeben</string>
     <string name="tooltipe_sex">Geschlecht auswählen</string>
-    <string name="tooltipe_height_min">Das Kind sollte größer als 45cm sein -ODER- Die Größe (des Kindes) sollte mehr als 45cm betragen</string>
-    <string name="tooltipe_height_max">Das Kind sollte kleiner als 140cm sein -ODER- Die Größe des Kindes sollte weniger als 140cm betragen</string>
+    <string name="tooltipe_height_min">Das Kind sollte größer als 45cm sein</string>
+    <string name="tooltipe_height_max">Das Kind sollte kleiner als 120cm sein</string>
     <string name="tooltipe_weight_min">Gewicht sollte größer als 2kg sein</string>
     <string name="tooltipe_weight_max">Gewicht sollte weniger als 30kg betragen</string>
 
@@ -282,8 +282,6 @@
     <string name="storage_permission_needed">Speichererlaubnis erforderlich!</string>
     <string name="older_3_months">Das Kind muss älter als 3 Monate sein, um den Armumfang vergleichen zu können</string>
     <string name="investigation">Die Untersuchung des Armumfangs mit dem Alter ist in Bearbeitung</string>
-    <string name="correct_data">Der Geburtstag sollte nicht TT-MM-JJJJ sein</string>
-
 
     <string name="login_error_parse">Token-Analyse fehlgeschlagen</string>
     <string name="login_error_backend">Konnte Ihr Backend nicht finden</string>
@@ -292,10 +290,8 @@
 
     <string name="scan_quality">Scanqualität : </string>
     <string name="score_light">Belichtung : </string>
-    <string name="score_duration">Dauer : </string>
-    <string name="score_duration_short">Die Dauer war zu kurz</string>
-    <string name="score_duration_long">Die Dauer war zu lang</string>
 
+    <string name="upload_over_wifi">Laden Scans nur über WLAN hoch</string>
     <string name="upload_completed">Upload abgeschlossen</string>
     <string name="less_than_minute">weniger als 1 Minute</string>
     <string name="minutes">Minuten</string>

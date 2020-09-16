@@ -376,6 +376,54 @@
             </LinearLayout>
 
             <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_settings"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="20sp" />
+
+                <com.balysv.materialripple.MaterialRippleLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_group_margin"
+                    android:paddingLeft="@dimen/activity_horizontal_margin"
+                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    app:mrl_rippleOverlay="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
+                            android:text="@string/upload_over_wifi"
+                            android:textColor="@color/colorBlack"
+                            android:textSize="18sp" />
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/upload_over_wifi"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                    </LinearLayout>
+                </com.balysv.materialripple.MaterialRippleLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/testQAlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

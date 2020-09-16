@@ -295,7 +295,7 @@ public class AREngineCamera implements ICamera {
       mPixelIntensity = frame.getLightEstimate().getPixelIntensity() * 2.0f;
 
       //process camera data
-      onProcessColorData(frame.acquireCameraImage());
+      onProcessColorData(frame.acquirePreviewImage());
       onProcessDepthData(frame.acquireDepthImage());
 
     } catch (Exception e) {

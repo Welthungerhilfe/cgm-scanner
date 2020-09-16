@@ -216,9 +216,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 mTitleView.setText(getString(R.string.front_view_01) + " - " + getString(R.string.mode_lying));
             }
-
-            fab.setImageResource(R.drawable.recorder);
-            lytScanner.setVisibility(View.VISIBLE);
+            openScan();
         }
     }
     @SuppressLint("SetTextI18n")
@@ -236,9 +234,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 mTitleView.setText(getString(R.string.lateral_view_02) + " - " + getString(R.string.mode_lying));
             }
-
-            fab.setImageResource(R.drawable.recorder);
-            lytScanner.setVisibility(View.VISIBLE);
+            openScan();
         }
     }
     @SuppressLint("SetTextI18n")
@@ -256,9 +252,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 mTitleView.setText(getString(R.string.back_view_03) + " - " + getString(R.string.mode_lying));
             }
-
-            fab.setImageResource(R.drawable.recorder);
-            lytScanner.setVisibility(View.VISIBLE);
+            openScan();
         }
     }
 
@@ -496,19 +490,23 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void updateScanningProgress() {
-        float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 24 : 8) - 1;
+        float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 24 : 8);
         float progressToAddFloat = 100.0f / cloudsToFinishScan;
         int progressToAdd = (int) progressToAddFloat;
         Log.d(TAG, progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
         if (mProgress+progressToAdd > 100) {
             mProgress = 100;
-            runOnUiThread(() -> fab.setImageResource(R.drawable.done));
+            runOnUiThread(() -> {
+                fab.setImageResource(R.drawable.done);
+                goToNextStep();
+            });
         } else {
             mProgress = mProgress+progressToAdd;
         }
 
         Log.d("scan_progress", String.valueOf(mProgress));
         Log.d("scan_progress_step", String.valueOf(progressToAdd));
+        progressBar.setProgress(mProgress);
     }
 
     private void changeMode() {
@@ -553,12 +551,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         animator.start();
     }
 
-    private void startScan() {
-        mProgress = 0;
-
-        resumeScan();
-    }
-
     private void resumeScan() {
         if (SCAN_STEP == AppConstants.SCAN_PREVIEW)
             return;
@@ -572,11 +564,15 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         fab.setImageResource(R.drawable.recorder);
     }
 
+    private void openScan() {
+        fab.setImageResource(R.drawable.recorder);
+        lytScanner.setVisibility(View.VISIBLE);
+        mProgress = 0;
+        progressBar.setProgress(0);
+    }
+
     public void closeScan() {
         mIsRecording = false;
-        progressBar.setProgress(0);
-        mProgress = 0;
-
         lytScanner.setVisibility(View.GONE);
     }
 
@@ -602,30 +598,15 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             public void onPostExecute(Boolean results) {
                 double lightScore = (Math.abs(averagePointCount / 38000 - 1.0) * 3);
 
-                double durationScore;
-                if (scanStep % 100 == 1)
-                    durationScore = Math.abs(1- Math.abs((double) pointCloudCount / 24 - 1));
-                else
-                    durationScore = Math.abs(1- Math.abs((double) pointCloudCount / 8 - 1));
-
                 if (lightScore > 1) lightScore -= 1;
-                if (durationScore > 1) durationScore -= 1;
 
                 Log.e("ScanQuality", String.valueOf(lightScore));
-                Log.e("DurationQuality", String.valueOf(durationScore));
 
                 String issues = getString(R.string.scan_quality);
                 issues = String.format("%s\n - " + getString(R.string.score_light) + "%d%%", issues, Math.round(lightScore * 100));
-                issues = String.format("%s\n - " + getString(R.string.score_duration) + "%d%%", issues, Math.round(durationScore * 100));
 
                 if (scanStep == AppConstants.SCAN_STANDING_FRONT || scanStep == AppConstants.SCAN_LYING_FRONT) {
                     btnScanStep1.setVisibility(View.GONE);
-
-                    if (pointCloudCount < 8) {
-                        issues = String.format("%s\n - " + getString(R.string.score_duration_short), issues);
-                    } else if (pointCloudCount > 9) {
-                        issues = String.format("%s\n - " + getString(R.string.score_duration_long), issues);
-                    }
 
                     txtScanStep1.setText(issues);
                     imgScanStep1.setVisibility(View.GONE);
@@ -636,11 +617,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 } else if (scanStep == AppConstants.SCAN_STANDING_SIDE || scanStep == AppConstants.SCAN_LYING_SIDE) {
                     btnScanStep2.setVisibility(View.GONE);
 
-                    if (pointCloudCount < 12) {
-                        issues = String.format("%s\n - " + getString(R.string.score_duration_short), issues);
-                    } else if (pointCloudCount > 27) {
-                        issues = String.format("%s\n - " + getString(R.string.score_duration_long), issues);
-                    }
                     txtScanStep2.setText(issues);
                     imgScanStep2.setVisibility(View.GONE);
                     lytScanAgain2.setVisibility(View.VISIBLE);
@@ -649,12 +625,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 } else if (scanStep == AppConstants.SCAN_STANDING_BACK || scanStep == AppConstants.SCAN_LYING_BACK) {
                     btnScanStep3.setVisibility(View.GONE);
-
-                    if (pointCloudCount < 8) {
-                        issues = String.format("%s\n - " + getString(R.string.score_duration_short), issues);
-                    } else if (pointCloudCount > 9) {
-                        issues = String.format("%s\n - " + getString(R.string.score_duration_long), issues);
-                    }
 
                     txtScanStep3.setText(issues);
                     imgScanStep3.setVisibility(View.GONE);
@@ -749,11 +719,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         pauseScan();
                     }
                 } else {
-                    if (mProgress > 0) {
-                        resumeScan();
-                    } else {
-                        startScan();
-                    }
+                    resumeScan();
                 }
                 break;
             case R.id.imgClose:
@@ -772,9 +738,20 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         @Override
         protected Void doInBackground(Void... voids) {
-            Gson gson = new Gson();
 
+            //stop AR
+            getCamera().onPause();
+
+            //check preconditions
+            TextView progressText = progressDialog.findViewById(R.id.wait_message);
+            if (!Utils.isNetworkAvailable(ScanModeActivity.this)) {
+                runOnUiThread(() -> progressText.setText(R.string.error_network));
+            }
             waitUntilFinished();
+            waitUntilOnline();
+            runOnUiThread(() -> progressText.setText(R.string.label_wait));
+
+            //save metadata into DB
             for (ArtifactResult ar : artifacts) {
                 artifactResultRepository.insertArtifactResult(ar);
             }
@@ -782,12 +759,16 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 fileLogRepository.insertFileLog(log);
             }
             measureRepository.insertMeasure(measure);
+
+            //start uploading
             runOnUiThread(() -> {
                 if (!AppController.getInstance().isUploadRunning()) {
                     startService(new Intent(getApplicationContext(), UploadService.class));
                 }
             });
 
+            //update measure metadata
+            Gson gson = new Gson();
             synchronized (SyncAdapter.getLock()) {
                 try {
                     CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
@@ -965,7 +946,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             mNumberOfFilesWritten++;
 
             updateScanningProgress();
-            progressBar.setProgress(mProgress);
 
             ArtifactResult ar = new ArtifactResult();
             ar.setConfidence_value(String.valueOf(100 - Artifact_Confidence_penalty));
@@ -1081,7 +1061,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             buffer.asFloatBuffer().put(pointCloudData.points);
 
             updateScanningProgress();
-            progressBar.setProgress(mProgress);
 
             float lightIntensity = mPixelIntensity;
             float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
@@ -1199,6 +1178,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             } else {
                 Log.d("ScanModeActivity", "All threads already finished");
             }
+        }
+    }
+
+    private void waitUntilOnline() {
+        while (!Utils.isNetworkAvailable(this)) {
+            Utils.sleep(1000);
         }
     }
 }

@@ -29,6 +29,8 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
@@ -251,8 +253,16 @@ public class Utils {
         return loc;
     }
 
-    public static boolean isLocationEnabled(Activity activity) {
-        return false;
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = cm.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    public static boolean isWifiConnected(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo wifi = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        return wifi != null && wifi.isConnected();
     }
 
     public static void openLocationSettings(Activity activity, int resultCode) {
@@ -281,5 +291,13 @@ public class Utils {
 
     public static int spToPx(float sp, Context context) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, context.getResources().getDisplayMetrics());
+    }
+
+    public static void sleep(long miliseconds) {
+        try {
+            Thread.sleep(miliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

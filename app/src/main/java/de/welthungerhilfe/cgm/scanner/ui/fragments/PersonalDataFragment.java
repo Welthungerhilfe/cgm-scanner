@@ -193,10 +193,13 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             }
         });
 
-        if (person.getSex().equals(AppConstants.VAL_SEX_FEMALE)) {
-            radioFemale.setChecked(true);
-        } else if (person.getSex().equals(AppConstants.VAL_SEX_MALE)) {
-            radioMale.setChecked(true);
+        String sex = person.getSex();
+        if (sex != null) {
+            if (sex.equals(AppConstants.VAL_SEX_FEMALE)) {
+                radioFemale.setChecked(true);
+            } else if (sex.equals(AppConstants.VAL_SEX_MALE)) {
+                radioMale.setChecked(true);
+            }
         }
 
         checkAge.setChecked(person.isAgeEstimated());
