@@ -300,6 +300,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private ArtifactResultRepository artifactResultRepository;
     private ArrayList<ArtifactResult> artifacts;
     private ArrayList<FileLog> files;
+    private final Object lock = new Object();
 
     private SessionManager session;
 
@@ -577,10 +578,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             @Override
             protected Boolean doInBackground(Void... voids) {
-                for (ArtifactResult ar : artifacts) {
-                    if (ar.getKey() == SCAN_STEP) {
-                        averagePointCount += ar.getReal();
-                        pointCloudCount++;
+                synchronized (lock) {
+                    for (ArtifactResult ar : artifacts) {
+                        if (ar.getKey() == SCAN_STEP) {
+                            averagePointCount += ar.getReal();
+                            pointCloudCount++;
+                        }
                     }
                 }
                 averagePointCount /= Math.max(pointCloudCount, 1);
@@ -745,13 +748,15 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             runOnUiThread(() -> progressText.setText(R.string.label_wait));
 
             //save metadata into DB
-            for (ArtifactResult ar : artifacts) {
-                artifactResultRepository.insertArtifactResult(ar);
+            synchronized (lock) {
+                for (ArtifactResult ar : artifacts) {
+                    artifactResultRepository.insertArtifactResult(ar);
+                }
+                for (FileLog log : files) {
+                    fileLogRepository.insertFileLog(log);
+                }
+                measureRepository.insertMeasure(measure);
             }
-            for (FileLog log : files) {
-                fileLogRepository.insertFileLog(log);
-            }
-            measureRepository.insertMeasure(measure);
 
             //start uploading service
             runOnUiThread(() -> {
@@ -841,8 +846,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
-
-                    synchronized (files) {
+                    synchronized (lock) {
                         files.add(log);
                     }
                 }
@@ -871,8 +875,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                             log.setAge(age);
                             log.setSchema_version(CgmDatabase.version);
                             log.setMeasureId(measure.getId());
-
-                            synchronized (files) {
+                            synchronized (lock) {
                                 files.add(log);
                             }
                         } catch (Exception e) {
@@ -911,7 +914,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             ar.setMisc("");
             ar.setType("DEPTHMAP_v0.1");
             ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
-            artifacts.add(ar);
+            synchronized (lock) {
+                artifacts.add(ar);
+            }
 
             Runnable thread = () -> {
 
@@ -945,8 +950,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
-
-                    synchronized (files) {
+                    synchronized (lock) {
                         files.add(log);
                     }
                 }
@@ -994,8 +998,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setAge(age);
                 log.setSchema_version(CgmDatabase.version);
                 log.setMeasureId(measure.getId());
-
-                synchronized (files) {
+                synchronized (lock) {
                     files.add(log);
                 }
             }
@@ -1034,7 +1037,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             ar.setMisc("");
             ar.setType("DEPTHMAP_v0.1");
             ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
-            artifacts.add(ar);
+            synchronized (lock) {
+                artifacts.add(ar);
+            }
 
             Runnable thread = () -> {
 
@@ -1069,8 +1074,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
-
-                    synchronized (files) {
+                    synchronized (lock) {
                         files.add(log);
                     }
                 }
@@ -1096,8 +1100,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setAge(age);
                         log.setSchema_version(CgmDatabase.version);
                         log.setMeasureId(measure.getId());
-
-                        synchronized (files) {
+                        synchronized (lock) {
                             files.add(log);
                         }
                     }
