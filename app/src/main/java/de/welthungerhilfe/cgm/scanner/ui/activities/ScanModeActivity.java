@@ -36,20 +36,12 @@ import com.google.ar.core.Pose;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
-import com.google.gson.Gson;
 import com.microsoft.appcenter.crashes.Crashes;
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.queue.CloudQueue;
-import com.microsoft.azure.storage.queue.CloudQueueClient;
-import com.microsoft.azure.storage.queue.CloudQueueMessage;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -62,7 +54,6 @@ import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
-import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
@@ -80,7 +71,6 @@ import de.welthungerhilfe.cgm.scanner.helper.camera.CameraCalibration;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ICamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoCamera;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
-import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoUtils;
@@ -90,6 +80,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private final int PERMISSION_LOCATION = 0x0001;
     private final int PERMISSION_CAMERA = 0x0002;
     private final int PERMISSION_STORAGE = 0x0002;
+
+    public static final String KEY_MEASURE = "KEY_MEASURE";
+    public static final String SUBFIX_COUNT = "_COUNT";
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -307,6 +300,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private ArtifactResultRepository artifactResultRepository;
     private ArrayList<ArtifactResult> artifacts;
     private ArrayList<FileLog> files;
+    private final Object lock = new Object();
 
     private SessionManager session;
 
@@ -584,10 +578,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             @Override
             protected Boolean doInBackground(Void... voids) {
-                for (ArtifactResult ar : artifacts) {
-                    if (ar.getKey() == SCAN_STEP) {
-                        averagePointCount += ar.getReal();
-                        pointCloudCount++;
+                synchronized (lock) {
+                    for (ArtifactResult ar : artifacts) {
+                        if (ar.getKey() == SCAN_STEP) {
+                            averagePointCount += ar.getReal();
+                            pointCloudCount++;
+                        }
                     }
                 }
                 averagePointCount /= Math.max(pointCloudCount, 1);
@@ -742,85 +738,44 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             //stop AR
             getCamera().onPause();
 
-            //check preconditions
-            TextView progressText = progressDialog.findViewById(R.id.wait_message);
-            if (!Utils.isNetworkAvailable(ScanModeActivity.this)) {
-                runOnUiThread(() -> progressText.setText(R.string.error_network));
-            }
+            //wait until everything is saved
             waitUntilFinished();
-            waitUntilOnline();
-            runOnUiThread(() -> progressText.setText(R.string.label_wait));
 
             //save metadata into DB
-            for (ArtifactResult ar : artifacts) {
-                artifactResultRepository.insertArtifactResult(ar);
+            synchronized (lock) {
+                for (ArtifactResult ar : artifacts) {
+                    artifactResultRepository.insertArtifactResult(ar);
+                }
+                for (FileLog log : files) {
+                    fileLogRepository.insertFileLog(log);
+                }
+                measureRepository.insertMeasure(measure);
             }
-            for (FileLog log : files) {
-                fileLogRepository.insertFileLog(log);
-            }
-            measureRepository.insertMeasure(measure);
 
-            //start uploading
+            //start uploading service
             runOnUiThread(() -> {
                 if (!AppController.getInstance().isUploadRunning()) {
                     startService(new Intent(getApplicationContext(), UploadService.class));
                 }
             });
 
-            //update measure metadata
-            Gson gson = new Gson();
-            synchronized (SyncAdapter.getLock()) {
-                try {
-                    CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
-                    CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
-
-                    try {
-                        if (!measure.isArtifact_synced()) {
-                            CloudQueue measureArtifactsQueue = queueClient.getQueueReference("artifact-list");
-                            measureArtifactsQueue.createIfNotExists();
-
-                            long totalNumbers  = fileLogRepository.getTotalArtifactCountForMeasure(measure.getId());
-                            final int size = 50;
-                            int offset = 0;
-
-                            while (offset + 1 < totalNumbers) {
-                                List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(measure.getId(), offset, size);
-
-                                ArtifactList artifactList = new ArtifactList();
-                                artifactList.setMeasure_id(measure.getId());
-                                artifactList.setStart(offset + 1);
-                                artifactList.setEnd(offset + measureArtifacts.size());
-                                artifactList.setArtifacts(measureArtifacts);
-                                artifactList.setTotal(totalNumbers);
-
-                                offset += measureArtifacts.size();
-
-                                CloudQueueMessage measureArtifactsMessage = new CloudQueueMessage(measure.getId());
-                                measureArtifactsMessage.setMessageContent(gson.toJson(artifactList));
-                                measureArtifactsQueue.addMessage(measureArtifactsMessage);
-                            }
-
-                            measure.setArtifact_synced(true);
-                            measure.setUploaded_at(System.currentTimeMillis());
-                        }
-
-                        CloudQueue measureQueue = queueClient.getQueueReference("measure");
-                        measureQueue.createIfNotExists();
-
-                        CloudQueueMessage message = new CloudQueueMessage(measure.getId());
-                        message.setMessageContent(gson.toJson(measure));
-                        measureQueue.addMessage(message);
-
-                        measure.setTimestamp(session.getSyncTimestamp());
-                        measureRepository.updateMeasure(measure);
-                    } catch (StorageException e) {
-                        e.printStackTrace();
-                    }
-                } catch (URISyntaxException | InvalidKeyException e) {
-                    e.printStackTrace();
+            //update measure metadata if possible
+            Context context = ScanModeActivity.this;
+            boolean wifiOnly = LocalPersistency.getBoolean(context, SettingsActivity.KEY_UPLOAD_WIFI);
+            if (wifiOnly) {
+                if (Utils.isWifiConnected(context)) {
+                    measureRepository.uploadMeasure(context, measure);
+                    return null;
                 }
+            } else if (Utils.isNetworkAvailable(context)) {
+                measureRepository.uploadMeasure(context, measure);
+                return null;
             }
 
+            //upload metadata later
+            long measureCount = LocalPersistency.getLong(context, KEY_MEASURE + SUBFIX_COUNT);
+            LocalPersistency.setString(context, KEY_MEASURE + measureCount, measure.getId());
+            LocalPersistency.setLong(context, KEY_MEASURE + SUBFIX_COUNT, measureCount + 1);
             return null;
         }
 
@@ -885,8 +840,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
-
-                    synchronized (files) {
+                    synchronized (lock) {
                         files.add(log);
                     }
                 }
@@ -915,8 +869,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                             log.setAge(age);
                             log.setSchema_version(CgmDatabase.version);
                             log.setMeasureId(measure.getId());
-
-                            synchronized (files) {
+                            synchronized (lock) {
                                 files.add(log);
                             }
                         } catch (Exception e) {
@@ -955,7 +908,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             ar.setMisc("");
             ar.setType("DEPTHMAP_v0.1");
             ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
-            artifacts.add(ar);
+            synchronized (lock) {
+                artifacts.add(ar);
+            }
 
             Runnable thread = () -> {
 
@@ -989,8 +944,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
-
-                    synchronized (files) {
+                    synchronized (lock) {
                         files.add(log);
                     }
                 }
@@ -1038,8 +992,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setAge(age);
                 log.setSchema_version(CgmDatabase.version);
                 log.setMeasureId(measure.getId());
-
-                synchronized (files) {
+                synchronized (lock) {
                     files.add(log);
                 }
             }
@@ -1078,7 +1031,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             ar.setMisc("");
             ar.setType("DEPTHMAP_v0.1");
             ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
-            artifacts.add(ar);
+            synchronized (lock) {
+                artifacts.add(ar);
+            }
 
             Runnable thread = () -> {
 
@@ -1113,8 +1068,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
-
-                    synchronized (files) {
+                    synchronized (lock) {
                         files.add(log);
                     }
                 }
@@ -1140,8 +1094,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setAge(age);
                         log.setSchema_version(CgmDatabase.version);
                         log.setMeasureId(measure.getId());
-
-                        synchronized (files) {
+                        synchronized (lock) {
                             files.add(log);
                         }
                     }
@@ -1178,12 +1131,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             } else {
                 Log.d("ScanModeActivity", "All threads already finished");
             }
-        }
-    }
-
-    private void waitUntilOnline() {
-        while (!Utils.isNetworkAvailable(this)) {
-            Utils.sleep(1000);
         }
     }
 }

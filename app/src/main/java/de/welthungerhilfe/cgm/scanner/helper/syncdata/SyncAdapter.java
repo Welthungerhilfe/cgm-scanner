@@ -56,6 +56,8 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
+import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
+import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -151,6 +153,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            boolean wifiOnly = LocalPersistency.getBoolean(getContext(), SettingsActivity.KEY_UPLOAD_WIFI);
+            if (wifiOnly && !Utils.isWifiConnected(getContext())) {
+                Log.d("SyncAdapter", "skipped due to missing WiFi connection");
+                return null;
+            }
+
+            if (!Utils.isNetworkAvailable(getContext())) {
+                Log.d("SyncAdapter", "skipped due to missing network connection");
+                return null;
+            }
+
             Log.d("SyncAdapter", "start updating");
             synchronized (getLock()) {
                 try {
@@ -161,6 +174,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     processPersonQueue(queueClient);
                     processMeasureQueue(queueClient);
                     processDeviceQueue(queueClient);
+                    processCachedMeasures();
 
                     session.setSyncTimestamp(currentTimestamp);
                 } catch (URISyntaxException | InvalidKeyException | IllegalArgumentException e) {
@@ -387,6 +401,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             } catch (StorageException e) {
                 currentTimestamp = prevTimestamp;
             }
+        }
+
+        private void processCachedMeasures() {
+
+            Context context = getContext();
+            long measureCount = LocalPersistency.getLong(context, ScanModeActivity.KEY_MEASURE + ScanModeActivity.SUBFIX_COUNT);
+            for (long i = 0; i < measureCount; i++) {
+                try {
+                    String id = LocalPersistency.getString(context, ScanModeActivity.KEY_MEASURE + i);
+                    Measure measure = measureRepository.getMeasureById(id);
+                    measureRepository.uploadMeasure(context, measure);
+                } catch (Exception e) {
+                }
+            }
+            LocalPersistency.setLong(context, ScanModeActivity.KEY_MEASURE + ScanModeActivity.SUBFIX_COUNT, 0);
         }
 
         private void onResultReceived(MeasureResult result) {
