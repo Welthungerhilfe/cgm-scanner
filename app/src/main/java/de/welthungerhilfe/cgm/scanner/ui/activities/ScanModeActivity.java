@@ -738,14 +738,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             //stop AR
             getCamera().onPause();
 
-            //check preconditions
-            TextView progressText = progressDialog.findViewById(R.id.wait_message);
-            if (!Utils.isNetworkAvailable(ScanModeActivity.this)) {
-                runOnUiThread(() -> progressText.setText(R.string.error_network));
-            }
+            //wait until everything is saved
             waitUntilFinished();
-            waitUntilOnline();
-            runOnUiThread(() -> progressText.setText(R.string.label_wait));
 
             //save metadata into DB
             synchronized (lock) {
@@ -1137,12 +1131,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             } else {
                 Log.d("ScanModeActivity", "All threads already finished");
             }
-        }
-    }
-
-    private void waitUntilOnline() {
-        while (!Utils.isNetworkAvailable(this)) {
-            Utils.sleep(1000);
         }
     }
 }
