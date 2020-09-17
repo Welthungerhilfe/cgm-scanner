@@ -29,6 +29,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -198,6 +199,11 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 case "consent":
                     path = AppConstants.STORAGE_CONSENT_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
                     break;
+            }
+
+            boolean wifiOnly = LocalPersistency.getBoolean(getBaseContext(), SettingsActivity.KEY_UPLOAD_WIFI);
+            while (wifiOnly && !Utils.isWifiConnected(getBaseContext())) {
+                Utils.sleep(3000);
             }
 
             String[] arr = log.getPath().split("/");

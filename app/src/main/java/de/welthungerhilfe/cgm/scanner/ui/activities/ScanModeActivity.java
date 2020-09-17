@@ -36,20 +36,12 @@ import com.google.ar.core.Pose;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
-import com.google.gson.Gson;
 import com.microsoft.appcenter.crashes.Crashes;
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.queue.CloudQueue;
-import com.microsoft.azure.storage.queue.CloudQueueClient;
-import com.microsoft.azure.storage.queue.CloudQueueMessage;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -62,7 +54,6 @@ import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
-import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
@@ -80,7 +71,6 @@ import de.welthungerhilfe.cgm.scanner.helper.camera.CameraCalibration;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ICamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoCamera;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
-import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoUtils;
@@ -90,6 +80,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private final int PERMISSION_LOCATION = 0x0001;
     private final int PERMISSION_CAMERA = 0x0002;
     private final int PERMISSION_STORAGE = 0x0002;
+
+    public static final String KEY_MEASURE = "KEY_MEASURE";
+    public static final String SUBFIX_COUNT = "_COUNT";
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -216,9 +209,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 mTitleView.setText(getString(R.string.front_view_01) + " - " + getString(R.string.mode_lying));
             }
-
-            fab.setImageResource(R.drawable.recorder);
-            lytScanner.setVisibility(View.VISIBLE);
+            openScan();
         }
     }
     @SuppressLint("SetTextI18n")
@@ -236,9 +227,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 mTitleView.setText(getString(R.string.lateral_view_02) + " - " + getString(R.string.mode_lying));
             }
-
-            fab.setImageResource(R.drawable.recorder);
-            lytScanner.setVisibility(View.VISIBLE);
+            openScan();
         }
     }
     @SuppressLint("SetTextI18n")
@@ -256,9 +245,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 mTitleView.setText(getString(R.string.back_view_03) + " - " + getString(R.string.mode_lying));
             }
-
-            fab.setImageResource(R.drawable.recorder);
-            lytScanner.setVisibility(View.VISIBLE);
+            openScan();
         }
     }
 
@@ -313,6 +300,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private ArtifactResultRepository artifactResultRepository;
     private ArrayList<ArtifactResult> artifacts;
     private ArrayList<FileLog> files;
+    private final Object lock = new Object();
 
     private SessionManager session;
 
@@ -496,19 +484,23 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void updateScanningProgress() {
-        float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 24 : 8) - 1;
+        float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 24 : 8);
         float progressToAddFloat = 100.0f / cloudsToFinishScan;
         int progressToAdd = (int) progressToAddFloat;
         Log.d(TAG, progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
         if (mProgress+progressToAdd > 100) {
             mProgress = 100;
-            runOnUiThread(() -> fab.setImageResource(R.drawable.done));
+            runOnUiThread(() -> {
+                fab.setImageResource(R.drawable.done);
+                goToNextStep();
+            });
         } else {
             mProgress = mProgress+progressToAdd;
         }
 
         Log.d("scan_progress", String.valueOf(mProgress));
         Log.d("scan_progress_step", String.valueOf(progressToAdd));
+        progressBar.setProgress(mProgress);
     }
 
     private void changeMode() {
@@ -553,12 +545,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         animator.start();
     }
 
-    private void startScan() {
-        mProgress = 0;
-
-        resumeScan();
-    }
-
     private void resumeScan() {
         if (SCAN_STEP == AppConstants.SCAN_PREVIEW)
             return;
@@ -572,11 +558,15 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         fab.setImageResource(R.drawable.recorder);
     }
 
+    private void openScan() {
+        fab.setImageResource(R.drawable.recorder);
+        lytScanner.setVisibility(View.VISIBLE);
+        mProgress = 0;
+        progressBar.setProgress(0);
+    }
+
     public void closeScan() {
         mIsRecording = false;
-        progressBar.setProgress(0);
-        mProgress = 0;
-
         lytScanner.setVisibility(View.GONE);
     }
 
@@ -588,10 +578,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             @Override
             protected Boolean doInBackground(Void... voids) {
-                for (ArtifactResult ar : artifacts) {
-                    if (ar.getKey() == SCAN_STEP) {
-                        averagePointCount += ar.getReal();
-                        pointCloudCount++;
+                synchronized (lock) {
+                    for (ArtifactResult ar : artifacts) {
+                        if (ar.getKey() == SCAN_STEP) {
+                            averagePointCount += ar.getReal();
+                            pointCloudCount++;
+                        }
                     }
                 }
                 averagePointCount /= Math.max(pointCloudCount, 1);
@@ -602,30 +594,15 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             public void onPostExecute(Boolean results) {
                 double lightScore = (Math.abs(averagePointCount / 38000 - 1.0) * 3);
 
-                double durationScore;
-                if (scanStep % 100 == 1)
-                    durationScore = Math.abs(1- Math.abs((double) pointCloudCount / 24 - 1));
-                else
-                    durationScore = Math.abs(1- Math.abs((double) pointCloudCount / 8 - 1));
-
                 if (lightScore > 1) lightScore -= 1;
-                if (durationScore > 1) durationScore -= 1;
 
                 Log.e("ScanQuality", String.valueOf(lightScore));
-                Log.e("DurationQuality", String.valueOf(durationScore));
 
                 String issues = getString(R.string.scan_quality);
                 issues = String.format("%s\n - " + getString(R.string.score_light) + "%d%%", issues, Math.round(lightScore * 100));
-                issues = String.format("%s\n - " + getString(R.string.score_duration) + "%d%%", issues, Math.round(durationScore * 100));
 
                 if (scanStep == AppConstants.SCAN_STANDING_FRONT || scanStep == AppConstants.SCAN_LYING_FRONT) {
                     btnScanStep1.setVisibility(View.GONE);
-
-                    if (pointCloudCount < 8) {
-                        issues = String.format("%s\n - " + getString(R.string.score_duration_short), issues);
-                    } else if (pointCloudCount > 9) {
-                        issues = String.format("%s\n - " + getString(R.string.score_duration_long), issues);
-                    }
 
                     txtScanStep1.setText(issues);
                     imgScanStep1.setVisibility(View.GONE);
@@ -636,11 +613,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 } else if (scanStep == AppConstants.SCAN_STANDING_SIDE || scanStep == AppConstants.SCAN_LYING_SIDE) {
                     btnScanStep2.setVisibility(View.GONE);
 
-                    if (pointCloudCount < 12) {
-                        issues = String.format("%s\n - " + getString(R.string.score_duration_short), issues);
-                    } else if (pointCloudCount > 27) {
-                        issues = String.format("%s\n - " + getString(R.string.score_duration_long), issues);
-                    }
                     txtScanStep2.setText(issues);
                     imgScanStep2.setVisibility(View.GONE);
                     lytScanAgain2.setVisibility(View.VISIBLE);
@@ -649,12 +621,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
                 } else if (scanStep == AppConstants.SCAN_STANDING_BACK || scanStep == AppConstants.SCAN_LYING_BACK) {
                     btnScanStep3.setVisibility(View.GONE);
-
-                    if (pointCloudCount < 8) {
-                        issues = String.format("%s\n - " + getString(R.string.score_duration_short), issues);
-                    } else if (pointCloudCount > 9) {
-                        issues = String.format("%s\n - " + getString(R.string.score_duration_long), issues);
-                    }
 
                     txtScanStep3.setText(issues);
                     imgScanStep3.setVisibility(View.GONE);
@@ -749,11 +715,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         pauseScan();
                     }
                 } else {
-                    if (mProgress > 0) {
-                        resumeScan();
-                    } else {
-                        startScan();
-                    }
+                    resumeScan();
                 }
                 break;
             case R.id.imgClose:
@@ -772,74 +734,48 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         @Override
         protected Void doInBackground(Void... voids) {
-            Gson gson = new Gson();
 
+            //stop AR
+            getCamera().onPause();
+
+            //wait until everything is saved
             waitUntilFinished();
-            for (ArtifactResult ar : artifacts) {
-                artifactResultRepository.insertArtifactResult(ar);
+
+            //save metadata into DB
+            synchronized (lock) {
+                for (ArtifactResult ar : artifacts) {
+                    artifactResultRepository.insertArtifactResult(ar);
+                }
+                for (FileLog log : files) {
+                    fileLogRepository.insertFileLog(log);
+                }
+                measureRepository.insertMeasure(measure);
             }
-            for (FileLog log : files) {
-                fileLogRepository.insertFileLog(log);
-            }
-            measureRepository.insertMeasure(measure);
+
+            //start uploading service
             runOnUiThread(() -> {
                 if (!AppController.getInstance().isUploadRunning()) {
                     startService(new Intent(getApplicationContext(), UploadService.class));
                 }
             });
 
-            synchronized (SyncAdapter.getLock()) {
-                try {
-                    CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
-                    CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
-
-                    try {
-                        if (!measure.isArtifact_synced()) {
-                            CloudQueue measureArtifactsQueue = queueClient.getQueueReference("artifact-list");
-                            measureArtifactsQueue.createIfNotExists();
-
-                            long totalNumbers  = fileLogRepository.getTotalArtifactCountForMeasure(measure.getId());
-                            final int size = 50;
-                            int offset = 0;
-
-                            while (offset + 1 < totalNumbers) {
-                                List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(measure.getId(), offset, size);
-
-                                ArtifactList artifactList = new ArtifactList();
-                                artifactList.setMeasure_id(measure.getId());
-                                artifactList.setStart(offset + 1);
-                                artifactList.setEnd(offset + measureArtifacts.size());
-                                artifactList.setArtifacts(measureArtifacts);
-                                artifactList.setTotal(totalNumbers);
-
-                                offset += measureArtifacts.size();
-
-                                CloudQueueMessage measureArtifactsMessage = new CloudQueueMessage(measure.getId());
-                                measureArtifactsMessage.setMessageContent(gson.toJson(artifactList));
-                                measureArtifactsQueue.addMessage(measureArtifactsMessage);
-                            }
-
-                            measure.setArtifact_synced(true);
-                            measure.setUploaded_at(System.currentTimeMillis());
-                        }
-
-                        CloudQueue measureQueue = queueClient.getQueueReference("measure");
-                        measureQueue.createIfNotExists();
-
-                        CloudQueueMessage message = new CloudQueueMessage(measure.getId());
-                        message.setMessageContent(gson.toJson(measure));
-                        measureQueue.addMessage(message);
-
-                        measure.setTimestamp(session.getSyncTimestamp());
-                        measureRepository.updateMeasure(measure);
-                    } catch (StorageException e) {
-                        e.printStackTrace();
-                    }
-                } catch (URISyntaxException | InvalidKeyException e) {
-                    e.printStackTrace();
+            //update measure metadata if possible
+            Context context = ScanModeActivity.this;
+            boolean wifiOnly = LocalPersistency.getBoolean(context, SettingsActivity.KEY_UPLOAD_WIFI);
+            if (wifiOnly) {
+                if (Utils.isWifiConnected(context)) {
+                    measureRepository.uploadMeasure(context, measure);
+                    return null;
                 }
+            } else if (Utils.isNetworkAvailable(context)) {
+                measureRepository.uploadMeasure(context, measure);
+                return null;
             }
 
+            //upload metadata later
+            long measureCount = LocalPersistency.getLong(context, KEY_MEASURE + SUBFIX_COUNT);
+            LocalPersistency.setString(context, KEY_MEASURE + measureCount, measure.getId());
+            LocalPersistency.setLong(context, KEY_MEASURE + SUBFIX_COUNT, measureCount + 1);
             return null;
         }
 
@@ -904,8 +840,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
-
-                    synchronized (files) {
+                    synchronized (lock) {
                         files.add(log);
                     }
                 }
@@ -934,8 +869,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                             log.setAge(age);
                             log.setSchema_version(CgmDatabase.version);
                             log.setMeasureId(measure.getId());
-
-                            synchronized (files) {
+                            synchronized (lock) {
                                 files.add(log);
                             }
                         } catch (Exception e) {
@@ -965,7 +899,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             mNumberOfFilesWritten++;
 
             updateScanningProgress();
-            progressBar.setProgress(mProgress);
 
             ArtifactResult ar = new ArtifactResult();
             ar.setConfidence_value(String.valueOf(100 - Artifact_Confidence_penalty));
@@ -975,7 +908,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             ar.setMisc("");
             ar.setType("DEPTHMAP_v0.1");
             ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
-            artifacts.add(ar);
+            synchronized (lock) {
+                artifacts.add(ar);
+            }
 
             Runnable thread = () -> {
 
@@ -1009,8 +944,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
-
-                    synchronized (files) {
+                    synchronized (lock) {
                         files.add(log);
                     }
                 }
@@ -1058,8 +992,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setAge(age);
                 log.setSchema_version(CgmDatabase.version);
                 log.setMeasureId(measure.getId());
-
-                synchronized (files) {
+                synchronized (lock) {
                     files.add(log);
                 }
             }
@@ -1081,7 +1014,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             buffer.asFloatBuffer().put(pointCloudData.points);
 
             updateScanningProgress();
-            progressBar.setProgress(mProgress);
 
             float lightIntensity = mPixelIntensity;
             float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
@@ -1099,7 +1031,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             ar.setMisc("");
             ar.setType("DEPTHMAP_v0.1");
             ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
-            artifacts.add(ar);
+            synchronized (lock) {
+                artifacts.add(ar);
+            }
 
             Runnable thread = () -> {
 
@@ -1134,8 +1068,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
-
-                    synchronized (files) {
+                    synchronized (lock) {
                         files.add(log);
                     }
                 }
@@ -1161,8 +1094,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setAge(age);
                         log.setSchema_version(CgmDatabase.version);
                         log.setMeasureId(measure.getId());
-
-                        synchronized (files) {
+                        synchronized (lock) {
                             files.add(log);
                         }
                     }

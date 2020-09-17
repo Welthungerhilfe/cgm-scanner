@@ -107,8 +107,7 @@ public class ManualDetailDialog extends Dialog {
         txtManualHeight.setText(String.valueOf(measure.getHeight()));
         txtManualWeight.setText(String.valueOf(measure.getWeight()));
         txtManualMuac.setText(String.valueOf(measure.getMuac()));
-        if (measure.isOedema()) {
-            checkManualOedema.setChecked(measure.isOedema());
-        }
+        checkManualOedema.setChecked(!measure.isOedema());
+        checkManualOedema.setEnabled(false);
     }
 }

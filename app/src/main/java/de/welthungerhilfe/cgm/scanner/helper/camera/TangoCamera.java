@@ -171,6 +171,7 @@ public class TangoCamera implements ICamera {
                 // re-connection in the OpenGL thread after resume.
                 mConnectedTextureIdGlThread = INVALID_TEXTURE_ID;
                 mTango.disconnect();
+                mTango = null;
                 mIsConnected = false;
             } catch (TangoErrorException e) {
                 Crashes.trackError(e);

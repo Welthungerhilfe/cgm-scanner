@@ -69,7 +69,7 @@
     <string name="measure_weight">04 Weight</string>
     <string name="measure_muac">05 MUAC</string>
     <string name="measure_head">06 Head Circumference</string>
-    <string name="measure_oedema">Oedema</string>
+    <string name="measure_oedema">No edema</string>
 
     <string name="start_scan">Start Scan</string>
     <string name="retake_scan">Retake Scan</string>
@@ -187,6 +187,9 @@
         <item>@string/selector_scan</item>
     </string-array>
 
+    <string name="selector_yes">Yes</string>
+    <string name="selector_no">No</string>
+
     <string name="mode_standing">Standing Up</string>
     <string name="mode_lying">Lying Down</string>
 
@@ -219,6 +222,7 @@
     <string name="menuLogout">Logout</string>
     <string name="performance_measurement">Performance Measurement</string>
     <string name="remote_config">Remote Config</string>
+
     <string name="remote_debug">Debug</string>
     <string name="remote_sync_period">Sync Period</string>
     <string name="remote_allow_delete">Allow Delete</string>
@@ -299,10 +303,8 @@
 
     <string name="scan_quality">Scan Quality : </string>
     <string name="score_light">Light Score : </string>
-    <string name="score_duration">Duration Score : </string>
-    <string name="score_duration_short">Duration was too short</string>
-    <string name="score_duration_long">Duration was too long</string>
 
+    <string name="upload_over_wifi">Upload scans only over Wi-Fi</string>
     <string name="upload_completed">Upload Completed</string>
     <string name="less_than_minute">less than 1 minute</string>
     <string name="minutes">minutes</string>
@@ -311,4 +313,8 @@
 
     <string name="result_generation_at">Result generation at</string>
     <string name="result_for">result for</string>
+
+    <string name="edema_check">Are you sure the child suffers from Edema?</string>
+    <string name="edema_link">How to check for bilateral edema\nyoutu.be/3pQUtOsjjSY?t=85</string>
+
 </resources>
