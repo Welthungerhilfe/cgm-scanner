@@ -42,6 +42,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
@@ -157,7 +158,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                     return true;
                 }
 
-                @SuppressLint("DefaultLocale")
                 public void onPostExecute(Boolean result) {
                     double lightScoreFront = (Math.abs(averagePointCountFront / 38000 - 1.0) * 3);
                     double durationScoreFront = Math.abs(1- Math.abs((double) pointCloudCountFront / 8 - 1));
@@ -193,7 +193,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
                     holder.rateOverallScore.setRating(5 * (float)overallScore);
 
-                    if (feedbackListener != null) holder.bindScanFeedbackListener(measureList.get(holder.getAdapterPosition()), overallScore);
+                    if (feedbackListener != null) holder.bindScanFeedbackListener(measure, overallScore);
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
@@ -211,8 +211,8 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             int heightConfidence = (int)(measure.getHeightConfidence() * 100);
             int weightConfidence = (int)(measure.getWeightConfidence() * 100);
 
-            holder.txtHeight.setText(String.format("%.2f%s", measure.getHeight(), context.getString(R.string.unit_cm)));
-            holder.txtWeight.setText(String.format("%.3f%s", measure.getWeight(), context.getString(R.string.unit_kg)));
+            holder.txtHeight.setText(String.format(Locale.getDefault(), "%.2f%s", measure.getHeight(), context.getString(R.string.unit_cm)));
+            holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f%s", measure.getWeight(), context.getString(R.string.unit_kg)));
 
             if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
                 holder.txtHeightConfidence.setVisibility(View.GONE);
@@ -229,7 +229,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         }
 
         if (listener != null) {
-            holder.bindSelectListener(measureList.get(holder.getAdapterPosition()));
+            holder.bindSelectListener(measure);
         }
     }
 
