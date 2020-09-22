@@ -19,6 +19,9 @@
 package de.welthungerhilfe.cgm.scanner.helper.camera;
 
 public class CameraCalibration {
+
+    public enum LightConditions { NORMAL, BRIGHT, DARK };
+
     public float[] colorCameraIntrinsic;
     public float[] depthCameraIntrinsic;
     public float[] depthCameraTranslation;

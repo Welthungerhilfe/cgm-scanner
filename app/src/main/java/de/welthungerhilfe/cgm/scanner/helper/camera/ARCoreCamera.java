@@ -451,6 +451,13 @@ public class ARCoreCamera implements ICamera {
     return mPixelIntensity;
   }
 
+  @Override
+  public CameraCalibration.LightConditions getLightConditionState() {
+    if (mPixelIntensity > 1.25f) return CameraCalibration.LightConditions.BRIGHT;
+    if (mPixelIntensity < 0.25f) return CameraCalibration.LightConditions.DARK;
+    return CameraCalibration.LightConditions.NORMAL;
+  }
+
   private void updateFrame(int texture, int width, int height) {
     try {
       if (mSession == null) {

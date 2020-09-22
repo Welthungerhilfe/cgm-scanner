@@ -288,6 +288,8 @@
 
     <string name="scan_quality">स्कैन गुणवत्ता : </string>
     <string name="score_light">लाइट स्कोर : </string>
+    <string name="score_light_bright">बहुत चमकीला</string>
+    <string name="score_light_dark">बहुत अँधेरा</string>
 
     <string name="upload_over_wifi">केवल वाई-फाई पर स्कैन अपलोड करें</string>
     <string name="upload_completed">अपलोड पूर्ण</string>

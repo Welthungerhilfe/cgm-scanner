@@ -29,4 +29,5 @@ public interface ICamera {
 
     CameraCalibration getCalibration();
     float getLightIntensity();
+    CameraCalibration.LightConditions getLightConditionState();
 }

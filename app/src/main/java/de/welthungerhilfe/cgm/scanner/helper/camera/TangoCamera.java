@@ -31,6 +31,7 @@ import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoConfig;
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoErrorException;
+import com.google.atap.tangoservice.TangoEvent;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
@@ -65,6 +66,10 @@ public class TangoCamera implements ICamera {
     private Semaphore mutex_on_mIsRecording;
     private AtomicBoolean mIsFrameAvailableTangoThread;
     private double[] mPose;
+    private float mPixelIntensity;
+    private CameraCalibration.LightConditions mLight;
+    private double mLastBright;
+    private double mLastDark;
 
     //App integration objects
     private Activity mActivity;
@@ -79,6 +84,10 @@ public class TangoCamera implements ICamera {
         mIsConnected = false;
         mIsFrameAvailableTangoThread = new AtomicBoolean(false);
         mPose = new double[]{0, 0, 0, 1, 0, 0, 0};
+        mPixelIntensity = 0;
+        mLight = CameraCalibration.LightConditions.NORMAL;
+        mLastBright = 0;
+        mLastDark = 0;
     }
 
     @Override
@@ -186,7 +195,25 @@ public class TangoCamera implements ICamera {
 
     @Override
     public float getLightIntensity() {
-        return 0;
+        return mPixelIntensity;
+    }
+
+    @Override
+    public CameraCalibration.LightConditions getLightConditionState() {
+        //prevent showing "too bright" directly after changing light conditions
+        double diff = Math.abs(mLastBright - System.currentTimeMillis());
+        if (mLight == CameraCalibration.LightConditions.BRIGHT) {
+          if (diff < 3000) {
+              mLight = CameraCalibration.LightConditions.NORMAL;
+          }
+        }
+
+        //reset light state if there was longer no change
+        diff = Math.min(diff, Math.abs(mLastDark - System.currentTimeMillis()));
+        if (diff > 1000) {
+            mLight = CameraCalibration.LightConditions.NORMAL;
+        }
+        return mLight;
     }
 
     private void startTango() {
@@ -307,12 +334,29 @@ public class TangoCamera implements ICamera {
                     mCameraSurfaceView.requestRender();
                 }
             }
+
+            @Override
+            public void onTangoEvent(TangoEvent event) {
+                super.onTangoEvent(event);
+
+                switch (event.eventKey) {
+                    case TangoEvent.DESCRIPTION_FISHEYE_OVER_EXPOSED:
+                        mLight = CameraCalibration.LightConditions.BRIGHT;
+                        mLastBright = System.currentTimeMillis();
+                        break;
+                    case TangoEvent.DESCRIPTION_FISHEYE_UNDER_EXPOSED:
+                        mLight = CameraCalibration.LightConditions.DARK;
+                        mLastDark = System.currentTimeMillis();
+                        break;
+                }
+            }
         });
 
         mTango.experimentalConnectOnFrameListener(TangoCameraIntrinsics.TANGO_CAMERA_COLOR, (tangoImageBuffer, i) -> {
             if ( ! mPointCloudAvailable) {
                 return;
             }
+            mPixelIntensity = TangoUtils.getPixelIntensity(tangoImageBuffer);
             for (TangoCameraListener listener : mListeners) {
                 listener.onTangoColorData(tangoImageBuffer);
             }
