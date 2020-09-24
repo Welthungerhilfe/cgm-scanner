@@ -68,8 +68,8 @@ public class TangoCamera implements ICamera {
     private double[] mPose;
     private float mPixelIntensity;
     private CameraCalibration.LightConditions mLight;
-    private double mLastBright;
-    private double mLastDark;
+    private long mLastBright;
+    private long mLastDark;
 
     //App integration objects
     private Activity mActivity;
@@ -200,19 +200,7 @@ public class TangoCamera implements ICamera {
 
     @Override
     public CameraCalibration.LightConditions getLightConditionState() {
-        //prevent showing "too bright" directly after changing light conditions
-        double diff = Math.abs(mLastBright - System.currentTimeMillis());
-        if (mLight == CameraCalibration.LightConditions.BRIGHT) {
-          if (diff < 3000) {
-              mLight = CameraCalibration.LightConditions.NORMAL;
-          }
-        }
-
-        //reset light state if there was longer no change
-        diff = Math.min(diff, Math.abs(mLastDark - System.currentTimeMillis()));
-        if (diff > 1000) {
-            mLight = CameraCalibration.LightConditions.NORMAL;
-        }
+        mLight = CameraCalibration.updateLight(mLight, mLastBright, mLastDark, 0);
         return mLight;
     }
 

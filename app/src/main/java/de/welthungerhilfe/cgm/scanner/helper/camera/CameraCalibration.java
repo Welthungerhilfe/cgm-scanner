@@ -57,4 +57,27 @@ public class CameraCalibration {
         output += depthCameraTranslation[0] + " " + depthCameraTranslation[1] + " " + depthCameraTranslation[2] + "\n";
         return output;
     }
+
+    public static LightConditions updateLight(LightConditions light, long lastBright, long lastDark, long sessionStart) {
+        //prevent showing "too bright" directly after changing light conditions
+        double diff = Math.abs(lastBright - System.currentTimeMillis());
+        if (light == CameraCalibration.LightConditions.BRIGHT) {
+            if (diff < 3000) {
+                light = CameraCalibration.LightConditions.NORMAL;
+            }
+        }
+
+        //prevent showing messages directly after session start
+        if ((Math.abs(lastBright - sessionStart) < 2000) || (Math.abs(lastDark - sessionStart) < 2000)) {
+            light = CameraCalibration.LightConditions.NORMAL;
+        }
+
+        //reset light state if there was longer no change
+        diff = Math.min(diff, Math.abs(lastDark - System.currentTimeMillis()));
+        if (diff > 1000) {
+            light = CameraCalibration.LightConditions.NORMAL;
+        }
+
+        return light;
+    }
 }
