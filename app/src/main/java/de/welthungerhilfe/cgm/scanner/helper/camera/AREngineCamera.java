@@ -76,6 +76,10 @@ public class AREngineCamera implements ICamera {
   private int mFrameIndex;
   private float mPixelIntensity;
   private boolean mShowDepth;
+  private CameraCalibration.LightConditions mLight;
+  private long mLastBright;
+  private long mLastDark;
+  private long mSessionStart;
 
   public AREngineCamera(Activity activity) {
     mActivity = activity;
@@ -86,6 +90,10 @@ public class AREngineCamera implements ICamera {
     mFrameIndex = 1;
     mPixelIntensity = 0;
     mShowDepth = LocalPersistency.getBoolean(activity, SettingsActivity.KEY_SHOW_DEPTH);
+    mLight = CameraCalibration.LightConditions.NORMAL;
+    mLastBright = 0;
+    mLastDark = 0;
+    mSessionStart = 0;
   }
 
   public void addListener(Object listener) {
@@ -267,6 +275,12 @@ public class AREngineCamera implements ICamera {
     return mPixelIntensity;
   }
 
+  @Override
+  public CameraCalibration.LightConditions getLightConditionState() {
+    mLight = CameraCalibration.updateLight(mLight, mLastBright, mLastDark, mSessionStart);
+    return mLight;
+  }
+
   private void updateFrame(int texture, int width, int height) {
     try {
       if (mSession == null) {
@@ -293,6 +307,17 @@ public class AREngineCamera implements ICamera {
 
       //get light estimation from AREngine
       mPixelIntensity = frame.getLightEstimate().getPixelIntensity() * 2.0f;
+      if (mPixelIntensity > 1.5f) {
+        mLight = CameraCalibration.LightConditions.BRIGHT;
+        mLastBright = System.currentTimeMillis();
+      }
+      if (mPixelIntensity < 0.25f) {
+        mLight = CameraCalibration.LightConditions.DARK;
+        mLastDark = System.currentTimeMillis();
+      }
+      if (mSessionStart == 0) {
+        mSessionStart = System.currentTimeMillis();
+      }
 
       //process camera data
       onProcessColorData(frame.acquirePreviewImage());

@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
+import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -304,6 +305,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private SessionManager session;
 
+    private TextView mTxtLightFeedback;
     private TextView mTitleView;
     private ProgressBar progressBar;
     private FloatingActionButton fab;
@@ -320,7 +322,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private long mNowTime;
     private String mNowTimeString;
-    private float mPixelIntensity;
 
     private long mColorSize;
     private long mColorTime;
@@ -357,6 +358,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     protected void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             Crashes.trackError(throwable);
@@ -394,6 +396,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         ButterKnife.bind(this);
 
+        mTxtLightFeedback = findViewById(R.id.txtLightFeedback);
         mTitleView = findViewById(R.id.txtTitle);
         progressBar = findViewById(R.id.progressBar);
         fab = findViewById(R.id.fab_scan_result);
@@ -886,6 +889,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onDepthDataReceived(Image image, Pose pose, int frameIndex) {
+
+        onLightUpdate(mCameraInstance.getLightConditionState());
+
         if (mIsRecording && (frameIndex % 10 == 0)) {
 
             long profile = System.currentTimeMillis();
@@ -961,8 +967,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
-        mPixelIntensity = TangoUtils.getPixelIntensity(tangoImageBuffer);
-
         String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + tangoImageBuffer.timestamp + ".jpg";
         File artifactFile = new File(mRgbSaveFolder.getPath(), currentImgFilename);
         TangoUtils.writeImageToFile(tangoImageBuffer, artifactFile);
@@ -1004,6 +1008,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onTangoDepthData(TangoPointCloudData pointCloudData, double[] pose, TangoCameraIntrinsics[] calibration) {
+
+        onLightUpdate(mCameraInstance.getLightConditionState());
+
         // Saving the frame or not, depending on the current mode.
         if ( mIsRecording ) {
             long profile = System.currentTimeMillis();
@@ -1015,7 +1022,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             updateScanningProgress();
 
-            float lightIntensity = mPixelIntensity;
+            float lightIntensity = mCameraInstance.getLightIntensity();
             float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
             float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
             double Artifact_Lighting_penalty=Math.abs((double) numPoints/38000-1.0)*100*3;
@@ -1104,6 +1111,24 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             onThreadChange(1);
             executor.execute(thread);
         }
+    }
+
+    private void onLightUpdate(CameraCalibration.LightConditions state) {
+        runOnUiThread(() -> {
+            switch (state) {
+                case NORMAL:
+                    mTxtLightFeedback.setVisibility(View.GONE);
+                    break;
+                case BRIGHT:
+                    mTxtLightFeedback.setText(R.string.score_light_bright);
+                    mTxtLightFeedback.setVisibility(View.VISIBLE);
+                    break;
+                case DARK:
+                    mTxtLightFeedback.setText(R.string.score_light_dark);
+                    mTxtLightFeedback.setVisibility(View.VISIBLE);
+                    break;
+            }
+        });
     }
 
     private void onThreadChange(int diff) {

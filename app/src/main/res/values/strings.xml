@@ -303,6 +303,8 @@
 
     <string name="scan_quality">Scan Quality : </string>
     <string name="score_light">Light Score : </string>
+    <string name="score_light_bright">Too bright</string>
+    <string name="score_light_dark">Too dark</string>
 
     <string name="upload_over_wifi">Upload scans only over Wi-Fi</string>
     <string name="upload_completed">Upload Completed</string>

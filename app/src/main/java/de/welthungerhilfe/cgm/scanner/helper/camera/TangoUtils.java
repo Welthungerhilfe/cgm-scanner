@@ -35,7 +35,8 @@ import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 public class TangoUtils {
 
     public static float getPixelIntensity(TangoImageBuffer imageBuffer) {
-        float intensity = 0.5f;
+        int max = 0;
+        int summary = 0;
         byte[] array = TangoUtils.copyImageBuffer(imageBuffer).data.array();
         int width = imageBuffer.width;
         int height = imageBuffer.height;
@@ -58,11 +59,11 @@ public class TangoUtils {
                 B = Math.min(Math.max(B, 0), 255);
 
                 //update pixel intensity
-                int highest = Math.max(Math.max(R, G), B);
-                intensity = intensity * 0.95f + (highest / 255.0f) * 0.05f;
+                max += 3 * 255;
+                summary += R + G + B;
             }
         }
-        return intensity * 1.5f;
+        return summary / (float)max * 1.5f;
     }
 
     public static TangoImageBuffer copyImageBuffer(TangoImageBuffer imageBuffer) {

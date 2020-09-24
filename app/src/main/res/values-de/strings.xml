@@ -290,6 +290,8 @@
 
     <string name="scan_quality">Scanqualität : </string>
     <string name="score_light">Belichtung : </string>
+    <string name="score_light_bright">Zu hell</string>
+    <string name="score_light_dark">Zu dunkel</string>
 
     <string name="upload_over_wifi">Laden Scans nur über WLAN hoch</string>
     <string name="upload_completed">Upload abgeschlossen</string>
