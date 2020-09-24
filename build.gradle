@@ -5,9 +5,8 @@ buildscript {
     repositories {
         google()
         jcenter()
-        maven {
-            url "http://developer.huawei.com/repo/"
-        }
+        maven { url "http://developer.huawei.com/repo/" }
+        maven { url "https://kotlin.bintray.com/kotlinx/" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.0.1'
