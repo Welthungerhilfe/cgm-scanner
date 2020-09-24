@@ -39,6 +39,7 @@ public class AppConstants {
     public static final String STORAGE_CALIBRATION_URL = "qrcode/{qrcode}/measure/{scantimestamp}/";
     public static final String STORAGE_DEPTH_URL = "qrcode/{qrcode}/measure/{scantimestamp}/depth/";
     public static final String STORAGE_RGB_URL = "qrcode/{qrcode}/measure/{scantimestamp}/rgb/";
+    public static final String STORAGE_CONTAINER = "scans";
 
     public static final String VAL_SEX_FEMALE = "female";
     public static final String VAL_SEX_MALE = "male";

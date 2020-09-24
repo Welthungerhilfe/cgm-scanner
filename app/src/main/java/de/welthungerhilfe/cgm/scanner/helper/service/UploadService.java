@@ -212,7 +212,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 final File file = new File(log.getPath());
                 FileInputStream stream = new FileInputStream(file);
 
-                CloudBlobContainer container = blobClient.getContainerReference("data");
+                CloudBlobContainer container = blobClient.getContainerReference(AppConstants.STORAGE_CONTAINER);
                 container.createIfNotExists();
 
                 CloudBlockBlob blob = container.getBlockBlobReference(path + arr[arr.length - 1]);
