@@ -564,6 +564,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private void openScan() {
         fab.setImageResource(R.drawable.recorder);
         lytScanner.setVisibility(View.VISIBLE);
+        mTxtLightFeedback.setVisibility(View.GONE);
         mProgress = 0;
         progressBar.setProgress(0);
     }
