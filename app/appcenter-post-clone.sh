@@ -27,11 +27,7 @@ echo "$APP_CONSTANT_FILE"
 
 if [ -e "$APP_CONSTANT_FILE" ]
 then
-    echo "Updating AZURE_ACCOUNT_NAME, AZURE_ACCOUNT_KEY"
-
-    # Key variable uses slashes /, therefore a different command seperator | is needed for sed
-    sed -i '' "s|{AZURE_ACCOUNT_NAME}|$AZURE_ACCOUNT_NAME|g" $APP_CONSTANT_FILE
-    sed -i '' "s|{AZURE_ACCOUNT_KEY}|$AZURE_ACCOUNT_KEY|g" $APP_CONSTANT_FILE
+    echo "Updating API KEYS"
 
     sed -i '' "s|{GOOGLE_MAPS_KEY}|$GOOGLE_MAPS_KEY|g" $APP_MANIFEST_FILE
 
@@ -42,6 +38,7 @@ then
     sed -i '' "s|{B2C_CLIENT_ID}|$B2C_CLIENT_ID|g" $APP_LOGIN_ACTIVITY
     sed -i '' "s|{B2C_RESPONSE_URL}|$B2C_RESPONSE_URL|g" $APP_LOGIN_ACTIVITY
     sed -i '' "s|{B2C_SCOPE}|$B2C_SCOPE|g" $APP_LOGIN_ACTIVITY
+    sed -i '' "s|{B2C_USER_FLOW}|$B2C_USER_FLOW|g" $APP_LOGIN_ACTIVITY
 
     echo "File content:"
     cat $APP_CONSTANT_FILE

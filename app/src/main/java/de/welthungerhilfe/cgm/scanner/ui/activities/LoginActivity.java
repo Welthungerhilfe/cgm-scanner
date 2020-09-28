@@ -149,9 +149,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         String clientID = "{B2C_CLIENT_ID}";
         String responseURL = "{B2C_RESPONSE_URL}";
         String scope = "{B2C_SCOPE}";
+        String userflow = "{B2C_USER_FLOW}";
 
-        String url = "https://whhict4x.b2clogin.com/whhict4x.onmicrosoft.com/oauth2/v2.0/";
-        url += "authorize?p=B2C_1_signupsignin1&client_id=" + clientID;
+        String url = "https://" + tenant + ".b2clogin.com/" + tenant + ".onmicrosoft.com";
+        url += "/oauth2/v2.0/authorize?p="+ userflow + "&client_id=" + clientID;
         url += "&nonce=defaultNonce&redirect_uri=" + responseURL;
         url += "&scope=https://" + tenant + ".onmicrosoft.com/" + clientID + "/" + scope;
         url += "&response_type=token&prompt=login&response_mode=query";
