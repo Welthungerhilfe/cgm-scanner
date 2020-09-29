@@ -2,10 +2,6 @@ package de.welthungerhilfe.cgm.scanner.helper.syncdata;
 
 import android.accounts.Account;
 import android.annotation.SuppressLint;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -13,12 +9,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SyncRequest;
 import android.content.SyncResult;
-import android.media.RingtoneManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Pair;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -31,13 +24,10 @@ import com.microsoft.azure.storage.queue.CloudQueueMessage;
 
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -55,19 +45,15 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureResultReposit
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
-import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
-import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
-
-    private static final String CHANNEL_ID = "CGM_Result_Generation_Notification";
 
     private static final Object lock = new Object();
 
@@ -198,8 +184,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         private void processMeasureResultQueue(CloudQueueClient queueClient) throws URISyntaxException {
-            HashMap<String, Pair<Float, Long>> heightNotification = new HashMap<>();
-            HashMap<String, Pair<Float, Long>> weightNotification = new HashMap<>();
+            HashMap<String, MeasureNotification> notifications = new HashMap<>();
 
             try {
                 CloudQueue measureResultQueue = queueClient.getQueueReference(Utils.getAndroidID(getContext().getContentResolver()) + "-measure-result");
@@ -222,13 +207,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             String messageStr = message.getMessageContentAsString();
                             Log.d("SyncAdapter", messageStr);
                             MeasureResult result = gson.fromJson(messageStr, MeasureResult.class);
+                            String qrCode = getQrCode(result.getMeasure_id());
+                            if (!notifications.containsKey(qrCode)) {
+                                notifications.put(qrCode, new MeasureNotification());
+                            }
+                            MeasureNotification notification = notifications.get(qrCode);
 
                             float keyMaxConfident = measureResultRepository.getConfidence(result.getMeasure_id(), result.getKey());
                             if (result.getConfidence_value() > keyMaxConfident) {
                                 measureResultRepository.insertMeasureResult(result);
                             }
 
-                            Pair<Float, Long> value = new Pair<>(result.getFloat_value(), System.currentTimeMillis());
                             if (result.getKey().contains("weight")) {
                                 float fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "weight%");
 
@@ -248,11 +237,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                             onResultReceived(result);
                                         }
 
-                                        weightNotification.remove(result.getMeasure_id());
-                                        weightNotification.put(result.getMeasure_id(), value);
+                                        notification.setWeight(result.getFloat_value());
                                     }
-                                } else if (!weightNotification.containsKey(result.getMeasure_id())) {
-                                    weightNotification.put(result.getMeasure_id(), value);
+                                } else if (!notification.hasWeight()) {
+                                    notification.setWeight(result.getFloat_value());
                                 }
                             } else if (result.getKey().contains("height")) {
                                 float fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "height%");
@@ -273,11 +261,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                             onResultReceived(result);
                                         }
 
-                                        heightNotification.remove(result.getMeasure_id());
-                                        heightNotification.put(result.getMeasure_id(), value);
+                                        notification.setHeight(result.getFloat_value());
                                     }
-                                } else if (!heightNotification.containsKey(result.getMeasure_id())) {
-                                    heightNotification.put(result.getMeasure_id(), value);
+                                } else if (notification.hasHeight()) {
+                                    notification.setHeight(result.getFloat_value());
                                 }
                             }
                         } catch (JsonSyntaxException e) {
@@ -291,18 +278,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 e.printStackTrace();
             }
 
-            int notificationID = Integer.parseInt(new SimpleDateFormat("ddHHmmss",  Locale.US).format(new Date()));
-            for (String id : heightNotification.keySet()) {
-                Pair<Float, Long> value = heightNotification.get(id);
-                if (value != null) {
-                    showNotification(getContext(), notificationID++, getQrCode(id), "height", value.first, value.second);
-                }
-            }
-            for (String id : weightNotification.keySet()) {
-                Pair<Float, Long> value = weightNotification.get(id);
-                if (value != null) {
-                    showNotification(getContext(), notificationID++, getQrCode(id), "weight", value.first, value.second);
-                }
+            for (String id : notifications.keySet()) {
+                notifications.get(id).showNotification(getContext(), id);
             }
         }
 
@@ -443,38 +420,5 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 LocalPersistency.setLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE, last);
             }
         }
-    }
-
-
-    private void showNotification(Context context, int notificationID, String qrCode, String type, double value, long timestamp) {
-        Notification.Builder notificationBuilder;
-
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        Intent notificationIntent = new Intent(context, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "CGM Result Generation", NotificationManager.IMPORTANCE_HIGH);
-            notificationManager.createNotificationChannel(channel);
-
-            notificationBuilder = new Notification.Builder(context, CHANNEL_ID);
-
-        } else {
-            notificationBuilder = new Notification.Builder(context);
-        }
-
-        notificationBuilder = notificationBuilder
-                .setSmallIcon(R.drawable.icon_notif)
-                .setContentIntent(pendingIntent)
-                .setPriority(Notification.PRIORITY_MAX)
-                .setVibrate(new long[]{0, 500, 1000})
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                .setOngoing(false);
-
-        notificationBuilder.setContentTitle(String.format(context.getString(R.string.result_generation_at) + " %s", DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE, timestamp)));
-        notificationBuilder.setContentText(String.format(Locale.US, "%s " + context.getString(R.string.result_for) + " %s : %.2f%s", type, qrCode, value, type.equals("weight") ? "kg" : "cm"));
-
-        notificationManager.notify(notificationID, notificationBuilder.build());
     }
 }
