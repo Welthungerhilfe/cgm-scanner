@@ -67,6 +67,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
 import de.welthungerhilfe.cgm.scanner.helper.service.DeviceService;
+import de.welthungerhilfe.cgm.scanner.helper.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
@@ -497,6 +498,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     @Override
     protected void onResume() {
         super.onResume();
+        MeasureNotification.dismissNotification(this);
         PersonRepository repository = PersonRepository.getInstance(this);
         if (repository.isUpdated()) {
             adapterData.clear();

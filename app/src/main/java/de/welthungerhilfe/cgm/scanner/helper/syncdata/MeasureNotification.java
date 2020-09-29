@@ -19,11 +19,12 @@ import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 public class MeasureNotification {
 
     private static final String CHANNEL_ID = "CGM_Result_Generation_Notification";
-    private static HashMap<String, Integer> qr2notificationId = new HashMap<>();
+    private static final int NOTIFICATION_ID = 2030;
+
+    private static String lastNotification = "";
 
     private Float height;
     private Float weight;
-    private Long timestamp;
 
     public boolean hasHeight() {
         return height != null;
@@ -35,19 +36,23 @@ public class MeasureNotification {
 
     public void setHeight(float value) {
         height = value;
-        timestamp = System.currentTimeMillis();
     }
 
     public void setWeight(float value) {
         weight = value;
-        timestamp = System.currentTimeMillis();
     }
 
-    public void showNotification(Context context, String qrCode) {
-        if (timestamp == null) {
-            return;
+    public static void dismissNotification(Context context) {
+        try {
+            lastNotification = "";
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(NOTIFICATION_ID);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
 
+    public static void showNotification(Context context, HashMap<String, MeasureNotification> notifications) {
         Notification.Builder notificationBuilder;
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -72,29 +77,39 @@ public class MeasureNotification {
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .setOngoing(false);
 
+        long timestamp = System.currentTimeMillis();
         String title = String.format(context.getString(R.string.result_generation_at) + " %s", DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE, timestamp));
-        String text = "";
-        if (hasHeight()) {
-            text += context.getString(R.string.label_height).replace(":", "") + " ";
-            text += context.getString(R.string.result_for) + " ";
-            text += String.format(Locale.US, "%s : %.2f%s", qrCode, height, "cm");
-        }
-        if (hasWeight()) {
-            if (!text.isEmpty()) {
-                text += "\n";
-            }
-            text += context.getString(R.string.label_weight).replace(":", "") + " ";
-            text += context.getString(R.string.result_for) + " ";
-            text += String.format(Locale.US, "%s : %.2f%s", qrCode, weight, "kg");
-        }
-        notificationBuilder.setContentTitle(title);
-        notificationBuilder.setContentText(text);
+        StringBuilder text = new StringBuilder();
 
-        if (!qr2notificationId.containsKey(qrCode))
-        {
-            qr2notificationId.put(qrCode, qr2notificationId.size());
+        for (String qrCode : notifications.keySet()) {
+            MeasureNotification n = notifications.get(qrCode);
+            if (n.hasHeight()) {
+                if (text.length() > 0) {
+                    text.append("\n");
+                }
+                text.append(context.getString(R.string.label_height).replace(":", "")).append(" ");
+                text.append(context.getString(R.string.result_for)).append(" ");
+                text.append(String.format(Locale.US, "%s : %.2f%s", qrCode, n.height, "cm"));
+            }
+            if (n.hasWeight()) {
+                if (text.length() > 0) {
+                    text.append("\n");
+                }
+                text.append(context.getString(R.string.label_weight).replace(":", "")).append(" ");
+                text.append(context.getString(R.string.result_for)).append(" ");
+                text.append(String.format(Locale.US, "%s : %.2f%s", qrCode, n.weight, "kg"));
+            }
         }
-        int notificationID = qr2notificationId.get(qrCode);
-        notificationManager.notify(notificationID, notificationBuilder.build());
+
+        if (text.length() > 0) {
+            if (lastNotification.length() > 0) {
+                lastNotification += "\n";
+            }
+            String finalText = lastNotification + text.toString();
+            notificationBuilder.setContentTitle(title);
+            notificationBuilder.setStyle(new Notification.BigTextStyle().bigText(finalText));
+            notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+            lastNotification = finalText;
+        }
     }
 }

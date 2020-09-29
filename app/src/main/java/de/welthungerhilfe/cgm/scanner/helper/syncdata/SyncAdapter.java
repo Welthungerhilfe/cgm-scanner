@@ -278,9 +278,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 e.printStackTrace();
             }
 
-            for (String id : notifications.keySet()) {
-                notifications.get(id).showNotification(getContext(), id);
-            }
+            MeasureNotification.showNotification(getContext(), notifications);
         }
 
         private void processPersonQueue(CloudQueueClient queueClient) throws URISyntaxException {
