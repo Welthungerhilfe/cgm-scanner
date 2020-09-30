@@ -173,13 +173,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         private String getQrCode(String measureId) {
-            String qrCode = measureId;
             try {
-                qrCode = measureRepository.getMeasureById(measureId).getQrCode();
+                return measureRepository.getMeasureById(measureId).getQrCode();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return qrCode;
+            return null;
         }
 
         private void processMeasureResultQueue(CloudQueueClient queueClient) throws URISyntaxException {
@@ -206,7 +205,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             Log.d("SyncAdapter", messageStr);
                             MeasureResult result = gson.fromJson(messageStr, MeasureResult.class);
                             String qrCode = getQrCode(result.getMeasure_id());
-
                             MeasureNotification notification = MeasureNotification.get(qrCode);
 
                             float keyMaxConfident = measureResultRepository.getConfidence(result.getMeasure_id(), result.getKey());
@@ -233,9 +231,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                             onResultReceived(result);
                                         }
 
-                                        notification.setWeight(result.getFloat_value());
+                                        if (notification != null) {
+                                            notification.setWeight(result.getFloat_value());
+                                        }
                                     }
-                                } else if (!notification.hasWeight()) {
+                                } else if ((notification != null) && !notification.hasWeight()) {
                                     notification.setWeight(result.getFloat_value());
                                 }
                             } else if (result.getKey().contains("height")) {
@@ -257,9 +257,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                             onResultReceived(result);
                                         }
 
-                                        notification.setHeight(result.getFloat_value());
+                                        if (notification != null) {
+                                            notification.setHeight(result.getFloat_value());
+                                        }
                                     }
-                                } else if (notification.hasHeight()) {
+                                } else if ((notification != null) && notification.hasHeight()) {
                                     notification.setHeight(result.getFloat_value());
                                 }
                             }

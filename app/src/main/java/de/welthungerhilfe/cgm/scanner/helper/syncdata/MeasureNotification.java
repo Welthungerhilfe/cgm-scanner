@@ -22,11 +22,15 @@ public class MeasureNotification {
     private static final int NOTIFICATION_ID = 2030;
 
     private static HashMap<String, MeasureNotification> notifications = new HashMap<>();
+    private static boolean updated = false;
 
     private Float height;
     private Float weight;
 
     public static MeasureNotification get(String qrCode) {
+        if (qrCode == null) {
+            return null;
+        }
         if (!notifications.containsKey(qrCode)) {
             notifications.put(qrCode, new MeasureNotification());
         }
@@ -43,10 +47,12 @@ public class MeasureNotification {
 
     public void setHeight(float value) {
         height = value;
+        updated = true;
     }
 
     public void setWeight(float value) {
         weight = value;
+        updated = true;
     }
 
     public static void dismissNotification(Context context) {
@@ -57,9 +63,15 @@ public class MeasureNotification {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        updated = false;
     }
 
     public static void showNotification(Context context) {
+        if (!updated) {
+            return;
+        }
+        updated = false;
+
         Notification.Builder notificationBuilder;
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -112,8 +124,12 @@ public class MeasureNotification {
         }
 
         if (valid) {
+            Notification.BigTextStyle style = new Notification.BigTextStyle();
+            style.bigText(text.toString());
+
+            notificationBuilder.setStyle(style);
             notificationBuilder.setContentTitle(title);
-            notificationBuilder.setStyle(new Notification.BigTextStyle().bigText(text.toString()));
+            notificationBuilder.setContentText(text.toString());
             notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
         }
     }
