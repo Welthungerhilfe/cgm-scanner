@@ -269,12 +269,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         measureResultQueue.deleteMessage(message);
                     }
+                    MeasureNotification.showNotification(getContext());
                 }
             } catch (StorageException e) {
                 e.printStackTrace();
             }
-
-            MeasureNotification.showNotification(getContext());
         }
 
         private void processPersonQueue(CloudQueueClient queueClient) throws URISyntaxException {

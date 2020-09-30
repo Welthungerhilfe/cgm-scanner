@@ -88,27 +88,30 @@ public class MeasureNotification {
         String title = String.format(context.getString(R.string.result_generation_at) + " %s", DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE, timestamp));
         StringBuilder text = new StringBuilder();
 
+        boolean valid = false;
         for (String qrCode : notifications.keySet()) {
             MeasureNotification n = get(qrCode);
             if (n.hasHeight()) {
-                if (text.length() > 0) {
+                if (valid) {
                     text.append("\n");
                 }
                 text.append(context.getString(R.string.label_height).replace(":", "")).append(" ");
                 text.append(context.getString(R.string.result_for)).append(" ");
                 text.append(String.format(Locale.US, "%s : %.2f%s", qrCode, n.height, "cm"));
+                valid = true;
             }
             if (n.hasWeight()) {
-                if (text.length() > 0) {
+                if (valid) {
                     text.append("\n");
                 }
                 text.append(context.getString(R.string.label_weight).replace(":", "")).append(" ");
                 text.append(context.getString(R.string.result_for)).append(" ");
                 text.append(String.format(Locale.US, "%s : %.2f%s", qrCode, n.weight, "kg"));
+                valid = true;
             }
         }
 
-        if (text.length() > 0) {
+        if (valid) {
             notificationBuilder.setContentTitle(title);
             notificationBuilder.setStyle(new Notification.BigTextStyle().bigText(text.toString()));
             notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
