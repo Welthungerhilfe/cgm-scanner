@@ -25,7 +25,6 @@ import com.microsoft.azure.storage.queue.CloudQueueMessage;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -184,7 +183,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         private void processMeasureResultQueue(CloudQueueClient queueClient) throws URISyntaxException {
-            HashMap<String, MeasureNotification> notifications = new HashMap<>();
 
             try {
                 CloudQueue measureResultQueue = queueClient.getQueueReference(Utils.getAndroidID(getContext().getContentResolver()) + "-measure-result");
@@ -208,10 +206,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             Log.d("SyncAdapter", messageStr);
                             MeasureResult result = gson.fromJson(messageStr, MeasureResult.class);
                             String qrCode = getQrCode(result.getMeasure_id());
-                            if (!notifications.containsKey(qrCode)) {
-                                notifications.put(qrCode, new MeasureNotification());
-                            }
-                            MeasureNotification notification = notifications.get(qrCode);
+
+                            MeasureNotification notification = MeasureNotification.get(qrCode);
 
                             float keyMaxConfident = measureResultRepository.getConfidence(result.getMeasure_id(), result.getKey());
                             if (result.getConfidence_value() > keyMaxConfident) {
@@ -278,7 +274,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 e.printStackTrace();
             }
 
-            MeasureNotification.showNotification(getContext(), notifications);
+            MeasureNotification.showNotification(getContext());
         }
 
         private void processPersonQueue(CloudQueueClient queueClient) throws URISyntaxException {

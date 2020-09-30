@@ -21,10 +21,17 @@ public class MeasureNotification {
     private static final String CHANNEL_ID = "CGM_Result_Generation_Notification";
     private static final int NOTIFICATION_ID = 2030;
 
-    private static String lastNotification = "";
+    private static HashMap<String, MeasureNotification> notifications = new HashMap<>();
 
     private Float height;
     private Float weight;
+
+    public static MeasureNotification get(String qrCode) {
+        if (!notifications.containsKey(qrCode)) {
+            notifications.put(qrCode, new MeasureNotification());
+        }
+        return notifications.get(qrCode);
+    }
 
     public boolean hasHeight() {
         return height != null;
@@ -44,7 +51,7 @@ public class MeasureNotification {
 
     public static void dismissNotification(Context context) {
         try {
-            lastNotification = "";
+            notifications.clear();
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.cancel(NOTIFICATION_ID);
         } catch (Exception e) {
@@ -52,7 +59,7 @@ public class MeasureNotification {
         }
     }
 
-    public static void showNotification(Context context, HashMap<String, MeasureNotification> notifications) {
+    public static void showNotification(Context context) {
         Notification.Builder notificationBuilder;
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -82,7 +89,7 @@ public class MeasureNotification {
         StringBuilder text = new StringBuilder();
 
         for (String qrCode : notifications.keySet()) {
-            MeasureNotification n = notifications.get(qrCode);
+            MeasureNotification n = get(qrCode);
             if (n.hasHeight()) {
                 if (text.length() > 0) {
                     text.append("\n");
@@ -102,14 +109,9 @@ public class MeasureNotification {
         }
 
         if (text.length() > 0) {
-            if (lastNotification.length() > 0) {
-                lastNotification += "\n";
-            }
-            String finalText = lastNotification + text.toString();
             notificationBuilder.setContentTitle(title);
-            notificationBuilder.setStyle(new Notification.BigTextStyle().bigText(finalText));
+            notificationBuilder.setStyle(new Notification.BigTextStyle().bigText(text.toString()));
             notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
-            lastNotification = finalText;
         }
     }
 }
