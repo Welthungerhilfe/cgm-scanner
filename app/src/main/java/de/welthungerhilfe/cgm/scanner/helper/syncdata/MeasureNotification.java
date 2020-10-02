@@ -21,10 +21,21 @@ public class MeasureNotification {
     private static final String CHANNEL_ID = "CGM_Result_Generation_Notification";
     private static final int NOTIFICATION_ID = 2030;
 
-    private static String lastNotification = "";
+    private static HashMap<String, MeasureNotification> notifications = new HashMap<>();
+    private static boolean updated = false;
 
     private Float height;
     private Float weight;
+
+    public static MeasureNotification get(String qrCode) {
+        if (qrCode == null) {
+            return null;
+        }
+        if (!notifications.containsKey(qrCode)) {
+            notifications.put(qrCode, new MeasureNotification());
+        }
+        return notifications.get(qrCode);
+    }
 
     public boolean hasHeight() {
         return height != null;
@@ -36,23 +47,31 @@ public class MeasureNotification {
 
     public void setHeight(float value) {
         height = value;
+        updated = true;
     }
 
     public void setWeight(float value) {
         weight = value;
+        updated = true;
     }
 
     public static void dismissNotification(Context context) {
         try {
-            lastNotification = "";
+            notifications.clear();
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.cancel(NOTIFICATION_ID);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        updated = false;
     }
 
-    public static void showNotification(Context context, HashMap<String, MeasureNotification> notifications) {
+    public static void showNotification(Context context) {
+        if (!updated) {
+            return;
+        }
+        updated = false;
+
         Notification.Builder notificationBuilder;
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -81,35 +100,37 @@ public class MeasureNotification {
         String title = String.format(context.getString(R.string.result_generation_at) + " %s", DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE, timestamp));
         StringBuilder text = new StringBuilder();
 
+        boolean valid = false;
         for (String qrCode : notifications.keySet()) {
-            MeasureNotification n = notifications.get(qrCode);
+            MeasureNotification n = get(qrCode);
             if (n.hasHeight()) {
-                if (text.length() > 0) {
+                if (valid) {
                     text.append("\n");
                 }
                 text.append(context.getString(R.string.label_height).replace(":", "")).append(" ");
                 text.append(context.getString(R.string.result_for)).append(" ");
                 text.append(String.format(Locale.US, "%s : %.2f%s", qrCode, n.height, "cm"));
+                valid = true;
             }
             if (n.hasWeight()) {
-                if (text.length() > 0) {
+                if (valid) {
                     text.append("\n");
                 }
                 text.append(context.getString(R.string.label_weight).replace(":", "")).append(" ");
                 text.append(context.getString(R.string.result_for)).append(" ");
                 text.append(String.format(Locale.US, "%s : %.2f%s", qrCode, n.weight, "kg"));
+                valid = true;
             }
         }
 
-        if (text.length() > 0) {
-            if (lastNotification.length() > 0) {
-                lastNotification += "\n";
-            }
-            String finalText = lastNotification + text.toString();
+        if (valid) {
+            Notification.BigTextStyle style = new Notification.BigTextStyle();
+            style.bigText(text.toString());
+
+            notificationBuilder.setStyle(style);
             notificationBuilder.setContentTitle(title);
-            notificationBuilder.setStyle(new Notification.BigTextStyle().bigText(finalText));
+            notificationBuilder.setContentText(text.toString());
             notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
-            lastNotification = finalText;
         }
     }
 }

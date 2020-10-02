@@ -25,7 +25,6 @@ import com.microsoft.azure.storage.queue.CloudQueueMessage;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -174,17 +173,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         private String getQrCode(String measureId) {
-            String qrCode = measureId;
             try {
-                qrCode = measureRepository.getMeasureById(measureId).getQrCode();
+                return measureRepository.getMeasureById(measureId).getQrCode();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return qrCode;
+            return null;
         }
 
         private void processMeasureResultQueue(CloudQueueClient queueClient) throws URISyntaxException {
-            HashMap<String, MeasureNotification> notifications = new HashMap<>();
 
             try {
                 CloudQueue measureResultQueue = queueClient.getQueueReference(Utils.getAndroidID(getContext().getContentResolver()) + "-measure-result");
@@ -208,10 +205,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             Log.d("SyncAdapter", messageStr);
                             MeasureResult result = gson.fromJson(messageStr, MeasureResult.class);
                             String qrCode = getQrCode(result.getMeasure_id());
-                            if (!notifications.containsKey(qrCode)) {
-                                notifications.put(qrCode, new MeasureNotification());
-                            }
-                            MeasureNotification notification = notifications.get(qrCode);
+                            MeasureNotification notification = MeasureNotification.get(qrCode);
 
                             float keyMaxConfident = measureResultRepository.getConfidence(result.getMeasure_id(), result.getKey());
                             if (result.getConfidence_value() > keyMaxConfident) {
@@ -237,9 +231,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                             onResultReceived(result);
                                         }
 
-                                        notification.setWeight(result.getFloat_value());
+                                        if (notification != null) {
+                                            notification.setWeight(result.getFloat_value());
+                                        }
                                     }
-                                } else if (!notification.hasWeight()) {
+                                } else if ((notification != null) && !notification.hasWeight()) {
                                     notification.setWeight(result.getFloat_value());
                                 }
                             } else if (result.getKey().contains("height")) {
@@ -261,9 +257,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                             onResultReceived(result);
                                         }
 
-                                        notification.setHeight(result.getFloat_value());
+                                        if (notification != null) {
+                                            notification.setHeight(result.getFloat_value());
+                                        }
                                     }
-                                } else if (notification.hasHeight()) {
+                                } else if ((notification != null) && notification.hasHeight()) {
                                     notification.setHeight(result.getFloat_value());
                                 }
                             }
@@ -273,12 +271,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         measureResultQueue.deleteMessage(message);
                     }
+                    MeasureNotification.showNotification(getContext());
                 }
             } catch (StorageException e) {
                 e.printStackTrace();
             }
-
-            MeasureNotification.showNotification(getContext(), notifications);
         }
 
         private void processPersonQueue(CloudQueueClient queueClient) throws URISyntaxException {

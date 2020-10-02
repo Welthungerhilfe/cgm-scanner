@@ -1,4 +1,4 @@
-/**
+/*
  *  Child Growth Monitor - quick and accurate data on malnutrition
  *  Copyright (c) $today.year Welthungerhilfe Innovation
  *
@@ -183,9 +183,14 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     session.setAzureAccountName("");
                     session.setAzureAccountKey("");
 
-                    Account[] accounts = accountManager.getAccounts();
-                    for (Account account : accounts) {
-                        accountManager.removeAccount(account, MainActivity.this, null, null);
+                    try {
+                        Account[] accounts = accountManager.getAccounts();
+                        for (Account account : accounts) {
+                            accountManager.removeAccount(account, MainActivity.this, null, null);
+                        }
+                    } catch (Exception e) {
+                        //no rights to remove the account from system settings
+                        e.printStackTrace();
                     }
 
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
