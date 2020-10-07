@@ -9,15 +9,10 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.AppCompatRadioButton;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-
-import com.balysv.materialripple.MaterialRippleLayout;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,6 +46,9 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureResultReposit
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView;
+import de.welthungerhilfe.cgm.scanner.ui.views.ToggleView;
+import de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -62,34 +60,31 @@ public class SettingsActivity extends BaseActivity {
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.txtSettingVersion)
-    TextView txtSettingVersion;
+    TwoLineTextView txtSettingVersion;
     @BindView(R.id.txtSettingUuid)
-    TextView txtSettingUuid;
+    TwoLineTextView txtSettingUuid;
     @BindView(R.id.txtSettingAccount)
-    TextView txtSettingAccount;
+    TwoLineTextView txtSettingAccount;
     @BindView(R.id.txtSettingAzureAccount)
-    TextView txtSettingAzureAccount;
+    TwoLineTextView txtSettingAzureAccount;
 
     @BindView(R.id.radioEnglish)
-    AppCompatRadioButton radioEnglish;
+    LanguageRadioView radioEnglish;
     @BindView(R.id.radioGerman)
-    AppCompatRadioButton radioGerman;
+    LanguageRadioView radioGerman;
     @BindView(R.id.radioHindi)
-    AppCompatRadioButton radioHindi;
+    LanguageRadioView radioHindi;
 
     @BindView(R.id.txtSettingBackupDate)
-    TextView txtSettingBackupDate;
+    TwoLineTextView txtSettingBackupDate;
 
     @BindView(R.id.upload_over_wifi)
-    SwitchCompat switchUploadOverWifi;
-
+    ToggleView switchUploadOverWifi;
 
     @BindView(R.id.testQAlayout)
     LinearLayout layoutTestQA;
     @BindView(R.id.show_depth_data)
-    SwitchCompat switchShowDepth;
-    @BindView(R.id.show_depth_data_layout)
-    MaterialRippleLayout layoutShowDepth;
+    ToggleView switchShowDepth;
 
     @OnClick(R.id.submenu_performance_measurement)
     void openPerformanceMeasurement(View view) {
@@ -105,24 +100,7 @@ public class SettingsActivity extends BaseActivity {
         startActivity(intent);
     }
 
-    @OnClick(R.id.lytLangEnglish)
-    void onEnglish(LinearLayout lytLangEnglish) {
-        changeLanguage(AppConstants.LANG_ENGLISH);
-    }
-
-    @OnClick(R.id.lytLangGerman)
-    void onGerman(LinearLayout lytLangGerman) {
-        changeLanguage(AppConstants.LANG_GERMAN);
-    }
-
-    @OnClick(R.id.lytLangHindi)
-    void onHindi(LinearLayout lytLangHindi) {
-        changeLanguage(AppConstants.LANG_HINDI);
-    }
-
     private SessionManager session;
-    private RemoteConfig config;
-
     private AlertDialog progressDialog;
 
     protected void onCreate(Bundle saveBundle) {
@@ -132,7 +110,7 @@ public class SettingsActivity extends BaseActivity {
         ButterKnife.bind(this);
 
         session = new SessionManager(this);
-        config = session.getRemoteConfig();
+        RemoteConfig config = session.getRemoteConfig();
 
         setupActionBar();
 
@@ -162,9 +140,9 @@ public class SettingsActivity extends BaseActivity {
         boolean showQA = BuildConfig.DEBUG || devBackend || devVersion;
         layoutTestQA.setVisibility(showQA ? View.VISIBLE : View.GONE);
 
-        txtSettingUuid.setText(Utils.getAndroidID(getContentResolver()));
+        txtSettingUuid.setText(2, Utils.getAndroidID(getContentResolver()));
         if (session.isTangoDevice()) {
-            layoutShowDepth.setVisibility(View.GONE);
+            switchShowDepth.setVisibility(View.GONE);
         } else {
             switchShowDepth.setChecked(LocalPersistency.getBoolean(this, KEY_SHOW_DEPTH));
             switchShowDepth.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_SHOW_DEPTH, value));
@@ -174,21 +152,20 @@ public class SettingsActivity extends BaseActivity {
         switchUploadOverWifi.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_UPLOAD_WIFI, value));
 
         try {
-            txtSettingVersion.setText(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
+            txtSettingVersion.setText(2, getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
-
-            txtSettingVersion.setText("1.0");
+            txtSettingVersion.setText(2,"1.0");
         }
 
         AccountManager accountManager = AccountManager.get(this);
         Account[] accounts = accountManager.getAccounts();
 
         if (accounts.length > 0) {
-            txtSettingAccount.setText(accounts[0].name);
+            txtSettingAccount.setText(1, accounts[0].name);
         }
 
-        txtSettingAzureAccount.setText(session.getAzureAccountName());
+        txtSettingAzureAccount.setText(1, session.getAzureAccountName());
 
         String code = session.getLanguage();
         switch (code) {
@@ -206,8 +183,8 @@ public class SettingsActivity extends BaseActivity {
         radioGerman.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_GERMAN));
         radioHindi.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_HINDI));
 
-        if (session.getBackupTimestamp() == 0) txtSettingBackupDate.setText(R.string.no_backups);
-        else txtSettingBackupDate.setText(DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, session.getBackupTimestamp()));
+        if (session.getBackupTimestamp() == 0) txtSettingBackupDate.setText(2, getString(R.string.no_backups));
+        else txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, session.getBackupTimestamp()));
 
         findViewById(R.id.btnBackupNow).setOnClickListener(view -> {
             progressDialog.show();
@@ -355,7 +332,7 @@ public class SettingsActivity extends BaseActivity {
 
                 public void onPostExecute(Void result) {
                     session.setBackupTimestamp(timestamp);
-                    txtSettingBackupDate.setText(DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, timestamp));
+                    txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, timestamp));
                     progressDialog.dismiss();
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
