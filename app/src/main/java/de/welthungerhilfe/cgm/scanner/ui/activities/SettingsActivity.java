@@ -186,22 +186,7 @@ public class SettingsActivity extends BaseActivity {
         });
 
         findViewById(R.id.btnContactSupport).setOnClickListener(view -> {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
-                return;
-            }
-
-            long timestamp = System.currentTimeMillis();
-            File dir = new File(getApplicationInfo().dataDir, "temp");
-            File screenshot = new File(AppController.getInstance().getRootDirectory(), "screenshot.png");
-            IO.deleteDirectory(dir);
-            BackupManager.doBackup(this, dir, timestamp, () -> {
-                IO.takeScreenshot(this, screenshot);
-                ContactSupportDialog contactSupportDialog = new ContactSupportDialog(this);
-                contactSupportDialog.attachFiles(dir.listFiles());
-                contactSupportDialog.attachScreenshot(screenshot);
-                contactSupportDialog.show();
-            });
+            ContactSupportDialog.show(this, "settings feedback");
         });
     }
 

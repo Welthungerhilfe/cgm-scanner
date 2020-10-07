@@ -19,9 +19,11 @@
 
 package de.welthungerhilfe.cgm.scanner.ui.dialogs;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -29,6 +31,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -38,15 +41,18 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.BackupManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ContactSupportDialog extends Dialog {
 
+    private static final int PERMISSION_STORAGE = 0x0003;
     private static final String SUPPORT_EMAIL = "support@childgrowthmonitor.org";
 
     private Context context;
+    private String type;
     private File screenshot;
     private File zip;
 
@@ -57,7 +63,10 @@ public class ContactSupportDialog extends Dialog {
     void onConfirm(TextView txtOK) {
         dismiss();
 
-        String subject = "CGM-Scanner version " + Utils.getAppVersion(context);
+        if (type == null) {
+            type = "";
+        }
+        String subject = "CGM-Scanner " + type + ", version " + Utils.getAppVersion(context);
 
         Intent sendIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         sendIntent.setType("application/zip");
@@ -104,5 +113,29 @@ public class ContactSupportDialog extends Dialog {
 
         zip = new File(AppController.getInstance().getRootDirectory(), "report.zip");
         IO.zip(paths, zip.getAbsolutePath());
+    }
+
+    public void setType(String value) {
+        type = value;
+    }
+
+    public static void show(BaseActivity activity, String type) {
+        if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
+            return;
+        }
+
+        long timestamp = System.currentTimeMillis();
+        File dir = new File(activity.getApplicationInfo().dataDir, "temp");
+        File screenshot = new File(AppController.getInstance().getRootDirectory(), "screenshot.png");
+        IO.deleteDirectory(dir);
+        BackupManager.doBackup(activity, dir, timestamp, () -> {
+            IO.takeScreenshot(activity, screenshot);
+            ContactSupportDialog contactSupportDialog = new ContactSupportDialog(activity);
+            contactSupportDialog.attachFiles(dir.listFiles());
+            contactSupportDialog.attachScreenshot(screenshot);
+            contactSupportDialog.setType(type);
+            contactSupportDialog.show();
+        });
     }
 }

@@ -277,6 +277,11 @@
     <string name="profile_performance_color_size">Last scan color data size</string>
     <string name="profile_performance_depth_size">Last scan depth data size</string>
     <string name="show_depth_data">Show depth data</string>
+
+    <string name="select_action">Select action</string>
+    <string name="edit_data">Edit data</string>
+    <string name="delete_data">Delete data</string>
+    <string name="show_details">Show details</string>
     <string name="contact_support">Contact support</string>
 
     <string name="label_overview">Overview</string>
