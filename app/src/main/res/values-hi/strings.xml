@@ -244,7 +244,7 @@
     <string name="side_scan">02. 360\' स्कैन</string>
     <string name="back_scan">03. बैक स्कैन</string>
     <string name="login_microsoft">Microsoft के साथ साइन इन करें</string>
-    <string name="backup">बैकअप</string>
+    <string name="backup">बैकअप और समर्थन</string>
     <string name="last_backup_date">अंतिम बैकअप तिथि</string>
     <string name="backup_now">अब समर्थन देना</string>
     <string name="no_backups">कोई बैकअप नहीं</string>
@@ -262,6 +262,7 @@
     <string name="profile_performance_color_size">अंतिम स्कैन रंग डेटा आकार</string>
     <string name="profile_performance_depth_size">अंतिम स्कैन गहराई डेटा आकार</string>
     <string name="show_depth_data">गहराई डेटा दिखाएं</string>
+    <string name="contact_support">सहयोग टीम से संपर्क करें</string>
 
     <string name="label_overview">अवलोकन</string>
     <string name="label_upload_speed">अपलोड गति : </string>

@@ -259,7 +259,7 @@
     <string name="side_scan">02. 360\' Scan</string>
     <string name="back_scan">03. Back Scan</string>
     <string name="login_microsoft">Sign In with Microsoft</string>
-    <string name="backup">Backup</string>
+    <string name="backup">Backup and support</string>
     <string name="last_backup_date">Last Backup Date</string>
     <string name="backup_now">Backup Now</string>
     <string name="no_backups">No backups</string>
@@ -277,6 +277,7 @@
     <string name="profile_performance_color_size">Last scan color data size</string>
     <string name="profile_performance_depth_size">Last scan depth data size</string>
     <string name="show_depth_data">Show depth data</string>
+    <string name="contact_support">Contact support</string>
 
     <string name="label_overview">Overview</string>
     <string name="label_upload_speed">Upload Speed : </string>

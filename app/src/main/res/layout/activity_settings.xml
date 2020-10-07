@@ -73,16 +73,33 @@
                     android:layout_height="wrap_content"
                     app:firstText="@string/last_backup_date"/>
 
-                <Button
-                    android:id="@+id/btnBackupNow"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="horizontal"
                     android:layout_marginTop="15dp"
-                    android:layout_marginBottom="15dp"
-                    android:background="@drawable/button_pink_round"
-                    android:text="@string/backup_now"
-                    android:textColor="@color/colorWhite"
-                    android:textSize="14sp" />
+                    android:layout_marginBottom="15dp">
+
+                    <Button
+                        android:id="@+id/btnBackupNow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:background="@drawable/button_pink_round"
+                        android:text="@string/backup_now"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="14sp" />
+
+                    <Button
+                        android:id="@+id/btnContactSupport"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:background="@drawable/button_pink_round"
+                        android:text="@string/contact_support"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="14sp" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout

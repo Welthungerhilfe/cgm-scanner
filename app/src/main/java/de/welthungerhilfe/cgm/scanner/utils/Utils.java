@@ -1,4 +1,4 @@
-/**
+/*
  *  Child Growth Monitor - quick and accurate data on malnutrition
  *  Copyright (c) $today.year Welthungerhilfe Innovation
  *
@@ -32,7 +32,6 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
-import android.util.Base64;
 import android.util.Log;
 import android.util.TypedValue;
 
@@ -43,11 +42,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -68,28 +64,6 @@ public class Utils {
             value /= values.size();
         }
         return value;
-    }
-    public static String getMD5(String filePath) {
-        String base64Digest = "";
-        try {
-            InputStream input = new FileInputStream(filePath);
-            byte[] buffer = new byte[1024];
-            MessageDigest md5Hash = MessageDigest.getInstance("MD5");
-            int numRead = 0;
-            while (numRead != -1) {
-                numRead = input.read(buffer);
-                if (numRead > 0) {
-                    md5Hash.update(buffer, 0, numRead);
-                }
-            }
-            input.close();
-            byte[] md5Bytes = md5Hash.digest();
-            base64Digest = Base64.encodeToString(md5Bytes, Base64.DEFAULT);
-
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-        return base64Digest;
     }
 
     public static void overrideFont(Context context, String defaultFontNameToOverride, String customFontFileNameInAssets) {
@@ -154,6 +128,15 @@ public class Utils {
 
     public static String getAndroidID(ContentResolver resolver) {
         return Settings.Secure.getString(resolver, Settings.Secure.ANDROID_ID);
+    }
+
+    public static String getAppVersion(Context context) {
+        try {
+            return context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return "unknown";
+        }
     }
 
     public static String getSaltString(int length) {

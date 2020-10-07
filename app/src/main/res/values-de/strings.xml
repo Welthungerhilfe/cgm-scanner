@@ -246,7 +246,7 @@
     <string name="side_scan">02. 360\' Scan</string>
     <string name="back_scan">03. Scan Rückansicht</string>
     <string name="login_microsoft">Melden Sie sich bei Microsoft an</string>
-    <string name="backup">Backup</string>
+    <string name="backup">Backup und Support</string>
     <string name="last_backup_date">Letztes Sicherungsdatum</string>
     <string name="backup_now">Jetzt sichern</string>
     <string name="no_backups">Keine Backups</string>
@@ -264,6 +264,7 @@
     <string name="profile_performance_color_size">Größe der letzten Scan-Farbdaten</string>
     <string name="profile_performance_depth_size">Größe der letzten Scan-Tiefendaten</string>
     <string name="show_depth_data">Tiefendaten anzeigen</string>
+    <string name="contact_support">Support kontaktieren</string>
 
     <string name="label_overview">Überblick</string>
     <string name="label_upload_speed">Upload-Geschwindigkeit : </string>

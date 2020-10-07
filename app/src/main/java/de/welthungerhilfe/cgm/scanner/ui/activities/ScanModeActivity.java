@@ -75,12 +75,13 @@ import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoUtils;
+import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener, ARCoreUtils.Camera2DataListener, TangoCamera.TangoCameraListener {
     private final int PERMISSION_LOCATION = 0x0001;
     private final int PERMISSION_CAMERA = 0x0002;
-    private final int PERMISSION_STORAGE = 0x0002;
+    private final int PERMISSION_STORAGE = 0x0003;
 
     public static final String KEY_MEASURE = "KEY_MEASURE";
     public static final String SUBFIX_COUNT = "_COUNT";
@@ -424,7 +425,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 .create();
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_STORAGE);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
         }
     }
 
@@ -834,7 +835,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
                     log.setType("rgb");
                     log.setPath(artifactFile.getPath());
-                    log.setHashValue(Utils.getMD5(artifactFile.getPath()));
+                    log.setHashValue(IO.getMD5(artifactFile.getPath()));
                     log.setFileSize(artifactFile.length());
                     log.setUploadDate(0);
                     log.setDeleted(false);
@@ -863,7 +864,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                             log.setId(AppController.getInstance().getArtifactId("camera-calibration", mNowTime));
                             log.setType("calibration");
                             log.setPath(artifactFile.getPath());
-                            log.setHashValue(Utils.getMD5(artifactFile.getPath()));
+                            log.setHashValue(IO.getMD5(artifactFile.getPath()));
                             log.setFileSize(artifactFile.length());
                             log.setUploadDate(0);
                             log.setDeleted(false);
@@ -941,7 +942,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
                     log.setType("depth");
                     log.setPath(artifactFile.getPath());
-                    log.setHashValue(Utils.getMD5(artifactFile.getPath()));
+                    log.setHashValue(IO.getMD5(artifactFile.getPath()));
                     log.setFileSize(artifactFile.length());
                     log.setUploadDate(0);
                     log.setDeleted(false);
@@ -987,7 +988,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
                 log.setType("rgb");
                 log.setPath(artifactFile.getPath());
-                log.setHashValue(Utils.getMD5(artifactFile.getPath()));
+                log.setHashValue(IO.getMD5(artifactFile.getPath()));
                 log.setFileSize(artifactFile.length());
                 log.setUploadDate(0);
                 log.setDeleted(false);
@@ -1066,7 +1067,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
                     log.setType("depth");
                     log.setPath(artifactFile.getPath());
-                    log.setHashValue(Utils.getMD5(artifactFile.getPath()));
+                    log.setHashValue(IO.getMD5(artifactFile.getPath()));
                     log.setFileSize(artifactFile.length());
                     log.setUploadDate(0);
                     log.setDeleted(false);
@@ -1092,7 +1093,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setId(AppController.getInstance().getArtifactId("camera-calibration", mNowTime));
                         log.setType("calibration");
                         log.setPath(artifactFile.getPath());
-                        log.setHashValue(Utils.getMD5(artifactFile.getPath()));
+                        log.setHashValue(IO.getMD5(artifactFile.getPath()));
                         log.setFileSize(artifactFile.length());
                         log.setUploadDate(0);
                         log.setDeleted(false);
