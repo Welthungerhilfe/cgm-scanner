@@ -146,7 +146,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         });
 
-        adapterData = new RecyclerPersonAdapter(this, recyclerData, session, viewModel);
+        adapterData = new RecyclerPersonAdapter(this, recyclerData, viewModel);
         adapterData.setPersonDetailListener(this);
         recyclerData.setAdapter(adapterData);
 

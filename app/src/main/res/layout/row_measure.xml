@@ -15,6 +15,16 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:background="@color/colorWhite">
 
+        <ImageView
+            android:id="@+id/contextMenuButton"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_context_menu"
+            android:tint="@color/colorGreyDark"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:contentDescription="@string/content_image"/>
+
         <LinearLayout
             android:id="@+id/lytContainer"
             android:layout_width="match_parent"

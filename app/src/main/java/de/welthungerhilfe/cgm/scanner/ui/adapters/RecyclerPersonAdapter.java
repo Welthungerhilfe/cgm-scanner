@@ -58,13 +58,13 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
     private SessionManager session;
     private PersonListViewModel viewModel;
 
-    public RecyclerPersonAdapter(BaseActivity ctx, RecyclerView recycler, SessionManager manager, PersonListViewModel model) {
+    public RecyclerPersonAdapter(BaseActivity ctx, RecyclerView recycler, PersonListViewModel model) {
         context = ctx;
         recyclerData = recycler;
-        session = manager;
         viewModel = model;
 
         repository = MeasureRepository.getInstance(ctx);
+        session = new SessionManager(context);
     }
 
     @Override

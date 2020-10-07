@@ -22,7 +22,6 @@ package de.welthungerhilfe.cgm.scanner.ui.adapters;
 import android.annotation.SuppressLint;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
@@ -40,6 +39,8 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -52,19 +53,25 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultReposi
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasureAdapter.ViewHolder> {
-    private Context context;
+    private BaseActivity context;
     private OnMeasureSelectListener listener;
     private OnMeasureFeedbackListener feedbackListener;
+    private ManualMeasureDialog.ManualMeasureListener manualMeasureListener;
     private List<Measure> measureList;
 
     private FileLogRepository artifactRepository;
     private ArtifactResultRepository artifactResultRepository;
 
     private SessionManager session;
+    private RecyclerView recyclerMeasure;
     private RemoteConfig config;
 
     public interface OnMeasureSelectListener {
@@ -75,15 +82,17 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         void onMeasureFeedback(Measure measure, double overallScore);
     }
 
-    public RecyclerMeasureAdapter(Context ctx) {
+    public RecyclerMeasureAdapter(BaseActivity ctx, RecyclerView recycler, ManualMeasureDialog.ManualMeasureListener listener) {
         context = ctx;
+        manualMeasureListener = listener;
+        recyclerMeasure = recycler;
 
         artifactRepository = FileLogRepository.getInstance(context);
         artifactResultRepository = ArtifactResultRepository.getInstance(context);
 
         measureList = new ArrayList<>();
 
-        this.session = new SessionManager(context);
+        session = new SessionManager(context);
         config = session.getRemoteConfig();
     }
 
@@ -229,7 +238,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         }
 
         if (listener != null) {
-            holder.bindSelectListener(measure);
+            holder.bindSelectListener(position);
         }
     }
 
@@ -269,6 +278,46 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         percentage.setVisibility(View.VISIBLE);
     }
 
+    public void deleteMeasure(int position) {
+        Measure measure = getItem(position);
+        if (!config.isAllow_delete()) {
+            notifyItemChanged(position);
+            Snackbar.make(recyclerMeasure, R.string.permission_delete, Snackbar.LENGTH_LONG).show();
+        } else {
+            ConfirmDialog dialog = new ConfirmDialog(context);
+            dialog.setMessage(R.string.delete_measure);
+            dialog.setConfirmListener(result -> {
+                if (result) {
+                    measure.setDeleted(true);
+                    measure.setDeletedBy(session.getUserEmail());
+                    measure.setTimestamp(Utils.getUniversalTimestamp());
+
+                    removeMeasure(measure);
+                } else {
+                    notifyItemChanged(position);
+                }
+            });
+            dialog.show();
+        }
+    }
+
+    public void editMeasure(int position) {
+        Measure measure = getItem(position);
+        if (!config.isAllow_edit()) {
+            notifyItemChanged(position);
+            Snackbar.make(recyclerMeasure, R.string.permission_edit, Snackbar.LENGTH_LONG).show();
+        } else if (measure.getDate() < Utils.getUniversalTimestamp() - config.getTime_to_allow_editing() * 3600 * 1000) {
+            notifyItemChanged(position);
+            Snackbar.make(recyclerMeasure, R.string.permission_expired, Snackbar.LENGTH_LONG).show();
+        } else if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
+            ManualMeasureDialog measureDialog = new ManualMeasureDialog(context);
+            measureDialog.setManualMeasureListener(manualMeasureListener);
+            measureDialog.setCloseListener(result -> notifyItemChanged(position));
+            measureDialog.setMeasure(measure);
+            measureDialog.show();
+        }
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         RelativeLayout rytItem;
 
@@ -282,6 +331,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         TextView txtWeightConfidence;
         ProgressBar progressUpload;
         AppCompatRatingBar rateOverallScore;
+        View contextMenu;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -296,10 +346,16 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             txtWeightConfidence = itemView.findViewById(R.id.txtWeightConfidence);
             rateOverallScore = itemView.findViewById(R.id.rateOverallScore);
             progressUpload = itemView.findViewById(R.id.progressUpload);
+            contextMenu = itemView.findViewById(R.id.contextMenuButton);
         }
 
-        public void bindSelectListener(Measure measure) {
-            rytItem.setOnClickListener(v -> listener.onMeasureSelect(measure));
+        public void bindSelectListener(int position) {
+            rytItem.setOnClickListener(v -> listener.onMeasureSelect(getItem(position)));
+            rytItem.setOnLongClickListener(view -> {
+                showContextMenu(position);
+                return true;
+            });
+            contextMenu.setOnClickListener(view -> showContextMenu(position));
         }
 
         public void bindScanFeedbackListener(Measure measure, double overallScore) {
@@ -310,5 +366,47 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                 return true;
             });
         }
+    }
+
+    private void showContextMenu(int position) {
+        CharSequence[] items = {
+                context.getString(R.string.show_details),
+                context.getString(R.string.delete_data),
+                context.getString(R.string.contact_support)
+        };
+        if (getItem(position).getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
+            items = new CharSequence[] {
+                    context.getString(R.string.show_details),
+                    context.getString(R.string.edit_data),
+                    context.getString(R.string.delete_data),
+                    context.getString(R.string.contact_support)
+            };
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
+        builder.setTitle(R.string.select_action);
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.setItems(items, (dialog, which) -> {
+            dialog.dismiss();
+
+            if (!getItem(position).getType().equals(AppConstants.VAL_MEASURE_MANUAL) && (which > 0)) {
+                which++;
+            }
+            switch (which) {
+                case 0:
+                    listener.onMeasureSelect(getItem(position));
+                    break;
+                case 1:
+                    editMeasure(position);
+                    break;
+                case 2:
+                    deleteMeasure(position);
+                    break;
+                case 3:
+                    ContactSupportDialog.show(context, "measure feedback");
+                    break;
+            }
+        });
+        builder.show();
     }
 }

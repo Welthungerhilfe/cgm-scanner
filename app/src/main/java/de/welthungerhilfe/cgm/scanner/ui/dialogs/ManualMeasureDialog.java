@@ -84,7 +84,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
     @OnCheckedChanged(R.id.checkManualOedema)
     void onAlert(CompoundButton buttonView, boolean isChecked) {
-        if (isChecked) {
+        if (!isChecked) {
             buttonView.setBackgroundResource(R.color.colorPink);
             buttonView.setTextColor(getContext().getColor(R.color.colorWhite));
         } else {
