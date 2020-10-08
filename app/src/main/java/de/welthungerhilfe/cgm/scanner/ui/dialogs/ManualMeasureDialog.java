@@ -108,7 +108,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                 final TextView message = new TextView(mContext);
                 final SpannableString s = new SpannableString(mContext.getText(R.string.edema_link));
                 Linkify.addLinks(s, Linkify.WEB_URLS);
-                int p = Utils.spToPx(25, getContext());
+                int p = Utils.dpToPx(25, getContext());
                 message.setPadding(p, p, p, p);
                 message.setText(s);
                 message.setTextSize(TypedValue.COMPLEX_UNIT_SP,16);

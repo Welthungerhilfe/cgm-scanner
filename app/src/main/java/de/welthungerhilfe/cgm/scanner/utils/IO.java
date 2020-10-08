@@ -22,13 +22,15 @@ public class IO {
     private static final int BUFFER = 80000;
 
     public static void deleteDirectory(File dir) {
-        for (File file : dir.listFiles()) {
-            if (file.isDirectory()) {
-                deleteDirectory(dir);
+        if (dir.exists()) {
+            for (File file : dir.listFiles()) {
+                if (file.isDirectory()) {
+                    deleteDirectory(dir);
+                }
+                file.delete();
             }
-            file.delete();
+            dir.delete();
         }
-        dir.delete();
     }
 
     public static String getMD5(String filePath) {
