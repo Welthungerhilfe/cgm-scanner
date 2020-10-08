@@ -48,6 +48,8 @@ import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerMeasureAdapter;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.FeedbackDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualDetailDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
@@ -155,24 +157,23 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void createMeasure() {
-        try {
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setTitle(R.string.title_add_measure);
-            builder.setItems(R.array.selector_measure, (d, which) -> {
-                if (which == 0) {
+        new ContextMenuDialog(context, getString(R.string.title_add_measure), new ContextMenuDialog.Item[] {
+                new ContextMenuDialog.Item(R.string.selector_manual, R.drawable.ic_manual),
+                new ContextMenuDialog.Item(R.string.selector_scan, R.drawable.ic_machine)
+        }, which -> {
+            switch (which) {
+                case 0:
                     ManualMeasureDialog measureDialog = new ManualMeasureDialog(context);
                     measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
                     measureDialog.show();
-                } else if (which == 1) {
+                    break;
+                case 1:
                     Intent intent = new Intent(getContext(), ScanModeActivity.class);
                     intent.putExtra(AppConstants.EXTRA_PERSON, person);
                     startActivity(intent);
-                }
-            });
-            builder.show();
-        } catch (RuntimeException e) {
-            // todo: Crashlytics.log(0, "measure fragment", e.getMessage());
-        }
+                    break;
+            }
+        });
     }
 
     @Override

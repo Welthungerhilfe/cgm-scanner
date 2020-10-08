@@ -56,6 +56,7 @@ import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -369,44 +370,49 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
     }
 
     private void showContextMenu(int position) {
-        CharSequence[] items = {
-                context.getString(R.string.show_details),
-                context.getString(R.string.delete_data),
-                context.getString(R.string.contact_support)
-        };
+        Measure measure = measureList.get(position);
+        String date = DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE_AND_TIME, measure.getDate());
+
         if (getItem(position).getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
-            items = new CharSequence[] {
-                    context.getString(R.string.show_details),
-                    context.getString(R.string.edit_data),
-                    context.getString(R.string.delete_data),
-                    context.getString(R.string.contact_support)
-            };
+            new ContextMenuDialog(context, date, new ContextMenuDialog.Item[] {
+                    new ContextMenuDialog.Item(R.string.show_details, R.drawable.ic_details),
+                    new ContextMenuDialog.Item(R.string.edit_data, R.drawable.ic_edit),
+                    new ContextMenuDialog.Item(R.string.delete_data, R.drawable.ic_delete),
+                    new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
+            }, which -> {
+                switch (which) {
+                    case 0:
+                        listener.onMeasureSelect(getItem(position));
+                        break;
+                    case 1:
+                        editMeasure(position);
+                        break;
+                    case 2:
+                        deleteMeasure(position);
+                        break;
+                    case 3:
+                        ContactSupportDialog.show(context, "measure " + date);
+                        break;
+                }
+            });
+        } else {
+            new ContextMenuDialog(context, date, new ContextMenuDialog.Item[] {
+                    new ContextMenuDialog.Item(R.string.show_details, R.drawable.ic_details),
+                    new ContextMenuDialog.Item(R.string.delete_data, R.drawable.ic_delete),
+                    new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
+            }, which -> {
+                switch (which) {
+                    case 0:
+                        listener.onMeasureSelect(getItem(position));
+                        break;
+                    case 1:
+                        deleteMeasure(position);
+                        break;
+                    case 2:
+                        ContactSupportDialog.show(context, "measure " + date);
+                        break;
+                }
+            });
         }
-
-        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
-        builder.setTitle(R.string.select_action);
-        builder.setNegativeButton(android.R.string.cancel, null);
-        builder.setItems(items, (dialog, which) -> {
-            dialog.dismiss();
-
-            if (!getItem(position).getType().equals(AppConstants.VAL_MEASURE_MANUAL) && (which > 0)) {
-                which++;
-            }
-            switch (which) {
-                case 0:
-                    listener.onMeasureSelect(getItem(position));
-                    break;
-                case 1:
-                    editMeasure(position);
-                    break;
-                case 2:
-                    deleteMeasure(position);
-                    break;
-                case 3:
-                    ContactSupportDialog.show(context, "measure feedback");
-                    break;
-            }
-        });
-        builder.show();
     }
 }

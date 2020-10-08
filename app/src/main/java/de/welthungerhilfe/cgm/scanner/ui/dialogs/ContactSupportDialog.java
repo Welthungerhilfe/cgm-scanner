@@ -49,7 +49,10 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 public class ContactSupportDialog extends Dialog {
 
     private static final int PERMISSION_STORAGE = 0x0003;
+
+    private static final String SUPPORT_APP = "com.google.android.gm";
     private static final String SUPPORT_EMAIL = "support@childgrowthmonitor.org";
+    private static final String SUPPORT_MIME = "application/zip";
 
     private Context context;
     private String type;
@@ -65,12 +68,14 @@ public class ContactSupportDialog extends Dialog {
 
         if (type == null) {
             type = "";
+        } else {
+            type = " - " + type;
         }
-        String subject = "CGM-Scanner " + type + ", version " + Utils.getAppVersion(context);
+        String subject = "CGM-Scanner version " + Utils.getAppVersion(context) + type;
 
         Intent sendIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-        sendIntent.setType("application/zip");
-        sendIntent.setPackage("com.google.android.gm");
+        sendIntent.setType(SUPPORT_MIME);
+        sendIntent.setPackage(SUPPORT_APP);
         sendIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { SUPPORT_EMAIL });
         sendIntent.putExtra(Intent.EXTRA_TEXT, inputMessage.getText().toString());
         sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject);

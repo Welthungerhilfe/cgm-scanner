@@ -263,7 +263,6 @@
     <string name="profile_performance_depth_size">अंतिम स्कैन गहराई डेटा आकार</string>
     <string name="show_depth_data">गहराई डेटा दिखाएं</string>
 
-    <string name="select_action">कार्रवाई चुनें</string>
     <string name="edit_data">डेटा संपादित करें</string>
     <string name="delete_data">डेटा हटाएं</string>
     <string name="show_details">प्रदर्शन का विवरण</string>

@@ -45,6 +45,7 @@ import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAdapter.ViewHolder> {
@@ -186,17 +187,14 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
     }
 
     private void showContextMenu(int position) {
-        CharSequence[] items = {
-                context.getString(R.string.show_details),
-                context.getString(R.string.delete_data),
-                context.getString(R.string.contact_support)
-        };
+        Person person = getItem(position);
+        String name = person.getName() + " " + person.getSurname();
 
-        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
-        builder.setTitle(R.string.select_action);
-        builder.setNegativeButton(android.R.string.cancel, null);
-        builder.setItems(items, (dialog, which) -> {
-            dialog.dismiss();
+        new ContextMenuDialog(context, name, new ContextMenuDialog.Item[] {
+                new ContextMenuDialog.Item(R.string.show_details, R.drawable.ic_details),
+                new ContextMenuDialog.Item(R.string.delete_data, R.drawable.ic_delete),
+                new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
+        }, which -> {
             switch (which) {
                 case 0:
                     personDetailListener.onPersonDetail(getItem(position));
@@ -205,10 +203,9 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
                     deletePerson(position);
                     break;
                 case 2:
-                    ContactSupportDialog.show(context, "main screen feedback");
+                    ContactSupportDialog.show(context, "person " + person.getQrcode());
                     break;
             }
         });
-        builder.show();
     }
 }
