@@ -60,6 +60,9 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -88,6 +91,7 @@ public class GrowthDataFragment extends Fragment {
     LinearLayout lytNotif;
     TextView txtNotifTitle;
     TextView txtNotifMessage;
+    View contextMenu;
 
     private Person person;
     private List<Measure> measures = new ArrayList<>();
@@ -147,6 +151,13 @@ public class GrowthDataFragment extends Fragment {
             chartType = position;
             setData();
         });
+
+        contextMenu = view.findViewById(R.id.contextMenuButton);
+        contextMenu.setOnClickListener(view12 -> new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+                new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
+        }, which -> {
+            ContactSupportDialog.show((BaseActivity) getActivity(), "growth " + person.getQrcode());
+        }));
 
         initChart();
         return view;

@@ -157,7 +157,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void createMeasure() {
-        new ContextMenuDialog(context, getString(R.string.title_add_measure), new ContextMenuDialog.Item[] {
+        new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
                 new ContextMenuDialog.Item(R.string.selector_manual, R.drawable.ic_manual),
                 new ContextMenuDialog.Item(R.string.selector_scan, R.drawable.ic_machine)
         }, which -> {

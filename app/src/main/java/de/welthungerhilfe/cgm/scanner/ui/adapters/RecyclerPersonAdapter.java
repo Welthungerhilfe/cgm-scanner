@@ -188,9 +188,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
     private void showContextMenu(int position) {
         Person person = getItem(position);
-        String name = person.getName() + " " + person.getSurname();
-
-        new ContextMenuDialog(context, name, new ContextMenuDialog.Item[] {
+        new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
                 new ContextMenuDialog.Item(R.string.show_details, R.drawable.ic_details),
                 new ContextMenuDialog.Item(R.string.delete_data, R.drawable.ic_delete),
                 new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),

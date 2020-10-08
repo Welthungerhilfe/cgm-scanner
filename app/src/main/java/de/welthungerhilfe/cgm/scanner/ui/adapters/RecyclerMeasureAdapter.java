@@ -374,7 +374,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         String date = DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE_AND_TIME, measure.getDate());
 
         if (getItem(position).getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
-            new ContextMenuDialog(context, date, new ContextMenuDialog.Item[] {
+            new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
                     new ContextMenuDialog.Item(R.string.show_details, R.drawable.ic_details),
                     new ContextMenuDialog.Item(R.string.edit_data, R.drawable.ic_edit),
                     new ContextMenuDialog.Item(R.string.delete_data, R.drawable.ic_delete),
@@ -396,7 +396,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                 }
             });
         } else {
-            new ContextMenuDialog(context, date, new ContextMenuDialog.Item[] {
+            new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
                     new ContextMenuDialog.Item(R.string.show_details, R.drawable.ic_details),
                     new ContextMenuDialog.Item(R.string.delete_data, R.drawable.ic_delete),
                     new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),

@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ContextMenuDialog {
@@ -30,7 +29,7 @@ public class ContextMenuDialog {
         void onSelected(int which);
     }
 
-    public ContextMenuDialog(Context context, String title, Item[] items, ContextMenuSelection callback) {
+    public ContextMenuDialog(Context context, Item[] items, ContextMenuSelection callback) {
         ArrayAdapter adapter = new ArrayAdapter<Item>(context, android.R.layout.select_dialog_item,
                 android.R.id.text1, items) {
 
@@ -52,7 +51,6 @@ public class ContextMenuDialog {
         };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(title + "\n");
         builder.setAdapter(adapter, (dialog, which) -> {
             dialog.dismiss();
             callback.onSelected(which);
