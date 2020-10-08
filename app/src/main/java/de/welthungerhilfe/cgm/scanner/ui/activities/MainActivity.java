@@ -20,7 +20,6 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -38,7 +37,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -72,7 +70,6 @@ import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-import de.welthungerhilfe.cgm.scanner.ui.views.SwipeView;
 
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
     private final int REQUEST_LOCATION = 0x1000;
@@ -132,7 +129,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         setupSidemenu();
         setupActionBar();
-        setupRecyclerView();
         setupSortDialog();
 
         lytManager = new LinearLayoutManager(MainActivity.this);
@@ -256,20 +252,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         ImageView magImage = searchView.findViewById(R.id.search_mag_icon);
         magImage.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
-    }
-
-    private void setupRecyclerView() {
-        SwipeView swipeController = new SwipeView(ItemTouchHelper.LEFT, this) {
-            @SuppressLint("StaticFieldLeak")
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                int position = viewHolder.getAdapterPosition();
-                adapterData.deletePerson(position);
-            }
-        };
-
-        ItemTouchHelper itemTouchhelper = new ItemTouchHelper(swipeController);
-        itemTouchhelper.attachToRecyclerView(recyclerData);
     }
 
     private void setupSortDialog() {
