@@ -89,11 +89,11 @@ public class ContactSupportDialog extends Dialog {
             recordAudio.setImageDrawable(context.getDrawable(R.drawable.stop));
             recording = true;
 
-            audioFile = new File(AppController.getInstance().getRootDirectory(), "voice_record.3gp");
+            audioFile = new File(AppController.getInstance().getRootDirectory(), "voice_record.wav");
             audioEncoder = new MediaRecorder();
             audioEncoder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            audioEncoder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            audioEncoder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            audioEncoder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
+            audioEncoder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
             audioEncoder.setAudioEncodingBitRate(128000);
             audioEncoder.setAudioSamplingRate(44100);
             audioEncoder.setOutputFile(audioFile.getAbsolutePath());
