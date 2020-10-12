@@ -193,6 +193,9 @@ public class ARCoreUtils {
     }
 
     public static boolean shouldUseAREngine() {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            return false;
+        }
         String manufacturer = Build.MANUFACTURER.toUpperCase();
         return manufacturer.startsWith("HONOR") || manufacturer.startsWith("HUAWEI");
     }
