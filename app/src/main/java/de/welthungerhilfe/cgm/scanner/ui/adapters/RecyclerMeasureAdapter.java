@@ -391,7 +391,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                         deleteMeasure(position);
                         break;
                     case 3:
-                        ContactSupportDialog.show(context, "measure " + date);
+                        ContactSupportDialog.show(context, "measure " + date, "measureID:" + getItem(position).getId());
                         break;
                 }
             });
@@ -409,7 +409,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                         deleteMeasure(position);
                         break;
                     case 2:
-                        ContactSupportDialog.show(context, "measure " + date);
+                        ContactSupportDialog.show(context, "measure " + date, "measureID:" + getItem(position).getId());
                         break;
                 }
             });

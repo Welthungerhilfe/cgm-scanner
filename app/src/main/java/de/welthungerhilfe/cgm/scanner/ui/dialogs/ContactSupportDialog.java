@@ -55,6 +55,7 @@ public class ContactSupportDialog extends Dialog {
     private static final String SUPPORT_MIME = "application/zip";
 
     private Context context;
+    public String footer;
     private String type;
     private File screenshot;
     private File zip;
@@ -72,12 +73,16 @@ public class ContactSupportDialog extends Dialog {
             type = " - " + type;
         }
         String subject = "CGM-Scanner version " + Utils.getAppVersion(context) + type;
+        String message = inputMessage.getText().toString();
+        if (footer != null) {
+            message += "\n\n" + footer;
+        }
 
         Intent sendIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         sendIntent.setType(SUPPORT_MIME);
         sendIntent.setPackage(SUPPORT_APP);
         sendIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { SUPPORT_EMAIL });
-        sendIntent.putExtra(Intent.EXTRA_TEXT, inputMessage.getText().toString());
+        sendIntent.putExtra(Intent.EXTRA_TEXT, message);
         sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
         ArrayList<Uri> uris = new ArrayList<Uri>();
@@ -120,11 +125,13 @@ public class ContactSupportDialog extends Dialog {
         IO.zip(paths, zip.getAbsolutePath());
     }
 
+    public void setFooter(String value) { footer = value; }
+
     public void setType(String value) {
         type = value;
     }
 
-    public static void show(BaseActivity activity, String type) {
+    public static void show(BaseActivity activity, String type, String footer) {
         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
             return;
@@ -139,6 +146,7 @@ public class ContactSupportDialog extends Dialog {
             ContactSupportDialog contactSupportDialog = new ContactSupportDialog(activity);
             contactSupportDialog.attachFiles(dir.listFiles());
             contactSupportDialog.attachScreenshot(screenshot);
+            contactSupportDialog.setFooter(footer);
             contactSupportDialog.setType(type);
             contactSupportDialog.show();
         });

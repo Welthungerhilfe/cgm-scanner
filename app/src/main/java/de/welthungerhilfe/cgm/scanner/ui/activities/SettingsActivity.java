@@ -186,7 +186,7 @@ public class SettingsActivity extends BaseActivity {
         });
 
         findViewById(R.id.btnContactSupport).setOnClickListener(view -> {
-            ContactSupportDialog.show(this, null);
+            ContactSupportDialog.show(this, null, null);
         });
     }
 

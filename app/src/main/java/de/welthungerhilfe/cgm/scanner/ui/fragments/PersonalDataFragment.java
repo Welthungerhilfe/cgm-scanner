@@ -155,7 +155,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         contextMenu.setOnClickListener(view12 -> new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
                 new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
         }, which -> {
-            ContactSupportDialog.show((BaseActivity) getActivity(), "data " + person.getQrcode());
+            ContactSupportDialog.show((BaseActivity) getActivity(), "data " + person.getQrcode(), "personID:" + person.getId());
         }));
 
         return view;

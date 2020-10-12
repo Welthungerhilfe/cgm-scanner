@@ -201,7 +201,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
                     deletePerson(position);
                     break;
                 case 2:
-                    ContactSupportDialog.show(context, "person " + person.getQrcode());
+                    ContactSupportDialog.show(context, "person " + person.getQrcode(), "personID:" + person.getId());
                     break;
             }
         });

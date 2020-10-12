@@ -32,7 +32,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
@@ -156,7 +155,7 @@ public class GrowthDataFragment extends Fragment {
         contextMenu.setOnClickListener(view12 -> new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
                 new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
         }, which -> {
-            ContactSupportDialog.show((BaseActivity) getActivity(), "growth " + person.getQrcode());
+            ContactSupportDialog.show((BaseActivity) getActivity(), "growth " + person.getQrcode(), "personID:" + person.getId());
         }));
 
         initChart();
