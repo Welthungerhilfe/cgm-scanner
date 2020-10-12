@@ -29,6 +29,8 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.AudioManager;
+import android.media.MediaActionSound;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
@@ -275,6 +277,20 @@ public class Utils {
 
     public static int dpToPx(float dp, Context context) {
         return (int) (dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+
+    public static void playShooterSound(Context context, int sample) {
+        AudioManager audio = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        switch( audio.getRingerMode() ){
+            case AudioManager.RINGER_MODE_NORMAL:
+                MediaActionSound sound = new MediaActionSound();
+                sound.play(sample);
+                break;
+            case AudioManager.RINGER_MODE_SILENT:
+                break;
+            case AudioManager.RINGER_MODE_VIBRATE:
+                break;
+        }
     }
 
     public static void sleep(long miliseconds) {

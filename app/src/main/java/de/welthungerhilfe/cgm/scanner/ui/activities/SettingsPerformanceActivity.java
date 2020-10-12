@@ -197,7 +197,7 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
             });
 
             //wait a second before updating again
-            sleep(1000);
+            Utils.sleep(1000);
         }
     }
 }

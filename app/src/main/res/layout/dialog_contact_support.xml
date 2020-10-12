@@ -40,13 +40,22 @@
             android:contentDescription="@string/content_image"/>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_marginStart="10dp"
             android:text="@string/contact_support"
             android:textSize="16sp"
             android:textColor="@color/colorGreyDark"
             android:textStyle="bold"/>
+
+        <ImageView
+            android:id="@+id/recordAudio"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:background="@drawable/button_grey_round"
+            android:src="@drawable/ic_record_audio"
+            android:contentDescription="@string/content_image"/>
 
     </LinearLayout>
 

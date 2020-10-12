@@ -21,16 +21,20 @@ package de.welthungerhilfe.cgm.scanner.ui.dialogs;
 
 import android.Manifest;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.MediaActionSound;
+import android.media.MediaRecorder;
 import android.net.Uri;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
 import java.io.File;
@@ -49,12 +53,18 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 public class ContactSupportDialog extends Dialog {
 
     private static final int PERMISSION_STORAGE = 0x0003;
+    private static final int PERMISSION_AUDIO = 0x0004;
 
     private static final String SUPPORT_APP = "com.google.android.gm";
     private static final String SUPPORT_EMAIL = "support@childgrowthmonitor.org";
     private static final String SUPPORT_MIME = "application/zip";
 
-    private Context context;
+    private File audioFile = null;
+    private MediaRecorder audioEncoder;
+    private static Runnable runnable = null;
+    private boolean recording = false;
+
+    private BaseActivity context;
     public String footer;
     private String type;
     private File screenshot;
@@ -62,9 +72,57 @@ public class ContactSupportDialog extends Dialog {
 
     @BindView(R.id.inputMessage)
     EditText inputMessage;
+    @BindView(R.id.recordAudio)
+    ImageView recordAudio;
+
+    @OnClick(R.id.recordAudio)
+    void onRecord(View record) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            runnable = () -> onRecord(null);
+            context.addResultListener(PERMISSION_AUDIO, listener);
+            ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSION_AUDIO);
+            return;
+        }
+
+        if (!recording) {
+            Utils.playShooterSound(context, MediaActionSound.START_VIDEO_RECORDING);
+            recordAudio.setImageDrawable(context.getDrawable(R.drawable.stop));
+            recording = true;
+
+            audioFile = new File(AppController.getInstance().getRootDirectory(), "voice_record.3gp");
+            audioEncoder = new MediaRecorder();
+            audioEncoder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            audioEncoder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            audioEncoder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            audioEncoder.setAudioEncodingBitRate(128000);
+            audioEncoder.setAudioSamplingRate(44100);
+            audioEncoder.setOutputFile(audioFile.getAbsolutePath());
+            try {
+                audioEncoder.prepare();
+                audioEncoder.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                audioEncoder.stop();
+                audioEncoder.release();
+                audioEncoder = null;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            Utils.playShooterSound(context, MediaActionSound.STOP_VIDEO_RECORDING);
+            recordAudio.setImageDrawable(context.getDrawable(R.drawable.ic_record_audio));
+            recording = false;
+        }
+    }
 
     @OnClick(R.id.txtOK)
     void onConfirm(TextView txtOK) {
+        if (recording) {
+            onRecord(null);
+        }
         dismiss();
 
         if (type == null) {
@@ -86,6 +144,7 @@ public class ContactSupportDialog extends Dialog {
         sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
         ArrayList<Uri> uris = new ArrayList<Uri>();
+        if (audioFile != null) uris.add(Uri.fromFile(audioFile));
         if (screenshot != null) uris.add(Uri.fromFile(screenshot));
         if (zip != null) uris.add(Uri.fromFile(zip));
         sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
@@ -133,6 +192,8 @@ public class ContactSupportDialog extends Dialog {
 
     public static void show(BaseActivity activity, String type, String footer) {
         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            runnable = () -> show(activity, type, footer);
+            activity.addResultListener(PERMISSION_STORAGE, listener);
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
             return;
         }
@@ -151,4 +212,19 @@ public class ContactSupportDialog extends Dialog {
             contactSupportDialog.show();
         });
     }
+
+    private static BaseActivity.ResultListener listener = new BaseActivity.ResultListener() {
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+
+        }
+
+        @Override
+        public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+            if (grantResults.length > 0) {
+                runnable.run();
+                runnable = null;
+            }
+        }
+    };
 }
