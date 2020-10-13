@@ -1,4 +1,4 @@
-/**
+/*
  *  Child Growth Monitor - quick and accurate data on malnutrition
  *  Copyright (c) $today.year Welthungerhilfe Innovation
  *
@@ -29,10 +29,12 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.AudioManager;
+import android.media.MediaActionSound;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
-import android.util.Base64;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 
@@ -43,11 +45,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -68,28 +67,6 @@ public class Utils {
             value /= values.size();
         }
         return value;
-    }
-    public static String getMD5(String filePath) {
-        String base64Digest = "";
-        try {
-            InputStream input = new FileInputStream(filePath);
-            byte[] buffer = new byte[1024];
-            MessageDigest md5Hash = MessageDigest.getInstance("MD5");
-            int numRead = 0;
-            while (numRead != -1) {
-                numRead = input.read(buffer);
-                if (numRead > 0) {
-                    md5Hash.update(buffer, 0, numRead);
-                }
-            }
-            input.close();
-            byte[] md5Bytes = md5Hash.digest();
-            base64Digest = Base64.encodeToString(md5Bytes, Base64.DEFAULT);
-
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-        return base64Digest;
     }
 
     public static void overrideFont(Context context, String defaultFontNameToOverride, String customFontFileNameInAssets) {
@@ -154,6 +131,15 @@ public class Utils {
 
     public static String getAndroidID(ContentResolver resolver) {
         return Settings.Secure.getString(resolver, Settings.Secure.ANDROID_ID);
+    }
+
+    public static String getAppVersion(Context context) {
+        try {
+            return context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return "unknown";
+        }
     }
 
     public static String getSaltString(int length) {
@@ -289,8 +275,22 @@ public class Utils {
                 });
     }
 
-    public static int spToPx(float sp, Context context) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, context.getResources().getDisplayMetrics());
+    public static int dpToPx(float dp, Context context) {
+        return (int) (dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+
+    public static void playShooterSound(Context context, int sample) {
+        AudioManager audio = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        switch( audio.getRingerMode() ){
+            case AudioManager.RINGER_MODE_NORMAL:
+                MediaActionSound sound = new MediaActionSound();
+                sound.play(sample);
+                break;
+            case AudioManager.RINGER_MODE_SILENT:
+                break;
+            case AudioManager.RINGER_MODE_VIBRATE:
+                break;
+        }
     }
 
     public static void sleep(long miliseconds) {

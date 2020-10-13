@@ -89,6 +89,10 @@ dependencies {
     implementation 'com.huawei.hms:arenginesdk:2.13.0.4' //Huawei AREngine
     implementation 'me.dm7.barcodescanner:zxing:1.9.8' //QR Code scanner
 
+    // Recording audio
+    implementation 'org.jcodec:jcodec:0.2.3'
+    implementation 'org.jcodec:jcodec-android:0.2.3'
+
     // Network
     implementation "com.microsoft.appcenter:appcenter-auth:2.5.0" //AppCenter authorisation
     implementation "com.microsoft.appcenter:appcenter-analytics:2.5.0" //AppCenter analytics

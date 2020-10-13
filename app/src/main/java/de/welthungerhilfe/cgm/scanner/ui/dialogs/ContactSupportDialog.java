@@ -1,0 +1,230 @@
+/*
+ * Child Growth Monitor - quick and accurate data on malnutrition
+ * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com> for Welthungerhilfe
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+package de.welthungerhilfe.cgm.scanner.ui.dialogs;
+
+import android.Manifest;
+import android.app.Dialog;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.media.MediaActionSound;
+import android.media.MediaRecorder;
+import android.net.Uri;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+
+import java.io.File;
+import java.util.ArrayList;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import de.welthungerhilfe.cgm.scanner.AppController;
+import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.BackupManager;
+import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
+import de.welthungerhilfe.cgm.scanner.utils.IO;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
+
+public class ContactSupportDialog extends Dialog {
+
+    private static final int PERMISSION_STORAGE = 0x0003;
+    private static final int PERMISSION_AUDIO = 0x0004;
+
+    private static final String SUPPORT_APP = "com.google.android.gm";
+    private static final String SUPPORT_EMAIL = "support@childgrowthmonitor.org";
+    private static final String SUPPORT_MIME = "application/zip";
+
+    private File audioFile = null;
+    private MediaRecorder audioEncoder;
+    private static Runnable runnable = null;
+    private boolean recording = false;
+
+    private BaseActivity context;
+    public String footer;
+    private String type;
+    private File screenshot;
+    private File zip;
+
+    @BindView(R.id.inputMessage)
+    EditText inputMessage;
+    @BindView(R.id.recordAudio)
+    ImageView recordAudio;
+
+    @OnClick(R.id.recordAudio)
+    void onRecord(View record) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            runnable = () -> onRecord(null);
+            context.addResultListener(PERMISSION_AUDIO, listener);
+            ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSION_AUDIO);
+            return;
+        }
+
+        if (!recording) {
+            Utils.playShooterSound(context, MediaActionSound.START_VIDEO_RECORDING);
+            recordAudio.setImageDrawable(context.getDrawable(R.drawable.stop));
+            recording = true;
+
+            audioFile = new File(AppController.getInstance().getRootDirectory(), "voice_record.wav");
+            audioEncoder = new MediaRecorder();
+            audioEncoder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            audioEncoder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
+            audioEncoder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+            audioEncoder.setAudioEncodingBitRate(128000);
+            audioEncoder.setAudioSamplingRate(44100);
+            audioEncoder.setOutputFile(audioFile.getAbsolutePath());
+            try {
+                audioEncoder.prepare();
+                audioEncoder.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                audioEncoder.stop();
+                audioEncoder.release();
+                audioEncoder = null;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            Utils.playShooterSound(context, MediaActionSound.STOP_VIDEO_RECORDING);
+            recordAudio.setImageDrawable(context.getDrawable(R.drawable.ic_record_audio));
+            recording = false;
+        }
+    }
+
+    @OnClick(R.id.txtOK)
+    void onConfirm(TextView txtOK) {
+        if (recording) {
+            onRecord(null);
+        }
+        dismiss();
+
+        if (type == null) {
+            type = "";
+        } else {
+            type = " - " + type;
+        }
+        String subject = "CGM-Scanner version " + Utils.getAppVersion(context) + type;
+        String message = inputMessage.getText().toString();
+        if (footer != null) {
+            message += "\n\n" + footer;
+        }
+
+        Intent sendIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        sendIntent.setType(SUPPORT_MIME);
+        sendIntent.setPackage(SUPPORT_APP);
+        sendIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { SUPPORT_EMAIL });
+        sendIntent.putExtra(Intent.EXTRA_TEXT, message);
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+
+        ArrayList<Uri> uris = new ArrayList<Uri>();
+        if (audioFile != null) uris.add(Uri.fromFile(audioFile));
+        if (screenshot != null) uris.add(Uri.fromFile(screenshot));
+        if (zip != null) uris.add(Uri.fromFile(zip));
+        sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+        context.startActivity(sendIntent);
+    }
+
+    @OnClick(R.id.txtCancel)
+    void onCancel(TextView txtCancel) {
+        dismiss();
+    }
+
+    public ContactSupportDialog(@NonNull BaseActivity context) {
+        super(context);
+        this.context = context;
+
+        this.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        this.setContentView(R.layout.dialog_contact_support);
+        this.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        this.getWindow().getAttributes().windowAnimations = R.style.DialogAnimationScale;
+        this.setCancelable(false);
+
+        ButterKnife.bind(this);
+    }
+
+    public void attachScreenshot(File file) {
+        screenshot = file;
+    }
+
+    public void attachFiles(File[] files) {
+        String[] paths = new String[files.length];
+        for (int i = 0; i < files.length; i++) {
+            paths[i] = files[i].getAbsolutePath();
+        }
+
+        zip = new File(AppController.getInstance().getRootDirectory(), "report.zip");
+        IO.zip(paths, zip.getAbsolutePath());
+    }
+
+    public void setFooter(String value) { footer = value; }
+
+    public void setType(String value) {
+        type = value;
+    }
+
+    public static void show(BaseActivity activity, String type, String footer) {
+        if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            runnable = () -> show(activity, type, footer);
+            activity.addResultListener(PERMISSION_STORAGE, listener);
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
+            return;
+        }
+
+        long timestamp = System.currentTimeMillis();
+        File dir = new File(activity.getApplicationInfo().dataDir, "temp");
+        File screenshot = new File(AppController.getInstance().getRootDirectory(), "screenshot.png");
+        IO.deleteDirectory(dir);
+        BackupManager.doBackup(activity, dir, timestamp, () -> {
+            IO.takeScreenshot(activity, screenshot);
+            ContactSupportDialog contactSupportDialog = new ContactSupportDialog(activity);
+            contactSupportDialog.attachFiles(dir.listFiles());
+            contactSupportDialog.attachScreenshot(screenshot);
+            contactSupportDialog.setFooter(footer);
+            contactSupportDialog.setType(type);
+            contactSupportDialog.show();
+        });
+    }
+
+    private static BaseActivity.ResultListener listener = new BaseActivity.ResultListener() {
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+
+        }
+
+        @Override
+        public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+            if (grantResults.length > 0) {
+                runnable.run();
+                runnable = null;
+            }
+        }
+    };
+}

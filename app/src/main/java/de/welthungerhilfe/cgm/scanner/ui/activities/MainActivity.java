@@ -20,17 +20,14 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBar;
@@ -40,7 +37,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -61,7 +57,6 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
@@ -70,13 +65,11 @@ import de.welthungerhilfe.cgm.scanner.helper.service.DeviceService;
 import de.welthungerhilfe.cgm.scanner.helper.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-import de.welthungerhilfe.cgm.scanner.ui.views.SwipeView;
 
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
     private final int REQUEST_LOCATION = 0x1000;
@@ -136,23 +129,22 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         setupSidemenu();
         setupActionBar();
-        setupRecyclerView();
         setupSortDialog();
-
-        adapterData = new RecyclerPersonAdapter(this);
-        adapterData.setPersonDetailListener(this);
 
         lytManager = new LinearLayoutManager(MainActivity.this);
         recyclerData.setLayoutManager(lytManager);
         recyclerData.setItemAnimator(new DefaultItemAnimator());
         recyclerData.setHasFixedSize(true);
-        recyclerData.setAdapter(adapterData);
         recyclerData.addOnScrollListener(new EndlessScrollListener(lytManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
                 viewModel.setCurrentPage(page);
             }
         });
+
+        adapterData = new RecyclerPersonAdapter(this, recyclerData, viewModel);
+        adapterData.setPersonDetailListener(this);
+        recyclerData.setAdapter(adapterData);
 
         startService(new Intent(this, DeviceService.class));
     }
@@ -260,51 +252,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         ImageView magImage = searchView.findViewById(R.id.search_mag_icon);
         magImage.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
-    }
-
-    private void setupRecyclerView() {
-        SwipeView swipeController = new SwipeView(ItemTouchHelper.LEFT, this) {
-            @SuppressLint("StaticFieldLeak")
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                int position = viewHolder.getAdapterPosition();
-
-                if (!AppController.getInstance().isAdmin()) {
-                    adapterData.notifyItemChanged(position);
-
-                    Snackbar.make(recyclerData, R.string.permission_delete, Snackbar.LENGTH_LONG).show();
-                } else {
-                    Person person = adapterData.getItem(position);
-
-                    ConfirmDialog dialog = new ConfirmDialog(MainActivity.this);
-                    dialog.setMessage(R.string.delete_person);
-                    dialog.setConfirmListener(result -> {
-                        if (result) {
-                            new AsyncTask<Void, Void, Void>() {
-                                @Override
-                                protected Void doInBackground(Void... voids) {
-                                    person.setDeleted(true);
-                                    person.setDeletedBy(session.getUserEmail());
-                                    person.setTimestamp(Utils.getUniversalTimestamp());
-
-                                    return null;
-                                }
-
-                                public void onPostExecute(Void result) {
-                                    viewModel.updatePerson(person);
-                                }
-                            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                        } else {
-                            adapterData.notifyItemChanged(position);
-                        }
-                    });
-                    dialog.show();
-                }
-            }
-        };
-
-        ItemTouchHelper itemTouchhelper = new ItemTouchHelper(swipeController);
-        itemTouchhelper.attachToRecyclerView(recyclerData);
     }
 
     private void setupSortDialog() {

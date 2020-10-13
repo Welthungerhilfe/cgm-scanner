@@ -18,7 +18,11 @@
  */
 
 package de.welthungerhilfe.cgm.scanner.ui.activities;
+import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.microsoft.appcenter.crashes.Crashes;
@@ -26,10 +30,20 @@ import com.novoda.merlin.Merlin;
 import com.novoda.merlin.registerable.connection.Connectable;
 import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
+import java.util.HashMap;
+
 import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 
 public class BaseActivity extends AppCompatActivity implements Connectable, Disconnectable {
+
+    public interface ResultListener {
+        void onActivityResult(int requestCode, int resultCode, @Nullable Intent data);
+        void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults);
+    }
+
+    private HashMap<Integer, ResultListener> map = new HashMap<>();
+
     public static class ExceptionHandler implements Thread.UncaughtExceptionHandler {
         @Override
         public void uncaughtException(Thread thread, Throwable ex) {
@@ -77,6 +91,25 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (map.containsKey(requestCode)) {
+            map.get(requestCode).onActivityResult(requestCode, resultCode, data);
+            map.remove(requestCode);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (map.containsKey(requestCode)) {
+            map.get(requestCode).onRequestPermissionsResult(requestCode, permissions, grantResults);
+            map.remove(requestCode);
+        }
+    }
+
+    @Override
     public void onConnect() {
         // todo: Crashlytics.log(0, "network state: ", "connected at " + Utils.beautifyDateTime(new Date()));
 
@@ -100,11 +133,10 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
         session.setConnectionTimestamp(System.currentTimeMillis());
     }
 
-    public void sleep(long miliseconds) {
-        try {
-            Thread.sleep(miliseconds);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public void addResultListener(int resultCode, ResultListener listener) {
+        if (map.containsKey(resultCode)) {
+            map.remove(resultCode);
         }
+        map.put(resultCode, listener);
     }
 }

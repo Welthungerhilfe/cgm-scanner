@@ -28,10 +28,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,9 +43,10 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerMeasureAdapter;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.FeedbackDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualDetailDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
@@ -55,22 +54,13 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-import de.welthungerhilfe.cgm.scanner.ui.views.SwipeView;
 
 public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.ManualMeasureListener, RecyclerMeasureAdapter.OnMeasureSelectListener, RecyclerMeasureAdapter.OnMeasureFeedbackListener {
     private Context context;
-
     private SessionManager session;
-    private RemoteConfig config;
 
-    private RecyclerView recyclerMeasure;
     private RecyclerMeasureAdapter adapterMeasure;
-
     private FloatingActionButton fabCreate;
-
-    private ManualMeasureDialog measureDialog;
-    private ManualDetailDialog detailDialog;
-    private FeedbackDialog feedbackDialog;
 
     private CreateDataViewModel viewModel;
 
@@ -90,7 +80,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
         this.context = context;
         this.session = new SessionManager(context);
-        config = session.getRemoteConfig();
+        RemoteConfig config = session.getRemoteConfig();
     }
 
     @Override
@@ -120,70 +110,12 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         // TODO: when coming from automatic scan show ManualMeasureDialog before displaying auto
         View view = inflater.inflate(R.layout.fragment_measure, container, false);
 
-        adapterMeasure = new RecyclerMeasureAdapter(context);
+        RecyclerView recyclerMeasure = view.findViewById(R.id.recyclerMeasure);
+        recyclerMeasure.setLayoutManager(new LinearLayoutManager(context));
+        adapterMeasure = new RecyclerMeasureAdapter((BaseActivity) getActivity(), recyclerMeasure, this);
         adapterMeasure.setMeasureSelectListener(this);
         adapterMeasure.setMeasureFeedbackListener(this);
-
-        recyclerMeasure = view.findViewById(R.id.recyclerMeasure);
         recyclerMeasure.setAdapter(adapterMeasure);
-        recyclerMeasure.setLayoutManager(new LinearLayoutManager(context));
-
-        SwipeView swipeController = new SwipeView(ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT, context) {
-
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                int position = viewHolder.getAdapterPosition();
-                Measure measure = adapterMeasure.getItem(position);
-
-                if (direction == ItemTouchHelper.LEFT) {
-                    if (!config.isAllow_delete()) {
-                        adapterMeasure.notifyItemChanged(position);
-                        Snackbar.make(recyclerMeasure, R.string.permission_delete, Snackbar.LENGTH_LONG).show();
-                    } else {
-                        ConfirmDialog dialog = new ConfirmDialog(context);
-                        dialog.setMessage(R.string.delete_measure);
-                        dialog.setConfirmListener(result -> {
-                            if (result) {
-                                measure.setDeleted(true);
-                                measure.setDeletedBy(session.getUserEmail());
-                                measure.setTimestamp(Utils.getUniversalTimestamp());
-
-                                adapterMeasure.removeMeasure(measure);
-                            } else {
-                                adapterMeasure.notifyItemChanged(position);
-                            }
-                        });
-                        dialog.show();
-                    }
-                } else if (direction == ItemTouchHelper.RIGHT){
-                    if (!config.isAllow_edit()) {
-                        adapterMeasure.notifyItemChanged(position);
-                        Snackbar.make(recyclerMeasure, R.string.permission_edit, Snackbar.LENGTH_LONG).show();
-                    } else if (measure.getDate() < Utils.getUniversalTimestamp() - config.getTime_to_allow_editing() * 3600 * 1000) {
-                        adapterMeasure.notifyItemChanged(position);
-                        Snackbar.make(recyclerMeasure, R.string.permission_expired, Snackbar.LENGTH_LONG).show();
-                    } else {
-                        if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
-                            if (measureDialog == null)
-                                measureDialog = new ManualMeasureDialog(context);
-                            measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
-                            measureDialog.setCloseListener(result -> adapterMeasure.notifyItemChanged(position));
-                            measureDialog.setMeasure(measure);
-                            measureDialog.show();
-                        } else {
-                            Intent intent = new Intent(getContext(), ScanModeActivity.class);
-                            intent.putExtra(AppConstants.EXTRA_PERSON, person);
-                            intent.putExtra(AppConstants.EXTRA_MEASURE, measure);
-                            startActivity(intent);
-                            adapterMeasure.notifyItemChanged(position);
-                        }
-                    }
-                }
-            }
-        };
-
-        ItemTouchHelper itemTouchhelper = new ItemTouchHelper(swipeController);
-        itemTouchhelper.attachToRecyclerView(recyclerMeasure);
 
         fabCreate = view.findViewById(R.id.fabCreate);
         fabCreate.setOnClickListener(this);
@@ -192,37 +124,33 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void createMeasure() {
-        try {
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setTitle(R.string.title_add_measure);
-            builder.setItems(R.array.selector_measure, (d, which) -> {
-                if (which == 0) {
-                    if (measureDialog == null)
-                        measureDialog = new ManualMeasureDialog(context);
+        new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+                new ContextMenuDialog.Item(R.string.selector_manual, R.drawable.ic_manual),
+                new ContextMenuDialog.Item(R.string.selector_scan, R.drawable.ic_machine)
+        }, which -> {
+            switch (which) {
+                case 0:
+                    ManualMeasureDialog measureDialog = new ManualMeasureDialog(context);
                     measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
                     measureDialog.show();
-                } else if (which == 1) {
+                    break;
+                case 1:
                     Intent intent = new Intent(getContext(), ScanModeActivity.class);
                     intent.putExtra(AppConstants.EXTRA_PERSON, person);
                     startActivity(intent);
-                }
-            });
-            builder.show();
-        } catch (RuntimeException e) {
-            // todo: Crashlytics.log(0, "measure fragment", e.getMessage());
-        }
+                    break;
+            }
+        });
     }
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.fabCreate:
-                if (person == null) {
-                    Snackbar.make(fabCreate, R.string.error_person_first, Snackbar.LENGTH_LONG).show();
-                } else {
-                    createMeasure();
-                }
-                break;
+        if (view.getId() == R.id.fabCreate) {
+            if (person == null) {
+                Snackbar.make(fabCreate, R.string.error_person_first, Snackbar.LENGTH_LONG).show();
+            } else {
+                createMeasure();
+            }
         }
     }
 
@@ -254,17 +182,14 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onMeasureSelect(Measure measure) {
-        if (detailDialog == null)
-            detailDialog = new ManualDetailDialog(context);
+        ManualDetailDialog detailDialog = new ManualDetailDialog(context);
         detailDialog.setMeasure(measure);
         detailDialog.show();
     }
 
     @Override
     public void onMeasureFeedback(Measure measure, double overallScore) {
-        if (feedbackDialog == null)
-            feedbackDialog = new FeedbackDialog(context);
-
+        FeedbackDialog feedbackDialog = new FeedbackDialog(context);
         feedbackDialog.setMeasure(measure);
         feedbackDialog.show();
     }
