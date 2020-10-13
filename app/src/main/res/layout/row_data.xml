@@ -84,9 +84,10 @@
             </LinearLayout>
 
             <ImageView
+                android:id="@+id/contextMenuButton"
                 android:layout_width="18dp"
                 android:layout_height="18dp"
-                android:src="@drawable/right"
+                android:src="@drawable/ic_context_menu"
                 android:tint="@color/colorGreyDark"
                 android:contentDescription="@string/content_image"/>
 

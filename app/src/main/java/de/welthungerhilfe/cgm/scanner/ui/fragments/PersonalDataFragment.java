@@ -55,7 +55,10 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.DateEditText;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
@@ -74,6 +77,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private EditText editName, editPrename, editLocation, editGuardian;
 
     private AppCompatRadioButton radioFemale, radioMale;
+    private View contextMenu;
 
     private Button btnNext;
     private long birthday = 0;
@@ -146,6 +150,13 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         radioMale = view.findViewById(R.id.radioMale);
         radioMale.setOnCheckedChangeListener(this);
+
+        contextMenu = view.findViewById(R.id.contextMenuButton);
+        contextMenu.setOnClickListener(view12 -> new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+                new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
+        }, which -> {
+            ContactSupportDialog.show((BaseActivity) getActivity(), "data " + person.getQrcode(), "personID:" + person.getId());
+        }));
 
         return view;
     }

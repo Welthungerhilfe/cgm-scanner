@@ -71,13 +71,22 @@
 
             <TextView
                 android:id="@+id/txtDate"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text=""
                 android:textColor="@color/colorGreyDark"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
+            <ImageView
+                android:id="@+id/contextMenuButton"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/ic_context_menu"
+                android:tint="@color/colorGreyDark"
+                android:contentDescription="@string/content_image"/>
         </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout

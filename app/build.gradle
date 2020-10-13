@@ -6,8 +6,8 @@ android {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 306
-        versionName "3.0.6-rc1"
+        versionCode 310
+        versionName "3.1.0-dev"
         manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", arengineValue:"optional", tangoRequired:"false"]
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         javaCompileOptions {
@@ -88,6 +88,10 @@ dependencies {
     implementation 'com.google.tango:support-base:1.54' //Google Tango helper
     implementation 'com.huawei.hms:arenginesdk:2.13.0.4' //Huawei AREngine
     implementation 'me.dm7.barcodescanner:zxing:1.9.8' //QR Code scanner
+
+    // Recording audio
+    implementation 'org.jcodec:jcodec:0.2.3'
+    implementation 'org.jcodec:jcodec-android:0.2.3'
 
     // Network
     implementation "com.microsoft.appcenter:appcenter-auth:2.5.0" //AppCenter authorisation
