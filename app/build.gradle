@@ -56,7 +56,7 @@ android {
         }
         nonar {
             dimension "platform"
-            minSdkVersion 28
+            minSdkVersion 24
             manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", arengineValue:"optional", tangoRequired:"false"]
         }
     }
