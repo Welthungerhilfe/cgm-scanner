@@ -93,9 +93,13 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         }
         oedema = isChecked;
     }
+
     @OnClick(R.id.imgLocation)
     void onLocation(ImageView imgLocation) {
-        getContext().startActivity(new Intent(getContext(), LocationDetectActivity.class));
+        LocationDetectActivity.navigate((AppCompatActivity) mContext, editManualLocation, location, location -> {
+            ManualMeasureDialog.this.location = location;
+            editManualLocation.setText(location.getAddress());
+        });
     }
     @OnClick(R.id.txtCancel)
     void onCancel(TextView txtCancel) {
