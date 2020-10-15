@@ -45,7 +45,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -757,16 +756,18 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 measureRepository.insertMeasure(measure);
             }
 
-            //start uploading service
-            runOnUiThread(() -> {
-                if (!AppController.getInstance().isUploadRunning()) {
-                    startService(new Intent(getApplicationContext(), UploadService.class));
-                }
-            });
-
-            //update measure metadata if possible
+            //upload metadata if possible
             Context context = ScanModeActivity.this;
             if (Utils.isUploadAllowed(context)) {
+
+                //start upload service
+                runOnUiThread(() -> {
+                    if (!AppController.getInstance().isUploadRunning()) {
+                        startService(new Intent(getApplicationContext(), UploadService.class));
+                    }
+                });
+
+                //add metadata into DB
                 measureRepository.uploadMeasure(context, measure);
                 return null;
             }
