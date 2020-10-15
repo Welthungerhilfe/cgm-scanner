@@ -96,6 +96,15 @@
     <string name="tooltip_birthday">Geburtstag eingeben</string>
     <string name="tooltip_guardian">Erziehungsberechtigte/n eingeben</string>
     <string name="tooltipe_sex">Geschlecht auswählen</string>
+
+    //please check this
+    <string name="tooltip_input">%1$s eingeben</string>
+    <string name="name_tooltip">Namen</string>
+    <string name="prename_tooltip">Vornamen</string>
+    <string name="birthday_tooltip">Geburtstag</string>
+    <string name="guardian_tooltip">Erziehungsberechtigte/n</string>
+
+
     <string name="tooltipe_height_min">Das Kind sollte größer als 45cm sein</string>
     <string name="tooltipe_height_max">Das Kind sollte kleiner als 120cm sein</string>
     <string name="tooltipe_weight_min">Gewicht sollte größer als 2kg sein</string>

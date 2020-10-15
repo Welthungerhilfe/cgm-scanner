@@ -95,6 +95,16 @@
     <string name="tooltip_birthday">Please input birthday</string>
     <string name="tooltip_guardian">Please input guardian</string>
     <string name="tooltipe_sex">Please select sex</string>
+
+    //please check this
+    <string name="tooltip_input">Please input %1$s</string>
+    <string name="name_tooltip">name</string>
+    <string name="prename_tooltip">prename</string>
+    <string name="birthday_tooltip">birthday</string>
+    <string name="guardian_tooltip">guardian</string>
+
+
+
     <string name="tooltipe_height_min">height should be more than 45cm</string>
     <string name="tooltipe_height_max">height should be less than 120cm</string>
     <string name="tooltipe_weight_min">weight should be more than 2kg</string>

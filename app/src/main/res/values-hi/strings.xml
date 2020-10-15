@@ -96,6 +96,15 @@
     <string name="tooltip_birthday">कृपया जन्मदिन का इनपुट दें</string>
     <string name="tooltip_guardian">कृपया अभिभावक का इनपुट दें</string>
     <string name="tooltipe_sex">कृपया लिंग का चयन करें</string>
+
+    //please check this
+    <string name="tooltip_input">कृपया %1$s का इनपुट दें</string>
+    <string name="name_tooltip">नाम</string>
+    <string name="prename_tooltip">उपनाम</string>
+    <string name="birthday_tooltip">जन्मदिन</string>
+    <string name="guardian_tooltip">अभिभावक</string>
+
+
     <string name="tooltipe_height_min">लम्बाई 45cm (सेन्टीमीटर्स) से बड़ी होनी चाहिए </string>
     <string name="tooltipe_height_max">लम्बाई 120cm (सेन्टीमीटर्स) से कम होनी चाहिए </string>
     <string name="tooltipe_weight_min">वजन 2kg से ज्यादा होना चाहिये </string>

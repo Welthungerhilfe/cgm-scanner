@@ -207,31 +207,31 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         String guardian = editGuardian.getText().toString();
 
         if (name.isEmpty()) {
-            editName.setError(getResources().getString(R.string.tooltip_name));
+            editName.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.name_tooltip)));
             valid = false;
         } else {
             editName.setError(null);
         }
 
         if (prename.isEmpty()) {
-            editPrename.setError(getResources().getString(R.string.tooltip_prename));
+            editPrename.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.prename_tooltip)));
             valid = false;
         } else {
             editPrename.setError(null);
         }
 
         if (birth.isEmpty()) {
-            editBirth.setError(getResources().getString(R.string.tooltip_birthday));
+            editBirth.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.birthday_tooltip)));
             valid = false;
         } else if (birth.equals("DD-MM-YYYY")){
-            editBirth.setError(getResources().getString(R.string.tooltip_birthday));
+            editBirth.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.birthday_tooltip)));
             valid = false;
         } else {
             editBirth.setError(null);
         }
 
         if (guardian.isEmpty()) {
-            editGuardian.setError(getResources().getString(R.string.tooltip_guardian));
+            editGuardian.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.guardian_tooltip)));
             valid = false;
         } else {
             editGuardian.setError(null);
