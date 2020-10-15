@@ -21,10 +21,10 @@ package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
 import android.app.Activity;
 import android.app.DialogFragment;
+
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.fragment.app.Fragment;
@@ -45,7 +45,6 @@ import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 
 import java.util.Date;
-import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -57,6 +56,7 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
+import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
@@ -77,7 +77,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private EditText editName, editPrename, editLocation, editGuardian;
 
     private AppCompatRadioButton radioFemale, radioMale;
-    private View contextMenu;
 
     private Button btnNext;
     private long birthday = 0;
@@ -151,7 +150,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         radioMale = view.findViewById(R.id.radioMale);
         radioMale.setOnCheckedChangeListener(this);
 
-        contextMenu = view.findViewById(R.id.contextMenuButton);
+        View contextMenu = view.findViewById(R.id.contextMenuButton);
         contextMenu.setOnClickListener(view12 -> new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
                 new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
         }, which -> {
@@ -175,32 +174,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         editPrename.setText(person.getSurname());
         editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getBirthday()));
         editGuardian.setText(person.getGuardian());
-        editLocation.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                new Thread(() -> {
-                    Geocoder geocoder = new Geocoder(getContext());
-                    try {
-                        List<Address> addresses = geocoder.getFromLocationName(editLocation.getText().toString(), 1);
-                        if(addresses.size() > 0) {
-                            Loc l = new Loc();
-                            l.setLatitude(addresses.get(0).getLatitude());
-                            l.setLongitude(addresses.get(0).getLongitude());
-                            l.setAddress(editLocation.getText().toString());
-                            getActivity().runOnUiThread(() -> setLocation(l));
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }).start();
+        editLocation.setOnFocusChangeListener((view, active) -> {
+            if (active) {
+                LocationDetectActivity.navigate((AppCompatActivity) getActivity(), editLocation, location, this::setLocation);
             }
         });
 
