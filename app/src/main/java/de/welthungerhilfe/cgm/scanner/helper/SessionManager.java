@@ -221,9 +221,4 @@ public class SessionManager {
     public String getAzureAccountKey() {
         return pref.getString(KEY_AZURE_ACCOUNT_KEY, null);
     }
-
-    public boolean isTangoDevice() {
-        //Note: the compatibility is checked by AndroidManifest
-        return Build.VERSION.SDK_INT <= 24;
-    }
 }

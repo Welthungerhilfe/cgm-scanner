@@ -36,7 +36,6 @@ import android.net.NetworkInfo;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TypedValue;
 
 import androidx.core.app.ActivityCompat;
 

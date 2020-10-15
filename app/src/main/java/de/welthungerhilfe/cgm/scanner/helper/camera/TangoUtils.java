@@ -1,5 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.helper.camera;
 
+import android.content.Context;
+import android.content.pm.PackageInfo;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
@@ -101,6 +103,13 @@ public class TangoUtils {
         }
 
         return depthmap;
+    }
+
+    public static boolean isTangoSupported(Context context) {
+        for (PackageInfo info : context.getPackageManager().getInstalledPackages(0))
+            if (info.packageName.compareTo("com.google.tango") == 0)
+                return true;
+        return false;
     }
 
     public static void writeCalibrationFile(File file, TangoCameraIntrinsics[] calibration) {

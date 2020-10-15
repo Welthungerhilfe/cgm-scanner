@@ -29,12 +29,12 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.BackupManager;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.helper.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView;
 import de.welthungerhilfe.cgm.scanner.ui.views.ToggleView;
 import de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
-import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class SettingsActivity extends BaseActivity {
@@ -128,7 +128,7 @@ public class SettingsActivity extends BaseActivity {
         layoutTestQA.setVisibility(showQA ? View.VISIBLE : View.GONE);
 
         txtSettingUuid.setText(2, Utils.getAndroidID(getContentResolver()));
-        if (session.isTangoDevice()) {
+        if (TangoUtils.isTangoSupported(this)) {
             switchShowDepth.setVisibility(View.GONE);
         } else {
             switchShowDepth.setChecked(LocalPersistency.getBoolean(this, KEY_SHOW_DEPTH));
