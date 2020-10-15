@@ -766,13 +766,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             //update measure metadata if possible
             Context context = ScanModeActivity.this;
-            boolean wifiOnly = LocalPersistency.getBoolean(context, SettingsActivity.KEY_UPLOAD_WIFI);
-            if (wifiOnly) {
-                if (Utils.isWifiConnected(context)) {
-                    measureRepository.uploadMeasure(context, measure);
-                    return null;
-                }
-            } else if (Utils.isNetworkAvailable(context)) {
+            if (Utils.isUploadAllowed(context)) {
                 measureRepository.uploadMeasure(context, measure);
                 return null;
             }

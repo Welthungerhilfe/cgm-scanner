@@ -54,6 +54,8 @@ import java.util.Random;
 import java.util.TimeZone;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 
 public class Utils {
 
@@ -276,6 +278,18 @@ public class Utils {
 
     public static int dpToPx(float dp, Context context) {
         return (int) (dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+
+    public static boolean isUploadAllowed(Context context) {
+        boolean wifiOnly = LocalPersistency.getBoolean(context, SettingsActivity.KEY_UPLOAD_WIFI);
+        if (wifiOnly) {
+            if (Utils.isWifiConnected(context)) {
+                return true;
+            }
+        } else if (Utils.isNetworkAvailable(context)) {
+            return true;
+        }
+        return false;
     }
 
     public static void playShooterSound(Context context, int sample) {
