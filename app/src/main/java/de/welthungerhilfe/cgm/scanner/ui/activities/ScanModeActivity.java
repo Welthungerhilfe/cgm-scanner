@@ -1030,7 +1030,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             double Artifact_Lighting_penalty=Math.abs((double) numPoints/38000-1.0)*100*3;
 
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
-                    "_" + String.format(Locale.US, "%03d", mNumberOfFilesWritten++);
+                    "_" + mNumberOfFilesWritten++ + "_" + pointCloudData.timestamp;
 
             ArtifactResult ar=new ArtifactResult();
             ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
