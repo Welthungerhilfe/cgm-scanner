@@ -3,14 +3,7 @@
     <string name="app_name_long">Child Growth Monitor Scanner App</string>
 
     <string name="permission_camera">Kamerazugriff benötigt!</string>
-    <string name="loading">laden…</string>
 
-    <string name="validate_user">Bitte Benutzernamen eingeben</string>
-    <string name="validate_password">Bitte Passwort eingeben</string>
-
-    <string name="label_login">Bitte anmelden:</string>
-    <string name="user">Benutzer</string>
-    <string name="password">Passwort</string>
     <string name="name">Nachname</string>
     <string name="guardian">Erziehungsberechtigte/r</string>
     <string name="prename">Vorname des Kindes</string>
@@ -19,13 +12,11 @@
     <string name="sex_male">männlich</string>
     <string name="sex_female">weiblich</string>
 
-    <string name="forgot"><u>Passwort vergessen?</u></string>
     <string name="ok">OK</string>
     <string name="confirm">Bestätigen</string>
     <string name="cancel">Abbrechen</string>
     <string name="back">Zurück</string>
     <string name="next">Speichern</string>
-    <string name="delete">Löschen</string>
     <string name="by">von</string>
     <string name="retake">Retake</string>
     <string name="label_continue">Fortsetzen</string>
@@ -45,7 +36,6 @@
     <string name="sortby">Sortieren nach</string>
     <string name="date">Datum</string>
     <string name="last_days">letzte %1$d Tage</string>
-    <string name="last_scans">letzte Scans (%1$d days)</string>
     <string name="label_location">Ort</string>
     <string name="last_location_error">letzter Ort nicht verfügar</string>
     <string name="sort_date">älteste Person oben</string>
@@ -56,7 +46,6 @@
     <string name="stunting_height_age">niedrigstes Größen/Alter-Verhältnis oben</string>
     <string name="no_filter">Ohne Filter</string>
     <string name="clear_filters">Alle Filter zurücksetzen</string>
-    <string name="no_persons">KEINE PERSONEN REGISTRIERT</string>
     <string name="circuit">Umkreis</string>
     <string name="own_data">Nur eigene Daten</string>
     <string name="created_by_self">zeige nur von mir eingetragene Kinder</string>
@@ -68,17 +57,14 @@
     <string name="measure_height">03 Größe</string>
     <string name="measure_weight">04 Gewicht</string>
     <string name="measure_muac">05 MUAC</string>
-    <string name="measure_head">06 Kopfumfang</string>
     <string name="measure_oedema">Kein Ödem</string>
 
     <string name="start_scan">Scan starten</string>
-    <string name="retake_scan">Scan wiederholen</string>
     <string name="complete_scan">Scan abschließen</string>
     <string name="axis_y">Y Achse</string>
     <string name="axis_x">X Achse</string>
     <string name="username">Benutzername</string>
     <string name="age_estimate">Alter ist geschätzt</string>
-    <string name="starting">Starten…</string>
 
     <string name="front_view_01">01. Vorderansicht</string>
     <string name="lateral_view_02">02. 360\' Ansicht</string>
@@ -93,8 +79,7 @@
 
     <string name="abbr_height">h:</string>
     <string name="abbr_weight">w:</string>
-    <string name="abbr_head">h:</string>
-    <string name="abbr_arm">a:</string>
+
 
     <string name="unit_km">km</string>
     <string name="unit_cm">cm</string>
@@ -105,7 +90,6 @@
     <string name="tooltip_kg_precision">mindestens drei Nachkommastellen</string>
     <string name="tooltip_weight_ex">z.B. 12.595</string>
     <string name="tooltip_cm">Wert in Zentimetern</string>
-    <string name="tooltip_precision">Millimeter angeben</string>
     <string name="tooltip_height_ex">z.B. 95.6</string>
     <string name="tooltip_name">Namen eingeben</string>
     <string name="tooltip_prename">Vornamen eingeben</string>
@@ -120,16 +104,10 @@
     <string name="tooltipe_muac_min">MUAC sollte größer als 9cm sein</string>
     <string name="tooltipe_muac_max">MUAC sollte kleiner als 22cm sein</string>
 
-    <string name="baby_full_body_front_scan_text">1/3. Vorne</string>
-    <string name="baby_left_right_scan_text">2/3. Rundum 360\'</string>
-    <string name="baby_full_body_back_scan_text">3/3. Hinten</string>
-    <string name="empty_string"/>
     <!-- drawer -->
     <string name="drawer_open">Öffnen</string>
     <string name="drawer_close">Schließen</string>
-    <string name="progress_uploading">Upload Fortschritt</string>
-    <string name="upload_success">Upload erfolgreich</string>
-    <string name="upload_failure">Upload fehlgeschlagen</string>
+
 
     <string name="error_network">Offline. Bitte Netzwerkverbindung prüfen.</string>
     <string name="error_login">Login fehlgeschlagen</string>
@@ -155,7 +133,6 @@
 
     <string name="title_scans">Scans-Scheduled</string>
     <string name="title_image_view">Bildansicht</string>
-    <string name="title_fast_uploading">Schnelles Hochladen</string>
     <string name="title_settings">Einstellungen</string>
     <string name="title_add_measure">Messung hinzufügen</string>
 
@@ -165,14 +142,12 @@
     <string name="axis_age">Alter in Monaten</string>
     <string name="axis_height">Größe</string>
     <string name="axis_weight">Gewicht</string>
-    <string name="axis_head">Kopfumfang in cm</string>
     <string name="axis_muac">MUAC in cm</string>
 
     <string name="filter_age_weight">1. Gewicht / Alter</string>
     <string name="filter_age_height">2. Größe / Alter</string>
     <string name="filter_height_weight">3. Gewicht / Größe</string>
-    <string name="filter_age_arm">4. Armumfang / Alter</string>
-    <string name="filter_age_head">5. Kopfumfang / Alter</string>
+
 
     <string name="selector_manual">Manuelle Messung hinzufügen</string>
     <string name="selector_scan">Scan hinzufügen</string>
@@ -204,9 +179,7 @@
 
     <string name="menuScans">Scans</string>
     <string name="menuTutorial">Tutorial</string>
-    <string name="menuHelp">Hilfe</string>
     <string name="menuSettings">Einstellungen</string>
-    <string name="menuFastUpload">Schnelles Hochladen</string>
     <string name="menuLogout">Ausloggen</string>
     <string name="performance_measurement">Leistungsmessung</string>
     <string name="remote_config">Remote-Konfiguration</string>
@@ -219,7 +192,6 @@
     <string name="menu_qr">QR Suche</string>
     <string name="menu_search">Suche</string>
     <string name="menu_filter">Sortierung und Filter</string>
-    <string name="login">Login</string>
     <string name="no_scans">Keine Scans</string>
     <string name="add_scans">Tippen Sie zum Starten des Scannens auf die Schaltfläche [+]</string>
     <string name="sam_wfa_title">Kind ist stark untergewichtig</string>
@@ -282,11 +254,9 @@
     <string name="search_by_qr">Suche mit QR</string>
     <string name="scan_qr_code_desc">Scannen Sie den QR-Code im Einverständnisformular, um ein Profil zu finden</string>
     <string name="address_parse_error">Adresse konnte nicht vom Standort analysiert werden</string>
-    <string name="address_error">App kann Gerätestandort nicht abrufen</string>
     <string name="person_not_defined">Zu dieser Person existiert kein Profil</string>
     <string name="storage_permission_needed">Speichererlaubnis erforderlich!</string>
-    <string name="older_3_months">Das Kind muss älter als 3 Monate sein, um den Armumfang vergleichen zu können</string>
-    <string name="investigation">Die Untersuchung des Armumfangs mit dem Alter ist in Bearbeitung</string>
+
 
     <string name="login_error_parse">Token-Analyse fehlgeschlagen</string>
     <string name="login_error_backend">Konnte Ihr Backend nicht finden</string>
