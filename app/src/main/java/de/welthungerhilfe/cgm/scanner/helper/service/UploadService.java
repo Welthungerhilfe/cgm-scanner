@@ -63,6 +63,10 @@ public class UploadService extends Service implements OnFileLogsLoad {
         }
     }
 
+    public static boolean isInitialized() {
+        return service != null;
+    }
+
     public void onCreate() {
         service = this;
 
@@ -102,6 +106,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
     @Override
     public void onDestroy() {
         Log.e("UploadService", "Stopped");
+        service = null;
         running = false;
 
         if (executor != null) {
