@@ -45,6 +45,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -964,7 +965,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
-        String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + tangoImageBuffer.timestamp + ".jpg";
+        String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + String.format(Locale.US, "%f", tangoImageBuffer.timestamp) + ".jpg";
         File artifactFile = new File(mRgbSaveFolder.getPath(), currentImgFilename);
         TangoUtils.writeImageToFile(tangoImageBuffer, artifactFile);
 
@@ -1025,7 +1026,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             double Artifact_Lighting_penalty=Math.abs((double) numPoints/38000-1.0)*100*3;
 
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
-                    "_" + mNumberOfFilesWritten++ + "_" + pointCloudData.timestamp;
+                    "_" + mNumberOfFilesWritten++ + "_" + String.format(Locale.US, "%f", pointCloudData.timestamp) + ".depth";
 
             ArtifactResult ar=new ArtifactResult();
             ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
