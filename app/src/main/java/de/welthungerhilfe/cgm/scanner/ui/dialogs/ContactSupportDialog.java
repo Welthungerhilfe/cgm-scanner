@@ -45,7 +45,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.BackupManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -198,19 +197,13 @@ public class ContactSupportDialog extends Dialog {
             return;
         }
 
-        long timestamp = System.currentTimeMillis();
-        File dir = new File(activity.getApplicationInfo().dataDir, "temp");
         File screenshot = new File(AppController.getInstance().getRootDirectory(), "screenshot.png");
-        IO.deleteDirectory(dir);
-        BackupManager.doBackup(activity, dir, timestamp, () -> {
-            IO.takeScreenshot(activity, screenshot);
-            ContactSupportDialog contactSupportDialog = new ContactSupportDialog(activity);
-            contactSupportDialog.attachFiles(dir.listFiles());
-            contactSupportDialog.attachScreenshot(screenshot);
-            contactSupportDialog.setFooter(footer);
-            contactSupportDialog.setType(type);
-            contactSupportDialog.show();
-        });
+        IO.takeScreenshot(activity, screenshot);
+        ContactSupportDialog contactSupportDialog = new ContactSupportDialog(activity);
+        contactSupportDialog.attachScreenshot(screenshot);
+        contactSupportDialog.setFooter(footer);
+        contactSupportDialog.setType(type);
+        contactSupportDialog.show();
     }
 
     private static BaseActivity.ResultListener listener = new BaseActivity.ResultListener() {
