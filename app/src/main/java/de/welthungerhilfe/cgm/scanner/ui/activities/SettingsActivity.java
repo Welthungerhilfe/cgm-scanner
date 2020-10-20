@@ -131,7 +131,7 @@ public class SettingsActivity extends BaseActivity {
         layoutTestQA.setVisibility(showQA ? View.VISIBLE : View.GONE);
 
         txtSettingUuid.setText(2, Utils.getAndroidID(getContentResolver()));
-        if (TangoUtils.isTangoSupported(this)) {
+        if (TangoUtils.isTangoSupported()) {
             switchShowDepth.setVisibility(View.GONE);
         } else {
             switchShowDepth.setChecked(LocalPersistency.getBoolean(this, KEY_SHOW_DEPTH));

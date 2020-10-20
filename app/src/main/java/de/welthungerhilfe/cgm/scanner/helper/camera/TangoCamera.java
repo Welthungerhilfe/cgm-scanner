@@ -1,4 +1,4 @@
-/**
+/*
  * Child Growth Monitor - quick and accurate data on malnutrition
  * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
  * Copyright (c) 2018 Welthungerhilfe Innovation
@@ -32,6 +32,7 @@ import com.google.atap.tangoservice.TangoConfig;
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoErrorException;
 import com.google.atap.tangoservice.TangoEvent;
+import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
@@ -43,6 +44,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class TangoCamera implements ICamera {
 
@@ -54,6 +56,7 @@ public class TangoCamera implements ICamera {
 
     //constants
     private static final String TAG = TangoCamera.class.getSimpleName();
+    private static final String TANGO_CORE = "com.google.tango";
     private static final int INVALID_TEXTURE_ID = 0;
 
     //Tango objects and status
@@ -209,6 +212,16 @@ public class TangoCamera implements ICamera {
             return;
         }
 
+        //check if Tango Core is installed
+        if (!Utils.isPackageInstalled(mActivity, TANGO_CORE)) {
+            mActivity.runOnUiThread(() -> {
+                Utils.openPlayStore(mActivity, TANGO_CORE);
+            });
+            Utils.sleep(100);
+            mActivity.finish();
+            return;
+        }
+
         mPointCloudAvailable = false;
         mutex_on_mIsRecording = new Semaphore(1,true);
 
@@ -224,7 +237,14 @@ public class TangoCamera implements ICamera {
                     mIsConnected = true;
 
                     setDisplayRotation();
+                } catch (TangoOutOfDateException e) {
+                    mActivity.runOnUiThread(() -> {
+                        Utils.openPlayStore(mActivity, TANGO_CORE);
+                    });
+                    Utils.sleep(100);
+                    mActivity.finish();
                 } catch (Exception e) {
+                    e.printStackTrace();
                     Crashes.trackError(e);
                 }
             }

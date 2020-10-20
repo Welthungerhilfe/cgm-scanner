@@ -22,7 +22,9 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.location.Address;
@@ -33,6 +35,7 @@ import android.media.AudioManager;
 import android.media.MediaActionSound;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -280,6 +283,24 @@ public class Utils {
         return (int) (dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 
+    public static boolean isPackageInstalled(Activity activity, String packageName) {
+        PackageManager pm = activity.getPackageManager();
+
+        for (PackageInfo info : activity.getPackageManager().getInstalledPackages(0)) {
+            if (info.packageName.compareTo(packageName) == 0) {
+                int state = pm.getApplicationEnabledSetting(packageName);
+                switch (state) {
+                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
+                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
+                        return false;
+                    default:
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static boolean isUploadAllowed(Context context) {
         boolean wifiOnly = LocalPersistency.getBoolean(context, SettingsActivity.KEY_UPLOAD_WIFI);
         if (wifiOnly) {
@@ -290,6 +311,12 @@ public class Utils {
             return true;
         }
         return false;
+    }
+
+    public static void openPlayStore(Activity activity, String packageName) {
+        Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=" + packageName);
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        activity.startActivity(intent);
     }
 
     public static void playShooterSound(Context context, int sample) {

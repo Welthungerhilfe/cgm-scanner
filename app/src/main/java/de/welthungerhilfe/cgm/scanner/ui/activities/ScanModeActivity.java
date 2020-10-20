@@ -792,7 +792,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private ICamera getCamera() {
         if (mCameraInstance == null) {
-            if (TangoUtils.isTangoSupported(this)) {
+            if (TangoUtils.isTangoSupported()) {
                 mCameraInstance = new TangoCamera(this);
             } else if (ARCoreUtils.shouldUseAREngine()) {
                 mCameraInstance = new AREngineCamera(this);
