@@ -174,7 +174,7 @@ public class Utils {
     }
 
     public static String getNameFromEmail(String email) {
-        if (email == null)
+        if (email==null || email.isEmpty())
             return "unknown";
         else {
             String[] arr = email.split("@");

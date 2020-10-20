@@ -99,6 +99,46 @@ public class UtilsTest {
 
     }
 
+    @Test
+    public void getNameFromEmail() {
+        //testing for email
+        String email = "cgm@childgrowthmonitor.org";
+        String name = Utils.getNameFromEmail(email);
+        assertThat("cgm",is(name));
 
+        //testing for null email
+        email = null;
+        name = Utils.getNameFromEmail(email);
+        assertThat("unknown",is(name));
 
+        //testing for empty email
+        email = null;
+        name = Utils.getNameFromEmail(email);
+        assertThat("unknown",is(name));
+
+    }
+
+    @Test
+    public void checkDoubleDecimals() {
+
+        //Check for two decimal
+        String str = "2.33";
+        int decimalNumber = Utils.checkDoubleDecimals(str);
+        assertThat(2,is(decimalNumber));
+
+        //Check for one decimal
+        str = "2.3";
+        decimalNumber = Utils.checkDoubleDecimals(str);
+        assertThat(1,is(decimalNumber));
+
+        //Check for No Decimal
+        str = "23";
+        decimalNumber = Utils.checkDoubleDecimals(str);
+        assertThat(0,is(decimalNumber));
+
+        //Check With "," insteadof "."
+        str = "2,3";
+        decimalNumber = Utils.checkDoubleDecimals(str);
+        assertThat(1,is(decimalNumber));
+    }
 }
