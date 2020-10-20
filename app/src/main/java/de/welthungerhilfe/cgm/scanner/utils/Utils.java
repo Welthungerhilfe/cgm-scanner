@@ -61,6 +61,10 @@ public class Utils {
 
     public static long averageValue(ArrayList<Long> values) {
         long value = 0;
+        if(values==null)
+        {
+            return value;
+        }
         for (long l : values) {
             value += l;
         }
@@ -83,6 +87,10 @@ public class Utils {
     }
 
     public static double parseDouble(String value) {
+        if(value==null)
+        {
+            return 0;
+        }
         value = value.replace(',', '.');
         try {
             return Double.parseDouble(value);
@@ -92,6 +100,10 @@ public class Utils {
     }
 
     public static float parseFloat(String value) {
+        if(value==null)
+        {
+            return 0;
+        }
         value = value.replace(',', '.');
         try {
             return Float.parseFloat(value);
