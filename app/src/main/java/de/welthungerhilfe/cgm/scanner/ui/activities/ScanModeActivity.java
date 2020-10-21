@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.Image;
+import android.media.MediaActionSound;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -555,11 +556,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         mIsRecording = true;
         fab.setImageResource(R.drawable.stop);
+        Utils.playShooterSound(this, MediaActionSound.START_VIDEO_RECORDING);
     }
 
     private void pauseScan() {
         mIsRecording = false;
         fab.setImageResource(R.drawable.recorder);
+        Utils.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
     }
 
     private void openScan() {
@@ -571,6 +574,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     public void closeScan() {
+        if (mIsRecording) {
+            Utils.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
+        }
         mIsRecording = false;
         lytScanner.setVisibility(View.GONE);
     }

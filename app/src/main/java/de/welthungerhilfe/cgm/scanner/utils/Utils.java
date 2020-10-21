@@ -62,6 +62,8 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 
 public class Utils {
 
+    private static MediaActionSound sound = null;
+
     public static long averageValue(ArrayList<Long> values) {
         long value = 0;
         for (long l : values) {
@@ -323,7 +325,9 @@ public class Utils {
         AudioManager audio = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         switch( audio.getRingerMode() ){
             case AudioManager.RINGER_MODE_NORMAL:
-                MediaActionSound sound = new MediaActionSound();
+                if (sound == null) {
+                    sound = new MediaActionSound();
+                }
                 sound.play(sample);
                 break;
             case AudioManager.RINGER_MODE_SILENT:
