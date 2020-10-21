@@ -22,10 +22,9 @@ package de.welthungerhilfe.cgm.scanner.ui.fragments;
 import android.app.Activity;
 import android.app.DialogFragment;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.fragment.app.Fragment;
@@ -46,7 +45,6 @@ import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 
 import java.util.Date;
-import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -58,6 +56,7 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
+import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
@@ -85,6 +84,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private CreateDataViewModel viewModel;
     private String qrCode;
     private Person person;
+    private Loc location;
 
     public static PersonalDataFragment getInstance(String qrCode) {
         PersonalDataFragment fragment = new PersonalDataFragment();
@@ -137,6 +137,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         editPrename.addTextChangedListener(this);
 
         editLocation = view.findViewById(R.id.editLocation);
+        editLocation.setOnClickListener(this);
 
         editBirth = view.findViewById(R.id.editBirth);
         editBirth.setOnDateInputListener(this);
@@ -190,10 +191,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void setLocation(Loc loc) {
         if (loc != null) {
             String address = loc.getAddress();
-            if ((address != null) && (address.length() > 0)) {
+            if ((location == null) || ((address != null) && (address.length() > 0))) {
                 if (editLocation.getText().toString().compareTo(address) != 0) {
                     editLocation.setText(address);
                 }
+                location = loc;
             }
         }
     }
@@ -283,24 +285,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setCreated(System.currentTimeMillis());
                     person.setCreatedBy(session.getUserEmail());
                     person.setSchema_version(CgmDatabase.version);
-
-                    new Thread(() -> {
-                        Geocoder geocoder = new Geocoder(getContext());
-
-                    }).start();
-
-                    try {
-                        List<Address> addresses = new Geocoder(getContext()).getFromLocationName(editLocation.getText().toString(), 1);
-                        if(addresses.size() > 0) {
-                            Loc l = new Loc();
-                            l.setLatitude(addresses.get(0).getLatitude());
-                            l.setLongitude(addresses.get(0).getLongitude());
-                            l.setAddress(editLocation.getText().toString());
-                            person.setLastLocation(l);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    person.setLastLocation(location);
 
                     viewModel.savePerson(person);
                 }
@@ -311,6 +296,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 break;
             case R.id.txtBack:
                 getActivity().finish();
+                break;
+            case R.id.editLocation:
+                LocationDetectActivity.navigate((AppCompatActivity) getActivity(), editLocation, location, location -> {
+                    setLocation(location);
+                });
                 break;
         }
     }
