@@ -12,35 +12,32 @@ public class UtilsTest {
 
     //for testing averageValue with some data
     @Test
-    public void averageValueTest()
-    {
+    public void averageValueTest() {
         ArrayList<Long> longValues = new ArrayList<>();
         longValues.add(1000L);
         longValues.add(1002L);
 
         long values = Utils.averageValue(longValues);
-        assertThat(1001L,is(values));
+        assertThat(1001L, is(values));
     }
 
     //for testing averageValue with null and empty list
     @Test
-    public void averageValueTestForEmptyandNullList()
-    {
+    public void averageValueTestForEmptyandNullList() {
         //testing with null arrayList
         ArrayList<Long> longValues = null;
         long values = Utils.averageValue(longValues);
-        assertThat(0L,is(values));
+        assertThat(0L, is(values));
 
         //testing with empty arrayList
         longValues = new ArrayList<>();
         values = Utils.averageValue(longValues);
-        assertThat(0L,is(values));
+        assertThat(0L, is(values));
     }
 
     // ########## Testing of parseDouble(ArrayList<Long> values) ##########
     @Test
-    public void parseDoubleTest()
-    {
+    public void parseDoubleTest() {
         //test string with "," character
         String str = "25,0123";
         Double value = Utils.parseDouble(str);
@@ -70,8 +67,7 @@ public class UtilsTest {
 
     // ########## Testing of parseDouble(ArrayList<Long> values) ##########
     @Test
-    public void parseFloatTest()
-    {
+    public void parseFloatTest() {
         //test string with "," character
         String str = "25,0123";
         float value = Utils.parseFloat(str);
@@ -104,17 +100,17 @@ public class UtilsTest {
         //testing for email
         String email = "cgm@childgrowthmonitor.org";
         String name = Utils.getNameFromEmail(email);
-        assertThat("cgm",is(name));
+        assertThat("cgm", is(name));
 
         //testing for null email
         email = null;
         name = Utils.getNameFromEmail(email);
-        assertThat("unknown",is(name));
+        assertThat("unknown", is(name));
 
         //testing for empty email
         email = null;
         name = Utils.getNameFromEmail(email);
-        assertThat("unknown",is(name));
+        assertThat("unknown", is(name));
 
     }
 
@@ -124,21 +120,21 @@ public class UtilsTest {
         //Check for two decimal
         String str = "2.33";
         int decimalNumber = Utils.checkDoubleDecimals(str);
-        assertThat(2,is(decimalNumber));
+        assertThat(2, is(decimalNumber));
 
         //Check for one decimal
         str = "2.3";
         decimalNumber = Utils.checkDoubleDecimals(str);
-        assertThat(1,is(decimalNumber));
+        assertThat(1, is(decimalNumber));
 
         //Check for No Decimal
         str = "23";
         decimalNumber = Utils.checkDoubleDecimals(str);
-        assertThat(0,is(decimalNumber));
+        assertThat(0, is(decimalNumber));
 
         //Check With "," insteadof "."
         str = "2,3";
         decimalNumber = Utils.checkDoubleDecimals(str);
-        assertThat(1,is(decimalNumber));
+        assertThat(1, is(decimalNumber));
     }
 }
