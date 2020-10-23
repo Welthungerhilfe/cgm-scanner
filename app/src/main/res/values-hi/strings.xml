@@ -3,14 +3,7 @@
     <string name="app_name_long">Child Growth Monitor Scanner App</string>
 
     <string name="permission_camera">कैमरा अनुमति की आवश्यकता है!</string>
-    <string name="loading">लोडिंग…</string>
 
-    <string name="validate_user">कृपया उपयोगकर्ता का नाम दर्ज करें</string>
-    <string name="validate_password">कृपया पासवर्ड दर्ज करें</string>
-
-    <string name="label_login">कृपया लॉगिन करें:</string>
-    <string name="user">उपयोगकर्ता</string>
-    <string name="password">पासवर्ड</string>
     <string name="name">परिवार का नाम</string>
     <string name="guardian">अभिभावक का नाम</string>
     <string name="prename">बच्चे का नाम</string>
@@ -19,13 +12,11 @@
     <string name="sex_male">पुरुष / लडका</string>
     <string name="sex_female">महिला / लडकी</string>
 
-    <string name="forgot"><u>पासवर्ड भूल गए?</u></string>
     <string name="ok">ठीक है</string>
     <string name="confirm">पुष्टि करें</string>
     <string name="cancel">रद्द करें</string>
     <string name="back">वापस जाएं</string>
     <string name="next">सहेजें / सेव</string>
-    <string name="delete">मिटाये</string>
     <string name="by">द्वारा</string>
     <string name="retake">फिर से लेना</string>
     <string name="label_continue">Continue</string>
@@ -45,8 +36,6 @@
     <string name="sortby">निम्न के अनुसार क्रमबद्ध करें</string>
     <string name="date">तारीख</string>
     <string name="last_days">अंतिम %1$d दिन</string>
-    <string name="last_scans">अंतिम स्कैन (%1$d दिन)</string>
-    <string name="label_location">स्थान</string>
     <string name="last_location_error">अंतिम स्थान उपलब्ध नहीं है</string>
     <string name="sort_date">सबसे अधिक उम्र का व्यक्ति शीर्ष पर</string>
     <string name="sort_location">सबसे निकटतम व्यक्ति शीर्ष पर</string>
@@ -56,45 +45,42 @@
     <string name="stunting_height_age">सबसे कम ऊंचाई/उम्र शीर्ष पर</string>
     <string name="no_filter">कोई फिल्टर नहीं</string>
     <string name="clear_filters">सभी फिल्टर हटा दे</string>
-    <string name="no_persons">कोई पंजीकृत व्यक्ति नहीं है</string>
     <string name="circuit">आसपास की खोज</string>
     <string name="own_data">केवल स्वमं का डेटा</string>
     <string name="created_by_self">केवल मेरे द्वारा जोड़े गए बच्चों को दिखाएं</string>
 
+    <string name="label_height">ऊंचाई</string>
+    <string name="label_weight">वजन</string>
+    <string name="label_date">तारीख:</string>
+    <string name="label_location">स्थान</string>
+
+
     <string name="manual_measure">मैनुअल नाप</string>
     <string name="machine_measure">मशीन नाप</string>
-    <string name="measure_date">01 स्कैन तिथि</string>
-    <string name="measure_location">02 स्कैन स्थान</string>
+    <string name="measure_date">01 तिथि</string>
+    <string name="measure_location">02 स्थान</string>
     <string name="measure_height">03 ऊंचाई</string>
     <string name="measure_weight">04 वज़न</string>
     <string name="measure_muac">05 एमयूएसी (मुआक)</string>
-    <string name="measure_head">06 सिर का घेरा / परिघ</string>
     <string name="measure_oedema">कोई एडिमा नहीं</string>
 
     <string name="start_scan">स्कैन शुरू करें</string>
-    <string name="retake_scan">फिर से स्कैन करे</string>
     <string name="complete_scan">पूरा स्कैन</string>
     <string name="axis_y">वाई अक्ष</string>
     <string name="axis_x">एक्स अक्ष</string>
     <string name="username">यूजरनेम</string>
     <string name="age_estimate">आयु अनुमानित है</string>
-    <string name="starting">शुरु हो रहा है…</string>
 
-    <string name="front_view_01">01. फ्रंट व्यू</string>
-    <string name="lateral_view_02">02. 360\' व्यू</string>
-    <string name="back_view_03">03. बैक व्यू</string>
+
     <string name="help_front_view_2">बच्चे को रूपरेखा के अंदर रखने की कोशिश करें। बच्चे को सामने से स्कैन करें।</string>
     <string name="help_lateral_view">सभी तरफ के व्यूज़ पाने के लिए बच्चे के चारों ओर फोन के साथ चलें।</string>
     <string name="help_back_view">बच्चे को पीछे से स्कैन करें।</string>
 
-    <string name="label_height">ऊंचाई:</string>
-    <string name="label_weight">वजन:</string>
-    <string name="label_date">तारीख:</string>
+
 
     <string name="abbr_height">एच:</string>
     <string name="abbr_weight">डब्ल्यू :</string>
-    <string name="abbr_head">एच:</string>
-    <string name="abbr_arm">ए :</string>
+
 
     <string name="unit_km">कि.मी.</string>
     <string name="unit_cm">से.मी.</string>
@@ -105,13 +91,20 @@
     <string name="tooltip_kg_precision">दशमलव बिंदु के बाद कम से कम तीन अंक</string>
     <string name="tooltip_weight_ex">जैसे 12.595</string>
     <string name="tooltip_cm">सेंटीमीटर में मूल्य</string>
-    <string name="tooltip_precision">मिलीमीटर प्रेसिजन का इस्तेमाल करें</string>
     <string name="tooltip_height_ex">जैसे 95.6</string>
     <string name="tooltip_name">कृपया नाम का इनपुट दें</string>
     <string name="tooltip_prename">कृपया उपनाम का इनपुट दें</string>
     <string name="tooltip_birthday">कृपया जन्मदिन का इनपुट दें</string>
     <string name="tooltip_guardian">कृपया अभिभावक का इनपुट दें</string>
     <string name="tooltipe_sex">कृपया लिंग का चयन करें</string>
+
+    <string name="tooltip_input">कृपया %1$s का इनपुट दें</string>
+    <string name="name_tooltip">नाम</string>
+    <string name="prename_tooltip">उपनाम</string>
+    <string name="birthday_tooltip">जन्मदिन</string>
+    <string name="guardian_tooltip">अभिभावक</string>
+
+
     <string name="tooltipe_height_min">लम्बाई 45cm (सेन्टीमीटर्स) से बड़ी होनी चाहिए </string>
     <string name="tooltipe_height_max">लम्बाई 120cm (सेन्टीमीटर्स) से कम होनी चाहिए </string>
     <string name="tooltipe_weight_min">वजन 2kg से ज्यादा होना चाहिये </string>
@@ -119,16 +112,11 @@
     <string name="tooltipe_muac_min">मध्य ऊपरी बांह की परिधि 9cm (सेन्टीमीटर्स) से बड़ी होनी चाहिए</string>
     <string name="tooltipe_muac_max">मध्य ऊपरी बांह की परिधि 22cm (सेन्टीमीटर्स) से कम होनी चाहिए</string>
 
-    <string name="baby_full_body_front_scan_text">1/3. सामने</string>
-    <string name="baby_left_right_scan_text">2/3. बाएँ दांए</string>
-    <string name="baby_full_body_back_scan_text">3/3। पीछे</string>
-    <string name="empty_string"/>
+
     <!-- drawer -->
     <string name="drawer_open">खोलें</string>
     <string name="drawer_close">बंद करे</string>
-    <string name="progress_uploading">अपलोडिंग प्रगति में है</string>
-    <string name="upload_success">सफलतापूर्वक अपलोड हो गया</string>
-    <string name="upload_failure">अपलोड विफल हुआ</string>
+
 
     <string name="error_network">कृपया अपनी नेटवर्क की स्थिति जांचें। अब आप ऑफ़लाइन हैं।</string>
     <string name="error_login">लॉगिन विफल हुआ</string>
@@ -155,7 +143,6 @@
     <string name="title_scans">स्कैन का समय</string>
     <string name="title_image_view">इमेज व्यू</string>
     <string name="title_settings">सेटिंग्स</string>
-    <string name="title_fast_uploading">Fast Uploading</string>
     <string name="title_add_measure">नाप जोड़ें</string>
 
     <string name="content_image">सामग्री फोटो </string>
@@ -164,14 +151,12 @@
     <string name="axis_age">महीनों में उम्र</string>
     <string name="axis_height">ऊंचाई</string>
     <string name="axis_weight">वजन</string>
-    <string name="axis_head">सिर परिधि सेमी में</string>
     <string name="axis_muac">मुआक सेमी में </string>
 
     <string name="filter_age_weight">1 वजन / उम</string>
     <string name="filter_age_height">2 ऊंचाई / उम</string>
     <string name="filter_height_weight">3 वजन / ऊंचाई</string>
-    <string name="filter_age_arm">4 एमयूएसी  / उम</string>
-    <string name="filter_age_head">5 शीर्ष परिधि / उम</string>
+
 
     <string name="selector_manual">मैन्युअल उपाय जोड़ें</string>
     <string name="selector_scan">स्कैन उपाय जोड़ें</string>
@@ -202,9 +187,7 @@
     <string name="get_start">शुरू हो जाओ</string>
     <string name="menuScans">स्कैन</string>
     <string name="menuTutorial">ट्यूटोरियल</string>
-    <string name="menuHelp">सहायता</string>
     <string name="menuSettings">सेटिंग्स</string>
-    <string name="menuFastUpload">Fast Upload</string>
     <string name="menuLogout">लोग आउट</string>
     <string name="performance_measurement">प्रदर्शन माप</string>
     <string name="remote_config">रिमोट कॉन्फिगर</string>
@@ -217,7 +200,6 @@
     <string name="menu_qr">क्यूआर खोजे </string>
     <string name="menu_search">खोजे </string>
     <string name="menu_filter">सॉर्ट करें और फ़िल्टर करें</string>
-    <string name="login">लॉग इन करें</string>
     <string name="no_scans">कोई स्कैन नहीं</string>
     <string name="add_scans">स्कैनिंग शुरू करने के लिए, [+] बटन टैप करें</string>
     <string name="sam_wfa_title">बच्चा गंभीर रूप से कम वजन का है</string>
@@ -280,11 +262,9 @@
     <string name="search_by_qr">क्यूआर द्वारा खोजें</string>
     <string name="scan_qr_code_desc">प्रोफ़ाइल खोजने के लिए सहमति फ़ॉर्म में QR कोड स्कैन करें</string>
     <string name="address_parse_error">स्थान से पते को पार्स नहीं किया जा सका</string>
-    <string name="address_error">अनुप्रयोग डिवाइस स्थान प्राप्त नहीं कर सकता</string>
     <string name="person_not_defined">व्यक्ति को परिभाषित नहीं किया गया था</string>
     <string name="storage_permission_needed">भंडारण अनुमति की आवश्यकता!</string>
-    <string name="older_3_months">हाथ की परिधि की तुलना करने के लिए बच्चे को 3 महीने से अधिक उम्र का होना चाहिए</string>
-    <string name="investigation">आयु के साथ हाथ की परिधि की जांच प्रक्रियाधीन है</string>
+
 
     <string name="login_error_parse">टोकन पार्स असफल</string>
     <string name="login_error_backend">अपना बैकएंड नहीं ढूंढ सका</string>

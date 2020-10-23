@@ -3,14 +3,7 @@
     <string name="app_name_long">Child Growth Monitor Scanner App</string>
 
     <string name="permission_camera">"Camera permission needed!"</string>
-    <string name="loading">loading…</string>
 
-    <string name="validate_user">Please input user name</string>
-    <string name="validate_password">Please input password</string>
-    
-    <string name="label_login">Please Log In:</string>
-    <string name="user">Username</string>
-    <string name="password">Password</string>
     <string name="name">family name</string>
     <string name="guardian">name of guardian</string>
     <string name="prename">name of child</string>
@@ -19,13 +12,11 @@
     <string name="sex_male">male</string>
     <string name="sex_female">female</string>
 
-    <string name="forgot"><u>Forgot password?</u></string>
     <string name="ok">OK</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
     <string name="back">Back</string>
     <string name="next">Save</string>
-    <string name="delete">Delete</string>
     <string name="by">by</string>
     <string name="retake">Retake</string>
     <string name="label_continue">Continue</string>
@@ -45,8 +36,6 @@
     <string name="sortby">Sort by</string>
     <string name="date">Date</string>
     <string name="last_days">last %1$d days</string>
-    <string name="last_scans">Last scans (%1$d days)</string>
-    <string name="label_location">Location</string>
     <string name="last_location_error">last location not available</string>
     <string name="sort_date">old person on top</string>
     <string name="sort_location">nearest person on top</string>
@@ -56,45 +45,41 @@
     <string name="stunting_height_age">lowest height/age on top</string>
     <string name="no_filter">No filter</string>
     <string name="clear_filters">Clear all filters</string>
-    <string name="no_persons">NO PERSONS REGISTERED</string>
     <string name="circuit">circumcise</string>
     <string name="own_data">Only own data</string>
     <string name="created_by_self">show only children created by myself</string>
 
+    <string name="label_height">Height</string>
+    <string name="label_weight">Weight</string>
+    <string name="label_date">Date:</string>
+    <string name="label_location">Location</string>
+
+
     <string name="manual_measure">Manual measure</string>
     <string name="machine_measure">Machine measure</string>
-    <string name="measure_date">01 Scan Date</string>
-    <string name="measure_location">02 Scan Location</string>
+    <string name="measure_date">01 Date</string>
+    <string name="measure_location">02 Location</string>
     <string name="measure_height">03 Height</string>
     <string name="measure_weight">04 Weight</string>
     <string name="measure_muac">05 MUAC</string>
-    <string name="measure_head">06 Head Circumference</string>
     <string name="measure_oedema">No edema</string>
 
     <string name="start_scan">Start Scan</string>
-    <string name="retake_scan">Retake Scan</string>
     <string name="complete_scan">Complete Scan</string>
     <string name="axis_y">Y Axis</string>
     <string name="axis_x">X Axis</string>
     <string name="username">Username</string>
     <string name="age_estimate">age is estimated</string>
-    <string name="starting">Starting…</string>
 
-    <string name="front_view_01">01. Front View</string>
-    <string name="lateral_view_02">02. 360\' View</string>
-    <string name="back_view_03">03. Back View</string>
+
     <string name="help_front_view_2">Try to place the child inside of the outline. Scan the front of the child.</string>
     <string name="help_lateral_view">Walk with the phone around the child to get views from all sides.</string>
     <string name="help_back_view">Scan the back of the child.</string>
 
-    <string name="label_height">Height: </string>
-    <string name="label_weight">Weight: </string>
-    <string name="label_date">Date: </string>
+
 
     <string name="abbr_height">h:</string>
     <string name="abbr_weight">w:</string>
-    <string name="abbr_head">h:</string>
-    <string name="abbr_arm">a:</string>
 
     <string name="unit_km">km</string>
     <string name="unit_cm">cm</string>
@@ -105,13 +90,21 @@
     <string name="tooltip_kg_precision">at least three digit after the decimal point</string>
     <string name="tooltip_weight_ex">i.e. 12.595</string>
     <string name="tooltip_cm">value in centimeters</string>
-    <string name="tooltip_precision">use millimeter precision</string>
     <string name="tooltip_height_ex">i.e. 95.6</string>
     <string name="tooltip_name">Please input name</string>
     <string name="tooltip_prename">Please input prename</string>
     <string name="tooltip_birthday">Please input birthday</string>
     <string name="tooltip_guardian">Please input guardian</string>
     <string name="tooltipe_sex">Please select sex</string>
+
+    <string name="tooltip_input">Please input %1$s</string>
+    <string name="name_tooltip">name</string>
+    <string name="prename_tooltip">prename</string>
+    <string name="birthday_tooltip">birthday</string>
+    <string name="guardian_tooltip">guardian</string>
+
+
+
     <string name="tooltipe_height_min">height should be more than 45cm</string>
     <string name="tooltipe_height_max">height should be less than 120cm</string>
     <string name="tooltipe_weight_min">weight should be more than 2kg</string>
@@ -119,16 +112,9 @@
     <string name="tooltipe_muac_min">MUAC should be more than 9cm</string>
     <string name="tooltipe_muac_max">MUAC should be less than 22cm</string>
 
-    <string name="baby_full_body_front_scan_text">1/3. Front</string>
-    <string name="baby_left_right_scan_text">2/3. all around 360\'</string>
-    <string name="baby_full_body_back_scan_text">3/3. Back</string>
-    <string name="empty_string"/>
     <!-- drawer -->
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
-    <string name="progress_uploading">progress uploading</string>
-    <string name="upload_success">upload success</string>
-    <string name="upload_failure">upload failure</string>
 
     <string name="error_network">Please check your network status. You are offline now.</string>
     <string name="error_login">Login failed</string>
@@ -154,7 +140,6 @@
 
     <string name="title_scans">Scans-Scheduled</string>
     <string name="title_image_view">Image View</string>
-    <string name="title_fast_uploading">Fast Uploading</string>
     <string name="title_settings">Settings</string>
     <string name="title_add_measure">Add Measure</string>
 
@@ -164,14 +149,11 @@
     <string name="axis_age">age in months</string>
     <string name="axis_height">height in cm</string>
     <string name="axis_weight">weight in kg</string>
-    <string name="axis_head">Head circumference in cm</string>
     <string name="axis_muac">MUAC in cm</string>
 
     <string name="filter_age_weight">1. Weight-for-age</string>
     <string name="filter_age_height">2. Height-for-age</string>
     <string name="filter_height_weight">3. Weight-for-height</string>
-    <string name="filter_age_arm">4. Arm circumference-for-age</string>
-    <string name="filter_age_head">5. Head circumference-for-age</string>
 
     <string-array name="filters" translatable="false">
         <item>@string/filter_age_weight</item>
@@ -211,9 +193,9 @@
     <string name="get_start">Get Started</string>
     <string name="menuScans">Scans</string>
     <string name="menuTutorial">Tutorial</string>
-    <string name="menuHelp">Help</string>
+
     <string name="menuSettings">Settings</string>
-    <string name="menuFastUpload">Fast Upload</string>
+
     <string name="menuLogout">Logout</string>
     <string name="performance_measurement">Performance Measurement</string>
     <string name="remote_config">Remote Config</string>
@@ -227,7 +209,7 @@
     <string name="menu_qr">QR Search</string>
     <string name="menu_search">Search</string>
     <string name="menu_filter">Sort and Filter</string>
-    <string name="login">Login</string>
+
     <string name="no_scans">No scans</string>
     <string name="add_scans">To start scanning, tap [+] button</string>
     <string name="sam_wfa_title">Child is severely under weight</string>
@@ -290,11 +272,9 @@
     <string name="search_by_qr">Search by QR</string>
     <string name="scan_qr_code_desc">Scan QR code in the consent form to search a profile</string>
     <string name="address_parse_error">Could not parse address from location</string>
-    <string name="address_error">App can\'t get device location</string>
+
     <string name="person_not_defined">Person was not defined</string>
     <string name="storage_permission_needed">Storage permission needed!</string>
-    <string name="older_3_months">Child needs to be older than 3 month to compare arm circumference</string>
-    <string name="investigation">Investigation of arm circumference with age is under process</string>
 
     <string name="login_error_parse">Token Parse Failed</string>
     <string name="login_error_backend">Couldn\'t find your backend</string>

@@ -206,11 +206,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             if (SCAN_MODE == AppConstants.SCAN_STANDING) {
                 SCAN_STEP = AppConstants.SCAN_STANDING_FRONT;
 
-                mTitleView.setText(getString(R.string.front_view_01) + " - " + getString(R.string.mode_standing));
+                mTitleView.setText(getString(R.string.front_scan) + " - " + getString(R.string.mode_standing));
             } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
                 SCAN_STEP = AppConstants.SCAN_LYING_FRONT;
 
-                mTitleView.setText(getString(R.string.front_view_01) + " - " + getString(R.string.mode_lying));
+                mTitleView.setText(getString(R.string.front_scan) + " - " + getString(R.string.mode_lying));
             }
             openScan();
         }
@@ -224,11 +224,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             if (SCAN_MODE == AppConstants.SCAN_STANDING) {
                 SCAN_STEP = AppConstants.SCAN_STANDING_SIDE;
 
-                mTitleView.setText(getString(R.string.lateral_view_02) + " - " + getString(R.string.mode_standing));
+                mTitleView.setText(getString(R.string.side_scan) + " - " + getString(R.string.mode_standing));
             } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
                 SCAN_STEP = AppConstants.SCAN_LYING_SIDE;
 
-                mTitleView.setText(getString(R.string.lateral_view_02) + " - " + getString(R.string.mode_lying));
+                mTitleView.setText(getString(R.string.side_scan) + " - " + getString(R.string.mode_lying));
             }
             openScan();
         }
@@ -242,11 +242,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             if (SCAN_MODE == AppConstants.SCAN_STANDING) {
                 SCAN_STEP = AppConstants.SCAN_STANDING_BACK;
 
-                mTitleView.setText(getString(R.string.back_view_03) + " - " + getString(R.string.mode_standing));
+                mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_standing));
             } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
                 SCAN_STEP = AppConstants.SCAN_LYING_BACK;
 
-                mTitleView.setText(getString(R.string.back_view_03) + " - " + getString(R.string.mode_lying));
+                mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_lying));
             }
             openScan();
         }
