@@ -8,6 +8,9 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -128,7 +131,7 @@ public class SettingsActivity extends BaseActivity {
         layoutTestQA.setVisibility(showQA ? View.VISIBLE : View.GONE);
 
         txtSettingUuid.setText(2, Utils.getAndroidID(getContentResolver()));
-        if (TangoUtils.isTangoSupported(this)) {
+        if (TangoUtils.isTangoSupported()) {
             switchShowDepth.setVisibility(View.GONE);
         } else {
             switchShowDepth.setChecked(LocalPersistency.getBoolean(this, KEY_SHOW_DEPTH));
@@ -171,18 +174,23 @@ public class SettingsActivity extends BaseActivity {
         findViewById(R.id.btnBackupNow).setOnClickListener(view -> {
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                addResultListener(PERMISSION_STORAGE, new ResultListener() {
+                    @Override
+                    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+
+                    }
+
+                    @Override
+                    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+                        if (grantResults.length > 0) {
+                            doBackup();
+                        }
+                    }
+                });
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
                 return;
             }
-            progressDialog.show();
-
-            long timestamp = System.currentTimeMillis();
-            File dir = AppController.getInstance().getRootDirectory();
-            BackupManager.doBackup(this, dir, timestamp, () -> {
-                session.setBackupTimestamp(timestamp);
-                txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, timestamp));
-                progressDialog.dismiss();
-            });
+            doBackup();
         });
 
         findViewById(R.id.btnContactSupport).setOnClickListener(view -> {
@@ -197,6 +205,17 @@ public class SettingsActivity extends BaseActivity {
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(i);
         finish();
+    }
+
+    private void doBackup() {
+        progressDialog.show();
+        long timestamp = System.currentTimeMillis();
+        File dir = AppController.getInstance().getRootDirectory();
+        BackupManager.doBackup(this, dir, timestamp, () -> {
+            session.setBackupTimestamp(timestamp);
+            txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, timestamp));
+            progressDialog.dismiss();
+        });
     }
 
     @Override

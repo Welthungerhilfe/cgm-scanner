@@ -29,7 +29,6 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
-import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -62,6 +61,10 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 }
             }
         }
+    }
+
+    public static boolean isInitialized() {
+        return service != null;
     }
 
     public void onCreate() {
@@ -103,6 +106,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
     @Override
     public void onDestroy() {
         Log.e("UploadService", "Stopped");
+        service = null;
         running = false;
 
         if (executor != null) {
@@ -112,6 +116,11 @@ public class UploadService extends Service implements OnFileLogsLoad {
     }
 
     private void loadQueueFileLogs() {
+        if (!Utils.isUploadAllowed(this)) {
+            Log.e("UploadService", "Skipped");
+            return;
+        }
+
         Log.e("UploadService", "Started");
         running = true;
 
@@ -201,8 +210,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                     break;
             }
 
-            boolean wifiOnly = LocalPersistency.getBoolean(getBaseContext(), SettingsActivity.KEY_UPLOAD_WIFI);
-            while (wifiOnly && !Utils.isWifiConnected(getBaseContext())) {
+            while (!Utils.isUploadAllowed(getBaseContext())) {
                 Utils.sleep(3000);
             }
 

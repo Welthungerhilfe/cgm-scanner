@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.Image;
+import android.media.MediaActionSound;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -555,11 +556,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         mIsRecording = true;
         fab.setImageResource(R.drawable.stop);
+        Utils.playShooterSound(this, MediaActionSound.START_VIDEO_RECORDING);
     }
 
     private void pauseScan() {
         mIsRecording = false;
         fab.setImageResource(R.drawable.recorder);
+        Utils.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
     }
 
     private void openScan() {
@@ -571,6 +574,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     public void closeScan() {
+        if (mIsRecording) {
+            Utils.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
+        }
         mIsRecording = false;
         lytScanner.setVisibility(View.GONE);
     }
@@ -757,22 +763,18 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 measureRepository.insertMeasure(measure);
             }
 
-            //start uploading service
-            runOnUiThread(() -> {
-                if (!AppController.getInstance().isUploadRunning()) {
-                    startService(new Intent(getApplicationContext(), UploadService.class));
-                }
-            });
-
-            //update measure metadata if possible
+            //upload metadata if possible
             Context context = ScanModeActivity.this;
-            boolean wifiOnly = LocalPersistency.getBoolean(context, SettingsActivity.KEY_UPLOAD_WIFI);
-            if (wifiOnly) {
-                if (Utils.isWifiConnected(context)) {
-                    measureRepository.uploadMeasure(context, measure);
-                    return null;
-                }
-            } else if (Utils.isNetworkAvailable(context)) {
+            if (Utils.isUploadAllowed(context)) {
+
+                //start upload service
+                runOnUiThread(() -> {
+                    if (!AppController.getInstance().isUploadRunning()) {
+                        startService(new Intent(getApplicationContext(), UploadService.class));
+                    }
+                });
+
+                //add metadata into DB
                 measureRepository.uploadMeasure(context, measure);
                 return null;
             }
@@ -796,7 +798,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private ICamera getCamera() {
         if (mCameraInstance == null) {
-            if (TangoUtils.isTangoSupported(this)) {
+            if (TangoUtils.isTangoSupported()) {
                 mCameraInstance = new TangoCamera(this);
             } else if (ARCoreUtils.shouldUseAREngine()) {
                 mCameraInstance = new AREngineCamera(this);
@@ -969,7 +971,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
-        String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + tangoImageBuffer.timestamp + ".jpg";
+        String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + String.format(Locale.US, "%f", tangoImageBuffer.timestamp) + ".jpg";
         File artifactFile = new File(mRgbSaveFolder.getPath(), currentImgFilename);
         TangoUtils.writeImageToFile(tangoImageBuffer, artifactFile);
 
@@ -1030,7 +1032,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             double Artifact_Lighting_penalty=Math.abs((double) numPoints/38000-1.0)*100*3;
 
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
-                    "_" + String.format(Locale.US, "%03d", mNumberOfFilesWritten++);
+                    "_" + mNumberOfFilesWritten++ + "_" + String.format(Locale.US, "%f", pointCloudData.timestamp) + ".depth";
 
             ArtifactResult ar=new ArtifactResult();
             ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));

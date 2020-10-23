@@ -57,11 +57,13 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
 import de.welthungerhilfe.cgm.scanner.helper.service.DeviceService;
+import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.helper.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
@@ -457,6 +459,10 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             viewModel.setFilterOwn();
             viewModel.setSortType(AppConstants.SORT_DATE);
             repository.setUpdated(false);
+        }
+
+        if (!AppController.getInstance().isUploadRunning()) {
+            startService(new Intent(getApplicationContext(), UploadService.class));
         }
     }
 }

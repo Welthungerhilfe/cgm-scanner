@@ -1,4 +1,4 @@
-/**
+/*
  *  Child Growth Monitor - quick and accurate data on malnutrition
  *  Copyright (c) $today.year Welthungerhilfe Innovation
  *
@@ -18,9 +18,7 @@
 
 package de.welthungerhilfe.cgm.scanner;
 
-import android.app.ActivityManager;
 import android.app.Application;
-import android.content.Context;
 import android.os.Environment;
 import android.os.StrictMode;
 
@@ -106,14 +104,6 @@ public class AppController extends Application {
     }
 
     public boolean isUploadRunning() {
-        ActivityManager manager = (ActivityManager) getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
-        if (manager != null) {
-            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-                if (UploadService.class.getName().equals(service.service.getClassName())) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return UploadService.isInitialized();
     }
 }

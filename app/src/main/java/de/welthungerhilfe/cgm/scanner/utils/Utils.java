@@ -22,7 +22,9 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.location.Address;
@@ -33,6 +35,7 @@ import android.media.AudioManager;
 import android.media.MediaActionSound;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -54,11 +57,19 @@ import java.util.Random;
 import java.util.TimeZone;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 
 public class Utils {
 
+    private static MediaActionSound sound = null;
+
     public static long averageValue(ArrayList<Long> values) {
         long value = 0;
+        if(values==null)
+        {
+            return value;
+        }
         for (long l : values) {
             value += l;
         }
@@ -81,6 +92,10 @@ public class Utils {
     }
 
     public static double parseDouble(String value) {
+        if(value==null)
+        {
+            return 0;
+        }
         value = value.replace(',', '.');
         try {
             return Double.parseDouble(value);
@@ -90,6 +105,10 @@ public class Utils {
     }
 
     public static float parseFloat(String value) {
+        if(value==null)
+        {
+            return 0;
+        }
         value = value.replace(',', '.');
         try {
             return Float.parseFloat(value);
@@ -160,7 +179,7 @@ public class Utils {
     }
 
     public static String getNameFromEmail(String email) {
-        if (email == null)
+        if (email==null || email.isEmpty())
             return "unknown";
         else {
             String[] arr = email.split("@");
@@ -278,11 +297,49 @@ public class Utils {
         return (int) (dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 
+    public static boolean isPackageInstalled(Activity activity, String packageName) {
+        PackageManager pm = activity.getPackageManager();
+
+        for (PackageInfo info : activity.getPackageManager().getInstalledPackages(0)) {
+            if (info.packageName.compareTo(packageName) == 0) {
+                int state = pm.getApplicationEnabledSetting(packageName);
+                switch (state) {
+                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
+                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
+                        return false;
+                    default:
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isUploadAllowed(Context context) {
+        boolean wifiOnly = LocalPersistency.getBoolean(context, SettingsActivity.KEY_UPLOAD_WIFI);
+        if (wifiOnly) {
+            if (Utils.isWifiConnected(context)) {
+                return true;
+            }
+        } else if (Utils.isNetworkAvailable(context)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static void openPlayStore(Activity activity, String packageName) {
+        Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=" + packageName);
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        activity.startActivity(intent);
+    }
+
     public static void playShooterSound(Context context, int sample) {
         AudioManager audio = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         switch( audio.getRingerMode() ){
             case AudioManager.RINGER_MODE_NORMAL:
-                MediaActionSound sound = new MediaActionSound();
+                if (sound == null) {
+                    sound = new MediaActionSound();
+                }
                 sound.play(sample);
                 break;
             case AudioManager.RINGER_MODE_SILENT:
