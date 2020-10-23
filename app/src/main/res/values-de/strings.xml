@@ -36,7 +36,6 @@
     <string name="sortby">Sortieren nach</string>
     <string name="date">Datum</string>
     <string name="last_days">letzte %1$d Tage</string>
-    <string name="label_location">Ort</string>
     <string name="last_location_error">letzter Ort nicht verfügar</string>
     <string name="sort_date">älteste Person oben</string>
     <string name="sort_location">nächste Person oben</string>
@@ -50,10 +49,16 @@
     <string name="own_data">Nur eigene Daten</string>
     <string name="created_by_self">zeige nur von mir eingetragene Kinder</string>
 
+    <string name="label_height">Größe</string>
+    <string name="label_weight">Gewicht </string>
+    <string name="label_date">Datum: </string>
+    <string name="label_location">Ort</string>
+
+
     <string name="manual_measure">manuelle Messung</string>
     <string name="machine_measure">Scan</string>
-    <string name="measure_date">01 Datum des Scans</string>
-    <string name="measure_location">02 Ort des Scans</string>
+    <string name="measure_date">01 Datum</string>
+    <string name="measure_location">02 Ort</string>
     <string name="measure_height">03 Größe</string>
     <string name="measure_weight">04 Gewicht</string>
     <string name="measure_muac">05 MUAC</string>
@@ -73,9 +78,7 @@
     <string name="help_lateral_view">Laufen Sie beim Scan um das Kind herum, um einen Scan von allen Seiten zu erzeugen.</string>
     <string name="help_back_view">Scannen Sie die Rückansicht des Kindes.</string>
 
-    <string name="label_height">Größe: </string>
-    <string name="label_weight">Gewicht: </string>
-    <string name="label_date">Datum: </string>
+
 
     <string name="abbr_height">h:</string>
     <string name="abbr_weight">w:</string>

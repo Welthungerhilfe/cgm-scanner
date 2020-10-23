@@ -107,7 +107,7 @@ public class MeasureNotification {
                 if (valid) {
                     text.append("\n");
                 }
-                text.append(context.getString(R.string.label_height).replace(":", "")).append(" ");
+                text.append(context.getString(R.string.label_height)).append(" ");
                 text.append(context.getString(R.string.result_for)).append(" ");
                 text.append(String.format(Locale.US, "%s : %.2f%s", qrCode, n.height, "cm"));
                 valid = true;
@@ -116,7 +116,7 @@ public class MeasureNotification {
                 if (valid) {
                     text.append("\n");
                 }
-                text.append(context.getString(R.string.label_weight).replace(":", "")).append(" ");
+                text.append(context.getString(R.string.label_weight)).append(" ");
                 text.append(context.getString(R.string.result_for)).append(" ");
                 text.append(String.format(Locale.US, "%s : %.2f%s", qrCode, n.weight, "kg"));
                 valid = true;
