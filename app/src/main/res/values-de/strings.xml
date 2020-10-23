@@ -71,9 +71,7 @@
     <string name="username">Benutzername</string>
     <string name="age_estimate">Alter ist geschätzt</string>
 
-    <string name="front_view_01">01. Vorderansicht</string>
-    <string name="lateral_view_02">02. 360\' Ansicht</string>
-    <string name="back_view_03">03. Rückansicht</string>
+
     <string name="help_front_view_2">Platzieren Sie das Kind innerhalb des Rahmens, um einen Frontalscan zu erzeugen.</string>
     <string name="help_lateral_view">Laufen Sie beim Scan um das Kind herum, um einen Scan von allen Seiten zu erzeugen.</string>
     <string name="help_back_view">Scannen Sie die Rückansicht des Kindes.</string>
@@ -100,7 +98,6 @@
     <string name="tooltip_guardian">Erziehungsberechtigte/n eingeben</string>
     <string name="tooltipe_sex">Geschlecht auswählen</string>
 
-    //please check this
     <string name="tooltip_input">%1$s eingeben</string>
     <string name="name_tooltip">Namen</string>
     <string name="prename_tooltip">Vornamen</string>

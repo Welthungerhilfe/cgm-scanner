@@ -71,9 +71,7 @@
     <string name="username">Username</string>
     <string name="age_estimate">age is estimated</string>
 
-    <string name="front_view_01">01. Front View</string>
-    <string name="lateral_view_02">02. 360\' View</string>
-    <string name="back_view_03">03. Back View</string>
+
     <string name="help_front_view_2">Try to place the child inside of the outline. Scan the front of the child.</string>
     <string name="help_lateral_view">Walk with the phone around the child to get views from all sides.</string>
     <string name="help_back_view">Scan the back of the child.</string>
@@ -99,7 +97,6 @@
     <string name="tooltip_guardian">Please input guardian</string>
     <string name="tooltipe_sex">Please select sex</string>
 
-    //please check this
     <string name="tooltip_input">Please input %1$s</string>
     <string name="name_tooltip">name</string>
     <string name="prename_tooltip">prename</string>

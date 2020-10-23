@@ -71,9 +71,7 @@
     <string name="username">यूजरनेम</string>
     <string name="age_estimate">आयु अनुमानित है</string>
 
-    <string name="front_view_01">01. फ्रंट व्यू</string>
-    <string name="lateral_view_02">02. 360\' व्यू</string>
-    <string name="back_view_03">03. बैक व्यू</string>
+
     <string name="help_front_view_2">बच्चे को रूपरेखा के अंदर रखने की कोशिश करें। बच्चे को सामने से स्कैन करें।</string>
     <string name="help_lateral_view">सभी तरफ के व्यूज़ पाने के लिए बच्चे के चारों ओर फोन के साथ चलें।</string>
     <string name="help_back_view">बच्चे को पीछे से स्कैन करें।</string>
@@ -100,7 +98,6 @@
     <string name="tooltip_guardian">कृपया अभिभावक का इनपुट दें</string>
     <string name="tooltipe_sex">कृपया लिंग का चयन करें</string>
 
-    //please check this
     <string name="tooltip_input">कृपया %1$s का इनपुट दें</string>
     <string name="name_tooltip">नाम</string>
     <string name="prename_tooltip">उपनाम</string>
