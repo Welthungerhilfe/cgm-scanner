@@ -15,8 +15,6 @@ import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -86,18 +84,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
         if (remainingCount <= 0) {
-            try {
-                synchronized (SyncAdapter.getLock()) {
-                    CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
-                    blobClient = storageAccount.createCloudBlobClient();
-                }
-
-                loadQueueFileLogs();
-
-                return START_STICKY;
-            } catch (URISyntaxException | InvalidKeyException | IllegalArgumentException e) {
-                e.printStackTrace();
-            }
+            loadQueueFileLogs();
+            return START_STICKY;
         }
 
         return START_NOT_STICKY;
@@ -219,6 +207,13 @@ public class UploadService extends Service implements OnFileLogsLoad {
             try {
                 final File file = new File(log.getPath());
                 FileInputStream stream = new FileInputStream(file);
+
+                if (blobClient == null) {
+                    synchronized (SyncAdapter.getLock()) {
+                        CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                        blobClient = storageAccount.createCloudBlobClient();
+                    }
+                }
 
                 CloudBlobContainer container = blobClient.getContainerReference(AppConstants.STORAGE_CONTAINER);
                 container.createIfNotExists();
