@@ -811,7 +811,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onColorDataReceived(Bitmap bitmap, int frameIndex) {
-        if (mIsRecording && (frameIndex % 10 == 0)) {
+        if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             long profile = System.currentTimeMillis();
             CameraCalibration calibration = mCameraInstance.getCalibration();
@@ -896,7 +896,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         onLightUpdate(mCameraInstance.getLightConditionState());
 
-        if (mIsRecording && (frameIndex % 10 == 0)) {
+        if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             long profile = System.currentTimeMillis();
             ARCoreUtils.Depthmap depthmap = ARCoreUtils.extractDepthmap(image, pose, mCameraInstance instanceof AREngineCamera);

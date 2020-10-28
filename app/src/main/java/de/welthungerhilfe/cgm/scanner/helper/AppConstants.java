@@ -45,7 +45,7 @@ public class AppConstants {
     public static final String VAL_SEX_MALE = "male";
 
     public static final String VAL_MEASURE_MANUAL = "manual";
-    public static final String VAL_MEASURE_AUTO = "v0.7";
+    public static final String VAL_MEASURE_AUTO = "v0.8";
 
     public static final String LANG_ENGLISH = "en";
     public static final String LANG_GERMAN = "de";
@@ -94,4 +94,6 @@ public class AppConstants {
     public static final int SORT_STUNTING = 3;
 
     public static final int MIN_CONFIDENCE = 100;
+
+    public static final int SCAN_FRAMESKIP = 6;
 }
