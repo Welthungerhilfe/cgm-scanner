@@ -1140,7 +1140,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             threadsCount += diff;
             if (threadsCount == 0) {
                 Log.d("ScanModeActivity", "The last thread finished");
-                threadsLock.notify();
             } else {
                 Log.d("ScanModeActivity", "Amount of threads : " + threadsCount);
             }
@@ -1148,18 +1147,15 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void waitUntilFinished() {
-        synchronized (threadsLock) {
-            if (threadsCount > 0) {
-                Log.d("ScanModeActivity", "Start waiting on running threads");
-                try {
-                    threadsLock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+        Log.d("ScanModeActivity", "Start waiting on running threads");
+        while (true) {
+            synchronized (threadsLock) {
+                if (threadsCount == 0) {
+                    break;
                 }
-                Log.d("ScanModeActivity", "Stop waiting on running threads");
-            } else {
-                Log.d("ScanModeActivity", "All threads already finished");
             }
+            Utils.sleep(5);
         }
+        Log.d("ScanModeActivity", "Stop waiting on running threads");
     }
 }
