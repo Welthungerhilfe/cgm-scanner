@@ -2,28 +2,37 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.view.View;
 import android.widget.LinearLayout;
+
+import com.shuhart.stepview.StepView;
+
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.Tutorial1Fragment;
-import de.welthungerhilfe.cgm.scanner.ui.fragments.Tutorial2Fragment;
-import de.welthungerhilfe.cgm.scanner.ui.fragments.Tutorial3Fragment;
-import de.welthungerhilfe.cgm.scanner.ui.fragments.Tutorial4Fragment;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.views.PagerView;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class TutorialActivity extends AppCompatActivity {
     @BindView(R.id.viewPager)
     PagerView viewPager;
     @BindView(R.id.lytStart)
     LinearLayout lytStart;
+    @BindView(R.id.stepView)
+    StepView stepView;
+
+    ArrayList<TutorialData> tutorialDataList;
 
     @OnClick(R.id.btnStart)
     void startWork() {
@@ -44,17 +53,14 @@ public class TutorialActivity extends AppCompatActivity {
         again = getIntent().getBooleanExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, false);
 
         session = new SessionManager(this);
-
-        Tutorial1Fragment tur1 = new Tutorial1Fragment();
-        Tutorial2Fragment tur2 = new Tutorial2Fragment();
-        Tutorial3Fragment tur3 = new Tutorial3Fragment();
-        Tutorial4Fragment tur4 = new Tutorial4Fragment();
+        tutorialDataList = Utils.getTutorialData(this);
 
         FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
-        adapter.addFragment(tur1, "tutorial1");
-        adapter.addFragment(tur2, "tutorial2");
-        adapter.addFragment(tur3, "tutorial3");
-        adapter.addFragment(tur4, "tutorial4");
+
+        for (int i = 0; i < tutorialDataList.size(); i++) {
+            adapter.addFragment(Tutorial1Fragment.newInstance(tutorialDataList.get(i)), "tutorial" + (i + 1));
+        }
+
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(4);
         viewPager.setSwipeEnabled(false);
@@ -71,6 +77,8 @@ public class TutorialActivity extends AppCompatActivity {
 
     private void showCompleteView() {
         lytStart.setVisibility(View.VISIBLE);
+        stepView.go(3,false);
+        stepView.done(true);
         lytStart.animate()
                 .translationY(0)
                 .setDuration(500);

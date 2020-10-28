@@ -56,8 +56,10 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
 
+import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 
 public class Utils {
@@ -355,5 +357,20 @@ public class Utils {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public static ArrayList<TutorialData> getTutorialData(Context context) {
+        ArrayList<TutorialData> tutorialDataList = new ArrayList<TutorialData>();
+        TutorialData tutorialData = new TutorialData(R.drawable.tutorial1,context.getResources().getString(R.string.tutorial1),context.getResources().getString(R.string.tutorial11),context.getResources().getString(R.string.tutorial12),0);
+        tutorialDataList.add(tutorialData);
+        tutorialData = new TutorialData(R.drawable.tutorial2,context.getResources().getString(R.string.tutorial2),context.getResources().getString(R.string.tutorial21),context.getResources().getString(R.string.tutorial22),1);
+        tutorialDataList.add(tutorialData);
+        tutorialData = new TutorialData(R.drawable.tutorial3,context.getResources().getString(R.string.tutorial3),context.getResources().getString(R.string.tutorial31),context.getResources().getString(R.string.tutorial32),2);
+        tutorialDataList.add(tutorialData);
+        tutorialData = new TutorialData(R.drawable.tutorial4,context.getResources().getString(R.string.tutorial4),context.getResources().getString(R.string.tutorial41),context.getResources().getString(R.string.tutorial42),3);
+        tutorialDataList.add(tutorialData);
+        return tutorialDataList;
+
+
     }
 }
