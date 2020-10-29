@@ -269,7 +269,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         if (height.isEmpty()) {
             editManualHeight.setError(tooltip_cm);
             valid = false;
-        } else if (Utils.checkDoubleDecimals(height) < 1) {
+        } else if (Utils.checkDoubleDecimals(height) != 1) {
             editManualHeight.setError(tooltip_decimal);
             valid = false;
         } else if (Utils.parseDouble(height) <= 45) {
@@ -285,7 +285,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         if (weight.isEmpty()) {
             editManualWeight.setError(tooltip_kg);
             valid = false;
-        } else if (Utils.checkDoubleDecimals(weight) < 3) {
+        } else if (Utils.checkDoubleDecimals(weight) != 3) {
             editManualWeight.setError(tooltip_kg_precision);
             valid = false;
         } else if (Utils.parseDouble(weight) < 2) {
@@ -301,7 +301,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         if (muac.isEmpty()) {
             editManualMuac.setError(tooltip_cm);
             valid = false;
-        } else if (Utils.checkDoubleDecimals(muac) < 1) {
+        } else if (Utils.checkDoubleDecimals(muac) != 1) {
             editManualMuac.setError(tooltip_decimal);
             valid = false;
         } else if (Utils.parseDouble(muac) < 7) {

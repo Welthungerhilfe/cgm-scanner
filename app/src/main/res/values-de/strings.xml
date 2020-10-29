@@ -87,8 +87,8 @@
     <string name="unit_kg">kg</string>
 
     <string name="tooltip_kg">Werte in Kilogramm</string>
-    <string name="tooltip_decimal">mindestens eine Nachkommastelle</string>
-    <string name="tooltip_kg_precision">mindestens drei Nachkommastellen</string>
+    <string name="tooltip_decimal">genau eine Nachkommastelle eingeben</string>
+    <string name="tooltip_kg_precision">genau drei Nachkommastellen eingeben</string>
     <string name="tooltip_weight_ex">z.B. 12.595</string>
     <string name="tooltip_cm">Wert in Zentimetern</string>
     <string name="tooltip_height_ex">z.B. 95.6</string>
