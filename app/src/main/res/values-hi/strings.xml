@@ -87,8 +87,8 @@
     <string name="unit_kg">किलोग्राम</string>
 
     <string name="tooltip_kg">किलोग्राम में मूल्य</string>
-    <string name="tooltip_decimal">दशमलव बिंदु के बाद कम से कम एक अंक</string>
-    <string name="tooltip_kg_precision">दशमलव बिंदु के बाद कम से कम तीन अंक</string>
+    <string name="tooltip_decimal">दशमलव बिंदु के बाद सटीक एक अंक दर्ज करें</string>
+    <string name="tooltip_kg_precision">दशमलव बिंदु के बाद सटीक तीन अंक दर्ज करें</string>
     <string name="tooltip_weight_ex">जैसे 12.595</string>
     <string name="tooltip_cm">सेंटीमीटर में मूल्य</string>
     <string name="tooltip_height_ex">जैसे 95.6</string>

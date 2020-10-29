@@ -86,8 +86,8 @@
     <string name="unit_kg">kg</string>
 
     <string name="tooltip_kg">value in kilograms</string>
-    <string name="tooltip_decimal">at least one digit after the decimal point</string>
-    <string name="tooltip_kg_precision">at least three digit after the decimal point</string>
+    <string name="tooltip_decimal">enter exact one digit after the decimal point</string>
+    <string name="tooltip_kg_precision">enter exact three digits after the decimal point</string>
     <string name="tooltip_weight_ex">i.e. 12.595</string>
     <string name="tooltip_cm">value in centimeters</string>
     <string name="tooltip_height_ex">i.e. 95.6</string>
