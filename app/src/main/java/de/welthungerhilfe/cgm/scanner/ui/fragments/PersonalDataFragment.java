@@ -79,7 +79,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private AppCompatRadioButton radioFemale, radioMale;
 
     private Button btnNext;
-    private long birthday = 0;
 
     private CreateDataViewModel viewModel;
     private String qrCode;
@@ -261,6 +260,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 break;
             case R.id.btnNext:
                 if (validate()) {
+                    long birthday = DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, editBirth.getText().toString());
 
                     String sex = "";
                     if (radioMale.isChecked())
@@ -276,8 +276,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
                     person.setName(editName.getText().toString());
                     person.setSurname(editPrename.getText().toString());
-                    if (birthday != 0)
-                        person.setBirthday(birthday);
+                    person.setBirthday(birthday);
                     person.setGuardian(editGuardian.getText().toString());
                     person.setSex(sex);
                     person.setAgeEstimated(checkAge.isChecked());
@@ -307,7 +306,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onDateTimeRecurrenceSet(SelectedDate selectedDate, int hourOfDay, int minute, SublimeRecurrencePicker.RecurrenceOption recurrenceOption, String recurrenceRule) {
-        birthday = selectedDate.getStartDate().getTimeInMillis();
+        long birthday = selectedDate.getStartDate().getTimeInMillis();
         editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, birthday));
     }
 
@@ -327,7 +326,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         InputMethodManager ime = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
         ime.hideSoftInputFromWindow(editBirth.getWindowToken(), 0);
 
-        birthday = DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, value);
+        long birthday = DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, value);
         editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, birthday));
         editBirth.clearFocus();
         PersonalDataFragment.this.onTextChanged();
