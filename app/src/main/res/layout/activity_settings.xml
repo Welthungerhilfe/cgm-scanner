@@ -17,7 +17,6 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -42,67 +41,17 @@
                     android:textColor="@color/colorPrimary"
                     android:textSize="20sp" />
 
-                <com.balysv.materialripple.MaterialRippleLayout
+                <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                    android:id="@+id/txtSettingVersion"
                     android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_marginTop="@dimen/activity_group_margin"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    app:mrl_rippleOverlay="true">
+                    android:layout_height="wrap_content"
+                    app:firstText="@string/version"/>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/version"
-                            android:textColor="@color/colorBlack"
-                            android:textSize="18sp" />
-
-                        <TextView
-                            android:id="@+id/txtSettingVersion"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/activity_section_margin"
-                            android:textSize="18sp" />
-                    </LinearLayout>
-
-                </com.balysv.materialripple.MaterialRippleLayout>
-
-                <com.balysv.materialripple.MaterialRippleLayout
+                <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                    android:id="@+id/txtSettingUuid"
                     android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_marginTop="@dimen/activity_group_margin"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    app:mrl_rippleOverlay="true">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/uuid"
-                            android:textColor="@color/colorBlack"
-                            android:textSize="18sp" />
-
-                        <TextView
-                            android:id="@+id/txtSettingUuid"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/activity_section_margin"
-                            android:textSize="18sp" />
-                    </LinearLayout>
-
-                </com.balysv.materialripple.MaterialRippleLayout>
+                    android:layout_height="wrap_content"
+                    app:firstText="@string/uuid"/>
             </LinearLayout>
 
             <LinearLayout
@@ -118,47 +67,39 @@
                     android:textColor="@color/colorPrimary"
                     android:textSize="20sp" />
 
-                <com.balysv.materialripple.MaterialRippleLayout
+                <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                    android:id="@+id/txtSettingBackupDate"
                     android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_marginTop="@dimen/activity_group_margin"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    app:mrl_rippleOverlay="true">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/last_backup_date"
-                            android:textColor="@color/colorBlack"
-                            android:textSize="18sp" />
-
-                        <TextView
-                            android:id="@+id/txtSettingBackupDate"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/activity_section_margin"
-                            android:textSize="18sp" />
-                    </LinearLayout>
-
-                </com.balysv.materialripple.MaterialRippleLayout>
-
-                <Button
-                    android:id="@+id/btnBackupNow"
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    app:firstText="@string/last_backup_date"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
                     android:layout_marginTop="15dp"
-                    android:layout_marginBottom="15dp"
-                    android:background="@drawable/button_pink_round"
-                    android:text="@string/backup_now"
-                    android:textColor="@color/colorWhite"
-                    android:textSize="14sp" />
+                    android:layout_marginBottom="15dp">
+
+                    <Button
+                        android:id="@+id/btnBackupNow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:background="@drawable/button_pink_round"
+                        android:text="@string/backup_now"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="14sp" />
+
+                    <Button
+                        android:id="@+id/btnContactSupport"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:background="@drawable/button_pink_round"
+                        android:text="@string/contact_support"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="14sp" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -174,70 +115,17 @@
                     android:textColor="@color/colorPrimary"
                     android:textSize="20sp" />
 
-                <com.balysv.materialripple.MaterialRippleLayout
+                <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                    android:id="@+id/txtSettingAccount"
                     android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_marginTop="@dimen/activity_group_margin"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    app:mrl_rippleOverlay="true">
+                    android:layout_height="wrap_content"
+                    app:secondText="@string/app_name_long"/>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/txtSettingAccount"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text=""
-                            android:textColor="@color/colorBlack"
-                            android:textSize="18sp" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/activity_section_margin"
-                            android:text="@string/app_name_long"
-                            android:textSize="18sp" />
-                    </LinearLayout>
-
-                </com.balysv.materialripple.MaterialRippleLayout>
-
-                <com.balysv.materialripple.MaterialRippleLayout
+                <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                    android:id="@+id/txtSettingAzureAccount"
                     android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_marginTop="@dimen/activity_group_margin"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    app:mrl_rippleOverlay="true">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/txtSettingAzureAccount"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text=""
-                            android:textColor="@color/colorBlack"
-                            android:textSize="18sp" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/activity_section_margin"
-                            android:text="@string/azure_account"
-                            android:textSize="18sp" />
-                    </LinearLayout>
-
-                </com.balysv.materialripple.MaterialRippleLayout>
-
+                    android:layout_height="wrap_content"
+                    app:secondText="@string/azure_account"/>
             </LinearLayout>
 
             <LinearLayout
@@ -257,122 +145,27 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <com.balysv.materialripple.MaterialRippleLayout
+                    <de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView
+                        android:id="@+id/radioEnglish"
                         android:layout_width="match_parent"
-                        android:layout_height="?attr/actionBarSize"
-                        android:layout_marginTop="@dimen/activity_group_margin"
-                        android:paddingLeft="@dimen/activity_horizontal_margin"
-                        android:paddingRight="@dimen/activity_horizontal_margin"
-                        app:mrl_rippleOverlay="true">
+                        android:layout_height="wrap_content"
+                        app:flagImage="@drawable/usa"
+                        app:language="@string/lang_english"/>
 
-                        <LinearLayout
-                            android:id="@+id/lytLangEnglish"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="42dp"
-                                android:layout_height="42dp"
-                                android:contentDescription="@string/content_image"
-                                android:src="@drawable/usa" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                                android:layout_weight="1"
-                                android:text="@string/lang_english"
-                                android:textColor="@color/colorBlack"
-                                android:textSize="18sp" />
-
-                            <androidx.appcompat.widget.AppCompatRadioButton
-                                android:id="@+id/radioEnglish"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content" />
-                        </LinearLayout>
-
-                    </com.balysv.materialripple.MaterialRippleLayout>
-
-                    <com.balysv.materialripple.MaterialRippleLayout
+                    <de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView
+                        android:id="@+id/radioGerman"
                         android:layout_width="match_parent"
-                        android:layout_height="?attr/actionBarSize"
-                        android:layout_marginTop="@dimen/activity_group_margin"
-                        android:paddingLeft="@dimen/activity_horizontal_margin"
-                        android:paddingRight="@dimen/activity_horizontal_margin"
-                        app:mrl_rippleOverlay="true">
+                        android:layout_height="wrap_content"
+                        app:flagImage="@drawable/germany"
+                        app:language="@string/lang_german"/>
 
-                        <LinearLayout
-                            android:id="@+id/lytLangGerman"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="42dp"
-                                android:layout_height="42dp"
-                                android:contentDescription="@string/content_image"
-                                android:src="@drawable/germany" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                                android:layout_weight="1"
-                                android:text="@string/lang_german"
-                                android:textColor="@color/colorBlack"
-                                android:textSize="18sp" />
-
-                            <androidx.appcompat.widget.AppCompatRadioButton
-                                android:id="@+id/radioGerman"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content" />
-                        </LinearLayout>
-
-                    </com.balysv.materialripple.MaterialRippleLayout>
-
-                    <com.balysv.materialripple.MaterialRippleLayout
+                    <de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView
+                        android:id="@+id/radioHindi"
                         android:layout_width="match_parent"
-                        android:layout_height="?attr/actionBarSize"
-                        android:layout_marginTop="@dimen/activity_group_margin"
-                        android:paddingLeft="@dimen/activity_horizontal_margin"
-                        android:paddingRight="@dimen/activity_horizontal_margin"
-                        app:mrl_rippleOverlay="true">
-
-                        <LinearLayout
-                            android:id="@+id/lytLangHindi"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="42dp"
-                                android:layout_height="42dp"
-                                android:contentDescription="@string/content_image"
-                                android:src="@drawable/india" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                                android:layout_weight="1"
-                                android:text="@string/lang_hindi"
-                                android:textColor="@color/colorBlack"
-                                android:textSize="18sp" />
-
-                            <androidx.appcompat.widget.AppCompatRadioButton
-                                android:id="@+id/radioHindi"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content" />
-                        </LinearLayout>
-
-                    </com.balysv.materialripple.MaterialRippleLayout>
-
+                        android:layout_height="wrap_content"
+                        app:flagImage="@drawable/india"
+                        app:language="@string/lang_hindi"/>
                 </RadioGroup>
-
             </LinearLayout>
 
             <LinearLayout
@@ -389,38 +182,11 @@
                     android:textColor="@color/colorPrimary"
                     android:textSize="20sp" />
 
-                <com.balysv.materialripple.MaterialRippleLayout
+                <de.welthungerhilfe.cgm.scanner.ui.views.ToggleView
+                    android:id="@+id/upload_over_wifi"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/activity_group_margin"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    app:mrl_rippleOverlay="true">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:paddingTop="10dp"
-                            android:paddingBottom="10dp"
-                            android:text="@string/upload_over_wifi"
-                            android:textColor="@color/colorBlack"
-                            android:textSize="18sp" />
-
-                        <androidx.appcompat.widget.SwitchCompat
-                            android:id="@+id/upload_over_wifi"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
-                </com.balysv.materialripple.MaterialRippleLayout>
-
+                    app:toggleText="@string/upload_over_wifi"/>
             </LinearLayout>
 
             <LinearLayout
@@ -437,97 +203,23 @@
                     android:textColor="@color/colorPrimary"
                     android:textSize="20sp" />
 
-                <com.balysv.materialripple.MaterialRippleLayout
+                <de.welthungerhilfe.cgm.scanner.ui.views.SubmenuButton
                     android:id="@+id/submenu_performance_measurement"
                     android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_marginTop="@dimen/activity_group_margin"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    app:mrl_rippleOverlay="true">
+                    android:layout_height="wrap_content"
+                    app:submenuText="@string/performance_measurement"/>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:paddingTop="10dp"
-                            android:paddingBottom="10dp"
-                            android:drawableRight="@drawable/right"
-                            android:text="@string/performance_measurement"
-                            android:textColor="@color/colorBlack"
-                            android:textSize="18sp" />
-
-                    </LinearLayout>
-
-                </com.balysv.materialripple.MaterialRippleLayout>
-
-                <com.balysv.materialripple.MaterialRippleLayout
+                <de.welthungerhilfe.cgm.scanner.ui.views.SubmenuButton
                     android:id="@+id/submenu_remote_config"
                     android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_marginTop="@dimen/activity_group_margin"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    app:mrl_rippleOverlay="true">
+                    android:layout_height="wrap_content"
+                    app:submenuText="@string/remote_config"/>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:paddingTop="10dp"
-                            android:paddingBottom="10dp"
-                            android:drawableRight="@drawable/right"
-                            android:text="@string/remote_config"
-                            android:textColor="@color/colorBlack"
-                            android:textSize="18sp" />
-
-                    </LinearLayout>
-
-                </com.balysv.materialripple.MaterialRippleLayout>
-
-                <com.balysv.materialripple.MaterialRippleLayout
-                    android:id="@+id/show_depth_data_layout"
+                <de.welthungerhilfe.cgm.scanner.ui.views.ToggleView
+                    android:id="@+id/show_depth_data"
                     android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_marginTop="@dimen/activity_group_margin"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    app:mrl_rippleOverlay="true">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:paddingTop="10dp"
-                            android:paddingBottom="10dp"
-                            android:text="@string/show_depth_data"
-                            android:textColor="@color/colorBlack"
-                            android:textSize="18sp" />
-
-                        <androidx.appcompat.widget.SwitchCompat
-                            android:id="@+id/show_depth_data"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
-                </com.balysv.materialripple.MaterialRippleLayout>
-
+                    android:layout_height="wrap_content"
+                    app:toggleText="@string/show_depth_data"/>
             </LinearLayout>
 
         </LinearLayout>

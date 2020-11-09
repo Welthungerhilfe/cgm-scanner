@@ -108,6 +108,13 @@ public class ARCoreUtils {
     }
 
     public static Depthmap extractDepthmap(Image image, Pose pose, boolean reorder) {
+        if (image == null) {
+            Depthmap depthmap = new Depthmap(0, 0);
+            depthmap.position = pose.getTranslation();
+            depthmap.rotation = pose.getRotationQuaternion();
+            depthmap.timestamp = 0;
+            return depthmap;
+        }
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
         if (reorder) {
@@ -193,6 +200,9 @@ public class ARCoreUtils {
     }
 
     public static boolean shouldUseAREngine() {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            return false;
+        }
         String manufacturer = Build.MANUFACTURER.toUpperCase();
         return manufacturer.startsWith("HONOR") || manufacturer.startsWith("HUAWEI");
     }

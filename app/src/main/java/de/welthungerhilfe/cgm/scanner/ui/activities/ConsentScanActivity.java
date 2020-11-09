@@ -72,6 +72,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
+import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ConsentScanActivity extends AppCompatActivity {
@@ -888,7 +889,7 @@ public class ConsentScanActivity extends AppCompatActivity {
                 log.setId(AppController.getInstance().getArtifactId("consent"));
                 log.setType("consent");
                 log.setPath(consentFile.getPath());
-                log.setHashValue(Utils.getMD5(consentFile.getPath()));
+                log.setHashValue(IO.getMD5(consentFile.getPath()));
                 log.setFileSize(consentFile.length());
                 log.setUploadDate(0);
                 log.setQrCode(qrCode);

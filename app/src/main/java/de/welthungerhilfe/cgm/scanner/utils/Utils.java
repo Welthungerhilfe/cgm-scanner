@@ -1,4 +1,4 @@
-/**
+/*
  *  Child Growth Monitor - quick and accurate data on malnutrition
  *  Copyright (c) $today.year Welthungerhilfe Innovation
  *
@@ -22,19 +22,23 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.AudioManager;
+import android.media.MediaActionSound;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.provider.Settings;
-import android.util.Base64;
+import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TypedValue;
 
 import androidx.core.app.ActivityCompat;
 
@@ -43,11 +47,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -55,12 +56,22 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
 
+import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
+import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 
 public class Utils {
 
+    private static MediaActionSound sound = null;
+
     public static long averageValue(ArrayList<Long> values) {
         long value = 0;
+        if(values==null)
+        {
+            return value;
+        }
         for (long l : values) {
             value += l;
         }
@@ -68,28 +79,6 @@ public class Utils {
             value /= values.size();
         }
         return value;
-    }
-    public static String getMD5(String filePath) {
-        String base64Digest = "";
-        try {
-            InputStream input = new FileInputStream(filePath);
-            byte[] buffer = new byte[1024];
-            MessageDigest md5Hash = MessageDigest.getInstance("MD5");
-            int numRead = 0;
-            while (numRead != -1) {
-                numRead = input.read(buffer);
-                if (numRead > 0) {
-                    md5Hash.update(buffer, 0, numRead);
-                }
-            }
-            input.close();
-            byte[] md5Bytes = md5Hash.digest();
-            base64Digest = Base64.encodeToString(md5Bytes, Base64.DEFAULT);
-
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-        return base64Digest;
     }
 
     public static void overrideFont(Context context, String defaultFontNameToOverride, String customFontFileNameInAssets) {
@@ -105,6 +94,10 @@ public class Utils {
     }
 
     public static double parseDouble(String value) {
+        if(value==null)
+        {
+            return 0;
+        }
         value = value.replace(',', '.');
         try {
             return Double.parseDouble(value);
@@ -114,6 +107,10 @@ public class Utils {
     }
 
     public static float parseFloat(String value) {
+        if(value==null)
+        {
+            return 0;
+        }
         value = value.replace(',', '.');
         try {
             return Float.parseFloat(value);
@@ -156,6 +153,15 @@ public class Utils {
         return Settings.Secure.getString(resolver, Settings.Secure.ANDROID_ID);
     }
 
+    public static String getAppVersion(Context context) {
+        try {
+            return context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return "unknown";
+        }
+    }
+
     public static String getSaltString(int length) {
         String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz";
         StringBuilder salt = new StringBuilder();
@@ -175,7 +181,7 @@ public class Utils {
     }
 
     public static String getNameFromEmail(String email) {
-        if (email == null)
+        if (email==null || email.isEmpty())
             return "unknown";
         else {
             String[] arr = email.split("@");
@@ -289,8 +295,60 @@ public class Utils {
                 });
     }
 
-    public static int spToPx(float sp, Context context) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, context.getResources().getDisplayMetrics());
+    public static int dpToPx(float dp, Context context) {
+        return (int) (dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+
+    public static boolean isPackageInstalled(Activity activity, String packageName) {
+        PackageManager pm = activity.getPackageManager();
+
+        for (PackageInfo info : activity.getPackageManager().getInstalledPackages(0)) {
+            if (info.packageName.compareTo(packageName) == 0) {
+                int state = pm.getApplicationEnabledSetting(packageName);
+                switch (state) {
+                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
+                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
+                        return false;
+                    default:
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isUploadAllowed(Context context) {
+        boolean wifiOnly = LocalPersistency.getBoolean(context, SettingsActivity.KEY_UPLOAD_WIFI);
+        if (wifiOnly) {
+            if (Utils.isWifiConnected(context)) {
+                return true;
+            }
+        } else if (Utils.isNetworkAvailable(context)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static void openPlayStore(Activity activity, String packageName) {
+        Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=" + packageName);
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        activity.startActivity(intent);
+    }
+
+    public static void playShooterSound(Context context, int sample) {
+        AudioManager audio = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        switch( audio.getRingerMode() ){
+            case AudioManager.RINGER_MODE_NORMAL:
+                if (sound == null) {
+                    sound = new MediaActionSound();
+                }
+                sound.play(sample);
+                break;
+            case AudioManager.RINGER_MODE_SILENT:
+                break;
+            case AudioManager.RINGER_MODE_VIBRATE:
+                break;
+        }
     }
 
     public static void sleep(long miliseconds) {
@@ -299,5 +357,20 @@ public class Utils {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public static ArrayList<TutorialData> getTutorialData(Context context) {
+        ArrayList<TutorialData> tutorialDataList = new ArrayList<TutorialData>();
+        TutorialData tutorialData = new TutorialData(R.drawable.tutorial1,context.getResources().getString(R.string.tutorial1),context.getResources().getString(R.string.tutorial11),context.getResources().getString(R.string.tutorial12),0);
+        tutorialDataList.add(tutorialData);
+        tutorialData = new TutorialData(R.drawable.tutorial2,context.getResources().getString(R.string.tutorial2),context.getResources().getString(R.string.tutorial21),context.getResources().getString(R.string.tutorial22),1);
+        tutorialDataList.add(tutorialData);
+        tutorialData = new TutorialData(R.drawable.tutorial3,context.getResources().getString(R.string.tutorial3),context.getResources().getString(R.string.tutorial31),context.getResources().getString(R.string.tutorial32),2);
+        tutorialDataList.add(tutorialData);
+        tutorialData = new TutorialData(R.drawable.tutorial4,context.getResources().getString(R.string.tutorial4),context.getResources().getString(R.string.tutorial41),context.getResources().getString(R.string.tutorial42),3);
+        tutorialDataList.add(tutorialData);
+        return tutorialDataList;
+
+
     }
 }

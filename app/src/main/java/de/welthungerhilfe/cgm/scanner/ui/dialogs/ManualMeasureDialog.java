@@ -21,7 +21,6 @@ package de.welthungerhilfe.cgm.scanner.ui.dialogs;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
@@ -84,7 +83,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
     @OnCheckedChanged(R.id.checkManualOedema)
     void onAlert(CompoundButton buttonView, boolean isChecked) {
-        if (isChecked) {
+        if (!isChecked) {
             buttonView.setBackgroundResource(R.color.colorPink);
             buttonView.setTextColor(getContext().getColor(R.color.colorWhite));
         } else {
@@ -93,9 +92,13 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         }
         oedema = isChecked;
     }
+
     @OnClick(R.id.imgLocation)
     void onLocation(ImageView imgLocation) {
-        getContext().startActivity(new Intent(getContext(), LocationDetectActivity.class));
+        LocationDetectActivity.navigate((AppCompatActivity) mContext, editManualLocation, location, location -> {
+            ManualMeasureDialog.this.location = location;
+            editManualLocation.setText(location.getAddress());
+        });
     }
     @OnClick(R.id.txtCancel)
     void onCancel(TextView txtCancel) {
@@ -108,7 +111,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                 final TextView message = new TextView(mContext);
                 final SpannableString s = new SpannableString(mContext.getText(R.string.edema_link));
                 Linkify.addLinks(s, Linkify.WEB_URLS);
-                int p = Utils.spToPx(25, getContext());
+                int p = Utils.dpToPx(25, getContext());
                 message.setPadding(p, p, p, p);
                 message.setText(s);
                 message.setTextSize(TypedValue.COMPLEX_UNIT_SP,16);

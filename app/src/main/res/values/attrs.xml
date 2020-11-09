@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <declare-styleable name="LanguageRadioView">
+        <attr name="flagImage" format="reference" />
+        <attr name="language" format="string|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="SubmenuButton">
+        <attr name="submenuText" format="string|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="ToggleView">
+        <attr name="toggleText" format="string|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="TwoLineTextView">
+        <attr name="firstText" format="string|reference" />
+        <attr name="secondText" format="string|reference" />
+    </declare-styleable>
+
     <declare-styleable name="UnitEditText">
         <attr name="unit" format="string|reference" />
         <attr name="unitPadding" format="dimension" />

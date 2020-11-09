@@ -3,6 +3,7 @@ package de.welthungerhilfe.cgm.scanner.helper.camera;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
+import android.os.Build;
 
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
@@ -101,6 +102,20 @@ public class TangoUtils {
         }
 
         return depthmap;
+    }
+
+    public static boolean isTangoSupported() {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
+            String device = Build.DEVICE.toUpperCase();
+
+            //Asus Zenfone AR
+            if (device.compareTo("ASUS_A002") == 0) return true;
+            if (device.compareTo("ASUS_A002_1") == 0) return true;
+            //Lenovo Phab 2 Pro
+            if (device.compareTo("PB2PRO") == 0) return true;
+        }
+
+        return false;
     }
 
     public static void writeCalibrationFile(File file, TangoCameraIntrinsics[] calibration) {

@@ -21,10 +21,10 @@ package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
 import android.app.Activity;
 import android.app.DialogFragment;
+
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.fragment.app.Fragment;
@@ -45,7 +45,6 @@ import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 
 import java.util.Date;
-import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -55,7 +54,11 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
+import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.DateEditText;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
@@ -76,12 +79,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private AppCompatRadioButton radioFemale, radioMale;
 
     private Button btnNext;
-    private long birthday = 0;
 
     private CreateDataViewModel viewModel;
-    private Loc location;
     private String qrCode;
     private Person person;
+    private Loc location;
 
     public static PersonalDataFragment getInstance(String qrCode) {
         PersonalDataFragment fragment = new PersonalDataFragment();
@@ -134,6 +136,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         editPrename.addTextChangedListener(this);
 
         editLocation = view.findViewById(R.id.editLocation);
+        editLocation.setOnClickListener(this);
 
         editBirth = view.findViewById(R.id.editBirth);
         editBirth.setOnDateInputListener(this);
@@ -146,6 +149,13 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         radioMale = view.findViewById(R.id.radioMale);
         radioMale.setOnCheckedChangeListener(this);
+
+        View contextMenu = view.findViewById(R.id.contextMenuButton);
+        contextMenu.setOnClickListener(view12 -> new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+                new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
+        }, which -> {
+            ContactSupportDialog.show((BaseActivity) getActivity(), "data " + person.getQrcode(), "personID:" + person.getId());
+        }));
 
         return view;
     }
@@ -164,34 +174,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         editPrename.setText(person.getSurname());
         editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getBirthday()));
         editGuardian.setText(person.getGuardian());
-        editLocation.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                new Thread(() -> {
-                    Geocoder geocoder = new Geocoder(getContext());
-                    try {
-                        List<Address> addresses = geocoder.getFromLocationName(editLocation.getText().toString(), 1);
-                        if(addresses.size() > 0) {
-                            Loc l = new Loc();
-                            l.setLatitude(addresses.get(0).getLatitude());
-                            l.setLongitude(addresses.get(0).getLongitude());
-                            l.setAddress(editLocation.getText().toString());
-                            getActivity().runOnUiThread(() -> setLocation(l));
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }).start();
-            }
-        });
 
         String sex = person.getSex();
         if (sex != null) {
@@ -208,12 +190,12 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void setLocation(Loc loc) {
         if (loc != null) {
             String address = loc.getAddress();
-            if ((address != null) && (address.length() > 0)) {
+            if ((location == null) || ((address != null) && (address.length() > 0))) {
                 if (editLocation.getText().toString().compareTo(address) != 0) {
                     editLocation.setText(address);
                 }
+                location = loc;
             }
-            location = loc;
         }
     }
 
@@ -226,31 +208,31 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         String guardian = editGuardian.getText().toString();
 
         if (name.isEmpty()) {
-            editName.setError(getResources().getString(R.string.tooltip_name));
+            editName.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.name_tooltip)));
             valid = false;
         } else {
             editName.setError(null);
         }
 
         if (prename.isEmpty()) {
-            editPrename.setError(getResources().getString(R.string.tooltip_prename));
+            editPrename.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.prename_tooltip)));
             valid = false;
         } else {
             editPrename.setError(null);
         }
 
         if (birth.isEmpty()) {
-            editBirth.setError(getResources().getString(R.string.tooltip_birthday));
+            editBirth.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.birthday_tooltip)));
             valid = false;
         } else if (birth.equals("DD-MM-YYYY")){
-            editBirth.setError(getResources().getString(R.string.tooltip_birthday));
+            editBirth.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.birthday_tooltip)));
             valid = false;
         } else {
             editBirth.setError(null);
         }
 
         if (guardian.isEmpty()) {
-            editGuardian.setError(getResources().getString(R.string.tooltip_guardian));
+            editGuardian.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.guardian_tooltip)));
             valid = false;
         } else {
             editGuardian.setError(null);
@@ -278,6 +260,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 break;
             case R.id.btnNext:
                 if (validate()) {
+                    long birthday = DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, editBirth.getText().toString());
 
                     String sex = "";
                     if (radioMale.isChecked())
@@ -293,8 +276,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
                     person.setName(editName.getText().toString());
                     person.setSurname(editPrename.getText().toString());
-                    if (birthday != 0)
-                        person.setBirthday(birthday);
+                    person.setBirthday(birthday);
                     person.setGuardian(editGuardian.getText().toString());
                     person.setSex(sex);
                     person.setAgeEstimated(checkAge.isChecked());
@@ -302,10 +284,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setCreated(System.currentTimeMillis());
                     person.setCreatedBy(session.getUserEmail());
                     person.setSchema_version(CgmDatabase.version);
-
-                    if (location != null) {
-                        person.setLastLocation(location);
-                    }
+                    person.setLastLocation(location);
 
                     viewModel.savePerson(person);
                 }
@@ -317,12 +296,17 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             case R.id.txtBack:
                 getActivity().finish();
                 break;
+            case R.id.editLocation:
+                LocationDetectActivity.navigate((AppCompatActivity) getActivity(), editLocation, location, location -> {
+                    setLocation(location);
+                });
+                break;
         }
     }
 
     @Override
     public void onDateTimeRecurrenceSet(SelectedDate selectedDate, int hourOfDay, int minute, SublimeRecurrencePicker.RecurrenceOption recurrenceOption, String recurrenceRule) {
-        birthday = selectedDate.getStartDate().getTimeInMillis();
+        long birthday = selectedDate.getStartDate().getTimeInMillis();
         editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, birthday));
     }
 
@@ -342,7 +326,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         InputMethodManager ime = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
         ime.hideSoftInputFromWindow(editBirth.getWindowToken(), 0);
 
-        birthday = DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, value);
+        long birthday = DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, value);
         editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, birthday));
         editBirth.clearFocus();
         PersonalDataFragment.this.onTextChanged();

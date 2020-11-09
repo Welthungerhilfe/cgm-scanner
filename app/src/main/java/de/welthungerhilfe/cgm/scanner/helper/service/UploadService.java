@@ -15,8 +15,6 @@ import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -29,7 +27,6 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
-import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -64,6 +61,10 @@ public class UploadService extends Service implements OnFileLogsLoad {
         }
     }
 
+    public static boolean isInitialized() {
+        return service != null;
+    }
+
     public void onCreate() {
         service = this;
 
@@ -83,18 +84,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
         if (remainingCount <= 0) {
-            try {
-                synchronized (SyncAdapter.getLock()) {
-                    CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
-                    blobClient = storageAccount.createCloudBlobClient();
-                }
-
-                loadQueueFileLogs();
-
-                return START_STICKY;
-            } catch (URISyntaxException | InvalidKeyException | IllegalArgumentException e) {
-                e.printStackTrace();
-            }
+            loadQueueFileLogs();
+            return START_STICKY;
         }
 
         return START_NOT_STICKY;
@@ -103,6 +94,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
     @Override
     public void onDestroy() {
         Log.e("UploadService", "Stopped");
+        service = null;
         running = false;
 
         if (executor != null) {
@@ -112,6 +104,11 @@ public class UploadService extends Service implements OnFileLogsLoad {
     }
 
     private void loadQueueFileLogs() {
+        if (!Utils.isUploadAllowed(this)) {
+            Log.e("UploadService", "Skipped");
+            return;
+        }
+
         Log.e("UploadService", "Started");
         running = true;
 
@@ -201,8 +198,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                     break;
             }
 
-            boolean wifiOnly = LocalPersistency.getBoolean(getBaseContext(), SettingsActivity.KEY_UPLOAD_WIFI);
-            while (wifiOnly && !Utils.isWifiConnected(getBaseContext())) {
+            while (!Utils.isUploadAllowed(getBaseContext())) {
                 Utils.sleep(3000);
             }
 
@@ -211,6 +207,13 @@ public class UploadService extends Service implements OnFileLogsLoad {
             try {
                 final File file = new File(log.getPath());
                 FileInputStream stream = new FileInputStream(file);
+
+                if (blobClient == null) {
+                    synchronized (SyncAdapter.getLock()) {
+                        CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                        blobClient = storageAccount.createCloudBlobClient();
+                    }
+                }
 
                 CloudBlobContainer container = blobClient.getContainerReference(AppConstants.STORAGE_CONTAINER);
                 container.createIfNotExists();

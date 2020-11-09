@@ -26,6 +26,9 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- contact support -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <supports-screens
         android:anyDensity="true"
         android:largeScreens="true"

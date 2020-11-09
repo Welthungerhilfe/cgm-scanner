@@ -75,13 +75,29 @@
         android:padding="@dimen/activity_horizontal_margin"
         android:orientation="vertical">
 
-        <com.jaredrummler.materialspinner.MaterialSpinner
-            android:id="@+id/dropChart"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/colorGreyDark"
-            android:textStyle="bold"
-            android:textSize="18sp"/>
+            android:orientation="horizontal">
+
+            <com.jaredrummler.materialspinner.MaterialSpinner
+                android:id="@+id/dropChart"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/colorGreyDark"
+                android:textStyle="bold"
+                android:textSize="18sp"/>
+
+            <ImageView
+                android:id="@+id/contextMenuButton"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginTop="15dp"
+                android:src="@drawable/ic_context_menu"
+                android:tint="@color/colorGreyDark"
+                android:contentDescription="@string/content_image"/>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -106,7 +122,6 @@
                 android:textColor="@color/colorGreyDark"
                 android:textStyle="bold"
                 android:textSize="18sp"/>
-
         </LinearLayout>
 
         <RelativeLayout

@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.Image;
+import android.media.MediaActionSound;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -75,12 +76,13 @@ import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoUtils;
+import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener, ARCoreUtils.Camera2DataListener, TangoCamera.TangoCameraListener {
     private final int PERMISSION_LOCATION = 0x0001;
     private final int PERMISSION_CAMERA = 0x0002;
-    private final int PERMISSION_STORAGE = 0x0002;
+    private final int PERMISSION_STORAGE = 0x0003;
 
     public static final String KEY_MEASURE = "KEY_MEASURE";
     public static final String SUBFIX_COUNT = "_COUNT";
@@ -204,11 +206,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             if (SCAN_MODE == AppConstants.SCAN_STANDING) {
                 SCAN_STEP = AppConstants.SCAN_STANDING_FRONT;
 
-                mTitleView.setText(getString(R.string.front_view_01) + " - " + getString(R.string.mode_standing));
+                mTitleView.setText(getString(R.string.front_scan) + " - " + getString(R.string.mode_standing));
             } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
                 SCAN_STEP = AppConstants.SCAN_LYING_FRONT;
 
-                mTitleView.setText(getString(R.string.front_view_01) + " - " + getString(R.string.mode_lying));
+                mTitleView.setText(getString(R.string.front_scan) + " - " + getString(R.string.mode_lying));
             }
             openScan();
         }
@@ -222,11 +224,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             if (SCAN_MODE == AppConstants.SCAN_STANDING) {
                 SCAN_STEP = AppConstants.SCAN_STANDING_SIDE;
 
-                mTitleView.setText(getString(R.string.lateral_view_02) + " - " + getString(R.string.mode_standing));
+                mTitleView.setText(getString(R.string.side_scan) + " - " + getString(R.string.mode_standing));
             } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
                 SCAN_STEP = AppConstants.SCAN_LYING_SIDE;
 
-                mTitleView.setText(getString(R.string.lateral_view_02) + " - " + getString(R.string.mode_lying));
+                mTitleView.setText(getString(R.string.side_scan) + " - " + getString(R.string.mode_lying));
             }
             openScan();
         }
@@ -240,11 +242,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             if (SCAN_MODE == AppConstants.SCAN_STANDING) {
                 SCAN_STEP = AppConstants.SCAN_STANDING_BACK;
 
-                mTitleView.setText(getString(R.string.back_view_03) + " - " + getString(R.string.mode_standing));
+                mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_standing));
             } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
                 SCAN_STEP = AppConstants.SCAN_LYING_BACK;
 
-                mTitleView.setText(getString(R.string.back_view_03) + " - " + getString(R.string.mode_lying));
+                mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_lying));
             }
             openScan();
         }
@@ -424,7 +426,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 .create();
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_STORAGE);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
         }
     }
 
@@ -554,11 +556,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         mIsRecording = true;
         fab.setImageResource(R.drawable.stop);
+        Utils.playShooterSound(this, MediaActionSound.START_VIDEO_RECORDING);
     }
 
     private void pauseScan() {
         mIsRecording = false;
         fab.setImageResource(R.drawable.recorder);
+        Utils.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
     }
 
     private void openScan() {
@@ -570,6 +574,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     public void closeScan() {
+        if (mIsRecording) {
+            Utils.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
+        }
         mIsRecording = false;
         lytScanner.setVisibility(View.GONE);
     }
@@ -756,22 +763,18 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 measureRepository.insertMeasure(measure);
             }
 
-            //start uploading service
-            runOnUiThread(() -> {
-                if (!AppController.getInstance().isUploadRunning()) {
-                    startService(new Intent(getApplicationContext(), UploadService.class));
-                }
-            });
-
-            //update measure metadata if possible
+            //upload metadata if possible
             Context context = ScanModeActivity.this;
-            boolean wifiOnly = LocalPersistency.getBoolean(context, SettingsActivity.KEY_UPLOAD_WIFI);
-            if (wifiOnly) {
-                if (Utils.isWifiConnected(context)) {
-                    measureRepository.uploadMeasure(context, measure);
-                    return null;
-                }
-            } else if (Utils.isNetworkAvailable(context)) {
+            if (Utils.isUploadAllowed(context)) {
+
+                //start upload service
+                runOnUiThread(() -> {
+                    if (!AppController.getInstance().isUploadRunning()) {
+                        startService(new Intent(getApplicationContext(), UploadService.class));
+                    }
+                });
+
+                //add metadata into DB
                 measureRepository.uploadMeasure(context, measure);
                 return null;
             }
@@ -795,7 +798,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private ICamera getCamera() {
         if (mCameraInstance == null) {
-            if (session.isTangoDevice()) {
+            if (TangoUtils.isTangoSupported()) {
                 mCameraInstance = new TangoCamera(this);
             } else if (ARCoreUtils.shouldUseAREngine()) {
                 mCameraInstance = new AREngineCamera(this);
@@ -808,7 +811,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onColorDataReceived(Bitmap bitmap, int frameIndex) {
-        if (mIsRecording && (frameIndex % 10 == 0)) {
+        if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             long profile = System.currentTimeMillis();
             CameraCalibration calibration = mCameraInstance.getCalibration();
@@ -834,7 +837,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
                     log.setType("rgb");
                     log.setPath(artifactFile.getPath());
-                    log.setHashValue(Utils.getMD5(artifactFile.getPath()));
+                    log.setHashValue(IO.getMD5(artifactFile.getPath()));
                     log.setFileSize(artifactFile.length());
                     log.setUploadDate(0);
                     log.setDeleted(false);
@@ -863,7 +866,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                             log.setId(AppController.getInstance().getArtifactId("camera-calibration", mNowTime));
                             log.setType("calibration");
                             log.setPath(artifactFile.getPath());
-                            log.setHashValue(Utils.getMD5(artifactFile.getPath()));
+                            log.setHashValue(IO.getMD5(artifactFile.getPath()));
                             log.setFileSize(artifactFile.length());
                             log.setUploadDate(0);
                             log.setDeleted(false);
@@ -893,7 +896,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         onLightUpdate(mCameraInstance.getLightConditionState());
 
-        if (mIsRecording && (frameIndex % 10 == 0)) {
+        if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             long profile = System.currentTimeMillis();
             ARCoreUtils.Depthmap depthmap = ARCoreUtils.extractDepthmap(image, pose, mCameraInstance instanceof AREngineCamera);
@@ -941,7 +944,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
                     log.setType("depth");
                     log.setPath(artifactFile.getPath());
-                    log.setHashValue(Utils.getMD5(artifactFile.getPath()));
+                    log.setHashValue(IO.getMD5(artifactFile.getPath()));
                     log.setFileSize(artifactFile.length());
                     log.setUploadDate(0);
                     log.setDeleted(false);
@@ -968,7 +971,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
-        String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + tangoImageBuffer.timestamp + ".jpg";
+        String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + String.format(Locale.US, "%f", tangoImageBuffer.timestamp) + ".jpg";
         File artifactFile = new File(mRgbSaveFolder.getPath(), currentImgFilename);
         TangoUtils.writeImageToFile(tangoImageBuffer, artifactFile);
 
@@ -987,7 +990,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
                 log.setType("rgb");
                 log.setPath(artifactFile.getPath());
-                log.setHashValue(Utils.getMD5(artifactFile.getPath()));
+                log.setHashValue(IO.getMD5(artifactFile.getPath()));
                 log.setFileSize(artifactFile.length());
                 log.setUploadDate(0);
                 log.setDeleted(false);
@@ -1029,7 +1032,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             double Artifact_Lighting_penalty=Math.abs((double) numPoints/38000-1.0)*100*3;
 
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
-                    "_" + String.format(Locale.US, "%03d", mNumberOfFilesWritten++);
+                    "_" + mNumberOfFilesWritten++ + "_" + String.format(Locale.US, "%f", pointCloudData.timestamp) + ".depth";
 
             ArtifactResult ar=new ArtifactResult();
             ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
@@ -1066,7 +1069,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
                     log.setType("depth");
                     log.setPath(artifactFile.getPath());
-                    log.setHashValue(Utils.getMD5(artifactFile.getPath()));
+                    log.setHashValue(IO.getMD5(artifactFile.getPath()));
                     log.setFileSize(artifactFile.length());
                     log.setUploadDate(0);
                     log.setDeleted(false);
@@ -1092,7 +1095,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setId(AppController.getInstance().getArtifactId("camera-calibration", mNowTime));
                         log.setType("calibration");
                         log.setPath(artifactFile.getPath());
-                        log.setHashValue(Utils.getMD5(artifactFile.getPath()));
+                        log.setHashValue(IO.getMD5(artifactFile.getPath()));
                         log.setFileSize(artifactFile.length());
                         log.setUploadDate(0);
                         log.setDeleted(false);
@@ -1137,7 +1140,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             threadsCount += diff;
             if (threadsCount == 0) {
                 Log.d("ScanModeActivity", "The last thread finished");
-                threadsLock.notify();
             } else {
                 Log.d("ScanModeActivity", "Amount of threads : " + threadsCount);
             }
@@ -1145,18 +1147,15 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void waitUntilFinished() {
-        synchronized (threadsLock) {
-            if (threadsCount > 0) {
-                Log.d("ScanModeActivity", "Start waiting on running threads");
-                try {
-                    threadsLock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+        Log.d("ScanModeActivity", "Start waiting on running threads");
+        while (true) {
+            synchronized (threadsLock) {
+                if (threadsCount == 0) {
+                    break;
                 }
-                Log.d("ScanModeActivity", "Stop waiting on running threads");
-            } else {
-                Log.d("ScanModeActivity", "All threads already finished");
             }
+            Utils.sleep(5);
         }
+        Log.d("ScanModeActivity", "Stop waiting on running threads");
     }
 }

@@ -57,7 +57,6 @@ import com.google.ar.core.Session;
 import com.google.ar.core.SharedCamera;
 
 import java.nio.ByteBuffer;
-import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -200,8 +199,23 @@ public class ARCoreCamera implements ICamera {
     scriptYuvToRgb.forEach(allocationRgb);
     allocationRgb.copyTo(bitmap);
 
-    synchronized (mCache) {
-      mCache.put(image.getTimestamp(), bitmap);
+    if (mDepthCameraId == null) {
+      Pose pose;
+      synchronized (mLock) {
+        pose = mPose;
+      }
+
+      for (ARCoreUtils.Camera2DataListener listener : mListeners) {
+        listener.onDepthDataReceived(null, pose, mFrameIndex);
+      }
+      for (ARCoreUtils.Camera2DataListener listener : mListeners) {
+        listener.onColorDataReceived(bitmap, mFrameIndex);
+      }
+      mFrameIndex++;
+    } else {
+      synchronized (mCache) {
+        mCache.put(image.getTimestamp(), bitmap);
+      }
     }
     allocationYuv.destroy();
     allocationRgb.destroy();
@@ -343,18 +357,20 @@ public class ARCoreCamera implements ICamera {
     mColorCameraId = mSession.getCameraConfig().getCameraId();
 
     // When ARCore is running, make sure it also updates our CPU image surface.
-    if (mColorCameraId.compareTo(mDepthCameraId) == 0) {
-      ArrayList<Surface> surfaces = new ArrayList<>();
-      surfaces.add(mImageReaderDepth16.getSurface());
-      sharedCamera.setAppSurfaces(mColorCameraId, surfaces);
-    } else {
-      CameraManager manager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
-      try {
-        manager.openCamera(mDepthCameraId, mSeparatedCameraCallback, null);
-      } catch (CameraAccessException e) {
-        e.printStackTrace();
-      } catch (Exception e) {
-        throw new RuntimeException("Interrupted while trying to lock camera opening.", e);
+    if (mDepthCameraId != null) {
+      if (mColorCameraId.compareTo(mDepthCameraId) == 0) {
+        ArrayList<Surface> surfaces = new ArrayList<>();
+        surfaces.add(mImageReaderDepth16.getSurface());
+        sharedCamera.setAppSurfaces(mColorCameraId, surfaces);
+      } else {
+        CameraManager manager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
+        try {
+          manager.openCamera(mDepthCameraId, mSeparatedCameraCallback, null);
+        } catch (CameraAccessException e) {
+          e.printStackTrace();
+        } catch (Exception e) {
+          throw new RuntimeException("Interrupted while trying to lock camera opening.", e);
+        }
       }
     }
 
@@ -480,7 +496,7 @@ public class ARCoreCamera implements ICamera {
       mCameraCalibration.colorCameraIntrinsic[1] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
       mCameraCalibration.colorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
       mCameraCalibration.colorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[1] / (float)intrinsics.getImageDimensions()[1];
-      if (mColorCameraId.compareTo(mDepthCameraId) == 0) {
+      if ((mDepthCameraId != null) && (mColorCameraId.compareTo(mDepthCameraId) == 0)) {
         mCameraCalibration.depthCameraIntrinsic = mCameraCalibration.colorCameraIntrinsic;
       }
       mCameraCalibration.setValid();
