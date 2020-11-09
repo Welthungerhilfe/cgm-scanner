@@ -277,9 +277,7 @@
     <string name="storage_permission_needed">Storage permission needed!</string>
 
     <string name="login_error_parse">Token Parse Failed</string>
-    <string name="login_error_backend">Couldn\'t find your backend</string>
     <string name="login_error_invalid">Couldn\'t get user email, please try again</string>
-    <string name="login_error_nobackend">Backend account is invalid</string>
 
     <string name="scan_quality">Scan Quality : </string>
     <string name="score_light">Light Score : </string>

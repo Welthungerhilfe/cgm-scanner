@@ -268,9 +268,7 @@
 
 
     <string name="login_error_parse">Token-Analyse fehlgeschlagen</string>
-    <string name="login_error_backend">Konnte Ihr Backend nicht finden</string>
     <string name="login_error_invalid">Benutzer-E-Mail konnte nicht abgerufen werden. Bitte versuchen Sie es erneut</string>
-    <string name="login_error_nobackend">Backend-Konto ist ungültig</string>
 
     <string name="scan_quality">Scanqualität : </string>
     <string name="score_light">Belichtung : </string>

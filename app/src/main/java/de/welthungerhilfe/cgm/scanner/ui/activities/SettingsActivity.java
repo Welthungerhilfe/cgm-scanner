@@ -124,8 +124,7 @@ public class SettingsActivity extends BaseActivity {
 
     @SuppressLint("StaticFieldLeak")
     private void initUI() {
-        String account = session.getAzureAccountName();
-        boolean devBackend = (account != null) && account.endsWith("dev");
+        boolean devBackend = false; //TODO:detect backend name
         boolean devVersion = BuildConfig.VERSION_NAME.endsWith("dev");
         boolean showQA = BuildConfig.DEBUG || devBackend || devVersion;
         layoutTestQA.setVisibility(showQA ? View.VISIBLE : View.GONE);
@@ -150,7 +149,7 @@ public class SettingsActivity extends BaseActivity {
             txtSettingAccount.setText(1, accounts[0].name);
         }
 
-        txtSettingAzureAccount.setText(1, session.getAzureAccountName());
+        txtSettingAzureAccount.setText(1, "");//TODO:detect backend name
 
         String code = session.getLanguage();
         switch (code) {

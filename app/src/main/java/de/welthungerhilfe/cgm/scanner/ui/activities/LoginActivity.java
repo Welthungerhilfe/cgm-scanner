@@ -36,14 +36,11 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.microsoft.azure.storage.CloudStorageAccount;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
 import net.minidev.json.JSONArray;
 
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.text.ParseException;
 import java.util.Map;
 
@@ -206,57 +203,40 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             JWT parsedToken = JWTParser.parse(idToken);
             Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
 
-            String azureAccountName = (String) claims.get("extension_azure_account_name");
-            String azureAccountKey = (String) claims.get("extension_azure_account_key");
-            if (azureAccountName != null && !azureAccountName.equals("") && azureAccountKey != null && !azureAccountKey.equals("")) {
-                JSONArray emails = (JSONArray) claims.get("emails");
-                if (emails != null && !emails.isEmpty()) {
-                    try {
-                        CloudStorageAccount.parse(String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", azureAccountName, azureAccountKey));
+            JSONArray emails = (JSONArray) claims.get("emails");
+            if (emails != null && !emails.isEmpty()) {
+                session.setAuthToken(idToken);
 
-                        session.setAzureAccountName(azureAccountName);
-                        session.setAzureAccountKey(azureAccountKey);
+                String token = (String) claims.get("at_hash");
+                String firstEmail = emails.get(0).toString();
 
-                        session.setAuthToken(idToken);
+                final Account account = new Account(firstEmail, AppConstants.ACCOUNT_TYPE);
+                accountManager.addAccountExplicitly(account, token, null);
 
-                        String token = (String) claims.get("at_hash");
-                        String firstEmail = emails.get(0).toString();
+                SyncAdapter.startPeriodicSync(account, getApplicationContext());
 
-                        final Account account = new Account(firstEmail, AppConstants.ACCOUNT_TYPE);
-                        accountManager.addAccountExplicitly(account, token, null);
+                final Intent intent = new Intent();
+                intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, firstEmail);
+                intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
+                intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
 
-                        SyncAdapter.startPeriodicSync(account, getApplicationContext());
-
-                        final Intent intent = new Intent();
-                        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, firstEmail);
-                        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
-                        intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
-
-                        setAccountAuthenticatorResult(intent.getExtras());
-                        setResult(RESULT_OK, intent);
+                setAccountAuthenticatorResult(intent.getExtras());
+                setResult(RESULT_OK, intent);
 
 
-                        session.saveRemoteConfig(new RemoteConfig());
-                        session.setSigned(true);
-                        session.setUserEmail(firstEmail);
+                session.saveRemoteConfig(new RemoteConfig());
+                session.setSigned(true);
+                session.setUserEmail(firstEmail);
 
-                        if (session.getTutorial())
-                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                        else
-                            startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
+                if (session.getTutorial())
+                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                else
+                    startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
 
-                        finish();
-                        return true;
-                    } catch (URISyntaxException | InvalidKeyException e) {
-                        e.printStackTrace();
-
-                        Toast.makeText(this, R.string.login_error_nobackend, Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(LoginActivity.this, R.string.login_error_invalid, Toast.LENGTH_LONG).show();
-                }
+                finish();
+                return true;
             } else {
-                Toast.makeText(this, R.string.login_error_backend, Toast.LENGTH_LONG).show();
+                Toast.makeText(LoginActivity.this, R.string.login_error_invalid, Toast.LENGTH_LONG).show();
             }
         } catch (ParseException e) {
             e.printStackTrace();

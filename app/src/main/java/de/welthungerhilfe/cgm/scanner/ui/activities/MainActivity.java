@@ -174,8 +174,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     break;
                 case R.id.menuLogout:
                     session.setSigned(false);
-                    session.setAzureAccountName("");
-                    session.setAzureAccountKey("");
 
                     try {
                         Account[] accounts = accountManager.getAccounts();

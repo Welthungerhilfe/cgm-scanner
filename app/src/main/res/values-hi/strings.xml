@@ -267,9 +267,7 @@
 
 
     <string name="login_error_parse">टोकन पार्स असफल</string>
-    <string name="login_error_backend">अपना बैकएंड नहीं ढूंढ सका</string>
     <string name="login_error_invalid">उपयोगकर्ता ईमेल प्राप्त नहीं कर सका, कृपया पुनः प्रयास करें</string>
-    <string name="login_error_nobackend">बैकेंड खाता अमान्य है</string>
 
     <string name="scan_quality">स्कैन गुणवत्ता : </string>
     <string name="score_light">लाइट स्कोर : </string>
