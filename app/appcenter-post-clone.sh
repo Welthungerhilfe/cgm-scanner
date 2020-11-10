@@ -17,32 +17,19 @@ cat $gsFile
 
 echo "Updated id!"
 
-APP_CONSTANT_FILE=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/helper/AppConstants.java
 APP_MANIFEST_FILE=$BUILD_REPOSITORY_LOCALPATH/app/src/main/AndroidManifest.xml
 APP_SPLASH_ACTIVITY=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/ui/activities/SplashActivity.java
 APP_LOGIN_ACTIVITY=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/ui/activities/LoginActivity.java
+APP_OAUTH_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_single_account.json
 
+echo "Updating API KEYS"
 
-echo "$APP_CONSTANT_FILE"
+sed -i '' "s|{GOOGLE_MAPS_KEY}|$GOOGLE_MAPS_KEY|g" $APP_MANIFEST_FILE
+sed -i '' "s|{OAUTH_PATH}|$OAUTH_PATH|g" $APP_MANIFEST_FILE
 
-if [ -e "$APP_CONSTANT_FILE" ]
-then
-    echo "Updating API KEYS"
+sed -i '' "s|{OAUTH_CLIENT_ID}|$OAUTH_CLIENT_ID|g" $APP_OAUTH_JSON
+sed -i '' "s|{OAUTH_PATH}|$OAUTH_PATH|g" $APP_OAUTH_JSON
+sed -i '' "s|{OAUTH_URL}|$OAUTH_URL|g" $APP_OAUTH_JSON
 
-    sed -i '' "s|{GOOGLE_MAPS_KEY}|$GOOGLE_MAPS_KEY|g" $APP_MANIFEST_FILE
-
-    sed -i '' "s|{APP_CENTER_KEY}|$APP_CENTER_KEY|g" $APP_MANIFEST_FILE
-    sed -i '' "s|{APP_CENTER_KEY}|$APP_CENTER_KEY|g" $APP_SPLASH_ACTIVITY
-
-    sed -i '' "s|{B2C_TENANT}|$B2C_TENANT|g" $APP_LOGIN_ACTIVITY
-    sed -i '' "s|{B2C_CLIENT_ID}|$B2C_CLIENT_ID|g" $APP_LOGIN_ACTIVITY
-    sed -i '' "s|{B2C_RESPONSE_URL}|$B2C_RESPONSE_URL|g" $APP_LOGIN_ACTIVITY
-    sed -i '' "s|{B2C_SCOPE}|$B2C_SCOPE|g" $APP_LOGIN_ACTIVITY
-    sed -i '' "s|{B2C_USER_FLOW}|$B2C_USER_FLOW|g" $APP_LOGIN_ACTIVITY
-
-    echo "File content:"
-    cat $APP_CONSTANT_FILE
-
-else
-    echo "$APP_CONSTANT_FILE is not found"
-fi
+sed -i '' "s|{OAUTH_SCOPE}|$OAUTH_SCOPE|g" $APP_LOGIN_ACTIVITY
+sed -i '' "s|{APP_CENTER_KEY}|$APP_CENTER_KEY|g" $APP_SPLASH_ACTIVITY

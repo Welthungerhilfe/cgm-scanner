@@ -1,0 +1,13 @@
+{
+  "client_id" : "{OAUTH_CLIENT_ID}",
+  "authorization_user_agent" : "DEFAULT",
+  "redirect_uri" : "msauth://de.welthungerhilfe.cgm.scanner{OAUTH_PATH}",
+  "account_mode" : "SINGLE",
+  "broker_redirect_uri_registered": true,
+  "authorities" : [
+    {
+      "type": "AAD",
+      "authority_url": "{OAUTH_URL}"
+    }
+  ]
+}

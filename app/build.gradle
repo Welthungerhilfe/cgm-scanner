@@ -100,6 +100,8 @@ dependencies {
     implementation 'com.microsoft.azure.android:azure-storage-android:2.0.0@aar' //Azure storage
     implementation 'com.novoda:merlin:1.1.7' //connection timestamping
     implementation 'androidx.room:room-runtime:2.2.5' //database syntax helper
+    implementation 'com.android.volley:volley:1.1.1' //Authentication answer parser
+    implementation 'com.microsoft.identity.client:msal:1.6.0' //Microsoft authentication
     annotationProcessor 'androidx.room:room-compiler:2.2.5' //database syntax compiler
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.4' //database debugging
 
