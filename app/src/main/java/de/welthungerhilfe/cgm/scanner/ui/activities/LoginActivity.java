@@ -97,7 +97,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                          * This requires "account_mode" : "SINGLE" in the config json file.
                          **/
                         singleAccountApp = application;
-                        loadAccount();
+                        if (session.isSigned()) {
+                            loadAccount();
+                        }
                     }
 
                     @Override
