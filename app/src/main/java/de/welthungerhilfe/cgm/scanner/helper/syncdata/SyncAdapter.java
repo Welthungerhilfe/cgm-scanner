@@ -23,7 +23,6 @@ import com.microsoft.azure.storage.queue.CloudQueueClient;
 import com.microsoft.azure.storage.queue.CloudQueueMessage;
 
 import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -163,7 +162,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     processCachedMeasures();
 
                     session.setSyncTimestamp(currentTimestamp);
-                } catch (URISyntaxException | IllegalArgumentException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
