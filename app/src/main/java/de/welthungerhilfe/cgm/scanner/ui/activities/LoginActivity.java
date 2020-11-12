@@ -92,13 +92,21 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 new IPublicClientApplication.ISingleAccountApplicationCreatedListener() {
                     @Override
                     public void onCreated(ISingleAccountPublicClientApplication application) {
-                        /**
-                         * This test app assumes that the app is only going to support one account.
-                         * This requires "account_mode" : "SINGLE" in the config json file.
-                         **/
                         singleAccountApp = application;
                         if (session.isSigned()) {
                             loadAccount();
+                        } else {
+                            singleAccountApp.signOut(new ISingleAccountPublicClientApplication.SignOutCallback() {
+                                @Override
+                                public void onSignOut() {
+                                    Log.d(TAG, "Signed out");
+                                }
+
+                                @Override
+                                public void onError(@NonNull MsalException exception) {
+                                    Log.e(TAG, exception.toString());
+                                }
+                            });
                         }
                     }
 
