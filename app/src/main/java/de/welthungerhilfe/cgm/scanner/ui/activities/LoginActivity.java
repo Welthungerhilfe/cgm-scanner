@@ -194,7 +194,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             public void onSuccess(IAuthenticationResult authenticationResult) {
                 /* Successfully got a token, use it to call a protected resource - MSGraph */
                 Log.d(TAG, "Successfully authenticated");
-                Log.d(TAG, "ID Token: " + authenticationResult.getAccount().getClaims().get("id_token"));
+                Log.d(TAG, "ID Token: " + authenticationResult.getAccount().getIdToken());
 
                 /* Update account */
                 processAuth(authenticationResult.getAccount(), true);
