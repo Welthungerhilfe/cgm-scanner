@@ -88,7 +88,8 @@ public class MeasureRepository {
         FileLogRepository fileLogRepository = FileLogRepository.getInstance(context);
         synchronized (SyncAdapter.getLock()) {
             try {
-                CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                //TODO:REST API implementation
+                CloudStorageAccount storageAccount = null;
                 CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
 
                 try {
@@ -133,7 +134,7 @@ public class MeasureRepository {
                 } catch (StorageException e) {
                     e.printStackTrace();
                 }
-            } catch (URISyntaxException | InvalidKeyException e) {
+            } catch (URISyntaxException e) {
                 e.printStackTrace();
             }
         }

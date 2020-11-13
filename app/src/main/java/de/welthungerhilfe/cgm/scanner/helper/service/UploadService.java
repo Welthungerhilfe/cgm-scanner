@@ -208,9 +208,10 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 final File file = new File(log.getPath());
                 FileInputStream stream = new FileInputStream(file);
 
+                //TODO:REST API implementation
                 if (blobClient == null) {
                     synchronized (SyncAdapter.getLock()) {
-                        CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                        CloudStorageAccount storageAccount = null;
                         blobClient = storageAccount.createCloudBlobClient();
                     }
                 }
