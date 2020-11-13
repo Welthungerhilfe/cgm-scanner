@@ -25,11 +25,15 @@ import android.os.StrictMode;
 import java.io.File;
 import java.io.IOException;
 
+import dagger.android.AndroidInjector;
+import dagger.android.support.DaggerApplication;
+import de.welthungerhilfe.cgm.scanner.di.DaggerAppComponent;
+import de.welthungerhilfe.cgm.scanner.di.module.NetworkModule;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class AppController extends Application {
+public class AppController extends DaggerApplication {
 
     private static AppController mInstance;
 
@@ -105,5 +109,11 @@ public class AppController extends Application {
 
     public boolean isUploadRunning() {
         return UploadService.isInitialized();
+    }
+
+    @Override
+    protected AndroidInjector<? extends DaggerApplication> applicationInjector() {
+        DaggerAppComponent.builder().bindInstance(AppController.this).build().inject(this);
+        return DaggerAppComponent.builder().bindInstance(AppController.this).build();
     }
 }

@@ -121,6 +121,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
             remainingCount = list.size();
         }
         Log.e("UploadService", String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
+        Log.i("UploadService ","this is inside onFileLoaded "+remainingCount);
 
         Context c = getApplicationContext();
         if (LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT)) {

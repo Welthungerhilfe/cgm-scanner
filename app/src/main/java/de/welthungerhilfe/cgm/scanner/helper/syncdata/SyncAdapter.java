@@ -25,8 +25,11 @@ import com.microsoft.azure.storage.queue.CloudQueueMessage;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -37,6 +40,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Posts;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
@@ -44,10 +48,19 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureResultReposit
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.remote.ApiService;
+import de.welthungerhilfe.cgm.scanner.remote.AppDataSource;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import retrofit2.Retrofit;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.SYNC_INTERVAL;
@@ -68,9 +81,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private SessionManager session;
     private AsyncTask<Void, Void, Void> syncTask;
 
-    public SyncAdapter(Context context, boolean autoInitialize) {
-        super(context, autoInitialize);
+    Retrofit retrofit;
 
+
+    public SyncAdapter(Context context, boolean autoInitialize, Retrofit retrofit) {
+        super(context, autoInitialize);
+        this.retrofit = retrofit;
         personRepository = PersonRepository.getInstance(context);
         measureRepository = MeasureRepository.getInstance(context);
         fileLogRepository = FileLogRepository.getInstance(context);
@@ -97,6 +113,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             currentTimestamp = System.currentTimeMillis();
 
             syncTask = new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+         //   Log.i("SyncAdapter","this is inside startSyncing ");
         }
     }
 
@@ -288,6 +305,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 for (int i = 0; i < syncablePersons.size(); i++) {
                     String content = gson.toJson(syncablePersons.get(i));
                     CloudQueueMessage message = new CloudQueueMessage(syncablePersons.get(i).getId());
+                    Log.i("Syncadapter","this is inside processPerson Queue "+content);
+                    callPost();
+
                     message.setMessageContent(content);
 
                     personQueue.addMessage(message);
@@ -311,6 +331,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 for (int i = 0; i < syncableMeasures.size(); i++) {
                     String content = gson.toJson(syncableMeasures.get(i));
                     CloudQueueMessage message = new CloudQueueMessage(syncableMeasures.get(i).getId());
+                    Log.i("Syncadapter","this is inside processMeasure Queue "+content);
+
+                    callPost();
+
+
+
                     message.setMessageContent(content);
 
                     measureQueue.addMessage(message);
@@ -362,6 +388,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 for (int i = 0; i < syncableDevices.size(); i++) {
                     String content = gson.toJson(syncableDevices.get(i));
                     CloudQueueMessage message = new CloudQueueMessage(syncableDevices.get(i).getId());
+                    Log.i("Syncadapter","this is inside processDevice Queue "+content);
                     message.setMessageContent(content);
 
                     deviceQueue.addMessage(message);
@@ -414,6 +441,48 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
                 LocalPersistency.setLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE, last);
             }
+        }
+    }
+
+    public void callPost()
+
+    {
+        HashMap<String,Object> data = new HashMap<>();
+        data.put("id","103");
+        data.put("userId","1");
+        data.put("title","jay");
+        data.put("body","something");
+
+        try {
+
+            retrofit.create(ApiService.class).getPost(data).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Posts>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull Posts posts) {
+                            Log.i("SyncAdapter", "this is value of post " + posts.getId());
+
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            Log.i("SyncAdapter", "this is value of post " + e.getMessage());
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        }
+        catch (Exception e)
+        {
+            Log.i("SyncAdapter","this is value of exception "+e.getMessage());
         }
     }
 }
