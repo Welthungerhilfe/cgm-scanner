@@ -23,31 +23,32 @@ import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
+import android.util.Log;
 import android.view.WindowManager;
-import android.webkit.WebChromeClient;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.microsoft.azure.storage.CloudStorageAccount;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.microsoft.identity.client.AuthenticationCallback;
+import com.microsoft.identity.client.IAccount;
+import com.microsoft.identity.client.IAuthenticationResult;
+import com.microsoft.identity.client.IPublicClientApplication;
+import com.microsoft.identity.client.ISingleAccountPublicClientApplication;
+import com.microsoft.identity.client.PublicClientApplication;
+import com.microsoft.identity.client.exception.MsalClientException;
+import com.microsoft.identity.client.exception.MsalException;
+import com.microsoft.identity.client.exception.MsalServiceException;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
 import net.minidev.json.JSONArray;
 
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.text.ParseException;
 import java.util.Map;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
@@ -56,12 +57,13 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.helper.authenticator.MSGraphRequestWrapper;
 import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class LoginActivity extends AccountAuthenticatorActivity {
 
-    @BindView(R.id.loginView)
-    WebView webView;
+    private static final String TAG = LoginActivity.class.toString();
 
     @OnClick({R.id.btnLoginMicrosoft})
     void doSignIn() {
@@ -70,6 +72,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
     private SessionManager session;
     private AccountManager accountManager;
+    private ISingleAccountPublicClientApplication singleAccountApp;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,6 +85,36 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         accountManager = AccountManager.get(this);
         session = new SessionManager(this);
+
+        // Creates a PublicClientApplication object with res/raw/auth_config_single_account.json
+        PublicClientApplication.createSingleAccountPublicClientApplication(getBaseContext(),
+                R.raw.auth_config_single_account,
+                new IPublicClientApplication.ISingleAccountApplicationCreatedListener() {
+                    @Override
+                    public void onCreated(ISingleAccountPublicClientApplication application) {
+                        singleAccountApp = application;
+                        if (session.isSigned()) {
+                            loadAccount();
+                        } else {
+                            singleAccountApp.signOut(new ISingleAccountPublicClientApplication.SignOutCallback() {
+                                @Override
+                                public void onSignOut() {
+                                    Log.d(TAG, "Signed out");
+                                }
+
+                                @Override
+                                public void onError(@NonNull MsalException exception) {
+                                    Log.e(TAG, exception.toString());
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onError(MsalException exception) {
+                        Log.e(TAG, exception.toString());
+                    }
+                });
     }
 
     @Override
@@ -145,124 +178,141 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             return;
         }
 
-        String tenant = "{B2C_TENANT}";
-        String clientID = "{B2C_CLIENT_ID}";
-        String responseURL = "{B2C_RESPONSE_URL}";
-        String scope = "{B2C_SCOPE}";
+        if (!Utils.isNetworkAvailable(this)) {
+            Toast.makeText(LoginActivity.this, R.string.error_network, Toast.LENGTH_LONG).show();
+            return;
+        }
 
-        String url = "https://whhict4x.b2clogin.com/whhict4x.onmicrosoft.com/oauth2/v2.0/";
-        url += "authorize?p=B2C_1_signupsignin1&client_id=" + clientID;
-        url += "&nonce=defaultNonce&redirect_uri=" + responseURL;
-        url += "&scope=https://" + tenant + ".onmicrosoft.com/" + clientID + "/" + scope;
-        url += "&response_type=token&prompt=login&response_mode=query";
-        url += "&authorization_user_agent=WEBVIEW";
+        if (singleAccountApp == null) {
+            return;
+        }
 
-        webView.setWebChromeClient(new WebChromeClient());
-        webView.setWebViewClient(new WebViewClient() {
+        String[] scopes = { "{OAUTH_SCOPE}" };
+        singleAccountApp.signIn(this, null, scopes, getAuthInteractiveCallback());
+    }
+
+
+    /**
+     * Callback used for interactive request.
+     * If succeeds we use the access token to call the Microsoft Graph.
+     * Does not check cache.
+     */
+    private AuthenticationCallback getAuthInteractiveCallback() {
+        return new AuthenticationCallback() {
+
             @Override
-            public void onPageFinished(WebView view, String stringUrl) {
-                if (stringUrl.startsWith(responseURL)) {
-                    try {
-                        String error = Uri.parse(stringUrl).getQueryParameter("error");
-                        if ((error == null) || (error.length() == 0)) {
-                            String authToken = Uri.parse(stringUrl).getQueryParameter("access_token");
-                            if (processToken(authToken)) {
-                                webView.loadUrl("about:blank");
-                                return;
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Toast.makeText(LoginActivity.this, R.string.error_login, Toast.LENGTH_LONG).show();
-                    }
-                    webView.loadUrl("about:blank");
-                    webView.setVisibility(View.GONE);
+            public void onSuccess(IAuthenticationResult authenticationResult) {
+                /* Successfully got a token, use it to call a protected resource - MSGraph */
+                Log.d(TAG, "Successfully authenticated");
+                Log.d(TAG, "ID Token: " + authenticationResult.getAccount().getIdToken());
+
+                /* Update account */
+                processAuth(authenticationResult.getAccount(), true);
+
+                /* call graph */
+                callGraphAPI(authenticationResult);
+            }
+
+            @Override
+            public void onError(MsalException exception) {
+                /* Failed to acquireToken */
+                Log.d(TAG, "Authentication failed: " + exception.toString());
+
+                if (exception instanceof MsalClientException) {
+                    /* Exception inside MSAL, more info inside MsalError.java */
+                } else if (exception instanceof MsalServiceException) {
+                    /* Exception when communicating with the STS, likely config issue */
                 }
+            }
+
+            @Override
+            public void onCancel() {
+                /* User canceled the authentication */
+                Log.d(TAG, "User cancelled login.");
+            }
+        };
+    }
+
+    /**
+     * Make an HTTP request to obtain MSGraph data
+     */
+    private void callGraphAPI(final IAuthenticationResult authenticationResult) {
+        MSGraphRequestWrapper.callGraphAPIUsingVolley(
+                getBaseContext(),
+                MSGraphRequestWrapper.MS_GRAPH_ROOT_ENDPOINT + "v1.0/me",
+                authenticationResult.getAccessToken(),
+                response -> Log.d(TAG, "Response: " + response.toString()),
+                error -> Log.d(TAG, "Error: " + error.toString()));
+    }
+
+
+    /**
+     * Load the currently signed-in account, if there's any.
+     */
+    private void loadAccount() {
+        if (singleAccountApp == null) {
+            return;
+        }
+
+        singleAccountApp.getCurrentAccountAsync(new ISingleAccountPublicClientApplication.CurrentAccountCallback() {
+            @Override
+            public void onAccountLoaded(@Nullable IAccount activeAccount) {
+                // You can use the account data to update your UI or your app database.
+                processAuth(activeAccount, false);
+            }
+
+            @Override
+            public void onAccountChanged(@Nullable IAccount priorAccount, @Nullable IAccount currentAccount) { }
+
+            @Override
+            public void onError(@NonNull MsalException exception) {
+                Log.e(TAG, exception.toString());
             }
         });
-
-        if (isConnected()) {
-            webView.getSettings().setJavaScriptEnabled(true);
-            webView.setVisibility(View.VISIBLE);
-            webView.loadUrl(url);
-        } else {
-            Toast.makeText(LoginActivity.this, R.string.error_network, Toast.LENGTH_LONG).show();
-        }
     }
 
-    private boolean isConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        if (null != cm) {
-            NetworkInfo info = cm.getActiveNetworkInfo();
-            return (info != null && info.isConnected());
-        }
-        return false;
-    }
+    private void processAuth(IAccount account, boolean feedback) {
 
-    private boolean processToken(String idToken) {
         try {
-            JWT parsedToken = JWTParser.parse(idToken);
-            Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
+            String token = account.getIdToken();
+            String email = account.getUsername();
+            if (email != null && !email.isEmpty()) {
+                session.setAuthToken(token);
 
-            String azureAccountName = (String) claims.get("extension_azure_account_name");
-            String azureAccountKey = (String) claims.get("extension_azure_account_key");
-            if (azureAccountName != null && !azureAccountName.equals("") && azureAccountKey != null && !azureAccountKey.equals("")) {
-                JSONArray emails = (JSONArray) claims.get("emails");
-                if (emails != null && !emails.isEmpty()) {
-                    try {
-                        CloudStorageAccount.parse(String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", azureAccountName, azureAccountKey));
+                final Account accountData = new Account(email, AppConstants.ACCOUNT_TYPE);
+                accountManager.addAccountExplicitly(accountData, token, null);
 
-                        session.setAzureAccountName(azureAccountName);
-                        session.setAzureAccountKey(azureAccountKey);
+                SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
 
-                        session.setAuthToken(idToken);
+                final Intent intent = new Intent();
+                intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, email);
+                intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
+                intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
 
-                        String token = (String) claims.get("at_hash");
-                        String firstEmail = emails.get(0).toString();
-
-                        final Account account = new Account(firstEmail, AppConstants.ACCOUNT_TYPE);
-                        accountManager.addAccountExplicitly(account, token, null);
-
-                        SyncAdapter.startPeriodicSync(account, getApplicationContext());
-
-                        final Intent intent = new Intent();
-                        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, firstEmail);
-                        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
-                        intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
-
-                        setAccountAuthenticatorResult(intent.getExtras());
-                        setResult(RESULT_OK, intent);
+                setAccountAuthenticatorResult(intent.getExtras());
+                setResult(RESULT_OK, intent);
 
 
-                        session.saveRemoteConfig(new RemoteConfig());
-                        session.setSigned(true);
-                        session.setUserEmail(firstEmail);
+                session.saveRemoteConfig(new RemoteConfig());
+                session.setSigned(true);
+                session.setUserEmail(email);
 
-                        if (session.getTutorial())
-                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                        else
-                            startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
+                if (session.getTutorial())
+                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                else
+                    startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
 
-                        finish();
-                        return true;
-                    } catch (URISyntaxException | InvalidKeyException e) {
-                        e.printStackTrace();
-
-                        Toast.makeText(this, R.string.login_error_nobackend, Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(LoginActivity.this, R.string.login_error_invalid, Toast.LENGTH_LONG).show();
-                }
-            } else {
-                Toast.makeText(this, R.string.login_error_backend, Toast.LENGTH_LONG).show();
+                finish();
+            } else if (feedback) {
+                Toast.makeText(LoginActivity.this, R.string.login_error_invalid, Toast.LENGTH_LONG).show();
             }
-        } catch (ParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
 
-            Toast.makeText(LoginActivity.this, R.string.login_error_parse, Toast.LENGTH_LONG).show();
+            if (feedback) {
+                Toast.makeText(LoginActivity.this, R.string.login_error_parse, Toast.LENGTH_LONG).show();
+            }
         }
-
-        return false;
     }
 }

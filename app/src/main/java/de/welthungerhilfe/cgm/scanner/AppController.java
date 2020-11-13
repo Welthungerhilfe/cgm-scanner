@@ -51,13 +51,6 @@ public class AppController extends DaggerApplication {
         mInstance = this;
     }
 
-    public String getAzureConnection() {
-        if (session.getAzureAccountName() == null || session.getAzureAccountKey() == null)
-            return null;
-        else
-            return String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", session.getAzureAccountName(), session.getAzureAccountKey());
-    }
-
     public boolean isAdmin() {
         return false;
     }

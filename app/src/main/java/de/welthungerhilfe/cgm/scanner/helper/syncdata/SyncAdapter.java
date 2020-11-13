@@ -23,7 +23,6 @@ import com.microsoft.azure.storage.queue.CloudQueueClient;
 import com.microsoft.azure.storage.queue.CloudQueueMessage;
 
 import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -166,10 +165,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 return null;
             }
 
+            //TODO:REST API implementation
             Log.d("SyncAdapter", "start updating");
             synchronized (getLock()) {
                 try {
-                    CloudStorageAccount storageAccount = CloudStorageAccount.parse(AppController.getInstance().getAzureConnection());
+                    CloudStorageAccount storageAccount = null;
                     CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
 
                     processMeasureResultQueue(queueClient);
@@ -179,7 +179,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     processCachedMeasures();
 
                     session.setSyncTimestamp(currentTimestamp);
-                } catch (URISyntaxException | InvalidKeyException | IllegalArgumentException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
