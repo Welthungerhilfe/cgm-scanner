@@ -90,7 +90,7 @@
 
                 <data
                     android:host="auth"
-                    android:scheme="msal354c94b8-e6cc-45dc-9cf4-15697542b518" />
+                    android:scheme="msal{APP_CENTER_KEY}" />
             </intent-filter>
         </activity>
 

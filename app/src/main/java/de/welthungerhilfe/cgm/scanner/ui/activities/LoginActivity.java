@@ -96,7 +96,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         if (session.isSigned()) {
             Account[] accounts = accountManager.getAccountsByType(AppConstants.ACCOUNT_TYPE);
             if (accounts.length > 0) {
-                if(!ContentResolver.isSyncActive(accounts[0], getString(R.string.sync_authority))) {
+                if (!ContentResolver.isSyncActive(accounts[0], getString(R.string.sync_authority))) {
                     session.setSyncTimestamp(0);
                     SyncAdapter.startPeriodicSync(accounts[0], getApplicationContext());
                 }
@@ -139,16 +139,16 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         }
     }
 
-   private void doSignInAction() {
-      /*   if (BuildConfig.DEBUG) {
+    private void doSignInAction() {
+        if (BuildConfig.DEBUG) {
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
             return;
-        }*/
+        }
 
-        String tenant = "whhict4x";
-        String clientID = "658cc6c6-2c1c-45a7-aac9-aaa295f7f308";
-        String responseURL = "http://localhost:5000/getAToken";
-        String scope = "cgm-scanner-auth";
+        String tenant = "{B2C_TENANT}";
+        String clientID = "{B2C_CLIENT_ID}";
+        String responseURL = "{B2C_RESPONSE_URL}";
+        String scope = "{B2C_SCOPE}";
 
         String url = "https://whhict4x.b2clogin.com/whhict4x.onmicrosoft.com/oauth2/v2.0/";
         url += "authorize?p=B2C_1_signupsignin1&client_id=" + clientID;
