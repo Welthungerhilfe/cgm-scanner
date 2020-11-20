@@ -24,7 +24,11 @@ import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -46,6 +50,8 @@ import com.nimbusds.jwt.JWTParser;
 
 import net.minidev.json.JSONArray;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.Map;
 
@@ -117,6 +123,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 });
     }
 
+
     @Override
     public void onStart() {
         super.onStart();
@@ -173,10 +180,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     }
 
     private void doSignInAction() {
-        if (BuildConfig.DEBUG) {
+        /*if (BuildConfig.DEBUG) {
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
             return;
-        }
+        }*/
 
         if (!Utils.isNetworkAvailable(this)) {
             Toast.makeText(LoginActivity.this, R.string.error_network, Toast.LENGTH_LONG).show();
@@ -187,7 +194,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             return;
         }
 
-        String[] scopes = { "{OAUTH_SCOPE}" };
+        String[] scopes = {"https://cgm-tagging-api-poc.azurewebsites.net/user_impersonation"};
         singleAccountApp.signIn(this, null, scopes, getAuthInteractiveCallback());
     }
 
@@ -262,7 +269,8 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             }
 
             @Override
-            public void onAccountChanged(@Nullable IAccount priorAccount, @Nullable IAccount currentAccount) { }
+            public void onAccountChanged(@Nullable IAccount priorAccount, @Nullable IAccount currentAccount) {
+            }
 
             @Override
             public void onError(@NonNull MsalException exception) {

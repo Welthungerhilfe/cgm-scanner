@@ -15,6 +15,7 @@ import dagger.Provides;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.manager.HttpInterceptor;
+import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import okhttp3.Cache;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
@@ -59,7 +60,7 @@ public class NetworkModule {
         // add logging as last interceptor
 //        client.cookieJar(new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(NapsNibbleApp.getContext())));
         client.addInterceptor(logging);
-        client.addInterceptor(new HttpInterceptor("https://jsonplaceholder.typicode.com/", client));
+        client.addInterceptor(new HttpInterceptor(AppConstants.testing_url, client));
 //        client.addInterceptor(new AddCookiesInterceptor());
 //        client.addInterceptor(new ReceivedCookiesInterceptor());
         client.cache(cache);
@@ -74,7 +75,7 @@ public class NetworkModule {
         Retrofit retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
-                .baseUrl("https://jsonplaceholder.typicode.com/")
+                .baseUrl(AppConstants.testing_url)
                 .client(new OkHttpClient())
                 .build();
         return retrofit;

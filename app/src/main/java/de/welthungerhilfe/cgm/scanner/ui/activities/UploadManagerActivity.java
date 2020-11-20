@@ -15,13 +15,17 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.UploadManagerViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerUploadAdapter;
+import retrofit2.Retrofit;
 
 public class UploadManagerActivity extends AppCompatActivity implements Runnable {
     @BindView(R.id.toolbar)
@@ -49,11 +53,17 @@ public class UploadManagerActivity extends AppCompatActivity implements Runnable
     private ArrayList<Double> secSpeedQueue = new ArrayList<>();
     private static final int SPEED_CALC_INTERVAL = 10; // calculate average upload speed of 10 secs
 
+    @Inject
+    Retrofit retrofit;
+
     public void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
         setContentView(R.layout.activity_upload_manager);
 
         ButterKnife.bind(this);
+
+        AndroidInjection.inject(this);
+
 
         setupToolbar();
 
@@ -65,7 +75,7 @@ public class UploadManagerActivity extends AppCompatActivity implements Runnable
         recyclerScans.setAdapter(adapter);
         recyclerScans.setLayoutManager(new LinearLayoutManager(this));
 
-        MeasureRepository repository = MeasureRepository.getInstance(this);
+        MeasureRepository repository = MeasureRepository.getInstance(this,retrofit);
         repository.getUploadMeasures().observe(this, measures -> {
             adapter.setData(measures);
         });

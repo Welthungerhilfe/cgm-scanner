@@ -21,13 +21,17 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
+
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+
 import androidx.fragment.app.DialogFragment;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBar;
@@ -37,6 +41,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -54,9 +59,12 @@ import com.orhanobut.dialogplus.ViewHolder;
 import java.util.Calendar;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
@@ -72,6 +80,7 @@ import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import retrofit2.Retrofit;
 
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
     private final int REQUEST_LOCATION = 0x1000;
@@ -107,6 +116,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     private SessionManager session;
     private AccountManager accountManager;
 
+    @Inject
+    Retrofit retrofit;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,8 +126,10 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         ButterKnife.bind(this);
 
+        AndroidInjection.inject(this);
         session = new SessionManager(MainActivity.this);
         accountManager = AccountManager.get(this);
+
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         final Observer<List<Person>> observer = list -> {
@@ -144,7 +158,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         });
 
-        adapterData = new RecyclerPersonAdapter(this, recyclerData, viewModel);
+        adapterData = new RecyclerPersonAdapter(this, recyclerData, viewModel,retrofit);
         adapterData.setPersonDetailListener(this);
         recyclerData.setAdapter(adapterData);
 

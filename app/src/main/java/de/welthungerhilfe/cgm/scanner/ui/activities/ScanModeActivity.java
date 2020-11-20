@@ -50,9 +50,12 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
@@ -78,6 +81,7 @@ import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import retrofit2.Retrofit;
 
 public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener, ARCoreUtils.Camera2DataListener, TangoCamera.TangoCameraListener {
     private final int PERMISSION_LOCATION = 0x0001;
@@ -168,6 +172,9 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     Button btnTutorial2;
     @BindView(R.id.btnTutorial3)
     Button btnTutorial3;
+
+    @Inject
+    Retrofit retrofit;
 
     @OnClick(R.id.lytScanStanding)
     void scanStanding() {
@@ -362,6 +369,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         super.onCreate(savedBundle);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        AndroidInjection.inject(this);
+
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             Crashes.trackError(throwable);
             finish();
@@ -408,7 +417,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         getCamera().onCreate();
 
-        measureRepository = MeasureRepository.getInstance(this);
+        measureRepository = MeasureRepository.getInstance(this,retrofit);
         fileLogRepository = FileLogRepository.getInstance(this);
         artifactResultRepository = ArtifactResultRepository.getInstance(this);
         artifacts = new ArrayList<>();

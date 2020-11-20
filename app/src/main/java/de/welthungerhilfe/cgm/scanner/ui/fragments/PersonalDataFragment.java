@@ -22,7 +22,9 @@ package de.welthungerhilfe.cgm.scanner.ui.fragments;
 import android.app.Activity;
 import android.app.DialogFragment;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
@@ -46,14 +48,20 @@ import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicke
 
 import java.util.Date;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import dagger.android.support.AndroidSupportInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
@@ -63,6 +71,7 @@ import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.DateEditText;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import retrofit2.Retrofit;
 
 public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, DateEditText.DateInputListener, TextWatcher {
 
@@ -85,13 +94,25 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private Person person;
     private Loc location;
 
+    @Inject
+    Retrofit retrofit;
+
+    ViewModelProvider.Factory factory;
+
     public static PersonalDataFragment getInstance(String qrCode) {
         PersonalDataFragment fragment = new PersonalDataFragment();
         fragment.qrCode = qrCode;
 
         return fragment;
     }
-    
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        AndroidSupportInjection.inject(this);
+
+    }
+
     public void onAttach(Context context) {
         super.onAttach(context);
 
@@ -102,7 +123,16 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void onActivityCreated(Bundle instance) {
         super.onActivityCreated(instance);
 
-        viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
+
+
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_personal, container, false);
+
+        factory = new CreateDataViewModelProvideFactory(getActivity(),retrofit);
+        viewModel = new ViewModelProvider(getActivity(),factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
             initUI();
@@ -111,11 +141,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             if (measure != null)
                 setLocation(measure.getLocation());
         });
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_personal, container, false);
 
         view.findViewById(R.id.rytConsentDetail).setOnClickListener(this);
         view.findViewById(R.id.imgBirth).setOnClickListener(this);
@@ -287,6 +312,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setLastLocation(location);
 
                     viewModel.savePerson(person);
+
                 }
 
                 break;

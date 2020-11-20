@@ -2,6 +2,7 @@ package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
 import androidx.lifecycle.LiveData;
 import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.microsoft.azure.storage.CloudStorageAccount;
@@ -10,31 +11,48 @@ import com.microsoft.azure.storage.queue.CloudQueue;
 import com.microsoft.azure.storage.queue.CloudQueueClient;
 import com.microsoft.azure.storage.queue.CloudQueueMessage;
 
+import org.json.JSONObject;
+
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.datasource.models.SuccessResponse;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.remote.ApiService;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import okhttp3.RequestBody;
+import retrofit2.Retrofit;
 
 public class MeasureRepository {
     private static MeasureRepository instance;
     private CgmDatabase database;
     private SessionManager session;
+    private Retrofit retrofit;
 
-    private MeasureRepository(Context context) {
+
+
+    private MeasureRepository(Context context, Retrofit retrofit) {
         database = CgmDatabase.getInstance(context);
         session = new SessionManager(context);
+        this.retrofit = retrofit;
     }
 
-    public static MeasureRepository getInstance(Context context) {
+    public static MeasureRepository getInstance(Context context, Retrofit retrofit) {
         if(instance == null) {
-            instance = new MeasureRepository(context);
+            instance = new MeasureRepository(context,retrofit);
         }
         return instance;
     }
@@ -89,18 +107,23 @@ public class MeasureRepository {
         synchronized (SyncAdapter.getLock()) {
             try {
                 //TODO:REST API implementation
-                CloudStorageAccount storageAccount = null;
-                CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
+            //    CloudStorageAccount storageAccount = null;
+              //  CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
 
                 try {
                     if (!measure.isArtifact_synced()) {
-                        CloudQueue measureArtifactsQueue = queueClient.getQueueReference("artifact-list");
-                        measureArtifactsQueue.createIfNotExists();
+                       /* CloudQueue measureArtifactsQueue = queueClient.getQueueReference("artifact-list");
+                        measureArtifactsQueue.createIfNotExists();*/
 
                         long totalNumbers  = fileLogRepository.getTotalArtifactCountForMeasure(measure.getId());
                         final int size = 50;
                         int offset = 0;
 
+                        measure.setArtifact_synced(true);
+                        measure.setUploaded_at(System.currentTimeMillis());
+                        postMeasure(measure);
+                        measure.setTimestamp(session.getSyncTimestamp());
+                        updateMeasure(measure);
                         while (offset + 1 < totalNumbers) {
                             List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(measure.getId(), offset, size);
 
@@ -113,16 +136,23 @@ public class MeasureRepository {
 
                             offset += measureArtifacts.size();
 
-                            CloudQueueMessage measureArtifactsMessage = new CloudQueueMessage(measure.getId());
+                            postArtifacts(artifactList);
+
+                           /* CloudQueueMessage measureArtifactsMessage = new CloudQueueMessage(measure.getId());
                             measureArtifactsMessage.setMessageContent(gson.toJson(artifactList));
-                            measureArtifactsQueue.addMessage(measureArtifactsMessage);
+                            measureArtifactsQueue.addMessage(measureArtifactsMessage);*/
                         }
 
-                        measure.setArtifact_synced(true);
-                        measure.setUploaded_at(System.currentTimeMillis());
+                      /*  measure.setArtifact_synced(true);
+                        measure.setUploaded_at(System.currentTimeMillis());*/
                     }
 
-                    CloudQueue measureQueue = queueClient.getQueueReference("measure");
+                  /*  postMeasure(measure);
+                    measure.setTimestamp(session.getSyncTimestamp());
+                    updateMeasure(measure);
+*/
+
+                   /* CloudQueue measureQueue = queueClient.getQueueReference("measure");
                     measureQueue.createIfNotExists();
 
                     CloudQueueMessage message = new CloudQueueMessage(measure.getId());
@@ -130,13 +160,89 @@ public class MeasureRepository {
                     measureQueue.addMessage(message);
 
                     measure.setTimestamp(session.getSyncTimestamp());
-                    updateMeasure(measure);
-                } catch (StorageException e) {
+                    updateMeasure(measure);*/
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } catch (URISyntaxException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void postArtifacts(ArtifactList artifactList)
+
+    {
+        try {
+            Log.i("MeasureRepository","this is value of artifacts "+artifactList);
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"),(new JSONObject(new Gson().toJson(artifactList))).toString());
+            Log.i("MeasureRepository","this is value of artifacts "+new Gson().toJson(artifactList));
+
+            retrofit.create(ApiService.class).postArtifacts("bearer "+session.getAuthToken(),body).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<SuccessResponse>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull SuccessResponse posts) {
+                            Log.i("MeasureRepository", "this is inside onNext artifactsList " + posts.getMessage());
+
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            Log.i("MeasureRepository", "this is inside onError ArtifactList " + e.getMessage());
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        }
+        catch (Exception e)
+        {
+            Log.i("SyncAdapter","this is value of exception "+e.getMessage());
+        }
+    }
+
+    public void postMeasure(Measure measure)
+
+    {
+        try {
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"),(new JSONObject(new Gson().toJson(measure))).toString());
+
+            retrofit.create(ApiService.class).postMeasure("bearer "+session.getAuthToken(),body).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<SuccessResponse>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull SuccessResponse posts) {
+                            Log.i("SyncAdapter", "this is inside onNext measure " + posts.getMessage());
+
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            Log.i("SyncAdapter", "this is inside onError Measure " + e.getMessage());
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        }
+        catch (Exception e)
+        {
+            Log.i("SyncAdapter","this is value of exception "+e.getMessage());
         }
     }
 }

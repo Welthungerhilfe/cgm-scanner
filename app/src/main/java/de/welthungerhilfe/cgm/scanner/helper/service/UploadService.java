@@ -12,24 +12,44 @@ import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
+import org.jcodec.common.io.IOUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import dagger.android.support.AndroidSupportInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.datasource.models.SuccessResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.remote.ApiService;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Retrofit;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.FILE_NOT_FOUND;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.MULTI_UPLOAD_BUNCH;
@@ -51,6 +71,11 @@ public class UploadService extends Service implements OnFileLogsLoad {
     private final Object lock = new Object();
     private ExecutorService executor;
 
+    @Inject
+    Retrofit retrofit;
+
+    SessionManager sessionManager;
+
     public static void forceResume() {
         if (service != null) {
             synchronized (service.lock) {
@@ -67,8 +92,9 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     public void onCreate() {
         service = this;
-
+        AndroidInjection.inject(this);
         repository = FileLogRepository.getInstance(getApplicationContext());
+        sessionManager = new SessionManager(getApplication());
 
         pendingArtefacts = new ArrayList<>();
 
@@ -121,7 +147,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
             remainingCount = list.size();
         }
         Log.e("UploadService", String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
-        Log.i("UploadService ","this is inside onFileLoaded "+remainingCount);
+        Log.i("UploadService ","this is inside onFileLoaded  "+remainingCount);
 
         Context c = getApplicationContext();
         if (LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT)) {
@@ -202,6 +228,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
             while (!Utils.isUploadAllowed(getBaseContext())) {
                 Utils.sleep(3000);
             }
+            //confirm with lubos
+            Utils.sleep(3000);
 
             String[] arr = log.getPath().split("/");
 
@@ -210,7 +238,11 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 FileInputStream stream = new FileInputStream(file);
 
                 //TODO:REST API implementation
-                if (blobClient == null) {
+
+
+                    uploadFiles(file, stream, log.getId());
+
+             /*  if (blobClient == null) {
                     synchronized (SyncAdapter.getLock()) {
                         CloudStorageAccount storageAccount = null;
                         blobClient = storageAccount.createCloudBlobClient();
@@ -221,7 +253,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 container.createIfNotExists();
 
                 CloudBlockBlob blob = container.getBlockBlobReference(path + arr[arr.length - 1]);
-                blob.upload(stream, stream.available());
+                blob.upload(stream, stream.available());*/
 
                 log.setUploadDate(Utils.getUniversalTimestamp());
 
@@ -233,9 +265,13 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 }
                 stream.close();
             } catch (FileNotFoundException e) {
+                Log.i("UploadService","this is exception "+e.getMessage());
+
                 log.setDeleted(true);
                 log.setStatus(FILE_NOT_FOUND);
             } catch (Exception e) {
+                Log.i("UploadService","this is exception "+e.getMessage());
+
                 log.setStatus(UPLOAD_ERROR);
             }
             log.setCreateDate(Utils.getUniversalTimestamp());
@@ -245,6 +281,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
             synchronized (lock) {
                 pendingArtefacts.remove(log.getId());
                 remainingCount--;
+                Log.i("UploadService","this is artifacts in queue "+remainingCount);
                 Log.e("UploadService", String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
                 if (remainingCount <= 0) {
                     loadQueueFileLogs();
@@ -269,5 +306,67 @@ public class UploadService extends Service implements OnFileLogsLoad {
         if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_END) == 0) {
             LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_END, System.currentTimeMillis());
         }
+    }
+
+    public void uploadFiles(File file, InputStream inputStream, String id1)
+    {
+        /*HashMap<String,String> data = new HashMap<>();
+        data.put("id",id);*/
+
+
+        RequestBody requestFile =
+                RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        MultipartBody.Part body = null;
+try {
+    body = MultipartBody.Part.createFormData(
+            "file", file.getName(), RequestBody.create(
+                    MediaType.parse("image/*"), IOUtils.toByteArray(inputStream)));
+}catch (Exception e)
+{
+
+}
+
+
+        RequestBody id =
+                RequestBody.create(MediaType.parse("multipart/form-data"), id1);
+
+        retrofit.create(ApiService.class).uploadFiles(sessionManager.getAuthToken(),body,id).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Observer<SuccessResponse>() {
+                @Override
+                public void onSubscribe(@NonNull Disposable d) {
+
+                }
+
+                @Override
+                public void onNext(@NonNull SuccessResponse posts) {
+                    Log.i("UploadService", "this is response uploadfiles " + posts.getMessage()+ file.getPath());
+
+                }
+
+                @Override
+                public void onError(@NonNull Throwable e) {
+
+                    Log.i("UploadService", "this is response onError uploadfiles " + e.getMessage() + file.getPath());
+                }
+
+                @Override
+                public void onComplete() {
+
+                }
+            });
+
+
+    }
+
+    private MultipartBody.Part createMultipartBody(String filePath) {
+        File file = new File(filePath);
+        RequestBody requestBody = createRequestBody(file);
+        return MultipartBody.Part.createFormData("file",file.getName(), requestBody);
+    }
+
+
+    private RequestBody createRequestBody(File file) {
+        return RequestBody.create(MediaType.parse("image/*"), file);
     }
 }

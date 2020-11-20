@@ -19,6 +19,8 @@
 
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.graphics.Color;
@@ -55,15 +57,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import dagger.android.support.AndroidSupportInjection;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import retrofit2.Retrofit;
 
 public class GrowthDataFragment extends Fragment {
     private Context context;
@@ -95,11 +103,24 @@ public class GrowthDataFragment extends Fragment {
     private Person person;
     private List<Measure> measures = new ArrayList<>();
 
+    @Inject
+    Retrofit retrofit;
+    ViewModelProvider.Factory factory;
+
+    CreateDataViewModel viewModel;
+
     public static GrowthDataFragment getInstance(String qrCode) {
         GrowthDataFragment fragment = new GrowthDataFragment();
         fragment.qrCode = qrCode;
 
         return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        AndroidSupportInjection.inject(this);
+
     }
 
     public void onAttach(Context context) {
@@ -111,7 +132,9 @@ public class GrowthDataFragment extends Fragment {
     public void onActivityCreated(Bundle instance) {
         super.onActivityCreated(instance);
 
-        CreateDataViewModel viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
+
+        factory = new CreateDataViewModelProvideFactory(getActivity(),retrofit);
+         viewModel = ViewModelProviders.of(this,factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
             setData();

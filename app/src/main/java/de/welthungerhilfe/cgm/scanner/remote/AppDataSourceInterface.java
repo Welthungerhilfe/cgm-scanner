@@ -4,9 +4,9 @@ import android.database.Observable;
 
 import java.util.HashMap;
 
-import de.welthungerhilfe.cgm.scanner.datasource.models.Posts;
+import de.welthungerhilfe.cgm.scanner.datasource.models.SuccessResponse;
 
 interface AppDataSourceInterface {
 
-    public Observable<Posts> getPost(HashMap<String,Object> data);
+    public Observable<SuccessResponse> getPost(HashMap<String,Object> data);
 }

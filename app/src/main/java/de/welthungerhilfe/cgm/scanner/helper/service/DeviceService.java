@@ -6,11 +6,16 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.text.method.ReplacementTransformationMethod;
+
 import androidx.annotation.Nullable;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
@@ -20,6 +25,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import retrofit2.Retrofit;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.HEALTH_INTERVAL;
 
@@ -34,8 +40,14 @@ public class DeviceService extends Service {
     }
 
     public void onCreate() {
+        AndroidInjection.inject(this);
+
+
         session = new SessionManager(getBaseContext());
     }
+
+    @Inject
+    Retrofit retrofit;
 
     @SuppressLint("StaticFieldLeak")
     @Override
@@ -65,7 +77,7 @@ public class DeviceService extends Service {
                     @Override
                     protected Void doInBackground(Void... voids) {
                         PersonRepository personRepo = PersonRepository.getInstance(getBaseContext());
-                        MeasureRepository measureRepo = MeasureRepository.getInstance(getBaseContext());
+                        MeasureRepository measureRepo = MeasureRepository.getInstance(getBaseContext(),retrofit);
                         FileLogRepository fileLogRepo = FileLogRepository.getInstance(getBaseContext());
 
                         device.setNew_artifacts(fileLogRepo.getArtifactCount());

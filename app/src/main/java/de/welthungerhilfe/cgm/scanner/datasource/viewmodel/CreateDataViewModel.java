@@ -1,13 +1,17 @@
 package de.welthungerhilfe.cgm.scanner.datasource.viewmodel;
 
+import android.accounts.Account;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
+
+import android.content.Context;
 import android.os.AsyncTask;
 import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
@@ -15,27 +19,39 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
+import retrofit2.Retrofit;
 
-public class CreateDataViewModel extends AndroidViewModel {
+public class CreateDataViewModel extends ViewModel {
 
     private LiveData<Person> personLiveData;
     private LiveData<List<Measure>> measuresLiveData;
     private LiveData<Measure> lastMeasureLiveData;
 
-    private MutableLiveData<Integer> tabLiveData;
+    private MutableLiveData<Integer> tabLiveData = new MutableLiveData<>(0);
 
     private PersonRepository personRepository;
     private MeasureRepository measureRepository;
+    private  SessionManager sessionManager;
+    Context context;
 
-    public CreateDataViewModel(@NonNull Application application) {
+   /* public CreateDataViewModel(@NonNull Application application) {
         super(application);
 
-        personRepository = PersonRepository.getInstance(application);
-        measureRepository = MeasureRepository.getInstance(application);
+    }*/
 
-        tabLiveData = new MutableLiveData<>();
-        tabLiveData.setValue(0);
-    }
+   public CreateDataViewModel(Context context, Retrofit retrofit) {
+
+        personRepository = PersonRepository.getInstance(context);
+        measureRepository = MeasureRepository.getInstance(context,retrofit);
+        sessionManager = new SessionManager(context);
+        this.context = context;
+
+
+
+   }
 
     public LiveData<Integer> getCurrentTab() {
         return tabLiveData;
@@ -98,7 +114,10 @@ public class CreateDataViewModel extends AndroidViewModel {
             }
 
             public void onPostExecute(Void result) {
+
                 setActiveTab(1);
+
+               startPerodicSync();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -114,7 +133,15 @@ public class CreateDataViewModel extends AndroidViewModel {
 
             public void onPostExecute(Void result) {
                 setActiveTab(2);
+               startPerodicSync();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    public void startPerodicSync()
+    {
+        final Account accountData = new Account(sessionManager.getUserEmail(), AppConstants.ACCOUNT_TYPE);
+
+        SyncAdapter.startPeriodicSync(accountData,context.getApplicationContext());
     }
 }

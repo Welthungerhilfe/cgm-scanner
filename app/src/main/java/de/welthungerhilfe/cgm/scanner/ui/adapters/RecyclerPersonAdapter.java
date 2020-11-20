@@ -47,6 +47,7 @@ import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import retrofit2.Retrofit;
 
 public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAdapter.ViewHolder> {
     private BaseActivity context;
@@ -59,12 +60,12 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
     private SessionManager session;
     private PersonListViewModel viewModel;
 
-    public RecyclerPersonAdapter(BaseActivity ctx, RecyclerView recycler, PersonListViewModel model) {
+    public RecyclerPersonAdapter(BaseActivity ctx, RecyclerView recycler, PersonListViewModel model, Retrofit retrofit) {
         context = ctx;
         recyclerData = recycler;
         viewModel = model;
 
-        repository = MeasureRepository.getInstance(ctx);
+        repository = MeasureRepository.getInstance(ctx,retrofit);
         session = new SessionManager(context);
     }
 

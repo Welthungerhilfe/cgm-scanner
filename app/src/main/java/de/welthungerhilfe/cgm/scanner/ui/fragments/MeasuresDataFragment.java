@@ -19,6 +19,7 @@
 
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +36,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import dagger.android.support.AndroidSupportInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 
@@ -42,6 +47,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
@@ -54,6 +60,7 @@ import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import retrofit2.Retrofit;
 
 public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.ManualMeasureListener, RecyclerMeasureAdapter.OnMeasureSelectListener, RecyclerMeasureAdapter.OnMeasureFeedbackListener {
     private Context context;
@@ -66,6 +73,18 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
     public String qrCode;
     private Person person;
+
+    @Inject
+    Retrofit retrofit;
+
+    ViewModelProvider.Factory factory;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        AndroidSupportInjection.inject(this);
+
+    }
 
     public static MeasuresDataFragment getInstance(String qrCode) {
         MeasuresDataFragment fragment = new MeasuresDataFragment();
@@ -87,7 +106,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     public void onActivityCreated(Bundle instance) {
         super.onActivityCreated(instance);
 
-        viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
+
+        factory = new CreateDataViewModelProvideFactory(getActivity(),retrofit);
+        viewModel = new ViewModelProvider(getActivity(),factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
         });
@@ -167,6 +188,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setHeadCircumference(headCircumference);
         measure.setArtifact("");
         measure.setLocation(location);
+        measure.setScannedBy(null);
         measure.setOedema(oedema);
         measure.setType(AppConstants.VAL_MEASURE_MANUAL);
         measure.setPersonId(person.getId());
