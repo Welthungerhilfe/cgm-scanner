@@ -7,11 +7,6 @@ import android.os.IBinder;
 import androidx.annotation.Nullable;
 import android.util.Log;
 
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.blob.CloudBlobContainer;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
-
 import org.jcodec.common.io.IOUtils;
 
 import java.io.File;
@@ -19,7 +14,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -28,15 +22,11 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-import dagger.android.support.AndroidSupportInjection;
-import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.SuccessResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.remote.ApiService;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
@@ -58,6 +48,9 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOADED_DELETE
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOAD_ERROR;
 
 public class UploadService extends Service implements OnFileLogsLoad {
+
+    private static final String TAG = UploadService.class.getSimpleName();
+
     private List<String> pendingArtefacts;
     private int remainingCount = 0;
 
@@ -65,8 +58,6 @@ public class UploadService extends Service implements OnFileLogsLoad {
     private static UploadService service = null;
 
     private FileLogRepository repository;
-
-    public CloudBlobClient blobClient;
 
     private final Object lock = new Object();
     private ExecutorService executor;
@@ -119,7 +110,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     @Override
     public void onDestroy() {
-        Log.e("UploadService", "Stopped");
+        Log.e(TAG, "Stopped");
         service = null;
         running = false;
 
@@ -131,11 +122,11 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     private void loadQueueFileLogs() {
         if (!Utils.isUploadAllowed(this)) {
-            Log.e("UploadService", "Skipped");
+            Log.e(TAG, "Skipped");
             return;
         }
 
-        Log.e("UploadService", "Started");
+        Log.e(TAG, "Started");
         running = true;
 
         repository.loadQueuedData(this);
@@ -146,7 +137,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
         synchronized (lock) {
             remainingCount = list.size();
         }
-        Log.e("UploadService", String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
+        Log.e(TAG, String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
         Log.i("UploadService ","this is inside onFileLoaded  "+remainingCount);
 
         Context c = getApplicationContext();
@@ -209,52 +200,33 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
             pendingArtefacts.add(log.getId());
 
-            String path = "";
+            String mime = "";
             switch (log.getType()) {
                 case "calibration":
-                    path = AppConstants.STORAGE_CALIBRATION_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                    mime = "text/plain";
                     break;
                 case "depth":
-                    path = AppConstants.STORAGE_DEPTH_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                    mime = "application/zip";
                     break;
                 case "rgb":
-                    path = AppConstants.STORAGE_RGB_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                    mime = "image/jpeg";
                     break;
                 case "consent":
-                    path = AppConstants.STORAGE_CONSENT_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                    mime = "image/png";
                     break;
+                default:
+                    Log.e(TAG, "Data type not supported");
             }
 
+            Utils.sleep(3000);
             while (!Utils.isUploadAllowed(getBaseContext())) {
                 Utils.sleep(3000);
             }
-            //confirm with lubos
-            Utils.sleep(3000);
-
-            String[] arr = log.getPath().split("/");
 
             try {
                 final File file = new File(log.getPath());
                 FileInputStream stream = new FileInputStream(file);
-
-                //TODO:REST API implementation
-
-
-                    uploadFiles(file, stream, log.getId());
-
-             /*  if (blobClient == null) {
-                    synchronized (SyncAdapter.getLock()) {
-                        CloudStorageAccount storageAccount = null;
-                        blobClient = storageAccount.createCloudBlobClient();
-                    }
-                }
-
-                CloudBlobContainer container = blobClient.getContainerReference(AppConstants.STORAGE_CONTAINER);
-                container.createIfNotExists();
-
-                CloudBlockBlob blob = container.getBlockBlobReference(path + arr[arr.length - 1]);
-                blob.upload(stream, stream.available());*/
-
+                uploadFiles(file, stream, log.getId(), mime);
                 log.setUploadDate(Utils.getUniversalTimestamp());
 
                 if (file.delete()) {
@@ -265,12 +237,12 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 }
                 stream.close();
             } catch (FileNotFoundException e) {
-                Log.i("UploadService","this is exception "+e.getMessage());
+                Log.i(TAG,"this is exception "+e.getMessage());
 
                 log.setDeleted(true);
                 log.setStatus(FILE_NOT_FOUND);
             } catch (Exception e) {
-                Log.i("UploadService","this is exception "+e.getMessage());
+                Log.i(TAG,"this is exception "+e.getMessage());
 
                 log.setStatus(UPLOAD_ERROR);
             }
@@ -281,8 +253,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
             synchronized (lock) {
                 pendingArtefacts.remove(log.getId());
                 remainingCount--;
-                Log.i("UploadService","this is artifacts in queue "+remainingCount);
-                Log.e("UploadService", String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
+                Log.i(TAG,"this is artifacts in queue "+remainingCount);
+                Log.e(TAG, String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
                 if (remainingCount <= 0) {
                     loadQueueFileLogs();
                 }
@@ -308,28 +280,18 @@ public class UploadService extends Service implements OnFileLogsLoad {
         }
     }
 
-    public void uploadFiles(File file, InputStream inputStream, String id1)
+    public void uploadFiles(File file, InputStream inputStream, String id1, String mime)
     {
-        /*HashMap<String,String> data = new HashMap<>();
-        data.put("id",id);*/
-
-
-        RequestBody requestFile =
-                RequestBody.create(MediaType.parse("multipart/form-data"), file);
         MultipartBody.Part body = null;
-try {
-    body = MultipartBody.Part.createFormData(
-            "file", file.getName(), RequestBody.create(
-                    MediaType.parse("image/*"), IOUtils.toByteArray(inputStream)));
-}catch (Exception e)
-{
+        try {
+            body = MultipartBody.Part.createFormData(
+                    "file", file.getName(), RequestBody.create(
+                            MediaType.parse(mime), IOUtils.toByteArray(inputStream)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-}
-
-
-        RequestBody id =
-                RequestBody.create(MediaType.parse("multipart/form-data"), id1);
-
+        RequestBody id = RequestBody.create(MediaType.parse("multipart/form-data"), id1);
         retrofit.create(ApiService.class).uploadFiles(sessionManager.getAuthToken(),body,id).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Observer<SuccessResponse>() {
@@ -340,14 +302,14 @@ try {
 
                 @Override
                 public void onNext(@NonNull SuccessResponse posts) {
-                    Log.i("UploadService", "this is response uploadfiles " + posts.getMessage()+ file.getPath());
+                    Log.i(TAG, "this is response uploadfiles " + posts.getMessage()+ file.getPath());
 
                 }
 
                 @Override
                 public void onError(@NonNull Throwable e) {
 
-                    Log.i("UploadService", "this is response onError uploadfiles " + e.getMessage() + file.getPath());
+                    Log.i(TAG, "this is response onError uploadfiles " + e.getMessage() + file.getPath());
                 }
 
                 @Override
@@ -355,18 +317,5 @@ try {
 
                 }
             });
-
-
-    }
-
-    private MultipartBody.Part createMultipartBody(String filePath) {
-        File file = new File(filePath);
-        RequestBody requestBody = createRequestBody(file);
-        return MultipartBody.Part.createFormData("file",file.getName(), requestBody);
-    }
-
-
-    private RequestBody createRequestBody(File file) {
-        return RequestBody.create(MediaType.parse("image/*"), file);
     }
 }
