@@ -21,6 +21,8 @@ package de.welthungerhilfe.cgm.scanner.helper.camera;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -38,14 +40,13 @@ import com.google.ar.core.Pose;
 import com.huawei.hiar.ARCamera;
 import com.huawei.hiar.ARCameraIntrinsics;
 import com.huawei.hiar.ARConfigBase;
+import com.huawei.hiar.AREnginesApk;
 import com.huawei.hiar.ARFrame;
 import com.huawei.hiar.ARPose;
 import com.huawei.hiar.ARSession;
 import com.huawei.hiar.ARWorldTrackingConfig;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
 import java.util.ArrayList;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -55,14 +56,24 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AREngineCamera implements ICamera {
 
   private static final String TAG = AREngineCamera.class.getSimpleName();
 
+  private static final String ACTION_HUAWEI_DOWNLOAD_QUIK = "com.huawei.appmarket.intent.action.AppDetail";
+
+  private static final String HUAWEI_MARTKET_NAME = "com.huawei.appmarket";
+
+  private static final String PACKAGE_NAME_KEY = "APP_PACKAGENAME";
+
+  private static final String PACKAGENAME_ARSERVICE = "com.huawei.arengine.service";
+
   //AREngine API
   private ARSession mSession;
   private ARPose mPose;
+  private boolean mFirstRequest;
   private final Object mLock;
 
   //App integration objects
@@ -86,6 +97,7 @@ public class AREngineCamera implements ICamera {
     mListeners = new ArrayList<>();
 
     mCameraCalibration = new CameraCalibration();
+    mFirstRequest = true;
     mLock = new Object();
     mFrameIndex = 1;
     mPixelIntensity = 0;
@@ -146,7 +158,9 @@ public class AREngineCamera implements ICamera {
     if (mActivity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
       if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
         if (mActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-          openCamera();
+          if (isAREngineSupportedAndUpToDate()) {
+            openCamera();
+          }
         }
       }
     }
@@ -265,6 +279,39 @@ public class AREngineCamera implements ICamera {
     }
   }
 
+  private void installAREngine() {
+    if (!mFirstRequest) {
+      return;
+    }
+    mFirstRequest = false;
+
+    new Thread(() -> {
+      mActivity.runOnUiThread(() -> {
+        try {
+          Intent intent = new Intent(ACTION_HUAWEI_DOWNLOAD_QUIK);
+          intent.putExtra(PACKAGE_NAME_KEY, PACKAGENAME_ARSERVICE);
+          intent.setPackage(HUAWEI_MARTKET_NAME);
+          intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          mActivity.startActivity(intent);
+        } catch (SecurityException e) {
+          Log.w(TAG, "the target app has no permission of media");
+        } catch (ActivityNotFoundException e) {
+          Log.w(TAG, "the target activity is not found: " + e.getMessage());
+        }
+      });
+      Utils.sleep(100);
+      mActivity.finish();
+    }).start();
+  }
+
+  private boolean isAREngineSupportedAndUpToDate() {
+    if (!AREnginesApk.isAREngineApkReady(mActivity)) {
+      installAREngine();
+      return false;
+    }
+    return true;
+  }
+
   @Override
   public CameraCalibration getCalibration() {
     return mCameraCalibration;
@@ -319,10 +366,20 @@ public class AREngineCamera implements ICamera {
         mSessionStart = System.currentTimeMillis();
       }
 
-      //process camera data
-      onProcessColorData(frame.acquirePreviewImage());
-      onProcessDepthData(frame.acquireDepthImage());
+      //get camera data
+      Image color = null;
+      Image depth = null;
+      try {
+        color = frame.acquirePreviewImage();
+        depth = frame.acquireDepthImage();
+      } catch (Exception e) {
+        e.printStackTrace();
+        installAREngine();
+      }
 
+      //process camera data
+      onProcessColorData(color);
+      onProcessDepthData(depth);
     } catch (Exception e) {
       e.printStackTrace();
     }
