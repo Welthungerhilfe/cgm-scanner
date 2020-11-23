@@ -24,11 +24,8 @@ import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
+
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -194,7 +191,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             return;
         }
 
-        String[] scopes = {"https://cgm-tagging-api-poc.azurewebsites.net/user_impersonation"};
+        String[] scopes = { "{OAUTH_SCOPE}" };
         singleAccountApp.signIn(this, null, scopes, getAuthInteractiveCallback());
     }
 

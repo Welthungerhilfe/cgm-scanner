@@ -1,25 +1,16 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
 import androidx.lifecycle.LiveData;
+
 import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.queue.CloudQueue;
-import com.microsoft.azure.storage.queue.CloudQueueClient;
-import com.microsoft.azure.storage.queue.CloudQueueMessage;
 
 import org.json.JSONObject;
 
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.util.List;
 
-import javax.inject.Inject;
-
-import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
@@ -43,7 +34,6 @@ public class MeasureRepository {
     private Retrofit retrofit;
 
 
-
     private MeasureRepository(Context context, Retrofit retrofit) {
         database = CgmDatabase.getInstance(context);
         session = new SessionManager(context);
@@ -51,8 +41,8 @@ public class MeasureRepository {
     }
 
     public static MeasureRepository getInstance(Context context, Retrofit retrofit) {
-        if(instance == null) {
-            instance = new MeasureRepository(context,retrofit);
+        if (instance == null) {
+            instance = new MeasureRepository(context, retrofit);
         }
         return instance;
     }
@@ -105,80 +95,51 @@ public class MeasureRepository {
         Gson gson = new Gson();
         FileLogRepository fileLogRepository = FileLogRepository.getInstance(context);
         synchronized (SyncAdapter.getLock()) {
+
+            //REST API implementation
             try {
-                //TODO:REST API implementation
-            //    CloudStorageAccount storageAccount = null;
-              //  CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
+                if (!measure.isArtifact_synced()) {
+                    long totalNumbers = fileLogRepository.getTotalArtifactCountForMeasure(measure.getId());
+                    final int size = 50;
+                    int offset = 0;
 
-                try {
-                    if (!measure.isArtifact_synced()) {
-                       /* CloudQueue measureArtifactsQueue = queueClient.getQueueReference("artifact-list");
-                        measureArtifactsQueue.createIfNotExists();*/
-
-                        long totalNumbers  = fileLogRepository.getTotalArtifactCountForMeasure(measure.getId());
-                        final int size = 50;
-                        int offset = 0;
-
-                        measure.setArtifact_synced(true);
-                        measure.setUploaded_at(System.currentTimeMillis());
-                        postMeasure(measure);
-                        measure.setTimestamp(session.getSyncTimestamp());
-                        updateMeasure(measure);
-                        while (offset + 1 < totalNumbers) {
-                            List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(measure.getId(), offset, size);
-
-                            ArtifactList artifactList = new ArtifactList();
-                            artifactList.setMeasure_id(measure.getId());
-                            artifactList.setStart(offset + 1);
-                            artifactList.setEnd(offset + measureArtifacts.size());
-                            artifactList.setArtifacts(measureArtifacts);
-                            artifactList.setTotal(totalNumbers);
-
-                            offset += measureArtifacts.size();
-
-                            postArtifacts(artifactList);
-
-                           /* CloudQueueMessage measureArtifactsMessage = new CloudQueueMessage(measure.getId());
-                            measureArtifactsMessage.setMessageContent(gson.toJson(artifactList));
-                            measureArtifactsQueue.addMessage(measureArtifactsMessage);*/
-                        }
-
-                      /*  measure.setArtifact_synced(true);
-                        measure.setUploaded_at(System.currentTimeMillis());*/
-                    }
-
-                  /*  postMeasure(measure);
+                    measure.setArtifact_synced(true);
+                    measure.setUploaded_at(System.currentTimeMillis());
+                    postMeasure(measure);
                     measure.setTimestamp(session.getSyncTimestamp());
                     updateMeasure(measure);
-*/
+                    while (offset + 1 < totalNumbers) {
+                        List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(measure.getId(), offset, size);
 
-                   /* CloudQueue measureQueue = queueClient.getQueueReference("measure");
-                    measureQueue.createIfNotExists();
+                        ArtifactList artifactList = new ArtifactList();
+                        artifactList.setMeasure_id(measure.getId());
+                        artifactList.setStart(offset + 1);
+                        artifactList.setEnd(offset + measureArtifacts.size());
+                        artifactList.setArtifacts(measureArtifacts);
+                        artifactList.setTotal(totalNumbers);
 
-                    CloudQueueMessage message = new CloudQueueMessage(measure.getId());
-                    message.setMessageContent(gson.toJson(measure));
-                    measureQueue.addMessage(message);
+                        offset += measureArtifacts.size();
 
-                    measure.setTimestamp(session.getSyncTimestamp());
-                    updateMeasure(measure);*/
-                } catch (Exception e) {
-                    e.printStackTrace();
+                        postArtifacts(artifactList);
+                    }
+
                 }
+
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
         }
     }
 
-    public void postArtifacts(ArtifactList artifactList)
-
-    {
+    public void postArtifacts(ArtifactList artifactList) {
         try {
-            Log.i("MeasureRepository","this is value of artifacts "+artifactList);
-            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"),(new JSONObject(new Gson().toJson(artifactList))).toString());
-            Log.i("MeasureRepository","this is value of artifacts "+new Gson().toJson(artifactList));
+            Log.i("MeasureRepository", "this is value of artifacts " + artifactList);
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(new Gson().toJson(artifactList))).toString());
+            Log.i("MeasureRepository", "this is value of artifacts " + new Gson().toJson(artifactList));
 
-            retrofit.create(ApiService.class).postArtifacts("bearer "+session.getAuthToken(),body).subscribeOn(Schedulers.io())
+            retrofit.create(ApiService.class).postArtifacts("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<SuccessResponse>() {
                         @Override
@@ -202,20 +163,16 @@ public class MeasureRepository {
 
                         }
                     });
-        }
-        catch (Exception e)
-        {
-            Log.i("SyncAdapter","this is value of exception "+e.getMessage());
+        } catch (Exception e) {
+            Log.i("SyncAdapter", "this is value of exception " + e.getMessage());
         }
     }
 
-    public void postMeasure(Measure measure)
-
-    {
+    public void postMeasure(Measure measure) {
         try {
-            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"),(new JSONObject(new Gson().toJson(measure))).toString());
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(new Gson().toJson(measure))).toString());
 
-            retrofit.create(ApiService.class).postMeasure("bearer "+session.getAuthToken(),body).subscribeOn(Schedulers.io())
+            retrofit.create(ApiService.class).postMeasure("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<SuccessResponse>() {
                         @Override
@@ -239,10 +196,8 @@ public class MeasureRepository {
 
                         }
                     });
-        }
-        catch (Exception e)
-        {
-            Log.i("SyncAdapter","this is value of exception "+e.getMessage());
+        } catch (Exception e) {
+            Log.i("SyncAdapter", "this is value of exception " + e.getMessage());
         }
     }
 }
