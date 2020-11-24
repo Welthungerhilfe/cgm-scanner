@@ -16,7 +16,6 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.queue.CloudQueue;
 import com.microsoft.azure.storage.queue.CloudQueueClient;
@@ -31,24 +30,19 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
-import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.SuccessResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.remote.ApiService;
-import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
-import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -71,7 +65,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private PersonRepository personRepository;
     private MeasureRepository measureRepository;
-    private FileLogRepository fileLogRepository;
     private DeviceRepository deviceRepository;
     private MeasureResultRepository measureResultRepository;
 
@@ -88,7 +81,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         this.retrofit = retrofit;
         personRepository = PersonRepository.getInstance(context);
         measureRepository = MeasureRepository.getInstance(context, retrofit);
-        fileLogRepository = FileLogRepository.getInstance(context);
         deviceRepository = DeviceRepository.getInstance(context);
         measureResultRepository = MeasureResultRepository.getInstance(context);
 
@@ -158,16 +150,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            boolean wifiOnly = LocalPersistency.getBoolean(getContext(), SettingsActivity.KEY_UPLOAD_WIFI);
-            if (wifiOnly && !Utils.isWifiConnected(getContext())) {
-                Log.d("SyncAdapter", "skipped due to missing WiFi connection");
+            if (!Utils.isUploadAllowed(getContext())) {
+                Log.d("SyncAdapter", "skipped due to missing connection");
                 return null;
             }
 
-            if (!Utils.isNetworkAvailable(getContext())) {
-                Log.d("SyncAdapter", "skipped due to missing network connection");
-                return null;
-            }
             Log.i("SyncAdapter", "this is inside before restApi ");
             Log.d("SyncAdapter", "start updating");
             //REST API implementation
@@ -181,6 +168,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     processCachedMeasures();*/
 
 
+                    measureRepository.uploadMeasures(getContext());
                     session.setSyncTimestamp(currentTimestamp);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -297,47 +285,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }
         }
 
-        private void processPersonQueue(CloudQueueClient queueClient) throws URISyntaxException {
+        private void processPersonQueue() {
             try {
-                CloudQueue personQueue = queueClient.getQueueReference("person");
-                personQueue.createIfNotExists();
-
-                Gson gson = new Gson();
-                List<Person> syncablePersons = personRepository.getSyncablePerson(prevTimestamp);
-                for (int i = 0; i < syncablePersons.size(); i++) {
-                    String content = gson.toJson(syncablePersons.get(i));
-                    CloudQueueMessage message = new CloudQueueMessage(syncablePersons.get(i).getId());
-                    Person person = syncablePersons.get(i);
-                    Log.i("Syncadapter", "this is inside processPerson Queue " + content);
-                    postPerson(person);
-                    message.setMessageContent(content);
-
-                    personQueue.addMessage(message);
-
-                    syncablePersons.get(i).setTimestamp(prevTimestamp);
-
-                    personRepository.updatePerson(syncablePersons.get(i));
-                }
-            } catch (StorageException e) {
-                currentTimestamp = prevTimestamp;
-            }
-        }
-
-        private void processPersonQueue() throws Exception {
-            try {
-
-                Gson gson = new Gson();
                 List<Person> syncablePersons = personRepository.getSyncablePerson(prevTimestamp);
                 for (int i = 0; i < syncablePersons.size(); i++) {
 
                     Person person = syncablePersons.get(i);
                     Log.i("Syncadapter", "this is inside processPerson Queue " + person);
                     postPerson(person);
-
-
-                    syncablePersons.get(i).setTimestamp(prevTimestamp);
-
-                    personRepository.updatePerson(syncablePersons.get(i));
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
@@ -345,104 +300,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
 
-        private void processMeasureQueue(CloudQueueClient queueClient) throws URISyntaxException {
-            try {
-                CloudQueue measureQueue = queueClient.getQueueReference("measure");
-                measureQueue.createIfNotExists();
-
-                Gson gson = new Gson();
-                Log.i("Syncadapter", "this is inside value of prevTimeStamp " + prevTimestamp);
-
-                List<Measure> syncableMeasures = measureRepository.getSyncableMeasure(prevTimestamp);
-                for (int i = 0; i < syncableMeasures.size(); i++) {
-                    String content = gson.toJson(syncableMeasures.get(i));
-                    CloudQueueMessage message = new CloudQueueMessage(syncableMeasures.get(i).getId());
-                    Log.i("Syncadapter", "this is inside processMeasure Queue " + content);
-
-
-                    message.setMessageContent(content);
-
-                    measureQueue.addMessage(message);
-                    Log.i("Syncadapter", "this is inside value of prevTimeStamp " + prevTimestamp);
-                    Log.i("Syncadapter", "this is inside is artifact_synced " + syncableMeasures.get(i).isArtifact_synced());
-                    if (!syncableMeasures.get(i).isArtifact_synced()) {
-                        CloudQueue measureArtifactsQueue = queueClient.getQueueReference("artifact-list");
-                        measureArtifactsQueue.createIfNotExists();
-
-                        long totalNumbers = fileLogRepository.getTotalArtifactCountForMeasure(syncableMeasures.get(i).getId());
-                        final int size = 50;
-                        int offset = 0;
-
-                        while (offset + 1 < totalNumbers) {
-                            List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(syncableMeasures.get(i).getId(), offset, size);
-
-                            ArtifactList artifactList = new ArtifactList();
-                            artifactList.setMeasure_id(syncableMeasures.get(i).getId());
-                            artifactList.setStart(offset + 1);
-                            artifactList.setEnd(offset + measureArtifacts.size());
-                            artifactList.setArtifacts(measureArtifacts);
-                            artifactList.setTotal(totalNumbers);
-
-                            offset += measureArtifacts.size();
-
-                            CloudQueueMessage measureArtifactsMessage = new CloudQueueMessage(syncableMeasures.get(i).getId());
-                            measureArtifactsMessage.setMessageContent(gson.toJson(artifactList));
-                            measureArtifactsQueue.addMessage(measureArtifactsMessage);
-                        }
-
-                        syncableMeasures.get(i).setUploaded_at(System.currentTimeMillis());
-                        syncableMeasures.get(i).setArtifact_synced(true);
-                    }
-
-                    syncableMeasures.get(i).setTimestamp(prevTimestamp);
-                    measureRepository.updateMeasure(syncableMeasures.get(i));
-                }
-            } catch (StorageException e) {
-                currentTimestamp = prevTimestamp;
-            }
-        }
-
         private void processMeasureQueue() {
             try {
-
-                Gson gson = new Gson();
                 Log.i("Syncadapter", "this is inside value of prevTimeStamp " + prevTimestamp);
 
                 List<Measure> syncableMeasures = measureRepository.getSyncableMeasure(prevTimestamp);
                 for (int i = 0; i < syncableMeasures.size(); i++) {
-                    String content = gson.toJson(syncableMeasures.get(i));
-                    CloudQueueMessage message = new CloudQueueMessage(syncableMeasures.get(i).getId());
-                    Log.i("Syncadapter", "this is inside processMeasure Queue " + content);
-
-                    postMeasure(syncableMeasures.get(i));
-                    Log.i("Syncadapter", "this is inside value of prevTimeStamp " + prevTimestamp);
-                    Log.i("Syncadapter", "this is inside is artifact_synced " + syncableMeasures.get(i).isArtifact_synced());
-                    if (!syncableMeasures.get(i).isArtifact_synced()) {
-                        long totalNumbers = fileLogRepository.getTotalArtifactCountForMeasure(syncableMeasures.get(i).getId());
-                        final int size = 50;
-                        int offset = 0;
-
-                        while (offset + 1 < totalNumbers) {
-                            List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(syncableMeasures.get(i).getId(), offset, size);
-
-                            ArtifactList artifactList = new ArtifactList();
-                            artifactList.setMeasure_id(syncableMeasures.get(i).getId());
-                            artifactList.setStart(offset + 1);
-                            artifactList.setEnd(offset + measureArtifacts.size());
-                            artifactList.setArtifacts(measureArtifacts);
-                            artifactList.setTotal(totalNumbers);
-
-                            offset += measureArtifacts.size();
-
-                            postArtifacts(artifactList);
-                        }
-
-                        syncableMeasures.get(i).setUploaded_at(System.currentTimeMillis());
-                        syncableMeasures.get(i).setArtifact_synced(true);
-                    }
-
-                    syncableMeasures.get(i).setTimestamp(prevTimestamp);
-                    measureRepository.updateMeasure(syncableMeasures.get(i));
+                    String localPersonId = syncableMeasures.get(i).getPersonId();
+                    Person person = personRepository.getPerson(localPersonId).getValue();
+                    String backendPersonId; //TODO: get the value
+                    //TODO:if there is no received backend ID yet, skip the call
+                    measureRepository.uploadMeasure(getContext(), syncableMeasures.get(i));
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
@@ -472,21 +340,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             } catch (StorageException e) {
                 currentTimestamp = prevTimestamp;
             }
-        }
-
-        private void processCachedMeasures() {
-
-            Context context = getContext();
-            long measureCount = LocalPersistency.getLong(context, ScanModeActivity.KEY_MEASURE + ScanModeActivity.SUBFIX_COUNT);
-            for (long i = 0; i < measureCount; i++) {
-                try {
-                    String id = LocalPersistency.getString(context, ScanModeActivity.KEY_MEASURE + i);
-                    Measure measure = measureRepository.getMeasureById(id);
-                    measureRepository.uploadMeasure(context, measure);
-                } catch (Exception e) {
-                }
-            }
-            LocalPersistency.setLong(context, ScanModeActivity.KEY_MEASURE + ScanModeActivity.SUBFIX_COUNT, 0);
         }
 
         private void onResultReceived(MeasureResult result) {
@@ -532,6 +385,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         public void onNext(@NonNull SuccessResponse posts) {
                             Log.i("SyncAdapter", "this is value of post " + posts.getMessage());
 
+                            //TODO:parse response: if (success)
+                            {
+                                //TODO:store received ID into person RoomDB
+                                person.setTimestamp(prevTimestamp);
+                                personRepository.updatePerson(person);
+                            }
                         }
 
                         @Override
@@ -548,71 +407,4 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.i("SyncAdapter", "this is value of exception " + e.getMessage());
         }
     }
-
-    public void postMeasure(Measure measure) {
-        try {
-            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(new Gson().toJson(measure))).toString());
-
-            retrofit.create(ApiService.class).postMeasure("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<SuccessResponse>() {
-                        @Override
-                        public void onSubscribe(@NonNull Disposable d) {
-
-                        }
-
-                        @Override
-                        public void onNext(@NonNull SuccessResponse posts) {
-                            Log.i("SyncAdapter", "this is inside onNext measure " + posts.getMessage());
-
-                        }
-
-                        @Override
-                        public void onError(@NonNull Throwable e) {
-                            Log.i("SyncAdapter", "this is inside onError Measure " + e.getMessage());
-                        }
-
-                        @Override
-                        public void onComplete() {
-
-                        }
-                    });
-        } catch (Exception e) {
-            Log.i("SyncAdapter", "this is value of exception " + e.getMessage());
-        }
-    }
-
-    public void postArtifacts(ArtifactList artifactList) {
-        try {
-            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(new Gson().toJson(artifactList))).toString());
-
-            retrofit.create(ApiService.class).postMeasure("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<SuccessResponse>() {
-                        @Override
-                        public void onSubscribe(@NonNull Disposable d) {
-
-                        }
-
-                        @Override
-                        public void onNext(@NonNull SuccessResponse posts) {
-                            Log.i("SyncAdapter", "this is inside onNext artifactsList " + posts.getMessage());
-
-                        }
-
-                        @Override
-                        public void onError(@NonNull Throwable e) {
-                            Log.i("SyncAdapter", "this is inside onError ArtifactList " + e.getMessage());
-                        }
-
-                        @Override
-                        public void onComplete() {
-
-                        }
-                    });
-        } catch (Exception e) {
-            Log.i("SyncAdapter", "this is value of exception " + e.getMessage());
-        }
-    }
-
 }

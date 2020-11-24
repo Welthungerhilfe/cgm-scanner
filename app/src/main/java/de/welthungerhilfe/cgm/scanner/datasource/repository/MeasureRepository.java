@@ -19,6 +19,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.SuccessResponse;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
 import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.remote.ApiService;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observer;
@@ -59,6 +60,10 @@ public class MeasureRepository {
         return database.measureDao().getSyncableMeasure(timestamp);
     }
 
+    public List<Measure> getNotSyncedMeasures() {
+        return database.measureDao().getNotSyncedMeasures();
+    }
+
     public Measure getMeasureById(String id) {
         return database.measureDao().getMeasureById(id);
     }
@@ -92,48 +97,21 @@ public class MeasureRepository {
     }
 
     public void uploadMeasure(Context context, Measure measure) {
-        Gson gson = new Gson();
-        FileLogRepository fileLogRepository = FileLogRepository.getInstance(context);
-        synchronized (SyncAdapter.getLock()) {
-
-            //REST API implementation
-            try {
-                if (!measure.isArtifact_synced()) {
-                    long totalNumbers = fileLogRepository.getTotalArtifactCountForMeasure(measure.getId());
-                    final int size = 50;
-                    int offset = 0;
-
-                    measure.setArtifact_synced(true);
-                    measure.setUploaded_at(System.currentTimeMillis());
-                    postMeasure(measure);
-                    measure.setTimestamp(session.getSyncTimestamp());
-                    updateMeasure(measure);
-                    while (offset + 1 < totalNumbers) {
-                        List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(measure.getId(), offset, size);
-
-                        ArtifactList artifactList = new ArtifactList();
-                        artifactList.setMeasure_id(measure.getId());
-                        artifactList.setStart(offset + 1);
-                        artifactList.setEnd(offset + measureArtifacts.size());
-                        artifactList.setArtifacts(measureArtifacts);
-                        artifactList.setTotal(totalNumbers);
-
-                        offset += measureArtifacts.size();
-
-                        postArtifacts(artifactList);
-                    }
-
-                }
-
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
+        if (Utils.isUploadAllowed(context)) {
+            FileLogRepository fileLogRepository = FileLogRepository.getInstance(context);
+            postMeasure(measure, fileLogRepository);
         }
     }
 
-    public void postArtifacts(ArtifactList artifactList) {
+    public void uploadMeasures(Context context) {
+        synchronized (SyncAdapter.getLock()) {
+            for (Measure measure : getNotSyncedMeasures()) {
+                uploadMeasure(context, measure);
+            }
+        }
+    }
+
+    public void postArtifacts(ArtifactList artifactList, Measure measure) {
         try {
             Log.i("MeasureRepository", "this is value of artifacts " + artifactList);
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(new Gson().toJson(artifactList))).toString());
@@ -151,6 +129,13 @@ public class MeasureRepository {
                         public void onNext(@NonNull SuccessResponse posts) {
                             Log.i("MeasureRepository", "this is inside onNext artifactsList " + posts.getMessage());
 
+                            //TODO:parse response: if (success)
+                            {
+                                measure.setArtifact_synced(true);
+                                measure.setTimestamp(session.getSyncTimestamp());
+                                measure.setUploaded_at(System.currentTimeMillis());
+                                updateMeasure(measure);
+                            }
                         }
 
                         @Override
@@ -168,7 +153,7 @@ public class MeasureRepository {
         }
     }
 
-    public void postMeasure(Measure measure) {
+    public void postMeasure(Measure measure, FileLogRepository fileLogRepository) {
         try {
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(new Gson().toJson(measure))).toString());
 
@@ -184,6 +169,18 @@ public class MeasureRepository {
                         public void onNext(@NonNull SuccessResponse posts) {
                             Log.i("SyncAdapter", "this is inside onNext measure " + posts.getMessage());
 
+                            //TODO:parse response: if (success)
+                            {
+                                List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(measure.getId());
+
+                                ArtifactList artifactList = new ArtifactList();
+                                artifactList.setMeasure_id(measure.getId());
+                                artifactList.setStart(1);
+                                artifactList.setEnd(measureArtifacts.size());
+                                artifactList.setArtifacts(measureArtifacts);
+                                artifactList.setTotal(measureArtifacts.size());
+                                postArtifacts(artifactList, measure);
+                            }
                         }
 
                         @Override

@@ -75,12 +75,8 @@ public class FileLogRepository {
         return database.fileLogDao().getAll();
     }
 
-    public List<FileLog> getArtifactsForMeasure(String measureId, int offset, int limit) {
-        return database.fileLogDao().getArtifactsForMeasure(measureId, offset, limit);
-    }
-
-    public long getTotalArtifactCountForMeasure(String measureId) {
-        return database.fileLogDao().getTotalArtifactCountForMeasure(measureId);
+    public List<FileLog> getArtifactsForMeasure(String measureId) {
+        return database.fileLogDao().getArtifactsForMeasure(measureId);
     }
 
     public LiveData<UploadStatus> getMeasureUploadProgress(String measureId) {

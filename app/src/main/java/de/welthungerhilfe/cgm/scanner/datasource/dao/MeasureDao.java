@@ -15,6 +15,9 @@ import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TAB
 
 @Dao
 public interface MeasureDao {
+    @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE artifact_synced=0")
+    List<Measure> getNotSyncedMeasures();
+
     @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE timestamp>:timestamp")
     List<Measure> getSyncableMeasure(long timestamp);
 

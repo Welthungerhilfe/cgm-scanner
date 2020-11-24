@@ -88,9 +88,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private final int PERMISSION_CAMERA = 0x0002;
     private final int PERMISSION_STORAGE = 0x0003;
 
-    public static final String KEY_MEASURE = "KEY_MEASURE";
-    public static final String SUBFIX_COUNT = "_COUNT";
-
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.imgScanStanding)
@@ -772,26 +769,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 measureRepository.insertMeasure(measure);
             }
 
-            //upload metadata if possible
-            Context context = ScanModeActivity.this;
-            if (Utils.isUploadAllowed(context)) {
-
-                //start upload service
-                runOnUiThread(() -> {
-                    if (!AppController.getInstance().isUploadRunning()) {
-                        startService(new Intent(getApplicationContext(), UploadService.class));
-                    }
-                });
-
-                //add metadata into DB
-                measureRepository.uploadMeasure(context, measure);
-                return null;
-            }
-
-            //upload metadata later
-            long measureCount = LocalPersistency.getLong(context, KEY_MEASURE + SUBFIX_COUNT);
-            LocalPersistency.setString(context, KEY_MEASURE + measureCount, measure.getId());
-            LocalPersistency.setLong(context, KEY_MEASURE + SUBFIX_COUNT, measureCount + 1);
+            //upload measure
+            measureRepository.uploadMeasures(getApplicationContext());
             return null;
         }
 
