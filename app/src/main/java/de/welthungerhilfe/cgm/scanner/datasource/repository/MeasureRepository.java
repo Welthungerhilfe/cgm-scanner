@@ -16,7 +16,9 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactList;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.SuccessResponse;
+import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.remote.ApiService;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -109,6 +111,7 @@ public class MeasureRepository {
                 uploadMeasure(context, measure);
             }
         }
+        UploadService.forceResume();
     }
 
     public void postArtifacts(ArtifactList artifactList, Measure measure) {
@@ -154,6 +157,12 @@ public class MeasureRepository {
     }
 
     public void postMeasure(Measure measure, FileLogRepository fileLogRepository) {
+        if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
+            //TODO:backend.scanner-api.measure.create_measure
+        } else {
+            //TODO:backend.scanner-api.scan.create_scan
+        }
+
         try {
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(new Gson().toJson(measure))).toString());
 
@@ -172,6 +181,9 @@ public class MeasureRepository {
                             //TODO:parse response: if (success)
                             {
                                 List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(measure.getId());
+                                for (FileLog log : measureArtifacts) {
+                                    //TODO:check if backend ID exists, if not call return;
+                                }
 
                                 ArtifactList artifactList = new ArtifactList();
                                 artifactList.setMeasure_id(measure.getId());
