@@ -12,6 +12,7 @@ import org.jcodec.common.io.IOUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -224,18 +225,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
             }
 
             try {
-                final File file = new File(log.getPath());
-                FileInputStream stream = new FileInputStream(file);
-                uploadFiles(file, stream, log.getId(), mime);
-                log.setUploadDate(Utils.getUniversalTimestamp());
-
-                if (file.delete()) {
-                    log.setDeleted(true);
-                    log.setStatus(UPLOADED_DELETED);
-                } else {
-                    log.setStatus(UPLOADED);
-                }
-                stream.close();
+                uploadFiles(log, mime);
             } catch (FileNotFoundException e) {
                 Log.i(TAG,"this is exception "+e.getMessage());
 
@@ -280,8 +270,10 @@ public class UploadService extends Service implements OnFileLogsLoad {
         }
     }
 
-    public void uploadFiles(File file, InputStream inputStream, String id1, String mime)
-    {
+    public void uploadFiles(FileLog log, String mime) throws IOException {
+        final File file = new File(log.getPath());
+        FileInputStream inputStream = new FileInputStream(file);
+
         MultipartBody.Part body = null;
         try {
             body = MultipartBody.Part.createFormData(
@@ -290,8 +282,9 @@ public class UploadService extends Service implements OnFileLogsLoad {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        inputStream.close();
 
-        RequestBody id = RequestBody.create(MediaType.parse("multipart/form-data"), id1);
+        RequestBody id = RequestBody.create(MediaType.parse("multipart/form-data"), log.getId());
         retrofit.create(ApiService.class).uploadFiles(sessionManager.getAuthToken(),body,id).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Observer<SuccessResponse>() {
@@ -303,7 +296,18 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 @Override
                 public void onNext(@NonNull SuccessResponse posts) {
                     Log.i(TAG, "this is response uploadfiles " + posts.getMessage()+ file.getPath());
+                    //TODO:parse response: if (success)
+                    {
+                        log.setUploadDate(Utils.getUniversalTimestamp());
 
+                        if (file.delete()) {
+                            log.setDeleted(true);
+                            log.setStatus(UPLOADED_DELETED);
+                        } else {
+                            log.setStatus(UPLOADED);
+                        }
+                        //TODO:store received ID into FileLog RoomDB
+                    }
                 }
 
                 @Override
