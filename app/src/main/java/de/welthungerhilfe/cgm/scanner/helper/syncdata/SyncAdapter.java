@@ -26,18 +26,21 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
 import de.welthungerhilfe.cgm.scanner.datasource.models.SuccessResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
@@ -70,6 +73,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private PersonRepository personRepository;
     private MeasureRepository measureRepository;
     private DeviceRepository deviceRepository;
+    private FileLogRepository fileLogRepository;
     private MeasureResultRepository measureResultRepository;
 
     private SessionManager session;
@@ -86,6 +90,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         personRepository = PersonRepository.getInstance(context);
         measureRepository = MeasureRepository.getInstance(context, retrofit);
         deviceRepository = DeviceRepository.getInstance(context);
+        fileLogRepository = FileLogRepository.getInstance(context);
         measureResultRepository = MeasureResultRepository.getInstance(context);
 
         session = new SessionManager(context);
@@ -97,7 +102,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        UploadService.forceResume();
         this.account = account;
         startSyncing();
     }
@@ -136,10 +140,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     public static void startPeriodicSync(Account newAccount, Context context) {
 
-        if (!AppController.getInstance().isUploadRunning()) {
-            context.startService(new Intent(context, UploadService.class));
-        }
-
         configurePeriodicSync(newAccount, context);
 
         ContentResolver.setSyncAutomatically(newAccount, context.getString(R.string.sync_authority), true);
@@ -157,6 +157,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             if (!Utils.isUploadAllowed(getContext())) {
                 Log.d(TAG, "skipped due to missing connection");
                 return null;
+            }
+
+            if (!UploadService.isInitialized()) {
+                getContext().startService(new Intent(getContext(), UploadService.class));
+            } else {
+                UploadService.forceResume();
             }
 
             Log.i(TAG, "this is inside before restApi ");
@@ -310,16 +316,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                 List<Measure> syncableMeasures = measureRepository.getSyncableMeasure();
                 for (int i = 0; i < syncableMeasures.size(); i++) {
-                    String localPersonId = syncableMeasures.get(i).getPersonId();
-                    Person person = personRepository.getPersonById(localPersonId);
-                    String backendPersonId = person.getServerId();
-                    if(backendPersonId!=null) {
-                        syncableMeasures.get(i).setPersonServerKey(backendPersonId);
-                        postMeasurments(syncableMeasures.get(i));
+                    Measure measure = syncableMeasures.get(i);
+                    if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
+                        String localPersonId = measure.getPersonId();
+                        Person person = personRepository.getPersonById(localPersonId);
+                        String backendPersonId = person.getServerId();
+                        if(backendPersonId!=null) {
+                            measure.setPersonServerKey(backendPersonId);
+                            postMeasurment(measure);
+                        }
+                    } else {
+                        HashMap<Integer, Scan> scans = measure.split(fileLogRepository);
+                        if (!scans.isEmpty()) {
+                            postScans(scans, measure);
+                        }
                     }
-                    //TODO: get the value
-                    //TODO:if there is no received backend ID yet, skip the call
-                  //  measureRepository.uploadMeasure(getContext(), syncableMeasures.get(i));
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
@@ -375,6 +386,56 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
                 LocalPersistency.setLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE, last);
             }
+        }
+    }
+
+    private void postScans(HashMap<Integer, Scan> scans, Measure measure) {
+        try {
+            Gson gson = new GsonBuilder()
+                    .excludeFieldsWithoutExposeAnnotation()
+                    .create();
+
+            final int[] count = {scans.values().size()};
+            for (Scan scan : scans.values()) {
+
+                RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(scan))).toString());
+                retrofit.create(ApiService.class).postPerson("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Observer<Scan>() {
+                            @Override
+                            public void onSubscribe(@NonNull Disposable d) {
+
+                            }
+
+                            @Override
+                            public void onNext(@NonNull Scan scan) {
+                                Log.i("MeasureRepository", "this is inside onNext artifactsList " + scan.toString());
+
+                                //TODO:parse response: if (success)
+                                {
+                                    count[0]--;
+                                    if (count[0] == 0) {
+                                        measure.setArtifact_synced(true);
+                                        measure.setTimestamp(session.getSyncTimestamp());
+                                        measure.setUploaded_at(System.currentTimeMillis());
+                                        updateMeasure(measure);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onError(@NonNull Throwable e) {
+                                Log.i(TAG, "this is value of post " + e.getMessage());
+                            }
+
+                            @Override
+                            public void onComplete() {
+
+                            }
+                        });
+            }
+        } catch (Exception e) {
+            Log.i(TAG, "this is value of exception " + e.getMessage());
         }
     }
 
@@ -436,7 +497,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public void postMeasurments(Measure measure) {
+    public void postMeasurment(Measure measure) {
         try {
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()

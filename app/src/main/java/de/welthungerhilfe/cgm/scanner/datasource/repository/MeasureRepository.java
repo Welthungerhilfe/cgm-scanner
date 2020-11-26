@@ -102,22 +102,6 @@ public class MeasureRepository {
         return database.measureDao().getUploadMeasures();
     }
 
-    public void uploadMeasure(Context context, Measure measure) {
-        if (Utils.isUploadAllowed(context)) {
-            FileLogRepository fileLogRepository = FileLogRepository.getInstance(context);
-            postMeasure(measure, fileLogRepository);
-        }
-    }
-
-    public void uploadMeasures(Context context) {
-        synchronized (SyncAdapter.getLock()) {
-            for (Measure measure : getNotSyncedMeasures()) {
-                uploadMeasure(context, measure);
-            }
-        }
-        UploadService.forceResume();
-    }
-
     public void postArtifacts(ArtifactList artifactList, Measure measure) {
         try {
             Log.i("MeasureRepository", "this is value of artifacts " + artifactList);

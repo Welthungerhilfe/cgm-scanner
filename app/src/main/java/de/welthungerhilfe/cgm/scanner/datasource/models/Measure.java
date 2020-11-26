@@ -29,9 +29,14 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import de.welthungerhilfe.cgm.scanner.datasource.repository.CsvExportableModel;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 
 import static androidx.room.ForeignKey.CASCADE;
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_MEASURE;
@@ -345,5 +350,52 @@ public class Measure extends CsvExportableModel implements Serializable {
     @Override
     public String getCsvHeaderString() {
         return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at,heightConfidence,weightConfidence,scannedBy";
+    }
+
+    public HashMap<Integer, Scan> split(FileLogRepository fileLogRepository) {
+
+        //check if measure is ready to be synced
+        HashMap<Integer, Scan> output = new HashMap<>();
+        List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(getId());
+        for (FileLog log : measureArtifacts) {
+            //TODO:check if backend ID exists, if not call return output;
+        }
+
+        //create structure to split artifacts by scan step
+        for (FileLog log : measureArtifacts) {
+            if (log.getStep() != 0) {
+                if (!output.containsKey(log.getStep())) {
+                    output.put(log.getStep(), new Scan());
+                }
+            }
+        }
+
+        //fill the structure
+        Set<Integer> keys = output.keySet();
+        for (Integer key : keys) {
+
+            //get the artifacts for a step
+            ArrayList<FileLog> stepArtifacts = new ArrayList<>();
+            for (FileLog log : measureArtifacts) {
+                if ((key == 0) || (key == log.getStep())) {
+                    stepArtifacts.add(log);
+                }
+            }
+
+            //create artifact list
+            ArtifactList artifactList = new ArtifactList();
+            artifactList.setMeasure_id(getId());
+            artifactList.setStart(1);
+            artifactList.setEnd(stepArtifacts.size());
+            artifactList.setArtifacts(measureArtifacts);
+            artifactList.setTotal(stepArtifacts.size());
+
+            Scan scan = new Scan();
+            scan.setArtifacts(artifactList);
+            scan.setType(key);
+            //TODO:fill the structure
+            output.replace(key, scan);
+        }
+        return output;
     }
 }

@@ -75,7 +75,6 @@ import de.welthungerhilfe.cgm.scanner.helper.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.CameraCalibration;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ICamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoCamera;
-import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoUtils;
@@ -768,15 +767,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 }
                 measureRepository.insertMeasure(measure);
             }
-
-            //upload measure
-            measureRepository.uploadMeasures(getApplicationContext());
             return null;
         }
 
         public void onPostExecute(Void result) {
             try {
-                UploadService.forceResume();
                 activity.finish();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -835,6 +830,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
+                    log.setStep(SCAN_STEP);
                     synchronized (lock) {
                         files.add(log);
                     }
@@ -864,6 +860,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                             log.setAge(age);
                             log.setSchema_version(CgmDatabase.version);
                             log.setMeasureId(measure.getId());
+                            log.setStep(0);
                             synchronized (lock) {
                                 files.add(log);
                             }
@@ -942,6 +939,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
+                    log.setStep(SCAN_STEP);
                     synchronized (lock) {
                         files.add(log);
                     }
@@ -988,6 +986,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setAge(age);
                 log.setSchema_version(CgmDatabase.version);
                 log.setMeasureId(measure.getId());
+                log.setStep(SCAN_STEP);
                 synchronized (lock) {
                     files.add(log);
                 }
@@ -1067,6 +1066,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setAge(age);
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
+                    log.setStep(SCAN_STEP);
                     synchronized (lock) {
                         files.add(log);
                     }
@@ -1093,6 +1093,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setAge(age);
                         log.setSchema_version(CgmDatabase.version);
                         log.setMeasureId(measure.getId());
+                        log.setStep(0);
                         synchronized (lock) {
                             files.add(log);
                         }
