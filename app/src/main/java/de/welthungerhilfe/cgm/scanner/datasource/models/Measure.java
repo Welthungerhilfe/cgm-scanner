@@ -358,7 +358,9 @@ public class Measure extends CsvExportableModel implements Serializable {
         HashMap<Integer, Scan> output = new HashMap<>();
         List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(getId());
         for (FileLog log : measureArtifacts) {
-            //TODO:check if backend ID exists, if not call return output;
+            if (log.getServerId() == null) {
+                return output;
+            }
         }
 
         //create structure to split artifacts by scan step
@@ -375,25 +377,30 @@ public class Measure extends CsvExportableModel implements Serializable {
         for (Integer key : keys) {
 
             //get the artifacts for a step
-            ArrayList<FileLog> stepArtifacts = new ArrayList<>();
+            List<Artifact> stepArtifacts = new ArrayList<>();
             for (FileLog log : measureArtifacts) {
                 if ((key == 0) || (key == log.getStep())) {
-                    stepArtifacts.add(log);
+                    Artifact artifact = new Artifact();
+                    artifact.setFile(log.getServerId());
+                    artifact.setFormat(log.getType());
+                    artifact.setTimestamp(log.getCreateDate());
+                    stepArtifacts.add(artifact);
                 }
             }
+            stepArtifacts.sort((a, b) -> (int) (b.getTimestamp() - a.getTimestamp()));
+            for (int i = 0; i < stepArtifacts.size(); i++) {
+                stepArtifacts.get(i).setOrder(i);
+            }
 
-            //create artifact list
-            ArtifactList artifactList = new ArtifactList();
-            artifactList.setMeasure_id(getId());
-            artifactList.setStart(1);
-            artifactList.setEnd(stepArtifacts.size());
-            artifactList.setArtifacts(measureArtifacts);
-            artifactList.setTotal(stepArtifacts.size());
-
+            //create scan object
             Scan scan = new Scan();
-            scan.setArtifacts(artifactList);
+            scan.setArtifacts(stepArtifacts);
+            scan.setLocation(getLocation());
+            scan.setPersonServerKey(getPersonServerKey());
+            scan.setScan_start(getTimestamp());
+            scan.setScan_end(getDate());
             scan.setType(key);
-            //TODO:fill the structure
+            scan.setVersion(getType());
             output.replace(key, scan);
         }
         return output;

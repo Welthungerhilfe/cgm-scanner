@@ -472,9 +472,5 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             viewModel.setSortType(AppConstants.SORT_DATE);
             repository.setUpdated(false);
         }
-
-        if (!AppController.getInstance().isUploadRunning()) {
-            startService(new Intent(getApplicationContext(), UploadService.class));
-        }
     }
 }

@@ -274,7 +274,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         measure.setMuac(0.0f);
         measure.setOedema(false);
         measure.setPersonId(person.getId());
-        measure.setTimestamp(Utils.getUniversalTimestamp());
+        measure.setTimestamp(mNowTime);
         measure.setQrCode(person.getQrcode());
         measure.setSchema_version(CgmDatabase.version);
         measure.setScannedBy(session.getDevice());
@@ -382,7 +382,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         executor = Executors.newFixedThreadPool(20);
 
-        mNowTime = System.currentTimeMillis();
+        mNowTime = Utils.getUniversalTimestamp();
         mNowTimeString = String.valueOf(mNowTime);
 
         session = new SessionManager(this);
