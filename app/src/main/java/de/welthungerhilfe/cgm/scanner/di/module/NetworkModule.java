@@ -38,6 +38,7 @@ public class NetworkModule {
     Gson provideGson() {
         GsonBuilder gsonBuilder = new GsonBuilder().setLenient();
         gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+        gsonBuilder.excludeFieldsWithoutExposeAnnotation();
         return gsonBuilder.serializeNulls().create();
     }
 

@@ -25,6 +25,9 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.annotation.NonNull;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 import java.util.Locale;
 
@@ -40,26 +43,82 @@ import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TAB
 public class Person extends CsvExportableModel implements Serializable {
     @PrimaryKey
     @NonNull
+    @Expose(serialize = false, deserialize = false)
     private String id;  // firebase id
+
+    @SerializedName("id")
+    @Expose
+    private String serverId;
+
+    private boolean isSynced = false;
+
+    @SerializedName("name")
+    @Expose
     private String name;
+
     private String surname;
+
+    @SerializedName("date_of_birth")
+    @Expose
     private long birthday;
+
+    @Expose
     private String sex;  // female, male, other
+
+    @SerializedName("guardian")
+    @Expose
     private String guardian;
+
+    @SerializedName("age_estimated")
+    @Expose
     private boolean isAgeEstimated;
+
+    @SerializedName("qr_code")
+    @Expose
     private String qrcode;
+
+    @SerializedName("qr_scanned")
+    @Expose
     private long created;
+
+    @Expose
     private long timestamp;
+
+    @Expose
     private String createdBy;
+
+    @Expose
     private boolean deleted;
+
+    @Expose
     private String deletedBy;
+
+    @Expose
     private int schema_version;
+
 
     @Embedded
     private Loc lastLocation;
 
     @Ignore
     private Measure lastMeasure;
+
+
+    public String getServerId() {
+        return serverId;
+    }
+
+    public void setServerId(String serverId) {
+        this.serverId = serverId;
+    }
+
+    public boolean isSynced() {
+        return isSynced;
+    }
+
+    public void setSynced(boolean synced) {
+        isSynced = synced;
+    }
 
     @NonNull
     public String getId() {
@@ -192,11 +251,11 @@ public class Person extends CsvExportableModel implements Serializable {
 
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%s,%d,%s,%s,%b,%s,%d,%d,%s,%b,%s,%d",id,name,surname,birthday,sex,guardian,isAgeEstimated,qrcode,created,timestamp,createdBy,deleted,deletedBy,schema_version);
+        return String.format(Locale.US, "%s,%s,%s,%d,%s,%s,%b,%s,%d,%d,%s,%b,%s,%d,%s", id, name, surname, birthday, sex, guardian, isAgeEstimated, qrcode, created, timestamp, createdBy, deleted, deletedBy, schema_version,serverId);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,name,surname,birthday,sex,guardian,isAgeEstimated,qrcode,created,timestamp,createdBy,deleted,deletedBy,schema_version";
+        return "id,name,surname,birthday,sex,guardian,isAgeEstimated,qrcode,created,timestamp,createdBy,deleted,deletedBy,schema_version,serverId";
     }
 }

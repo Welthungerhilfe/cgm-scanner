@@ -117,7 +117,7 @@ public class CreateDataViewModel extends ViewModel {
 
                 setActiveTab(1);
 
-               startPerodicSync();
+      //         startPerodicSync();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -133,7 +133,7 @@ public class CreateDataViewModel extends ViewModel {
 
             public void onPostExecute(Void result) {
                 setActiveTab(2);
-               startPerodicSync();
+          //     startPerodicSync();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }

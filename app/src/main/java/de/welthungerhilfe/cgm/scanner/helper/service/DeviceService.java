@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.text.method.ReplacementTransformationMethod;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -32,6 +33,7 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.HEALTH_INTERVAL
 public class DeviceService extends Service {
     private Timer timer = new Timer();
     private SessionManager session;
+    private static final String TAG = DeviceService.class.getSimpleName();
 
     @Nullable
     @Override
@@ -103,5 +105,11 @@ public class DeviceService extends Service {
         }, 0, HEALTH_INTERVAL);
 
         return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG,"this is inside onDestroy");
     }
 }

@@ -134,11 +134,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             Account[] accounts = accountManager.getAccountsByType(AppConstants.ACCOUNT_TYPE);
             if (accounts.length > 0) {
                 if (!ContentResolver.isSyncActive(accounts[0], getString(R.string.sync_authority))) {
-                    session.setSyncTimestamp(0);
                     SyncAdapter.startPeriodicSync(accounts[0], getApplicationContext());
                 }
             } else {
-                session.setSyncTimestamp(0);
 
                 try {
                     JWT parsedToken = JWTParser.parse(session.getAuthToken());

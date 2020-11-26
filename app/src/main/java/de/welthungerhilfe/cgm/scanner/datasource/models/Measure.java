@@ -25,6 +25,9 @@ import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 import androidx.annotation.NonNull;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 import java.util.Locale;
 
@@ -41,18 +44,46 @@ import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TAB
 public class Measure extends CsvExportableModel implements Serializable {
     @PrimaryKey
     @NonNull
+    @Expose(serialize = false, deserialize = false)
     private String id;
+
+    @SerializedName("id")
+    @Expose
+    private String measureServerKey;
+
     @ForeignKey(entity = Person.class, parentColumns = "id", childColumns = "personId", onDelete = CASCADE, onUpdate = CASCADE)
+    @Expose(serialize = false, deserialize = false)
     private String personId;
+
+    @SerializedName("person")
+    @Expose
+    private String personServerKey;
+
+    @SerializedName("measured")
+    @Expose
     private long date;
+
+    private boolean isSynced = false;
+
     private String type;
     private long age; // age from birthday in days
+
+    @Expose
     private double height;
+
+    @Expose
     private double weight;
+
+    @Expose
     private double muac;
+
+    @SerializedName("head_cir")
+    @Expose
     private double headCircumference;
     private String artifact;
     private boolean visible;
+
+    @Expose
     private boolean oedema;
     private long timestamp;
     private String createdBy;
@@ -68,8 +99,35 @@ public class Measure extends CsvExportableModel implements Serializable {
     private double weightConfidence;
     private String scannedBy;
 
+
     @Embedded
+    @SerializedName("location")
+    @Expose
     private Loc location;
+
+    public String getMeasureServerKey() {
+        return measureServerKey;
+    }
+
+    public void setMeasureServerKey(String measureServerKey) {
+        this.measureServerKey = measureServerKey;
+    }
+
+    public boolean isSynced() {
+        return isSynced;
+    }
+
+    public void setSynced(boolean synced) {
+        isSynced = synced;
+    }
+
+    public String getPersonServerKey() {
+        return personServerKey;
+    }
+
+    public void setPersonServerKey(String personServerKey) {
+        this.personServerKey = personServerKey;
+    }
 
     @NonNull
     public String getId() {

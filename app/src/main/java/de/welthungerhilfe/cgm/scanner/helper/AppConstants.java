@@ -26,7 +26,11 @@ package de.welthungerhilfe.cgm.scanner.helper;
 public class AppConstants {
 
 
-    public static final String testing_url = "https://cgm-api.azurewebsites.net/api/scan/";
+//    public static final String testing_url = "http://192.168.43.252:5000/api/scan/";
+
+ public static final String testing_url = "http://my-json-server.typicode.com/jaydesai111/jsontest/";
+
+
 
     public static final int MAX_IMAGE_SIZE = 512;
 

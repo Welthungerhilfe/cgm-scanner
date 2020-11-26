@@ -60,6 +60,10 @@ public class MeasureRepository {
         return database.measureDao().getSyncableMeasure(timestamp);
     }
 
+    public List<Measure> getSyncableMeasure() {
+        return database.measureDao().getSyncableMeasure();
+    }
+
     public List<Measure> getNotSyncedMeasures() {
         return database.measureDao().getNotSyncedMeasures();
     }
@@ -159,15 +163,15 @@ public class MeasureRepository {
 
             retrofit.create(ApiService.class).postMeasure("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<SuccessResponse>() {
+                    .subscribe(new Observer<Measure>() {
                         @Override
                         public void onSubscribe(@NonNull Disposable d) {
 
                         }
 
                         @Override
-                        public void onNext(@NonNull SuccessResponse posts) {
-                            Log.i("SyncAdapter", "this is inside onNext measure " + posts.getMessage());
+                        public void onNext(@NonNull Measure posts) {
+                            Log.i("SyncAdapter", "this is inside onNext measure " + posts);
 
                             //TODO:parse response: if (success)
                             {

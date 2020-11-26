@@ -4,6 +4,8 @@ package de.welthungerhilfe.cgm.scanner.remote;
 
 import java.util.HashMap;
 
+import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.SuccessResponse;
 import io.reactivex.rxjava3.core.Observable;
 import okhttp3.MultipartBody;
@@ -19,10 +21,10 @@ import retrofit2.http.Query;
 public interface ApiService {
 
     @POST("person")
-    Observable<SuccessResponse> postPerson(@Header("Authorization") String auth, @Body RequestBody person);
+    Observable<Person> postPerson(@Header("Authorization") String auth, @Body RequestBody person);
 
-    @POST("measure")
-    Observable<SuccessResponse> postMeasure(@Header("Authorization") String auth, @Body RequestBody measure);
+    @POST("measurements")
+    Observable<Measure> postMeasure(@Header("Authorization") String auth, @Body RequestBody measure);
 
     @POST("artifacts")
     Observable<SuccessResponse> postArtifacts(@Header("Authorization") String auth, @Body RequestBody artifacts);
