@@ -22,6 +22,7 @@ package de.welthungerhilfe.cgm.scanner.datasource.models;
 import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.annotation.NonNull;
 
@@ -64,9 +65,13 @@ public class Measure extends CsvExportableModel implements Serializable {
     @Expose
     private String personServerKey;
 
+
+    private long date;
+
     @SerializedName("measured")
     @Expose
-    private long date;
+    @Ignore
+    private String measured;
 
     private boolean isSynced = false;
 
@@ -82,8 +87,7 @@ public class Measure extends CsvExportableModel implements Serializable {
     @Expose
     private double muac;
 
-    @SerializedName("head_cir")
-    @Expose
+
     private double headCircumference;
     private String artifact;
     private boolean visible;
@@ -116,6 +120,14 @@ public class Measure extends CsvExportableModel implements Serializable {
 
     public void setMeasureServerKey(String measureServerKey) {
         this.measureServerKey = measureServerKey;
+    }
+
+    public String getMeasured() {
+        return measured;
+    }
+
+    public void setMeasured(String measured) {
+        this.measured = measured;
     }
 
     public boolean isSynced() {

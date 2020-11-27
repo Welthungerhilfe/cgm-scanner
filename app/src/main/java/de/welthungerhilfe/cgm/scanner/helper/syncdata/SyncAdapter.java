@@ -399,7 +399,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             for (Scan scan : scans.values()) {
 
                 RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(scan))).toString());
-                retrofit.create(ApiService.class).postPerson("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
+                retrofit.create(ApiService.class).postScans("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Observer<Scan>() {
                             @Override
@@ -445,7 +445,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
 
+            person1.setBirthdayString(Utils.convertTimestampToDate(person1.getBirthday()));
+            person1.setQr_scanned(Utils.convertTimestampToDate(person1.getCreated()));
+
+
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(person1))).toString());
+
+            Log.i(TAG,"this is data of person "+(new JSONObject(gson.toJson(person1))).toString());
 
             retrofit.create(ApiService.class).postPerson("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -502,8 +508,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
+            measure.setMeasured(Utils.convertTimestampToDate(measure.getDate()));
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(measure))).toString());
+            Log.i(TAG,"this is data of measure "+(new JSONObject(gson.toJson(measure))).toString());
 
             retrofit.create(ApiService.class).postMeasure("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

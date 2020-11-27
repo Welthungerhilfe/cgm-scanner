@@ -58,9 +58,13 @@ public class Person extends CsvExportableModel implements Serializable {
 
     private String surname;
 
+
+    private long birthday;
+
     @SerializedName("date_of_birth")
     @Expose
-    private long birthday;
+    @Ignore
+    private String birthdayString;
 
     @Expose
     private String sex;  // female, male, other
@@ -77,9 +81,12 @@ public class Person extends CsvExportableModel implements Serializable {
     @Expose
     private String qrcode;
 
+    private long created;
+
     @SerializedName("qr_scanned")
     @Expose
-    private long created;
+    @Ignore
+    private String qr_scanned;
 
     @Expose
     private long timestamp;
@@ -123,6 +130,22 @@ public class Person extends CsvExportableModel implements Serializable {
     @NonNull
     public String getId() {
         return id;
+    }
+
+    public String getBirthdayString() {
+        return birthdayString;
+    }
+
+    public void setBirthdayString(String birthdayString) {
+        this.birthdayString = birthdayString;
+    }
+
+    public String getQr_scanned() {
+        return qr_scanned;
+    }
+
+    public void setQr_scanned(String qr_scanned) {
+        this.qr_scanned = qr_scanned;
     }
 
     public void setId(@NonNull String id) {

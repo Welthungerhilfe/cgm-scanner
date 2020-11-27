@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
 import de.welthungerhilfe.cgm.scanner.datasource.models.SuccessResponse;
 import io.reactivex.rxjava3.core.Observable;
 import okhttp3.MultipartBody;
@@ -20,7 +21,7 @@ import retrofit2.http.Query;
 
 public interface ApiService {
 
-    @POST("person")
+    @POST("persons")
     Observable<Person> postPerson(@Header("Authorization") String auth, @Body RequestBody person);
 
     @POST("measurements")
@@ -29,9 +30,14 @@ public interface ApiService {
     @POST("artifacts")
     Observable<SuccessResponse> postArtifacts(@Header("Authorization") String auth, @Body RequestBody artifacts);
 
+    @POST("scans")
+    Observable<Scan> postScans(@Header("Authorization") String auth, @Body RequestBody scan);
+
     @Multipart
     @POST("upload")
     Observable<SuccessResponse> uploadFiles(@Header("Authorization") String auth, @Part MultipartBody.Part file, @Part("id") RequestBody id);
+
+
 
 
 }
