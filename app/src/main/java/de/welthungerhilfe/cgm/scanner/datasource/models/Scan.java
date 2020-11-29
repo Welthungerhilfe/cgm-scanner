@@ -8,11 +8,28 @@ import java.util.List;
 
 public class Scan implements Serializable {
 
+    @SerializedName("artifacts")
+    @Expose
     private List<Artifact> artifacts;
+
+    @SerializedName("location")
+    @Expose
     private Loc location;
+
+    @SerializedName("type")
+    @Expose
     private int type;
-    private long scan_start;
-    private long scan_end;
+
+    @SerializedName("scan_start")
+    @Expose
+    private String scan_start;
+
+    @SerializedName("scan_end")
+    @Expose
+    private String scan_end;
+
+    @SerializedName("version")
+    @Expose
     private String version;
 
     @SerializedName("person")
@@ -51,19 +68,19 @@ public class Scan implements Serializable {
         this.personServerKey = personServerKey;
     }
 
-    public long getScan_start() {
+    public String getScan_start() {
         return scan_start;
     }
 
-    public void setScan_start(long scan_start) {
+    public void setScan_start(String scan_start) {
         this.scan_start = scan_start;
     }
 
-    public long getScan_end() {
+    public String getScan_end() {
         return scan_end;
     }
 
-    public void setScan_end(long scan_end) {
+    public void setScan_end(String scan_end) {
         this.scan_end = scan_end;
     }
 

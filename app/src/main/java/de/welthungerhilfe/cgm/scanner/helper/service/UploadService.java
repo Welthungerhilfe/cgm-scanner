@@ -3,6 +3,7 @@ package de.welthungerhilfe.cgm.scanner.helper.service;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
 import android.util.Log;
@@ -218,26 +219,28 @@ public class UploadService extends Service implements OnFileLogsLoad {
                     Log.e(TAG, "Data type not supported");
             }
 
-            Utils.sleep(3000);
+            Utils.sleep(1000);
             while (!Utils.isUploadAllowed(getBaseContext())) {
                 Utils.sleep(3000);
             }
 
             try {
+                log.setCreateDate(Utils.getUniversalTimestamp());
                 uploadFiles(log, mime);
             } catch (FileNotFoundException e) {
                 Log.i(TAG,"this is exception "+e.getMessage());
 
                 log.setDeleted(true);
                 log.setStatus(FILE_NOT_FOUND);
+
             } catch (Exception e) {
                 Log.i(TAG,"this is exception "+e.getMessage());
 
                 log.setStatus(UPLOAD_ERROR);
             }
-            log.setCreateDate(Utils.getUniversalTimestamp());
-
-            repository.updateFileLog(log);
+            if(log.getServerId()!=null) {
+                repository.updateFileLog(log);
+            }
 
             synchronized (lock) {
                 pendingArtefacts.remove(log.getId());
@@ -283,21 +286,21 @@ public class UploadService extends Service implements OnFileLogsLoad {
         }
         inputStream.close();
 
-        RequestBody id = RequestBody.create(MediaType.parse("multipart/form-data"), log.getId());
-        retrofit.create(ApiService.class).uploadFiles(sessionManager.getAuthToken(),body,id).subscribeOn(Schedulers.io())
+        RequestBody filename = RequestBody.create(MediaType.parse("multipart/form-data"), file.getName());
+        retrofit.create(ApiService.class).uploadFiles(sessionManager.getAuthToken(),body,filename).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new Observer<SuccessResponse>() {
+            .subscribe(new Observer<String>() {
                 @Override
                 public void onSubscribe(@NonNull Disposable d) {
 
                 }
 
                 @Override
-                public void onNext(@NonNull SuccessResponse posts) {
-                    Log.i(TAG, "this is response uploadfiles " + posts.getMessage()+ file.getPath());
-                    //TODO:parse response: if (success)
-                    {
+                public void onNext(@NonNull String id) {
+                    Log.i(TAG, "this is response uploadfiles " + id+ file.getPath());
+
                         log.setUploadDate(Utils.getUniversalTimestamp());
+                        log.setServerId(id);
 
                         if (file.delete()) {
                             log.setDeleted(true);
@@ -305,8 +308,11 @@ public class UploadService extends Service implements OnFileLogsLoad {
                         } else {
                             log.setStatus(UPLOADED);
                         }
-                        //TODO:store received ID into FileLog RoomDB
-                    }
+
+                  updateFileLog(log);
+
+
+
                 }
 
                 @Override
@@ -320,5 +326,23 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
                 }
             });
+    }
+
+    public void updateFileLog(FileLog log)
+    {
+        new AsyncTask<Void,Void,Void>()
+        {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                repository.updateFileLog(log);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                Log.i(TAG,"this is saved "+ log.getServerId()+ log.getPath());
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 }

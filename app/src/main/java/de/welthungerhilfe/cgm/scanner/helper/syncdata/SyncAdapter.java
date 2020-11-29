@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SyncRequest;
 import android.content.SyncResult;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,6 +34,7 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
@@ -178,7 +180,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     processCachedMeasures();*/
 
 
-               //     measureRepository.uploadMeasures(getContext());
+                    //     measureRepository.uploadMeasures(getContext());
                     session.setSyncTimestamp(currentTimestamp);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -317,17 +319,24 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 List<Measure> syncableMeasures = measureRepository.getSyncableMeasure();
                 for (int i = 0; i < syncableMeasures.size(); i++) {
                     Measure measure = syncableMeasures.get(i);
+                    String localPersonId = measure.getPersonId();
+                    Person person = personRepository.getPersonById(localPersonId);
+                    String backendPersonId = person.getServerId();
+                    if (backendPersonId == null) {
+                        return;
+                    }
+                    measure.setPersonServerKey(backendPersonId);
+
                     if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
-                        String localPersonId = measure.getPersonId();
-                        Person person = personRepository.getPersonById(localPersonId);
-                        String backendPersonId = person.getServerId();
-                        if(backendPersonId!=null) {
-                            measure.setPersonServerKey(backendPersonId);
+
+
+                        if (backendPersonId != null) {
                             postMeasurment(measure);
                         }
                     } else {
                         HashMap<Integer, Scan> scans = measure.split(fileLogRepository);
                         if (!scans.isEmpty()) {
+                            Log.i(TAG, "this is values of scan " + scans);
                             postScans(scans, measure);
                         }
                     }
@@ -398,6 +407,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             final int[] count = {scans.values().size()};
             for (Scan scan : scans.values()) {
 
+                Log.i(TAG, "this is data of postScan " + (new JSONObject(gson.toJson(scan))).toString());
+
                 RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(scan))).toString());
                 retrofit.create(ApiService.class).postScans("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -409,18 +420,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                             @Override
                             public void onNext(@NonNull Scan scan) {
-                                Log.i("MeasureRepository", "this is inside onNext artifactsList " + scan.toString());
-
-                                //TODO:parse response: if (success)
-                                {
-                                    count[0]--;
-                                    if (count[0] == 0) {
-                                        measure.setArtifact_synced(true);
-                                        measure.setTimestamp(session.getSyncTimestamp());
-                                        measure.setUploaded_at(System.currentTimeMillis());
-                                        updateMeasure(measure);
-                                    }
+                                Log.i(TAG, "this is inside onNext artifactsList " + scan.toString());
+                                count[0]--;
+                                if (count[0] == 0) {
+                                    measure.setArtifact_synced(true);
+                                    measure.setTimestamp(session.getSyncTimestamp());
+                                    measure.setUploaded_at(System.currentTimeMillis());
+                                    measure.setSynced(true);
+                                    updateMeasure(measure);
                                 }
+
                             }
 
                             @Override
@@ -451,7 +460,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(person1))).toString());
 
-            Log.i(TAG,"this is data of person "+(new JSONObject(gson.toJson(person1))).toString());
+            Log.i(TAG, "this is data of person " + (new JSONObject(gson.toJson(person1))).toString());
 
             retrofit.create(ApiService.class).postPerson("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -463,12 +472,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Person person) {
-                            Log.i(TAG, "this is inside of person on next  " +person);
+                            Log.i(TAG, "this is inside of person on next  " + person);
                             person.setTimestamp(prevTimestamp);
                             person.setId(person1.getId());
                             person.setSurname(person1.getSurname());
                             person.setCreatedBy(person1.getCreatedBy());
+                            person.setCreated(person1.getCreated());
                             person.setSynced(true);
+                            Loc location = new Loc();
+                            person.setLastLocation(location);
+                            person.getLastLocation().setAddress(person1.getLastLocation().getAddress());
+                            person.getLastLocation().setLatitude(person1.getLastLocation().getLatitude());
+                            person.getLastLocation().setLongitude(person1.getLastLocation().getLongitude());
+                            person.setBirthday(person1.getBirthday());
                             updatePerson(person);
                         }
 
@@ -511,7 +527,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             measure.setMeasured(Utils.convertTimestampToDate(measure.getDate()));
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(measure))).toString());
-            Log.i(TAG,"this is data of measure "+(new JSONObject(gson.toJson(measure))).toString());
+            Log.i(TAG, "this is data of measure " + (new JSONObject(gson.toJson(measure))).toString());
 
             retrofit.create(ApiService.class).postMeasure("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -523,11 +539,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Measure measure1) {
-                            Log.i(TAG, "this is inside of measure on next  " +measure1);
+                            Log.i(TAG, "this is inside of measure on next  " + measure1);
                             measure1.setTimestamp(prevTimestamp);
                             measure1.setId(measure.getId());
                             measure1.setPersonId(measure.getPersonId());
                             measure1.setType(AppConstants.VAL_MEASURE_MANUAL);
+                            measure1.setCreatedBy(measure.getCreatedBy());
+                            measure1.setDate(measure.getDate());
+                            measure1.setUploaded_at(session.getSyncTimestamp());
                             measure1.setSynced(true);
                             updateMeasure(measure1);
                         }

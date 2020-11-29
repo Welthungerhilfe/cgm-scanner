@@ -38,6 +38,7 @@ import java.util.Set;
 
 import de.welthungerhilfe.cgm.scanner.datasource.repository.CsvExportableModel;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static androidx.room.ForeignKey.CASCADE;
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_MEASURE;
@@ -86,7 +87,6 @@ public class Measure extends CsvExportableModel implements Serializable {
 
     @Expose
     private double muac;
-
 
     private double headCircumference;
     private String artifact;
@@ -348,15 +348,19 @@ public class Measure extends CsvExportableModel implements Serializable {
     }
 
     @NonNull
-    public String getScannedBy() { return scannedBy; }
+    public String getScannedBy() {
+        return scannedBy;
+    }
 
-    public void setScannedBy(@NonNull String scannedBy) { this.scannedBy = scannedBy; }
+    public void setScannedBy(@NonNull String scannedBy) {
+        this.scannedBy = scannedBy;
+    }
 
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d,%d,%f,%f,%s",id,personId,date,type,age,height,weight,
-                muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at,
-                heightConfidence,weightConfidence,scannedBy);
+        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d,%d,%f,%f,%s", id, personId, date, type, age, height, weight,
+                muac, headCircumference, artifact, visible, oedema, timestamp, createdBy, deleted, deletedBy, qrCode, schema_version, artifact_synced, uploaded_at, resulted_at, received_at,
+                heightConfidence, weightConfidence, scannedBy);
     }
 
     @Override
@@ -396,6 +400,7 @@ public class Measure extends CsvExportableModel implements Serializable {
                     artifact.setFile(log.getServerId());
                     artifact.setFormat(log.getType());
                     artifact.setTimestamp(log.getCreateDate());
+                    artifact.setTimestampString(Utils.convertTimestampToDate(log.getCreateDate()));
                     stepArtifacts.add(artifact);
                 }
             }
@@ -409,8 +414,8 @@ public class Measure extends CsvExportableModel implements Serializable {
             scan.setArtifacts(stepArtifacts);
             scan.setLocation(getLocation());
             scan.setPersonServerKey(getPersonServerKey());
-            scan.setScan_start(getTimestamp());
-            scan.setScan_end(getDate());
+            scan.setScan_start(Utils.convertTimestampToDate(getTimestamp()));
+            scan.setScan_end(Utils.convertTimestampToDate(getDate()));
             scan.setType(key);
             scan.setVersion(getType());
             output.replace(key, scan);

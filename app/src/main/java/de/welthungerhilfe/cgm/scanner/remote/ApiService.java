@@ -34,8 +34,8 @@ public interface ApiService {
     Observable<Scan> postScans(@Header("Authorization") String auth, @Body RequestBody scan);
 
     @Multipart
-    @POST("upload")
-    Observable<SuccessResponse> uploadFiles(@Header("Authorization") String auth, @Part MultipartBody.Part file, @Part("id") RequestBody id);
+    @POST("files")
+    Observable<String> uploadFiles(@Header("Authorization") String auth, @Part MultipartBody.Part file, @Part("filename") RequestBody id);
 
 
 

@@ -19,6 +19,7 @@ public class FileLog extends CsvExportableModel implements Serializable {
     @PrimaryKey
     @NonNull
     private String id;
+    private String serverId;
     private String type; // consent, pcd, rgb
     private String path;
     private String hashValue;
@@ -34,7 +35,6 @@ public class FileLog extends CsvExportableModel implements Serializable {
     private String measureId;
     private int step;
 
-    private String serverId;
 
     @NonNull
     public String getId() {

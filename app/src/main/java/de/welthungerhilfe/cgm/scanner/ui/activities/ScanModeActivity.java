@@ -15,12 +15,16 @@ import android.media.Image;
 import android.media.MediaActionSound;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -76,6 +80,7 @@ import de.welthungerhilfe.cgm.scanner.helper.camera.CameraCalibration;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ICamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoCamera;
 import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreUtils;
+import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.helper.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.IO;
@@ -186,6 +191,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         changeMode();
     }
+
     @OnClick(R.id.lytScanLying)
     void scanLying() {
         SCAN_MODE = AppConstants.SCAN_LYING;
@@ -200,6 +206,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         changeMode();
     }
+
     @SuppressLint("SetTextI18n")
     @OnClick({R.id.btnScanStep1, R.id.btnRetake1})
     void scanStep1() {
@@ -218,6 +225,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             openScan();
         }
     }
+
     @SuppressLint("SetTextI18n")
     @OnClick({R.id.btnScanStep2, R.id.btnRetake2})
     void scanStep2() {
@@ -236,6 +244,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             openScan();
         }
     }
+
     @SuppressLint("SetTextI18n")
     @OnClick({R.id.btnScanStep3, R.id.btnRetake3})
     void scanStep3() {
@@ -413,7 +422,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         getCamera().onCreate();
 
-        measureRepository = MeasureRepository.getInstance(this,retrofit);
+        measureRepository = MeasureRepository.getInstance(this, retrofit);
         fileLogRepository = FileLogRepository.getInstance(this);
         artifactResultRepository = ArtifactResultRepository.getInstance(this);
         artifacts = new ArrayList<>();
@@ -467,45 +476,45 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         File extFileDir = AppController.getInstance().getRootDirectory();
 
         Log.e("Root Directory", extFileDir.getParent());
-        mScanArtefactsOutputFolder = new File(extFileDir,person.getQrcode() + "/measurements/" + mNowTimeString + "/");
-        mDepthmapSaveFolder = new File(mScanArtefactsOutputFolder,"depth");
-        mRgbSaveFolder = new File(mScanArtefactsOutputFolder,"rgb");
+        mScanArtefactsOutputFolder = new File(extFileDir, person.getQrcode() + "/measurements/" + mNowTimeString + "/");
+        mDepthmapSaveFolder = new File(mScanArtefactsOutputFolder, "depth");
+        mRgbSaveFolder = new File(mScanArtefactsOutputFolder, "rgb");
 
-        if(!mDepthmapSaveFolder.exists()) {
+        if (!mDepthmapSaveFolder.exists()) {
             boolean created = mDepthmapSaveFolder.mkdirs();
             if (created) {
                 Log.i(TAG, "Folder: \"" + mDepthmapSaveFolder + "\" created\n");
             } else {
-                Log.e(TAG,"Folder: \"" + mDepthmapSaveFolder + "\" could not be created!\n");
+                Log.e(TAG, "Folder: \"" + mDepthmapSaveFolder + "\" could not be created!\n");
             }
         }
 
-        if(!mRgbSaveFolder.exists()) {
+        if (!mRgbSaveFolder.exists()) {
             boolean created = mRgbSaveFolder.mkdirs();
             if (created) {
                 Log.i(TAG, "Folder: \"" + mRgbSaveFolder + "\" created\n");
             } else {
-                Log.e(TAG,"Folder: \"" + mRgbSaveFolder + "\" could not be created!\n");
+                Log.e(TAG, "Folder: \"" + mRgbSaveFolder + "\" could not be created!\n");
             }
         }
 
-        Log.v(TAG,"mDepthmapSaveFolder: "+mDepthmapSaveFolder);
-        Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
+        Log.v(TAG, "mDepthmapSaveFolder: " + mDepthmapSaveFolder);
+        Log.v(TAG, "mRgbSaveFolder: " + mRgbSaveFolder);
     }
 
     private void updateScanningProgress() {
         float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 24 : 8);
         float progressToAddFloat = 100.0f / cloudsToFinishScan;
         int progressToAdd = (int) progressToAddFloat;
-        Log.d(TAG, progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
-        if (mProgress+progressToAdd > 100) {
+        Log.d(TAG, progressToAddFloat + " currentProgress: " + mProgress + " progressToAdd: " + progressToAdd);
+        if (mProgress + progressToAdd > 100) {
             mProgress = 100;
             runOnUiThread(() -> {
                 fab.setImageResource(R.drawable.done);
                 goToNextStep();
             });
         } else {
-            mProgress = mProgress+progressToAdd;
+            mProgress = mProgress + progressToAdd;
         }
 
         Log.d("scan_progress", String.valueOf(mProgress));
@@ -656,7 +665,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, PERMISSION_LOCATION);
         } else {
-            LocationManager lm = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+            LocationManager lm = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
             boolean isGPSEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
             boolean isNetworkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -767,11 +776,20 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 }
                 measureRepository.insertMeasure(measure);
             }
+
+            runOnUiThread(() -> {
+                if (!UploadService.isInitialized()) {
+                    startService(new Intent(getApplicationContext(), UploadService.class));
+                } else {
+                    UploadService.forceResume();
+                }
+            });
             return null;
         }
 
         public void onPostExecute(Void result) {
             try {
+                UploadService.forceResume();
                 activity.finish();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -888,7 +906,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             float lightIntensity = mCameraInstance.getLightIntensity();
             float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
             float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
-            double Artifact_Confidence_penalty = Math.abs((double) depthmap.getCount()/38000-1.0)*100*3;
+            double Artifact_Confidence_penalty = Math.abs((double) depthmap.getCount() / 38000 - 1.0) * 100 * 3;
 
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
             mNumberOfFilesWritten++;
@@ -953,11 +971,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onTangoColorData(TangoImageBuffer tangoImageBuffer) {
-        if ( ! mIsRecording) {
+        if (!mIsRecording) {
             return;
         }
 
-        String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + String.format(Locale.US, "%f", tangoImageBuffer.timestamp) + ".jpg";
+        String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + String.format(Locale.US, "%f", tangoImageBuffer.timestamp) + ".jpg";
         File artifactFile = new File(mRgbSaveFolder.getPath(), currentImgFilename);
         TangoUtils.writeImageToFile(tangoImageBuffer, artifactFile);
 
@@ -1003,7 +1021,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         onLightUpdate(mCameraInstance.getLightConditionState());
 
         // Saving the frame or not, depending on the current mode.
-        if ( mIsRecording ) {
+        if (mIsRecording) {
             long profile = System.currentTimeMillis();
             int numPoints = pointCloudData.numPoints;
             double timestamp = pointCloudData.timestamp;
@@ -1016,13 +1034,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             float lightIntensity = mCameraInstance.getLightIntensity();
             float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
             float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
-            double Artifact_Lighting_penalty=Math.abs((double) numPoints/38000-1.0)*100*3;
+            double Artifact_Lighting_penalty = Math.abs((double) numPoints / 38000 - 1.0) * 100 * 3;
 
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
                     "_" + mNumberOfFilesWritten++ + "_" + String.format(Locale.US, "%f", pointCloudData.timestamp) + ".depth";
 
-            ArtifactResult ar=new ArtifactResult();
-            ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
+            ArtifactResult ar = new ArtifactResult();
+            ar.setConfidence_value(String.valueOf(100 - Artifact_Lighting_penalty));
             ar.setArtifact_id(AppController.getInstance().getPersonId());
             ar.setKey(SCAN_STEP);
             ar.setMeasure_id(measure.getId());

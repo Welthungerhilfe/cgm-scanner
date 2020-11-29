@@ -26,12 +26,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+
 import android.content.Context;
 import android.os.Bundle;
+
 import com.google.android.material.snackbar.Snackbar;
+
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatRadioButton;
+
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -124,15 +128,14 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         super.onActivityCreated(instance);
 
 
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_personal, container, false);
 
-        factory = new CreateDataViewModelProvideFactory(getActivity(),retrofit);
-        viewModel = new ViewModelProvider(getActivity(),factory).get(CreateDataViewModel.class);
+        factory = new CreateDataViewModelProvideFactory(getActivity(), retrofit);
+        viewModel = new ViewModelProvider(getActivity(), factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
             initUI();
@@ -176,7 +179,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         radioMale.setOnCheckedChangeListener(this);
 
         View contextMenu = view.findViewById(R.id.contextMenuButton);
-        contextMenu.setOnClickListener(view12 -> new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+        contextMenu.setOnClickListener(view12 -> new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
                 new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
         }, which -> {
             ContactSupportDialog.show((BaseActivity) getActivity(), "data " + person.getQrcode(), "personID:" + person.getId());
@@ -187,7 +190,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     public void initUI() {
         if (person == null) {
-            setLocation(((CreateDataActivity)getActivity()).location);
+            setLocation(((CreateDataActivity) getActivity()).location);
             return;
         } else {
             setLocation(person.getLastLocation());
@@ -233,31 +236,31 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         String guardian = editGuardian.getText().toString();
 
         if (name.isEmpty()) {
-            editName.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.name_tooltip)));
+            editName.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.name_tooltip)));
             valid = false;
         } else {
             editName.setError(null);
         }
 
         if (prename.isEmpty()) {
-            editPrename.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.prename_tooltip)));
+            editPrename.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.prename_tooltip)));
             valid = false;
         } else {
             editPrename.setError(null);
         }
 
         if (birth.isEmpty()) {
-            editBirth.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.birthday_tooltip)));
+            editBirth.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.birthday_tooltip)));
             valid = false;
-        } else if (birth.equals("DD-MM-YYYY")){
-            editBirth.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.birthday_tooltip)));
+        } else if (birth.equals("DD-MM-YYYY")) {
+            editBirth.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.birthday_tooltip)));
             valid = false;
         } else {
             editBirth.setError(null);
         }
 
         if (guardian.isEmpty()) {
-            editGuardian.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.guardian_tooltip)));
+            editGuardian.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.guardian_tooltip)));
             valid = false;
         } else {
             editGuardian.setError(null);

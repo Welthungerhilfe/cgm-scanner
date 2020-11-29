@@ -1,10 +1,28 @@
 package de.welthungerhilfe.cgm.scanner.datasource.models;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 public class Artifact {
 
+
     private long timestamp;
+
+
+    @SerializedName("timestamp")
+    @Expose
+    private String timestampString;
+
+    @SerializedName("order")
+    @Expose
     private int order;
+
+    @SerializedName("file")
+    @Expose
     private String file;
+
+    @SerializedName("format")
+    @Expose
     private String format;
 
 
@@ -36,7 +54,17 @@ public class Artifact {
         return format;
     }
 
-    public void setFormat(String order) {
+    public String getTimestampString() {
+        return timestampString;
+    }
+
+    public void setTimestampString(String timestampString) {
+        this.timestampString = timestampString;
+    }
+
+    public void setFormat(String format) {
         this.format = format;
     }
+
+
 }

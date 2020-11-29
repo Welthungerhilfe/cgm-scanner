@@ -3,6 +3,7 @@ package de.welthungerhilfe.cgm.scanner.datasource.viewmodel;
 import android.accounts.Account;
 import android.annotation.SuppressLint;
 import android.app.Application;
+
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -10,6 +11,7 @@ import androidx.lifecycle.Transformations;
 
 import android.content.Context;
 import android.os.AsyncTask;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 
@@ -34,7 +36,7 @@ public class CreateDataViewModel extends ViewModel {
 
     private PersonRepository personRepository;
     private MeasureRepository measureRepository;
-    private  SessionManager sessionManager;
+    private SessionManager sessionManager;
     Context context;
 
    /* public CreateDataViewModel(@NonNull Application application) {
@@ -42,16 +44,15 @@ public class CreateDataViewModel extends ViewModel {
 
     }*/
 
-   public CreateDataViewModel(Context context, Retrofit retrofit) {
+    public CreateDataViewModel(Context context, Retrofit retrofit) {
 
         personRepository = PersonRepository.getInstance(context);
-        measureRepository = MeasureRepository.getInstance(context,retrofit);
+        measureRepository = MeasureRepository.getInstance(context, retrofit);
         sessionManager = new SessionManager(context);
         this.context = context;
 
 
-
-   }
+    }
 
     public LiveData<Integer> getCurrentTab() {
         return tabLiveData;
@@ -117,7 +118,7 @@ public class CreateDataViewModel extends ViewModel {
 
                 setActiveTab(1);
 
-      //         startPerodicSync();
+                //         startPerodicSync();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -133,15 +134,14 @@ public class CreateDataViewModel extends ViewModel {
 
             public void onPostExecute(Void result) {
                 setActiveTab(2);
-          //     startPerodicSync();
+                //     startPerodicSync();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public void startPerodicSync()
-    {
+    public void startPerodicSync() {
         final Account accountData = new Account(sessionManager.getUserEmail(), AppConstants.ACCOUNT_TYPE);
 
-        SyncAdapter.startPeriodicSync(accountData,context.getApplicationContext());
+        SyncAdapter.startPeriodicSync(accountData, context.getApplicationContext());
     }
 }

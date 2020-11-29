@@ -47,7 +47,7 @@ public class Person extends CsvExportableModel implements Serializable {
     private String id;  // firebase id
 
     @SerializedName("id")
-    @Expose
+    @Expose(serialize = false)
     private String serverId;
 
     private boolean isSynced = false;
