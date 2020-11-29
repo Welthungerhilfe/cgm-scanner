@@ -31,6 +31,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -404,7 +405,7 @@ public class Measure extends CsvExportableModel implements Serializable {
                     stepArtifacts.add(artifact);
                 }
             }
-            stepArtifacts.sort((a, b) -> (int) (b.getTimestamp() - a.getTimestamp()));
+            Collections.sort(stepArtifacts, (a, b) -> (int) (b.getTimestamp() - a.getTimestamp()));
             for (int i = 0; i < stepArtifacts.size(); i++) {
                 stepArtifacts.get(i).setOrder(i);
             }
@@ -418,7 +419,8 @@ public class Measure extends CsvExportableModel implements Serializable {
             scan.setScan_end(Utils.convertTimestampToDate(getDate()));
             scan.setType(key);
             scan.setVersion(getType());
-            output.replace(key, scan);
+            output.remove(key);
+            output.put(key, scan);
         }
         return output;
     }
