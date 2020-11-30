@@ -272,7 +272,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     }
 
 
-    private void processAuth(String token, String email, boolean feedback) {
+    private void processAuth(String email, String token, boolean feedback) {
 
         try {
             if (email != null && !email.isEmpty()) {
