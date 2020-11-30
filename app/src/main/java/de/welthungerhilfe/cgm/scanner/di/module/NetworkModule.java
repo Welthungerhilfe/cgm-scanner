@@ -88,7 +88,7 @@ public class NetworkModule {
             return AppConstants.testing_url;
         } else {
             // production build
-            return "{OAUTH_SCOPE}/";
+            return "{API_URL}/";
         }
     }
 }
