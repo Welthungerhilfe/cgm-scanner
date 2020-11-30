@@ -128,41 +128,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         }
 
         if (session.isSigned()) {
-            Account[] accounts = accountManager.getAccountsByType(AppConstants.ACCOUNT_TYPE);
-            if (accounts.length > 0) {
-                if (!ContentResolver.isSyncActive(accounts[0], getString(R.string.sync_authority))) {
-                    SyncAdapter.startPeriodicSync(accounts[0], getApplicationContext());
-                }
-            } else {
-
-                try {
-                    JWT parsedToken = JWTParser.parse(session.getAuthToken());
-                    Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
-
-                    JSONArray emails = (JSONArray) claims.get("emails");
-                    if (emails != null && !emails.isEmpty()) {
-                        String token = (String) claims.get("at_hash");
-                        String firstEmail = emails.get(0).toString();
-
-                        final Account account = new Account(firstEmail, AppConstants.ACCOUNT_TYPE);
-
-                        accountManager.addAccountExplicitly(account, token, null);
-
-                        SyncAdapter.startPeriodicSync(account, getApplicationContext());
-
-                        final Intent intent = new Intent();
-                        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, firstEmail);
-                        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
-                        intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
-
-                        setAccountAuthenticatorResult(intent.getExtras());
-                        setResult(RESULT_OK, intent);
-                    }
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            }
-
             if (session.getTutorial())
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
             else
