@@ -47,14 +47,11 @@ import com.nimbusds.jwt.JWTParser;
 
 import net.minidev.json.JSONArray;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.Map;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
@@ -131,41 +128,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         }
 
         if (session.isSigned()) {
-            Account[] accounts = accountManager.getAccountsByType(AppConstants.ACCOUNT_TYPE);
-            if (accounts.length > 0) {
-                if (!ContentResolver.isSyncActive(accounts[0], getString(R.string.sync_authority))) {
-                    SyncAdapter.startPeriodicSync(accounts[0], getApplicationContext());
-                }
-            } else {
-
-                try {
-                    JWT parsedToken = JWTParser.parse(session.getAuthToken());
-                    Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
-
-                    JSONArray emails = (JSONArray) claims.get("emails");
-                    if (emails != null && !emails.isEmpty()) {
-                        String token = (String) claims.get("at_hash");
-                        String firstEmail = emails.get(0).toString();
-
-                        final Account account = new Account(firstEmail, AppConstants.ACCOUNT_TYPE);
-
-                        accountManager.addAccountExplicitly(account, token, null);
-
-                        SyncAdapter.startPeriodicSync(account, getApplicationContext());
-
-                        final Intent intent = new Intent();
-                        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, firstEmail);
-                        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
-                        intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
-
-                        setAccountAuthenticatorResult(intent.getExtras());
-                        setResult(RESULT_OK, intent);
-                    }
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            }
-
             if (session.getTutorial())
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
             else
@@ -206,10 +168,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             public void onSuccess(IAuthenticationResult authenticationResult) {
                 /* Successfully got a token, use it to call a protected resource - MSGraph */
                 Log.d(TAG, "Successfully authenticated");
-                Log.d(TAG, "ID Token: " + authenticationResult.getAccount().getIdToken());
+                Log.d(TAG, "ID Token: " + authenticationResult.getAccessToken());
 
                 /* Update account */
-                processAuth(authenticationResult.getAccount(), true);
+                processAuth(authenticationResult.getAccount().getUsername(), authenticationResult.getAccessToken(), true);
 
                 /* call graph */
                 callGraphAPI(authenticationResult);
@@ -260,7 +222,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             @Override
             public void onAccountLoaded(@Nullable IAccount activeAccount) {
                 // You can use the account data to update your UI or your app database.
-                processAuth(activeAccount, false);
+                processAuth(activeAccount.getUsername(), session.getAuthToken(), false);
             }
 
             @Override
@@ -275,11 +237,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     }
 
 
-    private void processAuth(IAccount account, boolean feedback) {
+    private void processAuth(String email, String token, boolean feedback) {
 
         try {
-            String token = account.getIdToken();
-            String email = account.getUsername();
             if (email != null && !email.isEmpty()) {
                 session.setAuthToken(token);
 
