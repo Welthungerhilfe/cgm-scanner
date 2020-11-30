@@ -419,7 +419,7 @@ public class Measure extends CsvExportableModel implements Serializable {
             scan.setScan_end(Utils.convertTimestampToDate(getDate()));
             scan.setType(key);
             scan.setVersion(getType());
-            output.remove(key);
+        //    output.remove(key);
             output.put(key, scan);
         }
         return output;
