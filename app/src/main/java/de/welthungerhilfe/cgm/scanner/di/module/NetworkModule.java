@@ -61,7 +61,7 @@ public class NetworkModule {
         // add logging as last interceptor
 //        client.cookieJar(new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(NapsNibbleApp.getContext())));
         client.addInterceptor(logging);
-        client.addInterceptor(new HttpInterceptor(AppConstants.testing_url, client));
+        client.addInterceptor(new HttpInterceptor(getUrl(), client));
 //        client.addInterceptor(new AddCookiesInterceptor());
 //        client.addInterceptor(new ReceivedCookiesInterceptor());
         client.cache(cache);
@@ -76,16 +76,19 @@ public class NetworkModule {
         Retrofit retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
-                .baseUrl(AppConstants.testing_url)
+                .baseUrl(getUrl())
                 .client(new OkHttpClient())
                 .build();
         return retrofit;
     }
 
-
-
-
-
-
-
+    private String getUrl() {
+        if (BuildConfig.DEBUG) {
+            // development build
+            return AppConstants.testing_url;
+        } else {
+            // production build
+            return "{OAUTH_SCOPE}";
+        }
+    }
 }
