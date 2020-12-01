@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SyncRequest;
 import android.content.SyncResult;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,7 +26,6 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -40,7 +38,6 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
-import de.welthungerhilfe.cgm.scanner.datasource.models.SuccessResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
@@ -48,6 +45,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureResultReposit
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.helper.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.remote.ApiService;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
@@ -435,6 +433,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             @Override
                             public void onError(@NonNull Throwable e) {
                                 Log.i(TAG, "this is value of post " + e.getMessage());
+                                AuthenticationHandler authentication = AuthenticationHandler.getInstance();
+                                if (authentication.isExpiredToken(e.getMessage())) {
+                                    authentication.updateToken(null);
+                                }
                             }
 
                             @Override
@@ -491,6 +493,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is value of post " + e.getMessage());
+                            AuthenticationHandler authentication = AuthenticationHandler.getInstance();
+                            if (authentication.isExpiredToken(e.getMessage())) {
+                                authentication.updateToken(null);
+                            }
                         }
 
                         @Override
@@ -554,6 +560,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is value of post " + e.getMessage());
+                            AuthenticationHandler authentication = AuthenticationHandler.getInstance();
+                            if (authentication.isExpiredToken(e.getMessage())) {
+                                authentication.updateToken(null);
+                            }
                         }
 
                         @Override
