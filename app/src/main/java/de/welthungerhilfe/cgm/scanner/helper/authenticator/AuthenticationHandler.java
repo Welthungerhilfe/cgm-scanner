@@ -101,6 +101,10 @@ public class AuthenticationHandler {
         singleAccountApp.signIn(activity, null, scopes, getAuthInteractiveCallback());
     }
 
+    public boolean isExpiredToken(String message) {
+        return message.contains("401");
+    }
+
     public void updateToken(IAuthenticationCallback callback) {
         this.callback = callback;
 
@@ -109,12 +113,16 @@ public class AuthenticationHandler {
             @Override
             public void onSuccess(IAuthenticationResult authenticationResult) {
                 session.setAuthToken(authenticationResult.getAccessToken());
-                callback.processAuth(session.getUserEmail(), session.getAuthToken(), false);
+                if (callback != null) {
+                    callback.processAuth(session.getUserEmail(), session.getAuthToken(), false);
+                }
             }
 
             @Override
             public void onError(MsalException exception) {
-                callback.processAuth(null, null, false);
+                if (callback != null) {
+                    callback.processAuth(null, null, false);
+                }
             }
         });
     }

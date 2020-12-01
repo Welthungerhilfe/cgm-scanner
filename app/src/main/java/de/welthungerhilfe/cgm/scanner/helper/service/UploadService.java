@@ -26,6 +26,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.helper.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.remote.ApiService;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
@@ -296,7 +297,10 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 public void onError(@NonNull Throwable e) {
 
                     Log.i(TAG, "this is response onError uploadfiles " + e.getMessage() + file.getPath());
-                    //TODO:update token, update queue
+                    AuthenticationHandler authentication = AuthenticationHandler.getInstance();
+                    if (authentication.isExpiredToken(e.getMessage())) {
+                        authentication.updateToken((email, token, feedback) -> updateFileLog(log));
+                    }
                 }
 
                 @Override
