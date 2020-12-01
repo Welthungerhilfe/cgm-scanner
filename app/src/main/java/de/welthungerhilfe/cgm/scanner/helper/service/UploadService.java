@@ -3,6 +3,7 @@ package de.welthungerhilfe.cgm.scanner.helper.service;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
 import android.util.Log;
@@ -286,29 +287,17 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 public void onNext(@NonNull String id) {
                     Log.i(TAG, "this is response uploadfiles " + id+ file.getPath());
 
-                        log.setUploadDate(Utils.getUniversalTimestamp());
-                        log.setServerId(id);
+                    log.setUploadDate(Utils.getUniversalTimestamp());
+                    log.setServerId(id);
 
-                        if (file.delete()) {
-                            log.setDeleted(true);
-                            log.setStatus(UPLOADED_DELETED);
-                        } else {
-                            log.setStatus(UPLOADED);
-                        }
-
-                    repository.updateFileLog(log);
-                    Log.i(TAG,"this is saved "+ log.getServerId()+ log.getPath());
-
-                    synchronized (lock) {
-                        pendingArtefacts.remove(log.getId());
-                        remainingCount--;
-                        Log.i(TAG,"this is artifacts in queue "+remainingCount);
-                        Log.e(TAG, String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
-                        if (remainingCount <= 0) {
-                            loadQueueFileLogs();
-                        }
-                        lock.notify();
+                    if (file.delete()) {
+                        log.setDeleted(true);
+                        log.setStatus(UPLOADED_DELETED);
+                    } else {
+                        log.setStatus(UPLOADED);
                     }
+
+                    updateFileLog(log);
                 }
 
                 @Override
@@ -322,5 +311,34 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
                 }
             });
+    }
+
+    public void updateFileLog(FileLog log)
+    {
+        new AsyncTask<Void,Void,Void>()
+        {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                repository.updateFileLog(log);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                Log.i(TAG,"this is saved "+ log.getServerId()+ log.getPath());
+
+                synchronized (lock) {
+                    pendingArtefacts.remove(log.getId());
+                    remainingCount--;
+                    Log.i(TAG,"this is artifacts in queue "+remainingCount);
+                    Log.e(TAG, String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
+                    if (remainingCount <= 0) {
+                        loadQueueFileLogs();
+                    }
+                    lock.notify();
+                }
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 }
