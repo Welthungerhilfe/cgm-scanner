@@ -21,9 +21,13 @@ import android.widget.LinearLayout;
 
 import java.io.File;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import dagger.android.AndroidInjection;
+import dagger.android.support.AndroidSupportInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -39,6 +43,7 @@ import de.welthungerhilfe.cgm.scanner.ui.views.ToggleView;
 import de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import retrofit2.Retrofit;
 
 public class SettingsActivity extends BaseActivity {
 
@@ -76,6 +81,9 @@ public class SettingsActivity extends BaseActivity {
     @BindView(R.id.show_depth_data)
     ToggleView switchShowDepth;
 
+    @Inject
+    Retrofit retrofit;
+
     @OnClick(R.id.submenu_performance_measurement)
     void openPerformanceMeasurement(View view) {
         Intent intent = new Intent(SettingsActivity.this, SettingsPerformanceActivity.class);
@@ -98,7 +106,7 @@ public class SettingsActivity extends BaseActivity {
         setContentView(R.layout.activity_settings);
 
         ButterKnife.bind(this);
-
+        AndroidInjection.inject(this);
         session = new SessionManager(this);
         RemoteConfig config = session.getRemoteConfig();
 
@@ -210,7 +218,7 @@ public class SettingsActivity extends BaseActivity {
         progressDialog.show();
         long timestamp = System.currentTimeMillis();
         File dir = AppController.getInstance().getRootDirectory();
-        BackupManager.doBackup(this, dir, timestamp, () -> {
+        BackupManager.doBackup(this, dir, timestamp, retrofit,() -> {
             session.setBackupTimestamp(timestamp);
             txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, timestamp));
             progressDialog.dismiss();

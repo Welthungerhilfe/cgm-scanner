@@ -4,6 +4,9 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.annotation.NonNull;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 import java.util.Locale;
 
@@ -16,6 +19,7 @@ public class FileLog extends CsvExportableModel implements Serializable {
     @PrimaryKey
     @NonNull
     private String id;
+    private String serverId;
     private String type; // consent, pcd, rgb
     private String path;
     private String hashValue;
@@ -29,6 +33,8 @@ public class FileLog extends CsvExportableModel implements Serializable {
     private long age;
     private int schema_version;
     private String measureId;
+    private int step;
+
 
     @NonNull
     public String getId() {
@@ -143,13 +149,29 @@ public class FileLog extends CsvExportableModel implements Serializable {
         this.measureId = measureId;
     }
 
+    public int getStep() {
+        return step;
+    }
+
+    public void setStep(int step) {
+        this.step = step;
+    }
+
+    public String getServerId() {
+        return serverId;
+    }
+
+    public void setServerId(String serverId) {
+        this.serverId = serverId;
+    }
+
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%s,%s,%d,%d,%b,%s,%d,%s,%d,%d,%d,%s",id,type,path,hashValue.replace("\n", "").replace("\r", ""),fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId);
+        return String.format(Locale.US, "%s,%s,%s,%s,%d,%d,%b,%s,%d,%s,%d,%d,%d,%s,%d,%s",id,type,path,hashValue.replace("\n", "").replace("\r", ""),fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId,step,serverId);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,type,path,hashValue,fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId";
+        return "id,type,path,hashValue,fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId,step,serverId";
     }
 }

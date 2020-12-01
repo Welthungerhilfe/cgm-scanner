@@ -45,6 +45,10 @@ public class PersonRepository {
         return database.personDao().getPersonByQr(key);
     }
 
+    public Person getPersonById(String id) {
+        return database.personDao().getPersonById(id);
+    }
+
     public void insertPerson(Person person) {
         database.personDao().insertPerson(person);
         setUpdated(true);
@@ -57,6 +61,10 @@ public class PersonRepository {
 
     public List<Person> getSyncablePerson(long timestamp) {
         return database.personDao().getSyncablePersons(timestamp);
+    }
+
+    public List<Person> getSyncablePerson() {
+        return database.personDao().getSyncablePersons();
     }
 
     public LiveData<List<Person>> getAvailablePersons(PersonFilter filter) {

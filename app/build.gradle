@@ -6,8 +6,8 @@ android {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 320
-        versionName "3.2.0-dev"
+        versionCode 400
+        versionName "4.0.0-dev"
         manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", arengineValue:"optional", tangoRequired:"false"]
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         javaCompileOptions {
@@ -92,6 +92,23 @@ dependencies {
     // Recording audio
     implementation 'org.jcodec:jcodec:0.2.3'
     implementation 'org.jcodec:jcodec-android:0.2.3'
+
+    //RxJava
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
+
+    //Retofit
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava3:2.9.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.0'
+
+    //Dagger2
+    implementation 'com.google.dagger:dagger:2.29.1'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.29.1'
+    api 'com.google.dagger:dagger-android:2.29.1'
+    api 'com.google.dagger:dagger-android-support:2.29.1' // if you use the support libraries
+    annotationProcessor 'com.google.dagger:dagger-android-processor:2.29.1'
 
     // Network
     implementation "com.microsoft.appcenter:appcenter-auth:2.5.0" //AppCenter authorisation

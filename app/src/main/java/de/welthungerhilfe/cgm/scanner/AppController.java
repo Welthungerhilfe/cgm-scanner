@@ -18,22 +18,20 @@
 
 package de.welthungerhilfe.cgm.scanner;
 
-import android.app.Application;
 import android.os.Environment;
 import android.os.StrictMode;
 
 import java.io.File;
 import java.io.IOException;
 
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
+import dagger.android.AndroidInjector;
+import dagger.android.support.DaggerApplication;
+import de.welthungerhilfe.cgm.scanner.di.DaggerAppComponent;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class AppController extends Application {
+public class AppController extends DaggerApplication {
 
     private static AppController mInstance;
-
-    private SessionManager session;
 
     @Override
     public void onCreate() {
@@ -41,8 +39,6 @@ public class AppController extends Application {
 
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
         Utils.overrideFont(getApplicationContext(), "SERIF", "roboto.ttf");
-
-        session = new SessionManager(this);
 
         mInstance = this;
     }
@@ -96,7 +92,9 @@ public class AppController extends Application {
         return mExtFileDir;
     }
 
-    public boolean isUploadRunning() {
-        return UploadService.isInitialized();
+    @Override
+    protected AndroidInjector<? extends DaggerApplication> applicationInjector() {
+        DaggerAppComponent.builder().bindInstance(AppController.this).build().inject(this);
+        return DaggerAppComponent.builder().bindInstance(AppController.this).build();
     }
 }

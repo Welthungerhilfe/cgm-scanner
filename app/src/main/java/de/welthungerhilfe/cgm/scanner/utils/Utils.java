@@ -37,6 +37,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.provider.Settings;
+import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
@@ -372,5 +373,13 @@ public class Utils {
         return tutorialDataList;
 
 
+    }
+
+    public static String convertTimestampToDate(Long timeStamp)
+    {
+        Calendar cal = Calendar.getInstance(Locale.ENGLISH);
+        cal.setTimeInMillis(timeStamp);
+        String date = DateFormat.format("yyyy-MM-dd hh:mm:ss", cal).toString();
+        return date;
     }
 }

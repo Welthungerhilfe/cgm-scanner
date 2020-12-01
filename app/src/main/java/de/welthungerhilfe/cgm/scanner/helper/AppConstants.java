@@ -25,9 +25,18 @@ package de.welthungerhilfe.cgm.scanner.helper;
 
 public class AppConstants {
 
+
+   public static final String testing_url = "http://192.168.43.252:5001/api/scan/";
+
+ //public static final String testing_url = "http://my-json-server.typicode.com/jaydesai111/jsontest/";
+
+
+
     public static final int MAX_IMAGE_SIZE = 512;
 
-    public static final long SYNC_INTERVAL = 60 * 5;
+   // public static final long SYNC_INTERVAL = 60 * 5;
+     public static final long SYNC_INTERVAL = 10;
+
     public static final long SYNC_FLEXTIME = SYNC_INTERVAL;
     public static final long MEMORY_MONITOR_INTERVAL = 60 * 1000; // 60 seconds
     public static final long HEALTH_INTERVAL = 60 * 60 * 1000; // 1 hour
@@ -35,11 +44,6 @@ public class AppConstants {
     public static final int MULTI_UPLOAD_BUNCH = 5;
 
     public static final String LOCAL_CONSENT_URL = "/{qrcode}/consent/{scantimestamp}/consent/";
-    public static final String STORAGE_CONSENT_URL = "qrcode/{qrcode}/consent/{scantimestamp}/";
-    public static final String STORAGE_CALIBRATION_URL = "qrcode/{qrcode}/measure/{scantimestamp}/";
-    public static final String STORAGE_DEPTH_URL = "qrcode/{qrcode}/measure/{scantimestamp}/depth/";
-    public static final String STORAGE_RGB_URL = "qrcode/{qrcode}/measure/{scantimestamp}/rgb/";
-    public static final String STORAGE_CONTAINER = "scans";
 
     public static final String VAL_SEX_FEMALE = "female";
     public static final String VAL_SEX_MALE = "male";

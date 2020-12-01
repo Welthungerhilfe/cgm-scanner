@@ -20,6 +20,8 @@
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.Manifest;
+
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
@@ -38,17 +40,22 @@ import android.view.MenuItem;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.GrowthDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasuresDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import retrofit2.Retrofit;
 
 /**
  * Created by Emerald on 2/19/2018.
@@ -73,6 +80,13 @@ public class CreateDataActivity extends BaseActivity {
     MeasuresDataFragment measureFragment;
     GrowthDataFragment growthFragment;
 
+    @Inject
+    Retrofit retrofit;
+
+    ViewModelProvider.Factory factory;
+
+    CreateDataViewModel viewModel;
+
     public Loc location = null;
 
     @Override
@@ -81,6 +95,8 @@ public class CreateDataActivity extends BaseActivity {
         setContentView(R.layout.activity_create);
         ButterKnife.bind(this);
 
+        AndroidInjection.inject(this);
+
         getCurrentLocation();
 
         qrCode = getIntent().getStringExtra(AppConstants.EXTRA_QR);
@@ -88,7 +104,9 @@ public class CreateDataActivity extends BaseActivity {
         setupActionBar();
         initFragments();
 
-        CreateDataViewModel viewModel = ViewModelProviders.of(this).get(CreateDataViewModel.class);
+
+        factory = new CreateDataViewModelProvideFactory(this,retrofit);
+        viewModel = new ViewModelProvider(this,factory).get(CreateDataViewModel.class);
         viewModel.getCurrentTab().observe(this, tab -> {
             viewpager.setCurrentItem(tab);
         });

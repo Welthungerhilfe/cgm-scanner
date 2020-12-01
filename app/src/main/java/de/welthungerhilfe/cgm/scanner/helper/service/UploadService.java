@@ -3,14 +3,12 @@ package de.welthungerhilfe.cgm.scanner.helper.service;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
 import android.util.Log;
 
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.blob.CloudBlobContainer;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
+import org.jcodec.common.io.IOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,15 +19,26 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import de.welthungerhilfe.cgm.scanner.AppController;
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.remote.ApiService;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Retrofit;
 
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.FILE_NOT_FOUND;
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.MULTI_UPLOAD_BUNCH;
@@ -38,6 +47,9 @@ import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOADED_DELETE
 import static de.welthungerhilfe.cgm.scanner.helper.AppConstants.UPLOAD_ERROR;
 
 public class UploadService extends Service implements OnFileLogsLoad {
+
+    private static final String TAG = UploadService.class.getSimpleName();
+
     private List<String> pendingArtefacts;
     private int remainingCount = 0;
 
@@ -46,10 +58,13 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     private FileLogRepository repository;
 
-    public CloudBlobClient blobClient;
-
     private final Object lock = new Object();
     private ExecutorService executor;
+
+    @Inject
+    Retrofit retrofit;
+
+    SessionManager sessionManager;
 
     public static void forceResume() {
         if (service != null) {
@@ -67,8 +82,9 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     public void onCreate() {
         service = this;
-
+        AndroidInjection.inject(this);
         repository = FileLogRepository.getInstance(getApplicationContext());
+        sessionManager = new SessionManager(getApplication());
 
         pendingArtefacts = new ArrayList<>();
 
@@ -93,7 +109,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     @Override
     public void onDestroy() {
-        Log.e("UploadService", "Stopped");
+        Log.e(TAG, "Stopped");
         service = null;
         running = false;
 
@@ -105,11 +121,11 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     private void loadQueueFileLogs() {
         if (!Utils.isUploadAllowed(this)) {
-            Log.e("UploadService", "Skipped");
+            Log.e(TAG, "Skipped");
             return;
         }
 
-        Log.e("UploadService", "Started");
+        Log.e(TAG, "Started");
         running = true;
 
         repository.loadQueuedData(this);
@@ -120,7 +136,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
         synchronized (lock) {
             remainingCount = list.size();
         }
-        Log.e("UploadService", String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
+        Log.e(TAG, String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
+        Log.i("UploadService ","this is inside onFileLoaded  "+remainingCount);
 
         Context c = getApplicationContext();
         if (LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT)) {
@@ -182,74 +199,30 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
             pendingArtefacts.add(log.getId());
 
-            String path = "";
+            String mime = "";
             switch (log.getType()) {
                 case "calibration":
-                    path = AppConstants.STORAGE_CALIBRATION_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                    mime = "text/plain";
                     break;
                 case "depth":
-                    path = AppConstants.STORAGE_DEPTH_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                    mime = "application/zip";
                     break;
                 case "rgb":
-                    path = AppConstants.STORAGE_RGB_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                    mime = "image/jpeg";
                     break;
                 case "consent":
-                    path = AppConstants.STORAGE_CONSENT_URL.replace("{qrcode}", log.getQrCode()).replace("{scantimestamp}", String.valueOf(log.getCreateDate()));
+                    mime = "image/png";
                     break;
+                default:
+                    Log.e(TAG, "Data type not supported");
             }
 
+            Utils.sleep(1000);
             while (!Utils.isUploadAllowed(getBaseContext())) {
                 Utils.sleep(3000);
             }
 
-            String[] arr = log.getPath().split("/");
-
-            try {
-                final File file = new File(log.getPath());
-                FileInputStream stream = new FileInputStream(file);
-
-                //TODO:REST API implementation
-                if (blobClient == null) {
-                    synchronized (SyncAdapter.getLock()) {
-                        CloudStorageAccount storageAccount = null;
-                        blobClient = storageAccount.createCloudBlobClient();
-                    }
-                }
-
-                CloudBlobContainer container = blobClient.getContainerReference(AppConstants.STORAGE_CONTAINER);
-                container.createIfNotExists();
-
-                CloudBlockBlob blob = container.getBlockBlobReference(path + arr[arr.length - 1]);
-                blob.upload(stream, stream.available());
-
-                log.setUploadDate(Utils.getUniversalTimestamp());
-
-                if (file.delete()) {
-                    log.setDeleted(true);
-                    log.setStatus(UPLOADED_DELETED);
-                } else {
-                    log.setStatus(UPLOADED);
-                }
-                stream.close();
-            } catch (FileNotFoundException e) {
-                log.setDeleted(true);
-                log.setStatus(FILE_NOT_FOUND);
-            } catch (Exception e) {
-                log.setStatus(UPLOAD_ERROR);
-            }
-            log.setCreateDate(Utils.getUniversalTimestamp());
-
-            repository.updateFileLog(log);
-
-            synchronized (lock) {
-                pendingArtefacts.remove(log.getId());
-                remainingCount--;
-                Log.e("UploadService", String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
-                if (remainingCount <= 0) {
-                    loadQueueFileLogs();
-                }
-                lock.notify();
-            }
+            uploadFiles(log, mime);
         }
     }
 
@@ -268,5 +241,96 @@ public class UploadService extends Service implements OnFileLogsLoad {
         if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_END) == 0) {
             LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_END, System.currentTimeMillis());
         }
+    }
+
+    public void uploadFiles(FileLog log, String mime) {
+        MultipartBody.Part body = null;
+        final File file = new File(log.getPath());
+        try {
+            FileInputStream inputStream = new FileInputStream(file);
+            body = MultipartBody.Part.createFormData("file", file.getName(), RequestBody.create(
+                            MediaType.parse(mime), IOUtils.toByteArray(inputStream)));
+            inputStream.close();
+            log.setCreateDate(Utils.getUniversalTimestamp());
+        } catch (FileNotFoundException e) {
+            Log.i(TAG,"this is exception "+e.getMessage());
+
+            log.setDeleted(true);
+            log.setStatus(FILE_NOT_FOUND);
+            updateFileLog(log);
+
+        } catch (Exception e) {
+            Log.i(TAG,"this is exception "+e.getMessage());
+
+            log.setStatus(UPLOAD_ERROR);
+            updateFileLog(log);
+        }
+
+        RequestBody filename = RequestBody.create(MediaType.parse("multipart/form-data"), file.getName());
+        retrofit.create(ApiService.class).uploadFiles("bearer " + sessionManager.getAuthToken(),body,filename).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Observer<String>() {
+                @Override
+                public void onSubscribe(@NonNull Disposable d) {
+
+                }
+
+                @Override
+                public void onNext(@NonNull String id) {
+                    Log.i(TAG, "this is response uploadfiles " + id+ file.getPath());
+
+                    log.setUploadDate(Utils.getUniversalTimestamp());
+                    log.setServerId(id);
+
+                    if (file.delete()) {
+                        log.setDeleted(true);
+                        log.setStatus(UPLOADED_DELETED);
+                    } else {
+                        log.setStatus(UPLOADED);
+                    }
+
+                    updateFileLog(log);
+                }
+
+                @Override
+                public void onError(@NonNull Throwable e) {
+
+                    Log.i(TAG, "this is response onError uploadfiles " + e.getMessage() + file.getPath());
+                }
+
+                @Override
+                public void onComplete() {
+
+                }
+            });
+    }
+
+    private void updateFileLog(FileLog log)
+    {
+        new AsyncTask<Void,Void,Void>()
+        {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                repository.updateFileLog(log);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                Log.i(TAG,"this is saved "+ log.getServerId()+ log.getPath());
+
+                synchronized (lock) {
+                    pendingArtefacts.remove(log.getId());
+                    remainingCount--;
+                    Log.i(TAG,"this is artifacts in queue "+remainingCount);
+                    Log.e(TAG, String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
+                    if (remainingCount <= 0) {
+                        loadQueueFileLogs();
+                    }
+                    lock.notify();
+                }
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 }

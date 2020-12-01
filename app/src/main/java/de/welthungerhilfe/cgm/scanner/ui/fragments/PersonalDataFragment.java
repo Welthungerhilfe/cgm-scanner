@@ -22,14 +22,20 @@ package de.welthungerhilfe.cgm.scanner.ui.fragments;
 import android.app.Activity;
 import android.app.DialogFragment;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+
 import android.content.Context;
 import android.os.Bundle;
+
 import com.google.android.material.snackbar.Snackbar;
+
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatRadioButton;
+
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -46,14 +52,20 @@ import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicke
 
 import java.util.Date;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import dagger.android.support.AndroidSupportInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
@@ -63,6 +75,7 @@ import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.DateEditText;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import retrofit2.Retrofit;
 
 public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, DateEditText.DateInputListener, TextWatcher {
 
@@ -85,13 +98,25 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private Person person;
     private Loc location;
 
+    @Inject
+    Retrofit retrofit;
+
+    ViewModelProvider.Factory factory;
+
     public static PersonalDataFragment getInstance(String qrCode) {
         PersonalDataFragment fragment = new PersonalDataFragment();
         fragment.qrCode = qrCode;
 
         return fragment;
     }
-    
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        AndroidSupportInjection.inject(this);
+
+    }
+
     public void onAttach(Context context) {
         super.onAttach(context);
 
@@ -102,7 +127,15 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void onActivityCreated(Bundle instance) {
         super.onActivityCreated(instance);
 
-        viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
+
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_personal, container, false);
+
+        factory = new CreateDataViewModelProvideFactory(getActivity(), retrofit);
+        viewModel = new ViewModelProvider(getActivity(), factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
             initUI();
@@ -111,11 +144,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             if (measure != null)
                 setLocation(measure.getLocation());
         });
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_personal, container, false);
 
         view.findViewById(R.id.rytConsentDetail).setOnClickListener(this);
         view.findViewById(R.id.imgBirth).setOnClickListener(this);
@@ -151,7 +179,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         radioMale.setOnCheckedChangeListener(this);
 
         View contextMenu = view.findViewById(R.id.contextMenuButton);
-        contextMenu.setOnClickListener(view12 -> new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+        contextMenu.setOnClickListener(view12 -> new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
                 new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
         }, which -> {
             ContactSupportDialog.show((BaseActivity) getActivity(), "data " + person.getQrcode(), "personID:" + person.getId());
@@ -162,7 +190,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     public void initUI() {
         if (person == null) {
-            setLocation(((CreateDataActivity)getActivity()).location);
+            setLocation(((CreateDataActivity) getActivity()).location);
             return;
         } else {
             setLocation(person.getLastLocation());
@@ -208,31 +236,31 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         String guardian = editGuardian.getText().toString();
 
         if (name.isEmpty()) {
-            editName.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.name_tooltip)));
+            editName.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.name_tooltip)));
             valid = false;
         } else {
             editName.setError(null);
         }
 
         if (prename.isEmpty()) {
-            editPrename.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.prename_tooltip)));
+            editPrename.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.prename_tooltip)));
             valid = false;
         } else {
             editPrename.setError(null);
         }
 
         if (birth.isEmpty()) {
-            editBirth.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.birthday_tooltip)));
+            editBirth.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.birthday_tooltip)));
             valid = false;
-        } else if (birth.equals("DD-MM-YYYY")){
-            editBirth.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.birthday_tooltip)));
+        } else if (birth.equals("DD-MM-YYYY")) {
+            editBirth.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.birthday_tooltip)));
             valid = false;
         } else {
             editBirth.setError(null);
         }
 
         if (guardian.isEmpty()) {
-            editGuardian.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.guardian_tooltip)));
+            editGuardian.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.guardian_tooltip)));
             valid = false;
         } else {
             editGuardian.setError(null);
@@ -287,6 +315,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setLastLocation(location);
 
                     viewModel.savePerson(person);
+
                 }
 
                 break;

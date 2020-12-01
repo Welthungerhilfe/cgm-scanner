@@ -22,13 +22,24 @@ package de.welthungerhilfe.cgm.scanner.datasource.models;
 import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.annotation.NonNull;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import de.welthungerhilfe.cgm.scanner.datasource.repository.CsvExportableModel;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static androidx.room.ForeignKey.CASCADE;
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_MEASURE;
@@ -41,18 +52,48 @@ import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TAB
 public class Measure extends CsvExportableModel implements Serializable {
     @PrimaryKey
     @NonNull
+    @Expose(serialize = false, deserialize = false)
     private String id;
+
+    @SerializedName("id")
+    @Expose
+    private String measureServerKey;
+
     @ForeignKey(entity = Person.class, parentColumns = "id", childColumns = "personId", onDelete = CASCADE, onUpdate = CASCADE)
+    @Expose(serialize = false, deserialize = false)
     private String personId;
+
+    @SerializedName("person")
+    @Expose
+    private String personServerKey;
+
+
     private long date;
+
+    @SerializedName("measured")
+    @Expose
+    @Ignore
+    private String measured;
+
+    private boolean isSynced = false;
+
     private String type;
     private long age; // age from birthday in days
+
+    @Expose
     private double height;
+
+    @Expose
     private double weight;
+
+    @Expose
     private double muac;
+
     private double headCircumference;
     private String artifact;
     private boolean visible;
+
+    @Expose
     private boolean oedema;
     private long timestamp;
     private String createdBy;
@@ -68,8 +109,43 @@ public class Measure extends CsvExportableModel implements Serializable {
     private double weightConfidence;
     private String scannedBy;
 
+
     @Embedded
+    @SerializedName("location")
+    @Expose
     private Loc location;
+
+    public String getMeasureServerKey() {
+        return measureServerKey;
+    }
+
+    public void setMeasureServerKey(String measureServerKey) {
+        this.measureServerKey = measureServerKey;
+    }
+
+    public String getMeasured() {
+        return measured;
+    }
+
+    public void setMeasured(String measured) {
+        this.measured = measured;
+    }
+
+    public boolean isSynced() {
+        return isSynced;
+    }
+
+    public void setSynced(boolean synced) {
+        isSynced = synced;
+    }
+
+    public String getPersonServerKey() {
+        return personServerKey;
+    }
+
+    public void setPersonServerKey(String personServerKey) {
+        this.personServerKey = personServerKey;
+    }
 
     @NonNull
     public String getId() {
@@ -273,19 +349,79 @@ public class Measure extends CsvExportableModel implements Serializable {
     }
 
     @NonNull
-    public String getScannedBy() { return scannedBy; }
+    public String getScannedBy() {
+        return scannedBy;
+    }
 
-    public void setScannedBy(@NonNull String scannedBy) { this.scannedBy = scannedBy; }
+    public void setScannedBy(@NonNull String scannedBy) {
+        this.scannedBy = scannedBy;
+    }
 
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d,%d,%f,%f,%s",id,personId,date,type,age,height,weight,
-                muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at,
-                heightConfidence,weightConfidence,scannedBy);
+        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d,%d,%f,%f,%s", id, personId, date, type, age, height, weight,
+                muac, headCircumference, artifact, visible, oedema, timestamp, createdBy, deleted, deletedBy, qrCode, schema_version, artifact_synced, uploaded_at, resulted_at, received_at,
+                heightConfidence, weightConfidence, scannedBy);
     }
 
     @Override
     public String getCsvHeaderString() {
         return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at,heightConfidence,weightConfidence,scannedBy";
+    }
+
+    public HashMap<Integer, Scan> split(FileLogRepository fileLogRepository) {
+
+        //check if measure is ready to be synced
+        HashMap<Integer, Scan> output = new HashMap<>();
+        List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(getId());
+        for (FileLog log : measureArtifacts) {
+            if (log.getServerId() == null) {
+                return output;
+            }
+        }
+
+        //create structure to split artifacts by scan step
+        for (FileLog log : measureArtifacts) {
+            if (log.getStep() != 0) {
+                if (!output.containsKey(log.getStep())) {
+                    output.put(log.getStep(), new Scan());
+                }
+            }
+        }
+
+        //fill the structure
+        Set<Integer> keys = output.keySet();
+        for (Integer key : keys) {
+
+            //get the artifacts for a step
+            List<Artifact> stepArtifacts = new ArrayList<>();
+            for (FileLog log : measureArtifacts) {
+                if ((key == 0) || (key == log.getStep())) {
+                    Artifact artifact = new Artifact();
+                    artifact.setFile(log.getServerId());
+                    artifact.setFormat(log.getType());
+                    artifact.setTimestamp(log.getCreateDate());
+                    artifact.setTimestampString(Utils.convertTimestampToDate(log.getCreateDate()));
+                    stepArtifacts.add(artifact);
+                }
+            }
+            Collections.sort(stepArtifacts, (a, b) -> (int) (b.getTimestamp() - a.getTimestamp()));
+            for (int i = 0; i < stepArtifacts.size(); i++) {
+                stepArtifacts.get(i).setOrder(i);
+            }
+
+            //create scan object
+            Scan scan = new Scan();
+            scan.setArtifacts(stepArtifacts);
+            scan.setLocation(getLocation());
+            scan.setPersonServerKey(getPersonServerKey());
+            scan.setScan_start(Utils.convertTimestampToDate(getTimestamp()));
+            scan.setScan_end(Utils.convertTimestampToDate(getDate()));
+            scan.setType(key);
+            scan.setVersion(getType());
+        //    output.remove(key);
+            output.put(key, scan);
+        }
+        return output;
     }
 }

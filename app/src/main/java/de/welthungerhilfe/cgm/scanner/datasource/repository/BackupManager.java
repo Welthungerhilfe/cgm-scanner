@@ -19,16 +19,17 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
+import retrofit2.Retrofit;
 
 public class BackupManager {
 
-    public static void doBackup(BaseActivity context, File folder, long timestamp, Runnable onFinished) {
+    public static void doBackup(BaseActivity context, File folder, long timestamp, Retrofit retrofit, Runnable onFinished) {
         folder.mkdirs();
 
         ArtifactResultRepository arRepo = ArtifactResultRepository.getInstance(context);
         DeviceRepository dRepo = DeviceRepository.getInstance(context);
         FileLogRepository flRepo = FileLogRepository.getInstance(context);
-        MeasureRepository mRepo = MeasureRepository.getInstance(context);
+        MeasureRepository mRepo = MeasureRepository.getInstance(context, retrofit);
         MeasureResultRepository mrRepo = MeasureResultRepository.getInstance(context);
         PersonRepository pRepo = PersonRepository.getInstance(context);
 
