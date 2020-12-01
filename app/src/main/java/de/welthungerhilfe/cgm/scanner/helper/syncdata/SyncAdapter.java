@@ -435,6 +435,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             @Override
                             public void onError(@NonNull Throwable e) {
                                 Log.i(TAG, "this is value of post " + e.getMessage());
+                                //TODO:update token
                             }
 
                             @Override
@@ -491,6 +492,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is value of post " + e.getMessage());
+                            //TODO:update token
                         }
 
                         @Override
@@ -554,6 +556,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is value of post " + e.getMessage());
+                            //TODO:update token
                         }
 
                         @Override

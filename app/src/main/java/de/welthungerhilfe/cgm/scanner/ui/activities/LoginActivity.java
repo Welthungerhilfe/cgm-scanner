@@ -22,33 +22,11 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
-import android.content.ContentResolver;
 import android.content.Intent;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.microsoft.identity.client.AuthenticationCallback;
-import com.microsoft.identity.client.IAccount;
-import com.microsoft.identity.client.IAuthenticationResult;
-import com.microsoft.identity.client.IPublicClientApplication;
-import com.microsoft.identity.client.ISingleAccountPublicClientApplication;
-import com.microsoft.identity.client.PublicClientApplication;
-import com.microsoft.identity.client.exception.MsalClientException;
-import com.microsoft.identity.client.exception.MsalException;
-import com.microsoft.identity.client.exception.MsalServiceException;
-import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.JWTParser;
-
-import net.minidev.json.JSONArray;
-
-import java.text.ParseException;
-import java.util.Map;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -57,22 +35,19 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
 import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.helper.authenticator.MSGraphRequestWrapper;
+import de.welthungerhilfe.cgm.scanner.helper.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class LoginActivity extends AccountAuthenticatorActivity {
-
-    private static final String TAG = LoginActivity.class.toString();
+public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback {
 
     @OnClick({R.id.btnLoginMicrosoft})
     void doSignIn() {
-        doSignInAction();
+        authentication.doSignInAction();
     }
 
-    private SessionManager session;
     private AccountManager accountManager;
-    private ISingleAccountPublicClientApplication singleAccountApp;
+    private AuthenticationHandler authentication;
+    private SessionManager session;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -83,38 +58,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         ButterKnife.bind(this);
 
-        accountManager = AccountManager.get(this);
         session = new SessionManager(this);
-
-        // Creates a PublicClientApplication object with res/raw/auth_config_single_account.json
-        PublicClientApplication.createSingleAccountPublicClientApplication(getBaseContext(),
-                R.raw.auth_config_single_account,
-                new IPublicClientApplication.ISingleAccountApplicationCreatedListener() {
-                    @Override
-                    public void onCreated(ISingleAccountPublicClientApplication application) {
-                        singleAccountApp = application;
-                        if (session.isSigned()) {
-                            loadAccount();
-                        } else {
-                            singleAccountApp.signOut(new ISingleAccountPublicClientApplication.SignOutCallback() {
-                                @Override
-                                public void onSignOut() {
-                                    Log.d(TAG, "Signed out");
-                                }
-
-                                @Override
-                                public void onError(@NonNull MsalException exception) {
-                                    Log.e(TAG, exception.toString());
-                                }
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onError(MsalException exception) {
-                        Log.e(TAG, exception.toString());
-                    }
-                });
+        authentication = new AuthenticationHandler(this, this, "{OAUTH_SCOPE}");
+        accountManager = AccountManager.get(this);
     }
 
 
@@ -136,108 +82,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         }
     }
 
-    private void doSignInAction() {
-        /*if (BuildConfig.DEBUG) {
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-            return;
-        }*/
-
-        if (!Utils.isNetworkAvailable(this)) {
-            Toast.makeText(LoginActivity.this, R.string.error_network, Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        if (singleAccountApp == null) {
-            return;
-        }
-
-        String[] scopes = { "{OAUTH_SCOPE}" };
-        singleAccountApp.signIn(this, null, scopes, getAuthInteractiveCallback());
-    }
-
-
-    /**
-     * Callback used for interactive request.
-     * If succeeds we use the access token to call the Microsoft Graph.
-     * Does not check cache.
-     */
-    private AuthenticationCallback getAuthInteractiveCallback() {
-        return new AuthenticationCallback() {
-
-            @Override
-            public void onSuccess(IAuthenticationResult authenticationResult) {
-                /* Successfully got a token, use it to call a protected resource - MSGraph */
-                Log.d(TAG, "Successfully authenticated");
-                Log.d(TAG, "ID Token: " + authenticationResult.getAccessToken());
-
-                /* Update account */
-                processAuth(authenticationResult.getAccount().getUsername(), authenticationResult.getAccessToken(), true);
-
-                /* call graph */
-                callGraphAPI(authenticationResult);
-            }
-
-            @Override
-            public void onError(MsalException exception) {
-                /* Failed to acquireToken */
-                Log.d(TAG, "Authentication failed: " + exception.toString());
-
-                if (exception instanceof MsalClientException) {
-                    /* Exception inside MSAL, more info inside MsalError.java */
-                } else if (exception instanceof MsalServiceException) {
-                    /* Exception when communicating with the STS, likely config issue */
-                }
-            }
-
-            @Override
-            public void onCancel() {
-                /* User canceled the authentication */
-                Log.d(TAG, "User cancelled login.");
-            }
-        };
-    }
-
-    /**
-     * Make an HTTP request to obtain MSGraph data
-     */
-    private void callGraphAPI(final IAuthenticationResult authenticationResult) {
-        MSGraphRequestWrapper.callGraphAPIUsingVolley(
-                getBaseContext(),
-                MSGraphRequestWrapper.MS_GRAPH_ROOT_ENDPOINT + "v1.0/me",
-                authenticationResult.getAccessToken(),
-                response -> Log.d(TAG, "Response: " + response.toString()),
-                error -> Log.d(TAG, "Error: " + error.toString()));
-    }
-
-
-    /**
-     * Load the currently signed-in account, if there's any.
-     */
-    private void loadAccount() {
-        if (singleAccountApp == null) {
-            return;
-        }
-
-        singleAccountApp.getCurrentAccountAsync(new ISingleAccountPublicClientApplication.CurrentAccountCallback() {
-            @Override
-            public void onAccountLoaded(@Nullable IAccount activeAccount) {
-                // You can use the account data to update your UI or your app database.
-                processAuth(activeAccount.getUsername(), session.getAuthToken(), false);
-            }
-
-            @Override
-            public void onAccountChanged(@Nullable IAccount priorAccount, @Nullable IAccount currentAccount) {
-            }
-
-            @Override
-            public void onError(@NonNull MsalException exception) {
-                Log.e(TAG, exception.toString());
-            }
-        });
-    }
-
-
-    private void processAuth(String email, String token, boolean feedback) {
+    public void processAuth(String email, String token, boolean feedback) {
 
         try {
             if (email != null && !email.isEmpty()) {

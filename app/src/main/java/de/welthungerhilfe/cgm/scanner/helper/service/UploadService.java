@@ -296,6 +296,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 public void onError(@NonNull Throwable e) {
 
                     Log.i(TAG, "this is response onError uploadfiles " + e.getMessage() + file.getPath());
+                    //TODO:update token, update queue
                 }
 
                 @Override
