@@ -13,7 +13,6 @@ import org.jcodec.common.io.IOUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -223,23 +222,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 Utils.sleep(3000);
             }
 
-            try {
-                log.setCreateDate(Utils.getUniversalTimestamp());
-                uploadFiles(log, mime);
-            } catch (FileNotFoundException e) {
-                Log.i(TAG,"this is exception "+e.getMessage());
-
-                log.setDeleted(true);
-                log.setStatus(FILE_NOT_FOUND);
-
-            } catch (Exception e) {
-                Log.i(TAG,"this is exception "+e.getMessage());
-
-                log.setStatus(UPLOAD_ERROR);
-            }
-            if(log.getServerId()!=null) {
-                repository.updateFileLog(log);
-            }
+            uploadFiles(log, mime);
         }
     }
 
@@ -260,19 +243,28 @@ public class UploadService extends Service implements OnFileLogsLoad {
         }
     }
 
-    public void uploadFiles(FileLog log, String mime) throws IOException {
-        final File file = new File(log.getPath());
-        FileInputStream inputStream = new FileInputStream(file);
-
+    public void uploadFiles(FileLog log, String mime) {
         MultipartBody.Part body = null;
+        final File file = new File(log.getPath());
         try {
-            body = MultipartBody.Part.createFormData(
-                    "file", file.getName(), RequestBody.create(
+            FileInputStream inputStream = new FileInputStream(file);
+            body = MultipartBody.Part.createFormData("file", file.getName(), RequestBody.create(
                             MediaType.parse(mime), IOUtils.toByteArray(inputStream)));
+            inputStream.close();
+            log.setCreateDate(Utils.getUniversalTimestamp());
+        } catch (FileNotFoundException e) {
+            Log.i(TAG,"this is exception "+e.getMessage());
+
+            log.setDeleted(true);
+            log.setStatus(FILE_NOT_FOUND);
+            updateFileLog(log);
+
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.i(TAG,"this is exception "+e.getMessage());
+
+            log.setStatus(UPLOAD_ERROR);
+            updateFileLog(log);
         }
-        inputStream.close();
 
         RequestBody filename = RequestBody.create(MediaType.parse("multipart/form-data"), file.getName());
         retrofit.create(ApiService.class).uploadFiles("bearer " + sessionManager.getAuthToken(),body,filename).subscribeOn(Schedulers.io())
@@ -313,7 +305,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
             });
     }
 
-    public void updateFileLog(FileLog log)
+    private void updateFileLog(FileLog log)
     {
         new AsyncTask<Void,Void,Void>()
         {
