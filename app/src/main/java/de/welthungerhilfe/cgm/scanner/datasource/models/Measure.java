@@ -39,7 +39,7 @@ import java.util.Set;
 
 import de.welthungerhilfe.cgm.scanner.datasource.repository.CsvExportableModel;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 
 import static androidx.room.ForeignKey.CASCADE;
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_MEASURE;
@@ -401,7 +401,7 @@ public class Measure extends CsvExportableModel implements Serializable {
                     artifact.setFile(log.getServerId());
                     artifact.setFormat(log.getType());
                     artifact.setTimestamp(log.getCreateDate());
-                    artifact.setTimestampString(Utils.convertTimestampToDate(log.getCreateDate()));
+                    artifact.setTimestampString(DataFormat.convertTimestampToDate(log.getCreateDate()));
                     stepArtifacts.add(artifact);
                 }
             }
@@ -415,11 +415,10 @@ public class Measure extends CsvExportableModel implements Serializable {
             scan.setArtifacts(stepArtifacts);
             scan.setLocation(getLocation());
             scan.setPersonServerKey(getPersonServerKey());
-            scan.setScan_start(Utils.convertTimestampToDate(getTimestamp()));
-            scan.setScan_end(Utils.convertTimestampToDate(getDate()));
+            scan.setScan_start(DataFormat.convertTimestampToDate(getTimestamp()));
+            scan.setScan_end(DataFormat.convertTimestampToDate(getDate()));
             scan.setType(key);
             scan.setVersion(getType());
-        //    output.remove(key);
             output.put(key, scan);
         }
         return output;

@@ -30,7 +30,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 
 /**
  * Created by Emerald on 2/21/2018.

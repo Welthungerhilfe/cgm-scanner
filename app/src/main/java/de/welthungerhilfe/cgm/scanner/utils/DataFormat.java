@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.Build;
 import android.text.format.DateFormat;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Locale;
 
 public class DataFormat {
@@ -27,6 +27,14 @@ public class DataFormat {
             default:
                 return null;
         }
+    }
+
+    public static String convertTimestampToDate(Long timeStamp)
+    {
+        Calendar cal = Calendar.getInstance(Locale.ENGLISH);
+        cal.setTimeInMillis(timeStamp);
+        String date = DateFormat.format("yyyy-MM-dd hh:mm:ss", cal).toString();
+        return date;
     }
 
     public static String filesize(Context context, long bytes) {

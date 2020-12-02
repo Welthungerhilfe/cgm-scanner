@@ -26,7 +26,7 @@ import java.io.IOException;
 
 import dagger.android.AndroidInjector;
 import dagger.android.support.DaggerApplication;
-import de.welthungerhilfe.cgm.scanner.di.DaggerAppComponent;
+import de.welthungerhilfe.cgm.scanner.network.module.DaggerAppComponent;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AppController extends DaggerApplication {

@@ -8,7 +8,7 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import retrofit2.Retrofit;
 
 public class MeasureRepository {

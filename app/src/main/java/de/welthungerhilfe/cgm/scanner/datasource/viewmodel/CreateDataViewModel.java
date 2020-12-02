@@ -2,9 +2,7 @@ package de.welthungerhilfe.cgm.scanner.datasource.viewmodel;
 
 import android.accounts.Account;
 import android.annotation.SuppressLint;
-import android.app.Application;
 
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
@@ -12,7 +10,6 @@ import androidx.lifecycle.Transformations;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 
 import java.util.List;
@@ -21,9 +18,9 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 import retrofit2.Retrofit;
 
 public class CreateDataViewModel extends ViewModel {

@@ -18,9 +18,9 @@ import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
-import de.welthungerhilfe.cgm.scanner.ui.fragments.Tutorial1Fragment;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.ui.fragments.TutorialFragment;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.views.PagerView;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -58,7 +58,7 @@ public class TutorialActivity extends AppCompatActivity {
         FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
 
         for (int i = 0; i < tutorialDataList.size(); i++) {
-            adapter.addFragment(Tutorial1Fragment.newInstance(tutorialDataList.get(i)), "tutorial" + (i + 1));
+            adapter.addFragment(TutorialFragment.newInstance(tutorialDataList.get(i)), "tutorial" + (i + 1));
         }
 
         viewPager.setAdapter(adapter);

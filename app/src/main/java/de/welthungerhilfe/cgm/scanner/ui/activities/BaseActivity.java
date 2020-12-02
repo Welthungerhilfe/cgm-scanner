@@ -32,8 +32,8 @@ import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
 import java.util.HashMap;
 
-import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.utils.LanguageHelper;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class BaseActivity extends AppCompatActivity implements Connectable, Disconnectable {
 
