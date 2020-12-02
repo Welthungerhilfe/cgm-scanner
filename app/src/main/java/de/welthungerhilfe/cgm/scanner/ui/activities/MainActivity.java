@@ -15,7 +15,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.accounts.Account;
@@ -59,8 +58,6 @@ import com.orhanobut.dialogplus.ViewHolder;
 import java.util.Calendar;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -78,7 +75,6 @@ import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-import retrofit2.Retrofit;
 
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
     private final int REQUEST_LOCATION = 0x1000;
@@ -113,9 +109,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     private SessionManager session;
     private AccountManager accountManager;
-
-    @Inject
-    Retrofit retrofit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,7 +149,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         });
 
-        adapterData = new RecyclerPersonAdapter(this, recyclerData, viewModel,retrofit);
+        adapterData = new RecyclerPersonAdapter(this, recyclerData, viewModel);
         adapterData.setPersonDetailListener(this);
         recyclerData.setAdapter(adapterData);
 

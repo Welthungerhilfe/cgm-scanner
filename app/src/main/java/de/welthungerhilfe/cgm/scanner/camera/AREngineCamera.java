@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.camera;
 
 import android.Manifest;
@@ -128,7 +127,7 @@ public class AREngineCamera implements ICamera {
     //setup AREngine cycle
     mGLSurfaceView = mActivity.findViewById(R.id.surfaceview);
     mGLSurfaceView.setRenderer(new GLSurfaceView.Renderer() {
-      private int[] textures = new int[1];
+      private final int[] textures = new int[1];
       private int width, height;
 
       @Override

@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.dialogs;
 
 import android.app.Dialog;
@@ -30,10 +29,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
-
-/**
- * Created by Emerald on 2/19/2018.
- */
 
 public class ConfirmDialog extends Dialog {
 

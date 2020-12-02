@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.dialogs;
 
 import android.app.Dialog;
@@ -53,10 +52,6 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
 import de.welthungerhilfe.cgm.scanner.ui.views.UnitEditText;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-
-/**
- * Created by Emerald on 2/23/2018.
- */
 
 public class ManualMeasureDialog extends Dialog implements View.OnClickListener {
 

@@ -1,3 +1,21 @@
+/*
+ * Child Growth Monitor - quick and accurate data on malnutrition
+ * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
+ * Copyright (c) 2018 Welthungerhilfe Innovation
+ * <p>
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p>
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.welthungerhilfe.cgm.scanner.network.service;
 
 import android.annotation.SuppressLint;
@@ -13,8 +31,6 @@ import androidx.annotation.Nullable;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.inject.Inject;
-
 import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
@@ -25,12 +41,11 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-import retrofit2.Retrofit;
 
 import static de.welthungerhilfe.cgm.scanner.AppConstants.HEALTH_INTERVAL;
 
 public class DeviceService extends Service {
-    private Timer timer = new Timer();
+    private final Timer timer = new Timer();
     private SessionManager session;
     private static final String TAG = DeviceService.class.getSimpleName();
 
@@ -46,9 +61,6 @@ public class DeviceService extends Service {
 
         session = new SessionManager(getBaseContext());
     }
-
-    @Inject
-    Retrofit retrofit;
 
     @SuppressLint("StaticFieldLeak")
     @Override
@@ -78,7 +90,7 @@ public class DeviceService extends Service {
                     @Override
                     protected Void doInBackground(Void... voids) {
                         PersonRepository personRepo = PersonRepository.getInstance(getBaseContext());
-                        MeasureRepository measureRepo = MeasureRepository.getInstance(getBaseContext(),retrofit);
+                        MeasureRepository measureRepo = MeasureRepository.getInstance(getBaseContext());
                         FileLogRepository fileLogRepo = FileLogRepository.getInstance(getBaseContext());
 
                         device.setNew_artifacts(fileLogRepo.getArtifactCount());

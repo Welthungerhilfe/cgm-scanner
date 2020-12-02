@@ -1,6 +1,23 @@
+/*
+ * Child Growth Monitor - quick and accurate data on malnutrition
+ * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
+ * Copyright (c) 2018 Welthungerhilfe Innovation
+ * <p>
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p>
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.welthungerhilfe.cgm.scanner.datasource.viewmodel;
 
-import android.accounts.Account;
 import android.annotation.SuppressLint;
 
 import androidx.lifecycle.LiveData;
@@ -18,10 +35,6 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
-import retrofit2.Retrofit;
 
 public class CreateDataViewModel extends ViewModel {
 
@@ -33,22 +46,11 @@ public class CreateDataViewModel extends ViewModel {
 
     private PersonRepository personRepository;
     private MeasureRepository measureRepository;
-    private SessionManager sessionManager;
-    Context context;
 
-   /* public CreateDataViewModel(@NonNull Application application) {
-        super(application);
-
-    }*/
-
-    public CreateDataViewModel(Context context, Retrofit retrofit) {
+    public CreateDataViewModel(Context context) {
 
         personRepository = PersonRepository.getInstance(context);
-        measureRepository = MeasureRepository.getInstance(context, retrofit);
-        sessionManager = new SessionManager(context);
-        this.context = context;
-
-
+        measureRepository = MeasureRepository.getInstance(context);
     }
 
     public LiveData<Integer> getCurrentTab() {
@@ -112,10 +114,7 @@ public class CreateDataViewModel extends ViewModel {
             }
 
             public void onPostExecute(Void result) {
-
                 setActiveTab(1);
-
-                //         startPerodicSync();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -131,14 +130,7 @@ public class CreateDataViewModel extends ViewModel {
 
             public void onPostExecute(Void result) {
                 setActiveTab(2);
-                //     startPerodicSync();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    public void startPerodicSync() {
-        final Account accountData = new Account(sessionManager.getUserEmail(), AppConstants.ACCOUNT_TYPE);
-
-        SyncAdapter.startPeriodicSync(accountData, context.getApplicationContext());
     }
 }

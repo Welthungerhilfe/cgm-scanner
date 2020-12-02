@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.dialogs;
 
 import android.app.Dialog;
@@ -36,10 +35,6 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
-
-/**
- * Created by Emerald on 2/23/2018.
- */
 
 public class ManualDetailDialog extends Dialog {
 
@@ -66,13 +61,10 @@ public class ManualDetailDialog extends Dialog {
         dismiss();
     }
 
-    private Context mContext;
     private Measure measure;
 
     public ManualDetailDialog(@NonNull Context context) {
         super(context);
-
-        mContext = context;
 
         this.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);

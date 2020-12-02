@@ -1,20 +1,3 @@
-package de.welthungerhilfe.cgm.scanner.camera;
-
-import android.graphics.ImageFormat;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
-import android.os.Build;
-
-import com.google.atap.tangoservice.TangoCameraIntrinsics;
-import com.google.atap.tangoservice.experimental.TangoImageBuffer;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
-import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
-
 /**
  * Child Growth Monitor - quick and accurate data on malnutrition
  * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
@@ -33,6 +16,23 @@ import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package de.welthungerhilfe.cgm.scanner.camera;
+
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
+import android.os.Build;
+
+import com.google.atap.tangoservice.TangoCameraIntrinsics;
+import com.google.atap.tangoservice.experimental.TangoImageBuffer;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
+import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
+
 public class TangoUtils {
 
     public static float getPixelIntensity(TangoImageBuffer imageBuffer) {

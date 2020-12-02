@@ -1,3 +1,21 @@
+/*
+ * Child Growth Monitor - quick and accurate data on malnutrition
+ * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
+ * Copyright (c) 2018 Welthungerhilfe Innovation
+ * <p>
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p>
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
 import android.os.AsyncTask;
@@ -19,17 +37,16 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
-import retrofit2.Retrofit;
 
 public class BackupManager {
 
-    public static void doBackup(BaseActivity context, File folder, long timestamp, Retrofit retrofit, Runnable onFinished) {
+    public static void doBackup(BaseActivity context, File folder, long timestamp, Runnable onFinished) {
         folder.mkdirs();
 
         ArtifactResultRepository arRepo = ArtifactResultRepository.getInstance(context);
         DeviceRepository dRepo = DeviceRepository.getInstance(context);
         FileLogRepository flRepo = FileLogRepository.getInstance(context);
-        MeasureRepository mRepo = MeasureRepository.getInstance(context, retrofit);
+        MeasureRepository mRepo = MeasureRepository.getInstance(context);
         MeasureResultRepository mrRepo = MeasureResultRepository.getInstance(context);
         PersonRepository pRepo = PersonRepository.getInstance(context);
 

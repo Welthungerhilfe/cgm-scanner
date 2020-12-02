@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.utils;
 
 import android.graphics.Bitmap;
@@ -31,10 +30,6 @@ import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
-
-/**
- * Created by Emerald on 2/21/2018.
- */
 
 public class BitmapUtils {
 

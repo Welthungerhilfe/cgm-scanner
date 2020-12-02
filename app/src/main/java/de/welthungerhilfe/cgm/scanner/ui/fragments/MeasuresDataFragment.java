@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
 import androidx.lifecycle.ViewModelProvider;
@@ -35,8 +34,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-
-import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
@@ -59,7 +56,6 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-import retrofit2.Retrofit;
 
 public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.ManualMeasureListener, RecyclerMeasureAdapter.OnMeasureSelectListener, RecyclerMeasureAdapter.OnMeasureFeedbackListener {
     private Context context;
@@ -72,9 +68,6 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
     public String qrCode;
     private Person person;
-
-    @Inject
-    Retrofit retrofit;
 
     ViewModelProvider.Factory factory;
 
@@ -106,7 +99,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         super.onActivityCreated(instance);
 
 
-        factory = new CreateDataViewModelProvideFactory(getActivity(),retrofit);
+        factory = new CreateDataViewModelProvideFactory(getActivity());
         viewModel = new ViewModelProvider(getActivity(),factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;

@@ -34,10 +34,6 @@ public class CameraCalibration {
         valid = false;
     }
 
-    public float[] getIntrinsic(boolean rgbCamera) {
-        return rgbCamera ? colorCameraIntrinsic : depthCameraIntrinsic;
-    }
-
     public boolean isValid() {
         return valid;
     }

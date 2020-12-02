@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
 import android.app.Activity;
@@ -51,8 +50,6 @@ import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicke
 
 import java.util.Date;
 
-import javax.inject.Inject;
-
 import dagger.android.support.AndroidSupportInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -72,7 +69,6 @@ import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.DateEditText;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-import retrofit2.Retrofit;
 
 public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, DateEditText.DateInputListener, TextWatcher {
 
@@ -94,9 +90,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private String qrCode;
     private Person person;
     private Loc location;
-
-    @Inject
-    Retrofit retrofit;
 
     ViewModelProvider.Factory factory;
 
@@ -131,7 +124,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_personal, container, false);
 
-        factory = new CreateDataViewModelProvideFactory(getActivity(), retrofit);
+        factory = new CreateDataViewModelProvideFactory(getActivity());
         viewModel = new ViewModelProvider(getActivity(), factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;

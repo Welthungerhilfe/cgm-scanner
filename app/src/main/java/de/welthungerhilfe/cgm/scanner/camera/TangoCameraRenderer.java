@@ -1,6 +1,6 @@
 package de.welthungerhilfe.cgm.scanner.camera;
 
-/**
+/*
  * Child Growth Monitor - quick and accurate data on malnutrition
  * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
  * Copyright (c) 2018 Welthungerhilfe Innovation
@@ -21,7 +21,6 @@ package de.welthungerhilfe.cgm.scanner.camera;
 
 import com.projecttango.tangosupport.TangoSupport;
 
-import android.graphics.SurfaceTexture;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -43,42 +42,12 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class TangoCameraRenderer implements GLSurfaceView.Renderer {
     private static final String TAG = TangoCameraRenderer.class.getSimpleName();
-    private static final boolean VERBOSE = false;
-
-    private static final int RECORDING_OFF = 0;
-    private static final int RECORDING_ON = 1;
-    private static final int RECORDING_RESUMED = 2;
-
-    private int mTextureId;
-
-    private SurfaceTexture mSurfaceTexture;
-    private boolean mRecordingEnabled;
-    private int mRecordingStatus;
-    private int mFrameCount;
 
     // width/height of the incoming camera preview frames
     private int mIncomingWidth;
     private int mIncomingHeight;
 
     private static final int INVALID_TEXTURE_ID = -1;
-
-    private final String vss =
-            "attribute vec2 vPosition;\n" +
-                    "attribute vec2 vTexCoord;\n" +
-                    "varying vec2 texCoord;\n" +
-                    "void main() {\n" +
-                    "  texCoord = vTexCoord;\n" +
-                    "  gl_Position = vec4(vPosition.x, vPosition.y, 0.0, 1.0);\n" +
-                    "}";
-
-    private final String fss =
-            "#extension GL_OES_EGL_image_external : require\n" +
-                    "precision mediump float;\n" +
-                    "uniform samplerExternalOES sTexture;\n" +
-                    "varying vec2 texCoord;\n" +
-                    "void main() {\n" +
-                    "  gl_FragColor = texture2D(sTexture,texCoord);\n" +
-                    "}";
 
     private final float[] textureCoords0 =
             new float[]{1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f};
@@ -107,13 +76,6 @@ public class TangoCameraRenderer implements GLSurfaceView.Renderer {
 
     public TangoCameraRenderer(RenderCallback callback) {
         mRenderCallback = callback;
-
-        mTextureId = INVALID_TEXTURE_ID;
-
-        mRecordingStatus = -1;
-        mRecordingEnabled = false;
-        mFrameCount = -1;
-
         mIncomingWidth = mIncomingHeight = -1;
 
         mTextures[0] = 0;
@@ -136,30 +98,6 @@ public class TangoCameraRenderer implements GLSurfaceView.Renderer {
         mIndices.put(itmp);
         mIndices.position(0);
     }
-
-
-    /**
-     * Notifies the renderer thread that the activity is pausing.
-     * <p>
-     * For best results, call this *after* disabling Camera preview.
-     */
-    public void notifyPausing() {
-        if (mSurfaceTexture != null) {
-            Log.d(TAG, "renderer pausing -- releasing SurfaceTexture");
-            mSurfaceTexture.release();
-            mSurfaceTexture = null;
-        }
-        mIncomingWidth = mIncomingHeight = -1;
-    }
-
-    /**
-     * Notifies the renderer that we want to stop or start recording.
-     */
-    public void changeRecordingState(boolean isRecording) {
-        Log.d(TAG, "changeRecordingState: was " + mRecordingEnabled + " now " + isRecording);
-        mRecordingEnabled = isRecording;
-    }
-
 
     public void updateColorCameraTextureUv(int rotation){
         float[] textureCoords =
@@ -196,26 +134,23 @@ public class TangoCameraRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 unused, EGLConfig eglConfig) {
         Log.d(TAG, "onSurfaceCreated");
 
-        // We're starting up or coming back.  Either way we've got a new EGLContext that will
-        // need to be shared with the video encoder, so figure out if a recording is already
-        // in progress.
-        //mRecordingEnabled = mVideoEncoder.isRecording();
-        if (mRecordingEnabled) {
-            mRecordingStatus = RECORDING_RESUMED;
-        } else {
-            mRecordingStatus = RECORDING_OFF;
-        }
-
-
-        // Create a SurfaceTexture, with an external texture, in this EGL context.  We don't
-        // have a Looper in this thread -- GLSurfaceView doesn't create one -- so the frame
-        // available messages will arrive on the main thread.
-        mSurfaceTexture = new SurfaceTexture(mTextureId);
-
-
         createTextures();
         createCameraVbos();
         GLES20.glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
+        String vss = "attribute vec2 vPosition;\n" +
+                "attribute vec2 vTexCoord;\n" +
+                "varying vec2 texCoord;\n" +
+                "void main() {\n" +
+                "  texCoord = vTexCoord;\n" +
+                "  gl_Position = vec4(vPosition.x, vPosition.y, 0.0, 1.0);\n" +
+                "}";
+        String fss = "#extension GL_OES_EGL_image_external : require\n" +
+                "precision mediump float;\n" +
+                "uniform samplerExternalOES sTexture;\n" +
+                "varying vec2 texCoord;\n" +
+                "void main() {\n" +
+                "  gl_FragColor = texture2D(sTexture,texCoord);\n" +
+                "}";
         mProgram = getProgram(vss, fss);
     }
 
@@ -228,8 +163,6 @@ public class TangoCameraRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 unused) {
-        if (VERBOSE) Log.d(TAG, "onDrawFrame tex=" + mTextureId);
-        boolean showBox = false;
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         // Call application-specific code that needs to run on the OpenGL thread.
@@ -271,15 +204,6 @@ public class TangoCameraRenderer implements GLSurfaceView.Renderer {
         // Unbind.
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-
-        // Enable depth write again for any additional rendering on top of the camera surface.
-        GLES20.glDepthMask(true);
-        // Draw a flashing box if we're recording.  This only appears on screen.
-        showBox = (mRecordingStatus == RECORDING_ON);
-        if (showBox && (++mFrameCount & 0x04) == 0) {
-            drawBox();
-        }
-
     }
 
     private void createTextures() {
@@ -365,15 +289,5 @@ public class TangoCameraRenderer implements GLSurfaceView.Renderer {
 
     public int getTextureId() {
         return mTextures[0];
-    }
-    /**
-     * Draws a red box in the corner.
-     */
-    private void drawBox() {
-        GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
-        GLES20.glScissor(0, 0, 100, 100);
-        GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
     }
 }

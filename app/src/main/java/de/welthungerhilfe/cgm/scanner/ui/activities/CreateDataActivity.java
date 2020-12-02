@@ -57,10 +57,6 @@ import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import retrofit2.Retrofit;
 
-/**
- * Created by Emerald on 2/19/2018.
- */
-
 public class CreateDataActivity extends BaseActivity {
 
     private final int PERMISSION_LOCATION = 0x002;
@@ -105,7 +101,7 @@ public class CreateDataActivity extends BaseActivity {
         initFragments();
 
 
-        factory = new CreateDataViewModelProvideFactory(this,retrofit);
+        factory = new CreateDataViewModelProvideFactory(this);
         viewModel = new ViewModelProvider(this,factory).get(CreateDataViewModel.class);
         viewModel.getCurrentTab().observe(this, tab -> {
             viewpager.setCurrentItem(tab);

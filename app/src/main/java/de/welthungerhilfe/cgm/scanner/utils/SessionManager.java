@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.utils;
 
 import android.content.Context;
@@ -30,10 +29,6 @@ import java.util.Locale;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
-
-/**
- * Created by Emerald on 2/21/2018.
- */
 
 public class SessionManager {
     private final String PREF_KEY_USER = "pref_key_user";

@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.datasource.models;
 
 import androidx.room.Embedded;
@@ -43,10 +42,6 @@ import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 
 import static androidx.room.ForeignKey.CASCADE;
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_MEASURE;
-
-/**
- * Created by Emerald on 2/19/2018.
- */
 
 @Entity(tableName = TABLE_MEASURE)
 public class Measure extends CsvExportableModel implements Serializable {

@@ -16,12 +16,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner;
-
-/**
- * Created by Emerald on 2/19/2018.
- */
 
 public class AppConstants {
 
