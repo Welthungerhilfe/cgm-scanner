@@ -49,7 +49,7 @@ import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.BackupManager;
+import de.welthungerhilfe.cgm.scanner.datasource.database.BackupManager;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
