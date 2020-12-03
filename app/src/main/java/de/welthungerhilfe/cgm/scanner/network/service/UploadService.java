@@ -317,6 +317,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
                     AuthenticationHandler authentication = AuthenticationHandler.getInstance();
                     if (authentication.isExpiredToken(e.getMessage())) {
                         authentication.updateToken((email, token, feedback) -> updateFileLog(log));
+                    } else {
+                        updateFileLog(log);
                     }
                 }
 
