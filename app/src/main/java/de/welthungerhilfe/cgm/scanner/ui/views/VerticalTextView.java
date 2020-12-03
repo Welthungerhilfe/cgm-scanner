@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.views;
 
 import android.annotation.SuppressLint;
@@ -26,10 +25,6 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.widget.TextView;
-
-/**
- * Created by Emerald on 2/24/2018.
- */
 
 @SuppressLint("AppCompatCustomView")
 public class VerticalTextView extends TextView {

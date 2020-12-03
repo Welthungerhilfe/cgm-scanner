@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.dialogs;
 
 import android.annotation.SuppressLint;
@@ -24,7 +23,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatRatingBar;
 import android.util.Log;
 import android.view.View;
@@ -41,12 +39,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureResultRepository;
 
-/**
- * Created by Emerald on 2/23/2018.
- */
-
 public class FeedbackDialog extends Dialog {
-    private final int REQUEST_LOCATION = 0x1000;
 
     @BindView(R.id.ratingOverall)
     AppCompatRatingBar ratingOverall;

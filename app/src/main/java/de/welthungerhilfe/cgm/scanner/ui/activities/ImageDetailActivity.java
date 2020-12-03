@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.graphics.Bitmap;
@@ -32,12 +31,9 @@ import com.bumptech.glide.Glide;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.views.ZoomImageView;
 
-/**
- * Created by emerald on 10/6/2017.
- */
 public class ImageDetailActivity extends AppCompatActivity {
     @BindView(R.id.zoomView)
     ZoomImageView zoomView;

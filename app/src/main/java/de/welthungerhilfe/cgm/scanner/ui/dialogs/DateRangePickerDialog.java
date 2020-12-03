@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.dialogs;
 
 import android.app.DialogFragment;
@@ -37,10 +36,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 import de.welthungerhilfe.cgm.scanner.R;
-
-/**
- * Created by Emerald on 2/23/2018.
- */
 
 public class DateRangePickerDialog extends DialogFragment {
     SublimePicker mSublimePicker;

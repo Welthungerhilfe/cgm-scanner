@@ -16,9 +16,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.adapters;
-
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;

@@ -15,7 +15,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package de.welthungerhilfe.cgm.scanner;
 
 import android.os.Environment;
@@ -26,7 +25,7 @@ import java.io.IOException;
 
 import dagger.android.AndroidInjector;
 import dagger.android.support.DaggerApplication;
-import de.welthungerhilfe.cgm.scanner.di.DaggerAppComponent;
+import de.welthungerhilfe.cgm.scanner.network.module.DaggerAppComponent;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AppController extends DaggerApplication {

@@ -18,10 +18,10 @@ cat $gsFile
 echo "Updated id!"
 
 APP_MANIFEST_FILE=$BUILD_REPOSITORY_LOCALPATH/app/src/main/AndroidManifest.xml
+APP_OAUTH_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_single_account.json
+APP_NETWORK_MODULE=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/network/module/NetworkModule.java
 APP_SPLASH_ACTIVITY=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/ui/activities/SplashActivity.java
 APP_LOGIN_ACTIVITY=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/ui/activities/LoginActivity.java
-APP_NETWORK_MODULE=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/di/module/NetworkModule.java
-APP_OAUTH_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_single_account.json
 
 echo "Updating API KEYS"
 

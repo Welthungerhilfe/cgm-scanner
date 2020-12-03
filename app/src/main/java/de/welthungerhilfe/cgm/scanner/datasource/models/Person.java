@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.datasource.models;
 
 import androidx.room.Embedded;
@@ -34,10 +33,6 @@ import java.util.Locale;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.CsvExportableModel;
 
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_PERSON;
-
-/**
- * Created by Emerald on 2/19/2018.
- */
 
 @Entity(tableName = TABLE_PERSON)
 public class Person extends CsvExportableModel implements Serializable {

@@ -1,3 +1,21 @@
+/*
+ * Child Growth Monitor - quick and accurate data on malnutrition
+ * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
+ * Copyright (c) 2018 Welthungerhilfe Innovation
+ * <p>
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p>
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.Manifest;
@@ -54,8 +72,6 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.inject.Inject;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -66,26 +82,25 @@ import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
-import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreCamera;
-import de.welthungerhilfe.cgm.scanner.helper.camera.AREngineCamera;
-import de.welthungerhilfe.cgm.scanner.helper.camera.CameraCalibration;
-import de.welthungerhilfe.cgm.scanner.helper.camera.ICamera;
-import de.welthungerhilfe.cgm.scanner.helper.camera.TangoCamera;
-import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreUtils;
-import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.camera.ARCoreCamera;
+import de.welthungerhilfe.cgm.scanner.camera.AREngineCamera;
+import de.welthungerhilfe.cgm.scanner.camera.CameraCalibration;
+import de.welthungerhilfe.cgm.scanner.camera.ICamera;
+import de.welthungerhilfe.cgm.scanner.camera.TangoCamera;
+import de.welthungerhilfe.cgm.scanner.camera.ARCoreUtils;
+import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
-import de.welthungerhilfe.cgm.scanner.helper.camera.TangoUtils;
+import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-import retrofit2.Retrofit;
 
 public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener, ARCoreUtils.Camera2DataListener, TangoCamera.TangoCameraListener {
     private final int PERMISSION_LOCATION = 0x0001;
@@ -173,9 +188,6 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     Button btnTutorial2;
     @BindView(R.id.btnTutorial3)
     Button btnTutorial3;
-
-    @Inject
-    Retrofit retrofit;
 
     @OnClick(R.id.lytScanStanding)
     void scanStanding() {
@@ -422,7 +434,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         getCamera().onCreate();
 
-        measureRepository = MeasureRepository.getInstance(this, retrofit);
+        measureRepository = MeasureRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
         artifactResultRepository = ArtifactResultRepository.getInstance(this);
         artifacts = new ArrayList<>();

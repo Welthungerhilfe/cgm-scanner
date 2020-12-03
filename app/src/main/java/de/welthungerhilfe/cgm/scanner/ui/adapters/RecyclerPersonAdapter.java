@@ -16,11 +16,9 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
 import androidx.lifecycle.LifecycleOwner;
-
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.AsyncTask;
@@ -41,13 +39,12 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-import retrofit2.Retrofit;
 
 public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAdapter.ViewHolder> {
     private BaseActivity context;
@@ -60,12 +57,12 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
     private SessionManager session;
     private PersonListViewModel viewModel;
 
-    public RecyclerPersonAdapter(BaseActivity ctx, RecyclerView recycler, PersonListViewModel model, Retrofit retrofit) {
+    public RecyclerPersonAdapter(BaseActivity ctx, RecyclerView recycler, PersonListViewModel model) {
         context = ctx;
         recyclerData = recycler;
         viewModel = model;
 
-        repository = MeasureRepository.getInstance(ctx,retrofit);
+        repository = MeasureRepository.getInstance(ctx);
         session = new SessionManager(context);
     }
 
