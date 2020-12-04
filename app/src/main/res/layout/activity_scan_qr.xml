@@ -4,6 +4,41 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <RelativeLayout
+        android:id="@+id/rlt_consent_form"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+        <ImageView
+            android:id="@+id/iv_consent_form"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            android:background="@color/colorBlack">
+        </ImageView>
+        <Button
+            android:id="@+id/btn_retake"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginStart="32dp"
+            android:background="@drawable/button_white_circular_bound"
+            android:text="@string/retake"
+            android:textColor="@color/colorWhite"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="32dp"/>
+        <Button
+            android:id="@+id/btn_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginRight="32dp"
+            android:background="@drawable/button_white_circular_bound"
+            android:text="@string/ok"
+            android:textColor="@color/colorWhite"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="32dp"/>
+    </RelativeLayout>
+
     <de.welthungerhilfe.cgm.scanner.ui.views.QRScanView
         android:id="@+id/qrScanView"
         android:layout_width="match_parent"
@@ -37,6 +72,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/ll_qr_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
