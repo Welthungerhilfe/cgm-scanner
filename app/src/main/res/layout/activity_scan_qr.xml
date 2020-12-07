@@ -9,47 +9,48 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone">
+
         <ImageView
             android:id="@+id/iv_consent_form"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="fitXY"
-            android:background="@color/colorBlack">
-        </ImageView>
+            android:background="@color/colorBlack"></ImageView>
+
         <Button
             android:id="@+id/btn_retake"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
+            android:layout_alignParentBottom="true"
             android:layout_marginStart="32dp"
+            android:layout_marginBottom="32dp"
             android:background="@drawable/button_white_circular_bound"
             android:text="@string/retake"
-            android:textColor="@color/colorWhite"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="32dp"/>
+            android:textColor="@color/colorWhite" />
+
         <Button
             android:id="@+id/btn_ok"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
             android:layout_marginRight="32dp"
+            android:layout_marginBottom="32dp"
             android:background="@drawable/button_white_circular_bound"
             android:text="@string/ok"
-            android:textColor="@color/colorWhite"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginBottom="32dp"/>
+            android:textColor="@color/colorWhite" />
     </RelativeLayout>
 
     <de.welthungerhilfe.cgm.scanner.ui.views.QRScanView
         android:id="@+id/qrScanView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        android:gravity="center_vertical"
         android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:gravity="center_vertical">
+        android:paddingRight="@dimen/activity_horizontal_margin">
 
         <ImageView
             android:id="@+id/imgClose"
@@ -67,7 +68,7 @@
             android:layout_marginStart="@dimen/activity_horizontal_margin"
             android:text="@string/search_by_qr"
             android:textColor="@color/colorWhite"
-            android:textSize="20sp"/>
+            android:textSize="20sp" />
 
     </LinearLayout>
 
@@ -76,16 +77,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:gravity="center"
-        android:paddingBottom="400dp"
         android:layout_marginLeft="50dp"
-        android:layout_marginRight="50dp">
+        android:layout_marginRight="50dp"
+        android:gravity="center"
+        android:paddingBottom="400dp">
 
         <ImageView
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/qr"
             android:scaleType="fitXY"
+            android:src="@drawable/qr"
             tools:ignore="ContentDescription" />
 
         <TextView
@@ -94,7 +95,7 @@
             android:layout_marginLeft="@dimen/activity_group_margin"
             android:text="@string/scan_qr_code_desc"
             android:textColor="@color/colorWhite"
-            android:textSize="18sp"/>
+            android:textSize="18sp" />
 
     </LinearLayout>
 

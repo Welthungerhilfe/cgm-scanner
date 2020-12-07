@@ -45,6 +45,8 @@ public class SessionManager {
     private final String KEY_CONNECTION_TIMESTAMP = "key_connection_timestamp";
     private final String KEY_TUTORIAL = "key_tutorial";
     private final String KEY_REMOTE_CONFIG = "key_remote_config";
+    private final String KEY_DONOT_SHOW_QR_CONFIRM_DIALOG = "key_donot_show_qr_confirm_dialog";
+
 
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
@@ -62,6 +64,16 @@ public class SessionManager {
 
     public boolean isSigned() {
         return pref.getBoolean(KEY_USER_SIGNED, false) && (getAuthToken() != null);
+    }
+
+    public void setQrConfirmDialogDoNotshow(boolean data) {
+        editor.putBoolean(KEY_DONOT_SHOW_QR_CONFIRM_DIALOG, data);
+
+        editor.commit();
+    }
+
+    public boolean isQrConfirmDoNotShowTicked() {
+        return pref.getBoolean(KEY_DONOT_SHOW_QR_CONFIRM_DIALOG, false);
     }
 
     public void setUserEmail(String email) {
