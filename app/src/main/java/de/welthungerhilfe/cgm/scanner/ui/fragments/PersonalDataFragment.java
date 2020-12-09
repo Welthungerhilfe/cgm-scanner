@@ -285,7 +285,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         sex = "male";
                     else if (radioFemale.isChecked())
                         sex = "female";
-
                     if (person == null) {
                         person = new Person();
                         person.setId(AppController.getInstance().getPersonId());
@@ -303,6 +302,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setCreatedBy(session.getUserEmail());
                     person.setSchema_version(CgmDatabase.version);
                     person.setLastLocation(location);
+                    person.setSynced(false);
 
                     viewModel.savePerson(person);
 

@@ -86,6 +86,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         startActivity(new Intent(MainActivity.this, QRScanActivity.class));
     }
 
+    String TAG = MainActivity.class.getSimpleName();
+
     @BindView(R.id.recyclerData)
     RecyclerView recyclerData;
     RecyclerPersonAdapter adapterData;
@@ -125,6 +127,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         final Observer<List<Person>> observer = list -> {
             Log.e("PersonRecycler", "Observer called");
+
             if (lytManager.getItemCount() == 0 && list != null && list.size() == 0) {
                 lytNoPerson.setVisibility(View.VISIBLE);
             } else {

@@ -317,7 +317,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                     Person person = syncablePersons.get(i);
                     Log.i("Syncadapter", "this is inside processPerson Queue " + person);
-                    postPerson(person);
+                    if (person.getServerId() == null || person.getServerId().isEmpty()) {
+                        postPerson(person);
+                    } else {
+                        putPerson(person);
+                    }
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
@@ -502,7 +506,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             person.getLastLocation().setLatitude(person1.getLastLocation().getLatitude());
                             person.getLastLocation().setLongitude(person1.getLastLocation().getLongitude());
                             person.setBirthday(person1.getBirthday());
-                            updatePerson(person);
+                            updatePersonOnDatabase(person);
                         }
 
                         @Override
@@ -524,8 +528,75 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
+    public void putPerson(Person person1) {
+        try {
+
+            Person putPerson = new Person();
+
+            putPerson.setBirthdayString(DataFormat.convertTimestampToDate(person1.getBirthday()));
+            putPerson.setGuardian(person1.getGuardian());
+            putPerson.setAgeEstimated(person1.isAgeEstimated());
+            putPerson.setName(person1.getName());
+            putPerson.setSex(person1.getSex());
+
+            Gson gson = new GsonBuilder()
+                    .excludeFieldsWithoutExposeAnnotation()
+                    .create();
+
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(putPerson))).toString());
+
+            Log.i(TAG, "this is data of person " + (new JSONObject(gson.toJson(putPerson))).toString());
+
+            retrofit.create(ApiService.class).putPerson("bearer " + session.getAuthToken(), body, person1.getServerId()).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Person>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull Person person) {
+                            Log.i(TAG, "this is inside of update person on next  " + person);
+                            person.setTimestamp(prevTimestamp);
+                            person.setId(person1.getId());
+                            person.setSurname(person1.getSurname());
+                            person.setCreatedBy(person1.getCreatedBy());
+                            person.setCreated(person1.getCreated());
+                            person.setSynced(true);
+                            Loc location = new Loc();
+                            person.setLastLocation(location);
+                            person.getLastLocation().setAddress(person1.getLastLocation().getAddress());
+                            person.getLastLocation().setLatitude(person1.getLastLocation().getLatitude());
+                            person.getLastLocation().setLongitude(person1.getLastLocation().getLongitude());
+                            person.setBirthday(person1.getBirthday());
+                            updatePersonOnDatabase(person);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            Log.i(TAG, "this is value of update person" +
+                                    "" +
+                                    " " + e.getMessage());
+                            AuthenticationHandler authentication = AuthenticationHandler.getInstance();
+                            if (authentication.isExpiredToken(e.getMessage())) {
+                                authentication.updateToken(null);
+                            }
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            Log.i(TAG, "this is value of exception " + e.getMessage());
+        }
+    }
+
+
     @SuppressLint("StaticFieldLeak")
-    public void updatePerson(Person person) {
+    public void updatePersonOnDatabase(Person person) {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
