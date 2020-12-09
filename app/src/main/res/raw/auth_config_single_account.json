@@ -1,13 +1,12 @@
 {
-  "client_id" : "{OAUTH_CLIENT_ID}",
+  "client_id" : "98e9e1be-53fb-47f4-b53a-5842aeb869d5",
   "authorization_user_agent" : "DEFAULT",
-  "redirect_uri" : "{OAUTH_REDIRECT_URL}",
-  "account_mode" : "SINGLE",
-  "broker_redirect_uri_registered": true,
+  "redirect_uri" : "msauth://de.welthungerhilfe.cgm.scanner/HG3KFO3TBAjNOYsTjEIr8WhqFLw%3D",
   "authorities" : [
     {
-      "type": "AAD",
-      "authority_url": "{OAUTH_URL}"
+      "type": "B2C",
+      "authority_url": "https://cgmb2csandbox.b2clogin.com/tfp/cgmb2csandbox.onmicrosoft.com/B2C_1_cgm-scanner-auth/",
+      "default": true
     }
   ]
 }

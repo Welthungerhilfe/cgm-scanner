@@ -98,7 +98,7 @@ public class NetworkModule {
             return AppConstants.TESTING_URL;
         } else {
             // production build
-            return "{API_URL}/";
+            return "https://cgm-be-ci-dev-scanner-api.azurewebsites.net/";
         }
     }
 }
