@@ -50,6 +50,7 @@ import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -285,12 +286,12 @@ public class UploadService extends Service implements OnFileLogsLoad {
         }
 
         RequestBody filename = RequestBody.create(MediaType.parse("multipart/form-data"), file.getName());
-        retrofit.create(ApiService.class).uploadFiles("bearer " + sessionManager.getAuthToken(),body,filename).subscribeOn(Schedulers.io())
+        Observable<String> request = retrofit.create(ApiService.class).uploadFiles("bearer " + sessionManager.getAuthToken(),body,filename);
+        request.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Observer<String>() {
                 @Override
                 public void onSubscribe(@NonNull Disposable d) {
-
                 }
 
                 @Override
@@ -316,6 +317,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                     Log.i(TAG, "this is response onError uploadfiles " + e.getMessage() + file.getPath());
                     AuthenticationHandler authentication = AuthenticationHandler.getInstance();
                     if (authentication.isExpiredToken(e.getMessage())) {
+                        Log.d(TAG, "observable=" + request.toString());
                         authentication.updateToken((email, token, feedback) -> updateFileLog(log));
                     } else {
                         updateFileLog(log);
