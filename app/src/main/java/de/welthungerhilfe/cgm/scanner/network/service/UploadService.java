@@ -317,7 +317,9 @@ public class UploadService extends Service implements OnFileLogsLoad {
                     Log.i(TAG, "this is response onError uploadfiles " + e.getMessage() + file.getPath());
                     AuthenticationHandler authentication = AuthenticationHandler.getInstance();
                     if (authentication.isExpiredToken(e.getMessage())) {
-                        Log.d(TAG, "error body=" + this.toString());
+                        Log.d(TAG, "error single=" + request.blockingSingle());
+                        Log.d(TAG, "error first=" + request.blockingFirst());
+                        Log.d(TAG, "error last=" + request.blockingLast());
                         authentication.updateToken((email, token, feedback) -> updateFileLog(log));
                     } else {
                         updateFileLog(log);
