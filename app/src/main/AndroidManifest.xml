@@ -28,6 +28,10 @@
     <!-- contact support -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <!--for foreground service-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+
     <supports-screens
         android:anyDensity="true"
         android:largeScreens="true"
@@ -158,7 +162,7 @@
                 -->
                 <data
                     android:host="de.welthungerhilfe.cgm.scanner"
-                    android:path="{OAUTH_PATH}"
+                    android:path="/BHFZ0LuVlEHKE4nIlCYWqlotEGo="
                     android:scheme="msauth" />
             </intent-filter>
         </activity>

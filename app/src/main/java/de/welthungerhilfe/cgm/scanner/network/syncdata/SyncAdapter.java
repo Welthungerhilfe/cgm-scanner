@@ -175,7 +175,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }
 
             if (!UploadService.isInitialized()) {
-                getContext().startService(new Intent(getContext(), UploadService.class));
+                try {
+                    getContext().startService(new Intent(getContext(), UploadService.class));
+                }catch (IllegalStateException e)
+                {
+                    Intent intent = new Intent(getContext(),UploadService.class);
+                    intent.putExtra("data",true);
+                    getContext().startForegroundService(intent);
+                }
             } else {
                 UploadService.forceResume();
             }

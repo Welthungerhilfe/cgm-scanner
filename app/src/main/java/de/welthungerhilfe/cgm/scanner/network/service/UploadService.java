@@ -18,12 +18,16 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.service;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+
 import android.util.Log;
 
 import org.jcodec.common.io.IOUtils;
@@ -40,7 +44,9 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
@@ -117,6 +123,20 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
+        boolean isForeGround = intent.getBooleanExtra("data",false);
+        if(isForeGround) {
+            Intent notificationIntent = new Intent(this, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                    0, notificationIntent, 0);
+            Notification notification = new NotificationCompat.Builder(this, "CGM")
+                    .setContentTitle("Example Service")
+                    .setContentText("sdjgdsjc jdscjdscjk")
+                    .setSmallIcon(R.drawable.icon_notif)
+                    .setContentIntent(pendingIntent)
+                    .build();
+            startForeground(1, notification);
+
+        }
         if (remainingCount <= 0) {
             loadQueueFileLogs();
             return START_STICKY;
