@@ -40,6 +40,8 @@ import com.microsoft.identity.client.exception.MsalServiceException;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
+import net.minidev.json.JSONArray;
+
 import java.text.ParseException;
 import java.util.Map;
 
@@ -193,16 +195,15 @@ public class AuthenticationHandler {
                 try {
                     JWT parsedToken = JWTParser.parse(authenticationResult.getAccessToken());
                     Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
-                    for (String key : claims.keySet()) {
-                        Log.d(TAG, "Key=" + claims.get(key).toString());
+                    JSONArray emails = (JSONArray) claims.get("emails");
+                    if (emails != null && !emails.isEmpty()) {
+                        callback.processAuth(emails.get(0).toString(), authenticationResult.getAccessToken(), true);
+
+                        callGraphAPI(authenticationResult);
                     }
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                callback.processAuth(authenticationResult.getAccount().getUsername(), authenticationResult.getAccessToken(), true);
-
-                /* call graph */
-                callGraphAPI(authenticationResult);
             }
 
             @Override
