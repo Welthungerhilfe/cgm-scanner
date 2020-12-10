@@ -37,6 +37,11 @@ import com.microsoft.identity.client.SilentAuthenticationCallback;
 import com.microsoft.identity.client.exception.MsalClientException;
 import com.microsoft.identity.client.exception.MsalException;
 import com.microsoft.identity.client.exception.MsalServiceException;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
+
+import java.text.ParseException;
+import java.util.Map;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
@@ -185,6 +190,15 @@ public class AuthenticationHandler {
                 Log.d(TAG, "Successfully authenticated");
 
                 /* Update account */
+                try {
+                    JWT parsedToken = JWTParser.parse(authenticationResult.getAccessToken());
+                    Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
+                    for (String key : claims.keySet()) {
+                        Log.d(TAG, "Key=" + claims.get(key).toString());
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 callback.processAuth(authenticationResult.getAccount().getUsername(), authenticationResult.getAccessToken(), true);
 
                 /* call graph */
