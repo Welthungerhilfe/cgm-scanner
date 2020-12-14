@@ -20,6 +20,10 @@ package de.welthungerhilfe.cgm.scanner.network.syncdata;
 
 import android.accounts.Account;
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -27,9 +31,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SyncRequest;
 import android.content.SyncResult;
+import android.media.RingtoneManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -47,10 +57,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
@@ -132,6 +144,26 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             syncTask = new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             Log.i(TAG, "this is inside startSyncing ");
         }
+
+
+        if (!UploadService.isInitialized()) {
+            try {
+                getContext().startService(new Intent(getContext(), UploadService.class));
+
+            }catch (IllegalStateException e)
+            {
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                {
+                    Intent intent = new Intent(getContext(),UploadService.class);
+                    intent.putExtra(AppConstants.IS_FOREGROUND,true);
+                    getContext().startForegroundService(intent);
+                }
+
+
+            }
+        } else {
+            UploadService.forceResume();
+        }
     }
 
     private static void syncImmediately(Account account, Context context) {
@@ -172,19 +204,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             if (!Utils.isUploadAllowed(getContext())) {
                 Log.d(TAG, "skipped due to missing connection");
                 return null;
-            }
-
-            if (!UploadService.isInitialized()) {
-                try {
-                    getContext().startService(new Intent(getContext(), UploadService.class));
-                }catch (IllegalStateException e)
-                {
-                    Intent intent = new Intent(getContext(),UploadService.class);
-                    intent.putExtra("data",true);
-                    getContext().startForegroundService(intent);
-                }
-            } else {
-                UploadService.forceResume();
             }
 
             Log.i(TAG, "this is inside before restApi ");
@@ -683,4 +702,5 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
+
 }

@@ -291,4 +291,7 @@
     <string name="edema_check">Sind Sie sicher, dass das Kind an Ödem leidet?</string>
     <string name="edema_link">Wie auf bilaterale Ödeme prüfen\nyoutu.be/3pQUtOsjjSY?t=85</string>
 
+    <string name="scan_is_uploading">Scan wird hochgeladen</string>
+
+
 </resources>

@@ -289,4 +289,7 @@
 
     <string name="edema_check">क्या आप सुनिश्चित हैं कि बच्चा एडेमा से पीड़ित है?</string>
     <string name="edema_link">द्विपक्षीय एडिमा की जांच कैसे करें\nyoutu.be/hGTyk6CM-5A</string>
+
+    <string name="scan_is_uploading">Sस्कैन अपलोड हो रहा है</string>
+
 </resources>

@@ -297,4 +297,6 @@
     <string name="edema_check">Are you sure the child suffers from Edema?</string>
     <string name="edema_link">How to check for bilateral edema\nyoutu.be/3pQUtOsjjSY?t=85</string>
 
+    <string name="scan_is_uploading">Scan is uploading</string>
+
 </resources>
