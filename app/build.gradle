@@ -7,7 +7,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 315
-        versionName "3.1.5-dev"
+        versionName "3.1.5"
         manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", arengineValue:"optional", tangoRequired:"false"]
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         javaCompileOptions {
