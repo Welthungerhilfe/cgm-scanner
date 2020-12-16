@@ -38,7 +38,6 @@ import android.widget.ImageView;
 import com.google.ar.core.Pose;
 import com.huawei.hiar.ARCamera;
 import com.huawei.hiar.ARConfigBase;
-import com.huawei.hiar.AREnginesApk;
 import com.huawei.hiar.ARFrame;
 import com.huawei.hiar.ARPose;
 import com.huawei.hiar.ARSession;
@@ -156,9 +155,7 @@ public class AREngineCamera implements ICamera {
     if (mActivity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
       if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
         if (mActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-          if (isAREngineSupportedAndUpToDate()) {
-            openCamera();
-          }
+          openCamera();
         }
       }
     }
@@ -300,14 +297,6 @@ public class AREngineCamera implements ICamera {
       Utils.sleep(100);
       mActivity.finish();
     }).start();
-  }
-
-  private boolean isAREngineSupportedAndUpToDate() {
-    if (AREnginesApk.checkAvailability(mActivity) != AREnginesApk.ARAvailability.SUPPORTED_INSTALLED) {
-      installAREngine();
-      return false;
-    }
-    return true;
   }
 
   @Override
