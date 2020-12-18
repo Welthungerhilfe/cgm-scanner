@@ -1,4 +1,4 @@
-/**
+/*
  * Child Growth Monitor - quick and accurate data on malnutrition
  * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
  * Copyright (c) 2018 Welthungerhilfe Innovation
@@ -44,8 +44,7 @@ public class NetworkModule {
     @Provides
     Cache provideHttpCache(Application application) {
         int cacheSize = 10 * 1024 * 1024;
-        Cache cache = new Cache(application.getCacheDir(), cacheSize);
-        return cache;
+        return new Cache(application.getCacheDir(), cacheSize);
     }
 
     @Provides
@@ -83,13 +82,12 @@ public class NetworkModule {
 
     @Provides
     Retrofit provideRetrofit(Gson gson) {
-        Retrofit retrofit = new Retrofit.Builder()
+        return new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
                 .baseUrl(getUrl())
                 .client(new OkHttpClient())
                 .build();
-        return retrofit;
     }
 
     private String getUrl() {
@@ -98,7 +96,7 @@ public class NetworkModule {
             return AppConstants.TESTING_URL;
         } else {
             // production build
-            return "https://cgm-be-ci-dev-scanner-api.azurewebsites.net/";
+            return "{API_URL}/";
         }
     }
 }
