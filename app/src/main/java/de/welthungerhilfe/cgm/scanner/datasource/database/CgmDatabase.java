@@ -176,8 +176,8 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final Migration MIGRATION_12_13 = new Migration(12, 13) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE persons ADD COLUMN isSynced INTEGER;");
-            database.execSQL("ALTER TABLE measures ADD COLUMN isSynced INTEGER;");
+            database.execSQL("ALTER TABLE persons ADD COLUMN isSynced INTEGER NOT NULL DEFAULT 0;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN isSynced INTEGER NOT NULL DEFAULT 0;");
         }
     };
     public static final Migration MIGRATION_13_14 = new Migration(13, 14) {
