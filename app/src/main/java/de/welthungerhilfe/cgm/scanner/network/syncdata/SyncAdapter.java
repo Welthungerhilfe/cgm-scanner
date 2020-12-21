@@ -479,8 +479,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             public void onError(@NonNull Throwable e) {
                                 Log.i(TAG, "this is value of post " + e.getMessage());
                                 AuthenticationHandler authentication = AuthenticationHandler.getInstance();
-                                if (authentication.isExpiredToken(e.getMessage())) {
-                                    authentication.updateToken(null);
+                                if (authentication != null) {
+                                    if (authentication.isExpiredToken(e.getMessage())) {
+                                        authentication.updateToken(null);
+                                    }
                                 }
                             }
 
@@ -539,8 +541,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is value of post " + e.getMessage());
                             AuthenticationHandler authentication = AuthenticationHandler.getInstance();
-                            if (authentication.isExpiredToken(e.getMessage())) {
-                                authentication.updateToken(null);
+                            if (authentication != null) {
+                                if (authentication.isExpiredToken(e.getMessage())) {
+                                    authentication.updateToken(null);
+                                }
                             }
                         }
 
@@ -605,8 +609,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     "" +
                                     " " + e.getMessage());
                             AuthenticationHandler authentication = AuthenticationHandler.getInstance();
-                            if (authentication.isExpiredToken(e.getMessage())) {
-                                authentication.updateToken(null);
+                            if (authentication != null) {
+                                if (authentication.isExpiredToken(e.getMessage())) {
+                                    authentication.updateToken(null);
+                                }
                             }
                         }
 
@@ -673,8 +679,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is value of post " + e.getMessage());
                             AuthenticationHandler authentication = AuthenticationHandler.getInstance();
-                            if (authentication.isExpiredToken(e.getMessage())) {
-                                authentication.updateToken(null);
+                            if (authentication != null) {
+                                if (authentication.isExpiredToken(e.getMessage())) {
+                                    authentication.updateToken(null);
+                                }
                             }
                         }
 
