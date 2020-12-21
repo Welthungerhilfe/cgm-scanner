@@ -67,7 +67,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         ButterKnife.bind(this);
 
         session = new SessionManager(this);
-        authentication = new AuthenticationHandler(this, this, "{OAUTH_SCOPE}" );
+        authentication = new AuthenticationHandler(this, this, AuthenticationHandler.Environment.SANDBOX );
         accountManager = AccountManager.get(this);
     }
 

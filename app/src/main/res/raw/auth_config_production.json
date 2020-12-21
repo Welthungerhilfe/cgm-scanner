@@ -1,0 +1,13 @@
+{
+  "client_id" : "{OAUTH_CLIENT_ID_PRODUCTION}",
+  "authorization_user_agent" : "DEFAULT",
+  "account_mode" : "SINGLE",
+  "redirect_uri" : "{OAUTH_REDIRECT_URL_PRODUCTION}",
+  "authorities" : [
+    {
+      "type": "B2C",
+      "authority_url": "{OAUTH_URL_PRODUCTION}",
+      "default": true
+    }
+  ]
+}
