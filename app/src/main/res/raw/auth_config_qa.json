@@ -1,13 +1,14 @@
 {
-  "client_id" : "{OAUTH_CLIENT_ID}",
+  "client_id" : "{OAUTH_CLIENT_ID_QA}",
   "authorization_user_agent" : "DEFAULT",
-  "redirect_uri" : "{OAUTH_REDIRECT_URL}",
   "account_mode" : "SINGLE",
   "broker_redirect_uri_registered": true,
+  "redirect_uri" : "{OAUTH_REDIRECT_URL}",
   "authorities" : [
     {
       "type": "AAD",
-      "authority_url": "{OAUTH_URL}"
+      "authority_url": "{OAUTH_URL_QA}",
+      "default": true
     }
   ]
 }

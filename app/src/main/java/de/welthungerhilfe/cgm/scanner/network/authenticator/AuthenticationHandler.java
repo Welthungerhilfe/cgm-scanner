@@ -37,12 +37,22 @@ import com.microsoft.identity.client.SilentAuthenticationCallback;
 import com.microsoft.identity.client.exception.MsalClientException;
 import com.microsoft.identity.client.exception.MsalException;
 import com.microsoft.identity.client.exception.MsalServiceException;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
 
+import net.minidev.json.JSONArray;
+
+import java.text.ParseException;
+import java.util.Map;
+
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AuthenticationHandler {
+
+    public enum Environment { SANDBOX, QA, PROUDCTION };
 
     public interface IAuthenticationCallback {
 
@@ -53,6 +63,7 @@ public class AuthenticationHandler {
 
     private Activity activity;
     private Context context;
+    private Environment environment;
     private SessionManager session;
     private ISingleAccountPublicClientApplication singleAccountApp;
     private IAuthenticationCallback callback;
@@ -61,19 +72,36 @@ public class AuthenticationHandler {
     @SuppressLint("StaticFieldLeak")
     private static AuthenticationHandler instance;
 
-    public AuthenticationHandler(Activity activity, IAuthenticationCallback callback, String scope) {
+    public AuthenticationHandler(Activity activity, IAuthenticationCallback callback, Environment environment) {
 
+        int config = 0;
         this.activity = activity;
         this.callback = callback;
+        this.environment = environment;
+        instance = this;
         context = activity.getApplicationContext();
         session = new SessionManager(context);
         scopes = new String[1];
-        scopes[0] = scope;
-        instance = this;
+        switch(environment) {
+            case SANDBOX:
+                config = R.raw.auth_config_sandbox;
+                scopes[0] = AppConstants.AUTH_SANDBOX;
+                break;
+            case QA:
+                config = R.raw.auth_config_qa;
+                scopes[0] = AppConstants.AUTH_QA;
+                break;
+            case PROUDCTION:
+                config = R.raw.auth_config_production;
+                scopes[0] = AppConstants.AUTH_PRODUCTION;
+                break;
+            default:
+                Log.e(TAG, "Environment not configured");
+                System.exit(0);
+        }
 
-        // Creates a PublicClientApplication object with res/raw/auth_config_single_account.json
-        PublicClientApplication.createSingleAccountPublicClientApplication(context,
-                R.raw.auth_config_single_account,
+        // Creates a PublicClientApplication object
+        PublicClientApplication.createSingleAccountPublicClientApplication(context, config,
                 new IPublicClientApplication.ISingleAccountApplicationCreatedListener() {
                     @Override
                     public void onCreated(ISingleAccountPublicClientApplication application) {
@@ -104,6 +132,10 @@ public class AuthenticationHandler {
 
     public static AuthenticationHandler getInstance() {
         return instance;
+    }
+
+    public Environment getEnvironment() {
+        return environment;
     }
 
     public void doSignInAction() {
@@ -185,10 +217,26 @@ public class AuthenticationHandler {
                 Log.d(TAG, "Successfully authenticated");
 
                 /* Update account */
-                callback.processAuth(authenticationResult.getAccount().getUsername(), authenticationResult.getAccessToken(), true);
-
-                /* call graph */
-                callGraphAPI(authenticationResult);
+                try {
+                    //AAD authentication
+                    String username = authenticationResult.getAccount().getUsername();
+                    if (username.indexOf('@') > 0) {
+                        callback.processAuth(username, authenticationResult.getAccessToken(), true);
+                        callGraphAPI(authenticationResult);
+                    }
+                    //B2C authentication
+                    else {
+                        JWT parsedToken = JWTParser.parse(authenticationResult.getAccessToken());
+                        Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
+                        JSONArray emails = (JSONArray) claims.get("emails");
+                        if (emails != null && !emails.isEmpty()) {
+                            callback.processAuth(emails.get(0).toString(), authenticationResult.getAccessToken(), true);
+                            callGraphAPI(authenticationResult);
+                        }
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override

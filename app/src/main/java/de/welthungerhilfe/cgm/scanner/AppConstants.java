@@ -21,7 +21,13 @@ package de.welthungerhilfe.cgm.scanner;
 public class AppConstants {
 
 
-    public static final String TESTING_URL = "http://192.168.43.252:5001/api/scan/";
+    public static final String AUTH_SANDBOX = "{OAUTH_SCOPE_SANDBOX}";
+    public static final String AUTH_QA = "{OAUTH_SCOPE_QA}";
+    public static final String AUTH_PRODUCTION = "{OAUTH_SCOPE_PRODUCTION}";
+    public static final String API_URL_SANDBOX = "{API_URL_SANDBOX}/";
+    public static final String API_URL_QA = "{API_URL_QA}/";
+    public static final String API_URL_PRODUCTION = "{API_URL_PRODUCTION}/";
+    public static final String API_TESTING_URL = "http://192.168.43.252:5001/api/scan/";
 
     public static final int MAX_IMAGE_SIZE = 512;
 
