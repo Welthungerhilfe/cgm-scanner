@@ -218,13 +218,21 @@ public class AuthenticationHandler {
 
                 /* Update account */
                 try {
-                    JWT parsedToken = JWTParser.parse(authenticationResult.getAccessToken());
-                    Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
-                    JSONArray emails = (JSONArray) claims.get("emails");
-                    if (emails != null && !emails.isEmpty()) {
-                        callback.processAuth(emails.get(0).toString(), authenticationResult.getAccessToken(), true);
-
+                    //AAD authentication
+                    String username = authenticationResult.getAccount().getUsername();
+                    if (username.indexOf('@') > 0) {
+                        callback.processAuth(username, authenticationResult.getAccessToken(), true);
                         callGraphAPI(authenticationResult);
+                    }
+                    //B2C authentication
+                    else {
+                        JWT parsedToken = JWTParser.parse(authenticationResult.getAccessToken());
+                        Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
+                        JSONArray emails = (JSONArray) claims.get("emails");
+                        if (emails != null && !emails.isEmpty()) {
+                            callback.processAuth(emails.get(0).toString(), authenticationResult.getAccessToken(), true);
+                            callGraphAPI(authenticationResult);
+                        }
                     }
                 } catch (ParseException e) {
                     e.printStackTrace();
