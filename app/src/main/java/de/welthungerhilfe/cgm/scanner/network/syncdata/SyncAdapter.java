@@ -40,6 +40,9 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -58,11 +61,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
+import de.welthungerhilfe.cgm.scanner.utils.AuthTokenRegisterWorker;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
@@ -150,12 +155,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             try {
                 getContext().startService(new Intent(getContext(), UploadService.class));
 
-            }catch (IllegalStateException e)
-            {
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                {
-                    Intent intent = new Intent(getContext(),UploadService.class);
-                    intent.putExtra(AppConstants.IS_FOREGROUND,true);
+            } catch (IllegalStateException e) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Intent intent = new Intent(getContext(), UploadService.class);
+                    intent.putExtra(AppConstants.IS_FOREGROUND, true);
                     getContext().startForegroundService(intent);
                 }
 
@@ -478,11 +481,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             @Override
                             public void onError(@NonNull Throwable e) {
                                 Log.i(TAG, "this is value of post " + e.getMessage());
-                                AuthenticationHandler authentication = AuthenticationHandler.getInstance();
-                                if (authentication != null) {
-                                    if (authentication.isExpiredToken(e.getMessage())) {
-                                        authentication.updateToken(null);
-                                    }
+                                if (Utils.isExpiredToken(e.getMessage())) {
+                                    OneTimeWorkRequest mywork =
+                                            new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
+                                                    .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+
+                                    WorkManager.getInstance(getContext().getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
+
                                 }
                             }
 
@@ -540,11 +545,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is value of post " + e.getMessage());
-                            AuthenticationHandler authentication = AuthenticationHandler.getInstance();
-                            if (authentication != null) {
-                                if (authentication.isExpiredToken(e.getMessage())) {
-                                    authentication.updateToken(null);
-                                }
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                OneTimeWorkRequest mywork =
+                                        new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
+                                                .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+
+                                WorkManager.getInstance(getContext().getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
+
                             }
                         }
 
@@ -608,11 +615,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             Log.i(TAG, "this is value of update person" +
                                     "" +
                                     " " + e.getMessage());
-                            AuthenticationHandler authentication = AuthenticationHandler.getInstance();
-                            if (authentication != null) {
-                                if (authentication.isExpiredToken(e.getMessage())) {
-                                    authentication.updateToken(null);
-                                }
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                OneTimeWorkRequest mywork =
+                                        new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
+                                                .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+
+                                WorkManager.getInstance(getContext().getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
+
                             }
                         }
 
@@ -678,11 +687,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is value of post " + e.getMessage());
-                            AuthenticationHandler authentication = AuthenticationHandler.getInstance();
-                            if (authentication != null) {
-                                if (authentication.isExpiredToken(e.getMessage())) {
-                                    authentication.updateToken(null);
-                                }
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                OneTimeWorkRequest mywork =
+                                        new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
+                                                .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+
+                                WorkManager.getInstance(getContext().getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
+
                             }
                         }
 

@@ -146,5 +146,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.11.0' //image preview
     implementation 'com.romandanylyk:pageindicatorview:1.0.2' //indicator of current page (in tutorial)
     implementation 'com.shuhart.stepview:stepview:1.5.1' // for showing steps(in tutorial)
+
+    implementation 'androidx.work:work-runtime:2.3.3'
 }
 apply plugin: 'com.google.gms.google-services'
