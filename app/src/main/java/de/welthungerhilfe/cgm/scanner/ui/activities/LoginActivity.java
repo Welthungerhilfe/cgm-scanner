@@ -23,11 +23,19 @@ import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.content.Intent;
 
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.CompoundButton;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -37,6 +45,8 @@ import de.welthungerhilfe.cgm.scanner.utils.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import okhttp3.internal.Util;
 
 public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback {
 
@@ -49,13 +59,25 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
         } else {
-            authentication.doSignInAction();
-        }
+            if(environment!=null) {
+                authentication = new AuthenticationHandler(this, this, environment);
+
+                authentication.doSignInAction();
+            }
+            else
+            {
+                Toast.makeText(this,"Please select an environment",Toast.LENGTH_LONG).show();
+            }
+       }
     }
 
     private AccountManager accountManager;
     private AuthenticationHandler authentication;
     private SessionManager session;
+    private AuthenticationHandler.Environment environment;
+
+    @BindView(R.id.rb_sand_box)
+    RadioButton rb_sand_box;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,8 +89,17 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         ButterKnife.bind(this);
 
         session = new SessionManager(this);
-        authentication = new AuthenticationHandler(this, this, AuthenticationHandler.Environment.QA );
         accountManager = AccountManager.get(this);
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            String version = pInfo.versionName;
+            if(version.contains("dev"))
+            {
+                rb_sand_box.setVisibility(View.VISIBLE);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -88,6 +119,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                 startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
             finish();
         }
+
     }
 
     public void processAuth(String email, String token, boolean feedback) {
@@ -128,6 +160,26 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
             if (feedback) {
                 Toast.makeText(LoginActivity.this, R.string.login_error_parse, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    @OnCheckedChanged({R.id.rb_prod_darshna, R.id.rb_prod_aah, R.id.rb_demo_qa, R.id.rb_sand_box})
+    public void onRadioButtonCheckChanged(CompoundButton button, boolean checked) {
+        if(checked) {
+            switch (button.getId()) {
+                case R.id.rb_prod_darshna:
+                    environment = AuthenticationHandler.Environment.PROUDCTION;
+                    break;
+                case R.id.rb_prod_aah:
+                    environment = AuthenticationHandler.Environment.PROUDCTION;
+                    break;
+                case R.id.rb_demo_qa:
+                    environment = AuthenticationHandler.Environment.QA;
+                    break;
+                case R.id.rb_sand_box:
+                    environment = AuthenticationHandler.Environment.SANDBOX;
+                    break;
             }
         }
     }
