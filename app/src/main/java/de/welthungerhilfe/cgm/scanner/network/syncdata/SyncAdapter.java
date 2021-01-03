@@ -535,9 +535,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             person.setSynced(true);
                             Loc location = new Loc();
                             person.setLastLocation(location);
-                            person.getLastLocation().setAddress(person1.getLastLocation().getAddress());
-                            person.getLastLocation().setLatitude(person1.getLastLocation().getLatitude());
-                            person.getLastLocation().setLongitude(person1.getLastLocation().getLongitude());
+                            if (person1.getLastLocation() != null) {
+                                person.getLastLocation().setAddress(person1.getLastLocation().getAddress());
+                                person.getLastLocation().setLatitude(person1.getLastLocation().getLatitude());
+                                person.getLastLocation().setLongitude(person1.getLastLocation().getLongitude());
+                            }
                             person.setBirthday(person1.getBirthday());
                             updatePersonOnDatabase(person);
                         }
