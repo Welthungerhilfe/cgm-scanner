@@ -42,15 +42,15 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
     @OnClick({R.id.btnLoginMicrosoft})
     void doSignIn() {
-        /*if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) {
             final Account accountData = new Account("test@test.com", AppConstants.ACCOUNT_TYPE);
             accountManager.addAccountExplicitly(accountData, "kjjhhj", null);
 
             SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
-        } else {*/
+        } else {
             authentication.doSignInAction();
-        //}
+        }
     }
 
     private AccountManager accountManager;
