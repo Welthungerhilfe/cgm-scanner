@@ -47,6 +47,8 @@ import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 
 public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback {
 
+    private AuthenticationHandler authentication;
+
     @OnClick({R.id.btnLoginMicrosoft})
     void doSignIn() {
         if (BuildConfig.DEBUG) {
@@ -56,9 +58,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
         } else {
-            if (environment!=null) {
-                AuthenticationHandler authentication = new AuthenticationHandler(this, this, environment);
-                authentication.doSignInAction();
+            if (environment != null) {
+                authentication = new AuthenticationHandler(this, this, environment, () -> authentication.doSignInAction());
             } else {
                 Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
             }

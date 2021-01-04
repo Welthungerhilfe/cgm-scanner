@@ -72,7 +72,7 @@ public class AuthenticationHandler {
     @SuppressLint("StaticFieldLeak")
     private static AuthenticationHandler instance;
 
-    public AuthenticationHandler(Activity activity, IAuthenticationCallback callback, Environment environment) {
+    public AuthenticationHandler(Activity activity, IAuthenticationCallback callback, Environment environment, Runnable onReady) {
 
         int config = 0;
         this.activity = activity;
@@ -120,6 +120,9 @@ public class AuthenticationHandler {
                                     Log.e(TAG, exception.toString());
                                 }
                             });
+                        }
+                        if (onReady != null) {
+                            onReady.run();
                         }
                     }
 
