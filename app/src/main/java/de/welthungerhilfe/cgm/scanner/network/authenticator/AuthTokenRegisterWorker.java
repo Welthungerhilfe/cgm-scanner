@@ -1,7 +1,12 @@
 package de.welthungerhilfe.cgm.scanner.network.authenticator;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
@@ -14,7 +19,9 @@ import com.microsoft.identity.client.PublicClientApplication;
 import com.microsoft.identity.client.SilentAuthenticationCallback;
 import com.microsoft.identity.client.exception.MsalException;
 
-import de.welthungerhilfe.cgm.scanner.network.module.NetworkModule;
+
+import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class AuthTokenRegisterWorker extends Worker {
@@ -23,6 +30,7 @@ public class AuthTokenRegisterWorker extends Worker {
     private ISingleAccountPublicClientApplication singleAccountApp;
 
     private static final String TAG = AuthTokenRegisterWorker.class.getSimpleName();
+
     public AuthTokenRegisterWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
@@ -60,6 +68,14 @@ public class AuthTokenRegisterWorker extends Worker {
             @Override
             public void onSuccess(IAuthenticationResult authenticationResult) {
                 session.setAuthToken(authenticationResult.getAccessToken());
+
+                AccountManager accountManager = AccountManager.get(getApplicationContext());
+
+                final Account accountData = new Account(session.getUserEmail(), AppConstants.ACCOUNT_TYPE);
+                accountManager.addAccountExplicitly(accountData, session.getAuthToken(), null);
+
+                SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
+
             }
 
             @Override

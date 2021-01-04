@@ -51,7 +51,7 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AuthenticationHandler {
 
-    public enum Environment { UNKNOWN, SANDBOX, QA, PROUDCTION };
+    public enum Environment {UNKNOWN, SANDBOX, QA, PROUDCTION};
 
     public interface IAuthenticationCallback {
 
@@ -73,7 +73,7 @@ public class AuthenticationHandler {
         this.callback = callback;
         context = activity.getApplicationContext();
         session = new SessionManager(context);
-        switch(environment) {
+        switch (environment) {
             case SANDBOX:
                 LocalPersistency.setLong(context, ENVIRONMENT_KEY, 0);
                 break;
@@ -120,9 +120,12 @@ public class AuthenticationHandler {
 
     public static int getConfig(Environment environment) {
         switch (environment) {
-            case SANDBOX: return R.raw.auth_config_sandbox;
-            case QA: return R.raw.auth_config_qa;
-            case PROUDCTION: return R.raw.auth_config_production;
+            case SANDBOX:
+                return R.raw.auth_config_sandbox;
+            case QA:
+                return R.raw.auth_config_qa;
+            case PROUDCTION:
+                return R.raw.auth_config_production;
             default:
                 Log.e(TAG, "Environment not configured");
                 System.exit(0);
@@ -131,10 +134,13 @@ public class AuthenticationHandler {
     }
 
     public static Environment getEnvironment(Context context) {
-        switch ((int)LocalPersistency.getLong(context, ENVIRONMENT_KEY)) {
-            case 0: return Environment.SANDBOX;
-            case 1: return Environment.QA;
-            case 2: return Environment.PROUDCTION;
+        switch ((int) LocalPersistency.getLong(context, ENVIRONMENT_KEY)) {
+            case 0:
+                return Environment.SANDBOX;
+            case 1:
+                return Environment.QA;
+            case 2:
+                return Environment.PROUDCTION;
             default:
                 Log.e(TAG, "Environment not configured");
                 System.exit(0);
@@ -143,10 +149,13 @@ public class AuthenticationHandler {
     }
 
     public static String[] getScopes(Context context) {
-        switch ((int)LocalPersistency.getLong(context, ENVIRONMENT_KEY)) {
-            case 0: return new String[]{ AppConstants.AUTH_SANDBOX };
-            case 1: return new String[]{ AppConstants.AUTH_QA };
-            case 2: return new String[]{ AppConstants.AUTH_PRODUCTION };
+        switch ((int) LocalPersistency.getLong(context, ENVIRONMENT_KEY)) {
+            case 0:
+                return new String[]{AppConstants.AUTH_SANDBOX};
+            case 1:
+                return new String[]{AppConstants.AUTH_QA};
+            case 2:
+                return new String[]{AppConstants.AUTH_PRODUCTION};
             default:
                 Log.e(TAG, "Environment not configured");
                 System.exit(0);
