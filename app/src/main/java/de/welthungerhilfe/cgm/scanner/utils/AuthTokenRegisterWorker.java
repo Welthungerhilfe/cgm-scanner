@@ -1,10 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.utils;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
@@ -17,7 +14,8 @@ import com.microsoft.identity.client.PublicClientApplication;
 import com.microsoft.identity.client.SilentAuthenticationCallback;
 import com.microsoft.identity.client.exception.MsalException;
 
-import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
+import de.welthungerhilfe.cgm.scanner.network.module.NetworkModule;
 
 public class AuthTokenRegisterWorker extends Worker {
 
@@ -33,18 +31,10 @@ public class AuthTokenRegisterWorker extends Worker {
     @Override
     public Result doWork() {
 
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // Run your task here
-                Toast.makeText(getApplicationContext(), "Testing auth", Toast.LENGTH_SHORT).show();
-            }
-        }, 0 );
-        Log.i(TAG, "doWork for Sync");
         context = getApplicationContext();
+        AuthenticationHandler.Environment environment = AuthenticationHandler.getEnvironment(context);
         PublicClientApplication.createSingleAccountPublicClientApplication(context,
-                R.raw.auth_config_single_account,
+                AuthenticationHandler.getConfig(environment),
                 new IPublicClientApplication.ISingleAccountApplicationCreatedListener() {
                     @Override
                     public void onCreated(ISingleAccountPublicClientApplication application) {
@@ -61,9 +51,8 @@ public class AuthTokenRegisterWorker extends Worker {
         return null;
     }
 
-    public void updateToken()
-    {
-        String[] scopes ={"https://cgm-tagging-api-poc.azurewebsites.net/user_impersonation"};
+    public void updateToken() {
+        String[] scopes ={ NetworkModule.getUrl() };
         SessionManager session = new SessionManager(getApplicationContext());
 
         String authority = singleAccountApp.getConfiguration().getDefaultAuthority().getAuthorityURL().toString();
@@ -71,16 +60,6 @@ public class AuthTokenRegisterWorker extends Worker {
             @Override
             public void onSuccess(IAuthenticationResult authenticationResult) {
                 session.setAuthToken(authenticationResult.getAccessToken());
-                Log.i(TAG,"this is value of auth token "+session.getAuthToken());
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Run your task here
-                        Toast.makeText(getApplicationContext(), session.getAuthToken(), Toast.LENGTH_SHORT).show();
-                    }
-                }, 0 );
-
             }
 
             @Override
