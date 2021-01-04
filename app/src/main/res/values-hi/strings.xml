@@ -265,7 +265,7 @@
     <string name="person_not_defined">व्यक्ति को परिभाषित नहीं किया गया था</string>
     <string name="storage_permission_needed">भंडारण अनुमति की आवश्यकता!</string>
 
-
+    <string name="login_backend_environment">कृपया एक बैकेंड चुनें</string>
     <string name="login_error_parse">टोकन पार्स असफल</string>
     <string name="login_error_invalid">उपयोगकर्ता ईमेल प्राप्त नहीं कर सका, कृपया पुनः प्रयास करें</string>
 
