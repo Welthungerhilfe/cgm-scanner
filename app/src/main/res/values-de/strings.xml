@@ -266,7 +266,7 @@
     <string name="person_not_defined">Zu dieser Person existiert kein Profil</string>
     <string name="storage_permission_needed">Speichererlaubnis erforderlich!</string>
 
-
+    <string name="login_backend_environment">Bitte wählen Sie ein Backend</string>
     <string name="login_error_parse">Token-Analyse fehlgeschlagen</string>
     <string name="login_error_invalid">Benutzer-E-Mail konnte nicht abgerufen werden. Bitte versuchen Sie es erneut</string>
 

@@ -276,6 +276,7 @@
     <string name="person_not_defined">Person was not defined</string>
     <string name="storage_permission_needed">Storage permission needed!</string>
 
+    <string name="login_backend_environment">Please select a backend</string>
     <string name="login_error_parse">Token Parse Failed</string>
     <string name="login_error_invalid">Couldn\'t get user email, please try again</string>
 

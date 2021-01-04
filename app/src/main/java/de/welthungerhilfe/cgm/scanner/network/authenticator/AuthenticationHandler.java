@@ -24,10 +24,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.microsoft.identity.client.AuthenticationCallback;
-import com.microsoft.identity.client.IAccount;
 import com.microsoft.identity.client.IAuthenticationResult;
 import com.microsoft.identity.client.IPublicClientApplication;
 import com.microsoft.identity.client.ISingleAccountPublicClientApplication;
@@ -67,7 +65,7 @@ public class AuthenticationHandler {
     private ISingleAccountPublicClientApplication singleAccountApp;
     private IAuthenticationCallback callback;
 
-    public AuthenticationHandler(Activity activity, IAuthenticationCallback callback, Environment environment) {
+    public AuthenticationHandler(Activity activity, IAuthenticationCallback callback, Environment environment, Runnable onFail) {
 
         this.activity = activity;
         this.callback = callback;
@@ -94,26 +92,29 @@ public class AuthenticationHandler {
                     @Override
                     public void onCreated(ISingleAccountPublicClientApplication application) {
                         singleAccountApp = application;
-                        if (session.isSigned()) {
-                            loadAccount();
-                        } else {
+                        if (!session.isSigned()) {
                             singleAccountApp.signOut(new ISingleAccountPublicClientApplication.SignOutCallback() {
                                 @Override
                                 public void onSignOut() {
                                     Log.d(TAG, "Signed out");
+                                    doSignInAction(onFail);
                                 }
 
                                 @Override
                                 public void onError(@NonNull MsalException exception) {
                                     Log.e(TAG, exception.toString());
+                                    doSignInAction(onFail);
                                 }
                             });
+                        } else {
+                            doSignInAction(onFail);
                         }
                     }
 
                     @Override
                     public void onError(MsalException exception) {
                         Log.e(TAG, exception.toString());
+                        onFail.run();
                     }
                 });
     }
@@ -154,7 +155,7 @@ public class AuthenticationHandler {
         }
     }
 
-    public void doSignInAction() {
+    private void doSignInAction(Runnable onFail) {
         if (!Utils.isNetworkAvailable(context)) {
             Toast.makeText(context, R.string.error_network, Toast.LENGTH_LONG).show();
             return;
@@ -164,33 +165,7 @@ public class AuthenticationHandler {
             return;
         }
 
-        singleAccountApp.signIn(activity, null, getScopes(activity), getAuthInteractiveCallback());
-    }
-
-    /**
-     * Load the currently signed-in account, if there's any.
-     */
-    private void loadAccount() {
-        if (singleAccountApp == null) {
-            return;
-        }
-
-        singleAccountApp.getCurrentAccountAsync(new ISingleAccountPublicClientApplication.CurrentAccountCallback() {
-            @Override
-            public void onAccountLoaded(@Nullable IAccount activeAccount) {
-                // You can use the account data to update your UI or your app database.
-                callback.processAuth(activeAccount.getUsername(), session.getAuthToken(), false);
-            }
-
-            @Override
-            public void onAccountChanged(@Nullable IAccount priorAccount, @Nullable IAccount currentAccount) {
-            }
-
-            @Override
-            public void onError(@NonNull MsalException exception) {
-                Log.e(TAG, exception.toString());
-            }
-        });
+        singleAccountApp.signIn(activity, null, getScopes(activity), getAuthInteractiveCallback(onFail));
     }
 
     /**
@@ -198,7 +173,7 @@ public class AuthenticationHandler {
      * If succeeds we use the access token to call the Microsoft Graph.
      * Does not check cache.
      */
-    private AuthenticationCallback getAuthInteractiveCallback() {
+    private AuthenticationCallback getAuthInteractiveCallback(Runnable onFail) {
         return new AuthenticationCallback() {
 
             @Override
@@ -226,6 +201,7 @@ public class AuthenticationHandler {
                     }
                 } catch (ParseException e) {
                     e.printStackTrace();
+                    onFail.run();
                 }
             }
 
@@ -239,12 +215,15 @@ public class AuthenticationHandler {
                 } else if (exception instanceof MsalServiceException) {
                     /* Exception when communicating with the STS, likely config issue */
                 }
+
+                onFail.run();
             }
 
             @Override
             public void onCancel() {
                 /* User canceled the authentication */
                 Log.d(TAG, "User cancelled login.");
+                onFail.run();
             }
         };
     }
