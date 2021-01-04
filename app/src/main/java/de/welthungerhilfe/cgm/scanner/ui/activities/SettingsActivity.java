@@ -47,6 +47,7 @@ import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.network.module.NetworkModule;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.database.BackupManager;
@@ -169,7 +170,10 @@ public class SettingsActivity extends BaseActivity {
             txtSettingAccount.setText(1, accounts[0].name);
         }
 
-        txtSettingAzureAccount.setText(1, "");//TODO:detect backend name
+        String apiURL = NetworkModule.getUrl();
+        apiURL = apiURL.replaceFirst("https://", "");
+        apiURL = apiURL.substring(0, apiURL.indexOf('.'));
+        txtSettingAzureAccount.setText(1, apiURL);
 
         String code = session.getLanguage();
         switch (code) {
