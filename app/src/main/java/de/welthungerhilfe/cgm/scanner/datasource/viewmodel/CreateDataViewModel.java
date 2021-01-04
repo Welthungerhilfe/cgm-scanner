@@ -26,6 +26,7 @@ import androidx.lifecycle.Transformations;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import androidx.lifecycle.ViewModel;
 
@@ -47,6 +48,8 @@ public class CreateDataViewModel extends ViewModel {
     private PersonRepository personRepository;
     private MeasureRepository measureRepository;
 
+    String TAG = CreateDataViewModel.class.getSimpleName();
+
     public CreateDataViewModel(Context context) {
 
         personRepository = PersonRepository.getInstance(context);
@@ -63,6 +66,7 @@ public class CreateDataViewModel extends ViewModel {
 
     public LiveData<Person> getPersonLiveData(String qrCode) {
         personLiveData = personRepository.getPerson(qrCode);
+        Log.i(TAG, "this is value of person livedata " + personLiveData.getValue());
 
         return personLiveData;
     }
@@ -108,8 +112,8 @@ public class CreateDataViewModel extends ViewModel {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                personRepository.insertPerson(person);
 
+                personRepository.insertPerson(person);
                 return null;
             }
 

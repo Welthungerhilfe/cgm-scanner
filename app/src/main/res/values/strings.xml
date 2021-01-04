@@ -25,7 +25,7 @@
     <string name="version">Version</string>
     <string name="uuid">UUID</string>
     <string name="account">Account</string>
-    <string name="azure_account">Azure Account</string>
+    <string name="azure_account">API Account</string>
     <string name="language">Language</string>
 
     <string name="lang_english">English</string>
@@ -276,6 +276,7 @@
     <string name="person_not_defined">Person was not defined</string>
     <string name="storage_permission_needed">Storage permission needed!</string>
 
+    <string name="login_backend_environment">Please select a backend</string>
     <string name="login_error_parse">Token Parse Failed</string>
     <string name="login_error_invalid">Couldn\'t get user email, please try again</string>
 
@@ -296,5 +297,7 @@
 
     <string name="edema_check">Are you sure the child suffers from Edema?</string>
     <string name="edema_link">How to check for bilateral edema\nyoutu.be/3pQUtOsjjSY?t=85</string>
+
+    <string name="scan_is_uploading">Scan is uploading</string>
 
 </resources>

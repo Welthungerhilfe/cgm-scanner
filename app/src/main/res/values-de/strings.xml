@@ -25,7 +25,7 @@
     <string name="version">Version</string>
     <string name="uuid">UUID</string>
     <string name="account">Konto</string>
-    <string name="azure_account">Azure Konto</string>
+    <string name="azure_account">API Konto</string>
     <string name="language">Sprache</string>
 
     <string name="lang_english">Englisch</string>
@@ -266,7 +266,7 @@
     <string name="person_not_defined">Zu dieser Person existiert kein Profil</string>
     <string name="storage_permission_needed">Speichererlaubnis erforderlich!</string>
 
-
+    <string name="login_backend_environment">Bitte wählen Sie ein Backend</string>
     <string name="login_error_parse">Token-Analyse fehlgeschlagen</string>
     <string name="login_error_invalid">Benutzer-E-Mail konnte nicht abgerufen werden. Bitte versuchen Sie es erneut</string>
 
@@ -290,5 +290,8 @@
 
     <string name="edema_check">Sind Sie sicher, dass das Kind an Ödem leidet?</string>
     <string name="edema_link">Wie auf bilaterale Ödeme prüfen\nyoutu.be/3pQUtOsjjSY?t=85</string>
+
+    <string name="scan_is_uploading">Scan wird hochgeladen</string>
+
 
 </resources>

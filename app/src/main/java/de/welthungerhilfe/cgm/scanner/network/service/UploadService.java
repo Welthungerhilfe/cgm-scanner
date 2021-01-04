@@ -18,12 +18,20 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.service;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.IBinder;
+
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+
 import android.util.Log;
 
 import org.jcodec.common.io.IOUtils;
@@ -36,15 +44,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthTokenRegisterWorker;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -79,6 +91,13 @@ public class UploadService extends Service implements OnFileLogsLoad {
     private final Object lock = new Object();
     private ExecutorService executor;
 
+    boolean isForeGround;
+
+    public static final int FOREGROUND_NOTIFICATION_ID = 100;
+
+    private static final String CHANNEL_ID = "CGM_Foreground_Notification";
+
+
     @Inject
     Retrofit retrofit;
 
@@ -100,6 +119,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     public void onCreate() {
         service = this;
+        running = false;
+
         AndroidInjection.inject(this);
         repository = FileLogRepository.getInstance(getApplicationContext());
         sessionManager = new SessionManager(getApplication());
@@ -116,7 +137,26 @@ public class UploadService extends Service implements OnFileLogsLoad {
     }
 
     @Override
-    public int onStartCommand(final Intent intent, int flags, int startId) {
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null && intent.hasExtra(AppConstants.IS_FOREGROUND)) {
+            isForeGround = intent.getBooleanExtra(AppConstants.IS_FOREGROUND, false);
+        } else {
+            isForeGround = false;
+        }
+
+        if (isForeGround) {
+            Intent notificationIntent = new Intent(this, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                    0, notificationIntent, 0);
+            Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setContentTitle(getApplicationContext().getString(R.string.app_name))
+                    .setContentText(getApplicationContext().getString(R.string.scan_is_uploading))
+                    .setSmallIcon(R.drawable.icon_notif)
+                    .setContentIntent(pendingIntent)
+                    .build();
+            startForeground(FOREGROUND_NOTIFICATION_ID, notification);
+
+        }
         if (remainingCount <= 0) {
             loadQueueFileLogs();
             return START_STICKY;
@@ -140,6 +180,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
     private void loadQueueFileLogs() {
         if (!Utils.isUploadAllowed(this)) {
             Log.e(TAG, "Skipped");
+            stopSelf();
             return;
         }
 
@@ -155,7 +196,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
             remainingCount = list.size();
         }
         Log.e(TAG, String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
-        Log.i("UploadService ","this is inside onFileLoaded  "+remainingCount);
+        Log.i("UploadService ", "this is inside onFileLoaded  " + remainingCount);
 
         Context c = getApplicationContext();
         if (LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT)) {
@@ -180,7 +221,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                     Runnable worker = new UploadThread(list.get(i));
                     executor.execute(worker);
                 } catch (Exception ex) {
-                    remainingCount --;
+                    remainingCount--;
                 }
             }
         }
@@ -189,7 +230,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
     private class UploadThread implements Runnable {
         private FileLog log;
 
-        UploadThread (FileLog log) {
+        UploadThread(FileLog log) {
             this.log = log;
         }
 
@@ -267,72 +308,73 @@ public class UploadService extends Service implements OnFileLogsLoad {
         try {
             FileInputStream inputStream = new FileInputStream(file);
             body = MultipartBody.Part.createFormData("file", file.getName(), RequestBody.create(
-                            MediaType.parse(mime), IOUtils.toByteArray(inputStream)));
+                    MediaType.parse(mime), IOUtils.toByteArray(inputStream)));
             inputStream.close();
             log.setCreateDate(Utils.getUniversalTimestamp());
         } catch (FileNotFoundException e) {
-            Log.i(TAG,"this is exception "+e.getMessage());
+            Log.i(TAG, "this is exception " + e.getMessage());
 
             log.setDeleted(true);
             log.setStatus(FILE_NOT_FOUND);
             updateFileLog(log);
 
         } catch (Exception e) {
-            Log.i(TAG,"this is exception "+e.getMessage());
+            Log.i(TAG, "this is exception " + e.getMessage());
 
             log.setStatus(UPLOAD_ERROR);
             updateFileLog(log);
         }
-
         RequestBody filename = RequestBody.create(MediaType.parse("multipart/form-data"), file.getName());
-        retrofit.create(ApiService.class).uploadFiles("bearer " + sessionManager.getAuthToken(),body,filename).subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new Observer<String>() {
-                @Override
-                public void onSubscribe(@NonNull Disposable d) {
+        retrofit.create(ApiService.class).uploadFiles("bearer " + sessionManager.getAuthToken(), body, filename).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<String>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
 
-                }
-
-                @Override
-                public void onNext(@NonNull String id) {
-                    Log.i(TAG, "this is response uploadfiles " + id+ file.getPath());
-
-                    log.setUploadDate(Utils.getUniversalTimestamp());
-                    log.setServerId(id);
-
-                    if (file.delete()) {
-                        log.setDeleted(true);
-                        log.setStatus(UPLOADED_DELETED);
-                    } else {
-                        log.setStatus(UPLOADED);
                     }
 
-                    updateFileLog(log);
-                }
+                    @Override
+                    public void onNext(@NonNull String id) {
+                        Log.i(TAG, "this is response uploadfiles " + id + file.getPath());
 
-                @Override
-                public void onError(@NonNull Throwable e) {
+                        log.setUploadDate(Utils.getUniversalTimestamp());
+                        log.setServerId(id);
 
-                    Log.i(TAG, "this is response onError uploadfiles " + e.getMessage() + file.getPath());
-                    AuthenticationHandler authentication = AuthenticationHandler.getInstance();
-                    if (authentication.isExpiredToken(e.getMessage())) {
-                        authentication.updateToken((email, token, feedback) -> updateFileLog(log));
-                    } else {
+                        if (file.delete()) {
+                            log.setDeleted(true);
+                            log.setStatus(UPLOADED_DELETED);
+                        } else {
+                            log.setStatus(UPLOADED);
+                        }
+
                         updateFileLog(log);
                     }
-                }
 
-                @Override
-                public void onComplete() {
+                    @Override
+                    public void onError(@NonNull Throwable e) {
 
-                }
-            });
+                        Log.i(TAG, "this is response onError uploadfiles " + e.getMessage() + file.getPath());
+                        if (Utils.isExpiredToken(e.getMessage())) {
+                            OneTimeWorkRequest mywork =
+                                    new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
+                                            .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+
+                            WorkManager.getInstance(getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker",ExistingWorkPolicy.KEEP,mywork);
+                            stopSelf();
+                        } else {
+                            updateFileLog(log);
+                        }
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
-    private void updateFileLog(FileLog log)
-    {
-        new AsyncTask<Void,Void,Void>()
-        {
+    private void updateFileLog(FileLog log) {
+        new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
                 repository.updateFileLog(log);
@@ -342,12 +384,12 @@ public class UploadService extends Service implements OnFileLogsLoad {
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
-                Log.i(TAG,"this is saved "+ log.getServerId()+ log.getPath());
+                Log.i(TAG, "this is saved " + log.getServerId() + log.getPath());
 
                 synchronized (lock) {
                     pendingArtefacts.remove(log.getId());
                     remainingCount--;
-                    Log.i(TAG,"this is artifacts in queue "+remainingCount);
+                    Log.i(TAG, "this is artifacts in queue " + remainingCount);
                     Log.e(TAG, String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
                     if (remainingCount <= 0) {
                         loadQueueFileLogs();

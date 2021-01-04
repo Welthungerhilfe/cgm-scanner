@@ -37,9 +37,7 @@ import android.widget.ImageView;
 
 import com.google.ar.core.Pose;
 import com.huawei.hiar.ARCamera;
-import com.huawei.hiar.ARCameraIntrinsics;
 import com.huawei.hiar.ARConfigBase;
-import com.huawei.hiar.AREnginesApk;
 import com.huawei.hiar.ARFrame;
 import com.huawei.hiar.ARPose;
 import com.huawei.hiar.ARSession;
@@ -157,9 +155,7 @@ public class AREngineCamera implements ICamera {
     if (mActivity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
       if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
         if (mActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-          if (isAREngineSupportedAndUpToDate()) {
-            openCamera();
-          }
+          openCamera();
         }
       }
     }
@@ -303,14 +299,6 @@ public class AREngineCamera implements ICamera {
     }).start();
   }
 
-  private boolean isAREngineSupportedAndUpToDate() {
-    if (!AREnginesApk.isAREngineApkReady(mActivity)) {
-      installAREngine();
-      return false;
-    }
-    return true;
-  }
-
   @Override
   public CameraCalibration getCalibration() {
     return mCameraCalibration;
@@ -336,12 +324,13 @@ public class AREngineCamera implements ICamera {
       //get calibration from AREngine
       mSession.setCameraTextureName(texture);
       mSession.setDisplayGeometry(0, width, height);
+      float[] projection = new float[16];
       ARFrame frame = mSession.update();
-      ARCameraIntrinsics intrinsics = frame.getCamera().getCameraImageIntrinsics();
-      mCameraCalibration.colorCameraIntrinsic[0] = intrinsics.getFocalLength()[0] / (float)intrinsics.getImageDimensions()[0];
-      mCameraCalibration.colorCameraIntrinsic[1] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
-      mCameraCalibration.colorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
-      mCameraCalibration.colorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[1] / (float)intrinsics.getImageDimensions()[1];
+      frame.getCamera().getProjectionMatrix(projection, 0, 0.001f, 100);
+      mCameraCalibration.colorCameraIntrinsic[0] = Math.abs(projection[5] / 2.0f);
+      mCameraCalibration.colorCameraIntrinsic[1] = Math.abs(projection[0] / 2.0f);
+      mCameraCalibration.colorCameraIntrinsic[2] = Math.abs((1.0f - projection[9]) / 2.0f);
+      mCameraCalibration.colorCameraIntrinsic[3] = Math.abs((1.0f - projection[8]) / 2.0f);
       mCameraCalibration.depthCameraIntrinsic = mCameraCalibration.colorCameraIntrinsic;
       mCameraCalibration.setValid();
 
@@ -369,7 +358,7 @@ public class AREngineCamera implements ICamera {
       Image color = null;
       Image depth = null;
       try {
-        color = frame.acquirePreviewImage();
+        color = frame.acquireCameraImage();
         depth = frame.acquireDepthImage();
       } catch (Exception e) {
         e.printStackTrace();

@@ -25,7 +25,7 @@
     <string name="version">संस्करण</string>
     <string name="uuid">UUID</string>
     <string name="account">खाता</string>
-    <string name="azure_account">Azure खाता</string>
+    <string name="azure_account">API खाता</string>
     <string name="language">भाषा</string>
 
     <string name="lang_english">अंग्रेज़ी</string>
@@ -265,7 +265,7 @@
     <string name="person_not_defined">व्यक्ति को परिभाषित नहीं किया गया था</string>
     <string name="storage_permission_needed">भंडारण अनुमति की आवश्यकता!</string>
 
-
+    <string name="login_backend_environment">कृपया एक बैकेंड चुनें</string>
     <string name="login_error_parse">टोकन पार्स असफल</string>
     <string name="login_error_invalid">उपयोगकर्ता ईमेल प्राप्त नहीं कर सका, कृपया पुनः प्रयास करें</string>
 
@@ -289,4 +289,7 @@
 
     <string name="edema_check">क्या आप सुनिश्चित हैं कि बच्चा एडेमा से पीड़ित है?</string>
     <string name="edema_link">द्विपक्षीय एडिमा की जांच कैसे करें\nyoutu.be/hGTyk6CM-5A</string>
+
+    <string name="scan_is_uploading">Sस्कैन अपलोड हो रहा है</string>
+
 </resources>
