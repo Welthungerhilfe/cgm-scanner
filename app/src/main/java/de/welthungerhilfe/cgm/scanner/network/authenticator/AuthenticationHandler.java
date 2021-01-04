@@ -71,7 +71,6 @@ public class AuthenticationHandler {
 
     public AuthenticationHandler(Activity activity, IAuthenticationCallback callback, Environment environment) {
 
-        int config = getConfig(environment);
         this.activity = activity;
         this.callback = callback;
         context = activity.getApplicationContext();
@@ -96,7 +95,7 @@ public class AuthenticationHandler {
         }
 
         // Creates a PublicClientApplication object
-        PublicClientApplication.createSingleAccountPublicClientApplication(context, config,
+        PublicClientApplication.createSingleAccountPublicClientApplication(context, getConfig(environment),
                 new IPublicClientApplication.ISingleAccountApplicationCreatedListener() {
                     @Override
                     public void onCreated(ISingleAccountPublicClientApplication application) {

@@ -1,4 +1,4 @@
-package de.welthungerhilfe.cgm.scanner.utils;
+package de.welthungerhilfe.cgm.scanner.network.authenticator;
 
 import android.content.Context;
 import android.util.Log;
@@ -14,8 +14,8 @@ import com.microsoft.identity.client.PublicClientApplication;
 import com.microsoft.identity.client.SilentAuthenticationCallback;
 import com.microsoft.identity.client.exception.MsalException;
 
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.network.module.NetworkModule;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class AuthTokenRegisterWorker extends Worker {
 
