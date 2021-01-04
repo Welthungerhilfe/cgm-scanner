@@ -29,6 +29,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
@@ -47,8 +49,6 @@ import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 
 public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback {
 
-    private AuthenticationHandler authentication;
-
     @OnClick({R.id.btnLoginMicrosoft})
     void doSignIn() {
         if (BuildConfig.DEBUG) {
@@ -59,7 +59,12 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
         } else {
             if (environment != null) {
-                authentication = new AuthenticationHandler(this, this, environment, () -> authentication.doSignInAction());
+                layout_login.setVisibility(View.GONE);
+                progressBar.setVisibility(View.VISIBLE);
+                new AuthenticationHandler(this, this, environment, () -> runOnUiThread(() -> {
+                    layout_login.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.GONE);
+                }));
             } else {
                 Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
             }
@@ -72,6 +77,12 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
     @BindView(R.id.rb_sandbox)
     RadioButton rb_sandbox;
+
+    @BindView(R.id.layout_login)
+    LinearLayout layout_login;
+
+    @BindView(R.id.login_progressbar)
+    ProgressBar progressBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
