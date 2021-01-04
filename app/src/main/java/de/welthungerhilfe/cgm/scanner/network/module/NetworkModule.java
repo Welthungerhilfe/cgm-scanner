@@ -19,6 +19,7 @@
 package de.welthungerhilfe.cgm.scanner.network.module;
 
 import android.app.Application;
+import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.FieldNamingPolicy;
@@ -29,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import dagger.Module;
 import dagger.Provides;
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
@@ -94,26 +96,24 @@ public class NetworkModule {
                 .build();
     }
 
-    private String getUrl() {
+    public static String getUrl() {
         if (BuildConfig.DEBUG) {
             // development build
             return AppConstants.API_TESTING_URL;
         } else {
-            AuthenticationHandler authenticationHandler = AuthenticationHandler.getInstance();
-            if (authenticationHandler != null) {
-                switch (authenticationHandler.getEnvironment()) {
-                    case SANDBOX:
-                        return AppConstants.API_URL_SANDBOX;
-                    case QA:
-                        return AppConstants.API_URL_QA;
-                    case PROUDCTION:
-                        return AppConstants.API_URL_PRODUCTION;
-                    default:
-                        Log.e(TAG, "Environment not configured");
-                        System.exit(0);
-                }
+            Context context = AppController.getInstance().getApplicationContext();
+            switch (AuthenticationHandler.getEnvironment(context)) {
+                case SANDBOX:
+                    return AppConstants.API_URL_SANDBOX;
+                case QA:
+                    return AppConstants.API_URL_QA;
+                case PROUDCTION:
+                    return AppConstants.API_URL_PRODUCTION;
+                default:
+                    Log.e(TAG, "Environment not configured");
+                    System.exit(0);
+                    return null;
             }
-            return null;
         }
     }
 }

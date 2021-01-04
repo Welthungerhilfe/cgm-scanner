@@ -25,7 +25,7 @@
     <string name="version">Version</string>
     <string name="uuid">UUID</string>
     <string name="account">Konto</string>
-    <string name="azure_account">Azure Konto</string>
+    <string name="azure_account">API Konto</string>
     <string name="language">Sprache</string>
 
     <string name="lang_english">Englisch</string>

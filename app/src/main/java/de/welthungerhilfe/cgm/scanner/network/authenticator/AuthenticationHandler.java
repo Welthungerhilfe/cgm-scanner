@@ -18,7 +18,6 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.authenticator;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
@@ -31,7 +30,6 @@ import com.microsoft.identity.client.IAuthenticationResult;
 import com.microsoft.identity.client.IPublicClientApplication;
 import com.microsoft.identity.client.ISingleAccountPublicClientApplication;
 import com.microsoft.identity.client.PublicClientApplication;
-import com.microsoft.identity.client.SilentAuthenticationCallback;
 import com.microsoft.identity.client.exception.MsalClientException;
 import com.microsoft.identity.client.exception.MsalException;
 import com.microsoft.identity.client.exception.MsalServiceException;
@@ -45,53 +43,43 @@ import java.util.Map;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AuthenticationHandler {
 
-    public enum Environment { SANDBOX, QA, PROUDCTION };
+    public enum Environment {UNKNOWN, SANDBOX, QA, PROUDCTION};
 
     public interface IAuthenticationCallback {
 
         void processAuth(String email, String token, boolean feedback);
     }
 
+    private static final String ENVIRONMENT_KEY = "ENVIRONMENT_KEY";
     private static final String TAG = AuthenticationHandler.class.toString();
 
     private Activity activity;
     private Context context;
-    private Environment environment;
     private SessionManager session;
     private ISingleAccountPublicClientApplication singleAccountApp;
     private IAuthenticationCallback callback;
-    private String[] scopes;
-
-    @SuppressLint("StaticFieldLeak")
-    private static AuthenticationHandler instance;
 
     public AuthenticationHandler(Activity activity, IAuthenticationCallback callback, Environment environment, Runnable onFail) {
 
-        int config = 0;
         this.activity = activity;
         this.callback = callback;
-        this.environment = environment;
-        instance = this;
         context = activity.getApplicationContext();
         session = new SessionManager(context);
-        scopes = new String[1];
-        switch(environment) {
+        switch (environment) {
             case SANDBOX:
-                config = R.raw.auth_config_sandbox;
-                scopes[0] = AppConstants.AUTH_SANDBOX;
+                LocalPersistency.setLong(context, ENVIRONMENT_KEY, 0);
                 break;
             case QA:
-                config = R.raw.auth_config_qa;
-                scopes[0] = AppConstants.AUTH_QA;
+                LocalPersistency.setLong(context, ENVIRONMENT_KEY, 1);
                 break;
             case PROUDCTION:
-                config = R.raw.auth_config_production;
-                scopes[0] = AppConstants.AUTH_PRODUCTION;
+                LocalPersistency.setLong(context, ENVIRONMENT_KEY, 2);
                 break;
             default:
                 Log.e(TAG, "Environment not configured");
@@ -99,7 +87,7 @@ public class AuthenticationHandler {
         }
 
         // Creates a PublicClientApplication object
-        PublicClientApplication.createSingleAccountPublicClientApplication(context, config,
+        PublicClientApplication.createSingleAccountPublicClientApplication(context, getConfig(environment),
                 new IPublicClientApplication.ISingleAccountApplicationCreatedListener() {
                     @Override
                     public void onCreated(ISingleAccountPublicClientApplication application) {
@@ -131,15 +119,52 @@ public class AuthenticationHandler {
                 });
     }
 
-    public static AuthenticationHandler getInstance() {
-        return instance;
+    public static int getConfig(Environment environment) {
+        switch (environment) {
+            case SANDBOX:
+                return R.raw.auth_config_sandbox;
+            case QA:
+                return R.raw.auth_config_qa;
+            case PROUDCTION:
+                return R.raw.auth_config_production;
+            default:
+                Log.e(TAG, "Environment not configured");
+                System.exit(0);
+                return -1;
+        }
     }
 
-    public Environment getEnvironment() {
-        return environment;
+    public static Environment getEnvironment(Context context) {
+        switch ((int) LocalPersistency.getLong(context, ENVIRONMENT_KEY)) {
+            case 0:
+                return Environment.SANDBOX;
+            case 1:
+                return Environment.QA;
+            case 2:
+                return Environment.PROUDCTION;
+            default:
+                Log.e(TAG, "Environment not configured");
+                System.exit(0);
+                return Environment.UNKNOWN;
+        }
     }
 
-    public void doSignInAction(Runnable onFail) {
+    public static String[] getScopes(Context context) {
+        switch ((int) LocalPersistency.getLong(context, ENVIRONMENT_KEY)) {
+            case 0:
+                return new String[]{AppConstants.AUTH_SANDBOX};
+            case 1:
+                return new String[]{AppConstants.AUTH_QA};
+            case 2:
+                return new String[]{AppConstants.AUTH_PRODUCTION};
+            default:
+                Log.e(TAG, "Environment not configured");
+                System.exit(0);
+                return null;
+        }
+    }
+
+    private void doSignInAction(Runnable onFail) {
         if (!Utils.isNetworkAvailable(context)) {
             Toast.makeText(context, R.string.error_network, Toast.LENGTH_LONG).show();
             return;
@@ -149,33 +174,7 @@ public class AuthenticationHandler {
             return;
         }
 
-        singleAccountApp.signIn(activity, null, scopes, getAuthInteractiveCallback(onFail));
-    }
-
-    public boolean isExpiredToken(String message) {
-        return message.contains("401");
-    }
-
-    public void updateToken(IAuthenticationCallback callback) {
-        this.callback = callback;
-
-        String authority = singleAccountApp.getConfiguration().getDefaultAuthority().getAuthorityURL().toString();
-        singleAccountApp.acquireTokenSilentAsync(scopes, authority, new SilentAuthenticationCallback() {
-            @Override
-            public void onSuccess(IAuthenticationResult authenticationResult) {
-                session.setAuthToken(authenticationResult.getAccessToken());
-                if (callback != null) {
-                    callback.processAuth(session.getUserEmail(), session.getAuthToken(), false);
-                }
-            }
-
-            @Override
-            public void onError(MsalException exception) {
-                if (callback != null) {
-                    callback.processAuth(null, null, false);
-                }
-            }
-        });
+        singleAccountApp.signIn(activity, null, getScopes(activity), getAuthInteractiveCallback(onFail));
     }
 
     /**

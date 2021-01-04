@@ -28,6 +28,9 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import android.util.Log;
 
@@ -41,6 +44,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -49,10 +53,10 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthTokenRegisterWorker;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -94,7 +98,6 @@ public class UploadService extends Service implements OnFileLogsLoad {
     private static final String CHANNEL_ID = "CGM_Foreground_Notification";
 
 
-
     @Inject
     Retrofit retrofit;
 
@@ -116,6 +119,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     public void onCreate() {
         service = this;
+        running = false;
+
         AndroidInjection.inject(this);
         repository = FileLogRepository.getInstance(getApplicationContext());
         sessionManager = new SessionManager(getApplication());
@@ -175,6 +180,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
     private void loadQueueFileLogs() {
         if (!Utils.isUploadAllowed(this)) {
             Log.e(TAG, "Skipped");
+            stopSelf();
             return;
         }
 
@@ -318,7 +324,6 @@ public class UploadService extends Service implements OnFileLogsLoad {
             log.setStatus(UPLOAD_ERROR);
             updateFileLog(log);
         }
-
         RequestBody filename = RequestBody.create(MediaType.parse("multipart/form-data"), file.getName());
         retrofit.create(ApiService.class).uploadFiles("bearer " + sessionManager.getAuthToken(), body, filename).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -349,13 +354,15 @@ public class UploadService extends Service implements OnFileLogsLoad {
                     public void onError(@NonNull Throwable e) {
 
                         Log.i(TAG, "this is response onError uploadfiles " + e.getMessage() + file.getPath());
-                        AuthenticationHandler authentication = AuthenticationHandler.getInstance();
-                        if (authentication != null) {
-                            if (authentication.isExpiredToken(e.getMessage())) {
-                                authentication.updateToken((email, token, feedback) -> updateFileLog(log));
-                            } else {
-                                updateFileLog(log);
-                            }
+                        if (Utils.isExpiredToken(e.getMessage())) {
+                            OneTimeWorkRequest mywork =
+                                    new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
+                                            .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+
+                            WorkManager.getInstance(getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker",ExistingWorkPolicy.KEEP,mywork);
+                            stopSelf();
+                        } else {
+                            updateFileLog(log);
                         }
                     }
 
