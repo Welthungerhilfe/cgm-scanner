@@ -119,6 +119,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     public void onCreate() {
         service = this;
+        running = false;
+
         AndroidInjection.inject(this);
         repository = FileLogRepository.getInstance(getApplicationContext());
         sessionManager = new SessionManager(getApplication());
