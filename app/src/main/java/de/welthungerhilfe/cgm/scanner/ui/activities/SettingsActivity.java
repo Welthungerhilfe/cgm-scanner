@@ -171,8 +171,13 @@ public class SettingsActivity extends BaseActivity {
         }
 
         String apiURL = NetworkModule.getUrl();
-        apiURL = apiURL.replaceFirst("https://", "");
-        apiURL = apiURL.substring(0, apiURL.indexOf('.'));
+        if (apiURL.contains("https://")) {
+            apiURL = apiURL.replaceFirst("https://", "");
+            apiURL = apiURL.substring(0, apiURL.indexOf('.'));
+        } else {
+            apiURL = apiURL.replaceFirst("http://", "");
+            apiURL = apiURL.substring(0, apiURL.indexOf('/'));
+        }
         txtSettingAzureAccount.setText(1, apiURL);
 
         String code = session.getLanguage();

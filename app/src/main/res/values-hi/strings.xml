@@ -25,7 +25,7 @@
     <string name="version">संस्करण</string>
     <string name="uuid">UUID</string>
     <string name="account">खाता</string>
-    <string name="azure_account">Azure खाता</string>
+    <string name="azure_account">API खाता</string>
     <string name="language">भाषा</string>
 
     <string name="lang_english">अंग्रेज़ी</string>
