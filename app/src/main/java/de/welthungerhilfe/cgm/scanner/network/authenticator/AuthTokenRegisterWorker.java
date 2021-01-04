@@ -52,7 +52,7 @@ public class AuthTokenRegisterWorker extends Worker {
     }
 
     public void updateToken() {
-        String[] scopes ={ NetworkModule.getUrl() };
+        String[] scopes = AuthenticationHandler.getScopes(getApplicationContext());
         SessionManager session = new SessionManager(getApplicationContext());
 
         String authority = singleAccountApp.getConfiguration().getDefaultAuthority().getAuthorityURL().toString();

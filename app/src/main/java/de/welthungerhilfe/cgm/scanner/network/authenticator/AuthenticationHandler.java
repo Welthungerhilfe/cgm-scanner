@@ -66,8 +66,6 @@ public class AuthenticationHandler {
     private SessionManager session;
     private ISingleAccountPublicClientApplication singleAccountApp;
     private IAuthenticationCallback callback;
-    private String[] scopes;
-
 
     public AuthenticationHandler(Activity activity, IAuthenticationCallback callback, Environment environment) {
 
@@ -75,18 +73,14 @@ public class AuthenticationHandler {
         this.callback = callback;
         context = activity.getApplicationContext();
         session = new SessionManager(context);
-        scopes = new String[1];
         switch(environment) {
             case SANDBOX:
-                scopes[0] = AppConstants.AUTH_SANDBOX;
                 LocalPersistency.setLong(context, ENVIRONMENT_KEY, 0);
                 break;
             case QA:
-                scopes[0] = AppConstants.AUTH_QA;
                 LocalPersistency.setLong(context, ENVIRONMENT_KEY, 1);
                 break;
             case PROUDCTION:
-                scopes[0] = AppConstants.AUTH_PRODUCTION;
                 LocalPersistency.setLong(context, ENVIRONMENT_KEY, 2);
                 break;
             default:
@@ -148,6 +142,18 @@ public class AuthenticationHandler {
         }
     }
 
+    public static String[] getScopes(Context context) {
+        switch ((int)LocalPersistency.getLong(context, ENVIRONMENT_KEY)) {
+            case 0: return new String[]{ AppConstants.AUTH_SANDBOX };
+            case 1: return new String[]{ AppConstants.AUTH_QA };
+            case 2: return new String[]{ AppConstants.AUTH_PRODUCTION };
+            default:
+                Log.e(TAG, "Environment not configured");
+                System.exit(0);
+                return null;
+        }
+    }
+
     public void doSignInAction() {
         if (!Utils.isNetworkAvailable(context)) {
             Toast.makeText(context, R.string.error_network, Toast.LENGTH_LONG).show();
@@ -158,7 +164,7 @@ public class AuthenticationHandler {
             return;
         }
 
-        singleAccountApp.signIn(activity, null, scopes, getAuthInteractiveCallback());
+        singleAccountApp.signIn(activity, null, getScopes(activity), getAuthInteractiveCallback());
     }
 
     /**
