@@ -191,7 +191,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
         Log.e(TAG, "Started");
         running = true;
 
-        repository.loadQueuedData(this);
+        repository.loadQueuedData(this, sessionManager);
     }
 
     @Override
@@ -285,7 +285,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 Utils.sleep(3000);
             }
 
-            uploadFiles(log, mime);
+            uploadFile(log, mime);
         }
     }
 
@@ -306,7 +306,12 @@ public class UploadService extends Service implements OnFileLogsLoad {
         }
     }
 
-    public void uploadFiles(FileLog log, String mime) {
+    public void uploadFile(FileLog log, String mime) {
+        if (!sessionManager.isSigned()) {
+            stopSelf();
+            return;
+        }
+
         MultipartBody.Part body = null;
         final File file = new File(log.getPath());
         try {

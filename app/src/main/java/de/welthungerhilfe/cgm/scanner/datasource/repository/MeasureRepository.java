@@ -22,12 +22,13 @@ import androidx.lifecycle.LiveData;
 
 import android.content.Context;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import retrofit2.Retrofit;
 
 public class MeasureRepository {
     private static MeasureRepository instance;
@@ -54,16 +55,18 @@ public class MeasureRepository {
         database.measureDao().updateMeasure(measure);
     }
 
-    public List<Measure> getSyncableMeasure(long timestamp) {
-        return database.measureDao().getSyncableMeasure(timestamp);
-    }
-
     public List<Measure> getSyncableMeasure() {
-        return database.measureDao().getSyncableMeasure();
-    }
-
-    public List<Measure> getNotSyncedMeasures() {
-        return database.measureDao().getNotSyncedMeasures();
+        ArrayList<Measure> toFilter = new ArrayList<>();
+        List<Measure> output = database.measureDao().getSyncableMeasure();
+        for (Measure m : output) {
+            if (m.getCreatedBy().compareTo(session.getUserEmail()) != 0) {
+                toFilter.add(m);
+            }
+        }
+        for (Measure m : toFilter) {
+            output.remove(m);
+        }
+        return output;
     }
 
     public Measure getMeasureById(String id) {

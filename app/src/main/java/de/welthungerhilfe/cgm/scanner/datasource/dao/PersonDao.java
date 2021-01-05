@@ -41,9 +41,6 @@ public interface PersonDao {
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE id=:id AND deleted=0 LIMIT 1")
     Person getPersonById(String id);
 
-    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE timestamp>:timestamp ORDER By timestamp")
-    List<Person> getSyncablePersons(long timestamp);
-
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE isSynced=0 ORDER By timestamp")
     List<Person> getSyncablePersons();
 
