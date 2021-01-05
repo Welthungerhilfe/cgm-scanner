@@ -184,6 +184,10 @@ public class UploadService extends Service implements OnFileLogsLoad {
             return;
         }
 
+        if (!sessionManager.isSigned()) {
+            stopSelf();
+            return;
+        }
         Log.e(TAG, "Started");
         running = true;
 

@@ -130,6 +130,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private synchronized void startSyncing() {
         Log.i(TAG, "this is inside startSyncing ");
 
+        if (!session.isSigned()) {
+            return;
+        }
         if (syncTask == null) {
             prevTimestamp = session.getSyncTimestamp();
             currentTimestamp = System.currentTimeMillis();
