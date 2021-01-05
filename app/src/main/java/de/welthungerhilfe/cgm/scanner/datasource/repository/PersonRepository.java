@@ -24,6 +24,7 @@ import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -78,12 +79,18 @@ public class PersonRepository {
         setUpdated(true);
     }
 
-    public List<Person> getSyncablePerson(long timestamp) {
-        return database.personDao().getSyncablePersons(timestamp);
-    }
-
     public List<Person> getSyncablePerson() {
-        return database.personDao().getSyncablePersons();
+        ArrayList<Person> toFilter = new ArrayList<>();
+        List<Person> output = database.personDao().getSyncablePersons() ;
+        for (Person p : output) {
+            if (p.getCreatedBy().compareTo(session.getUserEmail()) != 0) {
+                toFilter.add(p);
+            }
+        }
+        for (Person p : toFilter) {
+            output.remove(p);
+        }
+        return output;
     }
 
     public LiveData<List<Person>> getAvailablePersons(PersonFilter filter) {
