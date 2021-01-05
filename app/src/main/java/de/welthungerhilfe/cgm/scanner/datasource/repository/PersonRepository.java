@@ -22,7 +22,6 @@ import androidx.lifecycle.LiveData;
 import androidx.sqlite.db.SimpleSQLiteQuery;
 import android.content.Context;
 import android.location.Location;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +42,6 @@ public class PersonRepository {
     private SessionManager session;
     private boolean updated;
 
-    String TAG = PersonRepository.class.getSimpleName();
     private PersonRepository(Context context) {
         database = CgmDatabase.getInstance(context);
         session = new SessionManager(context);
