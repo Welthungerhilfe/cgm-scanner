@@ -23,12 +23,10 @@ import androidx.lifecycle.LiveData;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
@@ -54,17 +52,7 @@ public class FileLogRepository {
         new AsyncTask<Void, Void, List<FileLog>>() {
             @Override
             protected List<FileLog> doInBackground(Void... voids) {
-                ArrayList<FileLog> toFilter = new ArrayList<>();
-                List<FileLog> output = database.fileLogDao().loadQueuedData();
-                for (FileLog log : output) {
-                    if (log.getCreatedBy().compareTo(session.getUserEmail()) != 0) {
-                        toFilter.add(log);
-                    }
-                }
-                for (FileLog log : toFilter) {
-                    output.remove(log);
-                }
-                return output;
+                return database.fileLogDao().loadQueuedData();
             }
 
             @Override

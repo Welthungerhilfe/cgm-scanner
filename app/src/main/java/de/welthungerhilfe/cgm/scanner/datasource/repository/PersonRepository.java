@@ -23,7 +23,6 @@ import androidx.sqlite.db.SimpleSQLiteQuery;
 import android.content.Context;
 import android.location.Location;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -78,17 +77,7 @@ public class PersonRepository {
     }
 
     public List<Person> getSyncablePerson() {
-        ArrayList<Person> toFilter = new ArrayList<>();
-        List<Person> output = database.personDao().getSyncablePersons() ;
-        for (Person p : output) {
-            if (p.getCreatedBy().compareTo(session.getUserEmail()) != 0) {
-                toFilter.add(p);
-            }
-        }
-        for (Person p : toFilter) {
-            output.remove(p);
-        }
-        return output;
+        return database.personDao().getSyncablePersons();
     }
 
     public LiveData<List<Person>> getAvailablePersons(PersonFilter filter) {
