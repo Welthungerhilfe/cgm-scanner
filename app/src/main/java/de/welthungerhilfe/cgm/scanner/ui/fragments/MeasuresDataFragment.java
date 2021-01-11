@@ -49,15 +49,13 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerMeasureAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.FeedbackDialog;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualDetailDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.ManualMeasureListener, RecyclerMeasureAdapter.OnMeasureSelectListener, RecyclerMeasureAdapter.OnMeasureFeedbackListener {
+public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.ManualMeasureListener {
     private Context context;
     private SessionManager session;
 
@@ -126,8 +124,6 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         RecyclerView recyclerMeasure = view.findViewById(R.id.recyclerMeasure);
         recyclerMeasure.setLayoutManager(new LinearLayoutManager(context));
         adapterMeasure = new RecyclerMeasureAdapter((BaseActivity) getActivity(), recyclerMeasure, this);
-        adapterMeasure.setMeasureSelectListener(this);
-        adapterMeasure.setMeasureFeedbackListener(this);
         recyclerMeasure.setAdapter(adapterMeasure);
 
         fabCreate = view.findViewById(R.id.fabCreate);
@@ -192,19 +188,5 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setArtifact_synced(true);
 
         viewModel.insertMeasure(measure);
-    }
-
-    @Override
-    public void onMeasureSelect(Measure measure) {
-        ManualDetailDialog detailDialog = new ManualDetailDialog(context);
-        detailDialog.setMeasure(measure);
-        detailDialog.show();
-    }
-
-    @Override
-    public void onMeasureFeedback(Measure measure, double overallScore) {
-        FeedbackDialog feedbackDialog = new FeedbackDialog(context);
-        feedbackDialog.setMeasure(measure);
-        feedbackDialog.show();
     }
 }

@@ -51,6 +51,8 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.FeedbackDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualDetailDialog;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
@@ -62,8 +64,6 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasureAdapter.ViewHolder> {
     private BaseActivity context;
-    private OnMeasureSelectListener listener;
-    private OnMeasureFeedbackListener feedbackListener;
     private ManualMeasureDialog.ManualMeasureListener manualMeasureListener;
     private List<Measure> measureList;
 
@@ -73,14 +73,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
     private SessionManager session;
     private RecyclerView recyclerMeasure;
     private RemoteConfig config;
-
-    public interface OnMeasureSelectListener {
-        void onMeasureSelect(Measure measure);
-    }
-
-    public interface OnMeasureFeedbackListener {
-        void onMeasureFeedback(Measure measure, double overallScore);
-    }
 
     public RecyclerMeasureAdapter(BaseActivity ctx, RecyclerView recycler, ManualMeasureDialog.ManualMeasureListener listener) {
         context = ctx;
@@ -94,14 +86,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
         session = new SessionManager(context);
         config = session.getRemoteConfig();
-    }
-
-    public void setMeasureSelectListener(OnMeasureSelectListener listener) {
-        this.listener = listener;
-    }
-
-    public void setMeasureFeedbackListener(OnMeasureFeedbackListener listener) {
-        this.feedbackListener = listener;
     }
 
     @Override
@@ -201,8 +185,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                     if (scoreBack > overallScore) overallScore = scoreBack;
 
                     holder.rateOverallScore.setRating(5 * (float)overallScore);
-
-                    if (feedbackListener != null) holder.bindScanFeedbackListener(measure, overallScore);
+                    holder.bindScanFeedbackListener(measure, overallScore);
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
@@ -236,10 +219,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.txtHeightConfidence.setVisibility(View.GONE);
             holder.txtWeightConfidence.setVisibility(View.GONE);
         }
-
-        if (listener != null) {
-            holder.bindSelectListener(position);
-        }
+        holder.bindSelectListener(position);
     }
 
     @Override
@@ -278,7 +258,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         percentage.setVisibility(View.VISIBLE);
     }
 
-    public void deleteMeasure(int position) {
+    private void deleteMeasure(int position) {
         Measure measure = getItem(position);
         if (!config.isAllow_delete()) {
             notifyItemChanged(position);
@@ -301,7 +281,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         }
     }
 
-    public void editMeasure(int position) {
+    private void editMeasure(int position) {
         Measure measure = getItem(position);
         if (!config.isAllow_edit()) {
             notifyItemChanged(position);
@@ -316,6 +296,12 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             measureDialog.setMeasure(measure);
             measureDialog.show();
         }
+    }
+
+    private void showMeasure(Measure measure) {
+        ManualDetailDialog detailDialog = new ManualDetailDialog(context);
+        detailDialog.setMeasure(measure);
+        detailDialog.show();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -350,7 +336,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         }
 
         public void bindSelectListener(int position) {
-            rytItem.setOnClickListener(v -> listener.onMeasureSelect(getItem(position)));
+            rytItem.setOnClickListener(v -> showMeasure(getItem(position)));
             rytItem.setOnLongClickListener(view -> {
                 showContextMenu(position);
                 return true;
@@ -361,7 +347,9 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         public void bindScanFeedbackListener(Measure measure, double overallScore) {
             rateOverallScore.setOnTouchListener((view, motionEvent) -> {
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    feedbackListener.onMeasureFeedback(measure, overallScore);
+                    FeedbackDialog feedbackDialog = new FeedbackDialog(context);
+                    feedbackDialog.setMeasure(measure);
+                    feedbackDialog.show();
                 }
                 return true;
             });
@@ -381,7 +369,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             }, which -> {
                 switch (which) {
                     case 0:
-                        listener.onMeasureSelect(getItem(position));
+                        showMeasure(getItem(position));
                         break;
                     case 1:
                         editMeasure(position);
@@ -402,7 +390,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             }, which -> {
                 switch (which) {
                     case 0:
-                        listener.onMeasureSelect(getItem(position));
+                        showMeasure(getItem(position));
                         break;
                     case 1:
                         deleteMeasure(position);
