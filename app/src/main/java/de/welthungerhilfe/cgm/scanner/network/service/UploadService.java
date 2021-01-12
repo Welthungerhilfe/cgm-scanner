@@ -19,10 +19,13 @@
 package de.welthungerhilfe.cgm.scanner.network.service;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.IBinder;
 
@@ -95,8 +98,6 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     public static final int FOREGROUND_NOTIFICATION_ID = 100;
 
-    private static final String CHANNEL_ID = "CGM_Foreground_Notification";
-
 
     @Inject
     Retrofit retrofit;
@@ -145,10 +146,19 @@ public class UploadService extends Service implements OnFileLogsLoad {
         }
 
         if (isForeGround) {
+            String NOTIFICATION_CHANNEL_ID = "de.welthungerhilfe.cgm.scanner";
+            String channelName = "UploadService";
+            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+            chan.setLightColor(Color.BLUE);
+            chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            assert manager != null;
+            manager.createNotificationChannel(chan);
+
             Intent notificationIntent = new Intent(this, MainActivity.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(this,
                     0, notificationIntent, 0);
-            Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+            Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                     .setContentTitle(getApplicationContext().getString(R.string.app_name))
                     .setContentText(getApplicationContext().getString(R.string.scan_is_uploading))
                     .setSmallIcon(R.drawable.icon_notif)
@@ -368,7 +378,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                                     new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
                                             .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
 
-                            WorkManager.getInstance(getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker",ExistingWorkPolicy.KEEP,mywork);
+                            WorkManager.getInstance(getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
                             stopSelf();
                         } else {
                             updateFileLog(log);
