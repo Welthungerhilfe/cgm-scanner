@@ -167,11 +167,18 @@ public class GrowthDataFragment extends Fragment {
         });
 
         contextMenu = view.findViewById(R.id.contextMenuButton);
-        contextMenu.setOnClickListener(view12 -> new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
-                new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
-        }, which -> {
-            ContactSupportDialog.show((BaseActivity) getActivity(), "growth " + person.getQrcode(), "personID:" + person.getId());
-        }));
+        contextMenu.setOnClickListener(v -> {
+            if (person != null) {
+                String id = person.getId();
+                String qrCode = person.getQrcode();
+                BaseActivity activity = (BaseActivity) getActivity();
+                new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+                        new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
+                }, which -> {
+                    ContactSupportDialog.show(activity, "growth " + qrCode, "personID:" + id);
+                });
+            }
+        });
 
         initChart();
         return view;
