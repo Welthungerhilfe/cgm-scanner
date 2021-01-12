@@ -104,20 +104,14 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AndroidSupportInjection.inject(this);
-
     }
 
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
         this.context = context;
         session = new SessionManager(context);
-    }
-
-    public void onActivityCreated(Bundle instance) {
-        super.onActivityCreated(instance);
-
-
     }
 
     @Override
@@ -209,8 +203,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         if (loc != null) {
             String address = loc.getAddress();
             if ((location == null) || ((address != null) && (address.length() > 0))) {
-                if (editLocation.getText().toString().compareTo(address) != 0) {
-                    editLocation.setText(address);
+                if (editLocation != null) {
+                    Editable oldAddress = editLocation.getText();
+                    if ((oldAddress != null) && (oldAddress.toString().compareTo(address) != 0)) {
+                        editLocation.setText(address);
+                    }
                 }
                 location = loc;
             }
