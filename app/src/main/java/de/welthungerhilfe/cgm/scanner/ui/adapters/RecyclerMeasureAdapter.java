@@ -219,16 +219,12 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.txtHeightConfidence.setVisibility(View.GONE);
             holder.txtWeightConfidence.setVisibility(View.GONE);
         }
-        holder.bindSelectListener(position);
+        holder.bindSelectListener(measure);
     }
 
     @Override
     public int getItemCount() {
         return measureList.size();
-    }
-
-    public Measure getItem(int position) {
-        return measureList.get(position);
     }
 
     public void resetData(List<Measure> measureList) {
@@ -334,13 +330,13 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             contextMenu = itemView.findViewById(R.id.contextMenuButton);
         }
 
-        public void bindSelectListener(int position) {
-            rytItem.setOnClickListener(v -> showMeasure(getItem(position)));
+        public void bindSelectListener(Measure measure) {
+            rytItem.setOnClickListener(v -> showMeasure(measure));
             rytItem.setOnLongClickListener(view -> {
-                showContextMenu(position);
+                showContextMenu(measure);
                 return true;
             });
-            contextMenu.setOnClickListener(view -> showContextMenu(position));
+            contextMenu.setOnClickListener(view -> showContextMenu(measure));
         }
 
         public void bindScanFeedbackListener(Measure measure, double overallScore) {
@@ -355,11 +351,10 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         }
     }
 
-    private void showContextMenu(int position) {
-        Measure measure = measureList.get(position);
+    private void showContextMenu(Measure measure) {
         String date = DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE_AND_TIME, measure.getDate());
 
-        if (getItem(position).getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
+        if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
             new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
                     new ContextMenuDialog.Item(R.string.show_details, R.drawable.ic_details),
                     new ContextMenuDialog.Item(R.string.edit_data, R.drawable.ic_edit),
