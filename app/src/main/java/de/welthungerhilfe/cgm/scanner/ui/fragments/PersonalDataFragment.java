@@ -163,12 +163,18 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         radioMale.setOnCheckedChangeListener(this);
 
         View contextMenu = view.findViewById(R.id.contextMenuButton);
-        contextMenu.setOnClickListener(view12 -> new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
-                new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
-        }, which -> {
-            ContactSupportDialog.show((BaseActivity) getActivity(), "data " + person.getQrcode(), "personID:" + person.getId());
-        }));
-
+        contextMenu.setOnClickListener(v -> {
+            if (person != null) {
+                String id = person.getId();
+                String qrCode = person.getQrcode();
+                BaseActivity activity = (BaseActivity) getActivity();
+                new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+                        new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
+                }, which -> {
+                    ContactSupportDialog.show(activity, "data " + qrCode, "personID:" + id);
+                });
+            }
+        });
         return view;
     }
 
