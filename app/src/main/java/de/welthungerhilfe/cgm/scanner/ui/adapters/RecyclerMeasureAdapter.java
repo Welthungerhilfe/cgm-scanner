@@ -254,14 +254,14 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             text.setPaintFlags(Paint.ANTI_ALIAS_FLAG | Paint.STRIKE_THRU_TEXT_FLAG);
         }
 
-        percentage.setText(value + "%");
+        String label = value + "%";
+        percentage.setText(label);
         percentage.setVisibility(View.VISIBLE);
     }
 
-    private void deleteMeasure(int position) {
-        Measure measure = getItem(position);
+    private void deleteMeasure(Measure measure) {
         if (!config.isAllow_delete()) {
-            notifyItemChanged(position);
+            notifyDataSetChanged();
             Snackbar.make(recyclerMeasure, R.string.permission_delete, Snackbar.LENGTH_LONG).show();
         } else {
             ConfirmDialog dialog = new ConfirmDialog(context);
@@ -274,25 +274,24 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
                     removeMeasure(measure);
                 } else {
-                    notifyItemChanged(position);
+                    notifyDataSetChanged();
                 }
             });
             dialog.show();
         }
     }
 
-    private void editMeasure(int position) {
-        Measure measure = getItem(position);
+    private void editMeasure(Measure measure) {
         if (!config.isAllow_edit()) {
-            notifyItemChanged(position);
+            notifyDataSetChanged();
             Snackbar.make(recyclerMeasure, R.string.permission_edit, Snackbar.LENGTH_LONG).show();
         } else if (measure.getDate() < Utils.getUniversalTimestamp() - config.getTime_to_allow_editing() * 3600 * 1000) {
-            notifyItemChanged(position);
+            notifyDataSetChanged();
             Snackbar.make(recyclerMeasure, R.string.permission_expired, Snackbar.LENGTH_LONG).show();
         } else if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
             ManualMeasureDialog measureDialog = new ManualMeasureDialog(context);
             measureDialog.setManualMeasureListener(manualMeasureListener);
-            measureDialog.setCloseListener(result -> notifyItemChanged(position));
+            measureDialog.setCloseListener(result -> notifyDataSetChanged());
             measureDialog.setMeasure(measure);
             measureDialog.show();
         }
@@ -369,16 +368,16 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             }, which -> {
                 switch (which) {
                     case 0:
-                        showMeasure(getItem(position));
+                        showMeasure(measure);
                         break;
                     case 1:
-                        editMeasure(position);
+                        editMeasure(measure);
                         break;
                     case 2:
-                        deleteMeasure(position);
+                        deleteMeasure(measure);
                         break;
                     case 3:
-                        ContactSupportDialog.show(context, "measure " + date, "measureID:" + getItem(position).getId());
+                        ContactSupportDialog.show(context, "measure " + date, "measureID:" + measure.getId());
                         break;
                 }
             });
@@ -390,13 +389,13 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             }, which -> {
                 switch (which) {
                     case 0:
-                        showMeasure(getItem(position));
+                        showMeasure(measure);
                         break;
                     case 1:
-                        deleteMeasure(position);
+                        deleteMeasure(measure);
                         break;
                     case 2:
-                        ContactSupportDialog.show(context, "measure " + date, "measureID:" + getItem(position).getId());
+                        ContactSupportDialog.show(context, "measure " + date, "measureID:" + measure.getId());
                         break;
                 }
             });
