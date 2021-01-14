@@ -54,9 +54,13 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         if (BuildConfig.DEBUG) {
             final Account accountData = new Account("test@test.com", AppConstants.ACCOUNT_TYPE);
             accountManager.addAccountExplicitly(accountData, "kjjhhj", null);
-
+            if (environment == null) {
+                Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
+                return;
+            }
             SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            finish();
         } else {
             if (environment != null) {
                 layout_login.setVisibility(View.GONE);
@@ -68,7 +72,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             } else {
                 Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
             }
-       }
+        }
     }
 
     private AccountManager accountManager;
@@ -170,17 +174,20 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
     @OnCheckedChanged({R.id.rb_prod_darshna, R.id.rb_prod_aah, R.id.rb_demo_qa, R.id.rb_sandbox})
     public void onRadioButtonCheckChanged(CompoundButton button, boolean checked) {
-        if(checked) {
+        if (checked) {
             switch (button.getId()) {
                 case R.id.rb_prod_aah:
                 case R.id.rb_prod_darshna:
                     environment = AuthenticationHandler.Environment.PROUDCTION;
+                    session.setEnvironment(AppConstants.PROUDCTION);
                     break;
                 case R.id.rb_demo_qa:
                     environment = AuthenticationHandler.Environment.QA;
+                    session.setEnvironment(AppConstants.QA);
                     break;
                 case R.id.rb_sandbox:
                     environment = AuthenticationHandler.Environment.SANDBOX;
+                    session.setEnvironment(AppConstants.SANDBOX);
                     break;
             }
         }

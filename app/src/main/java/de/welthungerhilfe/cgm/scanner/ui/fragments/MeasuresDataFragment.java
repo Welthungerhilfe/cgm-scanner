@@ -23,13 +23,16 @@ import androidx.lifecycle.ViewModelProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.annotation.Nullable;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -98,7 +101,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
 
         factory = new CreateDataViewModelProvideFactory(getActivity());
-        viewModel = new ViewModelProvider(getActivity(),factory).get(CreateDataViewModel.class);
+        viewModel = new ViewModelProvider(getActivity(), factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
         });
@@ -133,7 +136,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void createMeasure() {
-        new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+        new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
                 new ContextMenuDialog.Item(R.string.selector_manual, R.drawable.ic_manual),
                 new ContextMenuDialog.Item(R.string.selector_scan, R.drawable.ic_machine)
         }, which -> {
@@ -158,7 +161,12 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             if (person == null) {
                 Snackbar.make(fabCreate, R.string.error_person_first, Snackbar.LENGTH_LONG).show();
             } else {
-                createMeasure();
+                if (person.getCreatedBy().equals(session.getUserEmail()) && person.getEnvironment() == session.getEnvironment()) {
+                    createMeasure();
+                } else {   //Change message with String
+                    Snackbar.make(fabCreate, "No authorization to create measurement", Snackbar.LENGTH_LONG).show();
+
+                }
             }
         }
     }
@@ -186,6 +194,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setQrCode(qrCode);
         measure.setSchema_version(CgmDatabase.version);
         measure.setArtifact_synced(true);
+        measure.setEnvironment(person.getEnvironment());
 
         viewModel.insertMeasure(measure);
     }

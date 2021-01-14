@@ -292,6 +292,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         person = new Person();
                         person.setId(AppController.getInstance().getPersonId());
                         person.setQrcode(qrCode);
+                        person.setEnvironment(session.getEnvironment());
+
                     }
 
                     person.setName(editName.getText().toString());

@@ -368,7 +368,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                                     new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
                                             .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
 
-                            WorkManager.getInstance(getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker",ExistingWorkPolicy.KEEP,mywork);
+                            WorkManager.getInstance(getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
                             stopSelf();
                         } else {
                             updateFileLog(log);

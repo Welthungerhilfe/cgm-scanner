@@ -34,8 +34,8 @@ import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TAB
 @Dao
 public interface MeasureDao {
 
-    @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE isSynced=0")
-    List<Measure> getSyncableMeasure();
+    @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE isSynced=0 AND environment=:environment")
+    List<Measure> getSyncableMeasure(int environment);
 
     @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE id=:id LIMIT 1")
     Measure getMeasureById(String id);
