@@ -167,6 +167,7 @@ public class AuthenticationHandler {
     private void doSignInAction(Runnable onFail) {
         if (!Utils.isNetworkAvailable(context)) {
             Toast.makeText(context, R.string.error_network, Toast.LENGTH_LONG).show();
+            onFail.run();
             return;
         }
 
