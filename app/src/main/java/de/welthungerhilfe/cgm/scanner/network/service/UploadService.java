@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.IBinder;
 
 import androidx.annotation.Nullable;
@@ -94,8 +95,6 @@ public class UploadService extends Service implements OnFileLogsLoad {
     private final Object lock = new Object();
     private ExecutorService executor;
 
-    boolean isForeGround;
-
     public static final int FOREGROUND_NOTIFICATION_ID = 100;
 
 
@@ -139,34 +138,33 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && intent.hasExtra(AppConstants.IS_FOREGROUND)) {
-            isForeGround = intent.getBooleanExtra(AppConstants.IS_FOREGROUND, false);
-        } else {
-            isForeGround = false;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (intent != null && intent.hasExtra(AppConstants.IS_FOREGROUND)) {
+                if (intent.getBooleanExtra(AppConstants.IS_FOREGROUND, false)) {
+                    String NOTIFICATION_CHANNEL_ID = "de.welthungerhilfe.cgm.scanner";
+                    String channelName = "UploadService";
+                    NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+                    chan.setLightColor(Color.BLUE);
+                    chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+                    NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    assert manager != null;
+                    manager.createNotificationChannel(chan);
+
+                    Intent notificationIntent = new Intent(this, MainActivity.class);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                            0, notificationIntent, 0);
+                    Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                            .setContentTitle(getApplicationContext().getString(R.string.app_name))
+                            .setContentText(getApplicationContext().getString(R.string.scan_is_uploading))
+                            .setSmallIcon(R.drawable.icon_notif)
+                            .setContentIntent(pendingIntent)
+                            .build();
+                    startForeground(FOREGROUND_NOTIFICATION_ID, notification);
+                }
+            }
         }
 
-        if (isForeGround) {
-            String NOTIFICATION_CHANNEL_ID = "de.welthungerhilfe.cgm.scanner";
-            String channelName = "UploadService";
-            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_DEFAULT);
-            chan.setLightColor(Color.BLUE);
-            chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            assert manager != null;
-            manager.createNotificationChannel(chan);
-
-            Intent notificationIntent = new Intent(this, MainActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this,
-                    0, notificationIntent, 0);
-            Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-                    .setContentTitle(getApplicationContext().getString(R.string.app_name))
-                    .setContentText(getApplicationContext().getString(R.string.scan_is_uploading))
-                    .setSmallIcon(R.drawable.icon_notif)
-                    .setContentIntent(pendingIntent)
-                    .build();
-            startForeground(FOREGROUND_NOTIFICATION_ID, notification);
-
-        }
         if (remainingCount <= 0) {
             loadQueueFileLogs();
             return START_STICKY;
