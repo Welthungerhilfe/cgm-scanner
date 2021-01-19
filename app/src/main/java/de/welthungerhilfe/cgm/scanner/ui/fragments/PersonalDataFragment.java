@@ -80,7 +80,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private AppCompatCheckBox checkAge;
 
     private DateEditText editBirth;
-    private EditText editName, editPrename, editLocation, editGuardian;
+    private EditText editName, editLocation, editGuardian;
 
     private AppCompatRadioButton radioFemale, radioMale;
 
@@ -144,9 +144,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         editName = view.findViewById(R.id.editName);
         editName.addTextChangedListener(this);
 
-        editPrename = view.findViewById(R.id.editPrename);
-        editPrename.addTextChangedListener(this);
-
         editLocation = view.findViewById(R.id.editLocation);
         editLocation.setOnClickListener(this);
 
@@ -188,8 +185,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         txtDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getCreated()));
 
-        editName.setText(person.getName());
-        editPrename.setText(person.getSurname());
+        editName.setText(person.getFullName());
         editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getBirthday()));
         editGuardian.setText(person.getGuardian());
 
@@ -224,7 +220,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         boolean valid = true;
 
         String name = editName.getText().toString();
-        String prename = editPrename.getText().toString();
         String birth = editBirth.getText().toString();
         String guardian = editGuardian.getText().toString();
 
@@ -233,13 +228,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             valid = false;
         } else {
             editName.setError(null);
-        }
-
-        if (prename.isEmpty()) {
-            editPrename.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.prename_tooltip)));
-            valid = false;
-        } else {
-            editPrename.setError(null);
         }
 
         if (birth.isEmpty()) {
@@ -295,7 +283,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     }
 
                     person.setName(editName.getText().toString());
-                    person.setSurname(editPrename.getText().toString());
                     person.setBirthday(birthday);
                     person.setGuardian(editGuardian.getText().toString());
                     person.setSex(sex);
@@ -369,11 +356,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     private void onTextChanged() {
         String name = editName.getText().toString();
-        String prename = editPrename.getText().toString();
         String birth = editBirth.getText().toString();
         String guardian = editGuardian.getText().toString();
 
-        if (!name.isEmpty() && !prename.isEmpty() && !birth.isEmpty() && !guardian.isEmpty() && (radioMale.isChecked() || radioFemale.isChecked())) {
+        if (!name.isEmpty() && !birth.isEmpty() && !guardian.isEmpty() && (radioMale.isChecked() || radioFemale.isChecked())) {
             btnNext.setTextColor(getResources().getColor(R.color.colorWhite));
             btnNext.setBackground(getResources().getDrawable(R.drawable.button_green_round));
         } else {
