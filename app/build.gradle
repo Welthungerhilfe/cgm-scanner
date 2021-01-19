@@ -7,7 +7,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 400
-        versionName "4.0.0-dev"
+        versionName "4.0.0-rc1"
         manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", arengineValue:"optional", tangoRequired:"false"]
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         javaCompileOptions {
@@ -119,7 +119,7 @@ dependencies {
     implementation 'com.novoda:merlin:1.1.7' //connection timestamping
     implementation 'androidx.room:room-runtime:2.2.5' //database syntax helper
     implementation 'com.android.volley:volley:1.1.1' //Authentication answer parser
-    implementation 'com.microsoft.identity.client:msal:2.0.2' //Microsoft authentication
+    implementation 'com.microsoft.identity.client:msal:2.0.5' //Microsoft authentication
     annotationProcessor 'androidx.room:room-compiler:2.2.5' //database syntax compiler
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.4' //database debugging
 

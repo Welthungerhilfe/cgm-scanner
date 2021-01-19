@@ -155,10 +155,12 @@ public class Person extends CsvExportableModel implements Serializable {
         this.name = name;
     }
 
+    @Deprecated
     public String getSurname() {
         return surname;
     }
 
+    @Deprecated
     public void setSurname(String surname) {
         this.surname = surname;
     }
@@ -265,6 +267,14 @@ public class Person extends CsvExportableModel implements Serializable {
 
     public void setSchema_version(int schema_version) {
         this.schema_version = schema_version;
+    }
+
+    public String getFullName() {
+        String fullname = getName();
+        if (getSurname() != null && !getSurname().isEmpty()) {
+            fullname = getName() + " " + getSurname();
+        }
+        return fullname;
     }
 
     @Override

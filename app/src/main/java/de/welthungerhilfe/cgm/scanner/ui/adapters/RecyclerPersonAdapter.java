@@ -76,8 +76,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
     @Override
     public void onBindViewHolder(RecyclerPersonAdapter.ViewHolder holder, int position) {
         Person person = getItem(position);
-        String name = person.getName() + " " + person.getSurname();
-        holder.txtName.setText(name);
+        holder.txtName.setText(person.getFullName());
 
         repository.getPersonLastMeasureLiveData(person.getId()).observe((LifecycleOwner) context, measure -> {
             if (measure != null) {

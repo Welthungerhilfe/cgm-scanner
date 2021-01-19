@@ -4,9 +4,8 @@
 
     <string name="permission_camera">"Camera permission needed!"</string>
 
-    <string name="name">family name</string>
+    <string name="name">name of child</string>
     <string name="guardian">name of guardian</string>
-    <string name="prename">name of child</string>
     <string name="birth">birth</string>
 
     <string name="sex_male">male</string>
@@ -92,14 +91,12 @@
     <string name="tooltip_cm">value in centimeters</string>
     <string name="tooltip_height_ex">i.e. 95.6</string>
     <string name="tooltip_name">Please input name</string>
-    <string name="tooltip_prename">Please input prename</string>
     <string name="tooltip_birthday">Please input birthday</string>
     <string name="tooltip_guardian">Please input guardian</string>
     <string name="tooltipe_sex">Please select sex</string>
 
     <string name="tooltip_input">Please input %1$s</string>
     <string name="name_tooltip">name</string>
-    <string name="prename_tooltip">prename</string>
     <string name="birthday_tooltip">birthday</string>
     <string name="guardian_tooltip">guardian</string>
 
