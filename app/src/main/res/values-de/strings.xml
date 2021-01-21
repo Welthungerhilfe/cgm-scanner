@@ -4,9 +4,8 @@
 
     <string name="permission_camera">Kamerazugriff benötigt!</string>
 
-    <string name="name">Nachname</string>
-    <string name="guardian">Erziehungsberechtigte/r</string>
-    <string name="prename">Vorname des Kindes</string>
+    <string name="name">Name des Kindes</string>
+    <string name="guardian">Erziehungsberechtigter</string>
     <string name="birth">Geburtstag</string>
 
     <string name="sex_male">männlich</string>
@@ -93,14 +92,12 @@
     <string name="tooltip_cm">Wert in Zentimetern</string>
     <string name="tooltip_height_ex">z.B. 95.6</string>
     <string name="tooltip_name">Namen eingeben</string>
-    <string name="tooltip_prename">Vornamen eingeben</string>
     <string name="tooltip_birthday">Geburtstag eingeben</string>
     <string name="tooltip_guardian">Erziehungsberechtigte/n eingeben</string>
     <string name="tooltipe_sex">Geschlecht auswählen</string>
 
     <string name="tooltip_input">%1$s eingeben</string>
     <string name="name_tooltip">Namen</string>
-    <string name="prename_tooltip">Vornamen</string>
     <string name="birthday_tooltip">Geburtstag</string>
     <string name="guardian_tooltip">Erziehungsberechtigte/n</string>
 

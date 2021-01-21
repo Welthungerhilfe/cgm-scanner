@@ -522,7 +522,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             Log.i(TAG, "this is inside of person on next  " + person);
                             person.setTimestamp(prevTimestamp);
                             person.setId(person1.getId());
-                            person.setSurname(person1.getSurname());
                             person.setCreatedBy(person1.getCreatedBy());
                             person.setCreated(person1.getCreated());
                             person.setSynced(true);
@@ -593,7 +592,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             Log.i(TAG, "this is inside of update person on next  " + person);
                             person.setTimestamp(prevTimestamp);
                             person.setId(person1.getId());
-                            person.setSurname(person1.getSurname());
                             person.setCreatedBy(person1.getCreatedBy());
                             person.setCreated(person1.getCreated());
                             person.setSynced(true);

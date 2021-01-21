@@ -4,9 +4,8 @@
 
     <string name="permission_camera">कैमरा अनुमति की आवश्यकता है!</string>
 
-    <string name="name">परिवार का नाम</string>
+    <string name="name">बच्चे का नाम</string>
     <string name="guardian">अभिभावक का नाम</string>
-    <string name="prename">बच्चे का नाम</string>
     <string name="birth">जन्म</string>
 
     <string name="sex_male">पुरुष / लडका</string>
@@ -93,14 +92,12 @@
     <string name="tooltip_cm">सेंटीमीटर में मूल्य</string>
     <string name="tooltip_height_ex">जैसे 95.6</string>
     <string name="tooltip_name">कृपया नाम का इनपुट दें</string>
-    <string name="tooltip_prename">कृपया उपनाम का इनपुट दें</string>
     <string name="tooltip_birthday">कृपया जन्मदिन का इनपुट दें</string>
     <string name="tooltip_guardian">कृपया अभिभावक का इनपुट दें</string>
     <string name="tooltipe_sex">कृपया लिंग का चयन करें</string>
 
     <string name="tooltip_input">कृपया %1$s का इनपुट दें</string>
     <string name="name_tooltip">नाम</string>
-    <string name="prename_tooltip">उपनाम</string>
     <string name="birthday_tooltip">जन्मदिन</string>
     <string name="guardian_tooltip">अभिभावक</string>
 
