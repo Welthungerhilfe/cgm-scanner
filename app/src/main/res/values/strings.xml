@@ -300,4 +300,6 @@
 
     <string name="scan_is_uploading">Scan is uploading</string>
 
+    <string name="no_authorazation">Not allowed, the person data were created in a different backend.</string>
+
 </resources>

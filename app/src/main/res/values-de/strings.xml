@@ -293,5 +293,9 @@
 
     <string name="scan_is_uploading">Scan wird hochgeladen</string>
 
+    <string name="no_authorazation">Nicht erlaubt, die Personendaten wurden in einem anderen Backend angelegt.</string>
+
+
+
 
 </resources>

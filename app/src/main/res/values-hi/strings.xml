@@ -292,4 +292,7 @@
 
     <string name="scan_is_uploading">Sस्कैन अपलोड हो रहा है</string>
 
+    <string name="no_authorazation">अनुमति नहीं है, व्यक्ति डेटा एक अलग बैकएंड में बनाया गया है.</string>
+
+
 </resources>

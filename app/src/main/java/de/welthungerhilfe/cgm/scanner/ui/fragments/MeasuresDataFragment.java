@@ -163,8 +163,8 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             } else {
                 if (person.getCreatedBy().equals(session.getUserEmail()) && person.getEnvironment() == session.getEnvironment()) {
                     createMeasure();
-                } else {   //Change message with String
-                    Snackbar.make(fabCreate, "No authorization to create measurement", Snackbar.LENGTH_LONG).show();
+                } else {
+                    Snackbar.make(fabCreate, R.string.no_authorazation, Snackbar.LENGTH_LONG).show();
 
                 }
             }
