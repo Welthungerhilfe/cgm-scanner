@@ -52,7 +52,7 @@ public class FileLogRepository {
         new AsyncTask<Void, Void, List<FileLog>>() {
             @Override
             protected List<FileLog> doInBackground(Void... voids) {
-                return database.fileLogDao().loadQueuedData();
+                return database.fileLogDao().loadQueuedData(session.getEnvironment());
             }
 
             @Override
@@ -94,8 +94,8 @@ public class FileLogRepository {
         return database.fileLogDao().getAll();
     }
 
-    public List<FileLog> getArtifactsForMeasure(String measureId) {
-        return database.fileLogDao().getArtifactsForMeasure(measureId);
+    public List<FileLog> getArtifactsForMeasure(String measureId,int environment) {
+        return database.fileLogDao().getArtifactsForMeasure(measureId,environment);
     }
 
     public LiveData<UploadStatus> getMeasureUploadProgress(String measureId) {

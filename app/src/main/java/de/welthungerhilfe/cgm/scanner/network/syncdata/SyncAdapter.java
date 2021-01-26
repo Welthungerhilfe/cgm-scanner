@@ -333,7 +333,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         private void processPersonQueue() {
             try {
-                List<Person> syncablePersons = personRepository.getSyncablePerson();
+                List<Person> syncablePersons = personRepository.getSyncablePerson(session.getEnvironment());
                 for (int i = 0; i < syncablePersons.size(); i++) {
 
                     Person person = syncablePersons.get(i);
@@ -354,14 +354,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             try {
                 Log.i("Syncadapter", "this is inside value of prevTimeStamp " + prevTimestamp);
 
-                List<Measure> syncableMeasures = measureRepository.getSyncableMeasure();
+                List<Measure> syncableMeasures = measureRepository.getSyncableMeasure(session.getEnvironment());
+
                 for (int i = 0; i < syncableMeasures.size(); i++) {
                     Measure measure = syncableMeasures.get(i);
                     String localPersonId = measure.getPersonId();
                     Person person = personRepository.getPersonById(localPersonId);
                     String backendPersonId = person.getServerId();
                     if (backendPersonId == null) {
-                        return;
+                        continue;
                     }
                     measure.setPersonServerKey(backendPersonId);
 
@@ -372,7 +373,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             postMeasurment(measure);
                         }
                     } else {
-                        HashMap<Integer, Scan> scans = measure.split(fileLogRepository);
+                        HashMap<Integer, Scan> scans = measure.split(fileLogRepository, session.getEnvironment());
                         if (!scans.isEmpty()) {
                             Log.i(TAG, "this is values of scan " + scans);
                             postScans(scans, measure);
@@ -524,6 +525,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             person.setCreatedBy(person1.getCreatedBy());
                             person.setCreated(person1.getCreated());
                             person.setSynced(true);
+                            person.setEnvironment(person1.getEnvironment());
                             Loc location = new Loc();
                             person.setLastLocation(location);
                             if (person1.getLastLocation() != null) {
@@ -673,6 +675,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             measure1.setDate(measure.getDate());
                             measure1.setUploaded_at(session.getSyncTimestamp());
                             measure1.setSynced(true);
+                            measure1.setEnvironment(measure.getEnvironment());
                             updateMeasure(measure1);
                         }
 

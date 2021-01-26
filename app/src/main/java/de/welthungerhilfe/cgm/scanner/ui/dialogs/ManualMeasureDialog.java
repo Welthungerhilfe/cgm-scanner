@@ -95,10 +95,12 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
             editManualLocation.setText(location.getAddress());
         });
     }
+
     @OnClick(R.id.txtCancel)
     void onCancel(TextView txtCancel) {
         dismiss();
     }
+
     @OnClick(R.id.btnOK)
     void OnConfirm(Button btnOK) {
         if (validate() && measureListener != null) {
@@ -109,13 +111,13 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                 int p = Utils.dpToPx(25, getContext());
                 message.setPadding(p, p, p, p);
                 message.setText(s);
-                message.setTextSize(TypedValue.COMPLEX_UNIT_SP,16);
+                message.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
                 message.setMovementMethod(LinkMovementMethod.getInstance());
                 AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                 builder.setTitle(R.string.edema_check);
                 builder.setView(message);
                 builder.setPositiveButton(R.string.selector_yes, (dialogInterface, i) -> {
-                    oedema=true;
+                    oedema = true;
                     measureListener.onManualMeasure(
                             measure != null ? measure.getId() : null,
                             Utils.parseDouble(editManualHeight.getText().toString()),
@@ -129,9 +131,8 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                 });
                 builder.setNegativeButton(R.string.selector_no, (dialogInterface, i) -> show());
                 builder.show();
-            }
-            else{
-                oedema=false;
+            } else {
+                oedema = false;
                 measureListener.onManualMeasure(
                         measure != null ? measure.getId() : null,
                         Utils.parseDouble(editManualHeight.getText().toString()),
@@ -184,7 +185,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         super(context);
 
         mContext = context;
-        location = ((CreateDataActivity)mContext).location;
+        location = ((CreateDataActivity) mContext).location;
 
         this.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);

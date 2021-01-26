@@ -65,6 +65,8 @@ public class Measure extends CsvExportableModel implements Serializable {
 
     private long date;
 
+    private int environment=0;
+
     @SerializedName("measured")
     @Expose
     @Ignore
@@ -352,23 +354,31 @@ public class Measure extends CsvExportableModel implements Serializable {
         this.scannedBy = scannedBy;
     }
 
+    public int getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(int environment) {
+        this.environment = environment;
+    }
+
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d,%d,%f,%f,%s", id, personId, date, type, age, height, weight,
+        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d,%d,%f,%f,%s,%d", id, personId, date, type, age, height, weight,
                 muac, headCircumference, artifact, visible, oedema, timestamp, createdBy, deleted, deletedBy, qrCode, schema_version, artifact_synced, uploaded_at, resulted_at, received_at,
-                heightConfidence, weightConfidence, scannedBy);
+                heightConfidence, weightConfidence, scannedBy, environment);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at,heightConfidence,weightConfidence,scannedBy";
+        return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at,heightConfidence,weightConfidence,scannedBy,environment";
     }
 
-    public HashMap<Integer, Scan> split(FileLogRepository fileLogRepository) {
+    public HashMap<Integer, Scan> split(FileLogRepository fileLogRepository,int environment) {
 
         //check if measure is ready to be synced
         HashMap<Integer, Scan> output = new HashMap<>();
-        List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(getId());
+        List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(getId(),environment);
         for (FileLog log : measureArtifacts) {
             if (log.getServerId() == null) {
                 return output;

@@ -20,12 +20,16 @@ package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
 import androidx.lifecycle.LiveData;
 import androidx.sqlite.db.SimpleSQLiteQuery;
+
 import android.content.Context;
 import android.location.Location;
+import android.util.Log;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+
+import javax.annotation.meta.When;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
@@ -40,6 +44,7 @@ public class PersonRepository {
     private CgmDatabase database;
     private SessionManager session;
     private boolean updated;
+    String TAG = PersonRepository.class.getSimpleName();
 
     private PersonRepository(Context context) {
         database = CgmDatabase.getInstance(context);
@@ -48,7 +53,7 @@ public class PersonRepository {
     }
 
     public static PersonRepository getInstance(Context context) {
-        if(instance == null) {
+        if (instance == null) {
             instance = new PersonRepository(context);
         }
         return instance;
@@ -76,8 +81,8 @@ public class PersonRepository {
         setUpdated(true);
     }
 
-    public List<Person> getSyncablePerson() {
-        return database.personDao().getSyncablePersons();
+    public List<Person> getSyncablePerson(int environment) {
+        return database.personDao().getSyncablePersons(environment);
     }
 
     public LiveData<List<Person>> getAvailablePersons(PersonFilter filter) {
@@ -92,7 +97,7 @@ public class PersonRepository {
         }
 
         if (filter.isOwn()) {
-            whereClause += String.format(" AND p.createdBy LIKE '%s'", Objects.requireNonNull(session.getUserEmail()));
+            whereClause += String.format(" AND p.createdBy LIKE '%s' AND p.environment=%d", Objects.requireNonNull(session.getUserEmail()), session.getEnvironment());
         }
 
         if (filter.isLocation()) {
@@ -149,7 +154,10 @@ public class PersonRepository {
                 break;
         }
 
+        Log.i(TAG, "this is value of whereclause " + whereClause);
+
         String query = String.format("SELECT %s FROM %s p WHERE %s ORDER BY %s %s", selectClause, CgmDatabase.TABLE_PERSON, whereClause, orderByClause, limitClause);
+        Log.i(TAG, "this is value of query " + query);
         return database.personDao().getResultPerson(new SimpleSQLiteQuery(query));
     }
 
