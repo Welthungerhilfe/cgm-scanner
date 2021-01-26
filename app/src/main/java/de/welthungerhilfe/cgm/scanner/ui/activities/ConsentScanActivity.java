@@ -888,7 +888,7 @@ public class ConsentScanActivity extends AppCompatActivity {
             final long timestamp = Utils.getUniversalTimestamp();
             final String consentFileString = timestamp + "_" + qrCode  + ".png";
 
-            File extFileDir = AppController.getInstance().getRootDirectory();
+            File extFileDir = AppController.getInstance().getRootDirectory(getBaseContext());
             File consentFileFolder = new File(extFileDir, AppConstants.LOCAL_CONSENT_URL.replace("{qrcode}", qrCode).replace("{scantimestamp}", String.valueOf(timestamp)));
             File consentFile = new File(consentFileFolder, consentFileString);
             if(!consentFileFolder.exists()) {

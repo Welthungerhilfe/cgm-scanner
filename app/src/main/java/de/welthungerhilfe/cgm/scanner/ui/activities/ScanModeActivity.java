@@ -486,7 +486,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void setupScanArtifacts() {
-        File extFileDir = AppController.getInstance().getRootDirectory();
+        File extFileDir = AppController.getInstance().getRootDirectory(this);
 
         Log.e("Root Directory", extFileDir.getParent());
         mScanArtefactsOutputFolder = new File(extFileDir, person.getQrcode() + "/measurements/" + mNowTimeString + "/");

@@ -38,6 +38,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
@@ -59,8 +60,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                 return;
             }
             SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-            finish();
+            startApp();
         } else {
             if (session.getEnvironment() != AppConstants.UNKNOWN) {
                 layout_login.setVisibility(View.GONE);
@@ -120,13 +120,24 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         }
 
         if (session.isSigned()) {
-            if (session.getTutorial())
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-            else
-                startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
-            finish();
+            startApp();
         }
+    }
 
+    private void startApp() {
+        layout_login.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
+
+        new Thread(() -> {
+            AppController.getInstance().getRootDirectory(getApplicationContext());
+            runOnUiThread(() -> {
+                if (session.getTutorial())
+                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                else
+                    startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
+                finish();
+            });
+        }).start();
     }
 
     public void processAuth(String email, String token, boolean feedback) {
@@ -153,12 +164,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                 session.setSigned(true);
                 session.setUserEmail(email);
 
-                if (session.getTutorial())
-                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                else
-                    startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
+                startApp();
 
-                finish();
             } else if (feedback) {
                 Toast.makeText(LoginActivity.this, R.string.login_error_invalid, Toast.LENGTH_LONG).show();
             }
