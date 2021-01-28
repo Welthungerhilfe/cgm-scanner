@@ -271,7 +271,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         } else if (Utils.parseDouble(height) <= 45) {
             editManualHeight.setError(tooltipe_height_min);
             valid = false;
-        } else if (Utils.parseDouble(height) >= 120) {
+        } else if (Utils.parseDouble(height) >= 130) {
             editManualHeight.setError(tooltipe_height_max);
             valid = false;
         } else {

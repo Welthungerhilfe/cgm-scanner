@@ -102,7 +102,7 @@
 
 
     <string name="tooltipe_height_min">लम्बाई 45cm (सेन्टीमीटर्स) से बड़ी होनी चाहिए </string>
-    <string name="tooltipe_height_max">लम्बाई 120cm (सेन्टीमीटर्स) से कम होनी चाहिए </string>
+    <string name="tooltipe_height_max">लम्बाई 130cm (सेन्टीमीटर्स) से कम होनी चाहिए </string>
     <string name="tooltipe_weight_min">वजन 2kg से ज्यादा होना चाहिये </string>
     <string name="tooltipe_weight_max">वजन 30kg से कम होना चाहिये </string>
     <string name="tooltipe_muac_min">मध्य ऊपरी बांह की परिधि 9cm (सेन्टीमीटर्स) से बड़ी होनी चाहिए</string>
