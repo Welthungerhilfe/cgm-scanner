@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">CGM Scanner</string>
-    <string name="app_name_long">Child Growth Monitor Scanner App</string>
 
     <string name="permission_camera">Kamerazugriff benötigt!</string>
 
