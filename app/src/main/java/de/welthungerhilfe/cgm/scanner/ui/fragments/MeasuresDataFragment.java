@@ -23,13 +23,16 @@ import androidx.lifecycle.ViewModelProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.annotation.Nullable;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,15 +52,13 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerMeasureAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.FeedbackDialog;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualDetailDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.ManualMeasureListener, RecyclerMeasureAdapter.OnMeasureSelectListener, RecyclerMeasureAdapter.OnMeasureFeedbackListener {
+public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.ManualMeasureListener {
     private Context context;
     private SessionManager session;
 
@@ -100,7 +101,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
 
         factory = new CreateDataViewModelProvideFactory(getActivity());
-        viewModel = new ViewModelProvider(getActivity(),factory).get(CreateDataViewModel.class);
+        viewModel = new ViewModelProvider(getActivity(), factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
         });
@@ -126,8 +127,6 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         RecyclerView recyclerMeasure = view.findViewById(R.id.recyclerMeasure);
         recyclerMeasure.setLayoutManager(new LinearLayoutManager(context));
         adapterMeasure = new RecyclerMeasureAdapter((BaseActivity) getActivity(), recyclerMeasure, this);
-        adapterMeasure.setMeasureSelectListener(this);
-        adapterMeasure.setMeasureFeedbackListener(this);
         recyclerMeasure.setAdapter(adapterMeasure);
 
         fabCreate = view.findViewById(R.id.fabCreate);
@@ -137,7 +136,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void createMeasure() {
-        new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+        new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
                 new ContextMenuDialog.Item(R.string.selector_manual, R.drawable.ic_manual),
                 new ContextMenuDialog.Item(R.string.selector_scan, R.drawable.ic_machine)
         }, which -> {
@@ -162,7 +161,12 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             if (person == null) {
                 Snackbar.make(fabCreate, R.string.error_person_first, Snackbar.LENGTH_LONG).show();
             } else {
-                createMeasure();
+                if (person.getCreatedBy().equals(session.getUserEmail()) && person.getEnvironment() == session.getEnvironment()) {
+                    createMeasure();
+                } else {
+                    Snackbar.make(fabCreate, R.string.no_authorazation, Snackbar.LENGTH_LONG).show();
+
+                }
             }
         }
     }
@@ -190,21 +194,8 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setQrCode(qrCode);
         measure.setSchema_version(CgmDatabase.version);
         measure.setArtifact_synced(true);
+        measure.setEnvironment(person.getEnvironment());
 
         viewModel.insertMeasure(measure);
-    }
-
-    @Override
-    public void onMeasureSelect(Measure measure) {
-        ManualDetailDialog detailDialog = new ManualDetailDialog(context);
-        detailDialog.setMeasure(measure);
-        detailDialog.show();
-    }
-
-    @Override
-    public void onMeasureFeedback(Measure measure, double overallScore) {
-        FeedbackDialog feedbackDialog = new FeedbackDialog(context);
-        feedbackDialog.setMeasure(measure);
-        feedbackDialog.show();
     }
 }

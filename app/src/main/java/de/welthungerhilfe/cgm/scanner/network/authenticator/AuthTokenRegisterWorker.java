@@ -40,7 +40,7 @@ public class AuthTokenRegisterWorker extends Worker {
     public Result doWork() {
 
         context = getApplicationContext();
-        AuthenticationHandler.Environment environment = AuthenticationHandler.getEnvironment(context);
+        int environment = AuthenticationHandler.getEnvironment(context);
         PublicClientApplication.createSingleAccountPublicClientApplication(context,
                 AuthenticationHandler.getConfig(environment),
                 new IPublicClientApplication.ISingleAccountApplicationCreatedListener() {

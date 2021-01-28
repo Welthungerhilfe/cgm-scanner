@@ -418,6 +418,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             measure.setAge(age);
             measure.setDate(System.currentTimeMillis());
             measure.setArtifact_synced(false);
+            measure.setEnvironment(session.getEnvironment());
         }
 
         setContentView(R.layout.activity_scan_mode);
@@ -485,7 +486,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void setupScanArtifacts() {
-        File extFileDir = AppController.getInstance().getRootDirectory();
+        File extFileDir = AppController.getInstance().getRootDirectory(this);
 
         Log.e("Root Directory", extFileDir.getParent());
         mScanArtefactsOutputFolder = new File(extFileDir, person.getQrcode() + "/measurements/" + mNowTimeString + "/");
@@ -861,6 +862,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
                     log.setStep(SCAN_STEP);
+                    log.setEnvironment(session.getEnvironment());
                     synchronized (lock) {
                         files.add(log);
                     }
@@ -891,6 +893,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                             log.setSchema_version(CgmDatabase.version);
                             log.setMeasureId(measure.getId());
                             log.setStep(0);
+                            log.setEnvironment(session.getEnvironment());
                             synchronized (lock) {
                                 files.add(log);
                             }
@@ -970,6 +973,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
                     log.setStep(SCAN_STEP);
+                    log.setEnvironment(session.getEnvironment());
                     synchronized (lock) {
                         files.add(log);
                     }
@@ -1017,6 +1021,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setSchema_version(CgmDatabase.version);
                 log.setMeasureId(measure.getId());
                 log.setStep(SCAN_STEP);
+                log.setEnvironment(session.getEnvironment());
                 synchronized (lock) {
                     files.add(log);
                 }
@@ -1097,6 +1102,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
                     log.setStep(SCAN_STEP);
+                    log.setEnvironment(session.getEnvironment());
                     synchronized (lock) {
                         files.add(log);
                     }
@@ -1124,6 +1130,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setSchema_version(CgmDatabase.version);
                         log.setMeasureId(measure.getId());
                         log.setStep(0);
+                        log.setEnvironment(session.getEnvironment());
                         synchronized (lock) {
                             files.add(log);
                         }

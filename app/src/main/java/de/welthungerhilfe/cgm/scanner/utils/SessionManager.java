@@ -23,6 +23,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 
 import com.google.gson.Gson;
+import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 
 import java.util.Locale;
 
@@ -46,7 +47,7 @@ public class SessionManager {
     private final String KEY_TUTORIAL = "key_tutorial";
     private final String KEY_REMOTE_CONFIG = "key_remote_config";
     private final String KEY_DONOT_SHOW_QR_CONFIRM_DIALOG = "key_donot_show_qr_confirm_dialog";
-
+    private final String SELECTED_ENVIRONMENT = "selected_environment";
 
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
@@ -205,5 +206,15 @@ public class SessionManager {
 
     public String getAuthToken() {
         return pref.getString(KEY_USER_TOKEN, null);
+    }
+
+    public void setEnvironment(int environment) {
+        editor.putInt(SELECTED_ENVIRONMENT, environment);
+
+        editor.commit();
+    }
+
+    public int getEnvironment() {
+        return pref.getInt(SELECTED_ENVIRONMENT, AppConstants.UNKNOWN);
     }
 }

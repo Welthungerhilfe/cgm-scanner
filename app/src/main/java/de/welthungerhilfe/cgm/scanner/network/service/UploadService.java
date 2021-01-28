@@ -19,11 +19,15 @@
 package de.welthungerhilfe.cgm.scanner.network.service;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.IBinder;
 
 import androidx.annotation.Nullable;
@@ -91,11 +95,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
     private final Object lock = new Object();
     private ExecutorService executor;
 
-    boolean isForeGround;
-
     public static final int FOREGROUND_NOTIFICATION_ID = 100;
-
-    private static final String CHANNEL_ID = "CGM_Foreground_Notification";
 
 
     @Inject
@@ -138,25 +138,33 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && intent.hasExtra(AppConstants.IS_FOREGROUND)) {
-            isForeGround = intent.getBooleanExtra(AppConstants.IS_FOREGROUND, false);
-        } else {
-            isForeGround = false;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (intent != null && intent.hasExtra(AppConstants.IS_FOREGROUND)) {
+                if (intent.getBooleanExtra(AppConstants.IS_FOREGROUND, false)) {
+                    String NOTIFICATION_CHANNEL_ID = "de.welthungerhilfe.cgm.scanner";
+                    String channelName = "UploadService";
+                    NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+                    chan.setLightColor(Color.BLUE);
+                    chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+                    NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    assert manager != null;
+                    manager.createNotificationChannel(chan);
+
+                    Intent notificationIntent = new Intent(this, MainActivity.class);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                            0, notificationIntent, 0);
+                    Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                            .setContentTitle(getApplicationContext().getString(R.string.app_name))
+                            .setContentText(getApplicationContext().getString(R.string.scan_is_uploading))
+                            .setSmallIcon(R.drawable.icon_notif)
+                            .setContentIntent(pendingIntent)
+                            .build();
+                    startForeground(FOREGROUND_NOTIFICATION_ID, notification);
+                }
+            }
         }
 
-        if (isForeGround) {
-            Intent notificationIntent = new Intent(this, MainActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this,
-                    0, notificationIntent, 0);
-            Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setContentTitle(getApplicationContext().getString(R.string.app_name))
-                    .setContentText(getApplicationContext().getString(R.string.scan_is_uploading))
-                    .setSmallIcon(R.drawable.icon_notif)
-                    .setContentIntent(pendingIntent)
-                    .build();
-            startForeground(FOREGROUND_NOTIFICATION_ID, notification);
-
-        }
         if (remainingCount <= 0) {
             loadQueueFileLogs();
             return START_STICKY;
@@ -184,10 +192,14 @@ public class UploadService extends Service implements OnFileLogsLoad {
             return;
         }
 
+        if (!sessionManager.isSigned()) {
+            stopSelf();
+            return;
+        }
         Log.e(TAG, "Started");
         running = true;
 
-        repository.loadQueuedData(this);
+        repository.loadQueuedData(this, sessionManager);
     }
 
     @Override
@@ -281,7 +293,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 Utils.sleep(3000);
             }
 
-            uploadFiles(log, mime);
+            uploadFile(log, mime);
         }
     }
 
@@ -302,7 +314,12 @@ public class UploadService extends Service implements OnFileLogsLoad {
         }
     }
 
-    public void uploadFiles(FileLog log, String mime) {
+    public void uploadFile(FileLog log, String mime) {
+        if (!sessionManager.isSigned()) {
+            stopSelf();
+            return;
+        }
+
         MultipartBody.Part body = null;
         final File file = new File(log.getPath());
         try {
@@ -359,7 +376,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                                     new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
                                             .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
 
-                            WorkManager.getInstance(getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker",ExistingWorkPolicy.KEEP,mywork);
+                            WorkManager.getInstance(getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
                             stopSelf();
                         } else {
                             updateFileLog(log);

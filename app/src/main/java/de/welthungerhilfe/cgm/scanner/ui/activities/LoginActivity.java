@@ -38,6 +38,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
@@ -54,26 +55,28 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         if (BuildConfig.DEBUG) {
             final Account accountData = new Account("test@test.com", AppConstants.ACCOUNT_TYPE);
             accountManager.addAccountExplicitly(accountData, "kjjhhj", null);
-
+            if (session.getEnvironment() == AppConstants.UNKNOWN) {
+                Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
+                return;
+            }
             SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            startApp();
         } else {
-            if (environment != null) {
+            if (session.getEnvironment() != AppConstants.UNKNOWN) {
                 layout_login.setVisibility(View.GONE);
                 progressBar.setVisibility(View.VISIBLE);
-                new AuthenticationHandler(this, this, environment, () -> runOnUiThread(() -> {
+                new AuthenticationHandler(this, this, () -> runOnUiThread(() -> {
                     layout_login.setVisibility(View.VISIBLE);
                     progressBar.setVisibility(View.GONE);
                 }));
             } else {
                 Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
             }
-       }
+        }
     }
 
     private AccountManager accountManager;
     private SessionManager session;
-    private AuthenticationHandler.Environment environment;
 
     @BindView(R.id.rb_sandbox)
     RadioButton rb_sandbox;
@@ -117,13 +120,24 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         }
 
         if (session.isSigned()) {
-            if (session.getTutorial())
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-            else
-                startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
-            finish();
+            startApp();
         }
+    }
 
+    private void startApp() {
+        layout_login.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
+
+        new Thread(() -> {
+            AppController.getInstance().getRootDirectory(getApplicationContext());
+            runOnUiThread(() -> {
+                if (session.getTutorial())
+                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                else
+                    startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
+                finish();
+            });
+        }).start();
     }
 
     public void processAuth(String email, String token, boolean feedback) {
@@ -150,12 +164,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                 session.setSigned(true);
                 session.setUserEmail(email);
 
-                if (session.getTutorial())
-                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                else
-                    startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
+                startApp();
 
-                finish();
             } else if (feedback) {
                 Toast.makeText(LoginActivity.this, R.string.login_error_invalid, Toast.LENGTH_LONG).show();
             }
@@ -170,17 +180,17 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
     @OnCheckedChanged({R.id.rb_prod_darshna, R.id.rb_prod_aah, R.id.rb_demo_qa, R.id.rb_sandbox})
     public void onRadioButtonCheckChanged(CompoundButton button, boolean checked) {
-        if(checked) {
+        if (checked) {
             switch (button.getId()) {
                 case R.id.rb_prod_aah:
                 case R.id.rb_prod_darshna:
-                    environment = AuthenticationHandler.Environment.PROUDCTION;
+                    session.setEnvironment(AppConstants.PROUDCTION);
                     break;
                 case R.id.rb_demo_qa:
-                    environment = AuthenticationHandler.Environment.QA;
+                    session.setEnvironment(AppConstants.QA);
                     break;
                 case R.id.rb_sandbox:
-                    environment = AuthenticationHandler.Environment.SANDBOX;
+                    session.setEnvironment(AppConstants.SANDBOX);
                     break;
             }
         }

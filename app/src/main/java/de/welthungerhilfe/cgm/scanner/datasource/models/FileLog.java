@@ -49,6 +49,7 @@ public class FileLog extends CsvExportableModel implements Serializable {
     private int schema_version;
     private String measureId;
     private int step;
+    private int environment;
 
 
     @NonNull
@@ -180,13 +181,21 @@ public class FileLog extends CsvExportableModel implements Serializable {
         this.serverId = serverId;
     }
 
+    public int getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(int environment) {
+        this.environment = environment;
+    }
+
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%s,%s,%d,%d,%b,%s,%d,%s,%d,%d,%d,%s,%d,%s",id,type,path,hashValue.replace("\n", "").replace("\r", ""),fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId,step,serverId);
+        return String.format(Locale.US, "%s,%s,%s,%s,%d,%d,%b,%s,%d,%s,%d,%d,%d,%s,%d,%s,%d",id,type,path,hashValue.replace("\n", "").replace("\r", ""),fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId,step,serverId,environment);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,type,path,hashValue,fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId,step,serverId";
+        return "id,type,path,hashValue,fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId,step,serverId,environment";
     }
 }

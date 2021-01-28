@@ -238,7 +238,7 @@ public class SettingsActivity extends BaseActivity {
     private void doBackup() {
         progressDialog.show();
         long timestamp = System.currentTimeMillis();
-        File dir = AppController.getInstance().getRootDirectory();
+        File dir = AppController.getInstance().getRootDirectory(this);
         BackupManager.doBackup(this, dir, timestamp,() -> {
             session.setBackupTimestamp(timestamp);
             txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, timestamp));

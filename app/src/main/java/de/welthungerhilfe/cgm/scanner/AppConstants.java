@@ -28,6 +28,13 @@ public class AppConstants {
     public static final String API_URL_PRODUCTION = "{API_URL_PRODUCTION}/";
     public static final String API_TESTING_URL = "http://192.168.43.252:5001/api/scan/";
 
+    //Environments Type
+    public static final int UNKNOWN = 0;
+    public static final int SANDBOX = 1;
+    public static final int QA = 2;
+    public static final int PROUDCTION = 3;
+
+
     public static final int MAX_IMAGE_SIZE = 512;
 
     public static final long SYNC_INTERVAL = 10;

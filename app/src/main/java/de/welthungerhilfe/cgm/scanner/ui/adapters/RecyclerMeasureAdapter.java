@@ -51,6 +51,8 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.FeedbackDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualDetailDialog;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
@@ -62,8 +64,6 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasureAdapter.ViewHolder> {
     private BaseActivity context;
-    private OnMeasureSelectListener listener;
-    private OnMeasureFeedbackListener feedbackListener;
     private ManualMeasureDialog.ManualMeasureListener manualMeasureListener;
     private List<Measure> measureList;
 
@@ -73,14 +73,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
     private SessionManager session;
     private RecyclerView recyclerMeasure;
     private RemoteConfig config;
-
-    public interface OnMeasureSelectListener {
-        void onMeasureSelect(Measure measure);
-    }
-
-    public interface OnMeasureFeedbackListener {
-        void onMeasureFeedback(Measure measure, double overallScore);
-    }
 
     public RecyclerMeasureAdapter(BaseActivity ctx, RecyclerView recycler, ManualMeasureDialog.ManualMeasureListener listener) {
         context = ctx;
@@ -94,14 +86,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
         session = new SessionManager(context);
         config = session.getRemoteConfig();
-    }
-
-    public void setMeasureSelectListener(OnMeasureSelectListener listener) {
-        this.listener = listener;
-    }
-
-    public void setMeasureFeedbackListener(OnMeasureFeedbackListener listener) {
-        this.feedbackListener = listener;
     }
 
     @Override
@@ -201,8 +185,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                     if (scoreBack > overallScore) overallScore = scoreBack;
 
                     holder.rateOverallScore.setRating(5 * (float)overallScore);
-
-                    if (feedbackListener != null) holder.bindScanFeedbackListener(measure, overallScore);
+                    holder.bindScanFeedbackListener(measure, overallScore);
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
@@ -236,19 +219,12 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.txtHeightConfidence.setVisibility(View.GONE);
             holder.txtWeightConfidence.setVisibility(View.GONE);
         }
-
-        if (listener != null) {
-            holder.bindSelectListener(position);
-        }
+        holder.bindSelectListener(measure);
     }
 
     @Override
     public int getItemCount() {
         return measureList.size();
-    }
-
-    public Measure getItem(int position) {
-        return measureList.get(position);
     }
 
     public void resetData(List<Measure> measureList) {
@@ -274,14 +250,14 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             text.setPaintFlags(Paint.ANTI_ALIAS_FLAG | Paint.STRIKE_THRU_TEXT_FLAG);
         }
 
-        percentage.setText(value + "%");
+        String label = value + "%";
+        percentage.setText(label);
         percentage.setVisibility(View.VISIBLE);
     }
 
-    public void deleteMeasure(int position) {
-        Measure measure = getItem(position);
+    private void deleteMeasure(Measure measure) {
         if (!config.isAllow_delete()) {
-            notifyItemChanged(position);
+            notifyDataSetChanged();
             Snackbar.make(recyclerMeasure, R.string.permission_delete, Snackbar.LENGTH_LONG).show();
         } else {
             ConfirmDialog dialog = new ConfirmDialog(context);
@@ -294,28 +270,33 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
                     removeMeasure(measure);
                 } else {
-                    notifyItemChanged(position);
+                    notifyDataSetChanged();
                 }
             });
             dialog.show();
         }
     }
 
-    public void editMeasure(int position) {
-        Measure measure = getItem(position);
+    private void editMeasure(Measure measure) {
         if (!config.isAllow_edit()) {
-            notifyItemChanged(position);
+            notifyDataSetChanged();
             Snackbar.make(recyclerMeasure, R.string.permission_edit, Snackbar.LENGTH_LONG).show();
         } else if (measure.getDate() < Utils.getUniversalTimestamp() - config.getTime_to_allow_editing() * 3600 * 1000) {
-            notifyItemChanged(position);
+            notifyDataSetChanged();
             Snackbar.make(recyclerMeasure, R.string.permission_expired, Snackbar.LENGTH_LONG).show();
         } else if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
             ManualMeasureDialog measureDialog = new ManualMeasureDialog(context);
             measureDialog.setManualMeasureListener(manualMeasureListener);
-            measureDialog.setCloseListener(result -> notifyItemChanged(position));
+            measureDialog.setCloseListener(result -> notifyDataSetChanged());
             measureDialog.setMeasure(measure);
             measureDialog.show();
         }
+    }
+
+    private void showMeasure(Measure measure) {
+        ManualDetailDialog detailDialog = new ManualDetailDialog(context);
+        detailDialog.setMeasure(measure);
+        detailDialog.show();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -349,30 +330,31 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             contextMenu = itemView.findViewById(R.id.contextMenuButton);
         }
 
-        public void bindSelectListener(int position) {
-            rytItem.setOnClickListener(v -> listener.onMeasureSelect(getItem(position)));
+        public void bindSelectListener(Measure measure) {
+            rytItem.setOnClickListener(v -> showMeasure(measure));
             rytItem.setOnLongClickListener(view -> {
-                showContextMenu(position);
+                showContextMenu(measure);
                 return true;
             });
-            contextMenu.setOnClickListener(view -> showContextMenu(position));
+            contextMenu.setOnClickListener(view -> showContextMenu(measure));
         }
 
         public void bindScanFeedbackListener(Measure measure, double overallScore) {
             rateOverallScore.setOnTouchListener((view, motionEvent) -> {
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    feedbackListener.onMeasureFeedback(measure, overallScore);
+                    FeedbackDialog feedbackDialog = new FeedbackDialog(context);
+                    feedbackDialog.setMeasure(measure);
+                    feedbackDialog.show();
                 }
                 return true;
             });
         }
     }
 
-    private void showContextMenu(int position) {
-        Measure measure = measureList.get(position);
+    private void showContextMenu(Measure measure) {
         String date = DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE_AND_TIME, measure.getDate());
 
-        if (getItem(position).getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
+        if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
             new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
                     new ContextMenuDialog.Item(R.string.show_details, R.drawable.ic_details),
                     new ContextMenuDialog.Item(R.string.edit_data, R.drawable.ic_edit),
@@ -381,16 +363,16 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             }, which -> {
                 switch (which) {
                     case 0:
-                        listener.onMeasureSelect(getItem(position));
+                        showMeasure(measure);
                         break;
                     case 1:
-                        editMeasure(position);
+                        editMeasure(measure);
                         break;
                     case 2:
-                        deleteMeasure(position);
+                        deleteMeasure(measure);
                         break;
                     case 3:
-                        ContactSupportDialog.show(context, "measure " + date, "measureID:" + getItem(position).getId());
+                        ContactSupportDialog.show(context, "measure " + date, "measureID:" + measure.getId());
                         break;
                 }
             });
@@ -402,13 +384,13 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             }, which -> {
                 switch (which) {
                     case 0:
-                        listener.onMeasureSelect(getItem(position));
+                        showMeasure(measure);
                         break;
                     case 1:
-                        deleteMeasure(position);
+                        deleteMeasure(measure);
                         break;
                     case 2:
-                        ContactSupportDialog.show(context, "measure " + date, "measureID:" + getItem(position).getId());
+                        ContactSupportDialog.show(context, "measure " + date, "measureID:" + measure.getId());
                         break;
                 }
             });
