@@ -102,7 +102,7 @@
 
 
     <string name="tooltipe_height_min">Das Kind sollte größer als 45cm sein</string>
-    <string name="tooltipe_height_max">Das Kind sollte kleiner als 120cm sein</string>
+    <string name="tooltipe_height_max">Das Kind sollte kleiner als 130cm sein</string>
     <string name="tooltipe_weight_min">Gewicht sollte größer als 2kg sein</string>
     <string name="tooltipe_weight_max">Gewicht sollte weniger als 30kg betragen</string>
 
