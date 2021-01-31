@@ -47,6 +47,7 @@ import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.network.module.NetworkModule;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.database.BackupManager;
@@ -169,7 +170,15 @@ public class SettingsActivity extends BaseActivity {
             txtSettingAccount.setText(1, accounts[0].name);
         }
 
-        txtSettingAzureAccount.setText(1, "");//TODO:detect backend name
+        String apiURL = NetworkModule.getUrl();
+        if (apiURL.contains("https://")) {
+            apiURL = apiURL.replaceFirst("https://", "");
+            apiURL = apiURL.substring(0, apiURL.indexOf('.'));
+        } else {
+            apiURL = apiURL.replaceFirst("http://", "");
+            apiURL = apiURL.substring(0, apiURL.indexOf('/'));
+        }
+        txtSettingAzureAccount.setText(1, apiURL);
 
         String code = session.getLanguage();
         switch (code) {
@@ -229,7 +238,7 @@ public class SettingsActivity extends BaseActivity {
     private void doBackup() {
         progressDialog.show();
         long timestamp = System.currentTimeMillis();
-        File dir = AppController.getInstance().getRootDirectory();
+        File dir = AppController.getInstance().getRootDirectory(this);
         BackupManager.doBackup(this, dir, timestamp,() -> {
             session.setBackupTimestamp(timestamp);
             txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, timestamp));

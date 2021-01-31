@@ -27,7 +27,6 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import retrofit2.Retrofit;
 
 public class MeasureRepository {
     private static MeasureRepository instance;
@@ -54,16 +53,8 @@ public class MeasureRepository {
         database.measureDao().updateMeasure(measure);
     }
 
-    public List<Measure> getSyncableMeasure(long timestamp) {
-        return database.measureDao().getSyncableMeasure(timestamp);
-    }
-
-    public List<Measure> getSyncableMeasure() {
-        return database.measureDao().getSyncableMeasure();
-    }
-
-    public List<Measure> getNotSyncedMeasures() {
-        return database.measureDao().getNotSyncedMeasures();
+    public List<Measure> getSyncableMeasure(int environment) {
+        return database.measureDao().getSyncableMeasure(environment);
     }
 
     public Measure getMeasureById(String id) {

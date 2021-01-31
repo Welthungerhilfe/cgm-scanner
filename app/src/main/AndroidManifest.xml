@@ -4,6 +4,7 @@
     package="de.welthungerhilfe.cgm.scanner">
 
     <!-- for AR functionality -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- Storage access -->
@@ -27,6 +28,10 @@
 
     <!-- contact support -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!--for foreground service-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
 
     <supports-screens
         android:anyDensity="true"

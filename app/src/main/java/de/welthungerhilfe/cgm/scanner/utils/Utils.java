@@ -371,4 +371,9 @@ public class Utils {
 
 
     }
+
+    //for checking-> MSAL authtoken expired or not
+    public static boolean isExpiredToken(String message) {
+        return message.contains("401");
+    }
 }

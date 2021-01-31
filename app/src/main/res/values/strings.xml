@@ -1,12 +1,11 @@
 <resources>
     <string name="app_name">CGM Scanner</string>
-    <string name="app_name_long">Child Growth Monitor Scanner App</string>
+    <string name="app_name_long" translatable="false">Child Growth Monitor Scanner App</string>
 
     <string name="permission_camera">"Camera permission needed!"</string>
 
-    <string name="name">family name</string>
+    <string name="name">name of child</string>
     <string name="guardian">name of guardian</string>
-    <string name="prename">name of child</string>
     <string name="birth">birth</string>
 
     <string name="sex_male">male</string>
@@ -25,7 +24,7 @@
     <string name="version">Version</string>
     <string name="uuid">UUID</string>
     <string name="account">Account</string>
-    <string name="azure_account">Azure Account</string>
+    <string name="azure_account">API Account</string>
     <string name="language">Language</string>
 
     <string name="lang_english">English</string>
@@ -92,21 +91,19 @@
     <string name="tooltip_cm">value in centimeters</string>
     <string name="tooltip_height_ex">i.e. 95.6</string>
     <string name="tooltip_name">Please input name</string>
-    <string name="tooltip_prename">Please input prename</string>
     <string name="tooltip_birthday">Please input birthday</string>
     <string name="tooltip_guardian">Please input guardian</string>
     <string name="tooltipe_sex">Please select sex</string>
 
     <string name="tooltip_input">Please input %1$s</string>
     <string name="name_tooltip">name</string>
-    <string name="prename_tooltip">prename</string>
     <string name="birthday_tooltip">birthday</string>
     <string name="guardian_tooltip">guardian</string>
 
 
 
     <string name="tooltipe_height_min">height should be more than 45cm</string>
-    <string name="tooltipe_height_max">height should be less than 120cm</string>
+    <string name="tooltipe_height_max">height should be less than 130cm</string>
     <string name="tooltipe_weight_min">weight should be more than 2kg</string>
     <string name="tooltipe_weight_max">weight should be less than 30kg</string>
     <string name="tooltipe_muac_min">MUAC should be more than 9cm</string>
@@ -276,6 +273,7 @@
     <string name="person_not_defined">Person was not defined</string>
     <string name="storage_permission_needed">Storage permission needed!</string>
 
+    <string name="login_backend_environment">Please select a backend</string>
     <string name="login_error_parse">Token Parse Failed</string>
     <string name="login_error_invalid">Couldn\'t get user email, please try again</string>
 
@@ -296,5 +294,9 @@
 
     <string name="edema_check">Are you sure the child suffers from Edema?</string>
     <string name="edema_link">How to check for bilateral edema\nyoutu.be/3pQUtOsjjSY?t=85</string>
+
+    <string name="scan_is_uploading">Scan is uploading</string>
+
+    <string name="no_authorazation">Not allowed, the person data were created in a different backend.</string>
 
 </resources>

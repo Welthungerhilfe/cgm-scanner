@@ -18,37 +18,44 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.authenticator;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.microsoft.identity.client.AuthenticationCallback;
-import com.microsoft.identity.client.IAccount;
 import com.microsoft.identity.client.IAuthenticationResult;
 import com.microsoft.identity.client.IPublicClientApplication;
 import com.microsoft.identity.client.ISingleAccountPublicClientApplication;
 import com.microsoft.identity.client.PublicClientApplication;
-import com.microsoft.identity.client.SilentAuthenticationCallback;
 import com.microsoft.identity.client.exception.MsalClientException;
 import com.microsoft.identity.client.exception.MsalException;
 import com.microsoft.identity.client.exception.MsalServiceException;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
 
+import net.minidev.json.JSONArray;
+
+import java.text.ParseException;
+import java.util.Map;
+
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AuthenticationHandler {
+
 
     public interface IAuthenticationCallback {
 
         void processAuth(String email, String token, boolean feedback);
     }
 
+    private static final String ENVIRONMENT_KEY = "ENVIRONMENT_KEY";
     private static final String TAG = AuthenticationHandler.class.toString();
 
     private Activity activity;
@@ -56,59 +63,86 @@ public class AuthenticationHandler {
     private SessionManager session;
     private ISingleAccountPublicClientApplication singleAccountApp;
     private IAuthenticationCallback callback;
-    private String[] scopes;
 
-    @SuppressLint("StaticFieldLeak")
-    private static AuthenticationHandler instance;
-
-    public AuthenticationHandler(Activity activity, IAuthenticationCallback callback, String scope) {
+    public AuthenticationHandler(Activity activity, IAuthenticationCallback callback, Runnable onFail) {
 
         this.activity = activity;
         this.callback = callback;
         context = activity.getApplicationContext();
         session = new SessionManager(context);
-        scopes = new String[1];
-        scopes[0] = scope;
-        instance = this;
 
-        // Creates a PublicClientApplication object with res/raw/auth_config_single_account.json
-        PublicClientApplication.createSingleAccountPublicClientApplication(context,
-                R.raw.auth_config_single_account,
+        // Creates a PublicClientApplication object
+        PublicClientApplication.createSingleAccountPublicClientApplication(context, getConfig(getEnvironment(context)),
                 new IPublicClientApplication.ISingleAccountApplicationCreatedListener() {
                     @Override
                     public void onCreated(ISingleAccountPublicClientApplication application) {
                         singleAccountApp = application;
-                        if (session.isSigned()) {
-                            loadAccount();
-                        } else {
+                        if (!session.isSigned()) {
                             singleAccountApp.signOut(new ISingleAccountPublicClientApplication.SignOutCallback() {
                                 @Override
                                 public void onSignOut() {
                                     Log.d(TAG, "Signed out");
+                                    doSignInAction(onFail);
                                 }
 
                                 @Override
                                 public void onError(@NonNull MsalException exception) {
                                     Log.e(TAG, exception.toString());
+                                    doSignInAction(onFail);
                                 }
                             });
+                        } else {
+                            doSignInAction(onFail);
                         }
                     }
 
                     @Override
                     public void onError(MsalException exception) {
                         Log.e(TAG, exception.toString());
+                        onFail.run();
                     }
                 });
     }
 
-    public static AuthenticationHandler getInstance() {
-        return instance;
+    public static int getConfig(int environment) {
+        switch (environment) {
+            case AppConstants.SANDBOX:
+                return R.raw.auth_config_sandbox;
+            case AppConstants.QA:
+                return R.raw.auth_config_qa;
+            case AppConstants.PROUDCTION:
+                return R.raw.auth_config_production;
+            default:
+                Log.e(TAG, "Environment not configured");
+                System.exit(0);
+                return -1;
+        }
     }
 
-    public void doSignInAction() {
+    public static int getEnvironment(Context context) {
+        SessionManager sessionManager = new SessionManager(context);
+        return sessionManager.getEnvironment();
+    }
+
+    public static String[] getScopes(Context context) {
+        switch (getEnvironment(context)) {
+            case AppConstants.SANDBOX:
+                return new String[]{AppConstants.AUTH_SANDBOX};
+            case AppConstants.QA:
+                return new String[]{AppConstants.AUTH_QA};
+            case AppConstants.PROUDCTION:
+                return new String[]{AppConstants.AUTH_PRODUCTION};
+            default:
+                Log.e(TAG, "Environment not configured");
+                System.exit(0);
+                return null;
+        }
+    }
+
+    private void doSignInAction(Runnable onFail) {
         if (!Utils.isNetworkAvailable(context)) {
             Toast.makeText(context, R.string.error_network, Toast.LENGTH_LONG).show();
+            onFail.run();
             return;
         }
 
@@ -116,59 +150,7 @@ public class AuthenticationHandler {
             return;
         }
 
-        singleAccountApp.signIn(activity, null, scopes, getAuthInteractiveCallback());
-    }
-
-    public boolean isExpiredToken(String message) {
-        return message.contains("401");
-    }
-
-    public void updateToken(IAuthenticationCallback callback) {
-        this.callback = callback;
-
-        String authority = singleAccountApp.getConfiguration().getDefaultAuthority().getAuthorityURL().toString();
-        singleAccountApp.acquireTokenSilentAsync(scopes, authority, new SilentAuthenticationCallback() {
-            @Override
-            public void onSuccess(IAuthenticationResult authenticationResult) {
-                session.setAuthToken(authenticationResult.getAccessToken());
-                if (callback != null) {
-                    callback.processAuth(session.getUserEmail(), session.getAuthToken(), false);
-                }
-            }
-
-            @Override
-            public void onError(MsalException exception) {
-                if (callback != null) {
-                    callback.processAuth(null, null, false);
-                }
-            }
-        });
-    }
-
-    /**
-     * Load the currently signed-in account, if there's any.
-     */
-    private void loadAccount() {
-        if (singleAccountApp == null) {
-            return;
-        }
-
-        singleAccountApp.getCurrentAccountAsync(new ISingleAccountPublicClientApplication.CurrentAccountCallback() {
-            @Override
-            public void onAccountLoaded(@Nullable IAccount activeAccount) {
-                // You can use the account data to update your UI or your app database.
-                callback.processAuth(activeAccount.getUsername(), session.getAuthToken(), false);
-            }
-
-            @Override
-            public void onAccountChanged(@Nullable IAccount priorAccount, @Nullable IAccount currentAccount) {
-            }
-
-            @Override
-            public void onError(@NonNull MsalException exception) {
-                Log.e(TAG, exception.toString());
-            }
-        });
+        singleAccountApp.signIn(activity, null, getScopes(activity), getAuthInteractiveCallback(onFail));
     }
 
     /**
@@ -176,7 +158,7 @@ public class AuthenticationHandler {
      * If succeeds we use the access token to call the Microsoft Graph.
      * Does not check cache.
      */
-    private AuthenticationCallback getAuthInteractiveCallback() {
+    private AuthenticationCallback getAuthInteractiveCallback(Runnable onFail) {
         return new AuthenticationCallback() {
 
             @Override
@@ -185,10 +167,27 @@ public class AuthenticationHandler {
                 Log.d(TAG, "Successfully authenticated");
 
                 /* Update account */
-                callback.processAuth(authenticationResult.getAccount().getUsername(), authenticationResult.getAccessToken(), true);
-
-                /* call graph */
-                callGraphAPI(authenticationResult);
+                try {
+                    //AAD authentication
+                    String username = authenticationResult.getAccount().getUsername();
+                    if (username.indexOf('@') > 0) {
+                        callback.processAuth(username, authenticationResult.getAccessToken(), true);
+                        callGraphAPI(authenticationResult);
+                    }
+                    //B2C authentication
+                    else {
+                        JWT parsedToken = JWTParser.parse(authenticationResult.getAccessToken());
+                        Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
+                        JSONArray emails = (JSONArray) claims.get("emails");
+                        if (emails != null && !emails.isEmpty()) {
+                            callback.processAuth(emails.get(0).toString(), authenticationResult.getAccessToken(), true);
+                            callGraphAPI(authenticationResult);
+                        }
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    onFail.run();
+                }
             }
 
             @Override
@@ -201,12 +200,15 @@ public class AuthenticationHandler {
                 } else if (exception instanceof MsalServiceException) {
                     /* Exception when communicating with the STS, likely config issue */
                 }
+
+                onFail.run();
             }
 
             @Override
             public void onCancel() {
                 /* User canceled the authentication */
                 Log.d(TAG, "User cancelled login.");
+                onFail.run();
             }
         };
     }

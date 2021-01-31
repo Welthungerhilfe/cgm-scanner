@@ -28,8 +28,13 @@ import android.content.Intent;
 import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -47,10 +52,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthTokenRegisterWorker;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
@@ -64,7 +71,6 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
@@ -124,6 +130,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private synchronized void startSyncing() {
         Log.i(TAG, "this is inside startSyncing ");
 
+        if (!session.isSigned()) {
+            return;
+        }
         if (syncTask == null) {
             prevTimestamp = session.getSyncTimestamp();
             currentTimestamp = System.currentTimeMillis();
@@ -131,6 +140,24 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             syncTask = new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             Log.i(TAG, "this is inside startSyncing ");
+        }
+
+
+        if (!UploadService.isInitialized()) {
+            try {
+                getContext().startService(new Intent(getContext(), UploadService.class));
+
+            } catch (IllegalStateException e) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Intent intent = new Intent(getContext(), UploadService.class);
+                    intent.putExtra(AppConstants.IS_FOREGROUND, true);
+                    getContext().startForegroundService(intent);
+                }
+
+
+            }
+        } else {
+            UploadService.forceResume();
         }
     }
 
@@ -172,12 +199,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             if (!Utils.isUploadAllowed(getContext())) {
                 Log.d(TAG, "skipped due to missing connection");
                 return null;
-            }
-
-            if (!UploadService.isInitialized()) {
-                getContext().startService(new Intent(getContext(), UploadService.class));
-            } else {
-                UploadService.forceResume();
             }
 
             Log.i(TAG, "this is inside before restApi ");
@@ -312,12 +333,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         private void processPersonQueue() {
             try {
-                List<Person> syncablePersons = personRepository.getSyncablePerson();
+                List<Person> syncablePersons = personRepository.getSyncablePerson(session.getEnvironment());
                 for (int i = 0; i < syncablePersons.size(); i++) {
 
                     Person person = syncablePersons.get(i);
                     Log.i("Syncadapter", "this is inside processPerson Queue " + person);
-                    postPerson(person);
+                    if (person.getServerId() == null || person.getServerId().isEmpty()) {
+                        postPerson(person);
+                    } else {
+                        putPerson(person);
+                    }
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
@@ -329,14 +354,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             try {
                 Log.i("Syncadapter", "this is inside value of prevTimeStamp " + prevTimestamp);
 
-                List<Measure> syncableMeasures = measureRepository.getSyncableMeasure();
+                List<Measure> syncableMeasures = measureRepository.getSyncableMeasure(session.getEnvironment());
+
                 for (int i = 0; i < syncableMeasures.size(); i++) {
                     Measure measure = syncableMeasures.get(i);
                     String localPersonId = measure.getPersonId();
                     Person person = personRepository.getPersonById(localPersonId);
                     String backendPersonId = person.getServerId();
                     if (backendPersonId == null) {
-                        return;
+                        continue;
                     }
                     measure.setPersonServerKey(backendPersonId);
 
@@ -347,7 +373,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             postMeasurment(measure);
                         }
                     } else {
-                        HashMap<Integer, Scan> scans = measure.split(fileLogRepository);
+                        HashMap<Integer, Scan> scans = measure.split(fileLogRepository, session.getEnvironment());
                         if (!scans.isEmpty()) {
                             Log.i(TAG, "this is values of scan " + scans);
                             postScans(scans, measure);
@@ -448,9 +474,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             @Override
                             public void onError(@NonNull Throwable e) {
                                 Log.i(TAG, "this is value of post " + e.getMessage());
-                                AuthenticationHandler authentication = AuthenticationHandler.getInstance();
-                                if (authentication.isExpiredToken(e.getMessage())) {
-                                    authentication.updateToken(null);
+                                if (Utils.isExpiredToken(e.getMessage())) {
+                                    OneTimeWorkRequest mywork =
+                                            new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
+                                                    .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+
+                                    WorkManager.getInstance(getContext().getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
+
                                 }
                             }
 
@@ -492,25 +522,31 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             Log.i(TAG, "this is inside of person on next  " + person);
                             person.setTimestamp(prevTimestamp);
                             person.setId(person1.getId());
-                            person.setSurname(person1.getSurname());
                             person.setCreatedBy(person1.getCreatedBy());
                             person.setCreated(person1.getCreated());
                             person.setSynced(true);
+                            person.setEnvironment(person1.getEnvironment());
                             Loc location = new Loc();
                             person.setLastLocation(location);
-                            person.getLastLocation().setAddress(person1.getLastLocation().getAddress());
-                            person.getLastLocation().setLatitude(person1.getLastLocation().getLatitude());
-                            person.getLastLocation().setLongitude(person1.getLastLocation().getLongitude());
+                            if (person1.getLastLocation() != null) {
+                                person.getLastLocation().setAddress(person1.getLastLocation().getAddress());
+                                person.getLastLocation().setLatitude(person1.getLastLocation().getLatitude());
+                                person.getLastLocation().setLongitude(person1.getLastLocation().getLongitude());
+                            }
                             person.setBirthday(person1.getBirthday());
-                            updatePerson(person);
+                            updatePersonOnDatabase(person);
                         }
 
                         @Override
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is value of post " + e.getMessage());
-                            AuthenticationHandler authentication = AuthenticationHandler.getInstance();
-                            if (authentication.isExpiredToken(e.getMessage())) {
-                                authentication.updateToken(null);
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                OneTimeWorkRequest mywork =
+                                        new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
+                                                .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+
+                                WorkManager.getInstance(getContext().getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
+
                             }
                         }
 
@@ -524,8 +560,78 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
+    public void putPerson(Person person1) {
+        try {
+
+            Person putPerson = new Person();
+
+            putPerson.setBirthdayString(DataFormat.convertTimestampToDate(person1.getBirthday()));
+            putPerson.setGuardian(person1.getGuardian());
+            putPerson.setAgeEstimated(person1.isAgeEstimated());
+            putPerson.setName(person1.getName());
+            putPerson.setSex(person1.getSex());
+
+            Gson gson = new GsonBuilder()
+                    .excludeFieldsWithoutExposeAnnotation()
+                    .create();
+
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(putPerson))).toString());
+
+            Log.i(TAG, "this is data of person " + (new JSONObject(gson.toJson(putPerson))).toString());
+
+            retrofit.create(ApiService.class).putPerson("bearer " + session.getAuthToken(), body, person1.getServerId()).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Person>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull Person person) {
+                            Log.i(TAG, "this is inside of update person on next  " + person);
+                            person.setTimestamp(prevTimestamp);
+                            person.setId(person1.getId());
+                            person.setCreatedBy(person1.getCreatedBy());
+                            person.setCreated(person1.getCreated());
+                            person.setSynced(true);
+                            Loc location = new Loc();
+                            person.setLastLocation(location);
+                            person.getLastLocation().setAddress(person1.getLastLocation().getAddress());
+                            person.getLastLocation().setLatitude(person1.getLastLocation().getLatitude());
+                            person.getLastLocation().setLongitude(person1.getLastLocation().getLongitude());
+                            person.setBirthday(person1.getBirthday());
+                            updatePersonOnDatabase(person);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            Log.i(TAG, "this is value of update person" +
+                                    "" +
+                                    " " + e.getMessage());
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                OneTimeWorkRequest mywork =
+                                        new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
+                                                .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+
+                                WorkManager.getInstance(getContext().getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
+
+                            }
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            Log.i(TAG, "this is value of exception " + e.getMessage());
+        }
+    }
+
+
     @SuppressLint("StaticFieldLeak")
-    public void updatePerson(Person person) {
+    public void updatePersonOnDatabase(Person person) {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
@@ -569,15 +675,20 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             measure1.setDate(measure.getDate());
                             measure1.setUploaded_at(session.getSyncTimestamp());
                             measure1.setSynced(true);
+                            measure1.setEnvironment(measure.getEnvironment());
                             updateMeasure(measure1);
                         }
 
                         @Override
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is value of post " + e.getMessage());
-                            AuthenticationHandler authentication = AuthenticationHandler.getInstance();
-                            if (authentication.isExpiredToken(e.getMessage())) {
-                                authentication.updateToken(null);
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                OneTimeWorkRequest mywork =
+                                        new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
+                                                .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+
+                                WorkManager.getInstance(getContext().getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
+
                             }
                         }
 
@@ -605,4 +716,5 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
+
 }

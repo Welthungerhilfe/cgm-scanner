@@ -1,4 +1,4 @@
-/**
+/*
  * Child Growth Monitor - quick and accurate data on malnutrition
  * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
  * Copyright (c) 2018 Welthungerhilfe Innovation
@@ -19,6 +19,8 @@
 package de.welthungerhilfe.cgm.scanner.network.module;
 
 import android.app.Application;
+import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -28,8 +30,10 @@ import java.util.concurrent.TimeUnit;
 
 import dagger.Module;
 import dagger.Provides;
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import okhttp3.Cache;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
@@ -41,11 +45,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 @Module
 public class NetworkModule {
 
+    private static final String TAG = NetworkModule.class.toString();
+
     @Provides
     Cache provideHttpCache(Application application) {
         int cacheSize = 10 * 1024 * 1024;
-        Cache cache = new Cache(application.getCacheDir(), cacheSize);
-        return cache;
+        return new Cache(application.getCacheDir(), cacheSize);
     }
 
     @Provides
@@ -83,22 +88,32 @@ public class NetworkModule {
 
     @Provides
     Retrofit provideRetrofit(Gson gson) {
-        Retrofit retrofit = new Retrofit.Builder()
+        return new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
                 .baseUrl(getUrl())
                 .client(new OkHttpClient())
                 .build();
-        return retrofit;
     }
 
-    private String getUrl() {
+    public static String getUrl() {
         if (BuildConfig.DEBUG) {
             // development build
-            return AppConstants.TESTING_URL;
+            return AppConstants.API_TESTING_URL;
         } else {
-            // production build
-            return "{API_URL}/";
+            Context context = AppController.getInstance().getApplicationContext();
+            switch (AuthenticationHandler.getEnvironment(context)) {
+                case AppConstants.SANDBOX:
+                    return AppConstants.API_URL_SANDBOX;
+                case AppConstants.QA:
+                    return AppConstants.API_URL_QA;
+                case AppConstants.PROUDCTION:
+                    return AppConstants.API_URL_PRODUCTION;
+                default:
+                    Log.e(TAG, "Environment not configured");
+                    System.exit(0);
+                    return null;
+            }
         }
     }
 }

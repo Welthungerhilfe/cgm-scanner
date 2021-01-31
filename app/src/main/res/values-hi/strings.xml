@@ -1,12 +1,10 @@
 <resources>
     <string name="app_name">CGM Scanner</string>
-    <string name="app_name_long">Child Growth Monitor Scanner App</string>
 
     <string name="permission_camera">कैमरा अनुमति की आवश्यकता है!</string>
 
-    <string name="name">परिवार का नाम</string>
+    <string name="name">बच्चे का नाम</string>
     <string name="guardian">अभिभावक का नाम</string>
-    <string name="prename">बच्चे का नाम</string>
     <string name="birth">जन्म</string>
 
     <string name="sex_male">पुरुष / लडका</string>
@@ -25,7 +23,7 @@
     <string name="version">संस्करण</string>
     <string name="uuid">UUID</string>
     <string name="account">खाता</string>
-    <string name="azure_account">Azure खाता</string>
+    <string name="azure_account">API खाता</string>
     <string name="language">भाषा</string>
 
     <string name="lang_english">अंग्रेज़ी</string>
@@ -93,20 +91,18 @@
     <string name="tooltip_cm">सेंटीमीटर में मूल्य</string>
     <string name="tooltip_height_ex">जैसे 95.6</string>
     <string name="tooltip_name">कृपया नाम का इनपुट दें</string>
-    <string name="tooltip_prename">कृपया उपनाम का इनपुट दें</string>
     <string name="tooltip_birthday">कृपया जन्मदिन का इनपुट दें</string>
     <string name="tooltip_guardian">कृपया अभिभावक का इनपुट दें</string>
     <string name="tooltipe_sex">कृपया लिंग का चयन करें</string>
 
     <string name="tooltip_input">कृपया %1$s का इनपुट दें</string>
     <string name="name_tooltip">नाम</string>
-    <string name="prename_tooltip">उपनाम</string>
     <string name="birthday_tooltip">जन्मदिन</string>
     <string name="guardian_tooltip">अभिभावक</string>
 
 
     <string name="tooltipe_height_min">लम्बाई 45cm (सेन्टीमीटर्स) से बड़ी होनी चाहिए </string>
-    <string name="tooltipe_height_max">लम्बाई 120cm (सेन्टीमीटर्स) से कम होनी चाहिए </string>
+    <string name="tooltipe_height_max">लम्बाई 130cm (सेन्टीमीटर्स) से कम होनी चाहिए </string>
     <string name="tooltipe_weight_min">वजन 2kg से ज्यादा होना चाहिये </string>
     <string name="tooltipe_weight_max">वजन 30kg से कम होना चाहिये </string>
     <string name="tooltipe_muac_min">मध्य ऊपरी बांह की परिधि 9cm (सेन्टीमीटर्स) से बड़ी होनी चाहिए</string>
@@ -265,7 +261,7 @@
     <string name="person_not_defined">व्यक्ति को परिभाषित नहीं किया गया था</string>
     <string name="storage_permission_needed">भंडारण अनुमति की आवश्यकता!</string>
 
-
+    <string name="login_backend_environment">कृपया एक बैकेंड चुनें</string>
     <string name="login_error_parse">टोकन पार्स असफल</string>
     <string name="login_error_invalid">उपयोगकर्ता ईमेल प्राप्त नहीं कर सका, कृपया पुनः प्रयास करें</string>
 
@@ -289,4 +285,10 @@
 
     <string name="edema_check">क्या आप सुनिश्चित हैं कि बच्चा एडेमा से पीड़ित है?</string>
     <string name="edema_link">द्विपक्षीय एडिमा की जांच कैसे करें\nyoutu.be/hGTyk6CM-5A</string>
+
+    <string name="scan_is_uploading">Sस्कैन अपलोड हो रहा है</string>
+
+    <string name="no_authorazation">अनुमति नहीं है, व्यक्ति डेटा एक अलग बैकएंड में बनाया गया है.</string>
+
+
 </resources>

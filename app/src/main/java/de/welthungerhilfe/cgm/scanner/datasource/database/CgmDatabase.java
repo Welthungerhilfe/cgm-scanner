@@ -23,7 +23,9 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
+
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 
 import de.welthungerhilfe.cgm.scanner.datasource.dao.ArtifactResultDao;
@@ -39,20 +41,25 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 
-@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class, MeasureResult.class, Device.class}, version = 15)
+@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class, MeasureResult.class, Device.class}, version = 16)
 public abstract class CgmDatabase extends RoomDatabase {
     private static final Object sLock = new Object();
 
     private static CgmDatabase instance;
 
     public abstract PersonDao personDao();
+
     public abstract MeasureDao measureDao();
+
     public abstract FileLogDao fileLogDao();
+
     public abstract DeviceDao deviceDao();
+
     public abstract ArtifactResultDao artifactResultDao();
+
     public abstract MeasureResultDao measureResultDao();
 
-    public static final int version = 15;
+    public static final int version = 16;
 
     public static final String DATABASE = "offline_db";
 
@@ -61,8 +68,8 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final String TABLE_MEASURE = "measures";
     public static final String TABLE_FILE_LOG = "file_logs";
     public static final String TABLE_DEVICE = "devices";
-    public static final String TABLE_ARTIFACT_RESULT="artifact_result";
-    public static final String TABLE_MEASURE_RESULT="measure_result";
+    public static final String TABLE_ARTIFACT_RESULT = "artifact_result";
+    public static final String TABLE_MEASURE_RESULT = "measure_result";
 
     public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
@@ -169,8 +176,8 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final Migration MIGRATION_12_13 = new Migration(12, 13) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE persons ADD COLUMN isSynced INTEGER;");
-            database.execSQL("ALTER TABLE measures ADD COLUMN isSynced INTEGER;");
+            database.execSQL("ALTER TABLE persons ADD COLUMN isSynced INTEGER NOT NULL DEFAULT 0;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN isSynced INTEGER NOT NULL DEFAULT 0;");
         }
     };
     public static final Migration MIGRATION_13_14 = new Migration(13, 14) {
@@ -186,14 +193,24 @@ public abstract class CgmDatabase extends RoomDatabase {
         }
     };
 
+    public static final Migration MIGRATION_15_16 = new Migration(15, 16) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE persons ADD COLUMN environment INTEGER NOT NULL DEFAULT 0;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN environment INTEGER NOT NULL DEFAULT 0;");
+            database.execSQL("ALTER TABLE file_logs ADD COLUMN environment INTEGER NOT NULL DEFAULT 0;");
+        }
+    };
+
     public static CgmDatabase getInstance(Context context) {
         synchronized (sLock) {
             if (instance == null) {
                 instance = Room.databaseBuilder(context.getApplicationContext(), CgmDatabase.class, DATABASE)
                         .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_4,
                                 MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10,
-                                MIGRATION_10_11,MIGRATION_11_12,MIGRATION_12_13,MIGRATION_13_14, MIGRATION_14_15)
+                                MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16)
                         .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
+                        .allowMainThreadQueries()
                         .build();
             }
             return instance;
