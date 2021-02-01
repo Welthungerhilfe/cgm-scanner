@@ -18,6 +18,7 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.service;
 
+import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
@@ -50,4 +51,7 @@ public interface ApiService {
     @Multipart
     @POST("files")
     Observable<String> uploadFiles(@Header("Authorization") String auth, @Part MultipartBody.Part file, @Part("filename") RequestBody id);
+
+    @POST("persons/{person_id}/consent")
+    Observable<Consent> postConsent(@Header("Authorization") String auth, @Body RequestBody personConsent, @Path("person_id") String id);
 }

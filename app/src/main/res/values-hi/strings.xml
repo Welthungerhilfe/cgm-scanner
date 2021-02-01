@@ -290,5 +290,8 @@
 
     <string name="no_authorazation">अनुमति नहीं है, व्यक्ति डेटा एक अलग बैकएंड में बनाया गया है.</string>
 
+    <string name="no_qr_code_found">qr code not found, please generator qr code first</string>
+
+
 
 </resources>

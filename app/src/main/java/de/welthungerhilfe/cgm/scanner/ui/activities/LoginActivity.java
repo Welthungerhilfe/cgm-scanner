@@ -59,6 +59,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                 Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
                 return;
             }
+            session.setSigned(true);
             SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
             startApp();
         } else {

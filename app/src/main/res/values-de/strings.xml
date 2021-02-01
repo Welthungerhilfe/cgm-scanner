@@ -291,6 +291,8 @@
 
     <string name="no_authorazation">Nicht erlaubt, die Personendaten wurden in einem anderen Backend angelegt.</string>
 
+    <string name="no_qr_code_found">qr code not found, please generator qr code first</string>
+
 
 
 

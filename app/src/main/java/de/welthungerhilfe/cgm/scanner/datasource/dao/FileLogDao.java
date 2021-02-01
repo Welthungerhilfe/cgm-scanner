@@ -43,6 +43,9 @@ public interface FileLogDao {
     @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE deleted=0 AND environment=:environment LIMIT 15")
     List<FileLog> loadQueuedData(int environment);
 
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE deleted=1 AND environment=:environment AND status!=203")
+    List<FileLog> loadConsentFile(int environment);
+
     @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE deleted=0")
     long getArtifactCount();
 

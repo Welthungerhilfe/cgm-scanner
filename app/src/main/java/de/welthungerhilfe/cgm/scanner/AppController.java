@@ -77,6 +77,15 @@ public class AppController extends DaggerApplication {
         File mExtFileDir = new File(c.getApplicationInfo().dataDir);
         IO.move(oldDir, mExtFileDir);
 
+      /*  File mExtFileDir;
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            mExtFileDir = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name_long));
+        } else {
+            mExtFileDir = getApplicationContext().getFilesDir();
+        }*/
+
+
         File nomedia = new File(mExtFileDir, ".nomedia");
         if (!nomedia.exists()) {
             try {

@@ -342,7 +342,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
             updateFileLog(log);
         }
         RequestBody filename = RequestBody.create(MediaType.parse("multipart/form-data"), file.getName());
-        retrofit.create(ApiService.class).uploadFiles("bearer " + sessionManager.getAuthToken(), body, filename).subscribeOn(Schedulers.io())
+        retrofit.create(ApiService.class).uploadFiles(sessionManager.getAuthToken(), body, filename).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<String>() {
                     @Override

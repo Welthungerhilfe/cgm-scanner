@@ -102,6 +102,9 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
 
     private static final int CAPTURED_CONSENT_SHEET_STEP = 1;
 
+    private static final int NO_QR_CODE_FOUND = 2;
+
+
     int CONFIRM_DIALOG_STEP = 0;
 
     private static final int IMAGE_CAPTURED_REQUEST = 100;
@@ -138,6 +141,9 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
                     qrScanView.setResultHandler(this);
                     qrScanView.startCamera();
                 }
+            }else if(CONFIRM_DIALOG_STEP == NO_QR_CODE_FOUND)
+            {
+                finish();
             }
             else
             {
@@ -197,8 +203,8 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
             }
             else
             {
-                //Add to string.xml
-                Toast.makeText(QRScanActivity.this,"No person found...",Toast.LENGTH_LONG).show();
+                //Add proper message to string.xml
+                showConfirmDialog(R.string.no_qr_code_found,NO_QR_CODE_FOUND);
             }
 
         }
@@ -239,8 +245,8 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         if(capturedImageBitmap!=null)
         {
-            capturedImageBitmap.compress(Bitmap.CompressFormat.JPEG,100,byteArrayOutputStream);
-            ImageSaver(byteArrayOutputStream.toByteArray(), QRScanActivity.this);
+            //capturedImageBitmap.compress(Bitmap.CompressFormat.WEBP,90,byteArrayOutputStream);
+            ImageSaver(capturedImageBitmap, QRScanActivity.this);
 
         }
     }
@@ -253,15 +259,15 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
         iv_consent_form.setImageBitmap(bitmap);
     }
 
-    void ImageSaver(final byte[] data1, Context context) {
+    void ImageSaver(Bitmap data1, Context context) {
 
 
         new AsyncTask<Void,Void,Void>(){
             @Override
             protected Void doInBackground(Void... voids) {
-               byte[] data = data1.clone();
+             //  byte[] data = data1.clone();
                 final long timestamp = Utils.getUniversalTimestamp();
-                final String consentFileString = timestamp + "_" + qrCode  + ".png";
+               final String consentFileString = timestamp + "_" + qrCode  + ".webp";
 
                 File extFileDir = AppController.getInstance().getRootDirectory(context);
                 File consentFileFolder = new File(extFileDir, AppConstants.LOCAL_CONSENT_URL.replace("{qrcode}", qrCode).replace("{scantimestamp}", String.valueOf(timestamp)));
@@ -273,12 +279,15 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
                     } else {
                         Log.e(TAG,"Folder: \"" + consentFileFolder + "\" could not be created!\n");
                     }
+
+                    BitmapUtils.writeBitmapToFileWebp(data1, consentFile);
+
                 }
 
                 FileOutputStream output = null;
                 try {
-                    output = new FileOutputStream(consentFile);
-                    output.write(data);
+                  /*  output = new FileOutputStream(consentFile);
+                    output.write(data);*/
 
                     FileLog log = new FileLog();
                     log.setId(AppController.getInstance().getArtifactId("consent"));
@@ -296,7 +305,7 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
                     fileLogRepository.insertFileLog(log);
 
 
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
                     if (output != null) {
@@ -316,6 +325,7 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
+                //add to string.xml
                 Toast.makeText(QRScanActivity.this,"ConsentImage Saved Successfully...",Toast.LENGTH_LONG).show();
                 finish();
 
