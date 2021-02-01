@@ -21,6 +21,7 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -55,6 +56,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.views.QRScanView;
@@ -88,6 +90,8 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
 
     FileLogRepository fileLogRepository;
 
+    PersonRepository personRepository;
+
     ByteArrayOutputStream out;
 
     Bitmap capturedImageBitmap;
@@ -102,6 +106,8 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
 
     private static final int IMAGE_CAPTURED_REQUEST = 100;
 
+    int activityBehaviourType = AppConstants.QR_SCAN_REQUEST;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,6 +115,8 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
         setContentView(R.layout.activity_scan_qr);
         ButterKnife.bind(this);
         fileLogRepository = FileLogRepository.getInstance(QRScanActivity.this);
+        personRepository = PersonRepository.getInstance(QRScanActivity.this);
+        activityBehaviourType = getIntent().getIntExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE,AppConstants.QR_SCAN_REQUEST);
         showConfirmDialog(R.string.message_legal,SCAN_QR_CODE_STEP);
 
 
@@ -174,9 +182,27 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
         qrScanView.stopCamera();
         this.qrCode = qrCode;
 
-        if(this.qrCode!=null && !this.qrCode.isEmpty()) {
-            showConfirmDialog(R.string.message_legal, CAPTURED_CONSENT_SHEET_STEP);
+        if(activityBehaviourType == AppConstants.QR_SCAN_REQUEST)
+        {
+            Intent intent = new Intent(QRScanActivity.this, CreateDataActivity.class);
+            intent.putExtra(AppConstants.EXTRA_QR, qrCode);
+            startActivity(intent);
+            finish();
         }
+        else
+        {
+            if(personRepository.findPersonByQr(qrCode) != null)
+            {
+                showConfirmDialog(R.string.message_legal, CAPTURED_CONSENT_SHEET_STEP);
+            }
+            else
+            {
+                //Add to string.xml
+                Toast.makeText(QRScanActivity.this,"No person found...",Toast.LENGTH_LONG).show();
+            }
+
+        }
+
 
     }
 
@@ -214,7 +240,7 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
         if(capturedImageBitmap!=null)
         {
             capturedImageBitmap.compress(Bitmap.CompressFormat.JPEG,100,byteArrayOutputStream);
-            ImageSaver(byteArrayOutputStream.toByteArray());
+            ImageSaver(byteArrayOutputStream.toByteArray(), QRScanActivity.this);
 
         }
     }
@@ -227,7 +253,7 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
         iv_consent_form.setImageBitmap(bitmap);
     }
 
-    void ImageSaver(final byte[] data1) {
+    void ImageSaver(final byte[] data1, Context context) {
 
 
         new AsyncTask<Void,Void,Void>(){
@@ -237,7 +263,7 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
                 final long timestamp = Utils.getUniversalTimestamp();
                 final String consentFileString = timestamp + "_" + qrCode  + ".png";
 
-                File extFileDir = AppController.getInstance().getRootDirectory();
+                File extFileDir = AppController.getInstance().getRootDirectory(context);
                 File consentFileFolder = new File(extFileDir, AppConstants.LOCAL_CONSENT_URL.replace("{qrcode}", qrCode).replace("{scantimestamp}", String.valueOf(timestamp)));
                 File consentFile = new File(consentFileFolder, consentFileString);
                 if(!consentFileFolder.exists()) {
@@ -265,8 +291,10 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
                     log.setDeleted(false);
                     log.setCreateDate(Utils.getUniversalTimestamp());
                     log.setCreatedBy(new SessionManager(QRScanActivity.this).getUserEmail());
+                    log.setEnvironment(new SessionManager(QRScanActivity.this).getEnvironment());
                     log.setSchema_version(CgmDatabase.version);
                     fileLogRepository.insertFileLog(log);
+
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -288,13 +316,17 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
-                Intent intent = new Intent(QRScanActivity.this, CreateDataActivity.class);
-                intent.putExtra(AppConstants.EXTRA_QR, qrCode);
-                startActivity(intent);
+                Toast.makeText(QRScanActivity.this,"ConsentImage Saved Successfully...",Toast.LENGTH_LONG).show();
                 finish();
+
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
+
+    }
+
+    void startCreateDataActivity()
+    {
 
     }
 

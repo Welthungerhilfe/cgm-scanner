@@ -104,4 +104,13 @@ public class AppConstants {
     public static final int SCAN_FRAMESKIP = 6;
 
     public static final String IS_FOREGROUND = "isForeGround";
+
+    //QRScanActivity
+    public static final String ACTIVITY_BEHAVIOUR_TYPE = "activityBehaviourType";
+
+    public static final int QR_SCAN_REQUEST = 900;
+
+    public static final int CONSENT_CAPTURED_REQUEST = 901;
+
+
 }
