@@ -54,6 +54,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
@@ -124,7 +125,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+        Log.i(TAG, "this is inside onPerformSync");
         startSyncing();
+
     }
 
     private synchronized void startSyncing() {
@@ -137,9 +140,24 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             prevTimestamp = session.getSyncTimestamp();
             currentTimestamp = System.currentTimeMillis();
 
+            //1.because of accountManager.removeAccount(account, MainActivity.this, null, null); in logout, syncadapter onPerformSync called twice next time.
+            //2. to avoid above scenario and maintain minimum 30 seconds gap between two consiqutive
+            if (BuildConfig.DEBUG) {
+                if((currentTimestamp-prevTimestamp) < 3000)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                if((currentTimestamp-prevTimestamp) < 30000)
+                {
+                    return;
+                }
+            }
 
             syncTask = new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            Log.i(TAG, "this is inside startSyncing ");
+            Log.i(TAG,"this is inside end startSynching");
         }
 
 
