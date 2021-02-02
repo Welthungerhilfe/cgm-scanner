@@ -74,14 +74,17 @@ public class IO {
     public static void delete(File f) {
         if (f.exists()) {
             if (f.isDirectory()) {
-                for (File file : f.listFiles()) {
-                    if (file.isDirectory()) {
-                        delete(f);
-                    }
-                    if (file.delete()) {
-                        Log.d(TAG, file.getAbsolutePath() + " deleted");
-                    } else {
-                        Log.e(TAG, file.getAbsolutePath() + " deleting failed");
+                File[] files = f.listFiles();
+                if ((files != null) && (files.length > 0)) {
+                    for (File file : files) {
+                        if (file.isDirectory()) {
+                            delete(f);
+                        }
+                        if (file.delete()) {
+                            Log.d(TAG, file.getAbsolutePath() + " deleted");
+                        } else {
+                            Log.e(TAG, file.getAbsolutePath() + " deleting failed");
+                        }
                     }
                 }
             }
@@ -109,8 +112,11 @@ public class IO {
             //move directory
             if (source.isDirectory()) {
                 if (!source.renameTo(destination)) {
-                    for (File f : source.listFiles()) {
-                        move(f, new File(destination, f.getName()));
+                    File[] files = source.listFiles();
+                    if ((files != null) && (files.length > 0)) {
+                        for (File f : files) {
+                            move(f, new File(destination, f.getName()));
+                        }
                     }
                     delete(source);
                 } else {
