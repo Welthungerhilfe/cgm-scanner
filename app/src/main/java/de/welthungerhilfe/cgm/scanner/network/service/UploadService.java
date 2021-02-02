@@ -18,6 +18,7 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.service;
 
+import android.accounts.Account;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -56,6 +57,8 @@ import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AccountUtils;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthTokenRegisterWorker;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
@@ -226,6 +229,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
         }
 
         if (remainingCount <= 0) {
+            Account accountData = AccountUtils.getAccount(getApplicationContext(), sessionManager);
+            SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
             stopSelf();
         } else {
             for (int i = 0; i < list.size(); i++) {
