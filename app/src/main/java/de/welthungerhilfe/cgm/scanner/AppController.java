@@ -73,14 +73,9 @@ public class AppController extends DaggerApplication {
     }
 
     public File getRootDirectory(Context c) {
-        //crashed on lenovo so added try-catch
         File mExtFileDir = new File(c.getApplicationInfo().dataDir);
-        try {
-            File oldDir = new File(Environment.getExternalStorageDirectory(), "Child Growth Monitor Scanner App");
-            IO.move(oldDir, mExtFileDir);
-        } catch (Exception e) {
-
-        }
+        File oldDir = new File(Environment.getExternalStorageDirectory(), "Child Growth Monitor Scanner App");
+        IO.move(oldDir, mExtFileDir);
 
         File nomedia = new File(mExtFileDir, ".nomedia");
         if (!nomedia.exists()) {

@@ -43,6 +43,7 @@ import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AccountUtils;
 import de.welthungerhilfe.cgm.scanner.utils.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
@@ -53,13 +54,13 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     @OnClick({R.id.btnLoginMicrosoft})
     void doSignIn() {
         if (BuildConfig.DEBUG) {
-            final Account accountData = new Account("test@test.com", AppConstants.ACCOUNT_TYPE);
-            accountManager.addAccountExplicitly(accountData, "kjjhhj", null);
             if (session.getEnvironment() == AppConstants.UNKNOWN) {
                 Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
                 return;
             }
             session.setSigned(true);
+
+            Account accountData = AccountUtils.getAccount(this, "test@test.com", "kjjhhj");
             SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
             startApp();
         } else {
@@ -76,7 +77,6 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         }
     }
 
-    private AccountManager accountManager;
     private SessionManager session;
 
     @BindView(R.id.rb_sandbox)
@@ -98,7 +98,6 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         ButterKnife.bind(this);
 
         session = new SessionManager(this);
-        accountManager = AccountManager.get(this);
         try {
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             String version = pInfo.versionName;
@@ -147,9 +146,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             if (email != null && !email.isEmpty()) {
                 session.setAuthToken(token);
 
-                final Account accountData = new Account(email, AppConstants.ACCOUNT_TYPE);
-                accountManager.addAccountExplicitly(accountData, token, null);
-
+                Account accountData = AccountUtils.getAccount(this, email, token);
                 SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
 
                 final Intent intent = new Intent();

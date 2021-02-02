@@ -205,8 +205,12 @@ public class SessionManager {
             return null;
         }
         else {
-            return "bearer " + pref.getString(KEY_USER_TOKEN, null);
+            return pref.getString(KEY_USER_TOKEN, null);
         }
+    }
+
+    public String getAuthTokenWithBearer() {
+        return "bearer " + getAuthToken();
     }
 
     public void setEnvironment(int environment) {

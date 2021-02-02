@@ -18,6 +18,7 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.service;
 
+import android.accounts.Account;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -32,9 +33,6 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-import androidx.work.ExistingWorkPolicy;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
 
 import android.util.Log;
 
@@ -48,7 +46,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -56,8 +53,10 @@ import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AccountUtils;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthTokenRegisterWorker;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
@@ -86,6 +85,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     private List<String> pendingArtefacts;
     private int remainingCount = 0;
+    private boolean updated = false;
 
     private static boolean running = false;
     private static UploadService service = null;
@@ -226,6 +226,11 @@ public class UploadService extends Service implements OnFileLogsLoad {
         }
 
         if (remainingCount <= 0) {
+            if (updated) {
+                updated = false;
+                Account accountData = AccountUtils.getAccount(getApplicationContext(), sessionManager);
+                SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
+            }
             stopSelf();
         } else {
             for (int i = 0; i < list.size(); i++) {
@@ -321,6 +326,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
             return;
         }
 
+        updated = true;
         MultipartBody.Part body = null;
         final File file = new File(log.getPath());
         Log.i(TAG, "this is file inside uploadFile " + file.getPath());
@@ -345,7 +351,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
             updateFileLog(log);
         }
         RequestBody filename = RequestBody.create(MediaType.parse("multipart/form-data"), file.getName());
-        retrofit.create(ApiService.class).uploadFiles(sessionManager.getAuthToken(), body, filename).subscribeOn(Schedulers.io())
+        retrofit.create(ApiService.class).uploadFiles(sessionManager.getAuthTokenWithBearer(), body, filename).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<String>() {
                     @Override
@@ -375,11 +381,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
                         Log.i(TAG, "this is file inside onError" + e.getMessage() + file.getPath());
                         if (Utils.isExpiredToken(e.getMessage())) {
-                            OneTimeWorkRequest mywork =
-                                    new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
-                                            .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
-
-                            WorkManager.getInstance(getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
+                            AuthenticationHandler.restoreToken(getBaseContext());
                             stopSelf();
                         } else {
                             updateFileLog(log);
