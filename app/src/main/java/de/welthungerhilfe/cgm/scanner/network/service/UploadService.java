@@ -85,6 +85,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     private List<String> pendingArtefacts;
     private int remainingCount = 0;
+    private boolean updated = false;
 
     private static boolean running = false;
     private static UploadService service = null;
@@ -225,8 +226,11 @@ public class UploadService extends Service implements OnFileLogsLoad {
         }
 
         if (remainingCount <= 0) {
-            Account accountData = AccountUtils.getAccount(getApplicationContext(), sessionManager);
-            SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
+            if (updated) {
+                updated = false;
+                Account accountData = AccountUtils.getAccount(getApplicationContext(), sessionManager);
+                SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
+            }
             stopSelf();
         } else {
             for (int i = 0; i < list.size(); i++) {
@@ -321,6 +325,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
             return;
         }
 
+        updated = true;
         MultipartBody.Part body = null;
         final File file = new File(log.getPath());
         try {
