@@ -24,6 +24,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import com.microsoft.identity.client.AuthenticationCallback;
 import com.microsoft.identity.client.IAuthenticationResult;
@@ -40,10 +43,10 @@ import net.minidev.json.JSONArray;
 
 import java.text.ParseException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -102,6 +105,14 @@ public class AuthenticationHandler {
                         onFail.run();
                     }
                 });
+    }
+
+    public static void restoreToken(Context context) {
+        OneTimeWorkRequest.Builder request = new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class);
+
+        // Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+        OneTimeWorkRequest mywork = request.setInitialDelay(5, TimeUnit.SECONDS).build();
+        WorkManager.getInstance(context.getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
     }
 
     public static int getConfig(int environment) {
