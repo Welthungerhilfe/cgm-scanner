@@ -126,13 +126,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Log.i(TAG, "this is inside onPerformSync");
 
         initUploadService();
-
-        synchronized (activeThreads) {
-            if (activeThreads > 0) {
-                return;
-            }
-        }
-
         startSyncing();
     }
 
@@ -159,6 +152,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         if (!session.isSigned()) {
             return;
         }
+
+        synchronized (activeThreads) {
+            if (activeThreads > 0) {
+                return;
+            }
+        }
+
         if (syncTask == null) {
             prevTimestamp = session.getSyncTimestamp();
             currentTimestamp = System.currentTimeMillis();
