@@ -156,15 +156,4 @@ public class BitmapUtils {
         }
     }
 
-    public static void writeBitmapToFileWebp(Bitmap bitmap, File file) {
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.WEBP, 25, fileOutputStream);
-            fileOutputStream.flush();
-            fileOutputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 }

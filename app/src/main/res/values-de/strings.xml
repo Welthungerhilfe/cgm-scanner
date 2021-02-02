@@ -293,6 +293,9 @@
 
     <string name="no_qr_code_found">qr code not found, please generator qr code first</string>
 
+    <string name="image_saved_successfully">image saved successfully</string>
+
+
 
 
 

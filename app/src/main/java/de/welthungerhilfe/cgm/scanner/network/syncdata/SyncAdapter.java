@@ -391,12 +391,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         private void processConsentSheet() {
             try {
 
-                List<FileLog> syncableConsent= fileLogRepository.loadConsentFile(session.getEnvironment());
+                List<FileLog> syncableConsent = fileLogRepository.loadConsentFile(session.getEnvironment());
 
                 for (int i = 0; i < syncableConsent.size(); i++) {
                     FileLog fileLog = syncableConsent.get(i);
-                    if(!fileLog.isDeleted())
-                    {
+                    if (!fileLog.isDeleted()) {
                         continue;
                     }
                     Person person = personRepository.findPersonByQr(fileLog.getQrCode());
@@ -404,14 +403,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     if (backendPersonId == null) {
                         continue;
                     }
-                    postConsentSheet(fileLog,backendPersonId);
+                    postConsentSheet(fileLog, backendPersonId);
 
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
             }
         }
-
 
 
         private void processDeviceQueue(CloudQueueClient queueClient) throws URISyntaxException {
@@ -751,12 +749,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
 
-            Consent consent =new Consent();
+            Consent consent = new Consent();
             consent.setFile(fileLog.getServerId());
             consent.setScanned(DataFormat.convertTimestampToDate(fileLog.getCreateDate()));
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(consent))).toString());
-            Log.i(TAG, "this is data of measure " + (new JSONObject(gson.toJson(consent))).toString());
+            Log.i(TAG, "this is data of postConsent " + (new JSONObject(gson.toJson(consent))).toString());
 
             retrofit.create(ApiService.class).postConsent(null, body, personId).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

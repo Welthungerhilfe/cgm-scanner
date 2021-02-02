@@ -282,7 +282,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
                     mime = "image/jpeg";
                     break;
                 case "consent":
-                    mime = "image/png";
+                    mime = "image/jpeg";
+                    //mime = "image/png";
                     break;
                 default:
                     Log.e(TAG, "Data type not supported");
@@ -322,6 +323,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
         MultipartBody.Part body = null;
         final File file = new File(log.getPath());
+        Log.i(TAG, "this is file inside uploadFile " + file.getPath());
+
         try {
             FileInputStream inputStream = new FileInputStream(file);
             body = MultipartBody.Part.createFormData("file", file.getName(), RequestBody.create(
@@ -329,14 +332,14 @@ public class UploadService extends Service implements OnFileLogsLoad {
             inputStream.close();
             log.setCreateDate(Utils.getUniversalTimestamp());
         } catch (FileNotFoundException e) {
-            Log.i(TAG, "this is exception " + e.getMessage());
+            Log.i(TAG, "this is file inside FileNotFoundException " + e.getMessage());
 
             log.setDeleted(true);
             log.setStatus(FILE_NOT_FOUND);
             updateFileLog(log);
 
         } catch (Exception e) {
-            Log.i(TAG, "this is exception " + e.getMessage());
+            Log.i(TAG, "this is file inside exception " + e.getMessage());
 
             log.setStatus(UPLOAD_ERROR);
             updateFileLog(log);
@@ -352,7 +355,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
                     @Override
                     public void onNext(@NonNull String id) {
-                        Log.i(TAG, "this is response uploadfiles " + id + file.getPath());
+                        Log.i(TAG, "this is file inside onNext " + id + file.getPath());
 
                         log.setUploadDate(Utils.getUniversalTimestamp());
                         log.setServerId(id);
@@ -370,7 +373,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                     @Override
                     public void onError(@NonNull Throwable e) {
 
-                        Log.i(TAG, "this is response onError uploadfiles " + e.getMessage() + file.getPath());
+                        Log.i(TAG, "this is file inside onError" + e.getMessage() + file.getPath());
                         if (Utils.isExpiredToken(e.getMessage())) {
                             OneTimeWorkRequest mywork =
                                     new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
@@ -401,7 +404,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
-                Log.i(TAG, "this is saved " + log.getServerId() + log.getPath());
+                Log.i(TAG, "this is file saved " + log.getServerId() + log.getPath());
 
                 synchronized (lock) {
                     pendingArtefacts.remove(log.getId());
