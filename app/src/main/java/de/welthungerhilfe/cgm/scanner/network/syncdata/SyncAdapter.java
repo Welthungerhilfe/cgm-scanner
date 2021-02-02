@@ -52,7 +52,6 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AccountUtils;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
@@ -125,8 +124,33 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.i(TAG, "this is inside onPerformSync");
-        startSyncing();
 
+        initUploadService();
+
+        synchronized (activeThreads) {
+            if (activeThreads > 0) {
+                return;
+            }
+        }
+
+        startSyncing();
+    }
+
+    private void initUploadService() {
+        if (!UploadService.isInitialized()) {
+            try {
+                getContext().startService(new Intent(getContext(), UploadService.class));
+
+            } catch (IllegalStateException e) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Intent intent = new Intent(getContext(), UploadService.class);
+                    intent.putExtra(AppConstants.IS_FOREGROUND, true);
+                    getContext().startForegroundService(intent);
+                }
+            }
+        } else {
+            UploadService.forceResume();
+        }
     }
 
     private synchronized void startSyncing() {
@@ -139,32 +163,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             prevTimestamp = session.getSyncTimestamp();
             currentTimestamp = System.currentTimeMillis();
 
-            synchronized (activeThreads) {
-                if (activeThreads > 0) {
-                    return;
-                }
-            }
-
             syncTask = new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             Log.i(TAG,"this is inside end startSynching");
-        }
-
-
-        if (!UploadService.isInitialized()) {
-            try {
-                getContext().startService(new Intent(getContext(), UploadService.class));
-
-            } catch (IllegalStateException e) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    Intent intent = new Intent(getContext(), UploadService.class);
-                    intent.putExtra(AppConstants.IS_FOREGROUND, true);
-                    getContext().startForegroundService(intent);
-                }
-
-
-            }
-        } else {
-            UploadService.forceResume();
         }
     }
 
@@ -713,10 +713,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         if (updated && (count == 0)) {
-            Context context = getContext();
-            SessionManager sessionManager = new SessionManager(context);
-            Account accountData = AccountUtils.getAccount(context, sessionManager);
-            SyncAdapter.startPeriodicSync(accountData, context);
+            new Thread(() -> startSyncing()).start();
         }
     }
 }
