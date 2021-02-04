@@ -27,6 +27,7 @@ import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 
 import java.util.Locale;
 
+import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
@@ -64,7 +65,11 @@ public class SessionManager {
     }
 
     public boolean isSigned() {
-        return pref.getBoolean(KEY_USER_SIGNED, false) && (getAuthToken() != null);
+        if (BuildConfig.DEBUG) {
+            return pref.getBoolean(KEY_USER_SIGNED, false);
+        } else {
+            return pref.getBoolean(KEY_USER_SIGNED, false) && (getAuthToken() != null);
+        }
     }
 
     public void setUserEmail(String email) {
@@ -195,7 +200,15 @@ public class SessionManager {
     }
 
     public String getAuthToken() {
-        return pref.getString(KEY_USER_TOKEN, null);
+        if (BuildConfig.DEBUG) {
+            return null;
+        } else {
+            return pref.getString(KEY_USER_TOKEN, null);
+        }
+    }
+
+    public String getAuthTokenWithBearer() {
+        return "bearer " + getAuthToken();
     }
 
     public void setEnvironment(int environment) {

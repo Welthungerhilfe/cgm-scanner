@@ -291,7 +291,6 @@
 
     <string name="no_authorazation">Nicht erlaubt, die Personendaten wurden in einem anderen Backend angelegt.</string>
 
-
-
+    <string name="error">Etwas ist schief gelaufen</string>
 
 </resources>
