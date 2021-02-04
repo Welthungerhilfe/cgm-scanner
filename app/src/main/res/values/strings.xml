@@ -303,4 +303,7 @@
 
     <string name="image_saved_successfully">image saved successfully</string>
 
+    <string name="error">Something went wrong</string>
+
+
 </resources>

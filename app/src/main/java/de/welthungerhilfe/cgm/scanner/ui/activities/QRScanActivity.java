@@ -119,12 +119,12 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
         personRepository = PersonRepository.getInstance(QRScanActivity.this);
         activityBehaviourType = getIntent().getIntExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST);
 
-        showConfirmDialog(R.string.message_legal, SCAN_QR_CODE_STEP);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_LOCATION);
-            return;
+        } else {
+            showConfirmDialog(R.string.message_legal, SCAN_QR_CODE_STEP);
         }
 
 
@@ -174,8 +174,7 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSION_LOCATION) {
             if (grantResults.length > 0 && grantResults[0] >= 0) {
-                qrScanView.setResultHandler(this);
-                qrScanView.startCamera();
+                showConfirmDialog(R.string.message_legal, SCAN_QR_CODE_STEP);
             } else {
                 Toast.makeText(QRScanActivity.this, R.string.permission_camera, Toast.LENGTH_LONG).show();
             }
@@ -190,17 +189,16 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
         this.qrCode = qrCode;
 
         if (activityBehaviourType == AppConstants.QR_SCAN_REQUEST) {
-            Intent intent = new Intent(QRScanActivity.this, CreateDataActivity.class);
-            intent.putExtra(AppConstants.EXTRA_QR, qrCode);
-            startActivity(intent);
-            finish();
-        } else {
-            if (personRepository.findPersonByQr(qrCode) != null) {
+            if (personRepository.findPersonByQr(qrCode) == null) {
                 showConfirmDialog(R.string.message_legal, CAPTURED_CONSENT_SHEET_STEP);
             } else {
-                //Add german string to string.xml
-                showConfirmDialog(R.string.no_qr_code_found, NO_QR_CODE_FOUND);
+                Intent intent = new Intent(QRScanActivity.this, CreateDataActivity.class);
+                intent.putExtra(AppConstants.EXTRA_QR, qrCode);
+                startActivity(intent);
+                finish();
             }
+        } else {
+            showConfirmDialog(R.string.message_legal, CAPTURED_CONSENT_SHEET_STEP);
 
         }
 
@@ -312,10 +310,15 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
             protected void onPostExecute(Boolean flag) {
                 super.onPostExecute(flag);
                 if (flag) {
-                    //add string to german string.xml
-                    Toast.makeText(QRScanActivity.this, R.string.image_saved_successfully, Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(QRScanActivity.this, CreateDataActivity.class);
+                    intent.putExtra(AppConstants.EXTRA_QR, qrCode);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    //add german string for error
+                    Toast.makeText(context, R.string.error, Toast.LENGTH_LONG).show();
                 }
-                finish();
+
 
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

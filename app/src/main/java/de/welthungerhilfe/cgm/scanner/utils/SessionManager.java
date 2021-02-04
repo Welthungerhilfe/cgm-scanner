@@ -67,8 +67,7 @@ public class SessionManager {
     public boolean isSigned() {
         if (BuildConfig.DEBUG) {
             return pref.getBoolean(KEY_USER_SIGNED, false);
-        }
-        else {
+        } else {
             return pref.getBoolean(KEY_USER_SIGNED, false) && (getAuthToken() != null);
         }
     }
@@ -203,8 +202,7 @@ public class SessionManager {
     public String getAuthToken() {
         if (BuildConfig.DEBUG) {
             return null;
-        }
-        else {
+        } else {
             return pref.getString(KEY_USER_TOKEN, null);
         }
     }
