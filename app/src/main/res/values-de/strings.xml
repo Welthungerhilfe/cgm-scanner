@@ -291,12 +291,6 @@
 
     <string name="no_authorazation">Nicht erlaubt, die Personendaten wurden in einem anderen Backend angelegt.</string>
 
-    <string name="no_qr_code_found">QR-Code nicht gefunden, bitte erst QR-Code erstellen.</string>
-
-    <string name="image_saved_successfully">Bild erfolgreich gespeichert</string>
-
-    <string name="error">Something went wrong</string>
-
-
+    <string name="error">Etwas ist schief gelaufen</string>
 
 </resources>

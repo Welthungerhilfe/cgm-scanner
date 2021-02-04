@@ -37,10 +37,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -75,24 +73,14 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
         finish();
     }
 
-    @BindView(R.id.rlt_consent_form)
-    RelativeLayout rlt_consent_form;
-
     @BindView(R.id.ll_qr_details)
     LinearLayout ll_qr_details;
-
-    @BindView(R.id.iv_consent_form)
-    ImageView iv_consent_form;
 
     String qrCode;
 
     FileLogRepository fileLogRepository;
 
     PersonRepository personRepository;
-
-    ByteArrayOutputStream out;
-
-    Bitmap capturedImageBitmap;
 
     Uri imageUri;
 
@@ -161,14 +149,16 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == IMAGE_CAPTURED_REQUEST && resultCode == RESULT_OK) {
             try {
-                capturedImageBitmap = MediaStore.Images.Media.getBitmap(
-                        getContentResolver(), imageUri);
-                showCapturedImage(capturedImageBitmap);
+                ll_qr_details.setVisibility(View.GONE);
+                qrScanView.setVisibility(View.GONE);
+                Bitmap capturedImageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+                ImageSaver(capturedImageBitmap, QRScanActivity.this);
+                return;
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
+        finish();
     }
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -217,7 +207,6 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
         }
     }
 
-    @OnClick(R.id.btn_retake)
     void startCaptureImage() {
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.TITLE, "Picture");
@@ -228,29 +217,12 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
         startActivityForResult(intent, IMAGE_CAPTURED_REQUEST);
     }
 
-    @OnClick(R.id.btn_ok)
-    void saveCapturedImage() {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        if (capturedImageBitmap != null) {
-            ImageSaver(capturedImageBitmap, QRScanActivity.this);
-
-        }
-    }
-
-    void showCapturedImage(Bitmap bitmap) {
-        ll_qr_details.setVisibility(View.GONE);
-        qrScanView.setVisibility(View.GONE);
-        rlt_consent_form.setVisibility(View.VISIBLE);
-        iv_consent_form.setImageBitmap(bitmap);
-    }
-
     void ImageSaver(Bitmap data1, Context context) {
 
 
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... voids) {
-                //  byte[] data = data1.clone();
                 final long timestamp = Utils.getUniversalTimestamp();
                 final String consentFileString = timestamp + "_" + qrCode + ".jpg";
 
@@ -315,7 +287,6 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
                     startActivity(intent);
                     finish();
                 } else {
-                    //add german string for error
                     Toast.makeText(context, R.string.error, Toast.LENGTH_LONG).show();
                 }
 
