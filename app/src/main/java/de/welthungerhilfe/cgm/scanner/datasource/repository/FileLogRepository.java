@@ -67,7 +67,6 @@ public class FileLogRepository {
 
     public List<FileLog> loadConsentFile(int environment) {
         return database.fileLogDao().loadConsentFile(environment);
-
     }
 
     public void insertFileLog(FileLog log) {
