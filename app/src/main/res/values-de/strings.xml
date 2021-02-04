@@ -291,9 +291,9 @@
 
     <string name="no_authorazation">Nicht erlaubt, die Personendaten wurden in einem anderen Backend angelegt.</string>
 
-    <string name="no_qr_code_found">qr code not found, please generator qr code first</string>
+    <string name="no_qr_code_found">QR-Code nicht gefunden, bitte erst QR-Code erstellen.</string>
 
-    <string name="image_saved_successfully">image saved successfully</string>
+    <string name="image_saved_successfully">Bild erfolgreich gespeichert</string>
 
 
 
