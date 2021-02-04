@@ -399,7 +399,9 @@ public class Measure extends CsvExportableModel implements Serializable {
         for (Integer key : keys) {
 
             //get the artifacts for a step
-            List<Artifact> stepArtifacts = new ArrayList<>();
+            List<Artifact> depthArtifacts = new ArrayList<>();
+            List<Artifact> otherArtifacts = new ArrayList<>();
+            List<Artifact> rgbArtifacts = new ArrayList<>();
             for (FileLog log : measureArtifacts) {
                 if ((key == 0) || (key == log.getStep())) {
                     Artifact artifact = new Artifact();
@@ -407,17 +409,46 @@ public class Measure extends CsvExportableModel implements Serializable {
                     artifact.setFormat(log.getType());
                     artifact.setTimestamp(log.getCreateDate());
                     artifact.setTimestampString(DataFormat.convertTimestampToDate(log.getCreateDate()));
-                    stepArtifacts.add(artifact);
+
+                    if (log.getPath().endsWith(".depth")) {
+                        depthArtifacts.add(artifact);
+                    } else if (log.getPath().endsWith(".jpg")) {
+                        rgbArtifacts.add(artifact);
+                    } else {
+                        otherArtifacts.add(artifact);
+                    }
                 }
             }
-            Collections.sort(stepArtifacts, (a, b) -> (int) (b.getTimestamp() - a.getTimestamp()));
-            for (int i = 0; i < stepArtifacts.size(); i++) {
-                stepArtifacts.get(i).setOrder(i);
+
+            //set the artifacts order
+            Collections.sort(rgbArtifacts, (a, b) -> (int) (b.getTimestamp() - a.getTimestamp()));
+            for (int i = 0; i < rgbArtifacts.size(); i++) {
+                rgbArtifacts.get(i).setOrder(i);
+            }
+            for (Artifact artifact : depthArtifacts) {
+                int bestOrder = 0;
+                long bestValue = Integer.MAX_VALUE;
+                for (int i = 0; i < rgbArtifacts.size(); i++) {
+                    long value = Math.abs(artifact.getTimestamp() - rgbArtifacts.get(i).getTimestamp());
+                    if (bestValue > value) {
+                        bestValue = value;
+                        bestOrder = i;
+                    }
+                }
+                artifact.setOrder(bestOrder);
+            }
+            int maxOrder = rgbArtifacts.size();
+            for (Artifact artifact : otherArtifacts) {
+                artifact.setOrder(maxOrder);
             }
 
             //create scan object
+            List<Artifact> artifacts = new ArrayList<>();
+            artifacts.addAll(depthArtifacts);
+            artifacts.addAll(otherArtifacts);
+            artifacts.addAll(rgbArtifacts);
             Scan scan = new Scan();
-            scan.setArtifacts(stepArtifacts);
+            scan.setArtifacts(artifacts);
             scan.setLocation(getLocation());
             scan.setPersonServerKey(getPersonServerKey());
             scan.setScan_start(DataFormat.convertTimestampToDate(getTimestamp()));
