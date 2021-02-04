@@ -441,12 +441,13 @@ public class Measure extends CsvExportableModel implements Serializable {
             for (Artifact artifact : otherArtifacts) {
                 artifact.setOrder(maxOrder);
             }
-
-            //create scan object
             List<Artifact> artifacts = new ArrayList<>();
             artifacts.addAll(depthArtifacts);
             artifacts.addAll(otherArtifacts);
             artifacts.addAll(rgbArtifacts);
+            Collections.sort(artifacts, (a, b) -> (int) (b.getOrder() - a.getOrder()));
+
+            //create scan object
             Scan scan = new Scan();
             scan.setArtifacts(artifacts);
             scan.setLocation(getLocation());
