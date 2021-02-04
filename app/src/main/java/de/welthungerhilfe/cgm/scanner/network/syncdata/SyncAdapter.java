@@ -745,7 +745,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.i(TAG, "this is data of postConsent " + (new JSONObject(gson.toJson(consent))).toString());
 
             onThreadChange(1);
-            retrofit.create(ApiService.class).postConsent(null, body, personId).subscribeOn(Schedulers.io())
+            retrofit.create(ApiService.class).postConsent(session.getAuthTokenWithBearer(), body, personId).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Consent>() {
                         @Override
