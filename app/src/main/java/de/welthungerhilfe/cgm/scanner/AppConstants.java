@@ -26,7 +26,7 @@ public class AppConstants {
     public static final String API_URL_SANDBOX = "{API_URL_SANDBOX}/";
     public static final String API_URL_QA = "{API_URL_QA}/";
     public static final String API_URL_PRODUCTION = "{API_URL_PRODUCTION}/";
-    public static final String API_TESTING_URL = "http://192.168.43.252:5001/api/scan/";
+    public static final String API_TESTING_URL = "http://192.168.43.252:5001/api/";
 
     //Environments Type
     public static final int UNKNOWN = 0;
@@ -91,6 +91,8 @@ public class AppConstants {
 
     public static final int UPLOADED = 201;
     public static final int UPLOADED_DELETED = 202;
+    public static final int CONSENT_UPLOADED = 203;
+
     public static final int UPLOAD_ERROR = 400;
     public static final int FILE_NOT_FOUND = 404;
 
@@ -104,4 +106,13 @@ public class AppConstants {
     public static final int SCAN_FRAMESKIP = 6;
 
     public static final String IS_FOREGROUND = "isForeGround";
+
+    //QRScanActivity
+    public static final String ACTIVITY_BEHAVIOUR_TYPE = "activityBehaviourType";
+
+    public static final int QR_SCAN_REQUEST = 900;
+
+    public static final int CONSENT_CAPTURED_REQUEST = 901;
+
+
 }

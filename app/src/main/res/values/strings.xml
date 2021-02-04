@@ -299,4 +299,6 @@
 
     <string name="no_authorazation">Not allowed, the person data were created in a different backend.</string>
 
+    <string name="error">Something went wrong</string>
+
 </resources>

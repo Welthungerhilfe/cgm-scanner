@@ -82,7 +82,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
-        startActivity(new Intent(MainActivity.this, QRScanActivity.class));
+        startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE,AppConstants.CONSENT_CAPTURED_REQUEST));
     }
 
     @BindView(R.id.recyclerData)
@@ -405,8 +405,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 openSearchBar();
                 break;
             case R.id.actionQr:
-                startActivity(new Intent(MainActivity.this, QRScanActivity.class));
-                //startActivity(new Intent(MainActivity.this, ConsentScanActivity.class));
+                startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE,AppConstants.QR_SCAN_REQUEST));
+             //   startActivity(new Intent(MainActivity.this, ConsentScanActivity.class));
                 break;
             case R.id.actionFilter:
                 openSort();

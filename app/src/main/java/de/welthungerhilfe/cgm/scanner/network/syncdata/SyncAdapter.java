@@ -50,7 +50,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
+import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
@@ -216,6 +218,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 try {
                     processPersonQueue();
                     processMeasureQueue();
+                    processConsentSheet();
                  /*  Things to yet implemented
                     processMeasureResultQueue(queueClient);
                     processDeviceQueue(queueClient);
@@ -393,6 +396,29 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }
         }
 
+        private void processConsentSheet() {
+            try {
+
+                List<FileLog> syncableConsent = fileLogRepository.loadConsentFile(session.getEnvironment());
+
+                for (int i = 0; i < syncableConsent.size(); i++) {
+                    FileLog fileLog = syncableConsent.get(i);
+                    if (!fileLog.isDeleted()) {
+                        continue;
+                    }
+                    Person person = personRepository.findPersonByQr(fileLog.getQrCode());
+                    String backendPersonId = person.getServerId();
+                    if (backendPersonId == null) {
+                        continue;
+                    }
+                    postConsentSheet(fileLog, backendPersonId);
+
+                }
+            } catch (Exception e) {
+                currentTimestamp = prevTimestamp;
+            }
+        }
+
 
         private void processDeviceQueue(CloudQueueClient queueClient) throws URISyntaxException {
             try {
@@ -458,7 +484,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                 onThreadChange(1);
                 RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(scan))).toString());
-                retrofit.create(ApiService.class).postScans("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
+                retrofit.create(ApiService.class).postScans(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Observer<Scan>() {
                             @Override
@@ -516,7 +542,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.i(TAG, "this is data of person " + (new JSONObject(gson.toJson(person1))).toString());
 
             onThreadChange(1);
-            retrofit.create(ApiService.class).postPerson("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
+            retrofit.create(ApiService.class).postPerson(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Person>() {
                         @Override
@@ -585,7 +611,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.i(TAG, "this is data of person " + (new JSONObject(gson.toJson(putPerson))).toString());
 
             onThreadChange(1);
-            retrofit.create(ApiService.class).putPerson("bearer " + session.getAuthToken(), body, person1.getServerId()).subscribeOn(Schedulers.io())
+            retrofit.create(ApiService.class).putPerson(session.getAuthTokenWithBearer(), body, person1.getServerId()).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Person>() {
                         @Override
@@ -661,7 +687,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.i(TAG, "this is data of measure " + (new JSONObject(gson.toJson(measure))).toString());
 
             onThreadChange(1);
-            retrofit.create(ApiService.class).postMeasure("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
+            retrofit.create(ApiService.class).postMeasure(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Measure>() {
                         @Override
@@ -683,6 +709,55 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             measure.setEnvironment(measure.getEnvironment());
                             measureRepository.updateMeasure(measure);
                             updated = true;
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            Log.i(TAG, "this is value of post " + e.getMessage());
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(getContext());
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            Log.i(TAG, "this is value of exception " + e.getMessage());
+        }
+    }
+
+    public void postConsentSheet(FileLog fileLog, String personId) {
+        try {
+            Gson gson = new GsonBuilder()
+                    .excludeFieldsWithoutExposeAnnotation()
+                    .create();
+
+            Consent consent = new Consent();
+            consent.setFile(fileLog.getServerId());
+            consent.setScanned(DataFormat.convertTimestampToDate(fileLog.getCreateDate()));
+
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(consent))).toString());
+            Log.i(TAG, "this is data of postConsent " + (new JSONObject(gson.toJson(consent))).toString());
+
+            onThreadChange(1);
+            retrofit.create(ApiService.class).postConsent(null, body, personId).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Consent>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull Consent consent) {
+                            Log.i(TAG, "this is inside of postConsent on next  " + consent);
+                            fileLog.setStatus(AppConstants.CONSENT_UPLOADED);
+                            fileLogRepository.updateFileLog(fileLog);
                             onThreadChange(-1);
                         }
 

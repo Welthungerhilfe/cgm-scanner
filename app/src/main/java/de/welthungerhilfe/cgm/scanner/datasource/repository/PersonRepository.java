@@ -71,6 +71,12 @@ public class PersonRepository {
         return database.personDao().getPersonById(id);
     }
 
+    public Person findPersonByQr(String qrCode)
+    {
+        return database.personDao().findPersonByQr(qrCode);
+
+    }
+
     public void insertPerson(Person person) {
         database.personDao().insertPerson(person);
         setUpdated(true);

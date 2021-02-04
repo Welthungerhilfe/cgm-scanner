@@ -19,7 +19,9 @@
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
 import android.annotation.SuppressLint;
+
 import androidx.lifecycle.LiveData;
+
 import android.content.Context;
 import android.os.AsyncTask;
 
@@ -41,7 +43,7 @@ public class FileLogRepository {
     }
 
     public static FileLogRepository getInstance(Context context) {
-        if(instance == null) {
+        if (instance == null) {
             instance = new FileLogRepository(context);
         }
         return instance;
@@ -60,6 +62,12 @@ public class FileLogRepository {
                 listener.onFileLogsLoaded(data);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+
+    public List<FileLog> loadConsentFile(int environment) {
+        return database.fileLogDao().loadConsentFile(environment);
+
     }
 
     public void insertFileLog(FileLog log) {
@@ -94,8 +102,8 @@ public class FileLogRepository {
         return database.fileLogDao().getAll();
     }
 
-    public List<FileLog> getArtifactsForMeasure(String measureId,int environment) {
-        return database.fileLogDao().getArtifactsForMeasure(measureId,environment);
+    public List<FileLog> getArtifactsForMeasure(String measureId, int environment) {
+        return database.fileLogDao().getArtifactsForMeasure(measureId, environment);
     }
 
     public LiveData<UploadStatus> getMeasureUploadProgress(String measureId) {

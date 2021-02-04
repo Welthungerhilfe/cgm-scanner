@@ -38,6 +38,9 @@ public interface PersonDao {
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE qrcode=:qrCode AND deleted=0 LIMIT 1")
     LiveData<Person> getPersonByQr(String qrCode);
 
+    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE qrcode=:qrCode AND deleted=0 LIMIT 1")
+    Person findPersonByQr(String qrCode);
+
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE id=:id AND deleted=0 LIMIT 1")
     Person getPersonById(String id);
 
