@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">CGM Scanner</string>
-    <string name="app_name_long">Child Growth Monitor Scanner App</string>
+    <string name="app_name_long" translatable="false">Child Growth Monitor Scanner App</string>
 
     <string name="permission_camera">"Camera permission needed!"</string>
 
@@ -103,7 +103,7 @@
 
 
     <string name="tooltipe_height_min">height should be more than 45cm</string>
-    <string name="tooltipe_height_max">height should be less than 120cm</string>
+    <string name="tooltipe_height_max">height should be less than 130cm</string>
     <string name="tooltipe_weight_min">weight should be more than 2kg</string>
     <string name="tooltipe_weight_max">weight should be less than 30kg</string>
     <string name="tooltipe_muac_min">MUAC should be more than 9cm</string>
@@ -296,5 +296,9 @@
     <string name="edema_link">How to check for bilateral edema\nyoutu.be/3pQUtOsjjSY?t=85</string>
 
     <string name="scan_is_uploading">Scan is uploading</string>
+
+    <string name="no_authorazation">Not allowed, the person data were created in a different backend.</string>
+
+    <string name="error">Something went wrong</string>
 
 </resources>

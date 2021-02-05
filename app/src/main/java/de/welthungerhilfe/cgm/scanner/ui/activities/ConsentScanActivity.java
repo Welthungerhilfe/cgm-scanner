@@ -103,6 +103,7 @@ public class ConsentScanActivity extends AppCompatActivity {
 
     private QRCodeReader mQrCodeReader;
     private FileLogRepository fileLogRepository;
+    SessionManager sessionManager;
 
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -507,6 +508,7 @@ public class ConsentScanActivity extends AppCompatActivity {
         super.onCreate(savedBundle);
         setContentView(R.layout.activity_consent_scan);
         ButterKnife.bind(this);
+        sessionManager = new SessionManager(this);
 
         initVariables();
     }
@@ -886,7 +888,7 @@ public class ConsentScanActivity extends AppCompatActivity {
             final long timestamp = Utils.getUniversalTimestamp();
             final String consentFileString = timestamp + "_" + qrCode  + ".png";
 
-            File extFileDir = AppController.getInstance().getRootDirectory();
+            File extFileDir = AppController.getInstance().getRootDirectory(getBaseContext());
             File consentFileFolder = new File(extFileDir, AppConstants.LOCAL_CONSENT_URL.replace("{qrcode}", qrCode).replace("{scantimestamp}", String.valueOf(timestamp)));
             File consentFile = new File(consentFileFolder, consentFileString);
             if(!consentFileFolder.exists()) {
@@ -915,6 +917,7 @@ public class ConsentScanActivity extends AppCompatActivity {
                 log.setCreateDate(Utils.getUniversalTimestamp());
                 log.setCreatedBy(new SessionManager(ConsentScanActivity.this).getUserEmail());
                 log.setSchema_version(CgmDatabase.version);
+                log.setEnvironment(sessionManager.getEnvironment());
 
                 new AsyncTask<Void, Void, Void>() {
                     @Override

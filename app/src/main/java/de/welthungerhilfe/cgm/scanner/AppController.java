@@ -17,6 +17,7 @@
  */
 package de.welthungerhilfe.cgm.scanner;
 
+import android.content.Context;
 import android.os.Environment;
 import android.os.StrictMode;
 
@@ -26,6 +27,7 @@ import java.io.IOException;
 import dagger.android.AndroidInjector;
 import dagger.android.support.DaggerApplication;
 import de.welthungerhilfe.cgm.scanner.network.module.DaggerAppComponent;
+import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AppController extends DaggerApplication {
@@ -70,14 +72,10 @@ public class AppController extends DaggerApplication {
         return String.format("%s-device-%s-%s", Utils.getAndroidID(getContentResolver()), Utils.getUniversalTimestamp(), Utils.getSaltString(16));
     }
 
-    public File getRootDirectory() {
-        File mExtFileDir;
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            mExtFileDir = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name_long));
-        } else {
-            mExtFileDir = getApplicationContext().getFilesDir();
-        }
+    public File getRootDirectory(Context c) {
+        File mExtFileDir = new File(c.getApplicationInfo().dataDir);
+        File oldDir = new File(Environment.getExternalStorageDirectory(), "Child Growth Monitor Scanner App");
+        IO.move(oldDir, mExtFileDir);
 
         File nomedia = new File(mExtFileDir, ".nomedia");
         if (!nomedia.exists()) {

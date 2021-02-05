@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">CGM Scanner</string>
-    <string name="app_name_long">Child Growth Monitor Scanner App</string>
 
     <string name="permission_camera">Kamerazugriff benötigt!</string>
 
@@ -103,7 +102,7 @@
 
 
     <string name="tooltipe_height_min">Das Kind sollte größer als 45cm sein</string>
-    <string name="tooltipe_height_max">Das Kind sollte kleiner als 120cm sein</string>
+    <string name="tooltipe_height_max">Das Kind sollte kleiner als 130cm sein</string>
     <string name="tooltipe_weight_min">Gewicht sollte größer als 2kg sein</string>
     <string name="tooltipe_weight_max">Gewicht sollte weniger als 30kg betragen</string>
 
@@ -290,5 +289,8 @@
 
     <string name="scan_is_uploading">Scan wird hochgeladen</string>
 
+    <string name="no_authorazation">Nicht erlaubt, die Personendaten wurden in einem anderen Backend angelegt.</string>
+
+    <string name="error">Etwas ist schief gelaufen</string>
 
 </resources>

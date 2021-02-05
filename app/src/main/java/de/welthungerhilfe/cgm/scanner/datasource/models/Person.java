@@ -47,6 +47,8 @@ public class Person extends CsvExportableModel implements Serializable {
 
     private boolean isSynced = false;
 
+    private int environment;
+
     @SerializedName("name")
     @Expose
     private String name;
@@ -269,6 +271,14 @@ public class Person extends CsvExportableModel implements Serializable {
         this.schema_version = schema_version;
     }
 
+    public int getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(int environment) {
+        this.environment = environment;
+    }
+
     public String getFullName() {
         String fullname = getName();
         if (getSurname() != null && !getSurname().isEmpty()) {
@@ -279,11 +289,11 @@ public class Person extends CsvExportableModel implements Serializable {
 
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%s,%d,%s,%s,%b,%s,%d,%d,%s,%b,%s,%d,%s", id, name, surname, birthday, sex, guardian, isAgeEstimated, qrcode, created, timestamp, createdBy, deleted, deletedBy, schema_version,serverId);
+        return String.format(Locale.US, "%s,%s,%s,%d,%s,%s,%b,%s,%d,%d,%s,%b,%s,%d,%s,%d", id, name, surname, birthday, sex, guardian, isAgeEstimated, qrcode, created, timestamp, createdBy, deleted, deletedBy, schema_version,serverId,environment);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,name,surname,birthday,sex,guardian,isAgeEstimated,qrcode,created,timestamp,createdBy,deleted,deletedBy,schema_version,serverId";
+        return "id,name,surname,birthday,sex,guardian,isAgeEstimated,qrcode,created,timestamp,createdBy,deleted,deletedBy,schema_version,serverId,environment";
     }
 }

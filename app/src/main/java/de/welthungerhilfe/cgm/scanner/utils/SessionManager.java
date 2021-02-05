@@ -23,9 +23,11 @@ import android.content.SharedPreferences;
 import android.os.Build;
 
 import com.google.gson.Gson;
+import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 
 import java.util.Locale;
 
+import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
@@ -45,6 +47,8 @@ public class SessionManager {
     private final String KEY_CONNECTION_TIMESTAMP = "key_connection_timestamp";
     private final String KEY_TUTORIAL = "key_tutorial";
     private final String KEY_REMOTE_CONFIG = "key_remote_config";
+    private final String SELECTED_ENVIRONMENT = "selected_environment";
+
 
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
@@ -61,7 +65,11 @@ public class SessionManager {
     }
 
     public boolean isSigned() {
-        return pref.getBoolean(KEY_USER_SIGNED, false) && (getAuthToken() != null);
+        if (BuildConfig.DEBUG) {
+            return pref.getBoolean(KEY_USER_SIGNED, false);
+        } else {
+            return pref.getBoolean(KEY_USER_SIGNED, false) && (getAuthToken() != null);
+        }
     }
 
     public void setUserEmail(String email) {
@@ -192,6 +200,24 @@ public class SessionManager {
     }
 
     public String getAuthToken() {
-        return pref.getString(KEY_USER_TOKEN, null);
+        if (BuildConfig.DEBUG) {
+            return null;
+        } else {
+            return pref.getString(KEY_USER_TOKEN, null);
+        }
+    }
+
+    public String getAuthTokenWithBearer() {
+        return "bearer " + getAuthToken();
+    }
+
+    public void setEnvironment(int environment) {
+        editor.putInt(SELECTED_ENVIRONMENT, environment);
+
+        editor.commit();
+    }
+
+    public int getEnvironment() {
+        return pref.getInt(SELECTED_ENVIRONMENT, AppConstants.UNKNOWN);
     }
 }

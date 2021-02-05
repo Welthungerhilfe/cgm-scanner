@@ -53,8 +53,8 @@ public class MeasureRepository {
         database.measureDao().updateMeasure(measure);
     }
 
-    public List<Measure> getSyncableMeasure() {
-        return database.measureDao().getSyncableMeasure();
+    public List<Measure> getSyncableMeasure(int environment) {
+        return database.measureDao().getSyncableMeasure(environment);
     }
 
     public Measure getMeasureById(String id) {

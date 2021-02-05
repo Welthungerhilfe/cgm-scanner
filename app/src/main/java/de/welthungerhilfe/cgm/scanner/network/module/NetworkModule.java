@@ -103,11 +103,11 @@ public class NetworkModule {
         } else {
             Context context = AppController.getInstance().getApplicationContext();
             switch (AuthenticationHandler.getEnvironment(context)) {
-                case SANDBOX:
+                case AppConstants.SANDBOX:
                     return AppConstants.API_URL_SANDBOX;
-                case QA:
+                case AppConstants.QA:
                     return AppConstants.API_URL_QA;
-                case PROUDCTION:
+                case AppConstants.PROUDCTION:
                     return AppConstants.API_URL_PRODUCTION;
                 default:
                     Log.e(TAG, "Environment not configured");

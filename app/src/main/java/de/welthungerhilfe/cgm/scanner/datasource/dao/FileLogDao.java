@@ -40,8 +40,11 @@ public interface FileLogDao {
     @Update(onConflict = REPLACE)
     void updateFileLog(FileLog log);
 
-    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE deleted=0 LIMIT 15")
-    List<FileLog> loadQueuedData();
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE deleted=0 AND environment=:environment LIMIT 15")
+    List<FileLog> loadQueuedData(int environment);
+
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE deleted=1 AND environment=:environment AND status!=203 AND type LIKE 'consent'")
+    List<FileLog> loadConsentFile(int environment);
 
     @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE deleted=0")
     long getArtifactCount();
@@ -61,8 +64,8 @@ public interface FileLogDao {
     @Query("SELECT * FROM " + TABLE_FILE_LOG)
     List<FileLog> getAll();
 
-    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE measureId=:measureId ORDER BY createDate")
-    List<FileLog> getArtifactsForMeasure(String measureId);
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE measureId=:measureId And environment=:environment ORDER BY createDate")
+    List<FileLog> getArtifactsForMeasure(String measureId,int environment);
 
     @Query("SELECT uploaded, total  FROM (SELECT SUM(fileSize) AS total FROM file_logs WHERE measureId LIKE :measureId), (SELECT SUM(fileSize) AS uploaded FROM file_logs WHERE measureId LIKE :measureId AND deleted=1)")
     LiveData<UploadStatus> getMeasureUploadProgress(String measureId);

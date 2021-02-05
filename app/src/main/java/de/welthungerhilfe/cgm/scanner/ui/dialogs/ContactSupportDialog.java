@@ -87,7 +87,7 @@ public class ContactSupportDialog extends Dialog {
             recordAudio.setImageDrawable(context.getDrawable(R.drawable.stop));
             recording = true;
 
-            audioFile = new File(AppController.getInstance().getRootDirectory(), "voice_record.wav");
+            audioFile = new File(AppController.getInstance().getRootDirectory(context), "voice_record.wav");
             audioEncoder = new MediaRecorder();
             audioEncoder.setAudioSource(MediaRecorder.AudioSource.MIC);
             audioEncoder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
@@ -178,7 +178,7 @@ public class ContactSupportDialog extends Dialog {
             paths[i] = files[i].getAbsolutePath();
         }
 
-        zip = new File(AppController.getInstance().getRootDirectory(), "report.zip");
+        zip = new File(AppController.getInstance().getRootDirectory(context), "report.zip");
         IO.zip(paths, zip.getAbsolutePath());
     }
 
@@ -196,7 +196,7 @@ public class ContactSupportDialog extends Dialog {
             return;
         }
 
-        File screenshot = new File(AppController.getInstance().getRootDirectory(), "screenshot.png");
+        File screenshot = new File(AppController.getInstance().getRootDirectory(activity), "screenshot.png");
         IO.takeScreenshot(activity, screenshot);
         ContactSupportDialog contactSupportDialog = new ContactSupportDialog(activity);
         contactSupportDialog.attachScreenshot(screenshot);

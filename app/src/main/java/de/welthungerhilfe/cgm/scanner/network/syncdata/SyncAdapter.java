@@ -32,10 +32,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.work.ExistingWorkPolicy;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -52,12 +48,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
+import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthTokenRegisterWorker;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
@@ -92,6 +89,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private String TAG = SyncAdapter.class.getSimpleName();
 
+    private Integer activeThreads;
+    private boolean updated;
+
     private long prevTimestamp;
     private long currentTimestamp;
 
@@ -115,6 +115,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         fileLogRepository = FileLogRepository.getInstance(context);
         measureResultRepository = MeasureResultRepository.getInstance(context);
 
+        activeThreads = 0;
         session = new SessionManager(context);
     }
 
@@ -124,25 +125,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+        Log.i(TAG, "this is inside onPerformSync");
+
+        initUploadService();
         startSyncing();
     }
 
-    private synchronized void startSyncing() {
-        Log.i(TAG, "this is inside startSyncing ");
-
-        if (!session.isSigned()) {
-            return;
-        }
-        if (syncTask == null) {
-            prevTimestamp = session.getSyncTimestamp();
-            currentTimestamp = System.currentTimeMillis();
-
-
-            syncTask = new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            Log.i(TAG, "this is inside startSyncing ");
-        }
-
-
+    private void initUploadService() {
         if (!UploadService.isInitialized()) {
             try {
                 getContext().startService(new Intent(getContext(), UploadService.class));
@@ -153,11 +142,31 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     intent.putExtra(AppConstants.IS_FOREGROUND, true);
                     getContext().startForegroundService(intent);
                 }
-
-
             }
         } else {
             UploadService.forceResume();
+        }
+    }
+
+    private synchronized void startSyncing() {
+        Log.i(TAG, "this is inside startSyncing ");
+
+        if (!session.isSigned()) {
+            return;
+        }
+
+        synchronized (activeThreads) {
+            if (activeThreads > 0) {
+                return;
+            }
+        }
+
+        if (syncTask == null) {
+            prevTimestamp = session.getSyncTimestamp();
+            currentTimestamp = System.currentTimeMillis();
+
+            syncTask = new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            Log.i(TAG,"this is inside end startSynching");
         }
     }
 
@@ -204,10 +213,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.i(TAG, "this is inside before restApi ");
             Log.d(TAG, "start updating");
             //REST API implementation
+            updated = false;
             synchronized (getLock()) {
                 try {
                     processPersonQueue();
                     processMeasureQueue();
+                    processConsentSheet();
                  /*  Things to yet implemented
                     processMeasureResultQueue(queueClient);
                     processDeviceQueue(queueClient);
@@ -333,7 +344,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         private void processPersonQueue() {
             try {
-                List<Person> syncablePersons = personRepository.getSyncablePerson();
+                List<Person> syncablePersons = personRepository.getSyncablePerson(session.getEnvironment());
                 for (int i = 0; i < syncablePersons.size(); i++) {
 
                     Person person = syncablePersons.get(i);
@@ -354,14 +365,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             try {
                 Log.i("Syncadapter", "this is inside value of prevTimeStamp " + prevTimestamp);
 
-                List<Measure> syncableMeasures = measureRepository.getSyncableMeasure();
+                List<Measure> syncableMeasures = measureRepository.getSyncableMeasure(session.getEnvironment());
+
                 for (int i = 0; i < syncableMeasures.size(); i++) {
                     Measure measure = syncableMeasures.get(i);
                     String localPersonId = measure.getPersonId();
                     Person person = personRepository.getPersonById(localPersonId);
                     String backendPersonId = person.getServerId();
                     if (backendPersonId == null) {
-                        return;
+                        continue;
                     }
                     measure.setPersonServerKey(backendPersonId);
 
@@ -372,12 +384,35 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             postMeasurment(measure);
                         }
                     } else {
-                        HashMap<Integer, Scan> scans = measure.split(fileLogRepository);
+                        HashMap<Integer, Scan> scans = measure.split(fileLogRepository, session.getEnvironment());
                         if (!scans.isEmpty()) {
                             Log.i(TAG, "this is values of scan " + scans);
                             postScans(scans, measure);
                         }
                     }
+                }
+            } catch (Exception e) {
+                currentTimestamp = prevTimestamp;
+            }
+        }
+
+        private void processConsentSheet() {
+            try {
+
+                List<FileLog> syncableConsent = fileLogRepository.loadConsentFile(session.getEnvironment());
+
+                for (int i = 0; i < syncableConsent.size(); i++) {
+                    FileLog fileLog = syncableConsent.get(i);
+                    if (!fileLog.isDeleted()) {
+                        continue;
+                    }
+                    Person person = personRepository.findPersonByQr(fileLog.getQrCode());
+                    String backendPersonId = person.getServerId();
+                    if (backendPersonId == null) {
+                        continue;
+                    }
+                    postConsentSheet(fileLog, backendPersonId);
+
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
@@ -447,8 +482,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                 Log.i(TAG, "this is data of postScan " + (new JSONObject(gson.toJson(scan))).toString());
 
+                onThreadChange(1);
                 RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(scan))).toString());
-                retrofit.create(ApiService.class).postScans("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
+                retrofit.create(ApiService.class).postScans(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Observer<Scan>() {
                             @Override
@@ -465,22 +501,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     measure.setTimestamp(session.getSyncTimestamp());
                                     measure.setUploaded_at(System.currentTimeMillis());
                                     measure.setSynced(true);
-                                    updateMeasure(measure);
+                                    updated = true;
+                                    measureRepository.updateMeasure(measure);
                                 }
-
+                                onThreadChange(-1);
                             }
 
                             @Override
                             public void onError(@NonNull Throwable e) {
                                 Log.i(TAG, "this is value of post " + e.getMessage());
                                 if (Utils.isExpiredToken(e.getMessage())) {
-                                    OneTimeWorkRequest mywork =
-                                            new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
-                                                    .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
-
-                                    WorkManager.getInstance(getContext().getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
-
+                                    AuthenticationHandler.restoreToken(getContext());
                                 }
+                                onThreadChange(-1);
                             }
 
                             @Override
@@ -508,7 +541,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             Log.i(TAG, "this is data of person " + (new JSONObject(gson.toJson(person1))).toString());
 
-            retrofit.create(ApiService.class).postPerson("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
+            onThreadChange(1);
+            retrofit.create(ApiService.class).postPerson(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Person>() {
                         @Override
@@ -524,6 +558,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             person.setCreatedBy(person1.getCreatedBy());
                             person.setCreated(person1.getCreated());
                             person.setSynced(true);
+                            person.setEnvironment(person1.getEnvironment());
                             Loc location = new Loc();
                             person.setLastLocation(location);
                             if (person1.getLastLocation() != null) {
@@ -533,19 +568,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             }
                             person.setBirthday(person1.getBirthday());
                             updatePersonOnDatabase(person);
+                            updated = true;
+                            onThreadChange(-1);
                         }
 
                         @Override
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is value of post " + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
-                                OneTimeWorkRequest mywork =
-                                        new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
-                                                .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
-
-                                WorkManager.getInstance(getContext().getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
-
+                                AuthenticationHandler.restoreToken(getContext());
                             }
+                            onThreadChange(-1);
                         }
 
                         @Override
@@ -577,7 +610,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             Log.i(TAG, "this is data of person " + (new JSONObject(gson.toJson(putPerson))).toString());
 
-            retrofit.create(ApiService.class).putPerson("bearer " + session.getAuthToken(), body, person1.getServerId()).subscribeOn(Schedulers.io())
+            onThreadChange(1);
+            retrofit.create(ApiService.class).putPerson(session.getAuthTokenWithBearer(), body, person1.getServerId()).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Person>() {
                         @Override
@@ -600,6 +634,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             person.getLastLocation().setLongitude(person1.getLastLocation().getLongitude());
                             person.setBirthday(person1.getBirthday());
                             updatePersonOnDatabase(person);
+                            updated = true;
+                            onThreadChange(-1);
                         }
 
                         @Override
@@ -608,13 +644,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     "" +
                                     " " + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
-                                OneTimeWorkRequest mywork =
-                                        new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
-                                                .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
-
-                                WorkManager.getInstance(getContext().getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
-
+                                AuthenticationHandler.restoreToken(getContext());
                             }
+                            onThreadChange(-1);
                         }
 
                         @Override
@@ -654,7 +686,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(measure))).toString());
             Log.i(TAG, "this is data of measure " + (new JSONObject(gson.toJson(measure))).toString());
 
-            retrofit.create(ApiService.class).postMeasure("bearer " + session.getAuthToken(), body).subscribeOn(Schedulers.io())
+            onThreadChange(1);
+            retrofit.create(ApiService.class).postMeasure(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Measure>() {
                         @Override
@@ -663,30 +696,29 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         }
 
                         @Override
-                        public void onNext(@NonNull Measure measure1) {
-                            Log.i(TAG, "this is inside of measure on next  " + measure1);
-                            measure1.setTimestamp(prevTimestamp);
-                            measure1.setId(measure.getId());
-                            measure1.setPersonId(measure.getPersonId());
-                            measure1.setType(AppConstants.VAL_MEASURE_MANUAL);
-                            measure1.setCreatedBy(measure.getCreatedBy());
-                            measure1.setDate(measure.getDate());
-                            measure1.setUploaded_at(session.getSyncTimestamp());
-                            measure1.setSynced(true);
-                            updateMeasure(measure1);
+                        public void onNext(@NonNull Measure measure) {
+                            Log.i(TAG, "this is inside of measure on next  " + measure);
+                            measure.setTimestamp(prevTimestamp);
+                            measure.setId(measure.getId());
+                            measure.setPersonId(measure.getPersonId());
+                            measure.setType(AppConstants.VAL_MEASURE_MANUAL);
+                            measure.setCreatedBy(measure.getCreatedBy());
+                            measure.setDate(measure.getDate());
+                            measure.setUploaded_at(session.getSyncTimestamp());
+                            measure.setSynced(true);
+                            measure.setEnvironment(measure.getEnvironment());
+                            measureRepository.updateMeasure(measure);
+                            updated = true;
+                            onThreadChange(-1);
                         }
 
                         @Override
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is value of post " + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
-                                OneTimeWorkRequest mywork =
-                                        new OneTimeWorkRequest.Builder(AuthTokenRegisterWorker.class)
-                                                .setInitialDelay(5, TimeUnit.SECONDS).build();// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
-
-                                WorkManager.getInstance(getContext().getApplicationContext()).enqueueUniqueWork("AuthTokenRegisterWorker", ExistingWorkPolicy.KEEP, mywork);
-
+                                AuthenticationHandler.restoreToken(getContext());
                             }
+                            onThreadChange(-1);
                         }
 
                         @Override
@@ -699,19 +731,64 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    @SuppressLint("StaticFieldLeak")
-    public void updateMeasure(Measure measure) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                measureRepository.updateMeasure(measure);
-                return null;
-            }
+    public void postConsentSheet(FileLog fileLog, String personId) {
+        try {
+            Gson gson = new GsonBuilder()
+                    .excludeFieldsWithoutExposeAnnotation()
+                    .create();
 
-            public void onPostExecute(Void result) {
+            Consent consent = new Consent();
+            consent.setFile(fileLog.getServerId());
+            consent.setScanned(DataFormat.convertTimestampToDate(fileLog.getCreateDate()));
 
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(consent))).toString());
+            Log.i(TAG, "this is data of postConsent " + (new JSONObject(gson.toJson(consent))).toString());
+
+            onThreadChange(1);
+            retrofit.create(ApiService.class).postConsent(session.getAuthTokenWithBearer(), body, personId).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Consent>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull Consent consent) {
+                            Log.i(TAG, "this is inside of postConsent on next  " + consent);
+                            fileLog.setStatus(AppConstants.CONSENT_UPLOADED);
+                            fileLogRepository.updateFileLog(fileLog);
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            Log.i(TAG, "this is value of post " + e.getMessage());
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(getContext());
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            Log.i(TAG, "this is value of exception " + e.getMessage());
+        }
     }
 
+    private void onThreadChange(int diff) {
+        int count;
+        synchronized (activeThreads) {
+            activeThreads += diff;
+            count = activeThreads;
+        }
+
+        if (updated && (count == 0)) {
+            new Thread(() -> startSyncing()).start();
+        }
+    }
 }

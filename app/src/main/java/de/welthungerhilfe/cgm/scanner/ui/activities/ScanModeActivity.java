@@ -418,6 +418,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             measure.setAge(age);
             measure.setDate(System.currentTimeMillis());
             measure.setArtifact_synced(false);
+            measure.setEnvironment(session.getEnvironment());
         }
 
         setContentView(R.layout.activity_scan_mode);
@@ -485,7 +486,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void setupScanArtifacts() {
-        File extFileDir = AppController.getInstance().getRootDirectory();
+        File extFileDir = AppController.getInstance().getRootDirectory(this);
 
         Log.e("Root Directory", extFileDir.getParent());
         mScanArtefactsOutputFolder = new File(extFileDir, person.getQrcode() + "/measurements/" + mNowTimeString + "/");
@@ -830,75 +831,82 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             CameraCalibration calibration = mCameraInstance.getCalibration();
 
             Runnable thread = () -> {
+                try {
 
-                //write RGB data
-                String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
-                currentImgFilename = currentImgFilename.replace('/', '_');
-                File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
-                BitmapUtils.writeBitmapToFile(bitmap, artifactFile);
+                    //write RGB data
+                    String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
+                    currentImgFilename = currentImgFilename.replace('/', '_');
+                    File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
+                    BitmapUtils.writeBitmapToFile(bitmap, artifactFile);
 
-                //upload RGB data
-                if (artifactFile.exists()) {
-                    mColorSize += artifactFile.length();
-                    mColorTime += System.currentTimeMillis() - profile;
-                    if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
-                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_SIZE, mColorSize);
-                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, mColorTime);
-                    }
+                    //upload RGB data
+                    if (artifactFile.exists()) {
+                        mColorSize += artifactFile.length();
+                        mColorTime += System.currentTimeMillis() - profile;
+                        if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
+                            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_SIZE, mColorSize);
+                            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, mColorTime);
+                        }
 
-                    FileLog log = new FileLog();
-                    log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
-                    log.setType("rgb");
-                    log.setPath(artifactFile.getPath());
-                    log.setHashValue(IO.getMD5(artifactFile.getPath()));
-                    log.setFileSize(artifactFile.length());
-                    log.setUploadDate(0);
-                    log.setDeleted(false);
-                    log.setQrCode(person.getQrcode());
-                    log.setCreateDate(mNowTime);
-                    log.setCreatedBy(session.getUserEmail());
-                    log.setAge(age);
-                    log.setSchema_version(CgmDatabase.version);
-                    log.setMeasureId(measure.getId());
-                    log.setStep(SCAN_STEP);
-                    synchronized (lock) {
-                        files.add(log);
-                    }
-                }
-
-                //write and upload calibration
-                artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
-                if (!artifactFile.exists()) {
-                    if (calibration.isValid()) {
-                        try {
-                            FileOutputStream fileOutputStream = new FileOutputStream(artifactFile.getAbsolutePath());
-                            fileOutputStream.write(calibration.toString().getBytes());
-                            fileOutputStream.flush();
-                            fileOutputStream.close();
-
-                            FileLog log = new FileLog();
-                            log.setId(AppController.getInstance().getArtifactId("camera-calibration", mNowTime));
-                            log.setType("calibration");
-                            log.setPath(artifactFile.getPath());
-                            log.setHashValue(IO.getMD5(artifactFile.getPath()));
-                            log.setFileSize(artifactFile.length());
-                            log.setUploadDate(0);
-                            log.setDeleted(false);
-                            log.setQrCode(person.getQrcode());
-                            log.setCreateDate(mNowTime);
-                            log.setCreatedBy(session.getUserEmail());
-                            log.setAge(age);
-                            log.setSchema_version(CgmDatabase.version);
-                            log.setMeasureId(measure.getId());
-                            log.setStep(0);
-                            synchronized (lock) {
-                                files.add(log);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        FileLog log = new FileLog();
+                        log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
+                        log.setType("rgb");
+                        log.setPath(artifactFile.getPath());
+                        log.setHashValue(IO.getMD5(artifactFile.getPath()));
+                        log.setFileSize(artifactFile.length());
+                        log.setUploadDate(0);
+                        log.setDeleted(false);
+                        log.setQrCode(person.getQrcode());
+                        log.setCreateDate(mNowTime);
+                        log.setCreatedBy(session.getUserEmail());
+                        log.setAge(age);
+                        log.setSchema_version(CgmDatabase.version);
+                        log.setMeasureId(measure.getId());
+                        log.setStep(SCAN_STEP);
+                        log.setEnvironment(session.getEnvironment());
+                        synchronized (lock) {
+                            files.add(log);
                         }
                     }
+
+                    //write and upload calibration
+                    artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
+                    if (!artifactFile.exists()) {
+                        if (calibration.isValid()) {
+                            try {
+                                FileOutputStream fileOutputStream = new FileOutputStream(artifactFile.getAbsolutePath());
+                                fileOutputStream.write(calibration.toString().getBytes());
+                                fileOutputStream.flush();
+                                fileOutputStream.close();
+
+                                FileLog log = new FileLog();
+                                log.setId(AppController.getInstance().getArtifactId("camera-calibration", mNowTime));
+                                log.setType("calibration");
+                                log.setPath(artifactFile.getPath());
+                                log.setHashValue(IO.getMD5(artifactFile.getPath()));
+                                log.setFileSize(artifactFile.length());
+                                log.setUploadDate(0);
+                                log.setDeleted(false);
+                                log.setQrCode(person.getQrcode());
+                                log.setCreateDate(mNowTime);
+                                log.setCreatedBy(session.getUserEmail());
+                                log.setAge(age);
+                                log.setSchema_version(CgmDatabase.version);
+                                log.setMeasureId(measure.getId());
+                                log.setStep(0);
+                                log.setEnvironment(session.getEnvironment());
+                                synchronized (lock) {
+                                    files.add(log);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+
                 onThreadChange(-1);
             };
             onThreadChange(1);
@@ -909,13 +917,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onDepthDataReceived(Image image, Pose pose, int frameIndex) {
 
-        onLightUpdate(mCameraInstance.getLightConditionState());
+        onLightUpdate(getCamera().getLightConditionState());
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             long profile = System.currentTimeMillis();
             ARCoreUtils.Depthmap depthmap = ARCoreUtils.extractDepthmap(image, pose, mCameraInstance instanceof AREngineCamera);
-            float lightIntensity = mCameraInstance.getLightIntensity();
+            float lightIntensity = getCamera().getLightIntensity();
             float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
             float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
             double Artifact_Confidence_penalty = Math.abs((double) depthmap.getCount() / 38000 - 1.0) * 100 * 3;
@@ -938,42 +946,48 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             }
 
             Runnable thread = () -> {
+                try {
 
-                //write depthmap
-                File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
-                ARCoreUtils.writeDepthmap(depthmap, artifactFile);
+                    //write depthmap
+                    File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
+                    ARCoreUtils.writeDepthmap(depthmap, artifactFile);
 
-                //profile process
-                if (artifactFile.exists()) {
-                    mDepthSize += artifactFile.length();
-                    mDepthTime += System.currentTimeMillis() - profile;
-                    if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
-                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_SIZE, mDepthSize);
-                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_TIME, mDepthTime);
+                    //profile process
+                    if (artifactFile.exists()) {
+                        mDepthSize += artifactFile.length();
+                        mDepthTime += System.currentTimeMillis() - profile;
+                        if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
+                            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_SIZE, mDepthSize);
+                            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_TIME, mDepthTime);
+                        }
                     }
+
+                    //upload depthmap
+                    if (artifactFile.exists()) {
+                        FileLog log = new FileLog();
+                        log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
+                        log.setType("depth");
+                        log.setPath(artifactFile.getPath());
+                        log.setHashValue(IO.getMD5(artifactFile.getPath()));
+                        log.setFileSize(artifactFile.length());
+                        log.setUploadDate(0);
+                        log.setDeleted(false);
+                        log.setQrCode(person.getQrcode());
+                        log.setCreateDate(mNowTime);
+                        log.setCreatedBy(session.getUserEmail());
+                        log.setAge(age);
+                        log.setSchema_version(CgmDatabase.version);
+                        log.setMeasureId(measure.getId());
+                        log.setStep(SCAN_STEP);
+                        log.setEnvironment(session.getEnvironment());
+                        synchronized (lock) {
+                            files.add(log);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
-                //upload depthmap
-                if (artifactFile.exists()) {
-                    FileLog log = new FileLog();
-                    log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
-                    log.setType("depth");
-                    log.setPath(artifactFile.getPath());
-                    log.setHashValue(IO.getMD5(artifactFile.getPath()));
-                    log.setFileSize(artifactFile.length());
-                    log.setUploadDate(0);
-                    log.setDeleted(false);
-                    log.setQrCode(person.getQrcode());
-                    log.setCreateDate(mNowTime);
-                    log.setCreatedBy(session.getUserEmail());
-                    log.setAge(age);
-                    log.setSchema_version(CgmDatabase.version);
-                    log.setMeasureId(measure.getId());
-                    log.setStep(SCAN_STEP);
-                    synchronized (lock) {
-                        files.add(log);
-                    }
-                }
                 onThreadChange(-1);
             };
             onThreadChange(1);
@@ -1017,6 +1031,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 log.setSchema_version(CgmDatabase.version);
                 log.setMeasureId(measure.getId());
                 log.setStep(SCAN_STEP);
+                log.setEnvironment(session.getEnvironment());
                 synchronized (lock) {
                     files.add(log);
                 }
@@ -1030,7 +1045,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onTangoDepthData(TangoPointCloudData pointCloudData, double[] pose, TangoCameraIntrinsics[] calibration) {
 
-        onLightUpdate(mCameraInstance.getLightConditionState());
+        onLightUpdate(getCamera().getLightConditionState());
 
         // Saving the frame or not, depending on the current mode.
         if (mIsRecording) {
@@ -1043,7 +1058,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             updateScanningProgress();
 
-            float lightIntensity = mCameraInstance.getLightIntensity();
+            float lightIntensity = getCamera().getLightIntensity();
             float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
             float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
             double Artifact_Lighting_penalty = Math.abs((double) numPoints / 38000 - 1.0) * 100 * 3;
@@ -1097,6 +1112,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     log.setSchema_version(CgmDatabase.version);
                     log.setMeasureId(measure.getId());
                     log.setStep(SCAN_STEP);
+                    log.setEnvironment(session.getEnvironment());
                     synchronized (lock) {
                         files.add(log);
                     }
@@ -1124,6 +1140,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                         log.setSchema_version(CgmDatabase.version);
                         log.setMeasureId(measure.getId());
                         log.setStep(0);
+                        log.setEnvironment(session.getEnvironment());
                         synchronized (lock) {
                             files.add(log);
                         }

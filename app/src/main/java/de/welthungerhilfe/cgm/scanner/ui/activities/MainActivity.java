@@ -17,8 +17,6 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Activity;
 
 import androidx.lifecycle.Observer;
@@ -66,6 +64,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AccountUtils;
 import de.welthungerhilfe.cgm.scanner.network.service.DeviceService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
@@ -83,10 +82,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
-        startActivity(new Intent(MainActivity.this, QRScanActivity.class));
+        startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE,AppConstants.CONSENT_CAPTURED_REQUEST));
     }
-
-    String TAG = MainActivity.class.getSimpleName();
 
     @BindView(R.id.recyclerData)
     RecyclerView recyclerData;
@@ -110,7 +107,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     private DialogPlus sortDialog;
 
     private SessionManager session;
-    private AccountManager accountManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,7 +117,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         AndroidInjection.inject(this);
         session = new SessionManager(MainActivity.this);
-        accountManager = AccountManager.get(this);
 
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
@@ -182,16 +177,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     break;
                 case R.id.menuLogout:
                     session.setSigned(false);
-
-                    try {
-                        Account[] accounts = accountManager.getAccounts();
-                        for (Account account : accounts) {
-                            accountManager.removeAccount(account, MainActivity.this, null, null);
-                        }
-                    } catch (Exception e) {
-                        //no rights to remove the account from system settings
-                        e.printStackTrace();
-                    }
+                    AccountUtils.removeAccount(this);
 
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();
@@ -419,8 +405,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 openSearchBar();
                 break;
             case R.id.actionQr:
-                startActivity(new Intent(MainActivity.this, QRScanActivity.class));
-                //startActivity(new Intent(MainActivity.this, ConsentScanActivity.class));
+                startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE,AppConstants.QR_SCAN_REQUEST));
+             //   startActivity(new Intent(MainActivity.this, ConsentScanActivity.class));
                 break;
             case R.id.actionFilter:
                 openSort();

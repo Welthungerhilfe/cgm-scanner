@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">CGM Scanner</string>
-    <string name="app_name_long">Child Growth Monitor Scanner App</string>
 
     <string name="permission_camera">कैमरा अनुमति की आवश्यकता है!</string>
 
@@ -103,7 +102,7 @@
 
 
     <string name="tooltipe_height_min">लम्बाई 45cm (सेन्टीमीटर्स) से बड़ी होनी चाहिए </string>
-    <string name="tooltipe_height_max">लम्बाई 120cm (सेन्टीमीटर्स) से कम होनी चाहिए </string>
+    <string name="tooltipe_height_max">लम्बाई 130cm (सेन्टीमीटर्स) से कम होनी चाहिए </string>
     <string name="tooltipe_weight_min">वजन 2kg से ज्यादा होना चाहिये </string>
     <string name="tooltipe_weight_max">वजन 30kg से कम होना चाहिये </string>
     <string name="tooltipe_muac_min">मध्य ऊपरी बांह की परिधि 9cm (सेन्टीमीटर्स) से बड़ी होनी चाहिए</string>
@@ -288,5 +287,9 @@
     <string name="edema_link">द्विपक्षीय एडिमा की जांच कैसे करें\nyoutu.be/hGTyk6CM-5A</string>
 
     <string name="scan_is_uploading">Sस्कैन अपलोड हो रहा है</string>
+
+    <string name="no_authorazation">अनुमति नहीं है, व्यक्ति डेटा एक अलग बैकएंड में बनाया गया है.</string>
+
+    <string name="error">कुछ गलत हो गया</string>
 
 </resources>
