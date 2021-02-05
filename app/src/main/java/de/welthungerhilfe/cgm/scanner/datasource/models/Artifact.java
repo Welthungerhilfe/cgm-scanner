@@ -80,10 +80,4 @@ public class Artifact {
     public void setFormat(String format) {
         this.format = format;
     }
-
-    public boolean isOrderable() {
-        if (format.compareTo("depth") == 0) return true;
-        if (format.compareTo("rgb") == 0) return true;
-        return false;
-    }
 }

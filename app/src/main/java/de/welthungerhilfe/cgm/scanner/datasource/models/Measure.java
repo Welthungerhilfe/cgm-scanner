@@ -410,9 +410,9 @@ public class Measure extends CsvExportableModel implements Serializable {
                     String timestamp = log.getPath();
                     timestamp = timestamp.substring(timestamp.lastIndexOf('_') + 1);
                     timestamp = timestamp.substring(0, timestamp.lastIndexOf('.'));
-                    int diff = 0;
+                    int diff;
                     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
-                        diff = (int) (Float.parseFloat(timestamp) * 1000);
+                        diff = (int) (Float.parseFloat(timestamp) * 10);
                     } else {
                         diff = Integer.parseInt(timestamp);
                     }
@@ -420,50 +420,14 @@ public class Measure extends CsvExportableModel implements Serializable {
                     Artifact artifact = new Artifact();
                     artifact.setFile(log.getServerId());
                     artifact.setFormat(log.getType());
-                    artifact.setOrder(-1);
-                    artifact.setTimestamp(log.getCreateDate() + diff);
-                    artifact.setTimestampString(DataFormat.convertTimestampToDate(artifact.getTimestamp()));
-
+                    artifact.setOrder(diff);
+                    artifact.setTimestamp(log.getCreateDate());
+                    artifact.setTimestampString(DataFormat.convertTimestampToDate(log.getCreateDate()));
                     scanArtifacts.add(artifact);
                 }
             }
 
             //set the artifacts order
-            int order = 0;
-            Collections.sort(scanArtifacts, (a, b) -> (int) (a.getTimestamp() - b.getTimestamp()));
-            for (int i = 0; i < scanArtifacts.size(); i++) {
-                Artifact artifact = scanArtifacts.get(i);
-                if (artifact.isOrderable() && (artifact.getOrder() == -1)) {
-                    artifact.setOrder(order);
-
-                    //find matching frame of another type
-                    int bestMatch = i + 1;
-                    long bestValue = 9999;
-                    for (int j = i + 1; j <= scanArtifacts.size(); j++) {
-                        Artifact match = scanArtifacts.get(i);
-                        if (match.isOrderable()) {
-                            if (match.getFormat().compareTo(artifact.getFormat()) != 0) {
-                                long diff = Math.abs(match.getTimestamp() - artifact.getTimestamp());
-                                if (bestValue > diff) {
-                                    bestValue = diff;
-                                    bestMatch = j;
-                                }
-                            }
-                        }
-                    }
-                    if (bestValue < 250) {
-                        scanArtifacts.get(bestMatch).setOrder(order);
-                    }
-                    order++;
-                }
-            }
-            for (int i = 0; i < scanArtifacts.size(); i++) {
-                Artifact artifact = scanArtifacts.get(i);
-                if (!artifact.isOrderable() && (artifact.getOrder() == -1)) {
-                    artifact.setOrder(order);
-                    order++;
-                }
-            }
             Collections.sort(scanArtifacts, (a, b) -> {
                 int diff = a.getOrder() - b.getOrder();
                 if (diff == 0) {
@@ -472,6 +436,18 @@ public class Measure extends CsvExportableModel implements Serializable {
                     return diff;
                 }
             });
+
+            //ordering from one
+            int order = 0;
+            int value = -1;
+            for (Artifact artifact : scanArtifacts) {
+                if (artifact.getOrder() == value) {
+                    artifact.setOrder(order);
+                } else {
+                    value = artifact.getOrder();
+                    artifact.setOrder(++order);
+                }
+            }
 
             //create scan object
             Scan scan = new Scan();
