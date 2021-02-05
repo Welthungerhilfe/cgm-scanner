@@ -18,6 +18,9 @@
  */
 package de.welthungerhilfe.cgm.scanner.datasource.models;
 
+import android.os.Build;
+import android.util.Log;
+
 import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -403,12 +406,23 @@ public class Measure extends CsvExportableModel implements Serializable {
             List<Artifact> scanArtifacts = new ArrayList<>();
             for (FileLog log : measureArtifacts) {
                 if ((key == 0) || (key == log.getStep())) {
+
+                    String timestamp = log.getPath();
+                    timestamp = timestamp.substring(timestamp.lastIndexOf('_') + 1);
+                    timestamp = timestamp.substring(0, timestamp.lastIndexOf('.'));
+                    int diff = 0;
+                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
+                        diff = (int) (Float.parseFloat(timestamp) * 1000);
+                    } else {
+                        diff = Integer.parseInt(timestamp);
+                    }
+
                     Artifact artifact = new Artifact();
                     artifact.setFile(log.getServerId());
                     artifact.setFormat(log.getType());
                     artifact.setOrder(-1);
-                    artifact.setTimestamp(log.getCreateDate());
-                    artifact.setTimestampString(DataFormat.convertTimestampToDate(log.getCreateDate()));
+                    artifact.setTimestamp(log.getCreateDate() + diff);
+                    artifact.setTimestampString(DataFormat.convertTimestampToDate(artifact.getTimestamp()));
 
                     scanArtifacts.add(artifact);
                 }
@@ -424,7 +438,7 @@ public class Measure extends CsvExportableModel implements Serializable {
 
                     //find matching frame of another type
                     int bestMatch = i + 1;
-                    long bestValue = Integer.MAX_VALUE;
+                    long bestValue = 9999;
                     for (int j = i + 1; j <= scanArtifacts.size(); j++) {
                         Artifact match = scanArtifacts.get(i);
                         if (match.isOrderable()) {
