@@ -18,6 +18,9 @@
  */
 package de.welthungerhilfe.cgm.scanner.datasource.models;
 
+import android.os.Build;
+import android.util.Log;
+
 import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -31,6 +34,7 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -399,25 +403,55 @@ public class Measure extends CsvExportableModel implements Serializable {
         for (Integer key : keys) {
 
             //get the artifacts for a step
-            List<Artifact> stepArtifacts = new ArrayList<>();
+            List<Artifact> scanArtifacts = new ArrayList<>();
             for (FileLog log : measureArtifacts) {
                 if ((key == 0) || (key == log.getStep())) {
+
+                    String timestamp = log.getPath();
+                    timestamp = timestamp.substring(timestamp.lastIndexOf('_') + 1);
+                    timestamp = timestamp.substring(0, timestamp.lastIndexOf('.'));
+                    int diff;
+                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
+                        diff = (int) (Float.parseFloat(timestamp) * 10);
+                    } else {
+                        diff = Integer.parseInt(timestamp);
+                    }
+
                     Artifact artifact = new Artifact();
                     artifact.setFile(log.getServerId());
                     artifact.setFormat(log.getType());
+                    artifact.setOrder(diff);
                     artifact.setTimestamp(log.getCreateDate());
                     artifact.setTimestampString(DataFormat.convertTimestampToDate(log.getCreateDate()));
-                    stepArtifacts.add(artifact);
+                    scanArtifacts.add(artifact);
                 }
             }
-            Collections.sort(stepArtifacts, (a, b) -> (int) (b.getTimestamp() - a.getTimestamp()));
-            for (int i = 0; i < stepArtifacts.size(); i++) {
-                stepArtifacts.get(i).setOrder(i);
+
+            //set the artifacts order
+            Collections.sort(scanArtifacts, (a, b) -> {
+                int diff = a.getOrder() - b.getOrder();
+                if (diff == 0) {
+                    return b.getFormat().compareTo(a.getFormat());
+                } else {
+                    return diff;
+                }
+            });
+
+            //ordering from one
+            int order = 0;
+            int value = -1;
+            for (Artifact artifact : scanArtifacts) {
+                if (artifact.getOrder() == value) {
+                    artifact.setOrder(order);
+                } else {
+                    value = artifact.getOrder();
+                    artifact.setOrder(++order);
+                }
             }
 
             //create scan object
             Scan scan = new Scan();
-            scan.setArtifacts(stepArtifacts);
+            scan.setArtifacts(scanArtifacts);
             scan.setLocation(getLocation());
             scan.setPersonServerKey(getPersonServerKey());
             scan.setScan_start(DataFormat.convertTimestampToDate(getTimestamp()));
