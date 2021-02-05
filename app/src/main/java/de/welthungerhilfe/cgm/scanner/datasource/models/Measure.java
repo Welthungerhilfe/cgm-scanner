@@ -31,6 +31,7 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -422,17 +423,22 @@ public class Measure extends CsvExportableModel implements Serializable {
                     artifact.setOrder(order);
 
                     //find matching frame of another type
+                    int bestMatch = i + 1;
+                    long bestValue = Integer.MAX_VALUE;
                     for (int j = i + 1; j <= scanArtifacts.size(); j++) {
                         Artifact match = scanArtifacts.get(i);
                         if (match.isOrderable()) {
                             if (match.getFormat().compareTo(artifact.getFormat()) != 0) {
                                 long diff = Math.abs(match.getTimestamp() - artifact.getTimestamp());
-                                if (diff < 50) {
-                                    match.setOrder(order);
-                                    break;
+                                if (bestValue > diff) {
+                                    bestValue = diff;
+                                    bestMatch = j;
                                 }
                             }
                         }
+                    }
+                    if (bestValue < 250) {
+                        scanArtifacts.get(bestMatch).setOrder(order);
                     }
                     order++;
                 }
@@ -444,7 +450,14 @@ public class Measure extends CsvExportableModel implements Serializable {
                     order++;
                 }
             }
-            Collections.sort(scanArtifacts, (a, b) -> (a.getOrder() - b.getOrder()));
+            Collections.sort(scanArtifacts, (a, b) -> {
+                int diff = a.getOrder() - b.getOrder();
+                if (diff == 0) {
+                    return b.getFormat().compareTo(a.getFormat());
+                } else {
+                    return diff;
+                }
+            });
 
             //create scan object
             Scan scan = new Scan();
