@@ -399,57 +399,56 @@ public class Measure extends CsvExportableModel implements Serializable {
         for (Integer key : keys) {
 
             //get the artifacts for a step
-            List<Artifact> depthArtifacts = new ArrayList<>();
-            List<Artifact> otherArtifacts = new ArrayList<>();
-            List<Artifact> rgbArtifacts = new ArrayList<>();
+            List<Artifact> scanArtifacts = new ArrayList<>();
             for (FileLog log : measureArtifacts) {
                 if ((key == 0) || (key == log.getStep())) {
                     Artifact artifact = new Artifact();
                     artifact.setFile(log.getServerId());
                     artifact.setFormat(log.getType());
+                    artifact.setOrder(-1);
                     artifact.setTimestamp(log.getCreateDate());
                     artifact.setTimestampString(DataFormat.convertTimestampToDate(log.getCreateDate()));
 
-                    if (log.getPath().endsWith(".depth")) {
-                        depthArtifacts.add(artifact);
-                    } else if (log.getPath().endsWith(".jpg")) {
-                        rgbArtifacts.add(artifact);
-                    } else {
-                        otherArtifacts.add(artifact);
-                    }
+                    scanArtifacts.add(artifact);
                 }
             }
 
             //set the artifacts order
-            Collections.sort(rgbArtifacts, (a, b) -> (int) (b.getTimestamp() - a.getTimestamp()));
-            for (int i = 0; i < rgbArtifacts.size(); i++) {
-                rgbArtifacts.get(i).setOrder(i);
-            }
-            for (Artifact artifact : depthArtifacts) {
-                int bestOrder = 0;
-                long bestValue = Integer.MAX_VALUE;
-                for (int i = 0; i < rgbArtifacts.size(); i++) {
-                    long value = Math.abs(artifact.getTimestamp() - rgbArtifacts.get(i).getTimestamp());
-                    if (bestValue > value) {
-                        bestValue = value;
-                        bestOrder = i;
+            int order = 0;
+            Collections.sort(scanArtifacts, (a, b) -> (int) (a.getTimestamp() - b.getTimestamp()));
+            for (int i = 0; i < scanArtifacts.size(); i++) {
+                Artifact artifact = scanArtifacts.get(i);
+                if (artifact.isOrderable() && (artifact.getOrder() == -1)) {
+                    artifact.setOrder(order);
+
+                    //find matching frame of another type
+                    for (int j = i + 1; j <= scanArtifacts.size(); j++) {
+                        Artifact match = scanArtifacts.get(i);
+                        if (match.isOrderable()) {
+                            if (match.getFormat().compareTo(artifact.getFormat()) != 0) {
+                                long diff = Math.abs(match.getTimestamp() - artifact.getTimestamp());
+                                if (diff < 50) {
+                                    match.setOrder(order);
+                                    break;
+                                }
+                            }
+                        }
                     }
+                    order++;
                 }
-                artifact.setOrder(bestOrder);
             }
-            int maxOrder = rgbArtifacts.size();
-            for (Artifact artifact : otherArtifacts) {
-                artifact.setOrder(maxOrder);
+            for (int i = 0; i < scanArtifacts.size(); i++) {
+                Artifact artifact = scanArtifacts.get(i);
+                if (!artifact.isOrderable() && (artifact.getOrder() == -1)) {
+                    artifact.setOrder(order);
+                    order++;
+                }
             }
-            List<Artifact> artifacts = new ArrayList<>();
-            artifacts.addAll(depthArtifacts);
-            artifacts.addAll(otherArtifacts);
-            artifacts.addAll(rgbArtifacts);
-            Collections.sort(artifacts, (a, b) -> (a.getOrder() - b.getOrder()));
+            Collections.sort(scanArtifacts, (a, b) -> (a.getOrder() - b.getOrder()));
 
             //create scan object
             Scan scan = new Scan();
-            scan.setArtifacts(artifacts);
+            scan.setArtifacts(scanArtifacts);
             scan.setLocation(getLocation());
             scan.setPersonServerKey(getPersonServerKey());
             scan.setScan_start(DataFormat.convertTimestampToDate(getTimestamp()));
