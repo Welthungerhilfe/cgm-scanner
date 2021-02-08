@@ -30,8 +30,8 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
-import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -61,9 +61,8 @@ import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import id.zelory.compressor.Compressor;
 
-public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.OnConfirmListener, QRScanView.QRScanHandler {
+public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConfirmListener, QRScanView.QRScanHandler {
     private final String TAG = QRScanActivity.class.getSimpleName();
-    private final int PERMISSION_LOCATION = 0x1000;
 
     @BindView(R.id.qrScanView)
     QRScanView qrScanView;
@@ -110,7 +109,7 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_LOCATION);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_CAMERA);
         } else {
             showConfirmDialog(R.string.message_legal, SCAN_QR_CODE_STEP);
         }
@@ -152,6 +151,10 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
                 ll_qr_details.setVisibility(View.GONE);
                 qrScanView.setVisibility(View.GONE);
                 Bitmap capturedImageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+                File file = new File(imageUri.getPath());
+                if (file.exists()) {
+                    file.delete();
+                }
                 ImageSaver(capturedImageBitmap, QRScanActivity.this);
                 return;
             } catch (Exception e) {
@@ -162,7 +165,7 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
     }
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == PERMISSION_LOCATION) {
+        if (requestCode == PERMISSION_CAMERA) {
             if (grantResults.length > 0 && grantResults[0] >= 0) {
                 showConfirmDialog(R.string.message_legal, SCAN_QR_CODE_STEP);
             } else {
@@ -210,8 +213,18 @@ public class QRScanActivity extends AppCompatActivity implements ConfirmDialog.O
     void startCaptureImage() {
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.TITLE, "Picture");
-        imageUri = getContentResolver().insert(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        File root = Environment.getExternalStorageDirectory();
+        root = new File(root, "Android");
+        root = new File(root, "data");
+        root = new File(root, getApplicationInfo().packageName);
+        if (!root.exists()) {
+            root.mkdirs();
+        }
+        File file = new File(root, "consent.jpg");
+        if (file.exists()) {
+            file.delete();
+        }
+        imageUri = Uri.fromFile(file);
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
         startActivityForResult(intent, IMAGE_CAPTURED_REQUEST);
