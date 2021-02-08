@@ -42,7 +42,7 @@ import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.views.PagerView;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class TutorialActivity extends AppCompatActivity {
+public class TutorialActivity extends BaseActivity {
     @BindView(R.id.viewPager)
     PagerView viewPager;
     @BindView(R.id.lytStart)

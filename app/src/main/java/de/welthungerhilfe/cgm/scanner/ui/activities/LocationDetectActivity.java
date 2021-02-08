@@ -60,11 +60,9 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class LocationDetectActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
+public class LocationDetectActivity extends BaseActivity implements OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
     public static final String EXTRA_LOCATION = "extra_location";
     public static final String KEY_TRANSITION = "key_transition";
-
-    private final int REQUEST_LOCATION = 0x1002;
 
     @BindView(R.id.editAddress)
     EditText editAddress;
@@ -176,9 +174,9 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
         drawMarker();
         googleMap.setOnCameraIdleListener(this);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, REQUEST_LOCATION);
+            ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, PERMISSION_LOCATION);
         } else {
-            Utils.openLocationSettings(this, REQUEST_LOCATION);
+            Utils.openLocationSettings(this, PERMISSION_LOCATION);
             googleMap.getUiSettings().setMyLocationButtonEnabled(false);
             googleMap.setMyLocationEnabled(true);
         }
@@ -255,7 +253,7 @@ public class LocationDetectActivity extends AppCompatActivity implements OnMapRe
     }
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == REQUEST_LOCATION) {
+        if (requestCode == PERMISSION_LOCATION) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             } else {
                 googleMap.getUiSettings().setMyLocationButtonEnabled(false);

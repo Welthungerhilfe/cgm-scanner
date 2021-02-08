@@ -40,7 +40,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.util.Log;
@@ -102,10 +101,7 @@ import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener, ARCoreUtils.Camera2DataListener, TangoCamera.TangoCameraListener {
-    private final int PERMISSION_LOCATION = 0x0001;
-    private final int PERMISSION_CAMERA = 0x0002;
-    private final int PERMISSION_STORAGE = 0x0003;
+public class ScanModeActivity extends BaseActivity implements View.OnClickListener, ARCoreUtils.Camera2DataListener, TangoCamera.TangoCameraListener {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
