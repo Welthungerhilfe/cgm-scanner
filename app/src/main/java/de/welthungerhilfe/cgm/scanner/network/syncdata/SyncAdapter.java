@@ -378,11 +378,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     measure.setPersonServerKey(backendPersonId);
 
                     if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
-
-
-                        if (backendPersonId != null) {
-                            postMeasurment(measure);
-                        }
+                        postMeasurement(measure);
                     } else {
                         HashMap<Integer, Scan> scans = measure.split(fileLogRepository, session.getEnvironment());
                         if (!scans.isEmpty()) {
@@ -676,7 +672,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public void postMeasurment(Measure measure) {
+    public void postMeasurement(Measure measure) {
         try {
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
@@ -696,18 +692,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         }
 
                         @Override
-                        public void onNext(@NonNull Measure measure) {
-                            Log.i(TAG, "this is inside of measure on next  " + measure);
-                            measure.setTimestamp(prevTimestamp);
-                            measure.setId(measure.getId());
-                            measure.setPersonId(measure.getPersonId());
-                            measure.setType(AppConstants.VAL_MEASURE_MANUAL);
-                            measure.setCreatedBy(measure.getCreatedBy());
-                            measure.setDate(measure.getDate());
-                            measure.setUploaded_at(session.getSyncTimestamp());
-                            measure.setSynced(true);
-                            measure.setEnvironment(measure.getEnvironment());
-                            measureRepository.updateMeasure(measure);
+                        public void onNext(@NonNull Measure measure1) {
+                            Log.i(TAG, "this is inside of measure on next  " + measure);                            measure1.setTimestamp(prevTimestamp);
+                            measure1.setId(measure.getId());
+                            measure1.setPersonId(measure.getPersonId());
+                            measure1.setType(AppConstants.VAL_MEASURE_MANUAL);
+                            measure1.setCreatedBy(measure.getCreatedBy());
+                            measure1.setDate(measure.getDate());
+                            measure1.setUploaded_at(session.getSyncTimestamp());
+                            measure1.setSynced(true);
+                            measureRepository.updateMeasure(measure1);
                             updated = true;
                             onThreadChange(-1);
                         }
