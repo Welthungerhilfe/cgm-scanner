@@ -52,8 +52,7 @@ public class DataFormat {
         TimeZone timeZone = TimeZone.getTimeZone("UTC");
         Calendar cal = Calendar.getInstance(timeZone);
         cal.setTimeInMillis(timeStamp);
-        String date = DateFormat.format("yyyy-MM-dd hh:mm:ss", cal).toString();
-        return date;
+        return DateFormat.format("yyyy-MM-dd HH:mm:ss", cal).toString();
     }
 
     public static String filesize(Context context, long bytes) {
