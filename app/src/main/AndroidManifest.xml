@@ -4,7 +4,6 @@
     package="de.welthungerhilfe.cgm.scanner">
 
     <!-- for AR functionality -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- Storage access -->
