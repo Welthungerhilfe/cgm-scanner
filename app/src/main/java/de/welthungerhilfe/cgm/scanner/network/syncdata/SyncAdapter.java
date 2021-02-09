@@ -244,15 +244,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             return null;
         }
 
-        private String getQrCode(String measureId) {
-            try {
-                return measureRepository.getMeasureById(measureId).getQrCode();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
         private void processMeasureResultQueue(CloudQueueClient queueClient) throws URISyntaxException {
 
             try {
@@ -300,7 +291,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                         measureRepository.updateMeasure(measure);
 
                                         if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
-                                            onResultReceived(result);
+                                            onResultReceived(result.getMeasure_id());
                                         }
 
                                         if (notification != null) {
@@ -326,7 +317,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                         measureRepository.updateMeasure(measure);
 
                                         if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
-                                            onResultReceived(result);
+                                            onResultReceived(result.getMeasure_id());
                                         }
 
                                         if (notification != null) {
@@ -461,32 +452,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             } catch (StorageException e) {
                 currentTimestamp = prevTimestamp;
-            }
-        }
-
-        private void onResultReceived(MeasureResult result) {
-
-            Context c = getContext();
-            if (!LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT))
-                return;
-            if (LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID).compareTo(result.getMeasure_id()) != 0)
-                return;
-
-            if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE) == 0) {
-
-                //set receive timestamp
-                LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE, System.currentTimeMillis());
-
-                //update average time
-                long diff = 0;
-                diff += LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE);
-                diff -= LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_SCAN);
-                ArrayList<Long> last = LocalPersistency.getLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE);
-                last.add(diff);
-                if (last.size() > 10) {
-                    last.remove(0);
-                }
-                LocalPersistency.setLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE, last);
             }
         }
     }
@@ -826,8 +791,33 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             if(estimatesResponse!=null)
                             {
                                 Collections.sort(estimatesResponse.height);
-                                Log.i(TAG,"this is value of height "+ estimatesResponse.height.get((estimatesResponse.height.size() / 2)).getValue());
+                                float height = estimatesResponse.height.get((estimatesResponse.height.size() / 2)).getValue();
+                                Log.i(TAG,"this is value of height "+ height);
+
+                                String qrCode = getQrCode(postScanResult.getMeasure_id());
+                                MeasureNotification notification = MeasureNotification.get(qrCode);
+
+                                Measure measure = measureRepository.getMeasureById(postScanResult.getMeasure_id());
+                                if (measure != null) {
+                                    measure.setHeight(height);
+                                    measure.setHeightConfidence(0);
+                                    measure.setResulted_at(postScanResult.getTimestamp());
+                                    measure.setReceived_at(System.currentTimeMillis());
+                                    measureRepository.updateMeasure(measure);
+
+                                    //TODO:if ((measure.getHeight() > 0) && (measure.getWeight() > 0))
+                                    {
+                                        onResultReceived(postScanResult.getMeasure_id());
+                                    }
+
+                                    if (notification != null) {
+                                        notification.setHeight(height);
+                                        MeasureNotification.showNotification(getContext());
+                                    }
+                                }
                             }
+                            postScanResult.setSynced(true);
+                            postScanResultrepository.updatePostScanResult(postScanResult);
                             updated = true;
                             onThreadChange(-1);
                         }
@@ -851,6 +841,40 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
+    private String getQrCode(String measureId) {
+        try {
+            return measureRepository.getMeasureById(measureId).getQrCode();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void onResultReceived(String measureId) {
+
+        Context c = getContext();
+        if (!LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT))
+            return;
+        if (LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID).compareTo(measureId) != 0)
+            return;
+
+        if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE) == 0) {
+
+            //set receive timestamp
+            LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE, System.currentTimeMillis());
+
+            //update average time
+            long diff = 0;
+            diff += LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE);
+            diff -= LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_SCAN);
+            ArrayList<Long> last = LocalPersistency.getLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE);
+            last.add(diff);
+            if (last.size() > 10) {
+                last.remove(0);
+            }
+            LocalPersistency.setLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE, last);
+        }
+    }
 
     private void onThreadChange(int diff) {
         int count;
