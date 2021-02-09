@@ -822,7 +822,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         @Override
                         public void onNext(@NonNull EstimatesResponse estimatesResponse) {
                             Log.i(TAG, "this is inside of getEstimate on next  " +estimatesResponse);
-
+                            //TODO : generate notification and store result based on confidence value
                             if(estimatesResponse!=null)
                             {
                                 Collections.sort(estimatesResponse.height);
