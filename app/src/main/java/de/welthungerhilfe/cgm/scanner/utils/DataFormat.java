@@ -25,6 +25,7 @@ import android.text.format.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class DataFormat {
 
@@ -47,9 +48,9 @@ public class DataFormat {
         }
     }
 
-    public static String convertTimestampToDate(Long timeStamp)
-    {
-        Calendar cal = Calendar.getInstance(Locale.ENGLISH);
+    public static String convertTimestampToDate(Long timeStamp) {
+        TimeZone timeZone = TimeZone.getTimeZone("UTC");
+        Calendar cal = Calendar.getInstance(timeZone);
         cal.setTimeInMillis(timeStamp);
         String date = DateFormat.format("yyyy-MM-dd hh:mm:ss", cal).toString();
         return date;
