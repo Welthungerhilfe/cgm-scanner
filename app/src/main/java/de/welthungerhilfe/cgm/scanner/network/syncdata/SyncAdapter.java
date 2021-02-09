@@ -45,6 +45,8 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -52,8 +54,11 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
+import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PostScanResultrepository;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
@@ -100,6 +105,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private DeviceRepository deviceRepository;
     private FileLogRepository fileLogRepository;
     private MeasureResultRepository measureResultRepository;
+    private PostScanResultrepository postScanResultrepository;
 
     private SessionManager session;
     private AsyncTask<Void, Void, Void> syncTask;
@@ -114,6 +120,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         deviceRepository = DeviceRepository.getInstance(context);
         fileLogRepository = FileLogRepository.getInstance(context);
         measureResultRepository = MeasureResultRepository.getInstance(context);
+        postScanResultrepository = PostScanResultrepository.getInstance(context);
 
         activeThreads = 0;
         session = new SessionManager(context);
@@ -166,7 +173,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             currentTimestamp = System.currentTimeMillis();
 
             syncTask = new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            Log.i(TAG,"this is inside end startSynching");
+            Log.i(TAG, "this is inside end startSynching");
         }
     }
 
@@ -219,6 +226,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     processPersonQueue();
                     processMeasureQueue();
                     processConsentSheet();
+                    processMeasureReasult();
                  /*  Things to yet implemented
                     processMeasureResultQueue(queueClient);
                     processDeviceQueue(queueClient);
@@ -340,6 +348,22 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             } catch (StorageException e) {
                 e.printStackTrace();
             }
+        }
+
+        private void processMeasureReasult() {
+
+            try {
+                List<PostScanResult> syncablePostScanResult = postScanResultrepository.getSyncablePostScanResult(session.getEnvironment());
+                for (int i = 0; i < syncablePostScanResult.size(); i++) {
+
+                    PostScanResult postScanResult = syncablePostScanResult.get(i);
+                    Log.i("Syncadapter", "this is inside processMeasureReasult Queue " + postScanResult);
+                    getEstimates(postScanResult);
+                }
+            } catch (Exception e) {
+                currentTimestamp = prevTimestamp;
+            }
+
         }
 
         private void processPersonQueue() {
@@ -491,6 +515,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             @Override
                             public void onNext(@NonNull Scan scan) {
                                 Log.i(TAG, "this is inside onNext artifactsList " + scan.toString());
+                                PostScanResult postScanResult = new PostScanResult();
+                                postScanResult.setEnvironment(measure.getEnvironment());
+                                postScanResult.setId(scan.getId());
+                                postScanResult.setMeasure_id(measure.getId());
+                                postScanResult.setTimestamp(prevTimestamp);
+                                postScanResultrepository.insertPostScanResult(postScanResult);
+
                                 count[0]--;
                                 if (count[0] == 0) {
                                     measure.setArtifact_synced(true);
@@ -522,6 +553,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.i(TAG, "this is value of exception " + e.getMessage());
         }
     }
+
 
     public void postPerson(Person person1) {
         try {
@@ -693,7 +725,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Measure measure1) {
-                            Log.i(TAG, "this is inside of measure on next  " + measure);                            measure1.setTimestamp(prevTimestamp);
+                            Log.i(TAG, "this is inside of measure on next  " + measure);
+                            measure1.setTimestamp(prevTimestamp);
                             measure1.setId(measure.getId());
                             measure1.setPersonId(measure.getPersonId());
                             measure1.setType(AppConstants.VAL_MEASURE_MANUAL);
@@ -773,6 +806,51 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.i(TAG, "this is value of exception " + e.getMessage());
         }
     }
+
+    public void getEstimates(PostScanResult postScanResult) {
+        try {
+            Log.i(TAG, "this is data of postScanResulu " + postScanResult.getId());
+
+            onThreadChange(1);
+            retrofit.create(ApiService.class).getEstimates(session.getAuthTokenWithBearer(), postScanResult.getId()).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<EstimatesResponse>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+                        @Override
+                        public void onNext(@NonNull EstimatesResponse estimatesResponse) {
+                            Log.i(TAG, "this is inside of getEstimate on next  " +estimatesResponse);
+
+                            if(estimatesResponse!=null)
+                            {
+                                Collections.sort(estimatesResponse.height);
+                                Log.i(TAG,"this is value of height "+ estimatesResponse.height.get((estimatesResponse.height.size() / 2)).getValue());
+                            }
+                            updated = true;
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            Log.i(TAG, "this is value of post " + e.getMessage());
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(getContext());
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            Log.i(TAG, "this is value of exception " + e.getMessage());
+        }
+    }
+
 
     private void onThreadChange(int diff) {
         int count;

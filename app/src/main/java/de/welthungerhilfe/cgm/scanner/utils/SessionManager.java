@@ -208,7 +208,14 @@ public class SessionManager {
     }
 
     public String getAuthTokenWithBearer() {
-        return "bearer " + getAuthToken();
+
+        if (BuildConfig.DEBUG) {
+            // on Localhost authorazation must be null, it's not accepting bearer also
+            return null;
+        } else {
+            return "bearer " + getAuthToken();
+        }
+
     }
 
     public void setEnvironment(int environment) {
