@@ -47,6 +47,9 @@ public interface ApiService {
     @POST("measurements")
     Observable<Measure> postMeasure(@Header("Authorization") String auth, @Body RequestBody measure);
 
+    @PUT("measurements/{id}")
+    Observable<Measure> putMeasure(@Header("Authorization") String auth, @Body RequestBody measure, @Path("id") String id);
+
     @POST("scans")
     Observable<Scan> postScans(@Header("Authorization") String auth, @Body RequestBody scan);
 

@@ -390,10 +390,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     if (backendPersonId == null) {
                         continue;
                     }
-                    measure.setPersonServerKey(backendPersonId);
 
+                    measure.setPersonServerKey(backendPersonId);
                     if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
-                        postMeasurement(measure);
+                        if (measure.getMeasureServerKey() != null) {
+                            putMeasurement(measure);
+                        } else {
+                            postMeasurement(measure);
+                        }
                     } else {
                         HashMap<Integer, Scan> scans = measure.split(fileLogRepository, session.getEnvironment());
                         if (!scans.isEmpty()) {
@@ -699,6 +703,62 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             measure1.setDate(measure.getDate());
                             measure1.setUploaded_at(session.getSyncTimestamp());
                             measure1.setSynced(true);
+                            measure1.setEnvironment(measure.getEnvironment());
+                            measureRepository.updateMeasure(measure1);
+                            updated = true;
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            Log.i(TAG, "this is value of post " + e.getMessage());
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(getContext());
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            Log.i(TAG, "this is value of exception " + e.getMessage());
+        }
+    }
+
+    public void putMeasurement(Measure measure) {
+        try {
+            Gson gson = new GsonBuilder()
+                    .excludeFieldsWithoutExposeAnnotation()
+                    .create();
+            measure.setMeasured(DataFormat.convertTimestampToDate(measure.getDate()));
+            measure.setPersonServerKey(null);
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(measure))).toString());
+            Log.i(TAG, "this is data of measure " + (new JSONObject(gson.toJson(measure))).toString());
+
+            onThreadChange(1);
+            retrofit.create(ApiService.class).putMeasure(session.getAuthTokenWithBearer(), body, measure.getMeasureServerKey()).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Measure>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull Measure measure1) {
+                            Log.i(TAG, "this is inside of measure on next  " + measure);
+                            measure1.setTimestamp(prevTimestamp);
+                            measure1.setId(measure.getId());
+                            measure1.setPersonId(measure.getPersonId());
+                            measure1.setType(AppConstants.VAL_MEASURE_MANUAL);
+                            measure1.setCreatedBy(measure.getCreatedBy());
+                            measure1.setDate(measure.getDate());
+                            measure1.setUploaded_at(session.getSyncTimestamp());
+                            measure1.setEnvironment(measure.getEnvironment());
+                            measure1.setSynced(true);
                             measureRepository.updateMeasure(measure1);
                             updated = true;
                             onThreadChange(-1);
@@ -784,39 +844,72 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         public void onSubscribe(@NonNull Disposable d) {
 
                         }
+
                         @Override
                         public void onNext(@NonNull EstimatesResponse estimatesResponse) {
-                            Log.i(TAG, "this is inside of getEstimate on next  " +estimatesResponse);
+                            Log.i(TAG, "this is inside of getEstimate on next  " + estimatesResponse);
                             //TODO : generate notification and store result based on confidence value
-                            if(estimatesResponse!=null)
-                            {
-                                Collections.sort(estimatesResponse.height);
-                                float height = estimatesResponse.height.get((estimatesResponse.height.size() / 2)).getValue();
-                                Log.i(TAG,"this is value of height "+ height);
+                            if (estimatesResponse != null) {
+                                if (estimatesResponse.height != null && estimatesResponse.height.size() > 0) {
+                                    Collections.sort(estimatesResponse.height);
+                                    float height = estimatesResponse.height.get((estimatesResponse.height.size() / 2)).getValue();
+                                    Log.i(TAG, "this is value of height " + height);
 
-                                String qrCode = getQrCode(postScanResult.getMeasure_id());
-                                MeasureNotification notification = MeasureNotification.get(qrCode);
+                                    String qrCode = getQrCode(postScanResult.getMeasure_id());
+                                    MeasureNotification notification = MeasureNotification.get(qrCode);
 
-                                Measure measure = measureRepository.getMeasureById(postScanResult.getMeasure_id());
-                                if (measure != null) {
-                                    measure.setHeight(height);
-                                    measure.setHeightConfidence(0);
-                                    measure.setResulted_at(postScanResult.getTimestamp());
-                                    measure.setReceived_at(System.currentTimeMillis());
-                                    measureRepository.updateMeasure(measure);
+                                    Measure measure = measureRepository.getMeasureById(postScanResult.getMeasure_id());
+                                    if (measure != null) {
+                                        measure.setHeight(height);
+                                        measure.setHeightConfidence(0);
+                                        measure.setResulted_at(postScanResult.getTimestamp());
+                                        measure.setReceived_at(System.currentTimeMillis());
+                                        measureRepository.updateMeasure(measure);
 
-                                    //TODO:if ((measure.getHeight() > 0) && (measure.getWeight() > 0))
-                                    {
+                                        //TODO:if ((measure.getHeight() > 0) && (measure.getWeight() > 0))
+                                        //  {
                                         onResultReceived(postScanResult.getMeasure_id());
-                                    }
+                                        //}
 
-                                    if (notification != null) {
-                                        notification.setHeight(height);
-                                        MeasureNotification.showNotification(getContext());
+                                        if (notification != null) {
+                                            notification.setHeight(height);
+                                            MeasureNotification.showNotification(getContext());
+                                        }
                                     }
+                                    postScanResult.setSynced(true);
                                 }
+
+                                if (estimatesResponse.weight != null && estimatesResponse.weight.size() > 0) {
+                                    Collections.sort(estimatesResponse.weight);
+                                    float weight = estimatesResponse.weight.get((estimatesResponse.weight.size() / 2)).getValue();
+                                    Log.i(TAG, "this is value of height " + weight);
+
+                                    String qrCode = getQrCode(postScanResult.getMeasure_id());
+                                    MeasureNotification notification = MeasureNotification.get(qrCode);
+
+                                    Measure measure = measureRepository.getMeasureById(postScanResult.getMeasure_id());
+                                    if (measure != null) {
+                                        measure.setWeight(weight);
+                                        measure.setWeightConfidence(0);
+                                        measure.setResulted_at(postScanResult.getTimestamp());
+                                        measure.setReceived_at(System.currentTimeMillis());
+                                        measureRepository.updateMeasure(measure);
+
+                                        //TODO:if ((measure.getHeight() > 0) && (measure.getWeight() > 0))
+                                        //  {
+                                        onResultReceived(postScanResult.getMeasure_id());
+                                        //}
+
+                                        if (notification != null) {
+                                            notification.setWeight(weight);
+                                            MeasureNotification.showNotification(getContext());
+                                        }
+                                    }
+                                    postScanResult.setSynced(true);
+
+                                }
+
                             }
-                            postScanResult.setSynced(true);
                             postScanResultrepository.updatePostScanResult(postScanResult);
                             updated = true;
                             onThreadChange(-1);
@@ -883,8 +976,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             count = activeThreads;
         }
 
-        if (updated && (count == 0)) {
+       /* if (updated && (count == 0)) {
             new Thread(() -> startSyncing()).start();
-        }
+        }*/
     }
 }

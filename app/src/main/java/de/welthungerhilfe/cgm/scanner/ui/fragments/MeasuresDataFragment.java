@@ -172,10 +172,13 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     }
 
     @Override
-    public void onManualMeasure(String id, double height, double weight, double muac, double headCircumference, Loc location, boolean oedema) {
+    public void onManualMeasure(String id, double height, double weight, double muac, double headCircumference, Loc location, boolean oedema, String measureServerKey) {
         Measure measure = new Measure();
         measure.setId(id != null ? id : AppController.getInstance().getMeasureId());
         measure.setDate(System.currentTimeMillis());
+        if(measureServerKey!=null) {
+            measure.setMeasureServerKey(measureServerKey);
+        }
         long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
         measure.setAge(age);
         measure.setHeight(height);
@@ -195,6 +198,8 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setSchema_version(CgmDatabase.version);
         measure.setArtifact_synced(true);
         measure.setEnvironment(person.getEnvironment());
+        measure.setSynced(false);
+
 
         viewModel.insertMeasure(measure);
     }

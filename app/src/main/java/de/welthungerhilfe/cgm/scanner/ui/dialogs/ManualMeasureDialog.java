@@ -103,6 +103,11 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
     @OnClick(R.id.btnOK)
     void OnConfirm(Button btnOK) {
+        String measureServerKey = null;
+        if(measure!=null)
+        {
+            measureServerKey = measure.getMeasureServerKey();
+        }
         if (validate() && measureListener != null) {
             if (!oedema) {
                 final TextView message = new TextView(mContext);
@@ -116,6 +121,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                 AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                 builder.setTitle(R.string.edema_check);
                 builder.setView(message);
+                String finalMeasureServerKey = measureServerKey;
                 builder.setPositiveButton(R.string.selector_yes, (dialogInterface, i) -> {
                     oedema = true;
                     measureListener.onManualMeasure(
@@ -125,7 +131,8 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                             Utils.parseDouble(editManualMuac.getText().toString()),
                             0f,
                             location,
-                            oedema
+                            oedema,
+                            finalMeasureServerKey
                     );
                     dismiss();
                 });
@@ -140,7 +147,8 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                         Utils.parseDouble(editManualMuac.getText().toString()),
                         0f,
                         location,
-                        oedema
+                        oedema,
+                       measureServerKey
                 );
                 dismiss();
             }
@@ -324,7 +332,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     }
 
     public interface ManualMeasureListener {
-        void onManualMeasure(String id, double height, double weight, double muac, double headCircumference, Loc location, boolean oedema);
+        void onManualMeasure(String id, double height, double weight, double muac, double headCircumference, Loc location, boolean oedema, String measureServerKey);
     }
 
     public interface CloseListener {
