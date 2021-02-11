@@ -4,12 +4,12 @@ import com.google.gson.annotations.Expose;
 
 public class EstimatesValue implements Comparable<EstimatesValue> {
     @Expose
-    public int value;
+    public float value;
 
     @Expose
-    public int confidence;
+    public float confidence;
 
-    public int getValue() {
+    public float getValue() {
         return value;
     }
 
@@ -17,20 +17,20 @@ public class EstimatesValue implements Comparable<EstimatesValue> {
         this.value = value;
     }
 
-    public int getConfidence() {
+    public float getConfidence() {
         return confidence;
     }
 
-    public void setConfidence(int confidence) {
+    public void setConfidence(float confidence) {
         this.confidence = confidence;
     }
 
 
     @Override
     public int compareTo(EstimatesValue o) {
-        int compareQuantity = ((EstimatesValue) o).getValue();
+        float compareQuantity = o.getValue();
 
         //ascending order
-        return this.value - compareQuantity;
+        return (int) ((this.value - compareQuantity) * 1000000);
     }
 }
