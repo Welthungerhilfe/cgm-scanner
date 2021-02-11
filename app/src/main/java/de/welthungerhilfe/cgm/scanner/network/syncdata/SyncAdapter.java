@@ -485,7 +485,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                             @Override
                             public void onNext(@NonNull Scan scan) {
-                                Log.i(TAG, "this is inside onNext artifactsList " + scan.toString());
+                                Log.i(TAG, "this is response success postScan " + scan.toString());
                                 PostScanResult postScanResult = new PostScanResult();
                                 postScanResult.setEnvironment(measure.getEnvironment());
                                 postScanResult.setId(scan.getId());
@@ -552,7 +552,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Person person) {
-                            Log.i(TAG, "this is inside of person on next  " + person);
+                            Log.i(TAG, "this is response success postPerson " +person);
                             person.setTimestamp(prevTimestamp);
                             person.setId(person1.getId());
                             person.setCreatedBy(person1.getCreatedBy());
@@ -575,7 +575,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is value of post " + e.getMessage());
+                            Log.i(TAG, "this is response error postperson" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(getContext());
                             }
@@ -622,7 +622,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Person person) {
-                            Log.i(TAG, "this is inside of update person on next  " + person);
+                            Log.i(TAG, "this is response success putPerson " +person);
                             person.setTimestamp(prevTimestamp);
                             person.setId(person1.getId());
                             person.setCreatedBy(person1.getCreatedBy());
@@ -642,9 +642,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is value of update person" +
-                                    "" +
-                                    " " + e.getMessage());
+                            Log.i(TAG, "this is response error putPerson" + e.getMessage());
+
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(getContext());
                             }
@@ -699,7 +698,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Measure measure1) {
-                            Log.i(TAG, "this is inside of measure on next  " + measure);
+                            Log.i(TAG, "this is response success postMeasure " +measure1);
                             measure1.setTimestamp(prevTimestamp);
                             measure1.setId(measure.getId());
                             measure1.setPersonId(measure.getPersonId());
@@ -717,7 +716,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is value of post " + e.getMessage());
+                            Log.i(TAG, "this is response error postMeasurements" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(getContext());
                             }
@@ -755,7 +754,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Measure measure1) {
-                            Log.i(TAG, "this is inside of measure on next  " + measure);
+                            Log.i(TAG, "this is response success putMeasure " +measure1);
                             measure1.setTimestamp(prevTimestamp);
                             measure1.setId(measure.getId());
                             measure1.setPersonId(measure.getPersonId());
@@ -773,7 +772,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is value of post " + e.getMessage());
+                            Log.i(TAG, "this is response error putMeasurements" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(getContext());
                             }
@@ -814,7 +813,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Consent consent) {
-                            Log.i(TAG, "this is inside of postConsent on next  " + consent);
+                            Log.i(TAG, "this is response success postConsentSheet " +consent);
                             fileLog.setStatus(AppConstants.CONSENT_UPLOADED);
                             fileLogRepository.updateFileLog(fileLog);
                             onThreadChange(-1);
@@ -822,7 +821,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is value of post " + e.getMessage());
+                            Log.i(TAG, "this is response error postConsentSheet" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(getContext());
                             }
@@ -854,7 +853,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull EstimatesResponse estimatesResponse) {
-                            Log.i(TAG, "this is inside of getEstimate on next  " + estimatesResponse);
+                            Log.i(TAG, "this is response success getEstimation " +estimatesResponse);
                             //TODO : generate notification and store result based on confidence value
                             if (estimatesResponse != null) {
                                 if (estimatesResponse.height != null && estimatesResponse.height.size() > 0) {
@@ -925,7 +924,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is value of post " + e.getMessage());
+                            Log.i(TAG, "this is response error getEstimation" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(getContext());
                             }
