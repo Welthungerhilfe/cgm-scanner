@@ -76,7 +76,6 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
-    private final int REQUEST_LOCATION = 0x1000;
 
     private PersonListViewModel viewModel;
 
@@ -357,7 +356,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     private void doFilterByLocation() {
         Intent intent = new Intent(MainActivity.this, LocationSearchActivity.class);
-        startActivityForResult(intent, REQUEST_LOCATION);
+        startActivityForResult(intent, PERMISSION_LOCATION);
     }
 
     private void openSort() {
@@ -426,7 +425,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     @Override
     public void onActivityResult(int reqCode, int resCode, Intent result) {
         super.onActivityResult(reqCode, resCode, result);
-        if (reqCode == REQUEST_LOCATION && resCode == Activity.RESULT_OK) {
+        if (reqCode == PERMISSION_LOCATION && resCode == Activity.RESULT_OK) {
             int radius = result.getIntExtra(AppConstants.EXTRA_RADIUS, 0);
 
             adapterData.clear();

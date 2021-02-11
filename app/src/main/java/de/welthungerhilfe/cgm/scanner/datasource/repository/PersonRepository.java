@@ -160,10 +160,8 @@ public class PersonRepository {
                 break;
         }
 
-        Log.i(TAG, "this is value of whereclause " + whereClause);
 
         String query = String.format("SELECT %s FROM %s p WHERE %s ORDER BY %s %s", selectClause, CgmDatabase.TABLE_PERSON, whereClause, orderByClause, limitClause);
-        Log.i(TAG, "this is value of query " + query);
         return database.personDao().getResultPerson(new SimpleSQLiteQuery(query));
     }
 

@@ -34,7 +34,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.views.ZoomImageView;
 
-public class ImageDetailActivity extends AppCompatActivity {
+public class ImageDetailActivity extends BaseActivity {
     @BindView(R.id.zoomView)
     ZoomImageView zoomView;
     @BindView(R.id.toolbar)

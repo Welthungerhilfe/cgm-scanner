@@ -37,6 +37,10 @@ import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class BaseActivity extends AppCompatActivity implements Connectable, Disconnectable {
 
+    protected final int PERMISSION_LOCATION = 0x0001;
+    protected final int PERMISSION_CAMERA = 0x0002;
+    protected final int PERMISSION_STORAGE = 0x0003;
+
     public interface ResultListener {
         void onActivityResult(int requestCode, int resultCode, @Nullable Intent data);
         void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults);

@@ -19,6 +19,7 @@
 package de.welthungerhilfe.cgm.scanner.network.service;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
+import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
@@ -26,6 +27,7 @@ import io.reactivex.rxjava3.core.Observable;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
@@ -45,6 +47,9 @@ public interface ApiService {
     @POST("measurements")
     Observable<Measure> postMeasure(@Header("Authorization") String auth, @Body RequestBody measure);
 
+    @PUT("measurements/{id}")
+    Observable<Measure> putMeasure(@Header("Authorization") String auth, @Body RequestBody measure, @Path("id") String id);
+
     @POST("scans")
     Observable<Scan> postScans(@Header("Authorization") String auth, @Body RequestBody scan);
 
@@ -54,4 +59,8 @@ public interface ApiService {
 
     @POST("persons/{person_id}/consent")
     Observable<Consent> postConsent(@Header("Authorization") String auth, @Body RequestBody personConsent, @Path("person_id") String id);
+
+    @GET("scans/{scan_id}/estimates")
+    Observable<EstimatesResponse> getEstimates(@Header("Authorization") String auth, @Path("scan_id") String scanId);
 }
+

@@ -22,7 +22,6 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
@@ -42,7 +41,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.UploadManagerViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerUploadAdapter;
 
-public class UploadManagerActivity extends AppCompatActivity implements Runnable {
+public class UploadManagerActivity extends BaseActivity implements Runnable {
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.recyclerScans)

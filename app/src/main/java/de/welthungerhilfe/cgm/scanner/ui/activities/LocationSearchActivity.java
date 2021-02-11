@@ -60,8 +60,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class LocationSearchActivity extends AppCompatActivity implements OnMapReadyCallback, SeekBar.OnSeekBarChangeListener {
-    private final int PERMISSION_LOCATION = 0x1001;
+public class LocationSearchActivity extends BaseActivity implements OnMapReadyCallback, SeekBar.OnSeekBarChangeListener {
 
     private Location location = null;
     private SessionManager session;

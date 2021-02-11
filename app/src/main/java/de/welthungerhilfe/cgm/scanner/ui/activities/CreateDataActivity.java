@@ -59,8 +59,6 @@ import retrofit2.Retrofit;
 
 public class CreateDataActivity extends BaseActivity {
 
-    private final int PERMISSION_LOCATION = 0x002;
-
     public String qrCode;
 
     @BindView(R.id.container)

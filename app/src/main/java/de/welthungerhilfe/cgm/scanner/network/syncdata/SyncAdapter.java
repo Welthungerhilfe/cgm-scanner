@@ -34,8 +34,6 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.queue.CloudQueue;
 import com.microsoft.azure.storage.queue.CloudQueueClient;
@@ -45,25 +43,26 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
+import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PostScanResultrepository;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
@@ -87,10 +86,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private static final Object lock = new Object();
 
-    private String TAG = SyncAdapter.class.getSimpleName();
+    private final String TAG = SyncAdapter.class.getSimpleName();
 
     private Integer activeThreads;
     private boolean updated;
+    private int updateDelay;
 
     private long prevTimestamp;
     private long currentTimestamp;
@@ -99,7 +99,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private MeasureRepository measureRepository;
     private DeviceRepository deviceRepository;
     private FileLogRepository fileLogRepository;
-    private MeasureResultRepository measureResultRepository;
+    private PostScanResultrepository postScanResultrepository;
 
     private SessionManager session;
     private AsyncTask<Void, Void, Void> syncTask;
@@ -113,7 +113,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         measureRepository = MeasureRepository.getInstance(context);
         deviceRepository = DeviceRepository.getInstance(context);
         fileLogRepository = FileLogRepository.getInstance(context);
-        measureResultRepository = MeasureResultRepository.getInstance(context);
+        postScanResultrepository = PostScanResultrepository.getInstance(context);
 
         activeThreads = 0;
         session = new SessionManager(context);
@@ -166,7 +166,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             currentTimestamp = System.currentTimeMillis();
 
             syncTask = new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            Log.i(TAG,"this is inside end startSynching");
+            Log.i(TAG, "this is inside end startSynching");
         }
     }
 
@@ -214,18 +214,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.d(TAG, "start updating");
             //REST API implementation
             updated = false;
+            updateDelay = 60 * 60 * 1000;
             synchronized (getLock()) {
                 try {
                     processPersonQueue();
                     processMeasureQueue();
                     processConsentSheet();
-                 /*  Things to yet implemented
-                    processMeasureResultQueue(queueClient);
-                    processDeviceQueue(queueClient);
-                    processCachedMeasures();*/
+                    processMeasureReasult();
+                    //TODO:implement processDeviceQueue(queueClient);
 
-
-                    //     measureRepository.uploadMeasures(getContext());
                     session.setSyncTimestamp(currentTimestamp);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -236,110 +233,20 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             return null;
         }
 
-        private String getQrCode(String measureId) {
-            try {
-                return measureRepository.getMeasureById(measureId).getQrCode();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        private void processMeasureResultQueue(CloudQueueClient queueClient) throws URISyntaxException {
+        private void processMeasureReasult() {
 
             try {
-                CloudQueue measureResultQueue = queueClient.getQueueReference(Utils.getAndroidID(getContext().getContentResolver()) + "-measure-result");
+                List<PostScanResult> syncablePostScanResult = postScanResultrepository.getSyncablePostScanResult(session.getEnvironment());
+                for (int i = 0; i < syncablePostScanResult.size(); i++) {
 
-                if (measureResultQueue.exists()) {
-                    Iterable<CloudQueueMessage> retrievedMessages;
-
-                    measureResultQueue.setShouldEncodeMessage(false);
-                    retrievedMessages = measureResultQueue.retrieveMessages(30);
-                    Gson gson = new Gson();
-
-                    Iterator<CloudQueueMessage> iterator = retrievedMessages.iterator();
-                    if (iterator.hasNext()) {
-                        Log.d(TAG, "has at least one message");
-                    }
-                    while (iterator.hasNext()) {
-                        CloudQueueMessage message = iterator.next();
-
-                        try {
-                            String messageStr = message.getMessageContentAsString();
-                            Log.d(TAG, messageStr);
-                            MeasureResult result = gson.fromJson(messageStr, MeasureResult.class);
-                            String qrCode = getQrCode(result.getMeasure_id());
-                            MeasureNotification notification = MeasureNotification.get(qrCode);
-
-                            float keyMaxConfident = measureResultRepository.getConfidence(result.getMeasure_id(), result.getKey());
-                            if (result.getConfidence_value() > keyMaxConfident) {
-                                measureResultRepository.insertMeasureResult(result);
-                            }
-
-                            if (result.getKey().contains("weight")) {
-                                float fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "weight%");
-
-                                if (result.getConfidence_value() >= fieldMaxConfidence) {
-                                    JsonObject object = new Gson().fromJson(result.getJson_value(), JsonObject.class);
-                                    long timestamp = object.get("timestamp").getAsLong();
-
-                                    Measure measure = measureRepository.getMeasureById(result.getMeasure_id());
-                                    if (measure != null) {
-                                        measure.setWeight(result.getFloat_value());
-                                        measure.setWeightConfidence(result.getConfidence_value());
-                                        measure.setResulted_at(timestamp);
-                                        measure.setReceived_at(System.currentTimeMillis());
-                                        measureRepository.updateMeasure(measure);
-
-                                        if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
-                                            onResultReceived(result);
-                                        }
-
-                                        if (notification != null) {
-                                            notification.setWeight(result.getFloat_value());
-                                        }
-                                    }
-                                } else if ((notification != null) && !notification.hasWeight()) {
-                                    notification.setWeight(result.getFloat_value());
-                                }
-                            } else if (result.getKey().contains("height")) {
-                                float fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "height%");
-
-                                if (result.getConfidence_value() >= fieldMaxConfidence) {
-                                    JsonObject object = new Gson().fromJson(result.getJson_value(), JsonObject.class);
-                                    long timestamp = object.get("timestamp").getAsLong();
-
-                                    Measure measure = measureRepository.getMeasureById(result.getMeasure_id());
-                                    if (measure != null) {
-                                        measure.setHeight(result.getFloat_value());
-                                        measure.setHeightConfidence(result.getConfidence_value());
-                                        measure.setResulted_at(timestamp);
-                                        measure.setReceived_at(System.currentTimeMillis());
-                                        measureRepository.updateMeasure(measure);
-
-                                        if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
-                                            onResultReceived(result);
-                                        }
-
-                                        if (notification != null) {
-                                            notification.setHeight(result.getFloat_value());
-                                        }
-                                    }
-                                } else if ((notification != null) && notification.hasHeight()) {
-                                    notification.setHeight(result.getFloat_value());
-                                }
-                            }
-                        } catch (JsonSyntaxException e) {
-                            e.printStackTrace();
-                        }
-
-                        measureResultQueue.deleteMessage(message);
-                    }
-                    MeasureNotification.showNotification(getContext());
+                    PostScanResult postScanResult = syncablePostScanResult.get(i);
+                    Log.i("Syncadapter", "this is inside processMeasureReasult Queue " + postScanResult);
+                    getEstimates(postScanResult);
                 }
-            } catch (StorageException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                currentTimestamp = prevTimestamp;
             }
+
         }
 
         private void processPersonQueue() {
@@ -375,13 +282,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     if (backendPersonId == null) {
                         continue;
                     }
+
                     measure.setPersonServerKey(backendPersonId);
-
                     if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
-
-
-                        if (backendPersonId != null) {
-                            postMeasurment(measure);
+                        if (measure.getMeasureServerKey() != null) {
+                            putMeasurement(measure);
+                        } else {
+                            postMeasurement(measure);
                         }
                     } else {
                         HashMap<Integer, Scan> scans = measure.split(fileLogRepository, session.getEnvironment());
@@ -443,32 +350,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 currentTimestamp = prevTimestamp;
             }
         }
-
-        private void onResultReceived(MeasureResult result) {
-
-            Context c = getContext();
-            if (!LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT))
-                return;
-            if (LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID).compareTo(result.getMeasure_id()) != 0)
-                return;
-
-            if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE) == 0) {
-
-                //set receive timestamp
-                LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE, System.currentTimeMillis());
-
-                //update average time
-                long diff = 0;
-                diff += LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE);
-                diff -= LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_SCAN);
-                ArrayList<Long> last = LocalPersistency.getLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE);
-                last.add(diff);
-                if (last.size() > 10) {
-                    last.remove(0);
-                }
-                LocalPersistency.setLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE, last);
-            }
-        }
     }
 
     private void postScans(HashMap<Integer, Scan> scans, Measure measure) {
@@ -494,7 +375,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                             @Override
                             public void onNext(@NonNull Scan scan) {
-                                Log.i(TAG, "this is inside onNext artifactsList " + scan.toString());
+                                Log.i(TAG, "this is response success postScan " + scan.toString());
+                                PostScanResult postScanResult = new PostScanResult();
+                                postScanResult.setEnvironment(measure.getEnvironment());
+                                postScanResult.setId(scan.getId());
+                                postScanResult.setMeasure_id(measure.getId());
+                                postScanResult.setTimestamp(prevTimestamp);
+                                postScanResultrepository.insertPostScanResult(postScanResult);
+
                                 count[0]--;
                                 if (count[0] == 0) {
                                     measure.setArtifact_synced(true);
@@ -502,6 +390,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     measure.setUploaded_at(System.currentTimeMillis());
                                     measure.setSynced(true);
                                     updated = true;
+                                    updateDelay = 0;
                                     measureRepository.updateMeasure(measure);
                                 }
                                 onThreadChange(-1);
@@ -526,6 +415,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.i(TAG, "this is value of exception " + e.getMessage());
         }
     }
+
 
     public void postPerson(Person person1) {
         try {
@@ -552,7 +442,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Person person) {
-                            Log.i(TAG, "this is inside of person on next  " + person);
+                            Log.i(TAG, "this is response success postPerson " +person);
                             person.setTimestamp(prevTimestamp);
                             person.setId(person1.getId());
                             person.setCreatedBy(person1.getCreatedBy());
@@ -569,12 +459,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             person.setBirthday(person1.getBirthday());
                             updatePersonOnDatabase(person);
                             updated = true;
+                            updateDelay = 0;
                             onThreadChange(-1);
                         }
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is value of post " + e.getMessage());
+                            Log.i(TAG, "this is response error postperson" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(getContext());
                             }
@@ -621,7 +512,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Person person) {
-                            Log.i(TAG, "this is inside of update person on next  " + person);
+                            Log.i(TAG, "this is response success putPerson " +person);
                             person.setTimestamp(prevTimestamp);
                             person.setId(person1.getId());
                             person.setCreatedBy(person1.getCreatedBy());
@@ -635,14 +526,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             person.setBirthday(person1.getBirthday());
                             updatePersonOnDatabase(person);
                             updated = true;
+                            updateDelay = 0;
                             onThreadChange(-1);
                         }
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is value of update person" +
-                                    "" +
-                                    " " + e.getMessage());
+                            Log.i(TAG, "this is response error putPerson" + e.getMessage());
+
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(getContext());
                             }
@@ -676,7 +567,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public void postMeasurment(Measure measure) {
+    public void postMeasurement(Measure measure) {
         try {
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
@@ -696,25 +587,82 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         }
 
                         @Override
-                        public void onNext(@NonNull Measure measure) {
-                            Log.i(TAG, "this is inside of measure on next  " + measure);
-                            measure.setTimestamp(prevTimestamp);
-                            measure.setId(measure.getId());
-                            measure.setPersonId(measure.getPersonId());
-                            measure.setType(AppConstants.VAL_MEASURE_MANUAL);
-                            measure.setCreatedBy(measure.getCreatedBy());
-                            measure.setDate(measure.getDate());
-                            measure.setUploaded_at(session.getSyncTimestamp());
-                            measure.setSynced(true);
-                            measure.setEnvironment(measure.getEnvironment());
-                            measureRepository.updateMeasure(measure);
+                        public void onNext(@NonNull Measure measure1) {
+                            Log.i(TAG, "this is response success postMeasure " +measure1);
+                            measure1.setTimestamp(prevTimestamp);
+                            measure1.setId(measure.getId());
+                            measure1.setPersonId(measure.getPersonId());
+                            measure1.setType(AppConstants.VAL_MEASURE_MANUAL);
+                            measure1.setCreatedBy(measure.getCreatedBy());
+                            measure1.setDate(measure.getDate());
+                            measure1.setUploaded_at(session.getSyncTimestamp());
+                            measure1.setSynced(true);
+                            measure1.setEnvironment(measure.getEnvironment());
+                            measureRepository.updateMeasure(measure1);
                             updated = true;
+                            updateDelay = 0;
                             onThreadChange(-1);
                         }
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is value of post " + e.getMessage());
+                            Log.i(TAG, "this is response error postMeasurements" + e.getMessage());
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(getContext());
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            Log.i(TAG, "this is value of exception " + e.getMessage());
+        }
+    }
+
+    public void putMeasurement(Measure measure) {
+        try {
+            Gson gson = new GsonBuilder()
+                    .excludeFieldsWithoutExposeAnnotation()
+                    .create();
+            measure.setMeasured(DataFormat.convertTimestampToDate(measure.getDate()));
+            measure.setPersonServerKey(null);
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(measure))).toString());
+            Log.i(TAG, "this is data of measure " + (new JSONObject(gson.toJson(measure))).toString());
+
+            onThreadChange(1);
+            retrofit.create(ApiService.class).putMeasure(session.getAuthTokenWithBearer(), body, measure.getMeasureServerKey()).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Measure>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull Measure measure1) {
+                            Log.i(TAG, "this is response success putMeasure " +measure1);
+                            measure1.setTimestamp(prevTimestamp);
+                            measure1.setId(measure.getId());
+                            measure1.setPersonId(measure.getPersonId());
+                            measure1.setType(AppConstants.VAL_MEASURE_MANUAL);
+                            measure1.setCreatedBy(measure.getCreatedBy());
+                            measure1.setDate(measure.getDate());
+                            measure1.setUploaded_at(session.getSyncTimestamp());
+                            measure1.setEnvironment(measure.getEnvironment());
+                            measure1.setSynced(true);
+                            measureRepository.updateMeasure(measure1);
+                            updated = true;
+                            updateDelay = 0;
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            Log.i(TAG, "this is response error putMeasurements" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(getContext());
                             }
@@ -755,7 +703,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Consent consent) {
-                            Log.i(TAG, "this is inside of postConsent on next  " + consent);
+                            Log.i(TAG, "this is response success postConsentSheet " +consent);
                             fileLog.setStatus(AppConstants.CONSENT_UPLOADED);
                             fileLogRepository.updateFileLog(fileLog);
                             onThreadChange(-1);
@@ -763,7 +711,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is value of post " + e.getMessage());
+                            Log.i(TAG, "this is response error postConsentSheet" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(getContext());
                             }
@@ -780,6 +728,139 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
+    public void getEstimates(PostScanResult postScanResult) {
+        try {
+            Log.i(TAG, "this is data of postScanResulu " + postScanResult.getId());
+
+            onThreadChange(1);
+            retrofit.create(ApiService.class).getEstimates(session.getAuthTokenWithBearer(), postScanResult.getId()).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<EstimatesResponse>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull EstimatesResponse estimatesResponse) {
+                            Log.i(TAG, "this is response success getEstimation " +estimatesResponse);
+                            //TODO : generate notification and store result based on confidence value
+                            if (estimatesResponse != null) {
+
+                                Measure measure = measureRepository.getMeasureById(postScanResult.getMeasure_id());
+                                if (estimatesResponse.height != null && estimatesResponse.height.size() > 0) {
+                                    Collections.sort(estimatesResponse.height);
+                                    float height = estimatesResponse.height.get((estimatesResponse.height.size() / 2)).getValue();
+                                    Log.i(TAG, "this is value of height " + height);
+
+                                    String qrCode = getQrCode(postScanResult.getMeasure_id());
+                                    MeasureNotification notification = MeasureNotification.get(qrCode);
+
+                                    if (measure != null) {
+                                        boolean hadHeight = measure.getHeight() > 0;
+                                        measure.setHeight(height);
+                                        measure.setHeightConfidence(0);
+                                        measure.setResulted_at(postScanResult.getTimestamp());
+                                        measure.setReceived_at(System.currentTimeMillis());
+                                        measureRepository.updateMeasure(measure);
+
+                                        if ((notification != null) && !hadHeight) {
+                                            notification.setHeight(height);
+                                            MeasureNotification.showNotification(getContext());
+                                        }
+                                    }
+                                }
+
+                                if (estimatesResponse.weight != null && estimatesResponse.weight.size() > 0) {
+                                    Collections.sort(estimatesResponse.weight);
+                                    float weight = estimatesResponse.weight.get((estimatesResponse.weight.size() / 2)).getValue();
+                                    Log.i(TAG, "this is value of height " + weight);
+
+                                    String qrCode = getQrCode(postScanResult.getMeasure_id());
+                                    MeasureNotification notification = MeasureNotification.get(qrCode);
+
+                                    if (measure != null) {
+                                        boolean hadWeight = measure.getWeight() > 0;
+                                        measure.setWeight(weight);
+                                        measure.setWeightConfidence(0);
+                                        measure.setResulted_at(postScanResult.getTimestamp());
+                                        measure.setReceived_at(System.currentTimeMillis());
+                                        measureRepository.updateMeasure(measure);
+
+                                        if ((notification != null) && !hadWeight) {
+                                            notification.setWeight(weight);
+                                            MeasureNotification.showNotification(getContext());
+                                        }
+                                    }
+                                }
+
+                                if (measure != null) {
+                                    if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
+                                        postScanResult.setSynced(true);
+                                        onResultReceived(postScanResult.getMeasure_id());
+                                    }
+                                }
+                            }
+                            postScanResultrepository.updatePostScanResult(postScanResult);
+                            updated = true;
+                            updateDelay = Math.min(60 * 1000, updateDelay);
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            Log.i(TAG, "this is response error getEstimation" + e.getMessage());
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(getContext());
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            Log.i(TAG, "this is value of exception " + e.getMessage());
+        }
+    }
+
+    private String getQrCode(String measureId) {
+        try {
+            return measureRepository.getMeasureById(measureId).getQrCode();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void onResultReceived(String measureId) {
+
+        Context c = getContext();
+        if (!LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT))
+            return;
+        if (LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID).compareTo(measureId) != 0)
+            return;
+
+        if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE) == 0) {
+
+            //set receive timestamp
+            LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE, System.currentTimeMillis());
+
+            //update average time
+            long diff = 0;
+            diff += LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE);
+            diff -= LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_SCAN);
+            ArrayList<Long> last = LocalPersistency.getLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE);
+            last.add(diff);
+            if (last.size() > 10) {
+                last.remove(0);
+            }
+            LocalPersistency.setLongArray(c, SettingsPerformanceActivity.KEY_TEST_RESULT_AVERAGE, last);
+        }
+    }
+
     private void onThreadChange(int diff) {
         int count;
         synchronized (activeThreads) {
@@ -788,7 +869,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         if (updated && (count == 0)) {
-            new Thread(() -> startSyncing()).start();
+            new Thread(() -> {
+                if (updateDelay > 0) {
+                    Utils.sleep(updateDelay);
+                }
+                startSyncing();
+            }).start();
         }
     }
 }
