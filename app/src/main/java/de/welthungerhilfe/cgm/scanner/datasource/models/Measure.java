@@ -51,11 +51,10 @@ import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TAB
 public class Measure extends CsvExportableModel implements Serializable {
     @PrimaryKey
     @NonNull
-    @Expose(serialize = false, deserialize = false)
     private String id;
 
     @SerializedName("id")
-    @Expose
+    @Expose(serialize = false)
     private String measureServerKey;
 
     @ForeignKey(entity = Person.class, parentColumns = "id", childColumns = "personId", onDelete = CASCADE, onUpdate = CASCADE)

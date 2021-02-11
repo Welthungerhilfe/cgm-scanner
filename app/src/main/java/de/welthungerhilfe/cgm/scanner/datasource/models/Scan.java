@@ -26,6 +26,10 @@ import java.util.List;
 
 public class Scan implements Serializable {
 
+    @SerializedName("id")
+    @Expose
+    private String id;
+
     @SerializedName("artifacts")
     @Expose
     private List<Artifact> artifacts;
@@ -53,6 +57,14 @@ public class Scan implements Serializable {
     @SerializedName("person")
     @Expose
     private String personServerKey;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public List<Artifact> getArtifacts() {
         return artifacts;
