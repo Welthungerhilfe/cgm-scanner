@@ -757,13 +757,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     MeasureNotification notification = MeasureNotification.get(qrCode);
 
                                     if (measure != null) {
+                                        boolean hadHeight = measure.getHeight() > 0;
                                         measure.setHeight(height);
                                         measure.setHeightConfidence(0);
                                         measure.setResulted_at(postScanResult.getTimestamp());
                                         measure.setReceived_at(System.currentTimeMillis());
                                         measureRepository.updateMeasure(measure);
 
-                                        if (notification != null) {
+                                        if ((notification != null) && !hadHeight) {
                                             notification.setHeight(height);
                                             MeasureNotification.showNotification(getContext());
                                         }
@@ -779,13 +780,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     MeasureNotification notification = MeasureNotification.get(qrCode);
 
                                     if (measure != null) {
+                                        boolean hadWeight = measure.getWeight() > 0;
                                         measure.setWeight(weight);
                                         measure.setWeightConfidence(0);
                                         measure.setResulted_at(postScanResult.getTimestamp());
                                         measure.setReceived_at(System.currentTimeMillis());
                                         measureRepository.updateMeasure(measure);
 
-                                        if (notification != null) {
+                                        if ((notification != null) && !hadWeight) {
                                             notification.setWeight(weight);
                                             MeasureNotification.showNotification(getContext());
                                         }
