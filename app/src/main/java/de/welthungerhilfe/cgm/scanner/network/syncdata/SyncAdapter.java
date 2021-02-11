@@ -803,7 +803,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             }
                             postScanResultrepository.updatePostScanResult(postScanResult);
                             updated = true;
-                            updateDelay = Math.min(10 * 1000, updateDelay);
+                            updateDelay = Math.min(60 * 1000, updateDelay);
                             onThreadChange(-1);
                         }
 
