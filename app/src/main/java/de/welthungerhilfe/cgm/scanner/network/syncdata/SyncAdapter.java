@@ -34,8 +34,6 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.queue.CloudQueue;
 import com.microsoft.azure.storage.queue.CloudQueueClient;
@@ -45,10 +43,8 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.R;
@@ -62,13 +58,11 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.PostScanResultreposi
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
@@ -92,7 +86,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private static final Object lock = new Object();
 
-    private String TAG = SyncAdapter.class.getSimpleName();
+    private final String TAG = SyncAdapter.class.getSimpleName();
 
     private Integer activeThreads;
     private boolean updated;
@@ -105,7 +99,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private MeasureRepository measureRepository;
     private DeviceRepository deviceRepository;
     private FileLogRepository fileLogRepository;
-    private MeasureResultRepository measureResultRepository;
     private PostScanResultrepository postScanResultrepository;
 
     private SessionManager session;
@@ -120,7 +113,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         measureRepository = MeasureRepository.getInstance(context);
         deviceRepository = DeviceRepository.getInstance(context);
         fileLogRepository = FileLogRepository.getInstance(context);
-        measureResultRepository = MeasureResultRepository.getInstance(context);
         postScanResultrepository = PostScanResultrepository.getInstance(context);
 
         activeThreads = 0;
@@ -229,13 +221,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     processMeasureQueue();
                     processConsentSheet();
                     processMeasureReasult();
-                 /*  Things to yet implemented
-                    processMeasureResultQueue(queueClient);
-                    processDeviceQueue(queueClient);
-                    processCachedMeasures();*/
+                    //TODO:implement processDeviceQueue(queueClient);
 
-
-                    //     measureRepository.uploadMeasures(getContext());
                     session.setSyncTimestamp(currentTimestamp);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -244,103 +231,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.d(TAG, "end updating");
             syncTask = null;
             return null;
-        }
-
-        private void processMeasureResultQueue(CloudQueueClient queueClient) throws URISyntaxException {
-
-            try {
-                CloudQueue measureResultQueue = queueClient.getQueueReference(Utils.getAndroidID(getContext().getContentResolver()) + "-measure-result");
-
-                if (measureResultQueue.exists()) {
-                    Iterable<CloudQueueMessage> retrievedMessages;
-
-                    measureResultQueue.setShouldEncodeMessage(false);
-                    retrievedMessages = measureResultQueue.retrieveMessages(30);
-                    Gson gson = new Gson();
-
-                    Iterator<CloudQueueMessage> iterator = retrievedMessages.iterator();
-                    if (iterator.hasNext()) {
-                        Log.d(TAG, "has at least one message");
-                    }
-                    while (iterator.hasNext()) {
-                        CloudQueueMessage message = iterator.next();
-
-                        try {
-                            String messageStr = message.getMessageContentAsString();
-                            Log.d(TAG, messageStr);
-                            MeasureResult result = gson.fromJson(messageStr, MeasureResult.class);
-                            String qrCode = getQrCode(result.getMeasure_id());
-                            MeasureNotification notification = MeasureNotification.get(qrCode);
-
-                            float keyMaxConfident = measureResultRepository.getConfidence(result.getMeasure_id(), result.getKey());
-                            if (result.getConfidence_value() > keyMaxConfident) {
-                                measureResultRepository.insertMeasureResult(result);
-                            }
-
-                            if (result.getKey().contains("weight")) {
-                                float fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "weight%");
-
-                                if (result.getConfidence_value() >= fieldMaxConfidence) {
-                                    JsonObject object = new Gson().fromJson(result.getJson_value(), JsonObject.class);
-                                    long timestamp = object.get("timestamp").getAsLong();
-
-                                    Measure measure = measureRepository.getMeasureById(result.getMeasure_id());
-                                    if (measure != null) {
-                                        measure.setWeight(result.getFloat_value());
-                                        measure.setWeightConfidence(result.getConfidence_value());
-                                        measure.setResulted_at(timestamp);
-                                        measure.setReceived_at(System.currentTimeMillis());
-                                        measureRepository.updateMeasure(measure);
-
-                                        if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
-                                            onResultReceived(result.getMeasure_id());
-                                        }
-
-                                        if (notification != null) {
-                                            notification.setWeight(result.getFloat_value());
-                                        }
-                                    }
-                                } else if ((notification != null) && !notification.hasWeight()) {
-                                    notification.setWeight(result.getFloat_value());
-                                }
-                            } else if (result.getKey().contains("height")) {
-                                float fieldMaxConfidence = measureResultRepository.getMaxConfidence(result.getMeasure_id(), "height%");
-
-                                if (result.getConfidence_value() >= fieldMaxConfidence) {
-                                    JsonObject object = new Gson().fromJson(result.getJson_value(), JsonObject.class);
-                                    long timestamp = object.get("timestamp").getAsLong();
-
-                                    Measure measure = measureRepository.getMeasureById(result.getMeasure_id());
-                                    if (measure != null) {
-                                        measure.setHeight(result.getFloat_value());
-                                        measure.setHeightConfidence(result.getConfidence_value());
-                                        measure.setResulted_at(timestamp);
-                                        measure.setReceived_at(System.currentTimeMillis());
-                                        measureRepository.updateMeasure(measure);
-
-                                        if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
-                                            onResultReceived(result.getMeasure_id());
-                                        }
-
-                                        if (notification != null) {
-                                            notification.setHeight(result.getFloat_value());
-                                        }
-                                    }
-                                } else if ((notification != null) && notification.hasHeight()) {
-                                    notification.setHeight(result.getFloat_value());
-                                }
-                            }
-                        } catch (JsonSyntaxException e) {
-                            e.printStackTrace();
-                        }
-
-                        measureResultQueue.deleteMessage(message);
-                    }
-                    MeasureNotification.showNotification(getContext());
-                }
-            } catch (StorageException e) {
-                e.printStackTrace();
-            }
         }
 
         private void processMeasureReasult() {
@@ -856,6 +746,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             Log.i(TAG, "this is response success getEstimation " +estimatesResponse);
                             //TODO : generate notification and store result based on confidence value
                             if (estimatesResponse != null) {
+
+                                Measure measure = measureRepository.getMeasureById(postScanResult.getMeasure_id());
                                 if (estimatesResponse.height != null && estimatesResponse.height.size() > 0) {
                                     Collections.sort(estimatesResponse.height);
                                     float height = estimatesResponse.height.get((estimatesResponse.height.size() / 2)).getValue();
@@ -864,18 +756,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     String qrCode = getQrCode(postScanResult.getMeasure_id());
                                     MeasureNotification notification = MeasureNotification.get(qrCode);
 
-                                    Measure measure = measureRepository.getMeasureById(postScanResult.getMeasure_id());
                                     if (measure != null) {
                                         measure.setHeight(height);
                                         measure.setHeightConfidence(0);
                                         measure.setResulted_at(postScanResult.getTimestamp());
                                         measure.setReceived_at(System.currentTimeMillis());
                                         measureRepository.updateMeasure(measure);
-
-                                        //TODO:if ((measure.getHeight() > 0) && (measure.getWeight() > 0))
-                                        //  {
-                                        onResultReceived(postScanResult.getMeasure_id());
-                                        //}
 
                                         if (notification != null) {
                                             notification.setHeight(height);
@@ -893,7 +779,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     String qrCode = getQrCode(postScanResult.getMeasure_id());
                                     MeasureNotification notification = MeasureNotification.get(qrCode);
 
-                                    Measure measure = measureRepository.getMeasureById(postScanResult.getMeasure_id());
                                     if (measure != null) {
                                         measure.setWeight(weight);
                                         measure.setWeightConfidence(0);
@@ -901,20 +786,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                         measure.setReceived_at(System.currentTimeMillis());
                                         measureRepository.updateMeasure(measure);
 
-                                        //TODO:if ((measure.getHeight() > 0) && (measure.getWeight() > 0))
-                                        //  {
-                                        onResultReceived(postScanResult.getMeasure_id());
-                                        //}
-
                                         if (notification != null) {
                                             notification.setWeight(weight);
                                             MeasureNotification.showNotification(getContext());
                                         }
                                     }
-                                    postScanResult.setSynced(true);
-
                                 }
 
+                                if (measure != null) {
+                                    if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
+                                        postScanResult.setSynced(true);
+                                        onResultReceived(postScanResult.getMeasure_id());
+                                    }
+                                }
                             }
                             postScanResultrepository.updatePostScanResult(postScanResult);
                             updated = true;
