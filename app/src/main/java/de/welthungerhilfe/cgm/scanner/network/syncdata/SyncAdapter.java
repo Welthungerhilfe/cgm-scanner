@@ -768,7 +768,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                             MeasureNotification.showNotification(getContext());
                                         }
                                     }
-                                    postScanResult.setSynced(true);
                                 }
 
                                 if (estimatesResponse.weight != null && estimatesResponse.weight.size() > 0) {
