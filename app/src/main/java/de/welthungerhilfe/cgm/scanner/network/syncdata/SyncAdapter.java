@@ -96,6 +96,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private Integer activeThreads;
     private boolean updated;
+    private int updateDelay;
 
     private long prevTimestamp;
     private long currentTimestamp;
@@ -221,6 +222,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.d(TAG, "start updating");
             //REST API implementation
             updated = false;
+            updateDelay = 60 * 60 * 1000;
             synchronized (getLock()) {
                 try {
                     processPersonQueue();
@@ -498,6 +500,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     measure.setUploaded_at(System.currentTimeMillis());
                                     measure.setSynced(true);
                                     updated = true;
+                                    updateDelay = 0;
                                     measureRepository.updateMeasure(measure);
                                 }
                                 onThreadChange(-1);
@@ -566,6 +569,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             person.setBirthday(person1.getBirthday());
                             updatePersonOnDatabase(person);
                             updated = true;
+                            updateDelay = 0;
                             onThreadChange(-1);
                         }
 
@@ -632,6 +636,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             person.setBirthday(person1.getBirthday());
                             updatePersonOnDatabase(person);
                             updated = true;
+                            updateDelay = 0;
                             onThreadChange(-1);
                         }
 
@@ -706,6 +711,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             measure1.setEnvironment(measure.getEnvironment());
                             measureRepository.updateMeasure(measure1);
                             updated = true;
+                            updateDelay = 0;
                             onThreadChange(-1);
                         }
 
@@ -761,6 +767,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             measure1.setSynced(true);
                             measureRepository.updateMeasure(measure1);
                             updated = true;
+                            updateDelay = 0;
                             onThreadChange(-1);
                         }
 
@@ -912,6 +919,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             }
                             postScanResultrepository.updatePostScanResult(postScanResult);
                             updated = true;
+                            updateDelay = Math.min(10 * 1000, updateDelay);
                             onThreadChange(-1);
                         }
 
@@ -976,8 +984,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             count = activeThreads;
         }
 
-       /* if (updated && (count == 0)) {
-            new Thread(() -> startSyncing()).start();
-        }*/
+        if (updated && (count == 0)) {
+            new Thread(() -> {
+                if (updateDelay > 0) {
+                    Utils.sleep(updateDelay);
+                }
+                startSyncing();
+            }).start();
+        }
     }
 }
