@@ -72,11 +72,9 @@ public class AppController extends DaggerApplication {
         return String.format("%s-device-%s-%s", Utils.getAndroidID(getContentResolver()), Utils.getUniversalTimestamp(), Utils.getSaltString(16));
     }
 
-    public File getPublicAppDirectory() {
-        File root = Environment.getExternalStorageDirectory();
-        root = new File(root, "Android");
-        root = new File(root, "data");
-        root = new File(root, getApplicationInfo().packageName);
+    public File getPublicAppDirectory(Context context) {
+        File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+        root = new File(root, context.getString(R.string.app_name_long));
         if (!root.exists()) {
             root.mkdirs();
         }
