@@ -213,13 +213,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
     void startCaptureImage() {
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.TITLE, "Picture");
-        File root = Environment.getExternalStorageDirectory();
-        root = new File(root, "Android");
-        root = new File(root, "data");
-        root = new File(root, getApplicationInfo().packageName);
-        if (!root.exists()) {
-            root.mkdirs();
-        }
+        File root = AppController.getInstance().getPublicAppDirectory();
         File file = new File(root, "consent.jpg");
         if (file.exists()) {
             file.delete();

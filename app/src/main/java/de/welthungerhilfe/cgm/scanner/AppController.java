@@ -72,6 +72,17 @@ public class AppController extends DaggerApplication {
         return String.format("%s-device-%s-%s", Utils.getAndroidID(getContentResolver()), Utils.getUniversalTimestamp(), Utils.getSaltString(16));
     }
 
+    public File getPublicAppDirectory() {
+        File root = Environment.getExternalStorageDirectory();
+        root = new File(root, "Android");
+        root = new File(root, "data");
+        root = new File(root, getApplicationInfo().packageName);
+        if (!root.exists()) {
+            root.mkdirs();
+        }
+        return root;
+    }
+
     public File getRootDirectory(Context c) {
         File mExtFileDir = new File(c.getApplicationInfo().dataDir);
         File oldDir = new File(Environment.getExternalStorageDirectory(), "Child Growth Monitor Scanner App");
