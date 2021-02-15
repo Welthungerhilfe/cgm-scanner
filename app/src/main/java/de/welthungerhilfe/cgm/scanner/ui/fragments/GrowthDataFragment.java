@@ -307,7 +307,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_weight);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = weightZScore(lastMeasure.getWeight(),median,skew,coefficient);
+                    zScore = newZScore(lastMeasure.getWeight(),median,skew,coefficient);
                 }
                 break;
             case 1:
@@ -315,7 +315,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_height);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = heightZScore(lastMeasure.getHeight(),median,skew,coefficient);
+                    zScore = newZScore(lastMeasure.getHeight(),median,skew,coefficient);
                 }
                 break;
             case 2:
@@ -323,7 +323,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_weight);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = weightZScore(lastMeasure.getWeight(),median,skew,coefficient);
+                    zScore = newZScore(lastMeasure.getWeight(),median,skew,coefficient);
                 }
                 break;
             case 3:
@@ -466,12 +466,7 @@ public class GrowthDataFragment extends Fragment {
     }
 
     //Compute ZScore as defined in https://www.who.int/growthref/computation.pdf
-    private double heightZScore(double y, double Mt, double Lt, double St) {
-        return (Math.pow(y / Mt, Lt) - 1) / (St * Lt);
-    }
-
-    //Compute ZScore as defined in https://www.who.int/growthref/computation.pdf
-    private double weightZScore(double y, double Mt, double Lt, double St) {
+    private double newZScore(double y, double Mt, double Lt, double St) {
         double Zind = (Math.pow(y / Mt, Lt) - 1) / (St * Lt);
         if (Zind >= -3 && Zind <= 3) {
             return Zind;
