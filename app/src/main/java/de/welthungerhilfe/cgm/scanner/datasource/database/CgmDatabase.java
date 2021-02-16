@@ -32,18 +32,16 @@ import de.welthungerhilfe.cgm.scanner.datasource.dao.ArtifactResultDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.DeviceDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.FileLogDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.MeasureDao;
-import de.welthungerhilfe.cgm.scanner.datasource.dao.MeasureResultDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.PersonDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.PostScanResultDao;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
 
-@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class, MeasureResult.class, Device.class, PostScanResult.class}, version = 17)
+@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class, Device.class, PostScanResult.class}, version = 18)
 public abstract class CgmDatabase extends RoomDatabase {
     private static final Object sLock = new Object();
 
@@ -59,21 +57,17 @@ public abstract class CgmDatabase extends RoomDatabase {
 
     public abstract ArtifactResultDao artifactResultDao();
 
-    public abstract MeasureResultDao measureResultDao();
-
     public abstract PostScanResultDao postScanResultDao();
 
-    public static final int version = 17;
+    public static final int version = 18;
 
     public static final String DATABASE = "offline_db";
 
     public static final String TABLE_PERSON = "persons";
-    public static final String TABLE_CONSENT = "consents";
     public static final String TABLE_MEASURE = "measures";
     public static final String TABLE_FILE_LOG = "file_logs";
     public static final String TABLE_DEVICE = "devices";
     public static final String TABLE_ARTIFACT_RESULT = "artifact_result";
-    public static final String TABLE_MEASURE_RESULT = "measure_result";
     public static final String TABLE_POST_SCAN_RESULT = "post_scan_result";
 
 
@@ -216,7 +210,12 @@ public abstract class CgmDatabase extends RoomDatabase {
         }
     };
 
-
+    public static final Migration MIGRATION_17_18 = new Migration(17, 18) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("DROP TABLE IF EXISTS `measure_result`");
+        }
+    };
 
     public static CgmDatabase getInstance(Context context) {
         synchronized (sLock) {
@@ -224,7 +223,8 @@ public abstract class CgmDatabase extends RoomDatabase {
                 instance = Room.databaseBuilder(context.getApplicationContext(), CgmDatabase.class, DATABASE)
                         .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_4,
                                 MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10,
-                                MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17)
+                                MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15,
+                                MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18)
                         .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
                         .allowMainThreadQueries()
                         .build();

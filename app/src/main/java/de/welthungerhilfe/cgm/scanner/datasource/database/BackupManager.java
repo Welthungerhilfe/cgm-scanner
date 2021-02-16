@@ -29,18 +29,15 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Locale;
 
-import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 
@@ -53,7 +50,6 @@ public class BackupManager {
         DeviceRepository dRepo = DeviceRepository.getInstance(context);
         FileLogRepository flRepo = FileLogRepository.getInstance(context);
         MeasureRepository mRepo = MeasureRepository.getInstance(context);
-        MeasureResultRepository mrRepo = MeasureResultRepository.getInstance(context);
         PersonRepository pRepo = PersonRepository.getInstance(context);
 
         new AsyncTask<Void, Void, Void>() {
@@ -141,24 +137,6 @@ public class BackupManager {
 
                     for (int i = 0; i < mAll.size(); i++) {
                         writer.append(mAll.get(i).getCsvFormattedString());
-                        writer.append('\n');
-                    }
-
-                    writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-
-                List<MeasureResult> mrAll = mrRepo.getAll();
-                String mrCsv = folder + File.separator + String.format(Locale.US, "%s-%d.csv", CgmDatabase.TABLE_MEASURE_RESULT, timestamp);
-                try {
-                    FileWriter writer = new FileWriter(mrCsv);
-                    writer.append(new MeasureResult().getCsvHeaderString());
-                    writer.append('\n');
-
-                    for (int i = 0; i < mrAll.size(); i++) {
-                        writer.append(mrAll.get(i).getCsvFormattedString());
                         writer.append('\n');
                     }
 
