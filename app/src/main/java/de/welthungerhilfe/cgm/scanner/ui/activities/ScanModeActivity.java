@@ -66,6 +66,7 @@ import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -78,13 +79,11 @@ import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
-import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
@@ -320,8 +319,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private MeasureRepository measureRepository;
     private FileLogRepository fileLogRepository;
-    private ArtifactResultRepository artifactResultRepository;
-    private ArrayList<ArtifactResult> artifacts;
+    private HashMap<Integer, ArrayList<Float>> lightScores;
     private ArrayList<FileLog> files;
     private final Object lock = new Object();
 
@@ -433,8 +431,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         measureRepository = MeasureRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
-        artifactResultRepository = ArtifactResultRepository.getInstance(this);
-        artifacts = new ArrayList<>();
+        lightScores = new HashMap<>();
         files = new ArrayList<>();
 
         setupToolbar();
@@ -607,28 +604,29 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     @SuppressLint("StaticFieldLeak")
     private void getScanQuality(int scanStep) {
         new AsyncTask<Void, Void, Boolean>() {
-            private double averagePointCount = 0;
-            private int pointCloudCount = 0;
+            private double lightScore = 0;
 
             @Override
             protected Boolean doInBackground(Void... voids) {
                 synchronized (lock) {
-                    for (ArtifactResult ar : artifacts) {
-                        if (ar.getKey() == SCAN_STEP) {
-                            averagePointCount += ar.getReal();
-                            pointCloudCount++;
+                    //get average light score
+                    if (lightScores.containsKey(SCAN_STEP)) {
+                        for (Float value : lightScores.get(SCAN_STEP)) {
+                            lightScore += value;
                         }
+                        lightScore /= (float)lightScores.get(SCAN_STEP).size();
+                    }
+
+                    //too bright values are not over 100%
+                    if (lightScore > 1) {
+                        lightScore = 1.0f - (lightScore - 1.0f);
                     }
                 }
-                averagePointCount /= Math.max(pointCloudCount, 1);
                 return true;
             }
 
             @SuppressLint("DefaultLocale")
             public void onPostExecute(Boolean results) {
-                double lightScore = (Math.abs(averagePointCount / 38000 - 1.0) * 3);
-
-                if (lightScore > 1) lightScore -= 1;
 
                 Log.e("ScanQuality", String.valueOf(lightScore));
 
@@ -777,9 +775,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
             //save metadata into DB
             synchronized (lock) {
-                for (ArtifactResult ar : artifacts) {
-                    artifactResultRepository.insertArtifactResult(ar);
-                }
                 for (FileLog log : files) {
                     fileLogRepository.insertFileLog(log);
                 }
@@ -919,27 +914,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
             long profile = System.currentTimeMillis();
             ARCoreUtils.Depthmap depthmap = ARCoreUtils.extractDepthmap(image, pose, mCameraInstance instanceof AREngineCamera);
-            float lightIntensity = getCamera().getLightIntensity();
-            float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
-            float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
-            double Artifact_Confidence_penalty = Math.abs((double) depthmap.getCount() / 38000 - 1.0) * 100 * 3;
-
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
             mNumberOfFilesWritten++;
 
             updateScanningProgress();
-
-            ArtifactResult ar = new ArtifactResult();
-            ar.setConfidence_value(String.valueOf(100 - Artifact_Confidence_penalty));
-            ar.setArtifact_id(AppController.getInstance().getPersonId());
-            ar.setKey(SCAN_STEP);
-            ar.setMeasure_id(measure.getId());
-            ar.setMisc("");
-            ar.setType("DEPTHMAP_v0.1");
-            ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
-            synchronized (lock) {
-                artifacts.add(ar);
-            }
+            onLightScore(getCamera().getLightIntensity());
 
             Runnable thread = () -> {
                 try {
@@ -1053,26 +1032,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             buffer.asFloatBuffer().put(pointCloudData.points);
 
             updateScanningProgress();
-
-            float lightIntensity = getCamera().getLightIntensity();
-            float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
-            float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
-            double Artifact_Lighting_penalty = Math.abs((double) numPoints / 38000 - 1.0) * 100 * 3;
+            onLightScore(getCamera().getLightIntensity());
 
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
                     "_" + mNumberOfFilesWritten++ + "_" + String.format(Locale.US, "%f", pointCloudData.timestamp) + ".depth";
-
-            ArtifactResult ar = new ArtifactResult();
-            ar.setConfidence_value(String.valueOf(100 - Artifact_Lighting_penalty));
-            ar.setArtifact_id(AppController.getInstance().getPersonId());
-            ar.setKey(SCAN_STEP);
-            ar.setMeasure_id(measure.getId());
-            ar.setMisc("");
-            ar.setType("DEPTHMAP_v0.1");
-            ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
-            synchronized (lock) {
-                artifacts.add(ar);
-            }
 
             Runnable thread = () -> {
 
@@ -1146,6 +1109,15 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             };
             onThreadChange(1);
             executor.execute(thread);
+        }
+    }
+
+    private void onLightScore(float score) {
+        synchronized (lock) {
+            if (!lightScores.containsKey(SCAN_STEP)) {
+                lightScores.put(SCAN_STEP, new ArrayList<>());
+            }
+            lightScores.get(SCAN_STEP).add(score);
         }
     }
 

@@ -29,12 +29,10 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Locale;
 
-import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
@@ -46,7 +44,6 @@ public class BackupManager {
     public static void doBackup(BaseActivity context, File folder, long timestamp, Runnable onFinished) {
         folder.mkdirs();
 
-        ArtifactResultRepository arRepo = ArtifactResultRepository.getInstance(context);
         DeviceRepository dRepo = DeviceRepository.getInstance(context);
         FileLogRepository flRepo = FileLogRepository.getInstance(context);
         MeasureRepository mRepo = MeasureRepository.getInstance(context);
@@ -71,23 +68,6 @@ public class BackupManager {
                     output.flush();
                     output.close();
                     fis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                List<ArtifactResult> arAll = arRepo.getAll();
-                String arCsv = folder + File.separator + String.format(Locale.US, "%s-%d.csv", CgmDatabase.TABLE_ARTIFACT_RESULT, timestamp);
-                try {
-                    FileWriter writer = new FileWriter(arCsv);
-                    writer.append(new ArtifactResult().getCsvHeaderString());
-                    writer.append('\n');
-
-                    for (int i = 0; i < arAll.size(); i++) {
-                        writer.append(arAll.get(i).getCsvFormattedString());
-                        writer.append('\n');
-                    }
-
-                    writer.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

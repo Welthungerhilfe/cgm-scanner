@@ -28,20 +28,18 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import de.welthungerhilfe.cgm.scanner.datasource.dao.ArtifactResultDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.DeviceDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.FileLogDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.MeasureDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.PersonDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.PostScanResultDao;
-import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
 
-@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class, Device.class, PostScanResult.class}, version = 18)
+@Database(entities = {Person.class, Measure.class, FileLog.class, Device.class, PostScanResult.class}, version = 18)
 public abstract class CgmDatabase extends RoomDatabase {
     private static final Object sLock = new Object();
 
@@ -55,8 +53,6 @@ public abstract class CgmDatabase extends RoomDatabase {
 
     public abstract DeviceDao deviceDao();
 
-    public abstract ArtifactResultDao artifactResultDao();
-
     public abstract PostScanResultDao postScanResultDao();
 
     public static final int version = 18;
@@ -67,7 +63,6 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final String TABLE_MEASURE = "measures";
     public static final String TABLE_FILE_LOG = "file_logs";
     public static final String TABLE_DEVICE = "devices";
-    public static final String TABLE_ARTIFACT_RESULT = "artifact_result";
     public static final String TABLE_POST_SCAN_RESULT = "post_scan_result";
 
 
@@ -213,6 +208,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final Migration MIGRATION_17_18 = new Migration(17, 18) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("DROP TABLE IF EXISTS `artifact_result`");
             database.execSQL("DROP TABLE IF EXISTS `measure_result`");
         }
     };
