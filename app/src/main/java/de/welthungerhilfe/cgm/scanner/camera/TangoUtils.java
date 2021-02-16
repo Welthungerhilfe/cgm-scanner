@@ -1,4 +1,4 @@
-/**
+/*
  * Child Growth Monitor - quick and accurate data on malnutrition
  * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
  * Copyright (c) 2018 Welthungerhilfe Innovation
@@ -31,9 +31,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
-
 public class TangoUtils {
+
+    private static final int JPG_COMPRESSION = 90;
 
     public static float getPixelIntensity(TangoImageBuffer imageBuffer) {
         int max = 0;
@@ -78,13 +78,13 @@ public class TangoUtils {
                 imageBuffer.timestamp, imageBuffer.format, clone);
     }
 
-    public static ARCoreUtils.Depthmap extractDepthmap(ByteBuffer buffer, int numPoints, double[] pose, double timestamp, TangoCameraIntrinsics calibration) {
+    public static Depthmap extractDepthmap(ByteBuffer buffer, int numPoints, float[] position, float[] rotation, double timestamp, TangoCameraIntrinsics calibration) {
         int width = 180;
         int height = 135;
 
-        ARCoreUtils.Depthmap depthmap = new ARCoreUtils.Depthmap(width, height);
-        depthmap.position = new float[] {(float) pose[4], (float) pose[5], (float) pose[6]};
-        depthmap.rotation = new float[] {(float) pose[0], (float) pose[1], (float) pose[2], (float) pose[3]};
+        Depthmap depthmap = new Depthmap(width, height);
+        depthmap.position = position;
+        depthmap.rotation = rotation;
         depthmap.timestamp = (long) timestamp;
         for (int i = 0; i < numPoints; i++) {
             float px = buffer.getFloat();
@@ -118,28 +118,6 @@ public class TangoUtils {
         return false;
     }
 
-    public static void writeCalibrationFile(File file, TangoCameraIntrinsics[] calibration) {
-        CameraCalibration c = new CameraCalibration();
-        c.colorCameraIntrinsic[0] = (float)calibration[0].fx / (float)calibration[0].width;
-        c.colorCameraIntrinsic[1] = (float)calibration[0].fy / (float)calibration[0].height;
-        c.colorCameraIntrinsic[2] = (float)calibration[0].cx / (float)calibration[0].width;
-        c.colorCameraIntrinsic[3] = (float)calibration[0].cy / (float)calibration[0].height;
-
-        c.colorCameraIntrinsic[0] = (float)calibration[1].fx / (float)calibration[1].width;
-        c.colorCameraIntrinsic[1] = (float)calibration[1].fy / (float)calibration[1].height;
-        c.colorCameraIntrinsic[2] = (float)calibration[1].cx / (float)calibration[1].width;
-        c.colorCameraIntrinsic[3] = (float)calibration[1].cy / (float)calibration[1].height;
-
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(file.getAbsolutePath());
-            fileOutputStream.write(c.toString().getBytes());
-            fileOutputStream.flush();
-            fileOutputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public static void writeImageToFile(TangoImageBuffer currentTangoImageBuffer, File file) {
 
         currentTangoImageBuffer = TangoUtils.copyImageBuffer(currentTangoImageBuffer);
@@ -149,7 +127,7 @@ public class TangoUtils {
 
         try (FileOutputStream out = new FileOutputStream(file)) {
             YuvImage yuvImage = new YuvImage(YuvImageByteArray, ImageFormat.NV21, currentImgWidth, currentImgHeight, null);
-            yuvImage.compressToJpeg(new Rect(0, 0, currentImgWidth, currentImgHeight), BitmapUtils.JPG_COMPRESSION, out);
+            yuvImage.compressToJpeg(new Rect(0, 0, currentImgWidth, currentImgHeight), JPG_COMPRESSION, out);
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();

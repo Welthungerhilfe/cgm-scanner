@@ -34,14 +34,9 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.queue.CloudQueue;
-import com.microsoft.azure.storage.queue.CloudQueueClient;
-import com.microsoft.azure.storage.queue.CloudQueueMessage;
 
 import org.json.JSONObject;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -219,9 +214,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 try {
                     processPersonQueue();
                     processMeasureQueue();
+                    processDeviceQueue();
                     processConsentSheet();
                     processMeasureReasult();
-                    //TODO:implement processDeviceQueue(queueClient);
 
                     session.setSyncTimestamp(currentTimestamp);
                 } catch (Exception e) {
@@ -327,26 +322,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
 
-        private void processDeviceQueue(CloudQueueClient queueClient) throws URISyntaxException {
+        private void processDeviceQueue()  {
             try {
-                CloudQueue deviceQueue = queueClient.getQueueReference("device");
-                deviceQueue.createIfNotExists();
-
-                Gson gson = new Gson();
                 List<Device> syncableDevices = deviceRepository.getSyncableDevice(prevTimestamp);
                 for (int i = 0; i < syncableDevices.size(); i++) {
-                    String content = gson.toJson(syncableDevices.get(i));
-                    CloudQueueMessage message = new CloudQueueMessage(syncableDevices.get(i).getId());
-                    Log.i("Syncadapter", "this is inside processDevice Queue " + content);
-                    message.setMessageContent(content);
 
-                    deviceQueue.addMessage(message);
-
+                    //TODO:process by REST API
                     syncableDevices.get(i).setSync_timestamp(prevTimestamp);
-
                     deviceRepository.updateDevice(syncableDevices.get(i));
                 }
-            } catch (StorageException e) {
+            } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
             }
         }
@@ -774,7 +759,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 if (estimatesResponse.weight != null && estimatesResponse.weight.size() > 0) {
                                     Collections.sort(estimatesResponse.weight);
                                     float weight = estimatesResponse.weight.get((estimatesResponse.weight.size() / 2)).getValue();
-                                    Log.i(TAG, "this is value of height " + weight);
+                                    Log.i(TAG, "this is value of weight " + weight);
 
                                     String qrCode = getQrCode(postScanResult.getMeasure_id());
                                     MeasureNotification notification = MeasureNotification.get(qrCode);

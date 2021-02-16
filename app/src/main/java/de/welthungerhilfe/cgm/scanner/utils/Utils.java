@@ -36,7 +36,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.provider.Settings;
-import android.util.DisplayMetrics;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
@@ -46,7 +45,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 
-import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -55,9 +53,7 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
 
-import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
-import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 
 public class Utils {
@@ -114,36 +110,6 @@ public class Utils {
             return Float.parseFloat(value);
         } catch (Exception e) {
         }
-        return 0;
-    }
-
-    public static double readUsage() {
-        try {
-            RandomAccessFile reader = new RandomAccessFile("/proc/stat", "r");
-            String load = reader.readLine();
-
-            String[] toks = load.split(" +");  // Split on one or more spaces
-
-            long idle1 = Long.parseLong(toks[4]);
-            long cpu1 = Long.parseLong(toks[2]) + Long.parseLong(toks[3]) + Long.parseLong(toks[5])
-                    + Long.parseLong(toks[6]) + Long.parseLong(toks[7]) + Long.parseLong(toks[8]);
-
-            reader.seek(0);
-            load = reader.readLine();
-            reader.close();
-
-            toks = load.split(" +");
-
-            long idle2 = Long.parseLong(toks[4]);
-            long cpu2 = Long.parseLong(toks[2]) + Long.parseLong(toks[3]) + Long.parseLong(toks[5])
-                    + Long.parseLong(toks[6]) + Long.parseLong(toks[7]) + Long.parseLong(toks[8]);
-
-            return (cpu2 - cpu1) / ((cpu2 + idle2) - (cpu1 + idle1));
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
         return 0;
     }
 
@@ -293,10 +259,6 @@ public class Utils {
                 });
     }
 
-    public static int dpToPx(float dp, Context context) {
-        return (int) (dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
-    }
-
     public static boolean isPackageInstalled(Activity activity, String packageName) {
         PackageManager pm = activity.getPackageManager();
 
@@ -355,21 +317,6 @@ public class Utils {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    public static ArrayList<TutorialData> getTutorialData(Context context) {
-        ArrayList<TutorialData> tutorialDataList = new ArrayList<TutorialData>();
-        TutorialData tutorialData = new TutorialData(R.drawable.tutorial1,context.getResources().getString(R.string.tutorial1),context.getResources().getString(R.string.tutorial11),context.getResources().getString(R.string.tutorial12),0);
-        tutorialDataList.add(tutorialData);
-        tutorialData = new TutorialData(R.drawable.tutorial2,context.getResources().getString(R.string.tutorial2),context.getResources().getString(R.string.tutorial21),context.getResources().getString(R.string.tutorial22),1);
-        tutorialDataList.add(tutorialData);
-        tutorialData = new TutorialData(R.drawable.tutorial3,context.getResources().getString(R.string.tutorial3),context.getResources().getString(R.string.tutorial31),context.getResources().getString(R.string.tutorial32),2);
-        tutorialDataList.add(tutorialData);
-        tutorialData = new TutorialData(R.drawable.tutorial4,context.getResources().getString(R.string.tutorial4),context.getResources().getString(R.string.tutorial41),context.getResources().getString(R.string.tutorial42),3);
-        tutorialDataList.add(tutorialData);
-        return tutorialDataList;
-
-
     }
 
     //for checking-> MSAL authtoken expired or not

@@ -61,7 +61,6 @@ import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
@@ -79,7 +78,7 @@ import static de.welthungerhilfe.cgm.scanner.AppConstants.UPLOADED;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.UPLOADED_DELETED;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.UPLOAD_ERROR;
 
-public class UploadService extends Service implements OnFileLogsLoad {
+public class UploadService extends Service implements FileLogRepository.OnFileLogsLoad {
 
     private static final String TAG = UploadService.class.getSimpleName();
 

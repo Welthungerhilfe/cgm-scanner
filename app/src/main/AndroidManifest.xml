@@ -170,9 +170,6 @@
         <service android:name=".network.service.UploadService"
             android:exported="false" />
 
-        <service android:name=".network.service.MemoryMonitorService"
-            android:exported="false" />
-
         <service android:name=".network.service.DeviceService"
             android:exported="false"/>
 
