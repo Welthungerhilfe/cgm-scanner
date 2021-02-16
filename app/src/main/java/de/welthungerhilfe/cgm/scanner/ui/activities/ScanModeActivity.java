@@ -830,7 +830,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
                     BitmapUtils.writeBitmapToFile(bitmap, artifactFile);
 
-                    //upload RGB data
+                    //save RGB metadata
                     if (artifactFile.exists()) {
                         mColorSize += artifactFile.length();
                         mColorTime += System.currentTimeMillis() - profile;
@@ -860,7 +860,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         }
                     }
 
-                    //write and upload calibration
+                    //save calibration data
                     artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
                     if (!artifactFile.exists()) {
                         if (calibration.isValid()) {
@@ -937,7 +937,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         }
                     }
 
-                    //upload depthmap
+                    //save depthmap metadata
                     if (artifactFile.exists()) {
                         FileLog log = new FileLog();
                         log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
@@ -1054,7 +1054,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     }
                 }
 
-                //upload depthmap
+                //save depthmap metadata
                 if (artifactFile.exists()) {
                     FileLog log = new FileLog();
                     log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
@@ -1078,7 +1078,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 }
 
 
-                //write and upload calibration
+                //save calibration data
                 artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
                 if (!artifactFile.exists()) {
                     TangoUtils.writeCalibrationFile(artifactFile, calibration);
