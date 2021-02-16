@@ -774,7 +774,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 if (estimatesResponse.weight != null && estimatesResponse.weight.size() > 0) {
                                     Collections.sort(estimatesResponse.weight);
                                     float weight = estimatesResponse.weight.get((estimatesResponse.weight.size() / 2)).getValue();
-                                    Log.i(TAG, "this is value of height " + weight);
+                                    Log.i(TAG, "this is value of weight " + weight);
 
                                     String qrCode = getQrCode(postScanResult.getMeasure_id());
                                     MeasureNotification notification = MeasureNotification.get(qrCode);

@@ -23,13 +23,10 @@ import androidx.sqlite.db.SimpleSQLiteQuery;
 
 import android.content.Context;
 import android.location.Location;
-import android.util.Log;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-
-import javax.annotation.meta.When;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
@@ -44,7 +41,6 @@ public class PersonRepository {
     private CgmDatabase database;
     private SessionManager session;
     private boolean updated;
-    String TAG = PersonRepository.class.getSimpleName();
 
     private PersonRepository(Context context) {
         database = CgmDatabase.getInstance(context);

@@ -35,9 +35,6 @@ public class BitmapUtils {
 
     public static final int JPG_COMPRESSION = 90;
 
-    public static final int PNG_COMPRESSION = 90;
-
-
     public static Bitmap getAcceptableBitmap(Bitmap bmp) {
         float ratio = 0;
         float scaledWidth = 0, scaledHeight = 0;
@@ -155,5 +152,4 @@ public class BitmapUtils {
             e.printStackTrace();
         }
     }
-
 }
