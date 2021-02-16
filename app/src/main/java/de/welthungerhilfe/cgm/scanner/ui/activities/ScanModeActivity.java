@@ -102,6 +102,8 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ScanModeActivity extends BaseActivity implements View.OnClickListener, ARCoreUtils.Camera2DataListener, TangoCamera.TangoCameraListener {
 
+    private enum ArtifactType { CALIBRATION, DEPTH, RGB };
+
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.imgScanStanding)
@@ -829,6 +831,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     currentImgFilename = currentImgFilename.replace('/', '_');
                     File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
                     BitmapUtils.writeBitmapToFile(bitmap, artifactFile);
+                    onProcessArtifact(artifactFile, ArtifactType.RGB);
 
                     //save RGB metadata
                     if (artifactFile.exists()) {
@@ -837,26 +840,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
                             LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_SIZE, mColorSize);
                             LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, mColorTime);
-                        }
-
-                        FileLog log = new FileLog();
-                        log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
-                        log.setType("rgb");
-                        log.setPath(artifactFile.getPath());
-                        log.setHashValue(IO.getMD5(artifactFile.getPath()));
-                        log.setFileSize(artifactFile.length());
-                        log.setUploadDate(0);
-                        log.setDeleted(false);
-                        log.setQrCode(person.getQrcode());
-                        log.setCreateDate(mNowTime);
-                        log.setCreatedBy(session.getUserEmail());
-                        log.setAge(age);
-                        log.setSchema_version(CgmDatabase.version);
-                        log.setMeasureId(measure.getId());
-                        log.setStep(SCAN_STEP);
-                        log.setEnvironment(session.getEnvironment());
-                        synchronized (lock) {
-                            files.add(log);
                         }
                     }
 
@@ -869,26 +852,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                 fileOutputStream.write(calibration.toString().getBytes());
                                 fileOutputStream.flush();
                                 fileOutputStream.close();
+                                onProcessArtifact(artifactFile, ArtifactType.CALIBRATION);
 
-                                FileLog log = new FileLog();
-                                log.setId(AppController.getInstance().getArtifactId("camera-calibration", mNowTime));
-                                log.setType("calibration");
-                                log.setPath(artifactFile.getPath());
-                                log.setHashValue(IO.getMD5(artifactFile.getPath()));
-                                log.setFileSize(artifactFile.length());
-                                log.setUploadDate(0);
-                                log.setDeleted(false);
-                                log.setQrCode(person.getQrcode());
-                                log.setCreateDate(mNowTime);
-                                log.setCreatedBy(session.getUserEmail());
-                                log.setAge(age);
-                                log.setSchema_version(CgmDatabase.version);
-                                log.setMeasureId(measure.getId());
-                                log.setStep(0);
-                                log.setEnvironment(session.getEnvironment());
-                                synchronized (lock) {
-                                    files.add(log);
-                                }
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -926,6 +891,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     //write depthmap
                     File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                     ARCoreUtils.writeDepthmap(depthmap, artifactFile);
+                    onProcessArtifact(artifactFile, ArtifactType.DEPTH);
 
                     //profile process
                     if (artifactFile.exists()) {
@@ -934,29 +900,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
                             LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_SIZE, mDepthSize);
                             LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_TIME, mDepthTime);
-                        }
-                    }
-
-                    //save depthmap metadata
-                    if (artifactFile.exists()) {
-                        FileLog log = new FileLog();
-                        log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
-                        log.setType("depth");
-                        log.setPath(artifactFile.getPath());
-                        log.setHashValue(IO.getMD5(artifactFile.getPath()));
-                        log.setFileSize(artifactFile.length());
-                        log.setUploadDate(0);
-                        log.setDeleted(false);
-                        log.setQrCode(person.getQrcode());
-                        log.setCreateDate(mNowTime);
-                        log.setCreatedBy(session.getUserEmail());
-                        log.setAge(age);
-                        log.setSchema_version(CgmDatabase.version);
-                        log.setMeasureId(measure.getId());
-                        log.setStep(SCAN_STEP);
-                        log.setEnvironment(session.getEnvironment());
-                        synchronized (lock) {
-                            files.add(log);
                         }
                     }
                 } catch (Exception e) {
@@ -978,10 +921,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + String.format(Locale.US, "%f", tangoImageBuffer.timestamp) + ".jpg";
         File artifactFile = new File(mRgbSaveFolder.getPath(), currentImgFilename);
-        TangoUtils.writeImageToFile(tangoImageBuffer, artifactFile);
 
         Runnable thread = () -> {
             long profile = System.currentTimeMillis();
+            TangoUtils.writeImageToFile(tangoImageBuffer, artifactFile);
+            onProcessArtifact(artifactFile, ArtifactType.RGB);
 
             if (artifactFile.exists()) {
                 mColorSize += artifactFile.length();
@@ -989,26 +933,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
                     LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_SIZE, mColorSize);
                     LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, mColorTime);
-                }
-
-                FileLog log = new FileLog();
-                log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
-                log.setType("rgb");
-                log.setPath(artifactFile.getPath());
-                log.setHashValue(IO.getMD5(artifactFile.getPath()));
-                log.setFileSize(artifactFile.length());
-                log.setUploadDate(0);
-                log.setDeleted(false);
-                log.setQrCode(person.getQrcode());
-                log.setCreateDate(mNowTime);
-                log.setCreatedBy(session.getUserEmail());
-                log.setAge(age);
-                log.setSchema_version(CgmDatabase.version);
-                log.setMeasureId(measure.getId());
-                log.setStep(SCAN_STEP);
-                log.setEnvironment(session.getEnvironment());
-                synchronized (lock) {
-                    files.add(log);
                 }
             }
             onThreadChange(-1);
@@ -1043,6 +967,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 ARCoreUtils.Depthmap depthmap = TangoUtils.extractDepthmap(buffer, numPoints, pose, timestamp, calibration[1]);
                 File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                 ARCoreUtils.writeDepthmap(depthmap, artifactFile);
+                onProcessArtifact(artifactFile, ArtifactType.DEPTH);
 
                 //profile process
                 if (artifactFile.exists()) {
@@ -1054,56 +979,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     }
                 }
 
-                //save depthmap metadata
-                if (artifactFile.exists()) {
-                    FileLog log = new FileLog();
-                    log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
-                    log.setType("depth");
-                    log.setPath(artifactFile.getPath());
-                    log.setHashValue(IO.getMD5(artifactFile.getPath()));
-                    log.setFileSize(artifactFile.length());
-                    log.setUploadDate(0);
-                    log.setDeleted(false);
-                    log.setQrCode(person.getQrcode());
-                    log.setCreateDate(mNowTime);
-                    log.setCreatedBy(session.getUserEmail());
-                    log.setAge(age);
-                    log.setSchema_version(CgmDatabase.version);
-                    log.setMeasureId(measure.getId());
-                    log.setStep(SCAN_STEP);
-                    log.setEnvironment(session.getEnvironment());
-                    synchronized (lock) {
-                        files.add(log);
-                    }
-                }
-
-
                 //save calibration data
                 artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
                 if (!artifactFile.exists()) {
                     TangoUtils.writeCalibrationFile(artifactFile, calibration);
-
-                    if (artifactFile.exists()) {
-                        FileLog log = new FileLog();
-                        log.setId(AppController.getInstance().getArtifactId("camera-calibration", mNowTime));
-                        log.setType("calibration");
-                        log.setPath(artifactFile.getPath());
-                        log.setHashValue(IO.getMD5(artifactFile.getPath()));
-                        log.setFileSize(artifactFile.length());
-                        log.setUploadDate(0);
-                        log.setDeleted(false);
-                        log.setQrCode(person.getQrcode());
-                        log.setCreateDate(mNowTime);
-                        log.setCreatedBy(session.getUserEmail());
-                        log.setAge(age);
-                        log.setSchema_version(CgmDatabase.version);
-                        log.setMeasureId(measure.getId());
-                        log.setStep(0);
-                        log.setEnvironment(session.getEnvironment());
-                        synchronized (lock) {
-                            files.add(log);
-                        }
-                    }
+                    onProcessArtifact(artifactFile, ArtifactType.CALIBRATION);
                 }
                 onThreadChange(-1);
             };
@@ -1137,6 +1017,42 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     break;
             }
         });
+    }
+
+    private void onProcessArtifact(File artifactFile, ArtifactType type) {
+        if (artifactFile.exists()) {
+            FileLog log = new FileLog();
+            switch (type) {
+                case CALIBRATION:
+                    log.setId(AppController.getInstance().getArtifactId("camera-calibration", mNowTime));
+                    log.setType("calibration");
+                    break;
+                case DEPTH:
+                    log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
+                    log.setType("depth");
+                    break;
+                case RGB:
+                    log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
+                    log.setType("rgb");
+                    break;
+            }
+            log.setPath(artifactFile.getPath());
+            log.setHashValue(IO.getMD5(artifactFile.getPath()));
+            log.setFileSize(artifactFile.length());
+            log.setUploadDate(0);
+            log.setDeleted(false);
+            log.setQrCode(person.getQrcode());
+            log.setCreateDate(mNowTime);
+            log.setCreatedBy(session.getUserEmail());
+            log.setAge(age);
+            log.setSchema_version(CgmDatabase.version);
+            log.setMeasureId(measure.getId());
+            log.setStep(0);
+            log.setEnvironment(session.getEnvironment());
+            synchronized (lock) {
+                files.add(log);
+            }
+        }
     }
 
     private void onThreadChange(int diff) {
