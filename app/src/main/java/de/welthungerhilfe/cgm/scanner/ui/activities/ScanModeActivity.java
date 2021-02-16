@@ -55,7 +55,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.ar.core.Pose;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
@@ -78,6 +77,7 @@ import butterknife.OnClick;
 import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
@@ -90,17 +90,15 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.camera.AREngineCamera;
-import de.welthungerhilfe.cgm.scanner.camera.CameraCalibration;
-import de.welthungerhilfe.cgm.scanner.camera.ICamera;
+import de.welthungerhilfe.cgm.scanner.camera.AbstractARCamera;
 import de.welthungerhilfe.cgm.scanner.camera.TangoCamera;
-import de.welthungerhilfe.cgm.scanner.camera.ARCoreUtils;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class ScanModeActivity extends BaseActivity implements View.OnClickListener, ARCoreUtils.Camera2DataListener, TangoCamera.TangoCameraListener {
+public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, TangoCamera.TangoCameraListener {
 
     private enum ArtifactType { CALIBRATION, DEPTH, RGB };
 
@@ -358,7 +356,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private int threadsCount = 0;
     private final Object threadsLock = new Object();
 
-    private ICamera mCameraInstance;
+    private AbstractARCamera mCameraInstance;
 
     public void onStart() {
         super.onStart();
@@ -429,7 +427,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         findViewById(R.id.imgClose).setOnClickListener(this);
 
-        getCamera().onCreate();
+        getCamera().onCreate(R.id.colorCameraPreview, R.id.depthCameraPreview, R.id.surfaceview);
 
         measureRepository = MeasureRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
@@ -803,14 +801,16 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private ICamera getCamera() {
+    private AbstractARCamera getCamera() {
         if (mCameraInstance == null) {
+            boolean showDepth = LocalPersistency.getBoolean(this, SettingsActivity.KEY_SHOW_DEPTH);
+
             if (TangoUtils.isTangoSupported()) {
                 mCameraInstance = new TangoCamera(this);
-            } else if (ARCoreUtils.shouldUseAREngine()) {
-                mCameraInstance = new AREngineCamera(this);
+            } else if (AREngineCamera.shouldUseAREngine()) {
+                mCameraInstance = new AREngineCamera(this, showDepth);
             } else {
-                mCameraInstance = new ARCoreCamera(this);
+                mCameraInstance = new ARCoreCamera(this, showDepth);
             }
         }
         return mCameraInstance;
@@ -821,7 +821,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             long profile = System.currentTimeMillis();
-            CameraCalibration calibration = mCameraInstance.getCalibration();
+            boolean hasCameraCalibration = mCameraInstance.hasCameraCalibration();
+            String cameraCalibration = mCameraInstance.getCameraCalibration();
 
             Runnable thread = () -> {
                 try {
@@ -846,10 +847,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     //save calibration data
                     artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
                     if (!artifactFile.exists()) {
-                        if (calibration.isValid()) {
+                        if (hasCameraCalibration) {
                             try {
                                 FileOutputStream fileOutputStream = new FileOutputStream(artifactFile.getAbsolutePath());
-                                fileOutputStream.write(calibration.toString().getBytes());
+                                fileOutputStream.write(cameraCalibration.getBytes());
                                 fileOutputStream.flush();
                                 fileOutputStream.close();
                                 onProcessArtifact(artifactFile, ArtifactType.CALIBRATION);
@@ -871,14 +872,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     @Override
-    public void onDepthDataReceived(Image image, Pose pose, int frameIndex) {
+    public void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex) {
 
         onLightUpdate(getCamera().getLightConditionState());
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             long profile = System.currentTimeMillis();
-            ARCoreUtils.Depthmap depthmap = ARCoreUtils.extractDepthmap(image, pose, mCameraInstance instanceof AREngineCamera);
+            Depthmap depthmap = getCamera().extractDepthmap(image, position, rotation, mCameraInstance instanceof AREngineCamera);
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
             mNumberOfFilesWritten++;
 
@@ -890,7 +891,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
                     //write depthmap
                     File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
-                    ARCoreUtils.writeDepthmap(depthmap, artifactFile);
+                    depthmap.save(artifactFile);
                     onProcessArtifact(artifactFile, ArtifactType.DEPTH);
 
                     //profile process
@@ -942,9 +943,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     @Override
-    public void onTangoDepthData(TangoPointCloudData pointCloudData, double[] pose, TangoCameraIntrinsics[] calibration) {
+    public void onTangoDepthData(TangoPointCloudData pointCloudData, float[] position, float[] rotation, TangoCameraIntrinsics[] calibration) {
 
         onLightUpdate(getCamera().getLightConditionState());
+        boolean hasCameraCalibration = mCameraInstance.hasCameraCalibration();
+        String cameraCalibration = mCameraInstance.getCameraCalibration();
 
         // Saving the frame or not, depending on the current mode.
         if (mIsRecording) {
@@ -964,9 +967,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             Runnable thread = () -> {
 
                 //write depthmap
-                ARCoreUtils.Depthmap depthmap = TangoUtils.extractDepthmap(buffer, numPoints, pose, timestamp, calibration[1]);
+                Depthmap depthmap = TangoUtils.extractDepthmap(buffer, numPoints, position, rotation, timestamp, calibration[1]);
                 File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
-                ARCoreUtils.writeDepthmap(depthmap, artifactFile);
+                depthmap.save(artifactFile);
                 onProcessArtifact(artifactFile, ArtifactType.DEPTH);
 
                 //profile process
@@ -982,8 +985,18 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 //save calibration data
                 artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
                 if (!artifactFile.exists()) {
-                    TangoUtils.writeCalibrationFile(artifactFile, calibration);
-                    onProcessArtifact(artifactFile, ArtifactType.CALIBRATION);
+                    if (hasCameraCalibration) {
+                        try {
+                            FileOutputStream fileOutputStream = new FileOutputStream(artifactFile.getAbsolutePath());
+                            fileOutputStream.write(cameraCalibration.getBytes());
+                            fileOutputStream.flush();
+                            fileOutputStream.close();
+                            onProcessArtifact(artifactFile, ArtifactType.CALIBRATION);
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
                 onThreadChange(-1);
             };
@@ -1001,7 +1014,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onLightUpdate(CameraCalibration.LightConditions state) {
+    private void onLightUpdate(AbstractARCamera.LightConditions state) {
         runOnUiThread(() -> {
             switch (state) {
                 case NORMAL:

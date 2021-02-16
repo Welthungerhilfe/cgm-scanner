@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.camera;
 
 import android.Manifest;
@@ -24,7 +23,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -44,7 +42,6 @@ import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
-import android.widget.ImageView;
 
 import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
@@ -65,12 +62,7 @@ import java.util.HashMap;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
-import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
-import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
-
-public class ARCoreCamera implements ICamera {
+public class ARCoreCamera extends AbstractARCamera {
 
   private static final String TAG = ARCoreCamera.class.getSimpleName();
 
@@ -84,60 +76,25 @@ public class ARCoreCamera implements ICamera {
 
   //ARCore API
   private Session mSession;
-  private Pose mPose;
   private final Object mLock;
 
   //App integration objects
-  private Activity mActivity;
-  private ImageView mColorCameraPreview;
-  private ImageView mDepthCameraPreview;
   private GLSurfaceView mGLSurfaceView;
-  private ArrayList<ARCoreUtils.Camera2DataListener> mListeners;
   private final HashMap<Long, Bitmap> mCache;
-  private CameraCalibration mCameraCalibration;
-  private int mFrameIndex;
-  private float mPixelIntensity;
-  private boolean mShowDepth;
-  private CameraCalibration.LightConditions mLight;
-  private long mLastBright;
-  private long mLastDark;
-  private long mSessionStart;
 
-  public ARCoreCamera(Activity activity) {
-    mActivity = activity;
+  public ARCoreCamera(Activity activity, boolean showDepth) {
+    super(activity, showDepth);
+
     mCache = new HashMap<>();
-    mListeners = new ArrayList<>();
-
-    mCameraCalibration = new CameraCalibration();
     mLock = new Object();
-    mFrameIndex = 1;
-    mPixelIntensity = 0;
-    mShowDepth = LocalPersistency.getBoolean(activity, SettingsActivity.KEY_SHOW_DEPTH);
-    mLight = CameraCalibration.LightConditions.NORMAL;
-    mLastBright = 0;
-    mLastDark = 0;
-    mSessionStart = 0;
-  }
-
-  public void addListener(Object listener) {
-    mListeners.add((ARCoreUtils.Camera2DataListener) listener);
-  }
-
-  public void removeListener(Object listener) {
-    mListeners.remove(listener);
   }
 
   @Override
-  public void onCreate() {
-    Bitmap bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-    bitmap.setPixel(0, 0, Color.TRANSPARENT);
-    mColorCameraPreview = mActivity.findViewById(R.id.colorCameraPreview);
-    mColorCameraPreview.setImageBitmap(bitmap);
-    mDepthCameraPreview = mActivity.findViewById(R.id.depthCameraPreview);
-    mDepthCameraPreview.setImageBitmap(bitmap);
+  public void onCreate(int colorPreview, int depthPreview, int surfaceview) {
+    super.onCreate(colorPreview, depthPreview, surfaceview);
 
     //setup ARCore cycle
-    mGLSurfaceView = mActivity.findViewById(R.id.surfaceview);
+    mGLSurfaceView = mActivity.findViewById(surfaceview);
     mGLSurfaceView.setRenderer(new GLSurfaceView.Renderer() {
       private int[] textures = new int[1];
       private int width, height;
@@ -186,7 +143,7 @@ public class ARCoreCamera implements ICamera {
   }
 
   private void onProcessColorData(Image image) {
-    final ByteBuffer yuvBytes = BitmapUtils.imageToByteBuffer(image);
+    final ByteBuffer yuvBytes = imageToByteBuffer(image);
 
     // Convert YUV to RGB
     final RenderScript rs = RenderScript.create(mActivity);
@@ -200,16 +157,18 @@ public class ARCoreCamera implements ICamera {
     allocationRgb.copyTo(bitmap);
 
     if (mDepthCameraId == null) {
-      Pose pose;
+      float[] position;
+      float[] rotation;
       synchronized (mLock) {
-        pose = mPose;
+        position = mPosition;
+        rotation = mRotation;
       }
 
-      for (ARCoreUtils.Camera2DataListener listener : mListeners) {
-        listener.onDepthDataReceived(null, pose, mFrameIndex);
+      for (Object listener : mListeners) {
+        ((Camera2DataListener)listener).onDepthDataReceived(null, position, rotation, mFrameIndex);
       }
-      for (ARCoreUtils.Camera2DataListener listener : mListeners) {
-        listener.onColorDataReceived(bitmap, mFrameIndex);
+      for (Object listener : mListeners) {
+        ((Camera2DataListener)listener).onColorDataReceived(bitmap, mFrameIndex);
       }
       mFrameIndex++;
     } else {
@@ -242,12 +201,14 @@ public class ARCoreCamera implements ICamera {
       return;
     }
     if (mShowDepth) {
-      mDepthCameraPreview.setImageBitmap(ARCoreUtils.getDepthPreview(image, false));
+      mDepthCameraPreview.setImageBitmap(getDepthPreview(image, false));
     }
 
-    Pose pose;
+    float[] position;
+    float[] rotation;
     synchronized (mLock) {
-      pose = mPose;
+      position = mPosition;
+      rotation = mRotation;
     }
 
     Bitmap bitmap = null;
@@ -266,11 +227,11 @@ public class ARCoreCamera implements ICamera {
     }
 
     if (bitmap != null && bestDiff < 50000) {
-      for (ARCoreUtils.Camera2DataListener listener : mListeners) {
-        listener.onDepthDataReceived(image, pose, mFrameIndex);
+      for (Object listener : mListeners) {
+        ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, mFrameIndex);
       }
-      for (ARCoreUtils.Camera2DataListener listener : mListeners) {
-        listener.onColorDataReceived(bitmap, mFrameIndex);
+      for (Object listener : mListeners) {
+        ((Camera2DataListener)listener).onColorDataReceived(bitmap, mFrameIndex);
       }
 
       synchronized (mCache) {
@@ -330,13 +291,13 @@ public class ARCoreCamera implements ICamera {
           int h = resolution.getHeight();
 
           int rank = 0;
-          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.REQUIRE_AND_USE) {
+          if ((w > 1024) && (h > 1024)) {
             rank += 1;
           }
-          if ((w > 1024) && (h > 1024)) {
+          if (Math.abs(mDepthWidth / (float)mDepthHeight - w / (float)h) < 0.0001f) {
             rank += 2;
           }
-          if (Math.abs(mDepthWidth / (float)mDepthHeight - w / (float)h) < 0.0001f) {
+          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.DO_NOT_USE) {
             rank += 4;
           }
 
@@ -406,13 +367,13 @@ public class ARCoreCamera implements ICamera {
               for (int c : ch) {
                 if (c == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT) {
                   mDepthCameraId = cameraId;
-                  mCameraCalibration.depthCameraTranslation = characteristics.get(CameraCharacteristics.LENS_POSE_TRANSLATION);
-                  mCameraCalibration.depthCameraIntrinsic = characteristics.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION);
-                  if (mCameraCalibration.depthCameraIntrinsic != null) {
-                    mCameraCalibration.depthCameraIntrinsic[0] /= (float)mDepthWidth;
-                    mCameraCalibration.depthCameraIntrinsic[1] /= (float)mDepthHeight;
-                    mCameraCalibration.depthCameraIntrinsic[2] /= (float)mDepthWidth;
-                    mCameraCalibration.depthCameraIntrinsic[3] /= (float)mDepthHeight;
+                  mDepthCameraTranslation = characteristics.get(CameraCharacteristics.LENS_POSE_TRANSLATION);
+                  mDepthCameraIntrinsic = characteristics.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION);
+                  if (mDepthCameraIntrinsic != null) {
+                    mDepthCameraIntrinsic[0] /= (float)mDepthWidth;
+                    mDepthCameraIntrinsic[1] /= (float)mDepthHeight;
+                    mDepthCameraIntrinsic[2] /= (float)mDepthWidth;
+                    mDepthCameraIntrinsic[3] /= (float)mDepthHeight;
                   }
                 }
               }
@@ -465,22 +426,6 @@ public class ARCoreCamera implements ICamera {
     return true;
   }
 
-  @Override
-  public CameraCalibration getCalibration() {
-    return mCameraCalibration;
-  }
-
-  @Override
-  public float getLightIntensity() {
-    return mPixelIntensity;
-  }
-
-  @Override
-  public CameraCalibration.LightConditions getLightConditionState() {
-    mLight = CameraCalibration.updateLight(mLight, mLastBright, mLastDark, mSessionStart);
-    return mLight;
-  }
-
   private void updateFrame(int texture, int width, int height) {
     try {
       if (mSession == null) {
@@ -492,29 +437,31 @@ public class ARCoreCamera implements ICamera {
       mSession.setDisplayGeometry(0, width, height);
       Frame frame = mSession.update();
       CameraIntrinsics intrinsics = frame.getCamera().getImageIntrinsics();
-      mCameraCalibration.colorCameraIntrinsic[0] = intrinsics.getFocalLength()[0] / (float)intrinsics.getImageDimensions()[0];
-      mCameraCalibration.colorCameraIntrinsic[1] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
-      mCameraCalibration.colorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
-      mCameraCalibration.colorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[1] / (float)intrinsics.getImageDimensions()[1];
+      mColorCameraIntrinsic[0] = intrinsics.getFocalLength()[0] / (float)intrinsics.getImageDimensions()[0];
+      mColorCameraIntrinsic[1] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
+      mColorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
+      mColorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[1] / (float)intrinsics.getImageDimensions()[1];
       if ((mDepthCameraId != null) && (mColorCameraId.compareTo(mDepthCameraId) == 0)) {
-        mCameraCalibration.depthCameraIntrinsic = mCameraCalibration.colorCameraIntrinsic;
+        mDepthCameraIntrinsic = mColorCameraIntrinsic;
       }
-      mCameraCalibration.setValid();
+      mHasCameraCalibration = true;
 
       //get pose from ARCore
       synchronized (mLock) {
         Camera camera = frame.getCamera();
-        mPose = camera.getPose();
+        Pose pose = camera.getPose();
+        mPosition = pose.getTranslation();
+        mRotation = pose.getRotationQuaternion();
       }
 
       //get light estimation from ARCore
       mPixelIntensity = frame.getLightEstimate().getPixelIntensity() * 2.0f;
       if (mPixelIntensity > 1.5f) {
-        mLight = CameraCalibration.LightConditions.BRIGHT;
+        mLight = LightConditions.BRIGHT;
         mLastBright = System.currentTimeMillis();
       }
       if (mPixelIntensity < 0.25f) {
-        mLight = CameraCalibration.LightConditions.DARK;
+        mLight = LightConditions.DARK;
         mLastDark = System.currentTimeMillis();
       }
       if (mSessionStart == 0) {

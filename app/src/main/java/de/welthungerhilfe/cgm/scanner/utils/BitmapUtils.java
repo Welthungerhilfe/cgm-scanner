@@ -19,15 +19,11 @@
 package de.welthungerhilfe.cgm.scanner.utils;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.ImageFormat;
 import android.graphics.Matrix;
-import android.media.Image;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.nio.ByteBuffer;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 
@@ -69,77 +65,6 @@ public class BitmapUtils {
         Matrix matrix = new Matrix();
         matrix.postScale(scaleWidth, scaleHeight);
         return Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true);
-    }
-
-    public static byte[] getRotatedByte(byte[] data, float degree) {
-        Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-        Matrix matrix = new Matrix();
-        matrix.postRotate(degree);
-        Bitmap rotatedBmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        rotatedBmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        return stream.toByteArray();
-    }
-
-    public static ByteBuffer imageToByteBuffer(Image image) {
-        final int  width  = image.getWidth();
-        final int  height = image.getHeight();
-
-        final Image.Plane[] planes     = image.getPlanes();
-        final byte[]        rowData    = new byte[planes[0].getRowStride()];
-        final int           bufferSize = width * height * ImageFormat.getBitsPerPixel(ImageFormat.YUV_420_888) / 8;
-        final ByteBuffer    output     = ByteBuffer.allocateDirect(bufferSize);
-
-        int channelOffset;
-        int outputStride;
-
-        for (int planeIndex = 0; planeIndex < 3; planeIndex++) {
-            if (planeIndex == 0) {
-                channelOffset = 0;
-                outputStride = 1;
-            } else if (planeIndex == 1) {
-                channelOffset = width * height + 1;
-                outputStride = 2;
-            } else {
-                channelOffset = width * height;
-                outputStride = 2;
-            }
-
-            final ByteBuffer buffer      = planes[planeIndex].getBuffer();
-            final int        rowStride   = planes[planeIndex].getRowStride();
-            final int        pixelStride = planes[planeIndex].getPixelStride();
-
-            final int shift         = (planeIndex == 0) ? 0 : 1;
-            final int widthShifted  = width >> shift;
-            final int heightShifted = height >> shift;
-
-            buffer.position(0);
-
-            for (int row = 0; row < heightShifted; row++) {
-                int length;
-
-                if (pixelStride == 1 && outputStride == 1) {
-                    length = widthShifted;
-                    buffer.get(output.array(), channelOffset, length);
-                    channelOffset += length;
-                } else {
-                    length = (widthShifted - 1) * pixelStride + 1;
-                    buffer.get(rowData, 0, length);
-
-                    for (int col = 0; col < widthShifted; col++) {
-                        output.array()[channelOffset] = rowData[col * pixelStride];
-                        channelOffset += outputStride;
-                    }
-                }
-
-                if (row < heightShifted - 1) {
-                    buffer.position(buffer.position() + rowStride - length);
-                }
-            }
-        }
-
-        return output;
     }
 
     public static void writeBitmapToFile(Bitmap bitmap, File file) {
