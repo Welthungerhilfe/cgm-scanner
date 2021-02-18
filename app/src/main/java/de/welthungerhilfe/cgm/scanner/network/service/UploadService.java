@@ -214,9 +214,11 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
             String measureId = LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID);
             boolean finished = true;
             for (FileLog log : list) {
-                if (measureId.compareTo(log.getMeasureId()) == 0) {
-                    finished = false;
-                    break;
+                if (log.getMeasureId() != null) {
+                    if (measureId.compareTo(log.getMeasureId()) == 0) {
+                        finished = false;
+                        break;
+                    }
                 }
             }
             if (finished) {
