@@ -74,6 +74,7 @@ import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.workmanager.WorkManagerUtils;
 
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
 
@@ -151,6 +152,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         recyclerData.setAdapter(adapterData);
 
         startService(new Intent(this, DeviceService.class));
+        WorkManagerUtils.startSyncingWithWorkManager(MainActivity.this);
     }
 
     @Override

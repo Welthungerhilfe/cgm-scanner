@@ -322,7 +322,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
 
-        private void processDeviceQueue()  {
+        private void processDeviceQueue() {
             try {
                 List<Device> syncableDevices = deviceRepository.getSyncableDevice(prevTimestamp);
                 for (int i = 0; i < syncableDevices.size(); i++) {
@@ -387,6 +387,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 if (Utils.isExpiredToken(e.getMessage())) {
                                     AuthenticationHandler.restoreToken(getContext());
                                 }
+
                                 onThreadChange(-1);
                             }
 
@@ -427,7 +428,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Person person) {
-                            Log.i(TAG, "this is response success postPerson " +person);
+                            Log.i(TAG, "this is response success postPerson " + person);
                             person.setTimestamp(prevTimestamp);
                             person.setId(person1.getId());
                             person.setCreatedBy(person1.getCreatedBy());
@@ -497,7 +498,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Person person) {
-                            Log.i(TAG, "this is response success putPerson " +person);
+                            Log.i(TAG, "this is response success putPerson " + person);
                             person.setTimestamp(prevTimestamp);
                             person.setId(person1.getId());
                             person.setCreatedBy(person1.getCreatedBy());
@@ -573,7 +574,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Measure measure1) {
-                            Log.i(TAG, "this is response success postMeasure " +measure1);
+                            Log.i(TAG, "this is response success postMeasure " + measure1);
                             measure1.setTimestamp(prevTimestamp);
                             measure1.setId(measure.getId());
                             measure1.setPersonId(measure.getPersonId());
@@ -629,7 +630,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Measure measure1) {
-                            Log.i(TAG, "this is response success putMeasure " +measure1);
+                            Log.i(TAG, "this is response success putMeasure " + measure1);
                             measure1.setTimestamp(prevTimestamp);
                             measure1.setId(measure.getId());
                             measure1.setPersonId(measure.getPersonId());
@@ -688,7 +689,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Consent consent) {
-                            Log.i(TAG, "this is response success postConsentSheet " +consent);
+                            Log.i(TAG, "this is response success postConsentSheet " + consent);
                             fileLog.setStatus(AppConstants.CONSENT_UPLOADED);
                             fileLogRepository.updateFileLog(fileLog);
                             onThreadChange(-1);
@@ -728,7 +729,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull EstimatesResponse estimatesResponse) {
-                            Log.i(TAG, "this is response success getEstimation " +estimatesResponse);
+                            Log.i(TAG, "this is response success getEstimation " + estimatesResponse);
                             //TODO : generate notification and store result based on confidence value
                             if (estimatesResponse != null) {
 
