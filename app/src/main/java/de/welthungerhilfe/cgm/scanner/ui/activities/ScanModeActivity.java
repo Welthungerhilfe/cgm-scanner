@@ -1037,14 +1037,17 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             FileLog log = new FileLog();
             switch (type) {
                 case CALIBRATION:
+                    log.setStep(0);
                     log.setId(AppController.getInstance().getArtifactId("camera-calibration", mNowTime));
                     log.setType("calibration");
                     break;
                 case DEPTH:
+                    log.setStep(SCAN_STEP);
                     log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
                     log.setType("depth");
                     break;
                 case RGB:
+                    log.setStep(SCAN_STEP);
                     log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
                     log.setType("rgb");
                     break;
@@ -1060,7 +1063,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             log.setAge(age);
             log.setSchema_version(CgmDatabase.version);
             log.setMeasureId(measure.getId());
-            log.setStep(0);
             log.setEnvironment(session.getEnvironment());
             synchronized (lock) {
                 files.add(log);
