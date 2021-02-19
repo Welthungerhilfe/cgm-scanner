@@ -59,9 +59,6 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                 return;
             }
             session.setSigned(true);
-            //calling from MainActivity with SyncingWorkmanager
-            /*Account accountData = AccountUtils.getAccount(this, "test@test.com", "kjjhhj");
-            SyncAdapter.startPeriodicSync(accountData, getApplicationContext());*/
             startApp();
         } else {
             if (session.getEnvironment() != AppConstants.UNKNOWN) {
@@ -145,9 +142,6 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         try {
             if (email != null && !email.isEmpty()) {
                 session.setAuthToken(token);
-                //calling from MainActivity with SyncingWorkmanager
-                /*Account accountData = AccountUtils.getAccount(this, email, token);
-                SyncAdapter.startPeriodicSync(accountData, getApplicationContext());*/
 
                 final Intent intent = new Intent();
                 intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, email);

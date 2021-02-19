@@ -20,6 +20,8 @@ package de.welthungerhilfe.cgm.scanner.network.syncdata;
 
 import android.accounts.Account;
 import android.annotation.SuppressLint;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -31,6 +33,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -124,6 +129,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         initUploadService();
         startSyncing();
+        addNotification();
     }
 
     private void initUploadService() {
@@ -863,4 +869,30 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }).start();
         }
     }
+
+    private void addNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("JAY", "JAY", importance);
+            channel.setDescription("JAY");
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager =getContext().getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext().getApplicationContext(), "JAY")
+                .setSmallIcon(R.drawable.icon_notif)
+                .setContentTitle("SynCAdapter noti")
+                .setContentText("Hello World!")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext().getApplicationContext());
+
+// notificationId is a unique int for each notification that you must define
+        notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+    }
+
 }

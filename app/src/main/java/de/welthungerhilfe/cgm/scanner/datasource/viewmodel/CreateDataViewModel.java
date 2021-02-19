@@ -39,6 +39,8 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AccountUtils;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
+import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class CreateDataViewModel extends ViewModel {
@@ -138,9 +140,8 @@ public class CreateDataViewModel extends ViewModel {
                 measureRepository.insertMeasure(measure);
 
                 Context appContext = context.getApplicationContext();
-                SessionManager sessionManager = new SessionManager(appContext);
-                Account accountData = AccountUtils.getAccount(appContext, sessionManager);
-                SyncAdapter.startPeriodicSync(accountData, appContext);
+                SyncingWorkManager.startSyncingWithWorkManager(appContext);
+
                 return null;
             }
 

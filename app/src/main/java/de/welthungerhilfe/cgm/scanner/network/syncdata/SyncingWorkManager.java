@@ -1,19 +1,20 @@
-package de.welthungerhilfe.cgm.scanner.workmanager;
+package de.welthungerhilfe.cgm.scanner.network.syncdata;
 
 import android.accounts.Account;
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 
+import java.util.concurrent.TimeUnit;
+
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AccountUtils;
-import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class SyncingWorkManager extends Worker {
@@ -38,5 +39,15 @@ public class SyncingWorkManager extends Worker {
         }
         SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
         return null;
+    }
+
+    public static void startSyncingWithWorkManager(Context context) {
+
+        PeriodicWorkRequest SyncingWorkManager =
+                new PeriodicWorkRequest.Builder(SyncingWorkManager.class, 16, TimeUnit.MINUTES).build();
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+                "SyncingWorkManager",
+                ExistingPeriodicWorkPolicy.REPLACE,
+                SyncingWorkManager);
     }
 }

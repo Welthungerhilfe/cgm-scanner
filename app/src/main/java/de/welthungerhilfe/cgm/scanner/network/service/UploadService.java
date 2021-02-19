@@ -33,6 +33,7 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import android.util.Log;
 
@@ -56,6 +57,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AccountUtils;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
@@ -96,6 +98,8 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
 
     public static final int FOREGROUND_NOTIFICATION_ID = 100;
 
+    private int onErrorCount = 0;
+
 
     @Inject
     Retrofit retrofit;
@@ -119,6 +123,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
     public void onCreate() {
         service = this;
         running = false;
+        onErrorCount = 0;
 
         AndroidInjection.inject(this);
         repository = FileLogRepository.getInstance(getApplicationContext());
@@ -177,6 +182,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
         Log.e(TAG, "Stopped");
         service = null;
         running = false;
+        onErrorCount = 0;
 
         if (executor != null) {
             executor.shutdownNow();
@@ -229,8 +235,8 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
         if (remainingCount <= 0) {
             if (updated) {
                 updated = false;
-                Account accountData = AccountUtils.getAccount(getApplicationContext(), sessionManager);
-                SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
+                SyncingWorkManager.startSyncingWithWorkManager(getApplicationContext());
+
             }
             stopSelf();
         } else {
@@ -377,6 +383,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                         }
 
                         updateFileLog(log);
+                        resetOnErrorCount();
                     }
 
                     @Override
@@ -389,6 +396,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                         } else {
                             updateFileLog(log);
                         }
+                        increaseOnErrorCount();
                     }
 
                     @Override
@@ -424,4 +432,45 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
+
+    private void increaseOnErrorCount()
+    {
+        if(++onErrorCount >= 3)
+        {
+            addNotification();
+            stopSelf();
+        }
+    }
+
+    private void resetOnErrorCount()
+    {
+        onErrorCount = 0;
+    }
+
+
+    private void addNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("JAY", "JAY", importance);
+            channel.setDescription("JAY");
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getApplicationContext().getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "JAY")
+                .setSmallIcon(R.drawable.icon_notif)
+                .setContentTitle("upload sservice stop...")
+                .setContentText("Hello World!")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
+
+// notificationId is a unique int for each notification that you must define
+        notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+    }
+
 }
