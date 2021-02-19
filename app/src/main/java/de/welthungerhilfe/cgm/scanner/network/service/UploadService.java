@@ -37,6 +37,8 @@ import androidx.core.app.NotificationManagerCompat;
 
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import org.jcodec.common.io.IOUtils;
 
 import java.io.File;
@@ -54,9 +56,7 @@ import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AccountUtils;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
-import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
@@ -79,6 +79,7 @@ import static de.welthungerhilfe.cgm.scanner.AppConstants.MULTI_UPLOAD_BUNCH;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.UPLOADED;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.UPLOADED_DELETED;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.UPLOAD_ERROR;
+import static de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager.provideRetrofit;
 
 public class UploadService extends Service implements FileLogRepository.OnFileLogsLoad {
 
@@ -101,7 +102,6 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
     private int onErrorCount = 0;
 
 
-    @Inject
     Retrofit retrofit;
 
     SessionManager sessionManager;
@@ -114,6 +114,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                 }
             }
         }
+
     }
 
     public static boolean isInitialized() {
@@ -124,8 +125,9 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
         service = this;
         running = false;
         onErrorCount = 0;
-
-        AndroidInjection.inject(this);
+        if (retrofit == null) {
+            retrofit = provideRetrofit();
+        }
         repository = FileLogRepository.getInstance(getApplicationContext());
         sessionManager = new SessionManager(getApplication());
 
@@ -433,17 +435,14 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    private void increaseOnErrorCount()
-    {
-        if(++onErrorCount >= 3)
-        {
+    private void increaseOnErrorCount() {
+        if (++onErrorCount >= 3) {
             addNotification();
             stopSelf();
         }
     }
 
-    private void resetOnErrorCount()
-    {
+    private void resetOnErrorCount() {
         onErrorCount = 0;
     }
 

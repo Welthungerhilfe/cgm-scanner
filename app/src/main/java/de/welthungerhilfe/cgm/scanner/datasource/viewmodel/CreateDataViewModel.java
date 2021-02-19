@@ -18,7 +18,6 @@
  */
 package de.welthungerhilfe.cgm.scanner.datasource.viewmodel;
 
-import android.accounts.Account;
 import android.annotation.SuppressLint;
 
 import androidx.lifecycle.LiveData;
@@ -37,11 +36,8 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AccountUtils;
-import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
-import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+
 
 public class CreateDataViewModel extends ViewModel {
 

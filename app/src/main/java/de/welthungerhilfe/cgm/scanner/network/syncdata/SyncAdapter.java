@@ -82,8 +82,9 @@ import retrofit2.Retrofit;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.SYNC_INTERVAL;
 
-public class SyncAdapter extends AbstractThreadedSyncAdapter {
+public class SyncAdapter {
 
+    private static SyncAdapter instance;
     private static final Object lock = new Object();
 
     private final String TAG = SyncAdapter.class.getSimpleName();
@@ -103,11 +104,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private SessionManager session;
     private AsyncTask<Void, Void, Void> syncTask;
-
     private Retrofit retrofit;
+    Context context;
 
-    public SyncAdapter(Context context, boolean autoInitialize, Retrofit retrofit) {
-        super(context, autoInitialize);
+    public SyncAdapter(Context context, Retrofit retrofit) {
+        this.context = context;
         this.retrofit = retrofit;
         personRepository = PersonRepository.getInstance(context);
         measureRepository = MeasureRepository.getInstance(context);
@@ -119,29 +120,27 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         session = new SessionManager(context);
     }
 
-    public static Object getLock() {
-        return lock;
+    public static SyncAdapter getInstance(Context context, Retrofit retrofit) {
+        if (instance == null) {
+            instance = new SyncAdapter(context, retrofit);
+        }
+        return instance;
     }
 
-    @Override
-    public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        Log.i(TAG, "this is inside onPerformSync");
-
-        initUploadService();
-        startSyncing();
-        addNotification();
+    public static Object getLock() {
+        return lock;
     }
 
     private void initUploadService() {
         if (!UploadService.isInitialized()) {
             try {
-                getContext().startService(new Intent(getContext(), UploadService.class));
+                context.startService(new Intent(context, UploadService.class));
 
             } catch (IllegalStateException e) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    Intent intent = new Intent(getContext(), UploadService.class);
+                    Intent intent = new Intent(context, UploadService.class);
                     intent.putExtra(AppConstants.IS_FOREGROUND, true);
-                    getContext().startForegroundService(intent);
+                    context.startForegroundService(intent);
                 }
             }
         } else {
@@ -171,33 +170,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    private static void syncImmediately(Account account, Context context) {
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        ContentResolver.requestSync(account, context.getString(R.string.sync_authority), bundle);
-    }
 
-    private static void configurePeriodicSync(Account account, Context context) {
-
-        String authority = context.getString(R.string.sync_authority);
-
-        SyncRequest request = new SyncRequest.Builder().
-                syncPeriodic(SYNC_INTERVAL, SYNC_FLEXTIME).
-                setSyncAdapter(account, authority).
-                setExtras(new Bundle()).build();
-
-        ContentResolver.requestSync(request);
-    }
-
-    public static void startPeriodicSync(Account newAccount, Context context) {
-
-        configurePeriodicSync(newAccount, context);
-
-        ContentResolver.setSyncAutomatically(newAccount, context.getString(R.string.sync_authority), true);
-
-        syncImmediately(newAccount, context);
-
+    public void startPeriodicSync() {
+        initUploadService();
+        startSyncing();
+        addNotification();
     }
 
 
@@ -206,7 +183,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (!Utils.isUploadAllowed(getContext())) {
+            if (!Utils.isUploadAllowed(context)) {
                 Log.d(TAG, "skipped due to missing connection");
                 return null;
             }
@@ -391,7 +368,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             public void onError(@NonNull Throwable e) {
                                 Log.i(TAG, "this is value of post " + e.getMessage());
                                 if (Utils.isExpiredToken(e.getMessage())) {
-                                    AuthenticationHandler.restoreToken(getContext());
+                                    AuthenticationHandler.restoreToken(context);
                                 }
 
                                 onThreadChange(-1);
@@ -459,7 +436,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is response error postperson" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
-                                AuthenticationHandler.restoreToken(getContext());
+                                AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
                         }
@@ -527,7 +504,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             Log.i(TAG, "this is response error putPerson" + e.getMessage());
 
                             if (Utils.isExpiredToken(e.getMessage())) {
-                                AuthenticationHandler.restoreToken(getContext());
+                                AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
                         }
@@ -600,7 +577,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is response error postMeasurements" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
-                                AuthenticationHandler.restoreToken(getContext());
+                                AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
                         }
@@ -656,7 +633,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is response error putMeasurements" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
-                                AuthenticationHandler.restoreToken(getContext());
+                                AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
                         }
@@ -705,7 +682,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is response error postConsentSheet" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
-                                AuthenticationHandler.restoreToken(getContext());
+                                AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
                         }
@@ -758,7 +735,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                                         if ((notification != null) && !hadHeight) {
                                             notification.setHeight(height);
-                                            MeasureNotification.showNotification(getContext());
+                                            MeasureNotification.showNotification(context);
                                         }
                                     }
                                 }
@@ -781,7 +758,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                                         if ((notification != null) && !hadWeight) {
                                             notification.setWeight(weight);
-                                            MeasureNotification.showNotification(getContext());
+                                            MeasureNotification.showNotification(context);
                                         }
                                     }
                                 }
@@ -803,7 +780,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is response error getEstimation" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
-                                AuthenticationHandler.restoreToken(getContext());
+                                AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
                         }
@@ -829,7 +806,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void onResultReceived(String measureId) {
 
-        Context c = getContext();
+        Context c = context;
         if (!LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT))
             return;
         if (LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID).compareTo(measureId) != 0)
@@ -878,18 +855,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             channel.setDescription("JAY");
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
-            NotificationManager notificationManager =getContext().getSystemService(NotificationManager.class);
+            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext().getApplicationContext(), "JAY")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context.getApplicationContext(), "JAY")
                 .setSmallIcon(R.drawable.icon_notif)
-                .setContentTitle("SynCAdapter noti")
+                .setContentTitle("SynCAdapter noti " + retrofit + " " + context)
                 .setContentText("Hello World!")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true);
 
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext().getApplicationContext());
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context.getApplicationContext());
 
 // notificationId is a unique int for each notification that you must define
         notificationManager.notify((int) System.currentTimeMillis(), builder.build());

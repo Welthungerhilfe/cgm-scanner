@@ -55,7 +55,6 @@ import de.welthungerhilfe.cgm.scanner.ui.fragments.GrowthDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasuresDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-import retrofit2.Retrofit;
 
 public class CreateDataActivity extends BaseActivity {
 
@@ -74,8 +73,7 @@ public class CreateDataActivity extends BaseActivity {
     MeasuresDataFragment measureFragment;
     GrowthDataFragment growthFragment;
 
-    @Inject
-    Retrofit retrofit;
+
 
     ViewModelProvider.Factory factory;
 

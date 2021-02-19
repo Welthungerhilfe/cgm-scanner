@@ -1,7 +1,9 @@
 package de.welthungerhilfe.cgm.scanner.network.syncdata;
 
 import android.accounts.Account;
+import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.work.ExistingPeriodicWorkPolicy;
@@ -11,16 +13,32 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.util.concurrent.TimeUnit;
 
+import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AccountUtils;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
+import de.welthungerhilfe.cgm.scanner.network.module.HttpInterceptor;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import okhttp3.Cache;
+import okhttp3.ConnectionPool;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SyncingWorkManager extends Worker {
 
+    public static final String TAG = SyncingWorkManager.class.getSimpleName();
     Context context;
     SessionManager sessionManager;
+    Retrofit retrofit;
 
     public SyncingWorkManager(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -31,13 +49,12 @@ public class SyncingWorkManager extends Worker {
     @Override
     public Result doWork() {
         sessionManager = new SessionManager(context.getApplicationContext());
-        Account accountData = null;
-        if (BuildConfig.DEBUG) {
-            accountData = AccountUtils.getAccount(context.getApplicationContext(), "test@test.com", "kjjhhj");
-        } else {
-            accountData = AccountUtils.getAccount(context.getApplicationContext(), sessionManager);
+
+        if (retrofit == null) {
+            retrofit = provideRetrofit();
         }
-        SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
+        SyncAdapter.getInstance(getApplicationContext(), retrofit).startPeriodicSync();
+
         return null;
     }
 
@@ -49,5 +66,43 @@ public class SyncingWorkManager extends Worker {
                 "SyncingWorkManager",
                 ExistingPeriodicWorkPolicy.REPLACE,
                 SyncingWorkManager);
+    }
+
+    public static Gson provideGson() {
+        GsonBuilder gsonBuilder = new GsonBuilder().setLenient();
+        gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+        gsonBuilder.excludeFieldsWithoutExposeAnnotation();
+        return gsonBuilder.serializeNulls().create();
+    }
+
+    public static Retrofit provideRetrofit() {
+        Gson gson = provideGson();
+        return new Retrofit.Builder()
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
+                .baseUrl(getUrl())
+                .client(new OkHttpClient())
+                .build();
+    }
+
+    public static String getUrl() {
+        if (BuildConfig.DEBUG) {
+            // development build
+            return AppConstants.API_TESTING_URL;
+        } else {
+            Context context = AppController.getInstance().getApplicationContext();
+            switch (AuthenticationHandler.getEnvironment(context)) {
+                case AppConstants.SANDBOX:
+                    return AppConstants.API_URL_SANDBOX;
+                case AppConstants.QA:
+                    return AppConstants.API_URL_QA;
+                case AppConstants.PROUDCTION:
+                    return AppConstants.API_URL_PRODUCTION;
+                default:
+                    Log.e(TAG, "Environment not configured");
+                    System.exit(0);
+                    return null;
+            }
+        }
     }
 }
