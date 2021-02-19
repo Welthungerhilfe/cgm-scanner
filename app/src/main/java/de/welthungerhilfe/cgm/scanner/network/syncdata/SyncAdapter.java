@@ -240,6 +240,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
+                e.printStackTrace();
             }
 
         }
@@ -259,6 +260,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
+                e.printStackTrace();
             }
         }
 
@@ -295,6 +297,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
+                e.printStackTrace();
             }
         }
 
@@ -318,6 +321,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
+                e.printStackTrace();
             }
         }
 
@@ -333,6 +337,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
+                e.printStackTrace();
             }
         }
     }
@@ -397,7 +402,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         });
             }
         } catch (Exception e) {
-            Log.i(TAG, "this is value of exception " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -463,7 +468,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            Log.i(TAG, "this is value of exception " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -531,7 +536,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            Log.i(TAG, "this is value of exception " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -587,7 +592,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            Log.i(TAG, "this is value of exception " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -643,7 +648,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            Log.i(TAG, "this is value of exception " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -692,7 +697,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            Log.i(TAG, "this is value of exception " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -790,7 +795,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            Log.i(TAG, "this is value of exception " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
