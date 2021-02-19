@@ -223,6 +223,7 @@ public class SyncAdapter {
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
+                e.printStackTrace();
             }
 
         }
@@ -242,6 +243,7 @@ public class SyncAdapter {
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
+                e.printStackTrace();
             }
         }
 
@@ -278,6 +280,7 @@ public class SyncAdapter {
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
+                e.printStackTrace();
             }
         }
 
@@ -301,6 +304,7 @@ public class SyncAdapter {
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
+                e.printStackTrace();
             }
         }
 
@@ -316,6 +320,7 @@ public class SyncAdapter {
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
+                e.printStackTrace();
             }
         }
     }
@@ -381,7 +386,7 @@ public class SyncAdapter {
                         });
             }
         } catch (Exception e) {
-            Log.i(TAG, "this is value of exception " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -426,7 +431,7 @@ public class SyncAdapter {
                                 person.getLastLocation().setLongitude(person1.getLastLocation().getLongitude());
                             }
                             person.setBirthday(person1.getBirthday());
-                            updatePersonOnDatabase(person);
+                            personRepository.updatePerson(person);
                             updated = true;
                             updateDelay = 0;
                             onThreadChange(-1);
@@ -447,7 +452,7 @@ public class SyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            Log.i(TAG, "this is value of exception " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -493,7 +498,7 @@ public class SyncAdapter {
                             person.getLastLocation().setLatitude(person1.getLastLocation().getLatitude());
                             person.getLastLocation().setLongitude(person1.getLastLocation().getLongitude());
                             person.setBirthday(person1.getBirthday());
-                            updatePersonOnDatabase(person);
+                            personRepository.updatePerson(person);
                             updated = true;
                             updateDelay = 0;
                             onThreadChange(-1);
@@ -515,25 +520,8 @@ public class SyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            Log.i(TAG, "this is value of exception " + e.getMessage());
+            e.printStackTrace();
         }
-    }
-
-
-    @SuppressLint("StaticFieldLeak")
-    public void updatePersonOnDatabase(Person person) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                personRepository.updatePerson(person);
-                return null;
-            }
-
-            public void onPostExecute(Void result) {
-
-
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public void postMeasurement(Measure measure) {
@@ -588,7 +576,7 @@ public class SyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            Log.i(TAG, "this is value of exception " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -644,7 +632,7 @@ public class SyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            Log.i(TAG, "this is value of exception " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -693,7 +681,7 @@ public class SyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            Log.i(TAG, "this is value of exception " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -791,7 +779,7 @@ public class SyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            Log.i(TAG, "this is value of exception " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
