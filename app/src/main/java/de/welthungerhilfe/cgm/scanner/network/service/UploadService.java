@@ -437,7 +437,6 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
 
     private void increaseOnErrorCount() {
         if (++onErrorCount >= 3) {
-            addNotification();
             stopSelf();
         }
     }
@@ -445,31 +444,4 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
     private void resetOnErrorCount() {
         onErrorCount = 0;
     }
-
-
-    private void addNotification() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("JAY", "JAY", importance);
-            channel.setDescription("JAY");
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getApplicationContext().getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "JAY")
-                .setSmallIcon(R.drawable.icon_notif)
-                .setContentTitle("upload sservice stop...")
-                .setContentText("Hello World!")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(true);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
-
-// notificationId is a unique int for each notification that you must define
-        notificationManager.notify((int) System.currentTimeMillis(), builder.build());
-    }
-
 }
