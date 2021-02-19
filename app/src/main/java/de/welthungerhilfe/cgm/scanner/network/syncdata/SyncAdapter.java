@@ -662,6 +662,8 @@ public class SyncAdapter {
                             Log.i(TAG, "this is response success postConsentSheet " + consent);
                             fileLog.setStatus(AppConstants.CONSENT_UPLOADED);
                             fileLogRepository.updateFileLog(fileLog);
+                            updated = true;
+                            updateDelay = 0;
                             onThreadChange(-1);
                         }
 
