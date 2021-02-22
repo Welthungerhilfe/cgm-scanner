@@ -17,6 +17,7 @@
  */
 package de.welthungerhilfe.cgm.scanner;
 
+import android.app.Application;
 import android.content.Context;
 import android.os.Environment;
 import android.os.StrictMode;
@@ -24,13 +25,11 @@ import android.os.StrictMode;
 import java.io.File;
 import java.io.IOException;
 
-import dagger.android.AndroidInjector;
-import dagger.android.support.DaggerApplication;
-import de.welthungerhilfe.cgm.scanner.network.module.DaggerAppComponent;
+
 import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class AppController extends DaggerApplication {
+public class AppController extends Application {
 
     private static AppController mInstance;
 
@@ -98,9 +97,4 @@ public class AppController extends DaggerApplication {
         return mExtFileDir;
     }
 
-    @Override
-    protected AndroidInjector<? extends DaggerApplication> applicationInjector() {
-        DaggerAppComponent.builder().bindInstance(AppController.this).build().inject(this);
-        return DaggerAppComponent.builder().bindInstance(AppController.this).build();
-    }
 }

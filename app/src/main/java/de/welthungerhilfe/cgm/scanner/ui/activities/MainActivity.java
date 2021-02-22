@@ -59,7 +59,6 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
@@ -114,7 +113,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         ButterKnife.bind(this);
 
-        AndroidInjection.inject(this);
         session = new SessionManager(MainActivity.this);
 
 

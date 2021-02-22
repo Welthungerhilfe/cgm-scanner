@@ -38,7 +38,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
-import dagger.android.support.AndroidSupportInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 
@@ -72,12 +71,6 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
     ViewModelProvider.Factory factory;
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        AndroidSupportInjection.inject(this);
-
-    }
 
     public static MeasuresDataFragment getInstance(String qrCode) {
         MeasuresDataFragment fragment = new MeasuresDataFragment();
