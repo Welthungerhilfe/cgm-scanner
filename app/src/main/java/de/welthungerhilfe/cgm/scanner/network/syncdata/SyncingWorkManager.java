@@ -1,7 +1,5 @@
 package de.welthungerhilfe.cgm.scanner.network.syncdata;
 
-import android.accounts.Account;
-import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
@@ -79,6 +77,22 @@ public class SyncingWorkManager extends Worker {
                 .baseUrl(getUrl())
                 .client(new OkHttpClient())
                 .build();
+    }
+
+    public static String getAPI() {
+        if (BuildConfig.DEBUG) {
+            return "localhost";
+        }
+
+        String apiURL = getUrl();
+        if (apiURL.contains("https://")) {
+            apiURL = apiURL.replaceFirst("https://", "");
+            apiURL = apiURL.substring(0, apiURL.indexOf('.'));
+        } else {
+            apiURL = apiURL.replaceFirst("http://", "");
+            apiURL = apiURL.substring(0, apiURL.indexOf('/'));
+        }
+        return apiURL;
     }
 
     public static String getUrl() {
