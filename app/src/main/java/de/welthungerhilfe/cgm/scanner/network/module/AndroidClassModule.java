@@ -22,7 +22,6 @@ import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
 import de.welthungerhilfe.cgm.scanner.network.service.DeviceService;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
-import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncService;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
@@ -34,9 +33,6 @@ import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
 
 @Module
 public abstract class AndroidClassModule {
-
-    @ContributesAndroidInjector
-    abstract SyncService provideSyncService();
 
     @ContributesAndroidInjector
     abstract SettingsActivity provideSettingActivity();

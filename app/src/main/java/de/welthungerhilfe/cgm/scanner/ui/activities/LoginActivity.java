@@ -18,7 +18,6 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
-import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.content.Intent;
@@ -43,11 +42,9 @@ import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AccountUtils;
 import de.welthungerhilfe.cgm.scanner.utils.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
-import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 
 public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback {
 
@@ -59,9 +56,6 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                 return;
             }
             session.setSigned(true);
-
-            Account accountData = AccountUtils.getAccount(this, "test@test.com", "kjjhhj");
-            SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
             startApp();
         } else {
             if (session.getEnvironment() != AppConstants.UNKNOWN) {
@@ -145,9 +139,6 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         try {
             if (email != null && !email.isEmpty()) {
                 session.setAuthToken(token);
-
-                Account accountData = AccountUtils.getAccount(this, email, token);
-                SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
 
                 final Intent intent = new Intent();
                 intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, email);

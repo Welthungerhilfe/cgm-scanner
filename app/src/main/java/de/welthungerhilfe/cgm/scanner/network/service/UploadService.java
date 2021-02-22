@@ -33,8 +33,11 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import android.util.Log;
+
+import com.google.gson.Gson;
 
 import org.jcodec.common.io.IOUtils;
 
@@ -53,9 +56,8 @@ import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AccountUtils;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
-import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
@@ -77,6 +79,7 @@ import static de.welthungerhilfe.cgm.scanner.AppConstants.MULTI_UPLOAD_BUNCH;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.UPLOADED;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.UPLOADED_DELETED;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.UPLOAD_ERROR;
+import static de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager.provideRetrofit;
 
 public class UploadService extends Service implements FileLogRepository.OnFileLogsLoad {
 
@@ -96,8 +99,9 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
 
     public static final int FOREGROUND_NOTIFICATION_ID = 100;
 
+    private int onErrorCount = 0;
 
-    @Inject
+
     Retrofit retrofit;
 
     SessionManager sessionManager;
@@ -110,6 +114,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                 }
             }
         }
+
     }
 
     public static boolean isInitialized() {
@@ -119,8 +124,10 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
     public void onCreate() {
         service = this;
         running = false;
-
-        AndroidInjection.inject(this);
+        onErrorCount = 0;
+        if (retrofit == null) {
+            retrofit = provideRetrofit();
+        }
         repository = FileLogRepository.getInstance(getApplicationContext());
         sessionManager = new SessionManager(getApplication());
 
@@ -177,6 +184,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
         Log.e(TAG, "Stopped");
         service = null;
         running = false;
+        onErrorCount = 0;
 
         if (executor != null) {
             executor.shutdownNow();
@@ -229,8 +237,8 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
         if (remainingCount <= 0) {
             if (updated) {
                 updated = false;
-                Account accountData = AccountUtils.getAccount(getApplicationContext(), sessionManager);
-                SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
+                SyncingWorkManager.startSyncingWithWorkManager(getApplicationContext());
+
             }
             stopSelf();
         } else {
@@ -377,6 +385,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                         }
 
                         updateFileLog(log);
+                        resetOnErrorCount();
                     }
 
                     @Override
@@ -389,6 +398,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                         } else {
                             updateFileLog(log);
                         }
+                        increaseOnErrorCount();
                     }
 
                     @Override
@@ -423,5 +433,15 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                 }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void increaseOnErrorCount() {
+        if (++onErrorCount >= 3) {
+            stopSelf();
+        }
+    }
+
+    private void resetOnErrorCount() {
+        onErrorCount = 0;
     }
 }

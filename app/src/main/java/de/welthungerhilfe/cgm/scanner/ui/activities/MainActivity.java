@@ -64,7 +64,6 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AccountUtils;
 import de.welthungerhilfe.cgm.scanner.network.service.DeviceService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
@@ -74,6 +73,7 @@ import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
 
@@ -151,6 +151,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         recyclerData.setAdapter(adapterData);
 
         startService(new Intent(this, DeviceService.class));
+        SyncingWorkManager.startSyncingWithWorkManager(MainActivity.this);
     }
 
     @Override
@@ -176,7 +177,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     break;
                 case R.id.menuLogout:
                     session.setSigned(false);
-                    AccountUtils.removeAccount(this);
 
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();

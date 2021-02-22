@@ -26,7 +26,7 @@ import dagger.android.AndroidInjectionModule;
 import dagger.android.AndroidInjector;
 import de.welthungerhilfe.cgm.scanner.AppController;
 
-@Component(modules = {AndroidInjectionModule.class,NetworkModule.class,AndroidClassModule.class})
+@Component(modules = {AndroidInjectionModule.class,AndroidClassModule.class})
 public interface AppComponent extends AndroidInjector<AppController> {
 
     @Component.Builder

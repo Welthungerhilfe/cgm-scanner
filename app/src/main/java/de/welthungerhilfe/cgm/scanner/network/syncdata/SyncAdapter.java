@@ -20,6 +20,8 @@ package de.welthungerhilfe.cgm.scanner.network.syncdata;
 
 import android.accounts.Account;
 import android.annotation.SuppressLint;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -31,6 +33,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -77,8 +82,9 @@ import retrofit2.Retrofit;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.SYNC_FLEXTIME;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.SYNC_INTERVAL;
 
-public class SyncAdapter extends AbstractThreadedSyncAdapter {
+public class SyncAdapter {
 
+    private static SyncAdapter instance;
     private static final Object lock = new Object();
 
     private final String TAG = SyncAdapter.class.getSimpleName();
@@ -98,11 +104,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private SessionManager session;
     private AsyncTask<Void, Void, Void> syncTask;
-
     private Retrofit retrofit;
+    Context context;
 
-    public SyncAdapter(Context context, boolean autoInitialize, Retrofit retrofit) {
-        super(context, autoInitialize);
+    public SyncAdapter(Context context, Retrofit retrofit) {
+        this.context = context;
         this.retrofit = retrofit;
         personRepository = PersonRepository.getInstance(context);
         measureRepository = MeasureRepository.getInstance(context);
@@ -114,28 +120,27 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         session = new SessionManager(context);
     }
 
-    public static Object getLock() {
-        return lock;
+    public static SyncAdapter getInstance(Context context, Retrofit retrofit) {
+        if (instance == null) {
+            instance = new SyncAdapter(context, retrofit);
+        }
+        return instance;
     }
 
-    @Override
-    public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        Log.i(TAG, "this is inside onPerformSync");
-
-        initUploadService();
-        startSyncing();
+    public static Object getLock() {
+        return lock;
     }
 
     private void initUploadService() {
         if (!UploadService.isInitialized()) {
             try {
-                getContext().startService(new Intent(getContext(), UploadService.class));
+                context.startService(new Intent(context, UploadService.class));
 
             } catch (IllegalStateException e) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    Intent intent = new Intent(getContext(), UploadService.class);
+                    Intent intent = new Intent(context, UploadService.class);
                     intent.putExtra(AppConstants.IS_FOREGROUND, true);
-                    getContext().startForegroundService(intent);
+                    context.startForegroundService(intent);
                 }
             }
         } else {
@@ -165,33 +170,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    private static void syncImmediately(Account account, Context context) {
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        ContentResolver.requestSync(account, context.getString(R.string.sync_authority), bundle);
-    }
 
-    private static void configurePeriodicSync(Account account, Context context) {
-
-        String authority = context.getString(R.string.sync_authority);
-
-        SyncRequest request = new SyncRequest.Builder().
-                syncPeriodic(SYNC_INTERVAL, SYNC_FLEXTIME).
-                setSyncAdapter(account, authority).
-                setExtras(new Bundle()).build();
-
-        ContentResolver.requestSync(request);
-    }
-
-    public static void startPeriodicSync(Account newAccount, Context context) {
-
-        configurePeriodicSync(newAccount, context);
-
-        ContentResolver.setSyncAutomatically(newAccount, context.getString(R.string.sync_authority), true);
-
-        syncImmediately(newAccount, context);
-
+    public void startPeriodicSync() {
+        initUploadService();
+        startSyncing();
     }
 
 
@@ -200,7 +182,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (!Utils.isUploadAllowed(getContext())) {
+            if (!Utils.isUploadAllowed(context)) {
                 Log.d(TAG, "skipped due to missing connection");
                 return null;
             }
@@ -326,7 +308,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
 
-        private void processDeviceQueue()  {
+        private void processDeviceQueue() {
             try {
                 List<Device> syncableDevices = deviceRepository.getSyncableDevice(prevTimestamp);
                 for (int i = 0; i < syncableDevices.size(); i++) {
@@ -390,8 +372,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             public void onError(@NonNull Throwable e) {
                                 Log.i(TAG, "this is value of post " + e.getMessage());
                                 if (Utils.isExpiredToken(e.getMessage())) {
-                                    AuthenticationHandler.restoreToken(getContext());
+                                    AuthenticationHandler.restoreToken(context);
                                 }
+
                                 onThreadChange(-1);
                             }
 
@@ -432,7 +415,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Person person) {
-                            Log.i(TAG, "this is response success postPerson " +person);
+                            Log.i(TAG, "this is response success postPerson " + person);
                             person.setTimestamp(prevTimestamp);
                             person.setId(person1.getId());
                             person.setCreatedBy(person1.getCreatedBy());
@@ -457,7 +440,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is response error postperson" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
-                                AuthenticationHandler.restoreToken(getContext());
+                                AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
                         }
@@ -502,7 +485,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Person person) {
-                            Log.i(TAG, "this is response success putPerson " +person);
+                            Log.i(TAG, "this is response success putPerson " + person);
                             person.setTimestamp(prevTimestamp);
                             person.setId(person1.getId());
                             person.setCreatedBy(person1.getCreatedBy());
@@ -525,7 +508,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             Log.i(TAG, "this is response error putPerson" + e.getMessage());
 
                             if (Utils.isExpiredToken(e.getMessage())) {
-                                AuthenticationHandler.restoreToken(getContext());
+                                AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
                         }
@@ -561,7 +544,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Measure measure1) {
-                            Log.i(TAG, "this is response success postMeasure " +measure1);
+                            Log.i(TAG, "this is response success postMeasure " + measure1);
                             measure1.setTimestamp(prevTimestamp);
                             measure1.setId(measure.getId());
                             measure1.setPersonId(measure.getPersonId());
@@ -581,7 +564,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is response error postMeasurements" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
-                                AuthenticationHandler.restoreToken(getContext());
+                                AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
                         }
@@ -617,7 +600,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Measure measure1) {
-                            Log.i(TAG, "this is response success putMeasure " +measure1);
+                            Log.i(TAG, "this is response success putMeasure " + measure1);
                             measure1.setTimestamp(prevTimestamp);
                             measure1.setId(measure.getId());
                             measure1.setPersonId(measure.getPersonId());
@@ -637,7 +620,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is response error putMeasurements" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
-                                AuthenticationHandler.restoreToken(getContext());
+                                AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
                         }
@@ -676,7 +659,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Consent consent) {
-                            Log.i(TAG, "this is response success postConsentSheet " +consent);
+                            Log.i(TAG, "this is response success postConsentSheet " + consent);
                             fileLog.setStatus(AppConstants.CONSENT_UPLOADED);
                             fileLogRepository.updateFileLog(fileLog);
                             updated = true;
@@ -688,7 +671,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is response error postConsentSheet" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
-                                AuthenticationHandler.restoreToken(getContext());
+                                AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
                         }
@@ -718,7 +701,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                         @Override
                         public void onNext(@NonNull EstimatesResponse estimatesResponse) {
-                            Log.i(TAG, "this is response success getEstimation " +estimatesResponse);
+                            Log.i(TAG, "this is response success getEstimation " + estimatesResponse);
                             //TODO : generate notification and store result based on confidence value
                             if (estimatesResponse != null) {
 
@@ -741,7 +724,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                                         if ((notification != null) && !hadHeight) {
                                             notification.setHeight(height);
-                                            MeasureNotification.showNotification(getContext());
+                                            MeasureNotification.showNotification(context);
                                         }
                                     }
                                 }
@@ -764,7 +747,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                                         if ((notification != null) && !hadWeight) {
                                             notification.setWeight(weight);
-                                            MeasureNotification.showNotification(getContext());
+                                            MeasureNotification.showNotification(context);
                                         }
                                     }
                                 }
@@ -786,7 +769,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is response error getEstimation" + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
-                                AuthenticationHandler.restoreToken(getContext());
+                                AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
                         }
@@ -812,7 +795,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void onResultReceived(String measureId) {
 
-        Context c = getContext();
+        Context c = context;
         if (!LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT))
             return;
         if (LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID).compareTo(measureId) != 0)
@@ -852,4 +835,5 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }).start();
         }
     }
+
 }

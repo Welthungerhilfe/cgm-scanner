@@ -114,5 +114,4 @@ public class AppConstants {
 
     public static final int CONSENT_CAPTURED_REQUEST = 901;
 
-
 }
