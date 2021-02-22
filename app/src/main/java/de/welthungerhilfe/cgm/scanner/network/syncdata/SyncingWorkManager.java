@@ -1,7 +1,5 @@
 package de.welthungerhilfe.cgm.scanner.network.syncdata;
 
-import android.accounts.Account;
-import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
@@ -23,12 +21,8 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
-import de.welthungerhilfe.cgm.scanner.network.module.HttpInterceptor;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import okhttp3.Cache;
-import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -83,6 +77,22 @@ public class SyncingWorkManager extends Worker {
                 .baseUrl(getUrl())
                 .client(new OkHttpClient())
                 .build();
+    }
+
+    public static String getAPI() {
+        if (BuildConfig.DEBUG) {
+            return "localhost";
+        }
+
+        String apiURL = getUrl();
+        if (apiURL.contains("https://")) {
+            apiURL = apiURL.replaceFirst("https://", "");
+            apiURL = apiURL.substring(0, apiURL.indexOf('.'));
+        } else {
+            apiURL = apiURL.replaceFirst("http://", "");
+            apiURL = apiURL.substring(0, apiURL.indexOf('/'));
+        }
+        return apiURL;
     }
 
     public static String getUrl() {
