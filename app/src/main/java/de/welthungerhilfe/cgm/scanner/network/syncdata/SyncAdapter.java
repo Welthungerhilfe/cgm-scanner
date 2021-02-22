@@ -18,24 +18,12 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.syncdata;
 
-import android.accounts.Account;
 import android.annotation.SuppressLint;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.content.AbstractThreadedSyncAdapter;
-import android.content.ContentProviderClient;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SyncRequest;
-import android.content.SyncResult;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Bundle;
 import android.util.Log;
-
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -78,9 +66,6 @@ import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
-
-import static de.welthungerhilfe.cgm.scanner.AppConstants.SYNC_FLEXTIME;
-import static de.welthungerhilfe.cgm.scanner.AppConstants.SYNC_INTERVAL;
 
 public class SyncAdapter {
 
@@ -207,6 +192,7 @@ public class SyncAdapter {
             }
             Log.d(TAG, "end updating");
             syncTask = null;
+            onThreadChange(0);
             return null;
         }
 
