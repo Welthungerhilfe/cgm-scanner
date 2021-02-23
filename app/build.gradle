@@ -79,11 +79,6 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1' //support more dex files in one APK
     implementation 'com.jakewharton:butterknife:10.2.1' //helper to link UI item easily from code
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.1' //compiler to link UI item easily from code
-    implementation 'com.google.dagger:dagger:2.29.1' //dependecy injection helper
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.29.1' //dependency injection compiler
-    annotationProcessor 'com.google.dagger:dagger-android-processor:2.29.1' //dependency injection processor
-    api 'com.google.dagger:dagger-android:2.29.1' //dependency core api
-    api 'com.google.dagger:dagger-android-support:2.29.1' //dependency support api
     implementation 'io.reactivex.rxjava3:rxjava:3.0.0' //RxJava core
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0' //RxJava for Android
     implementation 'androidx.work:work-runtime:2.3.3' //workmanager for background task

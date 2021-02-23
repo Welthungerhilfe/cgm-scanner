@@ -74,7 +74,6 @@ import java.util.concurrent.Executors;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.camera.Depthmap;
@@ -379,8 +378,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     protected void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        AndroidInjection.inject(this);
 
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             Crashes.trackError(throwable);

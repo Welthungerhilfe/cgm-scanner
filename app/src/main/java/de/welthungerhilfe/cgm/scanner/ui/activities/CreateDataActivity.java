@@ -40,11 +40,9 @@ import android.view.MenuItem;
 
 import java.util.List;
 
-import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
@@ -87,7 +85,6 @@ public class CreateDataActivity extends BaseActivity {
         setContentView(R.layout.activity_create);
         ButterKnife.bind(this);
 
-        AndroidInjection.inject(this);
 
         getCurrentLocation();
 

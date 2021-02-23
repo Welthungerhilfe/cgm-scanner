@@ -18,7 +18,6 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
-import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -54,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import dagger.android.support.AndroidSupportInjection;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
@@ -105,13 +103,6 @@ public class GrowthDataFragment extends Fragment {
         fragment.qrCode = qrCode;
 
         return fragment;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        AndroidSupportInjection.inject(this);
-
     }
 
     public void onAttach(Context context) {

@@ -41,7 +41,6 @@ import java.io.File;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -115,7 +114,6 @@ public class SettingsActivity extends BaseActivity {
         setContentView(R.layout.activity_settings);
 
         ButterKnife.bind(this);
-        AndroidInjection.inject(this);
         session = new SessionManager(this);
         RemoteConfig config = session.getRemoteConfig();
 
