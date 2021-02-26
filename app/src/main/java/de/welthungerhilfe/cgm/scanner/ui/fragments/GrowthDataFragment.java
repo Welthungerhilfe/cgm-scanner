@@ -50,6 +50,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -447,7 +448,7 @@ public class GrowthDataFragment extends Fragment {
         }
 
         if (entries.size() > 1) {
-            entries.sort((o1, o2) -> Float.compare(o1.getX(), o2.getX()));
+            Collections.sort(entries, (o1, o2) -> Float.compare(o1.getX(), o2.getX()));
             dataSets.add(createDataSet(entries, "measure", Color.rgb(158, 232, 252), 1.5f, false));
         }
 
