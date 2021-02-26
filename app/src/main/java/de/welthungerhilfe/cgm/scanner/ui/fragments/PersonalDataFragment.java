@@ -21,7 +21,6 @@ package de.welthungerhilfe.cgm.scanner.ui.fragments;
 import android.app.Activity;
 import android.app.DialogFragment;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -50,7 +49,6 @@ import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicke
 
 import java.util.Date;
 
-import dagger.android.support.AndroidSupportInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
@@ -100,11 +98,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         return fragment;
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        AndroidSupportInjection.inject(this);
-    }
 
     @Override
     public void onAttach(Context context) {

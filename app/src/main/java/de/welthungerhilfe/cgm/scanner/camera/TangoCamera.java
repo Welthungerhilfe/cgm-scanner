@@ -43,15 +43,14 @@ import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class TangoCamera implements ICamera {
+public class TangoCamera extends AbstractARCamera {
 
     public interface TangoCameraListener {
         void onTangoColorData(TangoImageBuffer tangoImageBuffer);
 
-        void onTangoDepthData(TangoPointCloudData pointCloudData, double[] pose, TangoCameraIntrinsics[] calibration);
+        void onTangoDepthData(TangoPointCloudData pointCloudData, float[] position, float[] rotation, TangoCameraIntrinsics[] calibration);
     }
 
     //constants
@@ -68,44 +67,21 @@ public class TangoCamera implements ICamera {
     private int mDisplayRotation = Surface.ROTATION_0;
     private Semaphore mutex_on_mIsRecording;
     private AtomicBoolean mIsFrameAvailableTangoThread;
-    private double[] mPose;
-    private float mPixelIntensity;
-    private CameraCalibration.LightConditions mLight;
-    private long mLastBright;
-    private long mLastDark;
 
     //App integration objects
-    private Activity mActivity;
     private GLSurfaceView mCameraSurfaceView;
     private TangoCameraRenderer mRenderer;
-    private ArrayList<TangoCameraListener> mListeners;
 
     public TangoCamera(Activity activity) {
-        mActivity = activity;
-        mListeners = new ArrayList<>();
+        super(activity, false);
 
         mIsConnected = false;
         mIsFrameAvailableTangoThread = new AtomicBoolean(false);
-        mPose = new double[]{0, 0, 0, 1, 0, 0, 0};
-        mPixelIntensity = 0;
-        mLight = CameraCalibration.LightConditions.NORMAL;
-        mLastBright = 0;
-        mLastDark = 0;
     }
 
     @Override
-    public void addListener(Object listener) {
-        mListeners.add((TangoCameraListener) listener);
-    }
-
-    @Override
-    public void removeListener(Object listener) {
-        mListeners.remove(listener);
-    }
-
-    @Override
-    public void onCreate() {
-        mCameraSurfaceView = mActivity.findViewById(R.id.surfaceview);
+    public void onCreate(int colorPreview, int depthPreview, int surfaceview) {
+        mCameraSurfaceView = mActivity.findViewById(surfaceview);
         mCameraSurfaceView.setEGLContextClientVersion(2);
         mRenderer = new TangoCameraRenderer(new TangoCameraRenderer.RenderCallback() {
 
@@ -191,22 +167,6 @@ public class TangoCamera implements ICamera {
         }
     }
 
-    @Override
-    public CameraCalibration getCalibration() {
-        return null;
-    }
-
-    @Override
-    public float getLightIntensity() {
-        return mPixelIntensity;
-    }
-
-    @Override
-    public CameraCalibration.LightConditions getLightConditionState() {
-        mLight = CameraCalibration.updateLight(mLight, mLastBright, mLastDark, 0);
-        return mLight;
-    }
-
     private void startTango() {
         if (mTango != null) {
             return;
@@ -278,13 +238,13 @@ public class TangoCamera implements ICamera {
                         e.printStackTrace();
                         Crashes.trackError(e);
                     }
-                    mPose[0] = pose.rotation[0];
-                    mPose[1] = pose.rotation[1];
-                    mPose[2] = pose.rotation[2];
-                    mPose[3] = pose.rotation[3];
-                    mPose[4] = pose.translation[0];
-                    mPose[5] = pose.translation[1];
-                    mPose[6] = pose.translation[2];
+                    mPosition[0] = (float) pose.translation[0];
+                    mPosition[1] = (float) pose.translation[1];
+                    mPosition[2] = (float) pose.translation[2];
+                    mRotation[0] = (float) pose.rotation[0];
+                    mRotation[1] = (float) pose.rotation[1];
+                    mRotation[2] = (float) pose.rotation[2];
+                    mRotation[3] = (float) pose.rotation[3];
                     mutex_on_mIsRecording.release();
                 }
             }
@@ -303,8 +263,24 @@ public class TangoCamera implements ICamera {
                         mTango.getCameraIntrinsics(TangoCameraIntrinsics.TANGO_CAMERA_COLOR),
                         mTango.getCameraIntrinsics(TangoCameraIntrinsics.TANGO_CAMERA_DEPTH)
                 };
-                for (TangoCameraListener listener : mListeners) {
-                    listener.onTangoDepthData(pointCloudData, mPose, calibration);
+                mColorCameraIntrinsic[0] = (float)calibration[0].fx / (float)calibration[0].width;
+                mColorCameraIntrinsic[1] = (float)calibration[0].fy / (float)calibration[0].height;
+                mColorCameraIntrinsic[2] = (float)calibration[0].cx / (float)calibration[0].width;
+                mColorCameraIntrinsic[3] = (float)calibration[0].cy / (float)calibration[0].height;
+                mDepthCameraIntrinsic[0] = (float)calibration[1].fx / (float)calibration[1].width;
+                mDepthCameraIntrinsic[1] = (float)calibration[1].fy / (float)calibration[1].height;
+                mDepthCameraIntrinsic[2] = (float)calibration[1].cx / (float)calibration[1].width;
+                mDepthCameraIntrinsic[3] = (float)calibration[1].cy / (float)calibration[1].height;
+                mHasCameraCalibration = true;
+
+                float[] position;
+                float[] rotation;
+                synchronized (mLock) {
+                    position = mPosition;
+                    rotation = mRotation;
+                }
+                for (Object listener : mListeners) {
+                    ((TangoCameraListener)listener).onTangoDepthData(pointCloudData, position, rotation, calibration);
                 }
                 mutex_on_mIsRecording.release();
             }
@@ -349,11 +325,11 @@ public class TangoCamera implements ICamera {
 
                 switch (event.eventKey) {
                     case TangoEvent.DESCRIPTION_FISHEYE_OVER_EXPOSED:
-                        mLight = CameraCalibration.LightConditions.BRIGHT;
+                        mLight = LightConditions.BRIGHT;
                         mLastBright = System.currentTimeMillis();
                         break;
                     case TangoEvent.DESCRIPTION_FISHEYE_UNDER_EXPOSED:
-                        mLight = CameraCalibration.LightConditions.DARK;
+                        mLight = LightConditions.DARK;
                         mLastDark = System.currentTimeMillis();
                         break;
                 }
@@ -365,8 +341,8 @@ public class TangoCamera implements ICamera {
                 return;
             }
             mPixelIntensity = TangoUtils.getPixelIntensity(tangoImageBuffer);
-            for (TangoCameraListener listener : mListeners) {
-                listener.onTangoColorData(tangoImageBuffer);
+            for (Object listener : mListeners) {
+                ((TangoCameraListener)listener).onTangoColorData(tangoImageBuffer);
             }
         });
     }

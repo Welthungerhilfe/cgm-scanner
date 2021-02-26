@@ -24,18 +24,16 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.media.Image;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.util.Log;
-import android.widget.ImageView;
 
-import com.google.ar.core.Pose;
 import com.huawei.hiar.ARCamera;
 import com.huawei.hiar.ARConfigBase;
 import com.huawei.hiar.ARFrame;
@@ -44,18 +42,13 @@ import com.huawei.hiar.ARSession;
 import com.huawei.hiar.ARWorldTrackingConfig;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
-import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
-import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class AREngineCamera implements ICamera {
+public class AREngineCamera extends AbstractARCamera {
 
   private static final String TAG = AREngineCamera.class.getSimpleName();
 
@@ -69,61 +62,22 @@ public class AREngineCamera implements ICamera {
 
   //AREngine API
   private ARSession mSession;
-  private ARPose mPose;
   private boolean mFirstRequest;
-  private final Object mLock;
 
   //App integration objects
-  private Activity mActivity;
-  private ImageView mColorCameraPreview;
-  private ImageView mDepthCameraPreview;
   private GLSurfaceView mGLSurfaceView;
-  private ArrayList<ARCoreUtils.Camera2DataListener> mListeners;
   private Bitmap mCache;
-  private CameraCalibration mCameraCalibration;
-  private int mFrameIndex;
-  private float mPixelIntensity;
-  private boolean mShowDepth;
-  private CameraCalibration.LightConditions mLight;
-  private long mLastBright;
-  private long mLastDark;
-  private long mSessionStart;
 
-  public AREngineCamera(Activity activity) {
-    mActivity = activity;
-    mListeners = new ArrayList<>();
-
-    mCameraCalibration = new CameraCalibration();
-    mFirstRequest = true;
-    mLock = new Object();
-    mFrameIndex = 1;
-    mPixelIntensity = 0;
-    mShowDepth = LocalPersistency.getBoolean(activity, SettingsActivity.KEY_SHOW_DEPTH);
-    mLight = CameraCalibration.LightConditions.NORMAL;
-    mLastBright = 0;
-    mLastDark = 0;
-    mSessionStart = 0;
-  }
-
-  public void addListener(Object listener) {
-    mListeners.add((ARCoreUtils.Camera2DataListener) listener);
-  }
-
-  public void removeListener(Object listener) {
-    mListeners.remove(listener);
+  public AREngineCamera(Activity activity, boolean showDepth) {
+    super(activity, showDepth);
   }
 
   @Override
-  public void onCreate() {
-    Bitmap bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-    bitmap.setPixel(0, 0, Color.TRANSPARENT);
-    mColorCameraPreview = mActivity.findViewById(R.id.colorCameraPreview);
-    mColorCameraPreview.setImageBitmap(bitmap);
-    mDepthCameraPreview = mActivity.findViewById(R.id.depthCameraPreview);
-    mDepthCameraPreview.setImageBitmap(bitmap);
+  public void onCreate(int colorPreview, int depthPreview, int surfaceview) {
+    super.onCreate(colorPreview, depthPreview, surfaceview);
 
     //setup AREngine cycle
-    mGLSurfaceView = mActivity.findViewById(R.id.surfaceview);
+    mGLSurfaceView = mActivity.findViewById(surfaceview);
     mGLSurfaceView.setRenderer(new GLSurfaceView.Renderer() {
       private final int[] textures = new int[1];
       private int width, height;
@@ -173,7 +127,7 @@ public class AREngineCamera implements ICamera {
       Log.w(TAG, "onImageAvailable: Skipping null image.");
       return;
     }
-    final ByteBuffer yuvBytes = BitmapUtils.imageToByteBuffer(image);
+    final ByteBuffer yuvBytes = imageToByteBuffer(image);
 
     // Convert YUV to RGB
     final RenderScript rs = RenderScript.create(mActivity);
@@ -208,25 +162,23 @@ public class AREngineCamera implements ICamera {
 
   private void onProcessDepthData(Image image) {
     if (mShowDepth) {
-      Bitmap preview = ARCoreUtils.getDepthPreview(image, true);
+      Bitmap preview = getDepthPreview(image, true);
       mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
     }
 
-    Pose pose;
+    float[] position;
+    float[] rotation;
     synchronized (mLock) {
-      float[] position = new float[3];
-      float[] rotation = new float[4];
-      mPose.getTranslation(position, 0);
-      mPose.getRotationQuaternion(rotation, 0);
-      pose = new Pose(position, rotation);
+      position = mPosition;
+      rotation = mRotation;
     }
 
     if (mCache != null) {
-      for (ARCoreUtils.Camera2DataListener listener : mListeners) {
-        listener.onDepthDataReceived(image, pose, mFrameIndex);
+      for (Object listener : mListeners) {
+        ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, mFrameIndex);
       }
-      for (ARCoreUtils.Camera2DataListener listener : mListeners) {
-        listener.onColorDataReceived(mCache, mFrameIndex);
+      for (Object listener : mListeners) {
+        ((Camera2DataListener)listener).onColorDataReceived(mCache, mFrameIndex);
       }
 
       mCache = null;
@@ -299,20 +251,9 @@ public class AREngineCamera implements ICamera {
     }).start();
   }
 
-  @Override
-  public CameraCalibration getCalibration() {
-    return mCameraCalibration;
-  }
-
-  @Override
-  public float getLightIntensity() {
-    return mPixelIntensity;
-  }
-
-  @Override
-  public CameraCalibration.LightConditions getLightConditionState() {
-    mLight = CameraCalibration.updateLight(mLight, mLastBright, mLastDark, mSessionStart);
-    return mLight;
+  public static boolean shouldUseAREngine() {
+    String manufacturer = Build.MANUFACTURER.toUpperCase();
+    return manufacturer.startsWith("HONOR") || manufacturer.startsWith("HUAWEI");
   }
 
   private void updateFrame(int texture, int width, int height) {
@@ -327,27 +268,29 @@ public class AREngineCamera implements ICamera {
       float[] projection = new float[16];
       ARFrame frame = mSession.update();
       frame.getCamera().getProjectionMatrix(projection, 0, 0.001f, 100);
-      mCameraCalibration.colorCameraIntrinsic[0] = Math.abs(projection[5] / 2.0f);
-      mCameraCalibration.colorCameraIntrinsic[1] = Math.abs(projection[0] / 2.0f);
-      mCameraCalibration.colorCameraIntrinsic[2] = Math.abs((1.0f - projection[9]) / 2.0f);
-      mCameraCalibration.colorCameraIntrinsic[3] = Math.abs((1.0f - projection[8]) / 2.0f);
-      mCameraCalibration.depthCameraIntrinsic = mCameraCalibration.colorCameraIntrinsic;
-      mCameraCalibration.setValid();
+      mColorCameraIntrinsic[0] = Math.abs(projection[5] / 2.0f);
+      mColorCameraIntrinsic[1] = Math.abs(projection[0] / 2.0f);
+      mColorCameraIntrinsic[2] = Math.abs((1.0f - projection[9]) / 2.0f);
+      mColorCameraIntrinsic[3] = Math.abs((1.0f - projection[8]) / 2.0f);
+      mDepthCameraIntrinsic = mColorCameraIntrinsic;
+      mHasCameraCalibration = true;
 
       //get pose from AREngine
       synchronized (mLock) {
         ARCamera camera = frame.getCamera();
-        mPose = camera.getPose();
+        ARPose pose = camera.getPose();
+        pose.getTranslation(mPosition, 0);
+        pose.getRotationQuaternion(mRotation, 0);
       }
 
       //get light estimation from AREngine
       mPixelIntensity = frame.getLightEstimate().getPixelIntensity() * 2.0f;
       if (mPixelIntensity > 1.5f) {
-        mLight = CameraCalibration.LightConditions.BRIGHT;
+        mLight = LightConditions.BRIGHT;
         mLastBright = System.currentTimeMillis();
       }
       if (mPixelIntensity < 0.25f) {
-        mLight = CameraCalibration.LightConditions.DARK;
+        mLight = LightConditions.DARK;
         mLastDark = System.currentTimeMillis();
       }
       if (mSessionStart == 0) {

@@ -31,7 +31,6 @@ import androidx.annotation.Nullable;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
@@ -56,7 +55,6 @@ public class DeviceService extends Service {
     }
 
     public void onCreate() {
-        AndroidInjection.inject(this);
 
 
         session = new SessionManager(getBaseContext());

@@ -23,6 +23,7 @@ import android.content.Context;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -113,7 +114,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                 final TextView message = new TextView(mContext);
                 final SpannableString s = new SpannableString(mContext.getText(R.string.edema_link));
                 Linkify.addLinks(s, Linkify.WEB_URLS);
-                int p = Utils.dpToPx(25, getContext());
+                int p = (int) (25 * ((float) getContext().getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
                 message.setPadding(p, p, p, p);
                 message.setText(s);
                 message.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);

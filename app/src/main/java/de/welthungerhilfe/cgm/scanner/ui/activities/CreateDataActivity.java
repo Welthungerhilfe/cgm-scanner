@@ -40,11 +40,9 @@ import android.view.MenuItem;
 
 import java.util.List;
 
-import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
@@ -55,7 +53,6 @@ import de.welthungerhilfe.cgm.scanner.ui.fragments.GrowthDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasuresDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-import retrofit2.Retrofit;
 
 public class CreateDataActivity extends BaseActivity {
 
@@ -74,8 +71,7 @@ public class CreateDataActivity extends BaseActivity {
     MeasuresDataFragment measureFragment;
     GrowthDataFragment growthFragment;
 
-    @Inject
-    Retrofit retrofit;
+
 
     ViewModelProvider.Factory factory;
 
@@ -89,7 +85,6 @@ public class CreateDataActivity extends BaseActivity {
         setContentView(R.layout.activity_create);
         ButterKnife.bind(this);
 
-        AndroidInjection.inject(this);
 
         getCurrentLocation();
 

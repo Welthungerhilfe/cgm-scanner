@@ -17,6 +17,7 @@
  */
 package de.welthungerhilfe.cgm.scanner;
 
+import android.app.Application;
 import android.content.Context;
 import android.os.Environment;
 import android.os.StrictMode;
@@ -24,13 +25,11 @@ import android.os.StrictMode;
 import java.io.File;
 import java.io.IOException;
 
-import dagger.android.AndroidInjector;
-import dagger.android.support.DaggerApplication;
-import de.welthungerhilfe.cgm.scanner.network.module.DaggerAppComponent;
+
 import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class AppController extends DaggerApplication {
+public class AppController extends Application {
 
     private static AppController mInstance;
 
@@ -72,6 +71,15 @@ public class AppController extends DaggerApplication {
         return String.format("%s-device-%s-%s", Utils.getAndroidID(getContentResolver()), Utils.getUniversalTimestamp(), Utils.getSaltString(16));
     }
 
+    public File getPublicAppDirectory(Context context) {
+        File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+        root = new File(root, context.getString(R.string.app_name_long));
+        if (!root.exists()) {
+            root.mkdirs();
+        }
+        return root;
+    }
+
     public File getRootDirectory(Context c) {
         File mExtFileDir = new File(c.getApplicationInfo().dataDir);
         File oldDir = new File(Environment.getExternalStorageDirectory(), "Child Growth Monitor Scanner App");
@@ -89,9 +97,4 @@ public class AppController extends DaggerApplication {
         return mExtFileDir;
     }
 
-    @Override
-    protected AndroidInjector<? extends DaggerApplication> applicationInjector() {
-        DaggerAppComponent.builder().bindInstance(AppController.this).build().inject(this);
-        return DaggerAppComponent.builder().bindInstance(AppController.this).build();
-    }
 }

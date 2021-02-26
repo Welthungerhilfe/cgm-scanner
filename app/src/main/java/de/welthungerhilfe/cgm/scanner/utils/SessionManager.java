@@ -227,4 +227,5 @@ public class SessionManager {
     public int getEnvironment() {
         return pref.getInt(SELECTED_ENVIRONMENT, AppConstants.UNKNOWN);
     }
+
 }

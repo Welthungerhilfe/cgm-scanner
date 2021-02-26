@@ -34,7 +34,6 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
@@ -72,7 +71,6 @@ public class UploadManagerActivity extends BaseActivity implements Runnable {
         setContentView(R.layout.activity_upload_manager);
 
         ButterKnife.bind(this);
-        AndroidInjection.inject(this);
 
         setupToolbar();
 

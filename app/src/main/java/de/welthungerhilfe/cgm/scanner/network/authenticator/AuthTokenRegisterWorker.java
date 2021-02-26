@@ -22,6 +22,8 @@ import com.microsoft.identity.client.exception.MsalException;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
+import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class AuthTokenRegisterWorker extends Worker {
@@ -68,13 +70,8 @@ public class AuthTokenRegisterWorker extends Worker {
             @Override
             public void onSuccess(IAuthenticationResult authenticationResult) {
                 session.setAuthToken(authenticationResult.getAccessToken());
+                SyncingWorkManager.startSyncingWithWorkManager(getApplicationContext());
 
-                AccountManager accountManager = AccountManager.get(getApplicationContext());
-
-                final Account accountData = new Account(session.getUserEmail(), AppConstants.ACCOUNT_TYPE);
-                accountManager.addAccountExplicitly(accountData, session.getAuthToken(), null);
-
-                SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
 
             }
 

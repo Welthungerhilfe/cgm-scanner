@@ -24,13 +24,9 @@ import androidx.lifecycle.Observer;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
-import android.os.AsyncTask;
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatRatingBar;
 import androidx.recyclerview.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -48,10 +44,8 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.FeedbackDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualDetailDialog;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
@@ -68,7 +62,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
     private List<Measure> measureList;
 
     private FileLogRepository artifactRepository;
-    private ArtifactResultRepository artifactResultRepository;
 
     private SessionManager session;
     private RecyclerView recyclerMeasure;
@@ -80,7 +73,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         recyclerMeasure = recycler;
 
         artifactRepository = FileLogRepository.getInstance(context);
-        artifactResultRepository = ArtifactResultRepository.getInstance(context);
 
         measureList = new ArrayList<>();
 
@@ -110,8 +102,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
         if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
             holder.imgType.setImageResource(R.drawable.manual);
-
-            holder.rateOverallScore.setVisibility(View.GONE);
         } else {
             holder.imgType.setImageResource(R.drawable.machine);
 
@@ -127,67 +117,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                 }
             };
             artifactRepository.getMeasureUploadProgress(measureId).observe((LifecycleOwner) context, statusObserver);
-
-            new AsyncTask<Void, Void, Boolean>() {
-                private double averagePointCountFront = 0;
-                private int pointCloudCountFront = 0;
-
-                private double averagePointCountSide = 0;
-                private int pointCloudCountSide = 0;
-
-                private double averagePointCountBack = 0;
-                private int pointCloudCountBack = 0;
-
-                @Override
-                protected Boolean doInBackground(Void... voids) {
-                    averagePointCountFront = artifactResultRepository.getAveragePointCountForFront(measure.getId());
-                    pointCloudCountFront = artifactResultRepository.getPointCloudCountForFront(measure.getId());
-
-                    averagePointCountSide = artifactResultRepository.getAveragePointCountForSide(measure.getId());
-                    pointCloudCountSide = artifactResultRepository.getPointCloudCountForSide(measure.getId());
-
-                    averagePointCountBack = artifactResultRepository.getAveragePointCountForBack(measure.getId());
-                    pointCloudCountBack = artifactResultRepository.getPointCloudCountForBack(measure.getId());
-                    return true;
-                }
-
-                public void onPostExecute(Boolean result) {
-                    double lightScoreFront = (Math.abs(averagePointCountFront / 38000 - 1.0) * 3);
-                    double durationScoreFront = Math.abs(1- Math.abs((double) pointCloudCountFront / 8 - 1));
-                    if (lightScoreFront > 1) lightScoreFront -= 1;
-                    if (durationScoreFront > 1) durationScoreFront -= 1;
-
-                    double lightScoreSide = (Math.abs(averagePointCountSide / 38000 - 1.0) * 3);
-                    double durationScoreSide = Math.abs(1- Math.abs((double) pointCloudCountSide / 24 - 1));
-                    if (lightScoreSide > 1) lightScoreSide -= 1;
-                    if (durationScoreSide > 1) durationScoreSide -= 1;
-
-                    double lightScoreBack = (Math.abs(averagePointCountBack / 38000 - 1.0) * 3);
-                    double durationScoreBack = Math.abs(1- Math.abs((double) pointCloudCountBack / 8 - 1));
-                    if (lightScoreBack > 1) lightScoreBack -= 1;
-                    if (durationScoreBack > 1) durationScoreBack -=  1;
-
-                    Log.e("front-light : ", String.valueOf(lightScoreFront));
-                    Log.e("side-light : ", String.valueOf(lightScoreSide));
-                    Log.e("back-light : ", String.valueOf(lightScoreBack));
-
-                    Log.e("front-duration : ", String.valueOf(durationScoreFront));
-                    Log.e("side-duration : ", String.valueOf(durationScoreSide));
-                    Log.e("back-duration : ", String.valueOf(durationScoreBack));
-
-                    double scoreFront = lightScoreFront * durationScoreFront;
-                    double scoreSide = lightScoreSide * durationScoreSide;
-                    double scoreBack = lightScoreBack * durationScoreBack;
-
-                    double overallScore = 0;
-                    if (scoreFront > overallScore) overallScore = scoreFront;
-                    if (scoreSide > overallScore) overallScore = scoreSide;
-                    if (scoreBack > overallScore) overallScore = scoreBack;
-
-                    holder.rateOverallScore.setRating(5 * (float)overallScore);
-                    holder.bindScanFeedbackListener(measure, overallScore);
-                }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
 
         if (measure.isOedema()) {
@@ -311,7 +240,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         TextView txtWeight;
         TextView txtWeightConfidence;
         ProgressBar progressUpload;
-        AppCompatRatingBar rateOverallScore;
         View contextMenu;
 
         public ViewHolder(View itemView) {
@@ -325,7 +253,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             txtHeightConfidence = itemView.findViewById(R.id.txtHeightConfidence);
             txtWeight = itemView.findViewById(R.id.txtWeight);
             txtWeightConfidence = itemView.findViewById(R.id.txtWeightConfidence);
-            rateOverallScore = itemView.findViewById(R.id.rateOverallScore);
             progressUpload = itemView.findViewById(R.id.progressUpload);
             contextMenu = itemView.findViewById(R.id.contextMenuButton);
         }
@@ -337,17 +264,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                 return true;
             });
             contextMenu.setOnClickListener(view -> showContextMenu(measure));
-        }
-
-        public void bindScanFeedbackListener(Measure measure, double overallScore) {
-            rateOverallScore.setOnTouchListener((view, motionEvent) -> {
-                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    FeedbackDialog feedbackDialog = new FeedbackDialog(context);
-                    feedbackDialog.setMeasure(measure);
-                    feedbackDialog.show();
-                }
-                return true;
-            });
         }
     }
 

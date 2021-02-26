@@ -19,8 +19,6 @@
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.Manifest;
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -43,11 +41,10 @@ import java.io.File;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.network.module.NetworkModule;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.database.BackupManager;
@@ -117,7 +114,6 @@ public class SettingsActivity extends BaseActivity {
         setContentView(R.layout.activity_settings);
 
         ButterKnife.bind(this);
-        AndroidInjection.inject(this);
         session = new SessionManager(this);
         RemoteConfig config = session.getRemoteConfig();
 
@@ -160,23 +156,8 @@ public class SettingsActivity extends BaseActivity {
         switchUploadOverWifi.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_UPLOAD_WIFI, value));
 
         txtSettingVersion.setText(2, Utils.getAppVersion(this));
-
-        AccountManager accountManager = AccountManager.get(this);
-        Account[] accounts = accountManager.getAccounts();
-
-        if (accounts.length > 0) {
-            txtSettingAccount.setText(1, accounts[0].name);
-        }
-
-        String apiURL = NetworkModule.getUrl();
-        if (apiURL.contains("https://")) {
-            apiURL = apiURL.replaceFirst("https://", "");
-            apiURL = apiURL.substring(0, apiURL.indexOf('.'));
-        } else {
-            apiURL = apiURL.replaceFirst("http://", "");
-            apiURL = apiURL.substring(0, apiURL.indexOf('/'));
-        }
-        txtSettingAzureAccount.setText(1, apiURL);
+        txtSettingAccount.setText(1, session.getUserEmail());
+        txtSettingAzureAccount.setText(1, SyncingWorkManager.getAPI());
 
         String code = session.getLanguage();
         switch (code) {
@@ -236,7 +217,7 @@ public class SettingsActivity extends BaseActivity {
     private void doBackup() {
         progressDialog.show();
         long timestamp = System.currentTimeMillis();
-        File dir = AppController.getInstance().getRootDirectory(this);
+        File dir = AppController.getInstance().getPublicAppDirectory(this);
         BackupManager.doBackup(this, dir, timestamp,() -> {
             session.setBackupTimestamp(timestamp);
             txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, timestamp));

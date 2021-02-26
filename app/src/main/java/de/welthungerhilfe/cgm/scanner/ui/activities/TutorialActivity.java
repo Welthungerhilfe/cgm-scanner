@@ -18,10 +18,9 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.View;
 import android.widget.LinearLayout;
@@ -40,7 +39,6 @@ import de.welthungerhilfe.cgm.scanner.ui.fragments.TutorialFragment;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.views.PagerView;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class TutorialActivity extends BaseActivity {
     @BindView(R.id.viewPager)
@@ -71,7 +69,7 @@ public class TutorialActivity extends BaseActivity {
         again = getIntent().getBooleanExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, false);
 
         session = new SessionManager(this);
-        tutorialDataList = Utils.getTutorialData(this);
+        tutorialDataList = getTutorialData(this);
 
         FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
 
@@ -100,5 +98,19 @@ public class TutorialActivity extends BaseActivity {
         lytStart.animate()
                 .translationY(0)
                 .setDuration(500);
+    }
+
+
+    private ArrayList<TutorialData> getTutorialData(Context context) {
+        ArrayList<TutorialData> tutorialDataList = new ArrayList<>();
+        TutorialData tutorialData = new TutorialData(R.drawable.tutorial1,context.getResources().getString(R.string.tutorial1),context.getResources().getString(R.string.tutorial11),context.getResources().getString(R.string.tutorial12),0);
+        tutorialDataList.add(tutorialData);
+        tutorialData = new TutorialData(R.drawable.tutorial2,context.getResources().getString(R.string.tutorial2),context.getResources().getString(R.string.tutorial21),context.getResources().getString(R.string.tutorial22),1);
+        tutorialDataList.add(tutorialData);
+        tutorialData = new TutorialData(R.drawable.tutorial3,context.getResources().getString(R.string.tutorial3),context.getResources().getString(R.string.tutorial31),context.getResources().getString(R.string.tutorial32),2);
+        tutorialDataList.add(tutorialData);
+        tutorialData = new TutorialData(R.drawable.tutorial4,context.getResources().getString(R.string.tutorial4),context.getResources().getString(R.string.tutorial41),context.getResources().getString(R.string.tutorial42),3);
+        tutorialDataList.add(tutorialData);
+        return tutorialDataList;
     }
 }

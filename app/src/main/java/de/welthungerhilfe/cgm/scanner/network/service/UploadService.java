@@ -33,8 +33,11 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import android.util.Log;
+
+import com.google.gson.Gson;
 
 import org.jcodec.common.io.IOUtils;
 
@@ -47,21 +50,17 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AccountUtils;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
-import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.OnFileLogsLoad;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
@@ -78,8 +77,9 @@ import static de.welthungerhilfe.cgm.scanner.AppConstants.MULTI_UPLOAD_BUNCH;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.UPLOADED;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.UPLOADED_DELETED;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.UPLOAD_ERROR;
+import static de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager.provideRetrofit;
 
-public class UploadService extends Service implements OnFileLogsLoad {
+public class UploadService extends Service implements FileLogRepository.OnFileLogsLoad {
 
     private static final String TAG = UploadService.class.getSimpleName();
 
@@ -97,8 +97,9 @@ public class UploadService extends Service implements OnFileLogsLoad {
 
     public static final int FOREGROUND_NOTIFICATION_ID = 100;
 
+    private int onErrorCount = 0;
 
-    @Inject
+
     Retrofit retrofit;
 
     SessionManager sessionManager;
@@ -111,6 +112,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 }
             }
         }
+
     }
 
     public static boolean isInitialized() {
@@ -120,8 +122,10 @@ public class UploadService extends Service implements OnFileLogsLoad {
     public void onCreate() {
         service = this;
         running = false;
-
-        AndroidInjection.inject(this);
+        onErrorCount = 0;
+        if (retrofit == null) {
+            retrofit = provideRetrofit();
+        }
         repository = FileLogRepository.getInstance(getApplicationContext());
         sessionManager = new SessionManager(getApplication());
 
@@ -178,6 +182,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
         Log.e(TAG, "Stopped");
         service = null;
         running = false;
+        onErrorCount = 0;
 
         if (executor != null) {
             executor.shutdownNow();
@@ -215,9 +220,11 @@ public class UploadService extends Service implements OnFileLogsLoad {
             String measureId = LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID);
             boolean finished = true;
             for (FileLog log : list) {
-                if (measureId.compareTo(log.getMeasureId()) == 0) {
-                    finished = false;
-                    break;
+                if (log.getMeasureId() != null) {
+                    if (measureId.compareTo(log.getMeasureId()) == 0) {
+                        finished = false;
+                        break;
+                    }
                 }
             }
             if (finished) {
@@ -228,8 +235,8 @@ public class UploadService extends Service implements OnFileLogsLoad {
         if (remainingCount <= 0) {
             if (updated) {
                 updated = false;
-                Account accountData = AccountUtils.getAccount(getApplicationContext(), sessionManager);
-                SyncAdapter.startPeriodicSync(accountData, getApplicationContext());
+                SyncingWorkManager.startSyncingWithWorkManager(getApplicationContext());
+
             }
             stopSelf();
         } else {
@@ -256,9 +263,11 @@ public class UploadService extends Service implements OnFileLogsLoad {
             Context c = getApplicationContext();
             if (LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT)) {
                 String measureId = LocalPersistency.getString(c, SettingsPerformanceActivity.KEY_TEST_RESULT_ID);
-                if (measureId.compareTo(log.getMeasureId()) == 0) {
-                    if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_START) == 0) {
-                        LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_START, System.currentTimeMillis());
+                if (log.getMeasureId() != null) {
+                    if (measureId.compareTo(log.getMeasureId()) == 0) {
+                        if (LocalPersistency.getLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_START) == 0) {
+                            LocalPersistency.setLong(c, SettingsPerformanceActivity.KEY_TEST_RESULT_START, System.currentTimeMillis());
+                        }
                     }
                 }
             }
@@ -374,6 +383,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                         }
 
                         updateFileLog(log);
+                        resetOnErrorCount();
                     }
 
                     @Override
@@ -386,6 +396,7 @@ public class UploadService extends Service implements OnFileLogsLoad {
                         } else {
                             updateFileLog(log);
                         }
+                        increaseOnErrorCount();
                     }
 
                     @Override
@@ -420,5 +431,15 @@ public class UploadService extends Service implements OnFileLogsLoad {
                 }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void increaseOnErrorCount() {
+        if (++onErrorCount >= 3) {
+            stopSelf();
+        }
+    }
+
+    private void resetOnErrorCount() {
+        onErrorCount = 0;
     }
 }
