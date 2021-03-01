@@ -37,10 +37,6 @@ public class AppConstants {
 
     public static final int MAX_IMAGE_SIZE = 512;
 
-    public static final long SYNC_INTERVAL = 10;
-
-    public static final long SYNC_FLEXTIME = SYNC_INTERVAL;
-    public static final long MEMORY_MONITOR_INTERVAL = 60 * 1000; // 60 seconds
     public static final long HEALTH_INTERVAL = 60 * 60 * 1000; // 1 hour
 
     public static final int MULTI_UPLOAD_BUNCH = 5;

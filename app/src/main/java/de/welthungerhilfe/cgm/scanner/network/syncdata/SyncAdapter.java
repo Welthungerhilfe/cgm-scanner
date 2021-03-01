@@ -19,7 +19,6 @@
 package de.welthungerhilfe.cgm.scanner.network.syncdata;
 
 import android.annotation.SuppressLint;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -194,6 +193,7 @@ public class SyncAdapter {
             }
             Log.d(TAG, "end updating");
             syncTask = null;
+            onThreadChange(0);
             return null;
         }
 
@@ -649,6 +649,8 @@ public class SyncAdapter {
                             Log.i(TAG, "this is response success postConsentSheet " + consent);
                             fileLog.setStatus(AppConstants.CONSENT_UPLOADED);
                             fileLogRepository.updateFileLog(fileLog);
+                            updated = true;
+                            updateDelay = 0;
                             onThreadChange(-1);
                         }
 
@@ -820,4 +822,5 @@ public class SyncAdapter {
             }).start();
         }
     }
+
 }

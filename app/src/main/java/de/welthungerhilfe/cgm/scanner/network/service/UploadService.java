@@ -46,6 +46,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
+
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
@@ -87,7 +88,6 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
     public static final int FN_ID_UPLOAD_SERVICE = 100;
 
     private int onErrorCount = 0;
-
 
     Retrofit retrofit;
 
