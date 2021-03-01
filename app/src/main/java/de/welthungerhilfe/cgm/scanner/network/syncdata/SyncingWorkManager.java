@@ -1,10 +1,5 @@
 package de.welthungerhilfe.cgm.scanner.network.syncdata;
 
-<<<<<<<HEAD
-import android.accounts.Account;
-import android.app.Application;
-=======
-        >>>>>>>develop
 import android.content.Context;
 import android.util.Log;
 
