@@ -18,26 +18,16 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.service;
 
-import android.accounts.Account;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 import android.util.Log;
-
-import com.google.gson.Gson;
 
 import org.jcodec.common.io.IOUtils;
 
@@ -50,13 +40,12 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
-import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
@@ -95,7 +84,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
     private final Object lock = new Object();
     private ExecutorService executor;
 
-    public static final int FOREGROUND_NOTIFICATION_ID = 100;
+    public static final int FN_ID_UPLOAD_SERVICE = 100;
 
     private int onErrorCount = 0;
 
@@ -146,25 +135,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (intent != null && intent.hasExtra(AppConstants.IS_FOREGROUND)) {
                 if (intent.getBooleanExtra(AppConstants.IS_FOREGROUND, false)) {
-                    String NOTIFICATION_CHANNEL_ID = "de.welthungerhilfe.cgm.scanner";
-                    String channelName = "UploadService";
-                    NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_DEFAULT);
-                    chan.setLightColor(Color.BLUE);
-                    chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-                    NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                    assert manager != null;
-                    manager.createNotificationChannel(chan);
-
-                    Intent notificationIntent = new Intent(this, MainActivity.class);
-                    PendingIntent pendingIntent = PendingIntent.getActivity(this,
-                            0, notificationIntent, 0);
-                    Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-                            .setContentTitle(getApplicationContext().getString(R.string.app_name))
-                            .setContentText(getApplicationContext().getString(R.string.scan_is_uploading))
-                            .setSmallIcon(R.drawable.icon_notif)
-                            .setContentIntent(pendingIntent)
-                            .build();
-                    startForeground(FOREGROUND_NOTIFICATION_ID, notification);
+                    startForeground(FN_ID_UPLOAD_SERVICE, MeasureNotification.createForegroundNotification(getApplicationContext(), getApplicationContext().getString(R.string.app_name), getApplicationContext().getString(R.string.scan_is_uploading)));
                 }
             }
         }

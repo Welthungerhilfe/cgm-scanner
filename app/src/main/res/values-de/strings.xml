@@ -269,5 +269,7 @@
     <string name="result_generation_at">Ergebnisgenerierung bei</string>
     <string name="result_for">Ergebnis für</string>
     <string name="scan_is_uploading">Scan wird hochgeladen</string>
+    <!--TODO :- replace english with german-->
+    <string name="wifi_state_change_watcher">Process is running for checking wifi status</string>
 
 </resources>
