@@ -65,7 +65,9 @@ public class SessionManager {
     }
 
     public boolean isSigned() {
-        if (BuildConfig.DEBUG) {
+        if (getEnvironment() == AppConstants.UNKNOWN) {
+            return false;
+        } else if (BuildConfig.DEBUG) {
             return pref.getBoolean(KEY_USER_SIGNED, false);
         } else {
             return pref.getBoolean(KEY_USER_SIGNED, false) && (getAuthToken() != null);
