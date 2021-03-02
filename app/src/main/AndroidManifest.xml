@@ -90,7 +90,6 @@
             android:name=".ui.activities.BaseActivity" />
 
         <activity android:name=".ui.activities.SplashActivity"
-            android:launchMode="singleTask"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -101,7 +100,6 @@
         <activity
             android:name=".ui.activities.LoginActivity"
             android:configChanges="locale"
-            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
 
         <activity
