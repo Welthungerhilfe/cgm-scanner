@@ -170,6 +170,7 @@ public class SyncAdapter {
         protected Void doInBackground(Void... voids) {
             if (!Utils.isUploadAllowed(context)) {
                 Log.d(TAG, "skipped due to missing connection");
+                syncTask = null;
                 return null;
             }
 
