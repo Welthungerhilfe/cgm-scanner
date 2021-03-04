@@ -8,6 +8,7 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.WifiStateChangeReceiver;
@@ -17,6 +18,7 @@ public class WifiStateChangereceiverHelperService extends Service {
     WifiStateChangeReceiver wifiStateChangeReceiver;
     public static boolean isServiceRunning = false;
     public static final int FN_ID_WIFI_STATE_CHANGE_SERVICE = 101;
+    public boolean stopService = false;
 
     @Nullable
     @Override
@@ -40,7 +42,10 @@ public class WifiStateChangereceiverHelperService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-
+        stopService = intent.getBooleanExtra(AppConstants.STOP_SERVICE, false);
+        if (stopService) {
+            stopSelf();
+        }
         return START_STICKY;
     }
 
