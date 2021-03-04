@@ -54,7 +54,7 @@ public class ContactSupportDialog extends Dialog {
     private static final int PERMISSION_AUDIO = 0x0004;
 
     private static final String SUPPORT_APP = "com.google.android.gm";
-    private static final String SUPPORT_EMAIL = "support@childgrowthmonitor.org";
+    private static final String SUPPORT_EMAIL = "cgm-helpdesk@zammad.com";
     private static final String SUPPORT_MIME = "application/zip";
 
     private File audioFile = null;
