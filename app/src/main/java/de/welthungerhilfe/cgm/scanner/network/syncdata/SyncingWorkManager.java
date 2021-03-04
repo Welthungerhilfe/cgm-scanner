@@ -79,6 +79,7 @@ public class SyncingWorkManager extends Worker {
                 .build();
     }
 
+
     public static String getAPI() {
         if (BuildConfig.DEBUG) {
             return "localhost";

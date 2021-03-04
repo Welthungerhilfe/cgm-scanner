@@ -269,5 +269,7 @@
     <string name="result_generation_at">परिणाम पीढ़ी पर</string>
     <string name="result_for">इसके लिए परिणाम</string>
     <string name="scan_is_uploading">Sस्कैन अपलोड हो रहा है</string>
+    <string name="wifi_state_change_watcher">वाईफ़ाई स्थिति की जाँच के लिए प्रक्रिया चल रही है</string>
+
 
 </resources>

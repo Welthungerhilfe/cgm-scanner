@@ -175,8 +175,10 @@ public class SettingsActivity extends BaseActivity {
         radioGerman.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_GERMAN));
         radioHindi.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_HINDI));
 
-        if (session.getBackupTimestamp() == 0) txtSettingBackupDate.setText(2, getString(R.string.no_backups));
-        else txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, session.getBackupTimestamp()));
+        if (session.getBackupTimestamp() == 0)
+            txtSettingBackupDate.setText(2, getString(R.string.no_backups));
+        else
+            txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, session.getBackupTimestamp()));
 
         findViewById(R.id.btnBackupNow).setOnClickListener(view -> {
 
@@ -208,7 +210,7 @@ public class SettingsActivity extends BaseActivity {
     private void changeLanguage(String code) {
         session.setLanguage(code);
 
-        Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage( getBaseContext().getPackageName() );
+        Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(i);
         finish();
@@ -218,7 +220,7 @@ public class SettingsActivity extends BaseActivity {
         progressDialog.show();
         long timestamp = System.currentTimeMillis();
         File dir = AppController.getInstance().getPublicAppDirectory(this);
-        BackupManager.doBackup(this, dir, timestamp,() -> {
+        BackupManager.doBackup(this, dir, timestamp, () -> {
             session.setBackupTimestamp(timestamp);
             txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, timestamp));
             progressDialog.dismiss();

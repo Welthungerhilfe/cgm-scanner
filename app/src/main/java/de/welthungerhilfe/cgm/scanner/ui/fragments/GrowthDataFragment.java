@@ -20,6 +20,7 @@ package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -116,7 +117,7 @@ public class GrowthDataFragment extends Fragment {
         super.onActivityCreated(instance);
 
         factory = new CreateDataViewModelProvideFactory(getActivity());
-        viewModel = ViewModelProviders.of(this,factory).get(CreateDataViewModel.class);
+        viewModel = ViewModelProviders.of(this, factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
             setData();
@@ -162,7 +163,7 @@ public class GrowthDataFragment extends Fragment {
                 String id = person.getId();
                 String qrCode = person.getQrcode();
                 BaseActivity activity = (BaseActivity) getActivity();
-                new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+                new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
                         new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
                 }, which -> {
                     ContactSupportDialog.show(activity, "growth " + qrCode, "personID:" + id);
@@ -202,21 +203,20 @@ public class GrowthDataFragment extends Fragment {
         mChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         mChart.getXAxis().setDrawGridLines(true);
         mChart.getXAxis().setValueFormatter((value, axis) -> {
-            axis.setLabelCount(6,true);
-            return value+"";
+            axis.setLabelCount(6, true);
+            return value + "";
         });
     }
 
     public void setData() {
-        if (person == null || measures == null)
+        if (person == null || measures == null || measures.size() == 0) {
             return;
-
+        }
         Measure lastMeasure = null;
         if (measures.size() > 0)
             lastMeasure = measures.get(measures.size() - 1);
 
         txtLabel.setText(person.getSex());
-
 
 
         long birthday = person.getBirthday();
@@ -236,7 +236,7 @@ public class GrowthDataFragment extends Fragment {
             BufferedReader reader;
 
             String[] boys, girls;
-            if(lastMeasure!=null && lastMeasure.getAge() < 365 * 2 && lastMeasure.getHeight()<=110){
+            if (lastMeasure != null && lastMeasure.getAge() < 365 * 2 && lastMeasure.getHeight() <= 110) {
                 boys = boys_0_2;
                 girls = girls_0_2;
             } else {
@@ -259,14 +259,14 @@ public class GrowthDataFragment extends Fragment {
                     continue;
                 }
                 if (lastMeasure != null) {
-                    if ((chartType == 0 || chartType == 1 )) {
-                        if ((int)rule == (int)(lastMeasure.getAge() * 12 / 365)) {
-                            skew=Utils.parseDouble(arr[1]);
+                    if ((chartType == 0 || chartType == 1)) {
+                        if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365)) {
+                            skew = Utils.parseDouble(arr[1]);
                             median = Utils.parseDouble(arr[2]);
                             coefficient = Utils.parseDouble(arr[3]);
                         }
                     } else if (chartType == 2) {
-                        if ((int)(rule * 2) == (int)(lastMeasure.getHeight() * 2)) {
+                        if ((int) (rule * 2) == (int) (lastMeasure.getHeight() * 2)) {
                             skew = Utils.parseDouble(arr[1]);
                             median = Utils.parseDouble(arr[2]);
                             coefficient = Utils.parseDouble(arr[3]);
@@ -299,7 +299,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_weight);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = newZScore(lastMeasure.getWeight(),median,skew,coefficient);
+                    zScore = newZScore(lastMeasure.getWeight(), median, skew, coefficient);
                 }
                 break;
             case 1:
@@ -307,7 +307,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_height);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = newZScore(lastMeasure.getHeight(),median,skew,coefficient);
+                    zScore = newZScore(lastMeasure.getHeight(), median, skew, coefficient);
                 }
                 break;
             case 2:
@@ -315,7 +315,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_weight);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = newZScore(lastMeasure.getWeight(),median,skew,coefficient);
+                    zScore = newZScore(lastMeasure.getWeight(), median, skew, coefficient);
                 }
                 break;
             case 3:
@@ -356,7 +356,7 @@ public class GrowthDataFragment extends Fragment {
 
             lytNotif.setBackgroundResource(R.color.colorRed);
             lytNotif.setVisibility(View.VISIBLE);
-        } else if (zScore < -2 && zScore >=-3) { // MAM
+        } else if (zScore < -2 && zScore >= -3) { // MAM
             switch (chartType) {
                 case 0: // weight for age
                     txtNotifTitle.setText(R.string.mam_wfa_title);
@@ -402,7 +402,7 @@ public class GrowthDataFragment extends Fragment {
                     y = (float) measure.getWeight();
                     break;
                 case 3:
-                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 /30;
+                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 / 30;
                     y = (float) measure.getMuac();
                     break;
             }
