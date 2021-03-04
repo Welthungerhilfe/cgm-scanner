@@ -182,7 +182,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     break;
                 case R.id.menuLogout:
                     session.setSigned(false);
-
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        if (WifiStateChangereceiverHelperService.isServiceRunning) {
+                            startForegroundService(new Intent(this, WifiStateChangereceiverHelperService.class)
+                                    .putExtra(AppConstants.STOP_SERVICE, true));
+                        }
+                    }
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();
                     break;

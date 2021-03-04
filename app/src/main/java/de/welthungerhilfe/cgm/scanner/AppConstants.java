@@ -110,4 +110,7 @@ public class AppConstants {
 
     public static final int CONSENT_CAPTURED_REQUEST = 901;
 
+    //WifiStateChangereceiverHelperService
+    public static final String STOP_SERVICE = "stop_service";
+
 }
