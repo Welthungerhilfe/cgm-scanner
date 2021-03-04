@@ -101,6 +101,7 @@
 
         <activity android:name=".ui.activities.BaseActivity" />
 
+
         <activity
             android:name=".ui.activities.SplashActivity"
             android:launchMode="singleTask"
@@ -113,7 +114,7 @@
 
         <activity
             android:name=".ui.activities.LoginActivity"
-            android:launchMode="singleTask"
+            android:configChanges="locale"
             android:screenOrientation="portrait" />
 
         <activity
