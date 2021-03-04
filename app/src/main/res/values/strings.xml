@@ -280,6 +280,6 @@
     <string name="result_generation_at">Result generation at</string>
     <string name="result_for">result for</string>
     <string name="scan_is_uploading">Scan is uploading</string>
-    <string name="wifi_state_change_watcher">Process is running for checking wifi status</string>
+    <string name="wifi_state_change_watcher">Process for checking of the WiFi status is running</string>
 
 </resources>

@@ -156,19 +156,8 @@ public class SettingsActivity extends BaseActivity {
         switchUploadOverWifi.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_UPLOAD_WIFI, value));
 
         txtSettingVersion.setText(2, Utils.getAppVersion(this));
-
-        String apiURL = SyncingWorkManager.getUrl();
-        if (apiURL.contains("https://")) {
-            apiURL = apiURL.replaceFirst("https://", "");
-            apiURL = apiURL.substring(0, apiURL.indexOf('.'));
-        } else {
-            apiURL = apiURL.replaceFirst("http://", "");
-            apiURL = apiURL.substring(0, apiURL.indexOf('/'));
-        }
-        txtSettingAzureAccount.setText(1, apiURL);
         txtSettingAccount.setText(1, session.getUserEmail());
         txtSettingAzureAccount.setText(1, SyncingWorkManager.getAPI());
-
 
         String code = session.getLanguage();
         switch (code) {
