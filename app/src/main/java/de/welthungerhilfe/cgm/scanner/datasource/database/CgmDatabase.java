@@ -200,7 +200,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final Migration MIGRATION_16_17 = new Migration(16, 17) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("CREATE TABLE IF NOT EXISTS `post_scan_result` (`id` INTEGER PRIMARY KEY NOT NULL, `measure_id` TEXT, `isSynced` INTEGER NOT NULL DEFAULT 0, `timestamp` INTEGER NOT NULL, `environment` INTEGER NOT NULL DEFAULT 0)");
+            database.execSQL("CREATE TABLE IF NOT EXISTS `post_scan_result` (`id` TEXT PRIMARY KEY NOT NULL, `measure_id` TEXT, `isSynced` INTEGER NOT NULL DEFAULT 0, `timestamp` INTEGER NOT NULL, `environment` INTEGER NOT NULL DEFAULT 0)");
 
         }
     };

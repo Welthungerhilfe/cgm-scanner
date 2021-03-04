@@ -24,8 +24,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.os.Build;
+
+import androidx.core.app.NotificationCompat;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -150,5 +153,27 @@ public class MeasureNotification {
             notificationBuilder.setContentText(text.toString());
             notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
         }
+    }
+
+    public static Notification createForegroundNotification(Context context, String title, String text) {
+        String NOTIFICATION_CHANNEL_ID = "de.welthungerhilfe.cgm.scanner";
+        String channelName = "UploadService";
+        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+        chan.setLightColor(Color.BLUE);
+        chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        assert manager != null;
+        manager.createNotificationChannel(chan);
+
+        Intent notificationIntent = new Intent(context, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context,
+                0, notificationIntent, 0);
+        Notification notification = new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setSmallIcon(R.drawable.icon_notif)
+                .setContentIntent(pendingIntent)
+                .build();
+        return notification;
     }
 }

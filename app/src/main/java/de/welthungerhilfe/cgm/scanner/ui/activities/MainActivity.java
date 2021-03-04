@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -64,6 +65,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
 import de.welthungerhilfe.cgm.scanner.network.service.DeviceService;
+import de.welthungerhilfe.cgm.scanner.network.service.WifiStateChangereceiverHelperService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
@@ -80,7 +82,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
-        startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE,AppConstants.CONSENT_CAPTURED_REQUEST));
+        startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.CONSENT_CAPTURED_REQUEST));
     }
 
     @BindView(R.id.recyclerData)
@@ -149,6 +151,11 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         recyclerData.setAdapter(adapterData);
 
         startService(new Intent(this, DeviceService.class));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!WifiStateChangereceiverHelperService.isServiceRunning) {
+                startForegroundService(new Intent(this, WifiStateChangereceiverHelperService.class));
+            }
+        }
         SyncingWorkManager.startSyncingWithWorkManager(MainActivity.this);
     }
 
@@ -402,8 +409,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 openSearchBar();
                 break;
             case R.id.actionQr:
-                startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE,AppConstants.QR_SCAN_REQUEST));
-             //   startActivity(new Intent(MainActivity.this, ConsentScanActivity.class));
+                startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
+                //   startActivity(new Intent(MainActivity.this, ConsentScanActivity.class));
                 break;
             case R.id.actionFilter:
                 openSort();

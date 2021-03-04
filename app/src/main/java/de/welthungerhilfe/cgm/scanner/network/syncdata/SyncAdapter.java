@@ -25,6 +25,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -65,6 +66,7 @@ import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
+
 
 public class SyncAdapter {
 
@@ -168,6 +170,7 @@ public class SyncAdapter {
         protected Void doInBackground(Void... voids) {
             if (!Utils.isUploadAllowed(context)) {
                 Log.d(TAG, "skipped due to missing connection");
+                syncTask = null;
                 return null;
             }
 
