@@ -156,6 +156,9 @@ public class MeasureNotification {
     }
 
     public static Notification createForegroundNotification(Context context, String title, String text) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return null;
+        }
         String NOTIFICATION_CHANNEL_ID = "de.welthungerhilfe.cgm.scanner";
         String channelName = "UploadService";
         NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_DEFAULT);
@@ -176,4 +179,5 @@ public class MeasureNotification {
                 .build();
         return notification;
     }
+
 }
