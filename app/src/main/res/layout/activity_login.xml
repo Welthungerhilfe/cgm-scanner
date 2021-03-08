@@ -85,7 +85,7 @@
                     android:id="@+id/rb_prod_namibia"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:text="Namibia"
+                    android:text="University of Namibia"
                     android:fontFamily="sans-serif-medium"
                     android:paddingTop="15dp"
                     android:paddingBottom="15dp"
