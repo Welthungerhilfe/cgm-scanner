@@ -103,12 +103,14 @@ public class SyncingWorkManager extends Worker {
         } else {
             Context context = AppController.getInstance().getApplicationContext();
             switch (AuthenticationHandler.getEnvironment(context)) {
-                case AppConstants.SANDBOX:
+                case AppConstants.ENV_SANDBOX:
                     return AppConstants.API_URL_SANDBOX;
-                case AppConstants.QA:
-                    return AppConstants.API_URL_QA;
-                case AppConstants.PROUDCTION:
-                    return AppConstants.API_URL_PRODUCTION;
+                case AppConstants.ENV_DEMO_QA:
+                    return AppConstants.API_URL_DEMO_QA;
+                case AppConstants.ENV_IN_BMZ:
+                    return AppConstants.API_URL_IN_BMZ;
+                case AppConstants.ENV_NAMIBIA:
+                    return AppConstants.API_URL_IN_NAMIBIA;
                 default:
                     Log.e(TAG, "Environment not configured");
                     System.exit(0);

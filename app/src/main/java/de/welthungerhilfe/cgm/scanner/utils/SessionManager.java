@@ -23,7 +23,6 @@ import android.content.SharedPreferences;
 import android.os.Build;
 
 import com.google.gson.Gson;
-import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 
 import java.util.Locale;
 
@@ -65,7 +64,7 @@ public class SessionManager {
     }
 
     public boolean isSigned() {
-        if (getEnvironment() == AppConstants.UNKNOWN) {
+        if (getEnvironment() == AppConstants.ENV_UNKNOWN) {
             return false;
         } else if (BuildConfig.DEBUG) {
             return pref.getBoolean(KEY_USER_SIGNED, false);
@@ -227,7 +226,7 @@ public class SessionManager {
     }
 
     public int getEnvironment() {
-        return pref.getInt(SELECTED_ENVIRONMENT, AppConstants.UNKNOWN);
+        return pref.getInt(SELECTED_ENVIRONMENT, AppConstants.ENV_UNKNOWN);
     }
 
 }
