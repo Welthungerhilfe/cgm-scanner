@@ -167,7 +167,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         }
     }
 
-    @OnCheckedChanged({R.id.rb_prod_darshna, R.id.rb_prod_aah, R.id.rb_demo_qa, R.id.rb_sandbox})
+    @OnCheckedChanged({R.id.rb_prod_darshna, R.id.rb_prod_aah, R.id.rb_prod_namibia, R.id.rb_demo_qa, R.id.rb_sandbox})
     public void onRadioButtonCheckChanged(CompoundButton button, boolean checked) {
         if (checked) {
             switch (button.getId()) {
