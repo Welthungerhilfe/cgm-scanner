@@ -80,6 +80,7 @@ import de.welthungerhilfe.cgm.scanner.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -97,7 +98,7 @@ import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, TangoCamera.TangoCameraListener {
+public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, TangoCamera.TangoCameraListener, ScanTypeView.ScanTypeListener {
 
     private enum ArtifactType { CALIBRATION, DEPTH, RGB };
 
@@ -117,28 +118,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     @BindView(R.id.txtScanLying)
     TextView txtScanLying;
 
-    @BindView(R.id.imgScanStep1)
-    ImageView imgScanStep1;
-    @BindView(R.id.imgScanStep2)
-    ImageView imgScanStep2;
-    @BindView(R.id.imgScanStep3)
-    ImageView imgScanStep3;
-
-    @BindView(R.id.btnScanStep1)
-    Button btnScanStep1;
-    @BindView(R.id.btnScanStep2)
-    Button btnScanStep2;
-    @BindView(R.id.btnScanStep3)
-    Button btnScanStep3;
     @BindView(R.id.btnScanComplete)
     Button btnScanComplete;
-
-    @BindView(R.id.lytScanStep1)
-    LinearLayout lytScanStep1;
-    @BindView(R.id.lytScanStep2)
-    LinearLayout lytScanStep2;
-    @BindView(R.id.lytScanStep3)
-    LinearLayout lytScanStep3;
 
     @BindView(R.id.lytSelectMode)
     LinearLayout lytSelectMode;
@@ -148,40 +129,12 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     @BindView(R.id.lytScanner)
     LinearLayout lytScanner;
 
-    @BindView(R.id.imgScanSuccess1)
-    ImageView imgScanSuccess1;
-    @BindView(R.id.imgScanSuccess2)
-    ImageView imgScanSuccess2;
-    @BindView(R.id.imgScanSuccess3)
-    ImageView imgScanSuccess3;
-
-    @BindView(R.id.txtScanStep1)
-    TextView txtScanStep1;
-    @BindView(R.id.txtScanStep2)
-    TextView txtScanStep2;
-    @BindView(R.id.txtScanStep3)
-    TextView txtScanStep3;
-
-    @BindView(R.id.lytScanAgain1)
-    LinearLayout lytScanAgain1;
-    @BindView(R.id.lytScanAgain2)
-    LinearLayout lytScanAgain2;
-    @BindView(R.id.lytScanAgain3)
-    LinearLayout lytScanAgain3;
-
-    @BindView(R.id.btnRetake1)
-    Button btnRetake1;
-    @BindView(R.id.btnRetake2)
-    Button btnRetake2;
-    @BindView(R.id.btnRetake3)
-    Button btnRetake3;
-
-    @BindView(R.id.btnTutorial1)
-    Button btnTutorial1;
-    @BindView(R.id.btnTutorial2)
-    Button btnTutorial2;
-    @BindView(R.id.btnTutorial3)
-    Button btnTutorial3;
+    @BindView(R.id.scanType1)
+    ScanTypeView scanType1;
+    @BindView(R.id.scanType2)
+    ScanTypeView scanType2;
+    @BindView(R.id.scanType3)
+    ScanTypeView scanType3;
 
     @OnClick(R.id.lytScanStanding)
     void scanStanding() {
@@ -213,65 +166,49 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         changeMode();
     }
 
-    @SuppressLint("SetTextI18n")
-    @OnClick({R.id.btnScanStep1, R.id.btnRetake1})
-    void scanStep1() {
+    @Override
+    public void onScan(int buttonId) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
         } else {
             if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-                SCAN_STEP = AppConstants.SCAN_STANDING_FRONT;
 
-                mTitleView.setText(getString(R.string.front_scan) + " - " + getString(R.string.mode_standing));
+                switch (buttonId) {
+                    case 1:
+                        SCAN_STEP = AppConstants.SCAN_STANDING_FRONT;
+                        mTitleView.setText(getString(R.string.front_scan) + " - " + getString(R.string.mode_standing));
+                        break;
+                    case 2:
+                        SCAN_STEP = AppConstants.SCAN_STANDING_SIDE;
+                        mTitleView.setText(getString(R.string.side_scan) + " - " + getString(R.string.mode_standing));
+                        break;
+                    case 3:
+                        SCAN_STEP = AppConstants.SCAN_STANDING_BACK;
+                        mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_standing));
+                        break;
+                }
             } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
-                SCAN_STEP = AppConstants.SCAN_LYING_FRONT;
-
-                mTitleView.setText(getString(R.string.front_scan) + " - " + getString(R.string.mode_lying));
+                switch (buttonId) {
+                    case 1:
+                        SCAN_STEP = AppConstants.SCAN_LYING_FRONT;
+                        mTitleView.setText(getString(R.string.front_scan) + " - " + getString(R.string.mode_lying));
+                        break;
+                    case 2:
+                        SCAN_STEP = AppConstants.SCAN_LYING_SIDE;
+                        mTitleView.setText(getString(R.string.side_scan) + " - " + getString(R.string.mode_lying));
+                        break;
+                    case 3:
+                        SCAN_STEP = AppConstants.SCAN_LYING_BACK;
+                        mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_lying));
+                        break;
+                }
             }
             openScan();
         }
     }
 
-    @SuppressLint("SetTextI18n")
-    @OnClick({R.id.btnScanStep2, R.id.btnRetake2})
-    void scanStep2() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
-        } else {
-            if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-                SCAN_STEP = AppConstants.SCAN_STANDING_SIDE;
-
-                mTitleView.setText(getString(R.string.side_scan) + " - " + getString(R.string.mode_standing));
-            } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
-                SCAN_STEP = AppConstants.SCAN_LYING_SIDE;
-
-                mTitleView.setText(getString(R.string.side_scan) + " - " + getString(R.string.mode_lying));
-            }
-            openScan();
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
-    @OnClick({R.id.btnScanStep3, R.id.btnRetake3})
-    void scanStep3() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
-        } else {
-            if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-                SCAN_STEP = AppConstants.SCAN_STANDING_BACK;
-
-                mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_standing));
-            } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
-                SCAN_STEP = AppConstants.SCAN_LYING_BACK;
-
-                mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_lying));
-            }
-            openScan();
-        }
-    }
-
-    @OnClick({R.id.btnTutorial1, R.id.btnTutorial2, R.id.btnTutorial3})
-    void showTutorial() {
+    @Override
+    public void onTutorial() {
         Intent intent = new Intent(ScanModeActivity.this, TutorialActivity.class);
         intent.putExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, true);
         startActivity(intent);
@@ -445,6 +382,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
         }
+
+        scanType1.setListener(1, this);
+        scanType2.setListener(2, this);
+        scanType3.setListener(3, this);
     }
 
     @Override
@@ -527,13 +468,13 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private void changeMode() {
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-            imgScanStep1.setImageResource(R.drawable.stand_front_active);
-            imgScanStep2.setImageResource(R.drawable.stand_side_active);
-            imgScanStep3.setImageResource(R.drawable.stand_back_active);
+            scanType1.setChildIcon(R.drawable.stand_front_active);
+            scanType2.setChildIcon(R.drawable.stand_side_active);
+            scanType3.setChildIcon(R.drawable.stand_back_active);
         } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
-            imgScanStep1.setImageResource(R.drawable.lying_front_active);
-            imgScanStep2.setImageResource(R.drawable.lying_side_active);
-            imgScanStep3.setImageResource(R.drawable.lying_back_active);
+            scanType1.setChildIcon(R.drawable.lying_front_active);
+            scanType2.setChildIcon(R.drawable.lying_side_active);
+            scanType3.setChildIcon(R.drawable.lying_back_active);
         }
     }
 
@@ -541,11 +482,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         closeScan();
 
         if (SCAN_STEP == AppConstants.SCAN_STANDING_FRONT || SCAN_STEP == AppConstants.SCAN_LYING_FRONT) {
-            btnScanStep1.setVisibility(View.GONE);
+            scanType1.goToNextStep();
         } else if (SCAN_STEP == AppConstants.SCAN_STANDING_SIDE || SCAN_STEP == AppConstants.SCAN_LYING_SIDE) {
-            btnScanStep2.setVisibility(View.GONE);
+            scanType2.goToNextStep();
         } else if (SCAN_STEP == AppConstants.SCAN_STANDING_BACK || SCAN_STEP == AppConstants.SCAN_LYING_BACK) {
-            btnScanStep3.setVisibility(View.GONE);
+            scanType3.goToNextStep();
         }
         getScanQuality(SCAN_STEP);
     }
@@ -631,30 +572,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 issues = String.format("%s\n - " + getString(R.string.score_light) + "%d%%", issues, Math.round(lightScore * 100));
 
                 if (scanStep == AppConstants.SCAN_STANDING_FRONT || scanStep == AppConstants.SCAN_LYING_FRONT) {
-                    btnScanStep1.setVisibility(View.GONE);
-
-                    txtScanStep1.setText(issues);
-                    imgScanStep1.setVisibility(View.GONE);
-                    lytScanAgain1.setVisibility(View.VISIBLE);
-
+                    scanType1.finishStep(issues);
                     step1 = true;
-
                 } else if (scanStep == AppConstants.SCAN_STANDING_SIDE || scanStep == AppConstants.SCAN_LYING_SIDE) {
-                    btnScanStep2.setVisibility(View.GONE);
-
-                    txtScanStep2.setText(issues);
-                    imgScanStep2.setVisibility(View.GONE);
-                    lytScanAgain2.setVisibility(View.VISIBLE);
-
+                    scanType2.finishStep(issues);
                     step2 = true;
 
                 } else if (scanStep == AppConstants.SCAN_STANDING_BACK || scanStep == AppConstants.SCAN_LYING_BACK) {
-                    btnScanStep3.setVisibility(View.GONE);
-
-                    txtScanStep3.setText(issues);
-                    imgScanStep3.setVisibility(View.GONE);
-                    lytScanAgain3.setVisibility(View.VISIBLE);
-
+                    scanType3.finishStep(issues);
                     step3 = true;
                 }
 
