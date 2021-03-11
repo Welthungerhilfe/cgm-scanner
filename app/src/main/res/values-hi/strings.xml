@@ -40,6 +40,8 @@
     <string name="no_scans">कोई स्कैन नहीं</string>
     <string name="add_scans">स्कैनिंग शुरू करने के लिए, [+] बटन टैप करें</string>
     <string name="title_scans">स्कैन का समय</string>
+    <string name="data_not_synced">बैकएंड के साथ डेटा सिंक करने की अनुमति नहीं</string>
+
 
     <!-- Filtering and sorting !-->
     <string name="filter">फ़िल्टर</string>

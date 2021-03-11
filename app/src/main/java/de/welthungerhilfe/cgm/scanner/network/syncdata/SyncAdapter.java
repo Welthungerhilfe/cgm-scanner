@@ -410,6 +410,7 @@ public class SyncAdapter {
                             person.setCreated(person1.getCreated());
                             person.setSynced(true);
                             person.setEnvironment(person1.getEnvironment());
+                            person.setDenied(false);
                             Loc location = new Loc();
                             person.setLastLocation(location);
                             if (person1.getLastLocation() != null) {
@@ -427,6 +428,10 @@ public class SyncAdapter {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is response error postperson" + e.getMessage());
+                            if (Utils.isDenied(e.getMessage())) {
+                                person1.setDenied(true);
+                                personRepository.updatePerson(person1);
+                            }
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
