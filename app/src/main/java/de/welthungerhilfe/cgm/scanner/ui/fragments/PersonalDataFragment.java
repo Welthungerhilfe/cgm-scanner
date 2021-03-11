@@ -197,7 +197,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void setLocation(Loc loc) {
         if (loc != null) {
             String address = loc.getAddress();
-            if ((location == null) || ((address != null) && (address.length() > 0))) {
+            if ((location == null) && (address != null) && (address.length() > 0)) {
                 if (editLocation != null) {
                     Editable oldAddress = editLocation.getText();
                     if ((oldAddress != null) && (oldAddress.toString().compareTo(address) != 0)) {
