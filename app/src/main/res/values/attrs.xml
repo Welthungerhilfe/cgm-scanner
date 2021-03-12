@@ -5,6 +5,13 @@
         <attr name="language" format="string|reference" />
     </declare-styleable>
 
+    <declare-styleable name="ScanType">
+        <attr name="scantypecolor" format="color|reference" />
+        <attr name="scantypeicon" format="integer" />
+        <attr name="scantypetext" format="string|reference" />
+        <attr name="scantypetitle" format="string|reference" />
+    </declare-styleable>
+
     <declare-styleable name="SubmenuButton">
         <attr name="submenuText" format="string|reference" />
     </declare-styleable>
