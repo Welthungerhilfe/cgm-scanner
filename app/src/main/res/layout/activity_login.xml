@@ -82,6 +82,18 @@
                     android:textSize="18sp"/>
 
                 <RadioButton
+                    android:id="@+id/rb_prod_namibia"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="University of Namibia"
+                    android:fontFamily="sans-serif-medium"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:buttonTint="@color/radio_text_selector"
+                    android:textColor="@color/radio_text_selector"
+                    android:textSize="18sp"/>
+
+                <RadioButton
                     android:id="@+id/rb_demo_qa"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
