@@ -91,11 +91,10 @@ public class SyncAdapter {
     private SessionManager session;
     private AsyncTask<Void, Void, Void> syncTask;
     private Retrofit retrofit;
-    Context context;
+    private Context context;
 
-    public SyncAdapter(Context context, Retrofit retrofit) {
+    public SyncAdapter(Context context) {
         this.context = context;
-        this.retrofit = retrofit;
         personRepository = PersonRepository.getInstance(context);
         measureRepository = MeasureRepository.getInstance(context);
         deviceRepository = DeviceRepository.getInstance(context);
@@ -106,15 +105,19 @@ public class SyncAdapter {
         session = new SessionManager(context);
     }
 
-    public static SyncAdapter getInstance(Context context, Retrofit retrofit) {
+    public static SyncAdapter getInstance(Context context) {
         if (instance == null) {
-            instance = new SyncAdapter(context, retrofit);
+            instance = new SyncAdapter(context);
         }
         return instance;
     }
 
     public static Object getLock() {
         return lock;
+    }
+
+    public void resetRetrofit() {
+        retrofit = null;
     }
 
     private void initUploadService() {
@@ -150,6 +153,10 @@ public class SyncAdapter {
         if (syncTask == null) {
             prevTimestamp = session.getSyncTimestamp();
             currentTimestamp = System.currentTimeMillis();
+
+            if (retrofit == null) {
+                retrofit = SyncingWorkManager.provideRetrofit();
+            }
 
             syncTask = new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             Log.i(TAG, "this is inside end startSynching");
