@@ -62,8 +62,7 @@ public class Utils {
 
     public static long averageValue(ArrayList<Long> values) {
         long value = 0;
-        if(values==null)
-        {
+        if (values == null) {
             return value;
         }
         for (long l : values) {
@@ -88,8 +87,7 @@ public class Utils {
     }
 
     public static double parseDouble(String value) {
-        if(value==null)
-        {
+        if (value == null) {
             return 0;
         }
         value = value.replace(',', '.');
@@ -101,8 +99,7 @@ public class Utils {
     }
 
     public static float parseFloat(String value) {
-        if(value==null)
-        {
+        if (value == null) {
             return 0;
         }
         value = value.replace(',', '.');
@@ -145,7 +142,7 @@ public class Utils {
     }
 
     public static String getNameFromEmail(String email) {
-        if (email==null || email.isEmpty())
+        if (email == null || email.isEmpty())
             return "unknown";
         else {
             String[] arr = email.split("@");
@@ -169,7 +166,7 @@ public class Utils {
             List<Address> addresses = null;
 
             try {
-                addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(),1);
+                addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
             } catch (Exception ioException) {
                 Log.e("", "Error in getting address for the location");
             }
@@ -297,7 +294,7 @@ public class Utils {
 
     public static void playShooterSound(Context context, int sample) {
         AudioManager audio = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-        switch( audio.getRingerMode() ){
+        switch (audio.getRingerMode()) {
             case AudioManager.RINGER_MODE_NORMAL:
                 if (sound == null) {
                     sound = new MediaActionSound();
@@ -322,5 +319,9 @@ public class Utils {
     //for checking-> MSAL authtoken expired or not
     public static boolean isExpiredToken(String message) {
         return message.contains("401");
+    }
+
+    public static boolean isDenied(String message) {
+        return message.contains("403");
     }
 }

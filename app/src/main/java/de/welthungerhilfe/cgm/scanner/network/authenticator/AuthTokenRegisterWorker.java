@@ -1,12 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.network.authenticator;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
@@ -19,11 +14,7 @@ import com.microsoft.identity.client.PublicClientApplication;
 import com.microsoft.identity.client.SilentAuthenticationCallback;
 import com.microsoft.identity.client.exception.MsalException;
 
-
-import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
-import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class AuthTokenRegisterWorker extends Worker {
@@ -43,6 +34,7 @@ public class AuthTokenRegisterWorker extends Worker {
 
         context = getApplicationContext();
         int environment = AuthenticationHandler.getEnvironment(context);
+        Log.d(TAG, "Renewing token for " + SyncingWorkManager.getAPI());
         PublicClientApplication.createSingleAccountPublicClientApplication(context,
                 AuthenticationHandler.getConfig(environment),
                 new IPublicClientApplication.ISingleAccountApplicationCreatedListener() {
@@ -50,12 +42,11 @@ public class AuthTokenRegisterWorker extends Worker {
                     public void onCreated(ISingleAccountPublicClientApplication application) {
                         singleAccountApp = application;
                         updateToken();
-
                     }
 
                     @Override
                     public void onError(MsalException exception) {
-                        Log.e(TAG, exception.toString());
+                        exception.printStackTrace();
                     }
                 });
         return null;
@@ -70,14 +61,13 @@ public class AuthTokenRegisterWorker extends Worker {
             @Override
             public void onSuccess(IAuthenticationResult authenticationResult) {
                 session.setAuthToken(authenticationResult.getAccessToken());
+                Log.d(TAG, "Token for " + SyncingWorkManager.getAPI() + " set");
                 SyncingWorkManager.startSyncingWithWorkManager(getApplicationContext());
-
-
             }
 
             @Override
             public void onError(MsalException exception) {
-
+                exception.printStackTrace();
             }
         });
     }

@@ -46,6 +46,7 @@
     <string name="no_scans">No scans</string>
     <string name="add_scans">To start scanning, tap [+] button</string>
     <string name="title_scans">Scans-Scheduled</string>
+    <string name="data_not_synced">No permission to sync the data with the backend</string>
 
     <!-- Filtering and sorting !-->
     <string name="filter">Filter</string>

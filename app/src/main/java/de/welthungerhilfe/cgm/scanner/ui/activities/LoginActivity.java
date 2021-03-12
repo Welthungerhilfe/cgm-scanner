@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
@@ -42,11 +43,14 @@ import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.utils.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 
 public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback {
+
+    private static final String TAG = LoginActivity.class.getSimpleName();
 
     @OnClick({R.id.btnLoginMicrosoft})
     void doSignIn() {
@@ -59,6 +63,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             startApp();
         } else {
             if (session.getEnvironment() != AppConstants.ENV_UNKNOWN) {
+                Log.d(TAG, "Login into " + SyncingWorkManager.getAPI());
                 layout_login.setVisibility(View.GONE);
                 progressBar.setVisibility(View.VISIBLE);
                 new AuthenticationHandler(this, this, () -> runOnUiThread(() -> {
@@ -139,6 +144,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         try {
             if (email != null && !email.isEmpty()) {
                 session.setAuthToken(token);
+                Log.d(TAG, "Token for " + SyncingWorkManager.getAPI() + " set");
 
                 final Intent intent = new Intent();
                 intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, email);
