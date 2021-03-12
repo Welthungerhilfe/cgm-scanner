@@ -67,7 +67,6 @@ import static de.welthungerhilfe.cgm.scanner.AppConstants.MULTI_UPLOAD_BUNCH;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.UPLOADED;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.UPLOADED_DELETED;
 import static de.welthungerhilfe.cgm.scanner.AppConstants.UPLOAD_ERROR;
-import static de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager.provideRetrofit;
 
 public class UploadService extends Service implements FileLogRepository.OnFileLogsLoad {
 
@@ -89,9 +88,9 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
 
     private int onErrorCount = 0;
 
-    Retrofit retrofit;
+    private Retrofit retrofit;
 
-    SessionManager sessionManager;
+    private SessionManager sessionManager;
 
     public static void forceResume() {
         if (service != null) {
@@ -101,7 +100,12 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                 }
             }
         }
+    }
 
+    public static void resetRetrofit() {
+        if (service != null) {
+            service.retrofit = null;
+        }
     }
 
     public static boolean isInitialized() {
@@ -112,9 +116,6 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
         service = this;
         running = false;
         onErrorCount = 0;
-        if (retrofit == null) {
-            retrofit = provideRetrofit();
-        }
         repository = FileLogRepository.getInstance(getApplicationContext());
         sessionManager = new SessionManager(getApplication());
 
@@ -331,6 +332,9 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
             updateFileLog(log);
         }
         RequestBody filename = RequestBody.create(MediaType.parse("multipart/form-data"), file.getName());
+        if (retrofit == null) {
+            retrofit = SyncingWorkManager.provideRetrofit();
+        }
         retrofit.create(ApiService.class).uploadFiles(sessionManager.getAuthTokenWithBearer(), body, filename).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<String>() {

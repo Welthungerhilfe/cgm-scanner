@@ -43,6 +43,8 @@ import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.utils.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
@@ -143,22 +145,25 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
         try {
             if (email != null && !email.isEmpty()) {
+
+                //update session
                 session.setAuthToken(token);
+                session.saveRemoteConfig(new RemoteConfig());
+                session.setSigned(true);
+                session.setUserEmail(email);
                 Log.d(TAG, "Token for " + SyncingWorkManager.getAPI() + " set");
 
+                //update account manager
                 final Intent intent = new Intent();
                 intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, email);
                 intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
                 intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
-
                 setAccountAuthenticatorResult(intent.getExtras());
                 setResult(RESULT_OK, intent);
 
-
-                session.saveRemoteConfig(new RemoteConfig());
-                session.setSigned(true);
-                session.setUserEmail(email);
-
+                //start the app
+                SyncAdapter.getInstance(getApplicationContext()).resetRetrofit();
+                UploadService.resetRetrofit();
                 startApp();
 
             } else if (feedback) {

@@ -21,7 +21,6 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
@@ -30,25 +29,15 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class SyncingWorkManager extends Worker {
 
     public static final String TAG = SyncingWorkManager.class.getSimpleName();
-    Context context;
-    SessionManager sessionManager;
-    Retrofit retrofit;
 
     public SyncingWorkManager(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        this.context = context;
     }
 
     @NonNull
     @Override
     public Result doWork() {
-        sessionManager = new SessionManager(context.getApplicationContext());
-
-        if (retrofit == null) {
-            retrofit = provideRetrofit();
-        }
-        SyncAdapter.getInstance(getApplicationContext(), retrofit).startPeriodicSync();
-
+        SyncAdapter.getInstance(getApplicationContext()).startPeriodicSync();
         return null;
     }
 
@@ -78,7 +67,6 @@ public class SyncingWorkManager extends Worker {
                 .client(new OkHttpClient())
                 .build();
     }
-
 
     public static String getAPI() {
         if (BuildConfig.DEBUG) {
