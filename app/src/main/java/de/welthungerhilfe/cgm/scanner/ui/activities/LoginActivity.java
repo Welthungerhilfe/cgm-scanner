@@ -51,14 +51,14 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     @OnClick({R.id.btnLoginMicrosoft})
     void doSignIn() {
         if (BuildConfig.DEBUG) {
-            if (session.getEnvironment() == AppConstants.UNKNOWN) {
+            if (session.getEnvironment() == AppConstants.ENV_UNKNOWN) {
                 Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
                 return;
             }
             session.setSigned(true);
             startApp();
         } else {
-            if (session.getEnvironment() != AppConstants.UNKNOWN) {
+            if (session.getEnvironment() != AppConstants.ENV_UNKNOWN) {
                 layout_login.setVisibility(View.GONE);
                 progressBar.setVisibility(View.VISIBLE);
                 new AuthenticationHandler(this, this, () -> runOnUiThread(() -> {
@@ -167,19 +167,22 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         }
     }
 
-    @OnCheckedChanged({R.id.rb_prod_darshna, R.id.rb_prod_aah, R.id.rb_demo_qa, R.id.rb_sandbox})
+    @OnCheckedChanged({R.id.rb_prod_darshna, R.id.rb_prod_aah, R.id.rb_prod_namibia, R.id.rb_demo_qa, R.id.rb_sandbox})
     public void onRadioButtonCheckChanged(CompoundButton button, boolean checked) {
         if (checked) {
             switch (button.getId()) {
                 case R.id.rb_prod_aah:
                 case R.id.rb_prod_darshna:
-                    session.setEnvironment(AppConstants.PROUDCTION);
+                    session.setEnvironment(AppConstants.ENV_IN_BMZ);
+                    break;
+                case R.id.rb_prod_namibia:
+                    session.setEnvironment(AppConstants.ENV_NAMIBIA);
                     break;
                 case R.id.rb_demo_qa:
-                    session.setEnvironment(AppConstants.QA);
+                    session.setEnvironment(AppConstants.ENV_DEMO_QA);
                     break;
                 case R.id.rb_sandbox:
-                    session.setEnvironment(AppConstants.SANDBOX);
+                    session.setEnvironment(AppConstants.ENV_SANDBOX);
                     break;
             }
         }

@@ -21,19 +21,21 @@ package de.welthungerhilfe.cgm.scanner;
 public class AppConstants {
 
     public static final String AUTH_SANDBOX = "{OAUTH_SCOPE_SANDBOX}";
-    public static final String AUTH_QA = "{OAUTH_SCOPE_QA}";
-    public static final String AUTH_PRODUCTION = "{OAUTH_SCOPE_PRODUCTION}";
+    public static final String AUTH_DEMO_QA = "{OAUTH_SCOPE_QA}";
+    public static final String AUTH_IN_BMZ = "{OAUTH_SCOPE_PRODUCTION}";
+    public static final String AUTH_NAMIBIA = "{OAUTH_SCOPE_NAMIBIA}";
     public static final String API_URL_SANDBOX = "{API_URL_SANDBOX}/";
-    public static final String API_URL_QA = "{API_URL_QA}/";
-    public static final String API_URL_PRODUCTION = "{API_URL_PRODUCTION}/";
+    public static final String API_URL_DEMO_QA = "{API_URL_QA}/";
+    public static final String API_URL_IN_BMZ = "{API_URL_PRODUCTION}/";
+    public static final String API_URL_NAMIBIA = "{API_URL_NAMIBIA}/";
     public static final String API_TESTING_URL = "http://192.168.43.252:5001/api/";
 
     //Environments Type
-    public static final int UNKNOWN = 0;
-    public static final int SANDBOX = 1;
-    public static final int QA = 2;
-    public static final int PROUDCTION = 3;
-
+    public static final int ENV_UNKNOWN = 0;
+    public static final int ENV_SANDBOX = 1;
+    public static final int ENV_DEMO_QA = 2;
+    public static final int ENV_IN_BMZ = 3;
+    public static final int ENV_NAMIBIA = 4;
 
     public static final int MAX_IMAGE_SIZE = 512;
 

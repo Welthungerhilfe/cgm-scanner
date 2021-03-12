@@ -117,12 +117,14 @@ public class AuthenticationHandler {
 
     public static int getConfig(int environment) {
         switch (environment) {
-            case AppConstants.SANDBOX:
+            case AppConstants.ENV_SANDBOX:
                 return R.raw.auth_config_sandbox;
-            case AppConstants.QA:
-                return R.raw.auth_config_qa;
-            case AppConstants.PROUDCTION:
-                return R.raw.auth_config_production;
+            case AppConstants.ENV_DEMO_QA:
+                return R.raw.auth_config_demoqa;
+            case AppConstants.ENV_IN_BMZ:
+                return R.raw.auth_config_inbmz;
+            case AppConstants.ENV_NAMIBIA:
+                return R.raw.auth_config_namibia;
             default:
                 Log.e(TAG, "Environment not configured");
                 System.exit(0);
@@ -137,12 +139,14 @@ public class AuthenticationHandler {
 
     public static String[] getScopes(Context context) {
         switch (getEnvironment(context)) {
-            case AppConstants.SANDBOX:
+            case AppConstants.ENV_SANDBOX:
                 return new String[]{AppConstants.AUTH_SANDBOX};
-            case AppConstants.QA:
-                return new String[]{AppConstants.AUTH_QA};
-            case AppConstants.PROUDCTION:
-                return new String[]{AppConstants.AUTH_PRODUCTION};
+            case AppConstants.ENV_DEMO_QA:
+                return new String[]{AppConstants.AUTH_DEMO_QA};
+            case AppConstants.ENV_IN_BMZ:
+                return new String[]{AppConstants.AUTH_IN_BMZ};
+            case AppConstants.ENV_NAMIBIA:
+                return new String[]{AppConstants.AUTH_NAMIBIA};
             default:
                 Log.e(TAG, "Environment not configured");
                 System.exit(0);
