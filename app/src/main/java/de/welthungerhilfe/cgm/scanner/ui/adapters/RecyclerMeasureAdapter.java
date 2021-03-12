@@ -19,13 +19,17 @@
 package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
 import android.annotation.SuppressLint;
+
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
+
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -125,12 +129,27 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.rytItem.setBackgroundResource(R.color.colorWhite);
         }
 
+        if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
+            if (measure.isSynced()) {
+                holder.iv_is_synced_corner.setVisibility(View.VISIBLE);
+            } else {
+                holder.iv_is_synced_corner.setVisibility(View.GONE);
+            }
+        } else {
+            if (measure.isSynced()) {
+                holder.iv_is_synced_centre.setVisibility(View.VISIBLE);
+            } else {
+                holder.iv_is_synced_centre.setVisibility(View.GONE);
+            }
+        }
+
+
         holder.txtDate.setText(DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE_AND_TIME, measure.getDate()));
         holder.txtAuthor.setText(Utils.getNameFromEmail(measure.getCreatedBy()));
 
         if (config.isMeasure_visibility()) {
-            int heightConfidence = (int)(measure.getHeightConfidence() * 100);
-            int weightConfidence = (int)(measure.getWeightConfidence() * 100);
+            int heightConfidence = (int) (measure.getHeightConfidence() * 100);
+            int weightConfidence = (int) (measure.getWeightConfidence() * 100);
 
             holder.txtHeight.setText(String.format(Locale.getDefault(), "%.2f%s", measure.getHeight(), context.getString(R.string.unit_cm)));
             holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f%s", measure.getWeight(), context.getString(R.string.unit_kg)));
@@ -232,7 +251,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         RelativeLayout rytItem;
 
         ImageView imgType;
-
+        ImageView iv_is_synced_corner, iv_is_synced_centre;
         TextView txtDate;
         TextView txtAuthor;
         TextView txtHeight;
@@ -247,6 +266,8 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
             rytItem = itemView.findViewById(R.id.rytItem);
             imgType = itemView.findViewById(R.id.imgType);
+            iv_is_synced_corner = itemView.findViewById(R.id.iv_is_synced_corner);
+            iv_is_synced_centre = itemView.findViewById(R.id.iv_is_synced_centre);
             txtDate = itemView.findViewById(R.id.txtDate);
             txtAuthor = itemView.findViewById(R.id.txtAuthor);
             txtHeight = itemView.findViewById(R.id.txtHeight);
@@ -271,7 +292,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         String date = DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE_AND_TIME, measure.getDate());
 
         if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
-            new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+            new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
                     new ContextMenuDialog.Item(R.string.show_details, R.drawable.ic_details),
                     new ContextMenuDialog.Item(R.string.edit_data, R.drawable.ic_edit),
                     new ContextMenuDialog.Item(R.string.delete_data, R.drawable.ic_delete),
@@ -293,7 +314,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                 }
             });
         } else {
-            new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+            new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
                     new ContextMenuDialog.Item(R.string.show_details, R.drawable.ic_details),
                     new ContextMenuDialog.Item(R.string.delete_data, R.drawable.ic_delete),
                     new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),

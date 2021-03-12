@@ -25,6 +25,8 @@
     <string name="congratulation">Herzliche Glückwünsche!</string>
     <string name="finish_tutorial">Sie haben das CGM Scanner Tutorial beendet</string>
     <string name="get_start">Los geht\'s</string>
+    <string name="data_not_synced">Keine Berechtigung zum Synchronisieren der Daten mit dem Backend</string>
+
 
     <!-- Main screen !-->
     <string name="username">Benutzername</string>

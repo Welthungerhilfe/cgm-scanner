@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
@@ -42,23 +43,29 @@ import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.utils.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 
 public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback {
 
+    private static final String TAG = LoginActivity.class.getSimpleName();
+
     @OnClick({R.id.btnLoginMicrosoft})
     void doSignIn() {
         if (BuildConfig.DEBUG) {
-            if (session.getEnvironment() == AppConstants.UNKNOWN) {
+            if (session.getEnvironment() == AppConstants.ENV_UNKNOWN) {
                 Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
                 return;
             }
             session.setSigned(true);
             startApp();
         } else {
-            if (session.getEnvironment() != AppConstants.UNKNOWN) {
+            if (session.getEnvironment() != AppConstants.ENV_UNKNOWN) {
+                Log.d(TAG, "Login into " + SyncingWorkManager.getAPI());
                 layout_login.setVisibility(View.GONE);
                 progressBar.setVisibility(View.VISIBLE);
                 new AuthenticationHandler(this, this, () -> runOnUiThread(() -> {
@@ -138,21 +145,25 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
         try {
             if (email != null && !email.isEmpty()) {
-                session.setAuthToken(token);
 
+                //update session
+                session.setAuthToken(token);
+                session.saveRemoteConfig(new RemoteConfig());
+                session.setSigned(true);
+                session.setUserEmail(email);
+                Log.d(TAG, "Token for " + SyncingWorkManager.getAPI() + " set");
+
+                //update account manager
                 final Intent intent = new Intent();
                 intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, email);
                 intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
                 intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
-
                 setAccountAuthenticatorResult(intent.getExtras());
                 setResult(RESULT_OK, intent);
 
-
-                session.saveRemoteConfig(new RemoteConfig());
-                session.setSigned(true);
-                session.setUserEmail(email);
-
+                //start the app
+                SyncAdapter.getInstance(getApplicationContext()).resetRetrofit();
+                UploadService.resetRetrofit();
                 startApp();
 
             } else if (feedback) {
@@ -167,19 +178,22 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         }
     }
 
-    @OnCheckedChanged({R.id.rb_prod_darshna, R.id.rb_prod_aah, R.id.rb_demo_qa, R.id.rb_sandbox})
+    @OnCheckedChanged({R.id.rb_prod_darshna, R.id.rb_prod_aah, R.id.rb_prod_namibia, R.id.rb_demo_qa, R.id.rb_sandbox})
     public void onRadioButtonCheckChanged(CompoundButton button, boolean checked) {
         if (checked) {
             switch (button.getId()) {
                 case R.id.rb_prod_aah:
                 case R.id.rb_prod_darshna:
-                    session.setEnvironment(AppConstants.PROUDCTION);
+                    session.setEnvironment(AppConstants.ENV_IN_BMZ);
+                    break;
+                case R.id.rb_prod_namibia:
+                    session.setEnvironment(AppConstants.ENV_NAMIBIA);
                     break;
                 case R.id.rb_demo_qa:
-                    session.setEnvironment(AppConstants.QA);
+                    session.setEnvironment(AppConstants.ENV_DEMO_QA);
                     break;
                 case R.id.rb_sandbox:
-                    session.setEnvironment(AppConstants.SANDBOX);
+                    session.setEnvironment(AppConstants.ENV_SANDBOX);
                     break;
             }
         }

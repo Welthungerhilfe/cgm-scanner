@@ -21,7 +21,6 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
@@ -30,25 +29,15 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class SyncingWorkManager extends Worker {
 
     public static final String TAG = SyncingWorkManager.class.getSimpleName();
-    Context context;
-    SessionManager sessionManager;
-    Retrofit retrofit;
 
     public SyncingWorkManager(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        this.context = context;
     }
 
     @NonNull
     @Override
     public Result doWork() {
-        sessionManager = new SessionManager(context.getApplicationContext());
-
-        if (retrofit == null) {
-            retrofit = provideRetrofit();
-        }
-        SyncAdapter.getInstance(getApplicationContext(), retrofit).startPeriodicSync();
-
+        SyncAdapter.getInstance(getApplicationContext()).startPeriodicSync();
         return null;
     }
 
@@ -79,7 +68,6 @@ public class SyncingWorkManager extends Worker {
                 .build();
     }
 
-
     public static String getAPI() {
         if (BuildConfig.DEBUG) {
             return "localhost";
@@ -103,12 +91,14 @@ public class SyncingWorkManager extends Worker {
         } else {
             Context context = AppController.getInstance().getApplicationContext();
             switch (AuthenticationHandler.getEnvironment(context)) {
-                case AppConstants.SANDBOX:
+                case AppConstants.ENV_SANDBOX:
                     return AppConstants.API_URL_SANDBOX;
-                case AppConstants.QA:
-                    return AppConstants.API_URL_QA;
-                case AppConstants.PROUDCTION:
-                    return AppConstants.API_URL_PRODUCTION;
+                case AppConstants.ENV_DEMO_QA:
+                    return AppConstants.API_URL_DEMO_QA;
+                case AppConstants.ENV_IN_BMZ:
+                    return AppConstants.API_URL_IN_BMZ;
+                case AppConstants.ENV_NAMIBIA:
+                    return AppConstants.API_URL_NAMIBIA;
                 default:
                     Log.e(TAG, "Environment not configured");
                     System.exit(0);
