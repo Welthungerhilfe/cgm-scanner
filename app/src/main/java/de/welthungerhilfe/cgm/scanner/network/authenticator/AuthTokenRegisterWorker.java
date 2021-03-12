@@ -1,6 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.network.authenticator;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
@@ -21,6 +22,8 @@ public class AuthTokenRegisterWorker extends Worker {
     Context context;
     private ISingleAccountPublicClientApplication singleAccountApp;
 
+    private static final String TAG = AuthTokenRegisterWorker.class.getSimpleName();
+
     public AuthTokenRegisterWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
@@ -31,6 +34,7 @@ public class AuthTokenRegisterWorker extends Worker {
 
         context = getApplicationContext();
         int environment = AuthenticationHandler.getEnvironment(context);
+        Log.d(TAG, "Renewing token for " + SyncingWorkManager.getAPI());
         PublicClientApplication.createSingleAccountPublicClientApplication(context,
                 AuthenticationHandler.getConfig(environment),
                 new IPublicClientApplication.ISingleAccountApplicationCreatedListener() {
@@ -57,6 +61,7 @@ public class AuthTokenRegisterWorker extends Worker {
             @Override
             public void onSuccess(IAuthenticationResult authenticationResult) {
                 session.setAuthToken(authenticationResult.getAccessToken());
+                Log.d(TAG, "Token for " + SyncingWorkManager.getAPI() + " set");
                 SyncingWorkManager.startSyncingWithWorkManager(getApplicationContext());
             }
 
