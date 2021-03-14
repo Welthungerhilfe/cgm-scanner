@@ -26,16 +26,13 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.microsoft.appcenter.crashes.Crashes;
-import com.novoda.merlin.Merlin;
-import com.novoda.merlin.registerable.connection.Connectable;
-import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
 import java.util.HashMap;
 
 import de.welthungerhilfe.cgm.scanner.utils.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
-public class BaseActivity extends AppCompatActivity implements Connectable, Disconnectable {
+public class BaseActivity extends AppCompatActivity {
 
     protected final int PERMISSION_LOCATION = 0x0001;
     protected final int PERMISSION_CAMERA = 0x0002;
@@ -43,6 +40,7 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
 
     public interface ResultListener {
         void onActivityResult(int requestCode, int resultCode, @Nullable Intent data);
+
         void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults);
     }
 
@@ -56,7 +54,6 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
         }
     }
 
-    private Merlin merlin;
     private SessionManager session;
 
     protected void onCreate(Bundle saveBundle) {
@@ -69,23 +66,16 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
     @Override
     public void onStart() {
         super.onStart();
-
         session = new SessionManager(this);
-
-        merlin = new Merlin.Builder().withConnectableCallbacks().withDisconnectableCallbacks().build(this);
-        merlin.registerConnectable(this);
-        merlin.registerDisconnectable(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        merlin.bind();
     }
 
     @Override
     protected void onPause() {
-        merlin.unbind();
         super.onPause();
     }
 
@@ -111,30 +101,6 @@ public class BaseActivity extends AppCompatActivity implements Connectable, Disc
             map.get(requestCode).onRequestPermissionsResult(requestCode, permissions, grantResults);
             map.remove(requestCode);
         }
-    }
-
-    @Override
-    public void onConnect() {
-        // todo: Crashlytics.log(0, "network state: ", "connected at " + Utils.beautifyDateTime(new Date()));
-
-        long timestamp = session.getConnectionTimestamp();
-        if (timestamp != 0) {
-            long seconds = (System.currentTimeMillis() - timestamp) / 1000;
-            // todo: Crashlytics.log(0, "network state duration: ", String.format("last connection lasts for %d seconds", seconds));
-        }
-        session.setConnectionTimestamp(System.currentTimeMillis());
-    }
-
-    @Override
-    public void onDisconnect() {
-        // todo: Crashlytics.log(0, "network state: ", "disconnected at " + Utils.beautifyDateTime(new Date()));
-
-        long timestamp = session.getConnectionTimestamp();
-        if (timestamp != 0) {
-            long seconds = (System.currentTimeMillis() - timestamp) / 1000;
-            // todo: Crashlytics.log(0, "network state duration: ", String.format("last connection lasts for %d seconds", seconds));
-        }
-        session.setConnectionTimestamp(System.currentTimeMillis());
     }
 
     public void addResultListener(int resultCode, ResultListener listener) {
