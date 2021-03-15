@@ -67,8 +67,7 @@
                     android:paddingBottom="15dp"
                     android:buttonTint="@color/radio_text_selector"
                     android:textColor="@color/radio_text_selector"
-                    android:textSize="18sp"
-                    android:visibility="gone"/>
+                    android:textSize="18sp"/>
 
                 <RadioButton
                     android:id="@+id/rb_prod_darshna"
@@ -80,8 +79,7 @@
                     android:paddingBottom="15dp"
                     android:buttonTint="@color/radio_text_selector"
                     android:textColor="@color/radio_text_selector"
-                    android:textSize="18sp"
-                    android:visibility="gone"/>
+                    android:textSize="18sp"/>
 
                 <RadioButton
                     android:id="@+id/rb_prod_namibia"
