@@ -25,14 +25,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.Image;
+import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.util.Log;
+import android.util.Size;
 
 import com.huawei.hiar.ARCamera;
 import com.huawei.hiar.ARConfigBase;
@@ -41,11 +39,10 @@ import com.huawei.hiar.ARPose;
 import com.huawei.hiar.ARSession;
 import com.huawei.hiar.ARWorldTrackingConfig;
 
-import java.nio.ByteBuffer;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import de.welthungerhilfe.cgm.scanner.utils.RenderToTexture;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AREngineCamera extends AbstractARCamera {
@@ -62,6 +59,8 @@ public class AREngineCamera extends AbstractARCamera {
 
   //AREngine API
   private ARSession mSession;
+  private RenderToTexture mRTT;
+  private Size mTextureRes;
   private boolean mFirstRequest;
 
   //App integration objects
@@ -70,6 +69,7 @@ public class AREngineCamera extends AbstractARCamera {
 
   public AREngineCamera(Activity activity, boolean showDepth) {
     super(activity, showDepth);
+    mRTT = new RenderToTexture();
   }
 
   @Override
@@ -78,6 +78,7 @@ public class AREngineCamera extends AbstractARCamera {
 
     //setup AREngine cycle
     mGLSurfaceView = mActivity.findViewById(surfaceview);
+    mGLSurfaceView.setEGLContextClientVersion(3);
     mGLSurfaceView.setRenderer(new GLSurfaceView.Renderer() {
       private final int[] textures = new int[1];
       private int width, height;
@@ -85,6 +86,12 @@ public class AREngineCamera extends AbstractARCamera {
       @Override
       public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
         GLES20.glGenTextures(1, textures, 0);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0]);
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
+        GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_NEAREST);
+        mRTT.init();
       }
 
       @Override
@@ -122,28 +129,12 @@ public class AREngineCamera extends AbstractARCamera {
     closeCamera();
   }
 
-  private void onProcessColorData(Image image) {
-    if (image == null) {
-      Log.w(TAG, "onImageAvailable: Skipping null image.");
+  private void onProcessColorData(Bitmap bitmap) {
+    if (bitmap == null) {
       return;
     }
-    final ByteBuffer yuvBytes = imageToByteBuffer(image);
-
-    // Convert YUV to RGB
-    final RenderScript rs = RenderScript.create(mActivity);
-    final Bitmap bitmap     = Bitmap.createBitmap(image.getWidth(), image.getHeight(), Bitmap.Config.ARGB_8888);
-    final Allocation allocationRgb = Allocation.createFromBitmap(rs, bitmap);
-    final Allocation allocationYuv = Allocation.createSized(rs, Element.U8(rs), yuvBytes.array().length);
-    allocationYuv.copyFrom(yuvBytes.array());
-    ScriptIntrinsicYuvToRGB scriptYuvToRgb = ScriptIntrinsicYuvToRGB.create(rs, Element.U8_4(rs));
-    scriptYuvToRgb.setInput(allocationYuv);
-    scriptYuvToRgb.forEach(allocationRgb);
-    allocationRgb.copyTo(bitmap);
 
     mCache = bitmap;
-    allocationYuv.destroy();
-    allocationRgb.destroy();
-    rs.destroy();
 
     //update preview window
     mActivity.runOnUiThread(() -> {
@@ -157,7 +148,6 @@ public class AREngineCamera extends AbstractARCamera {
       mDepthCameraPreview.setScaleX(scale);
       mDepthCameraPreview.setScaleY(scale);
     });
-    image.close();
   }
 
   private void onProcessDepthData(Image image) {
@@ -217,6 +207,10 @@ public class AREngineCamera extends AbstractARCamera {
       config.setFocusMode(ARConfigBase.FocusMode.AUTO_FOCUS);
       config.setLightingMode(ARConfigBase.LightingMode.AMBIENT_INTENSITY);
       mSession.configure(config);
+
+      // Get GPU image resolution
+      mTextureRes = mSession.getCameraConfig().GetTextureDimensions();
+      Log.d(TAG, "AREngine started with RGB " + mTextureRes.getWidth() + "x" + mTextureRes.getHeight());
     }
 
     try {
@@ -298,10 +292,10 @@ public class AREngineCamera extends AbstractARCamera {
       }
 
       //get camera data
-      Image color = null;
+      Bitmap color = null;
       Image depth = null;
       try {
-        color = frame.acquireCameraImage();
+        color = mRTT.renderData(texture, mTextureRes);
         depth = frame.acquireDepthImage();
       } catch (Exception e) {
         e.printStackTrace();
