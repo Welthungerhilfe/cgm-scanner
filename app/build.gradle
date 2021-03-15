@@ -97,7 +97,6 @@ dependencies {
     // Network
     implementation "com.microsoft.appcenter:appcenter-analytics:2.5.0" //AppCenter analytics
     implementation "com.microsoft.appcenter:appcenter-crashes:2.5.0" //AppCenter crash reports
-    implementation 'com.novoda:merlin:1.1.7' //connection timestamping
     implementation 'androidx.room:room-runtime:2.2.5' //database syntax helper
     implementation 'com.android.volley:volley:1.1.1' //Authentication answer parser
     implementation 'com.microsoft.identity.client:msal:2.0.5' //Microsoft authentication

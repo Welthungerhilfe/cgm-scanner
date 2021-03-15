@@ -157,15 +157,6 @@ public class SessionManager {
         return pref.getLong(KEY_SYNC_TIMESTAMP, 0);
     }
 
-    public void setConnectionTimestamp(long timestamp) {
-        editor.putLong(KEY_CONNECTION_TIMESTAMP, timestamp);
-        editor.commit();
-    }
-
-    public long getConnectionTimestamp() {
-        return pref.getLong(KEY_CONNECTION_TIMESTAMP, 0);
-    }
-
     public void setTutorial(boolean tutorial) {
         editor.putBoolean(KEY_TUTORIAL, tutorial);
 
