@@ -35,9 +35,12 @@ import android.util.Size;
 import com.huawei.hiar.ARCamera;
 import com.huawei.hiar.ARConfigBase;
 import com.huawei.hiar.ARFrame;
+import com.huawei.hiar.ARPlane;
 import com.huawei.hiar.ARPose;
 import com.huawei.hiar.ARSession;
 import com.huawei.hiar.ARWorldTrackingConfig;
+
+import java.util.ArrayList;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -59,6 +62,7 @@ public class AREngineCamera extends AbstractARCamera {
 
   //AREngine API
   private ARSession mSession;
+  private ArrayList<Float> mPlanes;
   private RenderToTexture mRTT;
   private Size mTextureRes;
   private boolean mFirstRequest;
@@ -69,6 +73,7 @@ public class AREngineCamera extends AbstractARCamera {
 
   public AREngineCamera(Activity activity, boolean showDepth) {
     super(activity, showDepth);
+    mPlanes = new ArrayList<>();
     mRTT = new RenderToTexture();
   }
 
@@ -152,7 +157,7 @@ public class AREngineCamera extends AbstractARCamera {
 
   private void onProcessDepthData(Image image) {
     if (mDepthMode != DepthPreviewMode.OFF) {
-      Bitmap preview = getDepthPreview(image, true, mDepthMode);
+      Bitmap preview = getDepthPreview(image, true, mDepthMode, mPlanes, mDepthCameraIntrinsic);
       mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
     }
 
@@ -206,6 +211,7 @@ public class AREngineCamera extends AbstractARCamera {
       config.setEnableItem(ARConfigBase.ENABLE_DEPTH);
       config.setFocusMode(ARConfigBase.FocusMode.AUTO_FOCUS);
       config.setLightingMode(ARConfigBase.LightingMode.AMBIENT_INTENSITY);
+      config.setPlaneFindingMode(ARConfigBase.PlaneFindingMode.HORIZONTAL_ONLY);
       mSession.configure(config);
 
       // Get GPU image resolution
@@ -268,6 +274,12 @@ public class AREngineCamera extends AbstractARCamera {
       mColorCameraIntrinsic[3] = Math.abs((1.0f - projection[8]) / 2.0f);
       mDepthCameraIntrinsic = mColorCameraIntrinsic;
       mHasCameraCalibration = true;
+
+      //get planes
+      mPlanes.clear();
+      for (ARPlane plane : mSession.getAllPlanes()) {
+        mPlanes.add(plane.getCenterPose().ty());
+      }
 
       //get pose from AREngine
       synchronized (mLock) {

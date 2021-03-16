@@ -49,6 +49,7 @@ import com.google.ar.core.CameraConfig;
 import com.google.ar.core.CameraIntrinsics;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
+import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.SharedCamera;
@@ -75,6 +76,7 @@ public class ARCoreCamera extends AbstractARCamera {
   private int mDepthHeight;
 
   //ARCore API
+  private ArrayList<Float> mPlanes;
   private Session mSession;
   private final Object mLock;
 
@@ -87,6 +89,7 @@ public class ARCoreCamera extends AbstractARCamera {
 
     mCache = new HashMap<>();
     mLock = new Object();
+    mPlanes = new ArrayList<>();
   }
 
   @Override
@@ -201,7 +204,7 @@ public class ARCoreCamera extends AbstractARCamera {
       return;
     }
     if (mDepthMode != DepthPreviewMode.OFF) {
-      mDepthCameraPreview.setImageBitmap(getDepthPreview(image, false, mDepthMode));
+      mDepthCameraPreview.setImageBitmap(getDepthPreview(image, false, mDepthMode, mPlanes, mDepthCameraIntrinsic));
     }
 
     float[] position;
@@ -279,6 +282,7 @@ public class ARCoreCamera extends AbstractARCamera {
       Config config = mSession.getConfig();
       config.setFocusMode(Config.FocusMode.AUTO);
       config.setLightEstimationMode(Config.LightEstimationMode.AMBIENT_INTENSITY);
+      config.setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL);
       mSession.configure(config);
 
       // Choose the camera configuration
@@ -452,6 +456,12 @@ public class ARCoreCamera extends AbstractARCamera {
         Pose pose = camera.getPose();
         mPosition = pose.getTranslation();
         mRotation = pose.getRotationQuaternion();
+      }
+
+      //get planes
+      mPlanes.clear();
+      for (Plane plane : mSession.getAllTrackables(Plane.class)) {
+        mPlanes.add(plane.getCenterPose().ty());
       }
 
       //get light estimation from ARCore

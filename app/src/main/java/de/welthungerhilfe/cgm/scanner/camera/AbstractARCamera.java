@@ -24,7 +24,6 @@ import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.media.Image;
-import android.util.Pair;
 import android.widget.ImageView;
 
 import java.nio.ByteBuffer;
@@ -184,7 +183,7 @@ public abstract class AbstractARCamera {
         return mLight;
     }
 
-    public Bitmap getDepthPreview(Image image, boolean reorder, DepthPreviewMode mode) {
+    public Bitmap getDepthPreview(Image image, boolean reorder, DepthPreviewMode mode, ArrayList<Float> planes, float[] calibration) {
         switch (mode) {
             case CENTER:
                 return getDepthPreviewCenter(image, reorder);
