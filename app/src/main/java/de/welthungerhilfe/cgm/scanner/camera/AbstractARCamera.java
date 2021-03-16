@@ -22,13 +22,16 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
+import android.graphics.Point;
 import android.media.Image;
+import android.util.Pair;
 import android.widget.ImageView;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
+import java.util.Stack;
 
 public abstract class AbstractARCamera {
 
@@ -38,6 +41,8 @@ public abstract class AbstractARCamera {
 
         void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex);
     }
+
+    public enum DepthPreviewMode { OFF, SOBEL, CENTER };
 
     public enum LightConditions { NORMAL, BRIGHT, DARK };
 
@@ -61,7 +66,7 @@ public abstract class AbstractARCamera {
     //AR status
     protected int mFrameIndex;
     protected float mPixelIntensity;
-    protected boolean mShowDepth;
+    protected DepthPreviewMode mDepthMode;
     protected LightConditions mLight;
     protected long mLastBright;
     protected long mLastDark;
@@ -85,7 +90,7 @@ public abstract class AbstractARCamera {
 
         mFrameIndex = 1;
         mPixelIntensity = 0;
-        mShowDepth = showDepth;
+        mDepthMode = showDepth ? DepthPreviewMode.CENTER : DepthPreviewMode.OFF;
         mLight = LightConditions.NORMAL;
         mLastBright = 0;
         mLastDark = 0;
@@ -179,50 +184,15 @@ public abstract class AbstractARCamera {
         return mLight;
     }
 
-    public Bitmap getDepthPreview(Image image, boolean reorder) {
-        Image.Plane plane = image.getPlanes()[0];
-        ByteBuffer buffer = plane.getBuffer();
-        if (reorder) {
-            buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
+    public Bitmap getDepthPreview(Image image, boolean reorder, DepthPreviewMode mode) {
+        switch (mode) {
+            case CENTER:
+                return getDepthPreviewCenter(image, reorder);
+            case SOBEL:
+                return getDepthPreviewSobel(image, reorder);
+            default:
+                return null;
         }
-        ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
-
-        ArrayList<Integer> pixel = new ArrayList<>();
-        while (shortDepthBuffer.hasRemaining()) {
-            pixel.add((int) shortDepthBuffer.get());
-        }
-        int stride = plane.getRowStride();
-        int width = image.getWidth();
-        int height = image.getHeight();
-
-        float[][] depth = new float[width][height];
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int depthSample = pixel.get((y / 2) * stride + x);
-                int depthRange = depthSample & 0x1FFF;
-                if ((x < 1) || (y < 1) || (x >= width - 1) || (y >= height - 1)) {
-                    depthRange = 0;
-                }
-                depth[x][y] = depthRange;
-            }
-        }
-
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        for (int y = 1; y < height - 1; y++) {
-            for (int x = 1; x < width - 1; x++) {
-
-                float mx = depth[x][y] - depth[x - 1][y];
-                float px = depth[x][y] - depth[x + 1][y];
-                float my = depth[x][y] - depth[x][y - 1];
-                float py = depth[x][y] - depth[x][y + 1];
-                float value = Math.abs(mx) + Math.abs(px) + Math.abs(my) + Math.abs(py);
-                int r = (int) Math.max(0, Math.min(1.0f * value, 255));
-                int g = (int) Math.max(0, Math.min(2.0f * value, 255));
-                int b = (int) Math.max(0, Math.min(3.0f * value, 255));
-                bitmap.setPixel(x, y, Color.argb(128, r, g, b));
-            }
-        }
-        return bitmap;
     }
 
     public LightConditions updateLight(LightConditions light, long lastBright, long lastDark, long sessionStart) {
@@ -306,5 +276,92 @@ public abstract class AbstractARCamera {
         }
 
         return output;
+    }
+
+    private Bitmap getDepthPreviewCenter(Image image, boolean reorder) {
+        Bitmap bitmap = getDepthPreviewSobel(image, reorder);
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+        int[] pixels = new int[w * h];
+        bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
+
+        ArrayList<Point> dirs = new ArrayList<>();
+        dirs.add(new Point(-1, 0));
+        dirs.add(new Point(1, 0));
+        dirs.add(new Point(0, -1));
+        dirs.add(new Point(0, 1));
+        Stack<Point> stack = new Stack<>();
+        Point p = new Point(w / 2, h / 2);
+        stack.push(p);
+        while (!stack.isEmpty()) {
+            p = stack.pop();
+
+            int index = p.y * w + p.x;
+            int color = pixels[index];
+            int r = Color.red(color);
+            int g = Color.green(color);
+            int b = Color.blue(color);
+            int a = Color.alpha(color);
+            if ((r < 64) && (a != 255)) {
+                pixels[index] = Color.argb(255, r, b, g);
+
+                for (Point d : dirs) {
+                    Point t = new Point(p.x + d.x, p.y + d.y);
+                    if ((t.x < 0) || (t.y < 0) || (t.x >= w) || (t.y >= h)) {
+                        continue;
+                    }
+                    stack.add(t);
+                }
+            }
+        }
+
+        bitmap.setPixels(pixels, 0, w, 0, 0, w, h);
+        return bitmap;
+    }
+
+    private Bitmap getDepthPreviewSobel(Image image, boolean reorder) {
+        Image.Plane plane = image.getPlanes()[0];
+        ByteBuffer buffer = plane.getBuffer();
+        if (reorder) {
+            buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
+        }
+        ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
+
+        ArrayList<Integer> pixel = new ArrayList<>();
+        while (shortDepthBuffer.hasRemaining()) {
+            pixel.add((int) shortDepthBuffer.get());
+        }
+        int stride = plane.getRowStride();
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        float[][] depth = new float[width][height];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int depthSample = pixel.get((y / 2) * stride + x);
+                int depthRange = depthSample & 0x1FFF;
+                if ((x < 1) || (y < 1) || (x >= width - 1) || (y >= height - 1)) {
+                    depthRange = 0;
+                }
+                depth[x][y] = depthRange;
+            }
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        for (int y = 1; y < height - 1; y++) {
+            for (int x = 1; x < width - 1; x++) {
+
+                float mx = depth[x][y] - depth[x - 1][y];
+                float px = depth[x][y] - depth[x + 1][y];
+                float my = depth[x][y] - depth[x][y - 1];
+                float py = depth[x][y] - depth[x][y + 1];
+                float value = Math.abs(mx) + Math.abs(px) + Math.abs(my) + Math.abs(py);
+                int r = (int) Math.max(0, Math.min(1.0f * value, 255));
+                int g = (int) Math.max(0, Math.min(2.0f * value, 255));
+                int b = (int) Math.max(0, Math.min(3.0f * value, 255));
+                bitmap.setPixel(x, y, Color.argb(128, r, g, b));
+            }
+        }
+        return bitmap;
     }
 }

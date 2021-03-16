@@ -200,8 +200,8 @@ public class ARCoreCamera extends AbstractARCamera {
       Log.w(TAG, "onImageAvailable: Skipping null image.");
       return;
     }
-    if (mShowDepth) {
-      mDepthCameraPreview.setImageBitmap(getDepthPreview(image, false));
+    if (mDepthMode != DepthPreviewMode.OFF) {
+      mDepthCameraPreview.setImageBitmap(getDepthPreview(image, false, mDepthMode));
     }
 
     float[] position;

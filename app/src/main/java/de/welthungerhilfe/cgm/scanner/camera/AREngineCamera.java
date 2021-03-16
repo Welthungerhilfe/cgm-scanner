@@ -151,8 +151,8 @@ public class AREngineCamera extends AbstractARCamera {
   }
 
   private void onProcessDepthData(Image image) {
-    if (mShowDepth) {
-      Bitmap preview = getDepthPreview(image, true);
+    if (mDepthMode != DepthPreviewMode.OFF) {
+      Bitmap preview = getDepthPreview(image, true, mDepthMode);
       mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
     }
 
