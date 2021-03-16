@@ -41,7 +41,7 @@ public abstract class AbstractARCamera {
         void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex);
     }
 
-    public enum DepthPreviewMode { OFF, SOBEL, CENTER };
+    public enum DepthPreviewMode { OFF, SOBEL, PLANE, CENTER };
 
     public enum LightConditions { NORMAL, BRIGHT, DARK };
 
@@ -183,12 +183,45 @@ public abstract class AbstractARCamera {
         return mLight;
     }
 
-    public Bitmap getDepthPreview(Image image, boolean reorder, DepthPreviewMode mode, ArrayList<Float> planes, float[] calibration) {
+    public Bitmap getDepthPreview(Image image, boolean reorder, DepthPreviewMode mode, ArrayList<Float> planes, float[] calibration, float[] position, float[] rotation) {
+
+        //get short buffer
+        Image.Plane plane = image.getPlanes()[0];
+        ByteBuffer buffer = plane.getBuffer();
+        if (reorder) {
+            buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
+        }
+        ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
+
+        //get buffer as array
+        ArrayList<Integer> pixel = new ArrayList<>();
+        while (shortDepthBuffer.hasRemaining()) {
+            pixel.add((int) shortDepthBuffer.get());
+        }
+
+        //get depthmap
+        int stride = plane.getRowStride();
+        int width = image.getWidth();
+        int height = image.getHeight();
+        float[][] depth = new float[width][height];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int depthSample = pixel.get((y / 2) * stride + x);
+                int depthRange = depthSample & 0x1FFF;
+                if ((x < 1) || (y < 1) || (x >= width - 1) || (y >= height - 1)) {
+                    depthRange = 0;
+                }
+                depth[x][y] = depthRange;
+            }
+        }
+
         switch (mode) {
             case CENTER:
-                return getDepthPreviewCenter(image, reorder);
+                return getDepthPreviewCenter(depth, planes, calibration, matrixCalculate(position, rotation));
+            case PLANE:
+                return getDepthPreviewPlane(depth, planes, calibration, matrixCalculate(position, rotation));
             case SOBEL:
-                return getDepthPreviewSobel(image, reorder);
+                return getDepthPreviewSobel(depth);
             default:
                 return null;
         }
@@ -277,8 +310,8 @@ public abstract class AbstractARCamera {
         return output;
     }
 
-    private Bitmap getDepthPreviewCenter(Image image, boolean reorder) {
-        Bitmap bitmap = getDepthPreviewSobel(image, reorder);
+    private Bitmap getDepthPreviewCenter(float[][] depth, ArrayList<Float> planes, float[] calibration, float[] matrix) {
+        Bitmap bitmap = getDepthPreviewSobel(depth);
         int w = bitmap.getWidth();
         int h = bitmap.getHeight();
         int[] pixels = new int[w * h];
@@ -301,7 +334,7 @@ public abstract class AbstractARCamera {
             int g = Color.green(color);
             int b = Color.blue(color);
             int a = Color.alpha(color);
-            if ((r < 64) && (a != 255)) {
+            if ((r < 64) && (a != 255)) { //TODO:ignore plane data
                 pixels[index] = Color.argb(255, r, b, g);
 
                 for (Point d : dirs) {
@@ -318,34 +351,57 @@ public abstract class AbstractARCamera {
         return bitmap;
     }
 
-    private Bitmap getDepthPreviewSobel(Image image, boolean reorder) {
-        Image.Plane plane = image.getPlanes()[0];
-        ByteBuffer buffer = plane.getBuffer();
-        if (reorder) {
-            buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
-        }
-        ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
+    private Bitmap getDepthPreviewPlane(float[][] depth, ArrayList<Float> planes, float[] calibration, float[] matrix) {
+        Bitmap bitmap = getDepthPreviewSobel(depth);
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+        int[] pixels = new int[w * h];
+        bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
 
-        ArrayList<Integer> pixel = new ArrayList<>();
-        while (shortDepthBuffer.hasRemaining()) {
-            pixel.add((int) shortDepthBuffer.get());
-        }
-        int stride = plane.getRowStride();
-        int width = image.getWidth();
-        int height = image.getHeight();
-
-        float[][] depth = new float[width][height];
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int depthSample = pixel.get((y / 2) * stride + x);
-                int depthRange = depthSample & 0x1FFF;
-                if ((x < 1) || (y < 1) || (x >= width - 1) || (y >= height - 1)) {
-                    depthRange = 0;
+        float fx = calibration[0] * (float)w;
+        float fy = calibration[1] * (float)h;
+        float cx = calibration[2] * (float)w;
+        float cy = calibration[3] * (float)h;
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                float z = depth[x][y] * 0.001f;
+                if (z > 0) {
+                    float tx = (x - cx) * z / fx;
+                    float ty = (y - cy) * z / fy;
+                    float[] point = matrixTransformPoint(matrix, -tx, -ty, z);
+                    //TODO:remove
+                    if (Math.abs(point[1] - 0) < 0.1f) {
+                        int index = y * w + x;
+                        int color = pixels[index];
+                        int r = Color.red(color);
+                        int g = Color.green(color);
+                        int b = Color.blue(color);
+                        pixels[index] = Color.argb(255, b, g, r);
+                    }
+                    //TODO:make this working (it seems the roll rotation is in wrong direction)
+                    /*for (Float f : planes) {
+                        if (Math.abs(point[1] - f) < 0.1f) {
+                            int index = y * w + x;
+                            int color = pixels[index];
+                            int r = Color.red(color);
+                            int g = Color.green(color);
+                            int b = Color.blue(color);
+                            pixels[index] = Color.argb(255, b, g, r);
+                            break;
+                        }
+                    }*/
                 }
-                depth[x][y] = depthRange;
             }
         }
 
+        bitmap.setPixels(pixels, 0, w, 0, 0, w, h);
+        return bitmap;
+    }
+
+    private Bitmap getDepthPreviewSobel(float[][] depth) {
+
+        int width = depth.length;
+        int height = depth[0].length;
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         for (int y = 1; y < height - 1; y++) {
             for (int x = 1; x < width - 1; x++) {
@@ -362,5 +418,56 @@ public abstract class AbstractARCamera {
             }
         }
         return bitmap;
+    }
+
+    private float[] matrixCalculate(float[] position, float[] rotation) {
+        float[] matrix = {1, 0, 0, 0,
+                          0, 1, 0, 0,
+                          0, 0, 1, 0,
+                          0, 0, 0, 1};
+
+        double sqw = rotation[3] * rotation[3];
+        double sqx = rotation[0] * rotation[0];
+        double sqy = rotation[1] * rotation[1];
+        double sqz = rotation[2] * rotation[2];
+
+        double invs = 1 / (sqx + sqy + sqz + sqw);
+        matrix[0] = (float) ((sqx - sqy - sqz + sqw) * invs);
+        matrix[5] = (float) ((-sqx + sqy - sqz + sqw) * invs);
+        matrix[10] = (float) ((-sqx - sqy + sqz + sqw) * invs);
+
+        double tmp1 = rotation[0] * rotation[1];
+        double tmp2 = rotation[2] * rotation[3];
+        matrix[1] = (float) (2.0 * (tmp1 + tmp2) * invs);
+        matrix[4] = (float) (2.0 * (tmp1 - tmp2) * invs);
+
+        tmp1 = rotation[0] * rotation[2];
+        tmp2 = rotation[1] * rotation[3];
+        matrix[2] = (float) (2.0 * (tmp1 - tmp2) * invs);
+        matrix[8] = (float) (2.0 * (tmp1 + tmp2) * invs);
+
+        tmp1 = rotation[1] * rotation[2];
+        tmp2 = rotation[0] * rotation[3];
+        matrix[6] = (float) (2.0 * (tmp1 + tmp2) * invs);
+        matrix[9] = (float) (2.0 * (tmp1 - tmp2) * invs);
+
+        matrix[12] = position[0];
+        matrix[13] = position[1];
+        matrix[14] = position[2];
+        return matrix;
+    }
+
+    private float[] matrixTransformPoint(float[] matrix, float x, float y, float z) {
+        float[] output = {0, 0, 0, 1};
+        output[0] = x * matrix[0] + y * matrix[4] + z * matrix[8] + matrix[12];
+        output[1] = x * matrix[1] + y * matrix[5] + z * matrix[9] + matrix[13];
+        output[2] = x * matrix[2] + y * matrix[6] + z * matrix[10] + matrix[14];
+        output[3] = x * matrix[3] + y * matrix[7] + z * matrix[11] + matrix[15];
+
+        output[0] /= Math.abs(output[3]);
+        output[1] /= Math.abs(output[3]);
+        output[2] /= Math.abs(output[3]);
+        output[3] = 1;
+        return output;
     }
 }
