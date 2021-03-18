@@ -33,6 +33,7 @@ import android.util.Log;
 import android.util.Size;
 
 import com.huawei.hiar.ARCamera;
+import com.huawei.hiar.ARCameraIntrinsics;
 import com.huawei.hiar.ARConfigBase;
 import com.huawei.hiar.ARFrame;
 import com.huawei.hiar.ARPlane;
@@ -215,7 +216,7 @@ public class AREngineCamera extends AbstractARCamera {
       mSession.configure(config);
 
       // Get GPU image resolution
-      mTextureRes = mSession.getCameraConfig().GetTextureDimensions();
+      mTextureRes = mSession.getCameraConfig().getTextureDimensions();
       Log.d(TAG, "AREngine started with RGB " + mTextureRes.getWidth() + "x" + mTextureRes.getHeight());
     }
 
@@ -265,13 +266,12 @@ public class AREngineCamera extends AbstractARCamera {
       //get calibration from AREngine
       mSession.setCameraTextureName(texture);
       mSession.setDisplayGeometry(0, width, height);
-      float[] projection = new float[16];
       ARFrame frame = mSession.update();
-      frame.getCamera().getProjectionMatrix(projection, 0, 0.001f, 100);
-      mColorCameraIntrinsic[0] = Math.abs(projection[5] / 2.0f);
-      mColorCameraIntrinsic[1] = Math.abs(projection[0] / 2.0f);
-      mColorCameraIntrinsic[2] = Math.abs((1.0f - projection[9]) / 2.0f);
-      mColorCameraIntrinsic[3] = Math.abs((1.0f - projection[8]) / 2.0f);
+      ARCameraIntrinsics intrinsics = frame.getCamera().getCameraImageIntrinsics();
+      mColorCameraIntrinsic[0] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
+      mColorCameraIntrinsic[1] = intrinsics.getFocalLength()[0] / (float)intrinsics.getImageDimensions()[0];
+      mColorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[1] / (float)intrinsics.getImageDimensions()[1];
+      mColorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
       mDepthCameraIntrinsic = mColorCameraIntrinsic;
       mHasCameraCalibration = true;
 
