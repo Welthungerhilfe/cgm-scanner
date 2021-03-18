@@ -215,20 +215,17 @@ public abstract class AbstractARCamera {
             }
         }
 
-        //get lowest plane
-        float lowestPlane = Integer.MAX_VALUE;
-        for (Float f : planes) {
-            float value = f - 2.0f * position[1];
-            if (lowestPlane > value) {
-                lowestPlane = value;
-            }
-        }
-
+        float bestPlane;
+        float[] matrix;
         switch (mode) {
             case CENTER:
-                return getDepthPreviewCenter(depth, lowestPlane, calibration, matrixCalculate(position, rotation));
+                matrix = matrixCalculate(position, rotation);
+                bestPlane = getBestPlane(depth, planes, calibration, matrix, position);
+                return getDepthPreviewCenter(depth, bestPlane, calibration, matrix);
             case PLANE:
-                return getDepthPreviewPlane(depth, lowestPlane, calibration, matrixCalculate(position, rotation));
+                matrix = matrixCalculate(position, rotation);
+                bestPlane = getBestPlane(depth, planes, calibration, matrix, position);
+                return getDepthPreviewPlane(depth, bestPlane, calibration, matrix);
             case SOBEL:
                 return getDepthPreviewSobel(depth);
             default:
@@ -317,6 +314,39 @@ public abstract class AbstractARCamera {
         }
 
         return output;
+    }
+
+    private float getBestPlane(float[][] depth, ArrayList<Float> planes, float[] calibration, float[] matrix, float[] position) {
+        int w = depth.length;
+        int h = depth[0].length;
+        float fx = calibration[0] * (float)w;
+        float fy = calibration[1] * (float)h;
+        float cx = calibration[2] * (float)w;
+        float cy = calibration[3] * (float)h;
+        int bestCount = 0;
+        float bestValue = Integer.MAX_VALUE;
+        for (Float f : planes) {
+            int count = 0;
+            float value = f - 2.0f * position[1];
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    float z = depth[x][y] * 0.001f;
+                    if (z > 0) {
+                        float tx = (x - cx) * z / fx;
+                        float ty = (y - cy) * z / fy;
+                        float[] point = matrixTransformPoint(matrix, -tx, ty, z);
+                        if (Math.abs(point[1] + value) < 0.1f) {
+                            count++;
+                        }
+                    }
+                }
+            }
+            if (bestCount < count) {
+                bestCount = count;
+                bestValue = value;
+            }
+        }
+        return bestValue;
     }
 
     private Bitmap getDepthPreviewCenter(float[][] depth, float plane, float[] calibration, float[] matrix) {
