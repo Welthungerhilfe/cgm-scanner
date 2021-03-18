@@ -411,7 +411,7 @@ public abstract class AbstractARCamera {
                     float tx = (x - cx) * z / fx;
                     float ty = (y - cy) * z / fy;
                     float[] point = matrixTransformPoint(matrix, -tx, ty, z);
-                    if (Math.abs(point[1] + plane) < 0.1f) {
+                    if (-point[1] - plane < 0.1f) {
                         int index = y * w + x;
                         int color = pixels[index];
                         int r = Color.red(color);
