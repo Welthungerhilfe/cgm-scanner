@@ -16,17 +16,20 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.datasource.models;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
-/**
- * Created by Emerald on 2/19/2018.
- */
-
 public class Loc implements Serializable {
+    @SerializedName("lat")
+    @Expose
     private double latitude;
+
+    @SerializedName("lng")
+    @Expose
     private double longitude;
     private String address;
 

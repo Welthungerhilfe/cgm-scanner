@@ -1,3 +1,21 @@
+/*
+ * Child Growth Monitor - quick and accurate data on malnutrition
+ * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
+ * Copyright (c) 2018 Welthungerhilfe Innovation
+ * <p>
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p>
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.Manifest;
@@ -31,7 +49,6 @@ import androidx.annotation.NonNull;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -69,22 +86,22 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class ConsentScanActivity extends AppCompatActivity {
+public class ConsentScanActivity extends BaseActivity {
 
     /**
      * Conversion from screen rotation to JPEG orientation.
      */
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
-    private static final int REQUEST_CAMERA_PERMISSION = 1;
 
     private QRCodeReader mQrCodeReader;
     private FileLogRepository fileLogRepository;
+    SessionManager sessionManager;
 
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -489,6 +506,7 @@ public class ConsentScanActivity extends AppCompatActivity {
         super.onCreate(savedBundle);
         setContentView(R.layout.activity_consent_scan);
         ButterKnife.bind(this);
+        sessionManager = new SessionManager(this);
 
         initVariables();
     }
@@ -522,12 +540,12 @@ public class ConsentScanActivity extends AppCompatActivity {
     }
 
     private void requestCameraPermission() {
-        requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CAMERA_PERMISSION);
+        requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_CAMERA);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_CAMERA_PERMISSION) {
+        if (requestCode == PERMISSION_CAMERA) {
             if (grantResults.length != 1 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
 
             }
@@ -868,7 +886,7 @@ public class ConsentScanActivity extends AppCompatActivity {
             final long timestamp = Utils.getUniversalTimestamp();
             final String consentFileString = timestamp + "_" + qrCode  + ".png";
 
-            File extFileDir = AppController.getInstance().getRootDirectory();
+            File extFileDir = AppController.getInstance().getRootDirectory(getBaseContext());
             File consentFileFolder = new File(extFileDir, AppConstants.LOCAL_CONSENT_URL.replace("{qrcode}", qrCode).replace("{scantimestamp}", String.valueOf(timestamp)));
             File consentFile = new File(consentFileFolder, consentFileString);
             if(!consentFileFolder.exists()) {
@@ -897,6 +915,7 @@ public class ConsentScanActivity extends AppCompatActivity {
                 log.setCreateDate(Utils.getUniversalTimestamp());
                 log.setCreatedBy(new SessionManager(ConsentScanActivity.this).getUserEmail());
                 log.setSchema_version(CgmDatabase.version);
+                log.setEnvironment(sessionManager.getEnvironment());
 
                 new AsyncTask<Void, Void, Void>() {
                     @Override

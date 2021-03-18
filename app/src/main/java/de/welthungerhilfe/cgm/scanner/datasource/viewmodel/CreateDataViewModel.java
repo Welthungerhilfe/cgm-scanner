@@ -1,13 +1,34 @@
+/*
+ * Child Growth Monitor - quick and accurate data on malnutrition
+ * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
+ * Copyright (c) 2018 Welthungerhilfe Innovation
+ * <p>
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p>
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.welthungerhilfe.cgm.scanner.datasource.viewmodel;
 
 import android.annotation.SuppressLint;
-import android.app.Application;
-import androidx.lifecycle.AndroidViewModel;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
+
+import android.content.Context;
 import android.os.AsyncTask;
-import androidx.annotation.NonNull;
+import android.util.Log;
+
+import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
@@ -15,26 +36,29 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 
-public class CreateDataViewModel extends AndroidViewModel {
+
+public class CreateDataViewModel extends ViewModel {
 
     private LiveData<Person> personLiveData;
     private LiveData<List<Measure>> measuresLiveData;
     private LiveData<Measure> lastMeasureLiveData;
 
-    private MutableLiveData<Integer> tabLiveData;
+    private MutableLiveData<Integer> tabLiveData = new MutableLiveData<>(0);
+
+    private Context context;
 
     private PersonRepository personRepository;
     private MeasureRepository measureRepository;
 
-    public CreateDataViewModel(@NonNull Application application) {
-        super(application);
+    String TAG = CreateDataViewModel.class.getSimpleName();
 
-        personRepository = PersonRepository.getInstance(application);
-        measureRepository = MeasureRepository.getInstance(application);
+    public CreateDataViewModel(Context context) {
+        this.context = context;
 
-        tabLiveData = new MutableLiveData<>();
-        tabLiveData.setValue(0);
+        personRepository = PersonRepository.getInstance(context);
+        measureRepository = MeasureRepository.getInstance(context);
     }
 
     public LiveData<Integer> getCurrentTab() {
@@ -47,6 +71,7 @@ public class CreateDataViewModel extends AndroidViewModel {
 
     public LiveData<Person> getPersonLiveData(String qrCode) {
         personLiveData = personRepository.getPerson(qrCode);
+        Log.i(TAG, "this is value of person livedata " + personLiveData.getValue());
 
         return personLiveData;
     }
@@ -92,8 +117,8 @@ public class CreateDataViewModel extends AndroidViewModel {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                personRepository.insertPerson(person);
 
+                personRepository.insertPerson(person);
                 return null;
             }
 
@@ -109,6 +134,10 @@ public class CreateDataViewModel extends AndroidViewModel {
             @Override
             protected Void doInBackground(Void... voids) {
                 measureRepository.insertMeasure(measure);
+
+                Context appContext = context.getApplicationContext();
+                SyncingWorkManager.startSyncingWithWorkManager(appContext);
+
                 return null;
             }
 

@@ -16,60 +16,78 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
-import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.Uri;
+
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.webkit.WebChromeClient;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RadioButton;
 import android.widget.Toast;
-
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.JWTParser;
-
-import net.minidev.json.JSONArray;
-
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
-import java.text.ParseException;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.helper.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
+import de.welthungerhilfe.cgm.scanner.utils.LanguageHelper;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 
-public class LoginActivity extends AccountAuthenticatorActivity {
+public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback {
 
-    @BindView(R.id.loginView)
-    WebView webView;
+    private static final String TAG = LoginActivity.class.getSimpleName();
 
     @OnClick({R.id.btnLoginMicrosoft})
     void doSignIn() {
-        doSignInAction();
+        if (BuildConfig.DEBUG) {
+            if (session.getEnvironment() == AppConstants.ENV_UNKNOWN) {
+                Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
+                return;
+            }
+            session.setSigned(true);
+            startApp();
+        } else {
+            if (session.getEnvironment() != AppConstants.ENV_UNKNOWN) {
+                Log.d(TAG, "Login into " + SyncingWorkManager.getAPI());
+                layout_login.setVisibility(View.GONE);
+                progressBar.setVisibility(View.VISIBLE);
+                new AuthenticationHandler(this, this, () -> runOnUiThread(() -> {
+                    layout_login.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.GONE);
+                }));
+            } else {
+                Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private SessionManager session;
-    private AccountManager accountManager;
+
+    @BindView(R.id.rb_sandbox)
+    RadioButton rb_sandbox;
+
+    @BindView(R.id.layout_login)
+    LinearLayout layout_login;
+
+    @BindView(R.id.login_progressbar)
+    ProgressBar progressBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,9 +98,18 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         ButterKnife.bind(this);
 
-        accountManager = AccountManager.get(this);
         session = new SessionManager(this);
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            String version = pInfo.versionName;
+            if (version.contains("dev")) {
+                rb_sandbox.setVisibility(View.VISIBLE);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
+
 
     @Override
     public void onStart() {
@@ -94,175 +121,81 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         }
 
         if (session.isSigned()) {
-            Account[] accounts = accountManager.getAccountsByType(AppConstants.ACCOUNT_TYPE);
-            if (accounts.length > 0) {
-                if(!ContentResolver.isSyncActive(accounts[0], getString(R.string.sync_authority))) {
-                    session.setSyncTimestamp(0);
-                    SyncAdapter.startPeriodicSync(accounts[0], getApplicationContext());
-                }
-            } else {
-                session.setSyncTimestamp(0);
-
-                try {
-                    JWT parsedToken = JWTParser.parse(session.getAuthToken());
-                    Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
-
-                    JSONArray emails = (JSONArray) claims.get("emails");
-                    if (emails != null && !emails.isEmpty()) {
-                        String token = (String) claims.get("at_hash");
-                        String firstEmail = emails.get(0).toString();
-
-                        final Account account = new Account(firstEmail, AppConstants.ACCOUNT_TYPE);
-
-                        accountManager.addAccountExplicitly(account, token, null);
-
-                        SyncAdapter.startPeriodicSync(account, getApplicationContext());
-
-                        final Intent intent = new Intent();
-                        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, firstEmail);
-                        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
-                        intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
-
-                        setAccountAuthenticatorResult(intent.getExtras());
-                        setResult(RESULT_OK, intent);
-                    }
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            if (session.getTutorial())
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-            else
-                startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
-            finish();
+            startApp();
         }
     }
 
-    private void doSignInAction() {
-        if (BuildConfig.DEBUG) {
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-            return;
-        }
+    private void startApp() {
+        layout_login.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
 
-        String tenant = "{B2C_TENANT}";
-        String clientID = "{B2C_CLIENT_ID}";
-        String responseURL = "{B2C_RESPONSE_URL}";
-        String scope = "{B2C_SCOPE}";
-
-        String url = "https://whhict4x.b2clogin.com/whhict4x.onmicrosoft.com/oauth2/v2.0/";
-        url += "authorize?p=B2C_1_signupsignin1&client_id=" + clientID;
-        url += "&nonce=defaultNonce&redirect_uri=" + responseURL;
-        url += "&scope=https://" + tenant + ".onmicrosoft.com/" + clientID + "/" + scope;
-        url += "&response_type=token&prompt=login&response_mode=query";
-        url += "&authorization_user_agent=WEBVIEW";
-
-        webView.setWebChromeClient(new WebChromeClient());
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageFinished(WebView view, String stringUrl) {
-                if (stringUrl.startsWith(responseURL)) {
-                    try {
-                        String error = Uri.parse(stringUrl).getQueryParameter("error");
-                        if ((error == null) || (error.length() == 0)) {
-                            String authToken = Uri.parse(stringUrl).getQueryParameter("access_token");
-                            if (processToken(authToken)) {
-                                webView.loadUrl("about:blank");
-                                return;
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Toast.makeText(LoginActivity.this, R.string.error_login, Toast.LENGTH_LONG).show();
-                    }
-                    webView.loadUrl("about:blank");
-                    webView.setVisibility(View.GONE);
-                }
-            }
-        });
-
-        if (isConnected()) {
-            webView.getSettings().setJavaScriptEnabled(true);
-            webView.setVisibility(View.VISIBLE);
-            webView.loadUrl(url);
-        } else {
-            Toast.makeText(LoginActivity.this, R.string.error_network, Toast.LENGTH_LONG).show();
-        }
+        new Thread(() -> {
+            AppController.getInstance().getRootDirectory(getApplicationContext());
+            runOnUiThread(() -> {
+                if (session.getTutorial())
+                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                else
+                    startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
+                finish();
+            });
+        }).start();
     }
 
-    private boolean isConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+    public void processAuth(String email, String token, boolean feedback) {
 
-        if (null != cm) {
-            NetworkInfo info = cm.getActiveNetworkInfo();
-            return (info != null && info.isConnected());
-        }
-        return false;
-    }
-
-    private boolean processToken(String idToken) {
         try {
-            JWT parsedToken = JWTParser.parse(idToken);
-            Map<String, Object> claims = parsedToken.getJWTClaimsSet().getClaims();
+            if (email != null && !email.isEmpty()) {
 
-            String azureAccountName = (String) claims.get("extension_azure_account_name");
-            String azureAccountKey = (String) claims.get("extension_azure_account_key");
-            if (azureAccountName != null && !azureAccountName.equals("") && azureAccountKey != null && !azureAccountKey.equals("")) {
-                JSONArray emails = (JSONArray) claims.get("emails");
-                if (emails != null && !emails.isEmpty()) {
-                    try {
-                        CloudStorageAccount.parse(String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", azureAccountName, azureAccountKey));
+                //update session
+                session.setAuthToken(token);
+                session.saveRemoteConfig(new RemoteConfig());
+                session.setSigned(true);
+                session.setUserEmail(email);
+                Log.d(TAG, "Token for " + SyncingWorkManager.getAPI() + " set");
 
-                        session.setAzureAccountName(azureAccountName);
-                        session.setAzureAccountKey(azureAccountKey);
+                //update account manager
+                final Intent intent = new Intent();
+                intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, email);
+                intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
+                intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
+                setAccountAuthenticatorResult(intent.getExtras());
+                setResult(RESULT_OK, intent);
 
-                        session.setAuthToken(idToken);
+                //start the app
+                SyncAdapter.getInstance(getApplicationContext()).resetRetrofit();
+                UploadService.resetRetrofit();
+                startApp();
 
-                        String token = (String) claims.get("at_hash");
-                        String firstEmail = emails.get(0).toString();
-
-                        final Account account = new Account(firstEmail, AppConstants.ACCOUNT_TYPE);
-                        accountManager.addAccountExplicitly(account, token, null);
-
-                        SyncAdapter.startPeriodicSync(account, getApplicationContext());
-
-                        final Intent intent = new Intent();
-                        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, firstEmail);
-                        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AppConstants.ACCOUNT_TYPE);
-                        intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
-
-                        setAccountAuthenticatorResult(intent.getExtras());
-                        setResult(RESULT_OK, intent);
-
-
-                        session.saveRemoteConfig(new RemoteConfig());
-                        session.setSigned(true);
-                        session.setUserEmail(firstEmail);
-
-                        if (session.getTutorial())
-                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                        else
-                            startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
-
-                        finish();
-                        return true;
-                    } catch (URISyntaxException | InvalidKeyException e) {
-                        e.printStackTrace();
-
-                        Toast.makeText(this, R.string.login_error_nobackend, Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(LoginActivity.this, R.string.login_error_invalid, Toast.LENGTH_LONG).show();
-                }
-            } else {
-                Toast.makeText(this, R.string.login_error_backend, Toast.LENGTH_LONG).show();
+            } else if (feedback) {
+                Toast.makeText(LoginActivity.this, R.string.login_error_invalid, Toast.LENGTH_LONG).show();
             }
-        } catch (ParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
 
-            Toast.makeText(LoginActivity.this, R.string.login_error_parse, Toast.LENGTH_LONG).show();
+            if (feedback) {
+                Toast.makeText(LoginActivity.this, R.string.login_error_parse, Toast.LENGTH_LONG).show();
+            }
         }
+    }
 
-        return false;
+    @OnCheckedChanged({R.id.rb_prod_darshna, R.id.rb_prod_aah, R.id.rb_prod_namibia, R.id.rb_demo_qa, R.id.rb_sandbox})
+    public void onRadioButtonCheckChanged(CompoundButton button, boolean checked) {
+        if (checked) {
+            switch (button.getId()) {
+                case R.id.rb_prod_aah:
+                case R.id.rb_prod_darshna:
+                    session.setEnvironment(AppConstants.ENV_IN_BMZ);
+                    break;
+                case R.id.rb_prod_namibia:
+                    session.setEnvironment(AppConstants.ENV_NAMIBIA);
+                    break;
+                case R.id.rb_demo_qa:
+                    session.setEnvironment(AppConstants.ENV_DEMO_QA);
+                    break;
+                case R.id.rb_sandbox:
+                    session.setEnvironment(AppConstants.ENV_SANDBOX);
+                    break;
+            }
+        }
     }
 }

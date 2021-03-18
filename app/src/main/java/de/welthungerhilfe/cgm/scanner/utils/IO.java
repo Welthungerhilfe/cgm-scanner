@@ -1,3 +1,21 @@
+/*
+ * Child Growth Monitor - quick and accurate data on malnutrition
+ * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
+ * Copyright (c) 2018 Welthungerhilfe Innovation
+ * <p>
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p>
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.welthungerhilfe.cgm.scanner.utils;
 
 import android.app.Activity;
@@ -12,6 +30,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -19,17 +38,99 @@ import java.util.zip.ZipOutputStream;
 
 public class IO {
 
+    private static final String TAG = IO.class.getName();
+
     private static final int BUFFER = 80000;
 
-    public static void deleteDirectory(File dir) {
-        if (dir.exists()) {
-            for (File file : dir.listFiles()) {
-                if (file.isDirectory()) {
-                    deleteDirectory(dir);
-                }
-                file.delete();
+    public static void copyFile(String inputPath, String outputPath) {
+        try {
+            //create output directory if it doesn't exist
+            File dir = new File(outputPath).getParentFile();
+            if (!dir.exists()) {
+                dir.mkdirs();
             }
-            dir.delete();
+
+            InputStream in = new FileInputStream(inputPath);
+            OutputStream out = new FileOutputStream(outputPath);
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            in.close();
+
+            // write the output file (You have now copied the file)
+            out.flush();
+            out.close();
+            Log.d(TAG, inputPath + " copied to " + outputPath);
+
+        } catch (Exception e) {
+            Log.e(TAG, inputPath + " copying to " + outputPath + " failed");
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
+    public static void delete(File f) {
+        if (f.exists()) {
+            if (f.isDirectory()) {
+                File[] files = f.listFiles();
+                if ((files != null) && (files.length > 0)) {
+                    for (File file : files) {
+                        if (file.isDirectory()) {
+                            delete(f);
+                        }
+                        if (file.delete()) {
+                            Log.d(TAG, file.getAbsolutePath() + " deleted");
+                        } else {
+                            Log.e(TAG, file.getAbsolutePath() + " deleting failed");
+                        }
+                    }
+                }
+            }
+            if (f.delete()) {
+                Log.d(TAG, f.getAbsolutePath() + " deleted");
+            } else {
+                Log.e(TAG, f.getAbsolutePath() + " deleting failed");
+            }
+        }
+    }
+
+    public static void move(File source, File destination) {
+        if (source.exists()) {
+
+            //ensure the parent directory exists
+            File dir = destination.getParentFile();
+            if (!dir.exists()) {
+                if (dir.mkdirs()) {
+                    Log.d(TAG, dir.getAbsolutePath() + " created");
+                } else {
+                    Log.e(TAG, dir.getAbsolutePath() + " creation failed");
+                }
+            }
+
+            //move directory
+            if (source.isDirectory()) {
+                if (!source.renameTo(destination)) {
+                    File[] files = source.listFiles();
+                    if ((files != null) && (files.length > 0)) {
+                        for (File f : files) {
+                            move(f, new File(destination, f.getName()));
+                        }
+                    }
+                    delete(source);
+                } else {
+                    Log.d(TAG, source.getAbsolutePath() + " moved to " + destination.getAbsolutePath());
+                }
+            }
+
+            //move file
+            else if (!source.renameTo(destination)) {
+                copyFile(source.getAbsolutePath(), destination.getAbsolutePath());
+                delete(source);
+            } else {
+                Log.d(TAG, source.getAbsolutePath() + " moved to " + destination.getAbsolutePath());
+            }
         }
     }
 

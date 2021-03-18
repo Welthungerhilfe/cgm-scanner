@@ -1,3 +1,21 @@
+/*
+ * Child Growth Monitor - quick and accurate data on malnutrition
+ * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
+ * Copyright (c) 2018 Welthungerhilfe Innovation
+ * <p>
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p>
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.Manifest;
@@ -15,12 +33,15 @@ import android.media.Image;
 import android.media.MediaActionSound;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,7 +55,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.ar.core.Pose;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
@@ -45,6 +65,7 @@ import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -55,37 +76,31 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
-import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
-import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
+import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreCamera;
-import de.welthungerhilfe.cgm.scanner.helper.camera.AREngineCamera;
-import de.welthungerhilfe.cgm.scanner.helper.camera.CameraCalibration;
-import de.welthungerhilfe.cgm.scanner.helper.camera.ICamera;
-import de.welthungerhilfe.cgm.scanner.helper.camera.TangoCamera;
-import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
-import de.welthungerhilfe.cgm.scanner.helper.camera.ARCoreUtils;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.camera.ARCoreCamera;
+import de.welthungerhilfe.cgm.scanner.camera.AREngineCamera;
+import de.welthungerhilfe.cgm.scanner.camera.AbstractARCamera;
+import de.welthungerhilfe.cgm.scanner.camera.TangoCamera;
+import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
-import de.welthungerhilfe.cgm.scanner.helper.camera.TangoUtils;
+import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class ScanModeActivity extends AppCompatActivity implements View.OnClickListener, ARCoreUtils.Camera2DataListener, TangoCamera.TangoCameraListener {
-    private final int PERMISSION_LOCATION = 0x0001;
-    private final int PERMISSION_CAMERA = 0x0002;
-    private final int PERMISSION_STORAGE = 0x0003;
+public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, TangoCamera.TangoCameraListener, ScanTypeView.ScanTypeListener {
 
-    public static final String KEY_MEASURE = "KEY_MEASURE";
-    public static final String SUBFIX_COUNT = "_COUNT";
+    private enum ArtifactType { CALIBRATION, DEPTH, RGB };
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -103,28 +118,8 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     @BindView(R.id.txtScanLying)
     TextView txtScanLying;
 
-    @BindView(R.id.imgScanStep1)
-    ImageView imgScanStep1;
-    @BindView(R.id.imgScanStep2)
-    ImageView imgScanStep2;
-    @BindView(R.id.imgScanStep3)
-    ImageView imgScanStep3;
-
-    @BindView(R.id.btnScanStep1)
-    Button btnScanStep1;
-    @BindView(R.id.btnScanStep2)
-    Button btnScanStep2;
-    @BindView(R.id.btnScanStep3)
-    Button btnScanStep3;
     @BindView(R.id.btnScanComplete)
     Button btnScanComplete;
-
-    @BindView(R.id.lytScanStep1)
-    LinearLayout lytScanStep1;
-    @BindView(R.id.lytScanStep2)
-    LinearLayout lytScanStep2;
-    @BindView(R.id.lytScanStep3)
-    LinearLayout lytScanStep3;
 
     @BindView(R.id.lytSelectMode)
     LinearLayout lytSelectMode;
@@ -134,40 +129,12 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     @BindView(R.id.lytScanner)
     LinearLayout lytScanner;
 
-    @BindView(R.id.imgScanSuccess1)
-    ImageView imgScanSuccess1;
-    @BindView(R.id.imgScanSuccess2)
-    ImageView imgScanSuccess2;
-    @BindView(R.id.imgScanSuccess3)
-    ImageView imgScanSuccess3;
-
-    @BindView(R.id.txtScanStep1)
-    TextView txtScanStep1;
-    @BindView(R.id.txtScanStep2)
-    TextView txtScanStep2;
-    @BindView(R.id.txtScanStep3)
-    TextView txtScanStep3;
-
-    @BindView(R.id.lytScanAgain1)
-    LinearLayout lytScanAgain1;
-    @BindView(R.id.lytScanAgain2)
-    LinearLayout lytScanAgain2;
-    @BindView(R.id.lytScanAgain3)
-    LinearLayout lytScanAgain3;
-
-    @BindView(R.id.btnRetake1)
-    Button btnRetake1;
-    @BindView(R.id.btnRetake2)
-    Button btnRetake2;
-    @BindView(R.id.btnRetake3)
-    Button btnRetake3;
-
-    @BindView(R.id.btnTutorial1)
-    Button btnTutorial1;
-    @BindView(R.id.btnTutorial2)
-    Button btnTutorial2;
-    @BindView(R.id.btnTutorial3)
-    Button btnTutorial3;
+    @BindView(R.id.scanType1)
+    ScanTypeView scanType1;
+    @BindView(R.id.scanType2)
+    ScanTypeView scanType2;
+    @BindView(R.id.scanType3)
+    ScanTypeView scanType3;
 
     @OnClick(R.id.lytScanStanding)
     void scanStanding() {
@@ -183,6 +150,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         changeMode();
     }
+
     @OnClick(R.id.lytScanLying)
     void scanLying() {
         SCAN_MODE = AppConstants.SCAN_LYING;
@@ -197,63 +165,50 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         changeMode();
     }
-    @SuppressLint("SetTextI18n")
-    @OnClick({R.id.btnScanStep1, R.id.btnRetake1})
-    void scanStep1() {
+
+    @Override
+    public void onScan(int buttonId) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
         } else {
             if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-                SCAN_STEP = AppConstants.SCAN_STANDING_FRONT;
 
-                mTitleView.setText(getString(R.string.front_scan) + " - " + getString(R.string.mode_standing));
+                switch (buttonId) {
+                    case 1:
+                        SCAN_STEP = AppConstants.SCAN_STANDING_FRONT;
+                        mTitleView.setText(getString(R.string.front_scan) + " - " + getString(R.string.mode_standing));
+                        break;
+                    case 2:
+                        SCAN_STEP = AppConstants.SCAN_STANDING_SIDE;
+                        mTitleView.setText(getString(R.string.side_scan) + " - " + getString(R.string.mode_standing));
+                        break;
+                    case 3:
+                        SCAN_STEP = AppConstants.SCAN_STANDING_BACK;
+                        mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_standing));
+                        break;
+                }
             } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
-                SCAN_STEP = AppConstants.SCAN_LYING_FRONT;
-
-                mTitleView.setText(getString(R.string.front_scan) + " - " + getString(R.string.mode_lying));
-            }
-            openScan();
-        }
-    }
-    @SuppressLint("SetTextI18n")
-    @OnClick({R.id.btnScanStep2, R.id.btnRetake2})
-    void scanStep2() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
-        } else {
-            if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-                SCAN_STEP = AppConstants.SCAN_STANDING_SIDE;
-
-                mTitleView.setText(getString(R.string.side_scan) + " - " + getString(R.string.mode_standing));
-            } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
-                SCAN_STEP = AppConstants.SCAN_LYING_SIDE;
-
-                mTitleView.setText(getString(R.string.side_scan) + " - " + getString(R.string.mode_lying));
-            }
-            openScan();
-        }
-    }
-    @SuppressLint("SetTextI18n")
-    @OnClick({R.id.btnScanStep3, R.id.btnRetake3})
-    void scanStep3() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
-        } else {
-            if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-                SCAN_STEP = AppConstants.SCAN_STANDING_BACK;
-
-                mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_standing));
-            } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
-                SCAN_STEP = AppConstants.SCAN_LYING_BACK;
-
-                mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_lying));
+                switch (buttonId) {
+                    case 1:
+                        SCAN_STEP = AppConstants.SCAN_LYING_FRONT;
+                        mTitleView.setText(getString(R.string.front_scan) + " - " + getString(R.string.mode_lying));
+                        break;
+                    case 2:
+                        SCAN_STEP = AppConstants.SCAN_LYING_SIDE;
+                        mTitleView.setText(getString(R.string.side_scan) + " - " + getString(R.string.mode_lying));
+                        break;
+                    case 3:
+                        SCAN_STEP = AppConstants.SCAN_LYING_BACK;
+                        mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_lying));
+                        break;
+                }
             }
             openScan();
         }
     }
 
-    @OnClick({R.id.btnTutorial1, R.id.btnTutorial2, R.id.btnTutorial3})
-    void showTutorial() {
+    @Override
+    public void onTutorial() {
         Intent intent = new Intent(ScanModeActivity.this, TutorialActivity.class);
         intent.putExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, true);
         startActivity(intent);
@@ -271,7 +226,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         measure.setMuac(0.0f);
         measure.setOedema(false);
         measure.setPersonId(person.getId());
-        measure.setTimestamp(Utils.getUniversalTimestamp());
+        measure.setTimestamp(mNowTime);
         measure.setQrCode(person.getQrcode());
         measure.setSchema_version(CgmDatabase.version);
         measure.setScannedBy(session.getDevice());
@@ -300,8 +255,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private MeasureRepository measureRepository;
     private FileLogRepository fileLogRepository;
-    private ArtifactResultRepository artifactResultRepository;
-    private ArrayList<ArtifactResult> artifacts;
+    private HashMap<Integer, ArrayList<Float>> lightScores;
     private ArrayList<FileLog> files;
     private final Object lock = new Object();
 
@@ -338,7 +292,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     private int threadsCount = 0;
     private final Object threadsLock = new Object();
 
-    private ICamera mCameraInstance;
+    private AbstractARCamera mCameraInstance;
 
     public void onStart() {
         super.onStart();
@@ -377,7 +331,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         executor = Executors.newFixedThreadPool(20);
 
-        mNowTime = System.currentTimeMillis();
+        mNowTime = Utils.getUniversalTimestamp();
         mNowTimeString = String.valueOf(mNowTime);
 
         session = new SessionManager(this);
@@ -392,6 +346,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
             measure.setAge(age);
             measure.setDate(System.currentTimeMillis());
             measure.setArtifact_synced(false);
+            measure.setEnvironment(session.getEnvironment());
         }
 
         setContentView(R.layout.activity_scan_mode);
@@ -406,12 +361,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
         findViewById(R.id.imgClose).setOnClickListener(this);
 
-        getCamera().onCreate();
+        getCamera().onCreate(R.id.colorCameraPreview, R.id.depthCameraPreview, R.id.surfaceview);
 
         measureRepository = MeasureRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
-        artifactResultRepository = ArtifactResultRepository.getInstance(this);
-        artifacts = new ArrayList<>();
+        lightScores = new HashMap<>();
         files = new ArrayList<>();
 
         setupToolbar();
@@ -428,6 +382,10 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
         }
+
+        scanType1.setListener(1, this);
+        scanType2.setListener(2, this);
+        scanType3.setListener(3, this);
     }
 
     @Override
@@ -459,48 +417,48 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void setupScanArtifacts() {
-        File extFileDir = AppController.getInstance().getRootDirectory();
+        File extFileDir = AppController.getInstance().getRootDirectory(this);
 
         Log.e("Root Directory", extFileDir.getParent());
-        mScanArtefactsOutputFolder = new File(extFileDir,person.getQrcode() + "/measurements/" + mNowTimeString + "/");
-        mDepthmapSaveFolder = new File(mScanArtefactsOutputFolder,"depth");
-        mRgbSaveFolder = new File(mScanArtefactsOutputFolder,"rgb");
+        mScanArtefactsOutputFolder = new File(extFileDir, person.getQrcode() + "/measurements/" + mNowTimeString + "/");
+        mDepthmapSaveFolder = new File(mScanArtefactsOutputFolder, "depth");
+        mRgbSaveFolder = new File(mScanArtefactsOutputFolder, "rgb");
 
-        if(!mDepthmapSaveFolder.exists()) {
+        if (!mDepthmapSaveFolder.exists()) {
             boolean created = mDepthmapSaveFolder.mkdirs();
             if (created) {
                 Log.i(TAG, "Folder: \"" + mDepthmapSaveFolder + "\" created\n");
             } else {
-                Log.e(TAG,"Folder: \"" + mDepthmapSaveFolder + "\" could not be created!\n");
+                Log.e(TAG, "Folder: \"" + mDepthmapSaveFolder + "\" could not be created!\n");
             }
         }
 
-        if(!mRgbSaveFolder.exists()) {
+        if (!mRgbSaveFolder.exists()) {
             boolean created = mRgbSaveFolder.mkdirs();
             if (created) {
                 Log.i(TAG, "Folder: \"" + mRgbSaveFolder + "\" created\n");
             } else {
-                Log.e(TAG,"Folder: \"" + mRgbSaveFolder + "\" could not be created!\n");
+                Log.e(TAG, "Folder: \"" + mRgbSaveFolder + "\" could not be created!\n");
             }
         }
 
-        Log.v(TAG,"mDepthmapSaveFolder: "+mDepthmapSaveFolder);
-        Log.v(TAG,"mRgbSaveFolder: "+mRgbSaveFolder);
+        Log.v(TAG, "mDepthmapSaveFolder: " + mDepthmapSaveFolder);
+        Log.v(TAG, "mRgbSaveFolder: " + mRgbSaveFolder);
     }
 
     private void updateScanningProgress() {
         float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 24 : 8);
         float progressToAddFloat = 100.0f / cloudsToFinishScan;
         int progressToAdd = (int) progressToAddFloat;
-        Log.d(TAG, progressToAddFloat+" currentProgress: "+mProgress+" progressToAdd: "+progressToAdd);
-        if (mProgress+progressToAdd > 100) {
+        Log.d(TAG, progressToAddFloat + " currentProgress: " + mProgress + " progressToAdd: " + progressToAdd);
+        if (mProgress + progressToAdd > 100) {
             mProgress = 100;
             runOnUiThread(() -> {
                 fab.setImageResource(R.drawable.done);
                 goToNextStep();
             });
         } else {
-            mProgress = mProgress+progressToAdd;
+            mProgress = mProgress + progressToAdd;
         }
 
         Log.d("scan_progress", String.valueOf(mProgress));
@@ -510,13 +468,13 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
     private void changeMode() {
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-            imgScanStep1.setImageResource(R.drawable.stand_front_active);
-            imgScanStep2.setImageResource(R.drawable.stand_side_active);
-            imgScanStep3.setImageResource(R.drawable.stand_back_active);
+            scanType1.setChildIcon(R.drawable.stand_front_active);
+            scanType2.setChildIcon(R.drawable.stand_side_active);
+            scanType3.setChildIcon(R.drawable.stand_back_active);
         } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
-            imgScanStep1.setImageResource(R.drawable.lying_front_active);
-            imgScanStep2.setImageResource(R.drawable.lying_side_active);
-            imgScanStep3.setImageResource(R.drawable.lying_back_active);
+            scanType1.setChildIcon(R.drawable.lying_front_active);
+            scanType2.setChildIcon(R.drawable.lying_side_active);
+            scanType3.setChildIcon(R.drawable.lying_back_active);
         }
     }
 
@@ -524,11 +482,11 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         closeScan();
 
         if (SCAN_STEP == AppConstants.SCAN_STANDING_FRONT || SCAN_STEP == AppConstants.SCAN_LYING_FRONT) {
-            btnScanStep1.setVisibility(View.GONE);
+            scanType1.goToNextStep();
         } else if (SCAN_STEP == AppConstants.SCAN_STANDING_SIDE || SCAN_STEP == AppConstants.SCAN_LYING_SIDE) {
-            btnScanStep2.setVisibility(View.GONE);
+            scanType2.goToNextStep();
         } else if (SCAN_STEP == AppConstants.SCAN_STANDING_BACK || SCAN_STEP == AppConstants.SCAN_LYING_BACK) {
-            btnScanStep3.setVisibility(View.GONE);
+            scanType3.goToNextStep();
         }
         getScanQuality(SCAN_STEP);
     }
@@ -584,28 +542,29 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
     @SuppressLint("StaticFieldLeak")
     private void getScanQuality(int scanStep) {
         new AsyncTask<Void, Void, Boolean>() {
-            private double averagePointCount = 0;
-            private int pointCloudCount = 0;
+            private double lightScore = 0;
 
             @Override
             protected Boolean doInBackground(Void... voids) {
                 synchronized (lock) {
-                    for (ArtifactResult ar : artifacts) {
-                        if (ar.getKey() == SCAN_STEP) {
-                            averagePointCount += ar.getReal();
-                            pointCloudCount++;
+                    //get average light score
+                    if (lightScores.containsKey(SCAN_STEP)) {
+                        for (Float value : lightScores.get(SCAN_STEP)) {
+                            lightScore += value;
                         }
+                        lightScore /= (float)lightScores.get(SCAN_STEP).size();
+                    }
+
+                    //too bright values are not over 100%
+                    if (lightScore > 1) {
+                        lightScore = 1.0f - (lightScore - 1.0f);
                     }
                 }
-                averagePointCount /= Math.max(pointCloudCount, 1);
                 return true;
             }
 
             @SuppressLint("DefaultLocale")
             public void onPostExecute(Boolean results) {
-                double lightScore = (Math.abs(averagePointCount / 38000 - 1.0) * 3);
-
-                if (lightScore > 1) lightScore -= 1;
 
                 Log.e("ScanQuality", String.valueOf(lightScore));
 
@@ -613,30 +572,14 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                 issues = String.format("%s\n - " + getString(R.string.score_light) + "%d%%", issues, Math.round(lightScore * 100));
 
                 if (scanStep == AppConstants.SCAN_STANDING_FRONT || scanStep == AppConstants.SCAN_LYING_FRONT) {
-                    btnScanStep1.setVisibility(View.GONE);
-
-                    txtScanStep1.setText(issues);
-                    imgScanStep1.setVisibility(View.GONE);
-                    lytScanAgain1.setVisibility(View.VISIBLE);
-
+                    scanType1.finishStep(issues);
                     step1 = true;
-
                 } else if (scanStep == AppConstants.SCAN_STANDING_SIDE || scanStep == AppConstants.SCAN_LYING_SIDE) {
-                    btnScanStep2.setVisibility(View.GONE);
-
-                    txtScanStep2.setText(issues);
-                    imgScanStep2.setVisibility(View.GONE);
-                    lytScanAgain2.setVisibility(View.VISIBLE);
-
+                    scanType2.finishStep(issues);
                     step2 = true;
 
                 } else if (scanStep == AppConstants.SCAN_STANDING_BACK || scanStep == AppConstants.SCAN_LYING_BACK) {
-                    btnScanStep3.setVisibility(View.GONE);
-
-                    txtScanStep3.setText(issues);
-                    imgScanStep3.setVisibility(View.GONE);
-                    lytScanAgain3.setVisibility(View.VISIBLE);
-
+                    scanType3.finishStep(issues);
                     step3 = true;
                 }
 
@@ -651,7 +594,7 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, PERMISSION_LOCATION);
         } else {
-            LocationManager lm = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+            LocationManager lm = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
             boolean isGPSEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
             boolean isNetworkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -754,35 +697,19 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
 
             //save metadata into DB
             synchronized (lock) {
-                for (ArtifactResult ar : artifacts) {
-                    artifactResultRepository.insertArtifactResult(ar);
-                }
                 for (FileLog log : files) {
                     fileLogRepository.insertFileLog(log);
                 }
                 measureRepository.insertMeasure(measure);
             }
 
-            //upload metadata if possible
-            Context context = ScanModeActivity.this;
-            if (Utils.isUploadAllowed(context)) {
-
-                //start upload service
-                runOnUiThread(() -> {
-                    if (!AppController.getInstance().isUploadRunning()) {
-                        startService(new Intent(getApplicationContext(), UploadService.class));
-                    }
-                });
-
-                //add metadata into DB
-                measureRepository.uploadMeasure(context, measure);
-                return null;
-            }
-
-            //upload metadata later
-            long measureCount = LocalPersistency.getLong(context, KEY_MEASURE + SUBFIX_COUNT);
-            LocalPersistency.setString(context, KEY_MEASURE + measureCount, measure.getId());
-            LocalPersistency.setLong(context, KEY_MEASURE + SUBFIX_COUNT, measureCount + 1);
+            runOnUiThread(() -> {
+                if (!UploadService.isInitialized()) {
+                    startService(new Intent(getApplicationContext(), UploadService.class));
+                } else {
+                    UploadService.forceResume();
+                }
+            });
             return null;
         }
 
@@ -796,14 +723,16 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
-    private ICamera getCamera() {
+    private AbstractARCamera getCamera() {
         if (mCameraInstance == null) {
+            boolean showDepth = LocalPersistency.getBoolean(this, SettingsActivity.KEY_SHOW_DEPTH);
+
             if (TangoUtils.isTangoSupported()) {
                 mCameraInstance = new TangoCamera(this);
-            } else if (ARCoreUtils.shouldUseAREngine()) {
-                mCameraInstance = new AREngineCamera(this);
+            } else if (AREngineCamera.shouldUseAREngine()) {
+                mCameraInstance = new AREngineCamera(this, showDepth);
             } else {
-                mCameraInstance = new ARCoreCamera(this);
+                mCameraInstance = new ARCoreCamera(this, showDepth);
             }
         }
         return mCameraInstance;
@@ -814,71 +743,178 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             long profile = System.currentTimeMillis();
-            CameraCalibration calibration = mCameraInstance.getCalibration();
+            boolean hasCameraCalibration = mCameraInstance.hasCameraCalibration();
+            String cameraCalibration = mCameraInstance.getCameraCalibration();
+
+            Runnable thread = () -> {
+                try {
+
+                    //write RGB data
+                    String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
+                    currentImgFilename = currentImgFilename.replace('/', '_');
+                    File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
+                    BitmapUtils.writeBitmapToFile(bitmap, artifactFile);
+                    onProcessArtifact(artifactFile, ArtifactType.RGB);
+
+                    //save RGB metadata
+                    if (artifactFile.exists()) {
+                        mColorSize += artifactFile.length();
+                        mColorTime += System.currentTimeMillis() - profile;
+                        if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
+                            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_SIZE, mColorSize);
+                            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, mColorTime);
+                        }
+                    }
+
+                    //save calibration data
+                    artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
+                    if (!artifactFile.exists()) {
+                        if (hasCameraCalibration) {
+                            try {
+                                FileOutputStream fileOutputStream = new FileOutputStream(artifactFile.getAbsolutePath());
+                                fileOutputStream.write(cameraCalibration.getBytes());
+                                fileOutputStream.flush();
+                                fileOutputStream.close();
+                                onProcessArtifact(artifactFile, ArtifactType.CALIBRATION);
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                onThreadChange(-1);
+            };
+            onThreadChange(1);
+            executor.execute(thread);
+        }
+    }
+
+    @Override
+    public void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex) {
+
+        onLightUpdate(getCamera().getLightConditionState());
+
+        if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
+
+            long profile = System.currentTimeMillis();
+            Depthmap depthmap = getCamera().extractDepthmap(image, position, rotation, mCameraInstance instanceof AREngineCamera);
+            String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
+            mNumberOfFilesWritten++;
+
+            updateScanningProgress();
+            onLightScore(getCamera().getLightIntensity());
+
+            Runnable thread = () -> {
+                try {
+
+                    //write depthmap
+                    File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
+                    depthmap.save(artifactFile);
+                    onProcessArtifact(artifactFile, ArtifactType.DEPTH);
+
+                    //profile process
+                    if (artifactFile.exists()) {
+                        mDepthSize += artifactFile.length();
+                        mDepthTime += System.currentTimeMillis() - profile;
+                        if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
+                            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_SIZE, mDepthSize);
+                            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_TIME, mDepthTime);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                onThreadChange(-1);
+            };
+            onThreadChange(1);
+            executor.execute(thread);
+        }
+    }
+
+    @Override
+    public void onTangoColorData(TangoImageBuffer tangoImageBuffer) {
+        if (!mIsRecording) {
+            return;
+        }
+
+        String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + String.format(Locale.US, "%f", tangoImageBuffer.timestamp) + ".jpg";
+        File artifactFile = new File(mRgbSaveFolder.getPath(), currentImgFilename);
+
+        Runnable thread = () -> {
+            long profile = System.currentTimeMillis();
+            TangoUtils.writeImageToFile(tangoImageBuffer, artifactFile);
+            onProcessArtifact(artifactFile, ArtifactType.RGB);
+
+            if (artifactFile.exists()) {
+                mColorSize += artifactFile.length();
+                mColorTime += System.currentTimeMillis() - profile;
+                if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
+                    LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_SIZE, mColorSize);
+                    LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, mColorTime);
+                }
+            }
+            onThreadChange(-1);
+        };
+        onThreadChange(1);
+        executor.execute(thread);
+    }
+
+    @Override
+    public void onTangoDepthData(TangoPointCloudData pointCloudData, float[] position, float[] rotation, TangoCameraIntrinsics[] calibration) {
+
+        onLightUpdate(getCamera().getLightConditionState());
+        boolean hasCameraCalibration = mCameraInstance.hasCameraCalibration();
+        String cameraCalibration = mCameraInstance.getCameraCalibration();
+
+        // Saving the frame or not, depending on the current mode.
+        if (mIsRecording) {
+            long profile = System.currentTimeMillis();
+            int numPoints = pointCloudData.numPoints;
+            double timestamp = pointCloudData.timestamp;
+            ByteBuffer buffer = ByteBuffer.allocate(pointCloudData.numPoints * 4 * 4);
+            buffer.order(ByteOrder.LITTLE_ENDIAN);
+            buffer.asFloatBuffer().put(pointCloudData.points);
+
+            updateScanningProgress();
+            onLightScore(getCamera().getLightIntensity());
+
+            String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
+                    "_" + mNumberOfFilesWritten++ + "_" + String.format(Locale.US, "%f", pointCloudData.timestamp) + ".depth";
 
             Runnable thread = () -> {
 
-                //write RGB data
-                String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
-                currentImgFilename = currentImgFilename.replace('/', '_');
-                File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
-                BitmapUtils.writeBitmapToFile(bitmap, artifactFile);
+                //write depthmap
+                Depthmap depthmap = TangoUtils.extractDepthmap(buffer, numPoints, position, rotation, timestamp, calibration[1]);
+                File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
+                depthmap.save(artifactFile);
+                onProcessArtifact(artifactFile, ArtifactType.DEPTH);
 
-                //upload RGB data
+                //profile process
                 if (artifactFile.exists()) {
-                    mColorSize += artifactFile.length();
-                    mColorTime += System.currentTimeMillis() - profile;
+                    mDepthSize += artifactFile.length();
+                    mDepthTime += System.currentTimeMillis() - profile;
                     if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
-                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_SIZE, mColorSize);
-                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, mColorTime);
-                    }
-
-                    FileLog log = new FileLog();
-                    log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
-                    log.setType("rgb");
-                    log.setPath(artifactFile.getPath());
-                    log.setHashValue(IO.getMD5(artifactFile.getPath()));
-                    log.setFileSize(artifactFile.length());
-                    log.setUploadDate(0);
-                    log.setDeleted(false);
-                    log.setQrCode(person.getQrcode());
-                    log.setCreateDate(mNowTime);
-                    log.setCreatedBy(session.getUserEmail());
-                    log.setAge(age);
-                    log.setSchema_version(CgmDatabase.version);
-                    log.setMeasureId(measure.getId());
-                    synchronized (lock) {
-                        files.add(log);
+                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_SIZE, mDepthSize);
+                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_TIME, mDepthTime);
                     }
                 }
 
-                //write and upload calibration
+                //save calibration data
                 artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
                 if (!artifactFile.exists()) {
-                    if (calibration.isValid()) {
+                    if (hasCameraCalibration) {
                         try {
                             FileOutputStream fileOutputStream = new FileOutputStream(artifactFile.getAbsolutePath());
-                            fileOutputStream.write(calibration.toString().getBytes());
+                            fileOutputStream.write(cameraCalibration.getBytes());
                             fileOutputStream.flush();
                             fileOutputStream.close();
+                            onProcessArtifact(artifactFile, ArtifactType.CALIBRATION);
 
-                            FileLog log = new FileLog();
-                            log.setId(AppController.getInstance().getArtifactId("camera-calibration", mNowTime));
-                            log.setType("calibration");
-                            log.setPath(artifactFile.getPath());
-                            log.setHashValue(IO.getMD5(artifactFile.getPath()));
-                            log.setFileSize(artifactFile.length());
-                            log.setUploadDate(0);
-                            log.setDeleted(false);
-                            log.setQrCode(person.getQrcode());
-                            log.setCreateDate(mNowTime);
-                            log.setCreatedBy(session.getUserEmail());
-                            log.setAge(age);
-                            log.setSchema_version(CgmDatabase.version);
-                            log.setMeasureId(measure.getId());
-                            synchronized (lock) {
-                                files.add(log);
-                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -891,233 +927,16 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
-    @Override
-    public void onDepthDataReceived(Image image, Pose pose, int frameIndex) {
-
-        onLightUpdate(mCameraInstance.getLightConditionState());
-
-        if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
-
-            long profile = System.currentTimeMillis();
-            ARCoreUtils.Depthmap depthmap = ARCoreUtils.extractDepthmap(image, pose, mCameraInstance instanceof AREngineCamera);
-            float lightIntensity = mCameraInstance.getLightIntensity();
-            float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
-            float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
-            double Artifact_Confidence_penalty = Math.abs((double) depthmap.getCount()/38000-1.0)*100*3;
-
-            String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
-            mNumberOfFilesWritten++;
-
-            updateScanningProgress();
-
-            ArtifactResult ar = new ArtifactResult();
-            ar.setConfidence_value(String.valueOf(100 - Artifact_Confidence_penalty));
-            ar.setArtifact_id(AppController.getInstance().getPersonId());
-            ar.setKey(SCAN_STEP);
-            ar.setMeasure_id(measure.getId());
-            ar.setMisc("");
-            ar.setType("DEPTHMAP_v0.1");
-            ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
-            synchronized (lock) {
-                artifacts.add(ar);
+    private void onLightScore(float score) {
+        synchronized (lock) {
+            if (!lightScores.containsKey(SCAN_STEP)) {
+                lightScores.put(SCAN_STEP, new ArrayList<>());
             }
-
-            Runnable thread = () -> {
-
-                //write depthmap
-                File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
-                ARCoreUtils.writeDepthmap(depthmap, artifactFile);
-
-                //profile process
-                if (artifactFile.exists()) {
-                    mDepthSize += artifactFile.length();
-                    mDepthTime += System.currentTimeMillis() - profile;
-                    if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
-                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_SIZE, mDepthSize);
-                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_TIME, mDepthTime);
-                    }
-                }
-
-                //upload depthmap
-                if (artifactFile.exists()) {
-                    FileLog log = new FileLog();
-                    log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
-                    log.setType("depth");
-                    log.setPath(artifactFile.getPath());
-                    log.setHashValue(IO.getMD5(artifactFile.getPath()));
-                    log.setFileSize(artifactFile.length());
-                    log.setUploadDate(0);
-                    log.setDeleted(false);
-                    log.setQrCode(person.getQrcode());
-                    log.setCreateDate(mNowTime);
-                    log.setCreatedBy(session.getUserEmail());
-                    log.setAge(age);
-                    log.setSchema_version(CgmDatabase.version);
-                    log.setMeasureId(measure.getId());
-                    synchronized (lock) {
-                        files.add(log);
-                    }
-                }
-                onThreadChange(-1);
-            };
-            onThreadChange(1);
-            executor.execute(thread);
+            lightScores.get(SCAN_STEP).add(score);
         }
     }
 
-    @Override
-    public void onTangoColorData(TangoImageBuffer tangoImageBuffer) {
-        if ( ! mIsRecording) {
-            return;
-        }
-
-        String currentImgFilename = "rgb_" + person.getQrcode() +"_" + mNowTimeString + "_" + SCAN_STEP + "_" + String.format(Locale.US, "%f", tangoImageBuffer.timestamp) + ".jpg";
-        File artifactFile = new File(mRgbSaveFolder.getPath(), currentImgFilename);
-        TangoUtils.writeImageToFile(tangoImageBuffer, artifactFile);
-
-        Runnable thread = () -> {
-            long profile = System.currentTimeMillis();
-
-            if (artifactFile.exists()) {
-                mColorSize += artifactFile.length();
-                mColorTime += System.currentTimeMillis() - profile;
-                if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
-                    LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_SIZE, mColorSize);
-                    LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, mColorTime);
-                }
-
-                FileLog log = new FileLog();
-                log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
-                log.setType("rgb");
-                log.setPath(artifactFile.getPath());
-                log.setHashValue(IO.getMD5(artifactFile.getPath()));
-                log.setFileSize(artifactFile.length());
-                log.setUploadDate(0);
-                log.setDeleted(false);
-                log.setQrCode(person.getQrcode());
-                log.setCreateDate(mNowTime);
-                log.setCreatedBy(session.getUserEmail());
-                log.setAge(age);
-                log.setSchema_version(CgmDatabase.version);
-                log.setMeasureId(measure.getId());
-                synchronized (lock) {
-                    files.add(log);
-                }
-            }
-            onThreadChange(-1);
-        };
-        onThreadChange(1);
-        executor.execute(thread);
-    }
-
-    @Override
-    public void onTangoDepthData(TangoPointCloudData pointCloudData, double[] pose, TangoCameraIntrinsics[] calibration) {
-
-        onLightUpdate(mCameraInstance.getLightConditionState());
-
-        // Saving the frame or not, depending on the current mode.
-        if ( mIsRecording ) {
-            long profile = System.currentTimeMillis();
-            int numPoints = pointCloudData.numPoints;
-            double timestamp = pointCloudData.timestamp;
-            ByteBuffer buffer = ByteBuffer.allocate(pointCloudData.numPoints * 4 * 4);
-            buffer.order(ByteOrder.LITTLE_ENDIAN);
-            buffer.asFloatBuffer().put(pointCloudData.points);
-
-            updateScanningProgress();
-
-            float lightIntensity = mCameraInstance.getLightIntensity();
-            float lightOverbright = Math.min(Math.max(lightIntensity - 1.0f, 0.0f), 0.99f);
-            float Artifact_Light_estimation = Math.min(lightIntensity, 0.99f) - lightOverbright;
-            double Artifact_Lighting_penalty=Math.abs((double) numPoints/38000-1.0)*100*3;
-
-            String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
-                    "_" + mNumberOfFilesWritten++ + "_" + String.format(Locale.US, "%f", pointCloudData.timestamp) + ".depth";
-
-            ArtifactResult ar=new ArtifactResult();
-            ar.setConfidence_value(String.valueOf(100-Artifact_Lighting_penalty));
-            ar.setArtifact_id(AppController.getInstance().getPersonId());
-            ar.setKey(SCAN_STEP);
-            ar.setMeasure_id(measure.getId());
-            ar.setMisc("");
-            ar.setType("DEPTHMAP_v0.1");
-            ar.setReal(38000 * (1.0f + Artifact_Light_estimation / 3.0f));
-            synchronized (lock) {
-                artifacts.add(ar);
-            }
-
-            Runnable thread = () -> {
-
-                //write depthmap
-                ARCoreUtils.Depthmap depthmap = TangoUtils.extractDepthmap(buffer, numPoints, pose, timestamp, calibration[1]);
-                File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
-                ARCoreUtils.writeDepthmap(depthmap, artifactFile);
-
-                //profile process
-                if (artifactFile.exists()) {
-                    mDepthSize += artifactFile.length();
-                    mDepthTime += System.currentTimeMillis() - profile;
-                    if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
-                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_SIZE, mDepthSize);
-                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_TIME, mDepthTime);
-                    }
-                }
-
-                //upload depthmap
-                if (artifactFile.exists()) {
-                    FileLog log = new FileLog();
-                    log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
-                    log.setType("depth");
-                    log.setPath(artifactFile.getPath());
-                    log.setHashValue(IO.getMD5(artifactFile.getPath()));
-                    log.setFileSize(artifactFile.length());
-                    log.setUploadDate(0);
-                    log.setDeleted(false);
-                    log.setQrCode(person.getQrcode());
-                    log.setCreateDate(mNowTime);
-                    log.setCreatedBy(session.getUserEmail());
-                    log.setAge(age);
-                    log.setSchema_version(CgmDatabase.version);
-                    log.setMeasureId(measure.getId());
-                    synchronized (lock) {
-                        files.add(log);
-                    }
-                }
-
-
-                //write and upload calibration
-                artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
-                if (!artifactFile.exists()) {
-                    TangoUtils.writeCalibrationFile(artifactFile, calibration);
-
-                    if (artifactFile.exists()) {
-                        FileLog log = new FileLog();
-                        log.setId(AppController.getInstance().getArtifactId("camera-calibration", mNowTime));
-                        log.setType("calibration");
-                        log.setPath(artifactFile.getPath());
-                        log.setHashValue(IO.getMD5(artifactFile.getPath()));
-                        log.setFileSize(artifactFile.length());
-                        log.setUploadDate(0);
-                        log.setDeleted(false);
-                        log.setQrCode(person.getQrcode());
-                        log.setCreateDate(mNowTime);
-                        log.setCreatedBy(session.getUserEmail());
-                        log.setAge(age);
-                        log.setSchema_version(CgmDatabase.version);
-                        log.setMeasureId(measure.getId());
-                        synchronized (lock) {
-                            files.add(log);
-                        }
-                    }
-                }
-                onThreadChange(-1);
-            };
-            onThreadChange(1);
-            executor.execute(thread);
-        }
-    }
-
-    private void onLightUpdate(CameraCalibration.LightConditions state) {
+    private void onLightUpdate(AbstractARCamera.LightConditions state) {
         runOnUiThread(() -> {
             switch (state) {
                 case NORMAL:
@@ -1133,6 +952,44 @@ public class ScanModeActivity extends AppCompatActivity implements View.OnClickL
                     break;
             }
         });
+    }
+
+    private void onProcessArtifact(File artifactFile, ArtifactType type) {
+        if (artifactFile.exists()) {
+            FileLog log = new FileLog();
+            switch (type) {
+                case CALIBRATION:
+                    log.setStep(0);
+                    log.setId(AppController.getInstance().getArtifactId("camera-calibration", mNowTime));
+                    log.setType("calibration");
+                    break;
+                case DEPTH:
+                    log.setStep(SCAN_STEP);
+                    log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
+                    log.setType("depth");
+                    break;
+                case RGB:
+                    log.setStep(SCAN_STEP);
+                    log.setId(AppController.getInstance().getArtifactId("scan-rgb", mNowTime));
+                    log.setType("rgb");
+                    break;
+            }
+            log.setPath(artifactFile.getPath());
+            log.setHashValue(IO.getMD5(artifactFile.getPath()));
+            log.setFileSize(artifactFile.length());
+            log.setUploadDate(0);
+            log.setDeleted(false);
+            log.setQrCode(person.getQrcode());
+            log.setCreateDate(mNowTime);
+            log.setCreatedBy(session.getUserEmail());
+            log.setAge(age);
+            log.setSchema_version(CgmDatabase.version);
+            log.setMeasureId(measure.getId());
+            log.setEnvironment(session.getEnvironment());
+            synchronized (lock) {
+                files.add(log);
+            }
+        }
     }
 
     private void onThreadChange(int diff) {

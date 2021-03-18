@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.datasource.models;
 
 import androidx.room.Embedded;
@@ -25,6 +24,9 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.annotation.NonNull;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 import java.util.Locale;
 
@@ -32,28 +34,74 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.CsvExportableModel;
 
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_PERSON;
 
-/**
- * Created by Emerald on 2/19/2018.
- */
-
 @Entity(tableName = TABLE_PERSON)
 public class Person extends CsvExportableModel implements Serializable {
     @PrimaryKey
     @NonNull
+    @Expose(serialize = false, deserialize = false)
     private String id;  // firebase id
+
+    @SerializedName("id")
+    @Expose(serialize = false)
+    private String serverId;
+
+    private boolean isSynced = false;
+
+    private boolean isDenied = false;
+
+    private int environment;
+
+    @SerializedName("name")
+    @Expose
     private String name;
+
     private String surname;
+
+
     private long birthday;
+
+    @SerializedName("date_of_birth")
+    @Expose
+    @Ignore
+    private String birthdayString;
+
+    @Expose
     private String sex;  // female, male, other
+
+    @SerializedName("guardian")
+    @Expose
     private String guardian;
+
+    @SerializedName("age_estimated")
+    @Expose
     private boolean isAgeEstimated;
+
+    @SerializedName("qr_code")
+    @Expose
     private String qrcode;
+
     private long created;
+
+    @SerializedName("qr_scanned")
+    @Expose
+    @Ignore
+    private String qr_scanned;
+
+    @Expose
     private long timestamp;
+
+    @Expose
     private String createdBy;
+
+    @Expose
     private boolean deleted;
+
+    @Expose
     private String deletedBy;
+
+    @Expose
     private int schema_version;
+
 
     @Embedded
     private Loc lastLocation;
@@ -61,9 +109,42 @@ public class Person extends CsvExportableModel implements Serializable {
     @Ignore
     private Measure lastMeasure;
 
+
+    public String getServerId() {
+        return serverId;
+    }
+
+    public void setServerId(String serverId) {
+        this.serverId = serverId;
+    }
+
+    public boolean isSynced() {
+        return isSynced;
+    }
+
+    public void setSynced(boolean synced) {
+        isSynced = synced;
+    }
+
     @NonNull
     public String getId() {
         return id;
+    }
+
+    public String getBirthdayString() {
+        return birthdayString;
+    }
+
+    public void setBirthdayString(String birthdayString) {
+        this.birthdayString = birthdayString;
+    }
+
+    public String getQr_scanned() {
+        return qr_scanned;
+    }
+
+    public void setQr_scanned(String qr_scanned) {
+        this.qr_scanned = qr_scanned;
     }
 
     public void setId(@NonNull String id) {
@@ -78,10 +159,12 @@ public class Person extends CsvExportableModel implements Serializable {
         this.name = name;
     }
 
+    @Deprecated
     public String getSurname() {
         return surname;
     }
 
+    @Deprecated
     public void setSurname(String surname) {
         this.surname = surname;
     }
@@ -190,13 +273,37 @@ public class Person extends CsvExportableModel implements Serializable {
         this.schema_version = schema_version;
     }
 
+    public int getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(int environment) {
+        this.environment = environment;
+    }
+
+    public boolean isDenied() {
+        return isDenied;
+    }
+
+    public void setDenied(boolean denied) {
+        isDenied = denied;
+    }
+
+    public String getFullName() {
+        String fullname = getName();
+        if (getSurname() != null && !getSurname().isEmpty()) {
+            fullname = getName() + " " + getSurname();
+        }
+        return fullname;
+    }
+
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%s,%d,%s,%s,%b,%s,%d,%d,%s,%b,%s,%d",id,name,surname,birthday,sex,guardian,isAgeEstimated,qrcode,created,timestamp,createdBy,deleted,deletedBy,schema_version);
+        return String.format(Locale.US, "%s,%s,%s,%d,%s,%s,%b,%s,%d,%d,%s,%b,%s,%d,%s,%d,%b", id, name, surname, birthday, sex, guardian, isAgeEstimated, qrcode, created, timestamp, createdBy, deleted, deletedBy, schema_version, serverId, environment, isDenied);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,name,surname,birthday,sex,guardian,isAgeEstimated,qrcode,created,timestamp,createdBy,deleted,deletedBy,schema_version";
+        return "id,name,surname,birthday,sex,guardian,isAgeEstimated,qrcode,created,timestamp,createdBy,deleted,deletedBy,schema_version,serverId,environment,isDenied";
     }
 }

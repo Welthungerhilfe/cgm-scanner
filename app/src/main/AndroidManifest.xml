@@ -24,10 +24,20 @@
     <!-- push notification -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- contact support -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!--for foreground service-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!--for wifi state change-->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <!--for internet-->
+    <uses-permission android:name="android.permission.INTERNET" />
+
 
     <supports-screens
         android:anyDensity="true"
@@ -36,28 +46,36 @@
         android:resizeable="true"
         android:smallScreens="true" />
 
-    <uses-feature android:name="android.hardware.camera"/>
+    <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.location.gps" />
-    <uses-feature android:name="android.hardware.camera.ar" android:required="${arCameraRequired}"/>
-    <uses-feature android:name="com.google.ar.core.depth" android:required="${depthCameraRequired}"/>
-    <uses-feature android:glEsVersion="0x00020000" android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera.ar"
+        android:required="${arCameraRequired}" />
+    <uses-feature
+        android:name="com.google.ar.core.depth"
+        android:required="${depthCameraRequired}" />
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
 
     <application
         android:name=".AppController"
         android:allowBackup="true"
+        android:extractNativeLibs="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:supportsRtl="true"
         android:largeHeap="true"
-        android:windowSoftInputMode="adjustResize"
-        android:theme="@style/AppTheme.NoActionBar"
-        android:extractNativeLibs="true"
         android:requestLegacyExternalStorage="true"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme.NoActionBar"
+        android:usesCleartextTraffic="true"
+        android:windowSoftInputMode="adjustResize"
         tools:replace="android:allowBackup">
 
-		<uses-library
+        <uses-library
             android:name="com.projecttango.libtango_device2"
             android:required="${tangoRequired}" />
+
         <meta-data
             android:name="com.google.ar.core"
             android:value="${arcoreValue}" />
@@ -81,24 +99,11 @@
             android:name="firebase_crashlytics_collection_enabled"
             android:value="false" />
 
-        <activity android:name="com.microsoft.identity.client.BrowserTabActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+        <activity android:name=".ui.activities.BaseActivity" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="auth"
-                    android:scheme="msal{APP_CENTER_KEY}" />
-            </intent-filter>
-        </activity>
 
         <activity
-            android:name=".ui.activities.BaseActivity" />
-
-        <activity android:name=".ui.activities.SplashActivity"
-            android:launchMode="singleTask"
+            android:name=".ui.activities.SplashActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -108,74 +113,95 @@
 
         <activity
             android:name=".ui.activities.LoginActivity"
-            android:launchMode="singleTask"
+            android:configChanges="locale"
             android:screenOrientation="portrait" />
 
         <activity
             android:name=".ui.activities.MainActivity"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"/>
-
-        <activity android:name=".ui.activities.TutorialActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.activities.QRScanActivity"
-            android:screenOrientation="portrait"/>
-
-        <activity android:name=".ui.activities.ConsentScanActivity"
+        <activity
+            android:name=".ui.activities.TutorialActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.activities.CreateDataActivity"
-            android:windowSoftInputMode="stateAlwaysHidden"
-            android:screenOrientation="portrait">
+        <activity
+            android:name=".ui.activities.QRScanActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.activities.ConsentScanActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.activities.CreateDataActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateAlwaysHidden">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.activities.MainActivity"/>
+                android:value=".ui.activities.MainActivity" />
         </activity>
 
-        <activity android:name=".ui.activities.LocationSearchActivity"
+        <activity
+            android:name=".ui.activities.LocationSearchActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.activities.LocationDetectActivity"
+        <activity
+            android:name=".ui.activities.LocationDetectActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.activities.ImageDetailActivity"
+        <activity
+            android:name=".ui.activities.ImageDetailActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.activities.SettingsActivity"
+        <activity
+            android:name=".ui.activities.SettingsActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.activities.SettingsRemoteConfigActivity"
+        <activity
+            android:name=".ui.activities.SettingsRemoteConfigActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.activities.SettingsPerformanceActivity"
+        <activity
+            android:name=".ui.activities.SettingsPerformanceActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.activities.ScanModeActivity"
+        <activity
+            android:name=".ui.activities.ScanModeActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.activities.UploadManagerActivity"
+        <activity
+            android:name=".ui.activities.UploadManagerActivity"
             android:screenOrientation="portrait" />
 
-        <receiver
-            android:name=".helper.receiver.BootReceiver"
-            android:enabled="true"
-            android:exported="true">
+        <activity android:name="com.microsoft.identity.client.BrowserTabActivity">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!--
+                    Add in your scheme/host from registered redirect URI
+                    note that the leading "/" is required for android:path
+                -->
+                <data
+                    android:host="de.welthungerhilfe.cgm.scanner"
+                    android:path="{OAUTH_PATH}"
+                    android:scheme="msauth" />
             </intent-filter>
-        </receiver>
+        </activity>
 
-        <service android:name=".helper.service.UploadService"
+        <service
+            android:name=".network.service.UploadService"
             android:exported="false" />
 
-        <service android:name=".helper.service.MemoryMonitorService"
+        <service
+            android:name=".network.service.DeviceService"
             android:exported="false" />
 
-        <service android:name=".helper.service.DeviceService"
-            android:exported="false"/>
-
-        <service android:name=".helper.authenticator.AuthenticatorService"
+        <service
+            android:name=".network.authenticator.AuthenticatorService"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
@@ -185,34 +211,32 @@
                 android:resource="@xml/authenticator" />
         </service>
 
-        <service android:name=".helper.syncdata.SyncService"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.content.SyncAdapter" />
-            </intent-filter>
-            <meta-data
-                android:name="android.content.SyncAdapter"
-                android:resource="@xml/syncadapter" />
-        </service>
-
         <service
-            android:exported="false"
-            android:name="com.novoda.merlin.service.MerlinService" />
+            android:name="com.novoda.merlin.service.MerlinService"
+            android:exported="false" />
 
         <provider
-            android:name=".helper.syncdata.StubProvider"
+            android:name=".network.syncdata.StubProvider"
             android:authorities="de.welthungerhilfe.cgm.scanner"
             android:exported="false"
             android:syncable="true" />
 
-        <provider
-            android:name=".helper.InternalStorageContentProvider"
-            android:authorities="de.welthungerhilfe.cgm.scanner"
-            android:exported="false"/>
-
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
+
+        <receiver
+            android:name=".network.syncdata.WifiStateChangeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.net.wifi.STATE_CHANGE" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".network.service.WifiStateChangereceiverHelperService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

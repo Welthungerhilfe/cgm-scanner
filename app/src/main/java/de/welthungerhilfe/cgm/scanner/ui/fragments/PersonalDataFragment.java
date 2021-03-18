@@ -16,20 +16,23 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
 import android.app.Activity;
 import android.app.DialogFragment;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
+
 import android.content.Context;
 import android.os.Bundle;
+
 import com.google.android.material.snackbar.Snackbar;
+
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatRadioButton;
+
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -52,8 +55,9 @@ import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
@@ -74,7 +78,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private AppCompatCheckBox checkAge;
 
     private DateEditText editBirth;
-    private EditText editName, editPrename, editLocation, editGuardian;
+    private EditText editName, editLocation, editGuardian;
 
     private AppCompatRadioButton radioFemale, radioMale;
 
@@ -85,13 +89,17 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private Person person;
     private Loc location;
 
+    ViewModelProvider.Factory factory;
+
     public static PersonalDataFragment getInstance(String qrCode) {
         PersonalDataFragment fragment = new PersonalDataFragment();
         fragment.qrCode = qrCode;
 
         return fragment;
     }
-    
+
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
@@ -99,10 +107,12 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         session = new SessionManager(context);
     }
 
-    public void onActivityCreated(Bundle instance) {
-        super.onActivityCreated(instance);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_personal, container, false);
 
-        viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
+        factory = new CreateDataViewModelProvideFactory(getActivity());
+        viewModel = new ViewModelProvider(getActivity(), factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
             initUI();
@@ -111,11 +121,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             if (measure != null)
                 setLocation(measure.getLocation());
         });
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_personal, container, false);
 
         view.findViewById(R.id.rytConsentDetail).setOnClickListener(this);
         view.findViewById(R.id.imgBirth).setOnClickListener(this);
@@ -131,9 +136,6 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         editName = view.findViewById(R.id.editName);
         editName.addTextChangedListener(this);
-
-        editPrename = view.findViewById(R.id.editPrename);
-        editPrename.addTextChangedListener(this);
 
         editLocation = view.findViewById(R.id.editLocation);
         editLocation.setOnClickListener(this);
@@ -151,18 +153,24 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         radioMale.setOnCheckedChangeListener(this);
 
         View contextMenu = view.findViewById(R.id.contextMenuButton);
-        contextMenu.setOnClickListener(view12 -> new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
-                new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
-        }, which -> {
-            ContactSupportDialog.show((BaseActivity) getActivity(), "data " + person.getQrcode(), "personID:" + person.getId());
-        }));
-
+        contextMenu.setOnClickListener(v -> {
+            if (person != null) {
+                String id = person.getId();
+                String qrCode = person.getQrcode();
+                BaseActivity activity = (BaseActivity) getActivity();
+                new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+                        new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
+                }, which -> {
+                    ContactSupportDialog.show(activity, "data " + qrCode, "personID:" + id);
+                });
+            }
+        });
         return view;
     }
 
     public void initUI() {
         if (person == null) {
-            setLocation(((CreateDataActivity)getActivity()).location);
+            setLocation(((CreateDataActivity) getActivity()).location);
             return;
         } else {
             setLocation(person.getLastLocation());
@@ -170,8 +178,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         txtDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getCreated()));
 
-        editName.setText(person.getName());
-        editPrename.setText(person.getSurname());
+        editName.setText(person.getFullName());
         editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getBirthday()));
         editGuardian.setText(person.getGuardian());
 
@@ -190,9 +197,12 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void setLocation(Loc loc) {
         if (loc != null) {
             String address = loc.getAddress();
-            if ((location == null) || ((address != null) && (address.length() > 0))) {
-                if (editLocation.getText().toString().compareTo(address) != 0) {
-                    editLocation.setText(address);
+            if ((location == null) && (address != null) && (address.length() > 0)) {
+                if (editLocation != null) {
+                    Editable oldAddress = editLocation.getText();
+                    if ((oldAddress != null) && (oldAddress.toString().compareTo(address) != 0)) {
+                        editLocation.setText(address);
+                    }
                 }
                 location = loc;
             }
@@ -203,36 +213,28 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         boolean valid = true;
 
         String name = editName.getText().toString();
-        String prename = editPrename.getText().toString();
         String birth = editBirth.getText().toString();
         String guardian = editGuardian.getText().toString();
 
         if (name.isEmpty()) {
-            editName.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.name_tooltip)));
+            editName.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.name_tooltip)));
             valid = false;
         } else {
             editName.setError(null);
         }
 
-        if (prename.isEmpty()) {
-            editPrename.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.prename_tooltip)));
-            valid = false;
-        } else {
-            editPrename.setError(null);
-        }
-
         if (birth.isEmpty()) {
-            editBirth.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.birthday_tooltip)));
+            editBirth.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.birthday_tooltip)));
             valid = false;
-        } else if (birth.equals("DD-MM-YYYY")){
-            editBirth.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.birthday_tooltip)));
+        } else if (birth.equals("DD-MM-YYYY")) {
+            editBirth.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.birthday_tooltip)));
             valid = false;
         } else {
             editBirth.setError(null);
         }
 
         if (guardian.isEmpty()) {
-            editGuardian.setError(getResources().getString(R.string.tooltip_input,getResources().getString(R.string.guardian_tooltip)));
+            editGuardian.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.guardian_tooltip)));
             valid = false;
         } else {
             editGuardian.setError(null);
@@ -267,15 +269,15 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         sex = "male";
                     else if (radioFemale.isChecked())
                         sex = "female";
-
                     if (person == null) {
                         person = new Person();
                         person.setId(AppController.getInstance().getPersonId());
                         person.setQrcode(qrCode);
+                        person.setEnvironment(session.getEnvironment());
+
                     }
 
                     person.setName(editName.getText().toString());
-                    person.setSurname(editPrename.getText().toString());
                     person.setBirthday(birthday);
                     person.setGuardian(editGuardian.getText().toString());
                     person.setSex(sex);
@@ -285,8 +287,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setCreatedBy(session.getUserEmail());
                     person.setSchema_version(CgmDatabase.version);
                     person.setLastLocation(location);
+                    person.setSynced(false);
 
                     viewModel.savePerson(person);
+
                 }
 
                 break;
@@ -347,11 +351,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     private void onTextChanged() {
         String name = editName.getText().toString();
-        String prename = editPrename.getText().toString();
         String birth = editBirth.getText().toString();
         String guardian = editGuardian.getText().toString();
 
-        if (!name.isEmpty() && !prename.isEmpty() && !birth.isEmpty() && !guardian.isEmpty() && (radioMale.isChecked() || radioFemale.isChecked())) {
+        if (!name.isEmpty() && !birth.isEmpty() && !guardian.isEmpty() && (radioMale.isChecked() || radioFemale.isChecked())) {
             btnNext.setTextColor(getResources().getColor(R.color.colorWhite));
             btnNext.setBackground(getResources().getDrawable(R.drawable.button_green_round));
         } else {

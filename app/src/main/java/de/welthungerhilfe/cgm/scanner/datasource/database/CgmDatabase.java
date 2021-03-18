@@ -1,51 +1,70 @@
+/*
+ * Child Growth Monitor - quick and accurate data on malnutrition
+ * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
+ * Copyright (c) 2018 Welthungerhilfe Innovation
+ * <p>
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p>
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.welthungerhilfe.cgm.scanner.datasource.database;
-
 
 import androidx.sqlite.db.SupportSQLiteDatabase;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
+
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 
-import de.welthungerhilfe.cgm.scanner.datasource.dao.ArtifactResultDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.DeviceDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.FileLogDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.MeasureDao;
-import de.welthungerhilfe.cgm.scanner.datasource.dao.MeasureResultDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.PersonDao;
-import de.welthungerhilfe.cgm.scanner.datasource.models.ArtifactResult;
+import de.welthungerhilfe.cgm.scanner.datasource.dao.PostScanResultDao;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.datasource.models.MeasureResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
 
-@Database(entities = {Person.class, Measure.class, FileLog.class, ArtifactResult.class, MeasureResult.class, Device.class}, version = 10)
+@Database(entities = {Person.class, Measure.class, FileLog.class, Device.class, PostScanResult.class}, version = 19)
 public abstract class CgmDatabase extends RoomDatabase {
     private static final Object sLock = new Object();
 
     private static CgmDatabase instance;
 
     public abstract PersonDao personDao();
-    public abstract MeasureDao measureDao();
-    public abstract FileLogDao fileLogDao();
-    public abstract DeviceDao deviceDao();
-    public abstract ArtifactResultDao artifactResultDao();
-    public abstract MeasureResultDao measureResultDao();
 
-    public static final int version = 10;
+    public abstract MeasureDao measureDao();
+
+    public abstract FileLogDao fileLogDao();
+
+    public abstract DeviceDao deviceDao();
+
+    public abstract PostScanResultDao postScanResultDao();
+
+    public static final int version = 19;
 
     public static final String DATABASE = "offline_db";
 
     public static final String TABLE_PERSON = "persons";
-    public static final String TABLE_CONSENT = "consents";
     public static final String TABLE_MEASURE = "measures";
     public static final String TABLE_FILE_LOG = "file_logs";
     public static final String TABLE_DEVICE = "devices";
-    public static final String TABLE_ARTIFACT_RESULT="artifact_result";
-    public static final String TABLE_MEASURE_RESULT="measure_result";
+    public static final String TABLE_POST_SCAN_RESULT = "post_scan_result";
+
 
     public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
@@ -134,12 +153,83 @@ public abstract class CgmDatabase extends RoomDatabase {
         }
     };
 
+    public static final Migration MIGRATION_10_11 = new Migration(10, 11) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE persons ADD COLUMN serverId TEXT;");
+        }
+    };
+
+    public static final Migration MIGRATION_11_12 = new Migration(11, 12) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE measures ADD COLUMN measureServerKey TEXT;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN personServerKey TEXT;");
+
+        }
+    };
+    public static final Migration MIGRATION_12_13 = new Migration(12, 13) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE persons ADD COLUMN isSynced INTEGER NOT NULL DEFAULT 0;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN isSynced INTEGER NOT NULL DEFAULT 0;");
+        }
+    };
+    public static final Migration MIGRATION_13_14 = new Migration(13, 14) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE file_logs ADD COLUMN step INTEGER NOT NULL DEFAULT 0;");
+        }
+    };
+    public static final Migration MIGRATION_14_15 = new Migration(14, 15) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE file_logs ADD COLUMN serverId TEXT;");
+        }
+    };
+
+    public static final Migration MIGRATION_15_16 = new Migration(15, 16) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE persons ADD COLUMN environment INTEGER NOT NULL DEFAULT 0;");
+            database.execSQL("ALTER TABLE measures ADD COLUMN environment INTEGER NOT NULL DEFAULT 0;");
+            database.execSQL("ALTER TABLE file_logs ADD COLUMN environment INTEGER NOT NULL DEFAULT 0;");
+        }
+    };
+
+    public static final Migration MIGRATION_16_17 = new Migration(16, 17) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS `post_scan_result` (`id` TEXT PRIMARY KEY NOT NULL, `measure_id` TEXT, `isSynced` INTEGER NOT NULL DEFAULT 0, `timestamp` INTEGER NOT NULL, `environment` INTEGER NOT NULL DEFAULT 0)");
+
+        }
+    };
+
+    public static final Migration MIGRATION_17_18 = new Migration(17, 18) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("DROP TABLE IF EXISTS `artifact_result`");
+            database.execSQL("DROP TABLE IF EXISTS `measure_result`");
+        }
+    };
+
+    public static final Migration MIGRATION_18_19 = new Migration(18, 19) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE persons ADD COLUMN isDenied INTEGER NOT NULL DEFAULT 0;");
+        }
+    };
+
     public static CgmDatabase getInstance(Context context) {
         synchronized (sLock) {
             if (instance == null) {
                 instance = Room.databaseBuilder(context.getApplicationContext(), CgmDatabase.class, DATABASE)
-                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_4, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
+                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_4,
+                                MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10,
+                                MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15,
+                                MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18,MIGRATION_18_19)
                         .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
+                        .allowMainThreadQueries()
                         .build();
             }
             return instance;

@@ -16,20 +16,23 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.annotation.Nullable;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,20 +45,19 @@ import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerMeasureAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.FeedbackDialog;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualDetailDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.ManualMeasureListener, RecyclerMeasureAdapter.OnMeasureSelectListener, RecyclerMeasureAdapter.OnMeasureFeedbackListener {
+public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.ManualMeasureListener {
     private Context context;
     private SessionManager session;
 
@@ -66,6 +68,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
     public String qrCode;
     private Person person;
+
+    ViewModelProvider.Factory factory;
+
 
     public static MeasuresDataFragment getInstance(String qrCode) {
         MeasuresDataFragment fragment = new MeasuresDataFragment();
@@ -87,7 +92,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     public void onActivityCreated(Bundle instance) {
         super.onActivityCreated(instance);
 
-        viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
+
+        factory = new CreateDataViewModelProvideFactory(getActivity());
+        viewModel = new ViewModelProvider(getActivity(), factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
         });
@@ -113,8 +120,6 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         RecyclerView recyclerMeasure = view.findViewById(R.id.recyclerMeasure);
         recyclerMeasure.setLayoutManager(new LinearLayoutManager(context));
         adapterMeasure = new RecyclerMeasureAdapter((BaseActivity) getActivity(), recyclerMeasure, this);
-        adapterMeasure.setMeasureSelectListener(this);
-        adapterMeasure.setMeasureFeedbackListener(this);
         recyclerMeasure.setAdapter(adapterMeasure);
 
         fabCreate = view.findViewById(R.id.fabCreate);
@@ -124,7 +129,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void createMeasure() {
-        new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+        new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
                 new ContextMenuDialog.Item(R.string.selector_manual, R.drawable.ic_manual),
                 new ContextMenuDialog.Item(R.string.selector_scan, R.drawable.ic_machine)
         }, which -> {
@@ -149,16 +154,24 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             if (person == null) {
                 Snackbar.make(fabCreate, R.string.error_person_first, Snackbar.LENGTH_LONG).show();
             } else {
-                createMeasure();
+                if (person.getCreatedBy().equals(session.getUserEmail()) && person.getEnvironment() == session.getEnvironment()) {
+                    createMeasure();
+                } else {
+                    Snackbar.make(fabCreate, R.string.no_authorazation, Snackbar.LENGTH_LONG).show();
+
+                }
             }
         }
     }
 
     @Override
-    public void onManualMeasure(String id, double height, double weight, double muac, double headCircumference, Loc location, boolean oedema) {
+    public void onManualMeasure(String id, double height, double weight, double muac, double headCircumference, Loc location, boolean oedema, String measureServerKey) {
         Measure measure = new Measure();
         measure.setId(id != null ? id : AppController.getInstance().getMeasureId());
         measure.setDate(System.currentTimeMillis());
+        if(measureServerKey!=null) {
+            measure.setMeasureServerKey(measureServerKey);
+        }
         long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
         measure.setAge(age);
         measure.setHeight(height);
@@ -167,6 +180,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setHeadCircumference(headCircumference);
         measure.setArtifact("");
         measure.setLocation(location);
+        measure.setScannedBy(null);
         measure.setOedema(oedema);
         measure.setType(AppConstants.VAL_MEASURE_MANUAL);
         measure.setPersonId(person.getId());
@@ -176,21 +190,10 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setQrCode(qrCode);
         measure.setSchema_version(CgmDatabase.version);
         measure.setArtifact_synced(true);
+        measure.setEnvironment(person.getEnvironment());
+        measure.setSynced(false);
+
 
         viewModel.insertMeasure(measure);
-    }
-
-    @Override
-    public void onMeasureSelect(Measure measure) {
-        ManualDetailDialog detailDialog = new ManualDetailDialog(context);
-        detailDialog.setMeasure(measure);
-        detailDialog.show();
-    }
-
-    @Override
-    public void onMeasureFeedback(Measure measure, double overallScore) {
-        FeedbackDialog feedbackDialog = new FeedbackDialog(context);
-        feedbackDialog.setMeasure(measure);
-        feedbackDialog.show();
     }
 }

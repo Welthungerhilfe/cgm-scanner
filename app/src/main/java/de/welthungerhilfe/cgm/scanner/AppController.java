@@ -15,25 +15,23 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package de.welthungerhilfe.cgm.scanner;
 
 import android.app.Application;
+import android.content.Context;
 import android.os.Environment;
 import android.os.StrictMode;
 
 import java.io.File;
 import java.io.IOException;
 
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
+
+import de.welthungerhilfe.cgm.scanner.utils.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AppController extends Application {
 
     private static AppController mInstance;
-
-    private SessionManager session;
 
     @Override
     public void onCreate() {
@@ -42,16 +40,7 @@ public class AppController extends Application {
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
         Utils.overrideFont(getApplicationContext(), "SERIF", "roboto.ttf");
 
-        session = new SessionManager(this);
-
         mInstance = this;
-    }
-
-    public String getAzureConnection() {
-        if (session.getAzureAccountName() == null || session.getAzureAccountKey() == null)
-            return null;
-        else
-            return String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", session.getAzureAccountName(), session.getAzureAccountKey());
     }
 
     public boolean isAdmin() {
@@ -82,14 +71,19 @@ public class AppController extends Application {
         return String.format("%s-device-%s-%s", Utils.getAndroidID(getContentResolver()), Utils.getUniversalTimestamp(), Utils.getSaltString(16));
     }
 
-    public File getRootDirectory() {
-        File mExtFileDir;
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            mExtFileDir = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name_long));
-        } else {
-            mExtFileDir = getApplicationContext().getFilesDir();
+    public File getPublicAppDirectory(Context context) {
+        File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+        root = new File(root, context.getString(R.string.app_name_long));
+        if (!root.exists()) {
+            root.mkdirs();
         }
+        return root;
+    }
+
+    public File getRootDirectory(Context c) {
+        File mExtFileDir = new File(c.getApplicationInfo().dataDir);
+        File oldDir = new File(Environment.getExternalStorageDirectory(), "Child Growth Monitor Scanner App");
+        IO.move(oldDir, mExtFileDir);
 
         File nomedia = new File(mExtFileDir, ".nomedia");
         if (!nomedia.exists()) {
@@ -103,7 +97,4 @@ public class AppController extends Application {
         return mExtFileDir;
     }
 
-    public boolean isUploadRunning() {
-        return UploadService.isInitialized();
-    }
 }

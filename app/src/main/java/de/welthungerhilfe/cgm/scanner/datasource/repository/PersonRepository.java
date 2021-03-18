@@ -1,7 +1,26 @@
+/*
+ * Child Growth Monitor - quick and accurate data on malnutrition
+ * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
+ * Copyright (c) 2018 Welthungerhilfe Innovation
+ * <p>
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p>
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
 import androidx.lifecycle.LiveData;
 import androidx.sqlite.db.SimpleSQLiteQuery;
+
 import android.content.Context;
 import android.location.Location;
 
@@ -12,10 +31,9 @@ import java.util.Objects;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.utils.PersonFilter;
-
+import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.datasource.filter.PersonFilter;
 
 public class PersonRepository {
     private static PersonRepository instance;
@@ -31,7 +49,7 @@ public class PersonRepository {
     }
 
     public static PersonRepository getInstance(Context context) {
-        if(instance == null) {
+        if (instance == null) {
             instance = new PersonRepository(context);
         }
         return instance;
@@ -45,6 +63,16 @@ public class PersonRepository {
         return database.personDao().getPersonByQr(key);
     }
 
+    public Person getPersonById(String id) {
+        return database.personDao().getPersonById(id);
+    }
+
+    public Person findPersonByQr(String qrCode)
+    {
+        return database.personDao().findPersonByQr(qrCode);
+
+    }
+
     public void insertPerson(Person person) {
         database.personDao().insertPerson(person);
         setUpdated(true);
@@ -55,8 +83,8 @@ public class PersonRepository {
         setUpdated(true);
     }
 
-    public List<Person> getSyncablePerson(long timestamp) {
-        return database.personDao().getSyncablePersons(timestamp);
+    public List<Person> getSyncablePerson(int environment) {
+        return database.personDao().getSyncablePersons(environment);
     }
 
     public LiveData<List<Person>> getAvailablePersons(PersonFilter filter) {
@@ -71,7 +99,7 @@ public class PersonRepository {
         }
 
         if (filter.isOwn()) {
-            whereClause += String.format(" AND p.createdBy LIKE '%s'", Objects.requireNonNull(session.getUserEmail()));
+            whereClause += String.format(" AND p.createdBy LIKE '%s' AND p.environment=%d", Objects.requireNonNull(session.getUserEmail()), session.getEnvironment());
         }
 
         if (filter.isLocation()) {
@@ -127,6 +155,7 @@ public class PersonRepository {
                 whereClause += " AND age>0 AND h>0";
                 break;
         }
+
 
         String query = String.format("SELECT %s FROM %s p WHERE %s ORDER BY %s %s", selectClause, CgmDatabase.TABLE_PERSON, whereClause, orderByClause, limitClause);
         return database.personDao().getResultPerson(new SimpleSQLiteQuery(query));

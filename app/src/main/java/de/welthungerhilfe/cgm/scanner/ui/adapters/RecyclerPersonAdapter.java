@@ -16,17 +16,16 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
 import androidx.lifecycle.LifecycleOwner;
-
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -41,7 +40,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
@@ -78,13 +77,12 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
     @Override
     public void onBindViewHolder(RecyclerPersonAdapter.ViewHolder holder, int position) {
         Person person = getItem(position);
-        String name = person.getName() + " " + person.getSurname();
-        holder.txtName.setText(name);
+        holder.txtName.setText(person.getFullName());
 
         repository.getPersonLastMeasureLiveData(person.getId()).observe((LifecycleOwner) context, measure -> {
             if (measure != null) {
                 holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f", measure.getWeight()));
-                holder.txtHeight.setText(String.format(Locale.getDefault(),"%.2f", measure.getHeight()));
+                holder.txtHeight.setText(String.format(Locale.getDefault(), "%.2f", measure.getHeight()));
             } else {
                 holder.txtWeight.setText("0.0");
                 holder.txtHeight.setText("0.0");
@@ -93,6 +91,13 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
         if (personDetailListener != null) {
             holder.bindPersonDetail(position);
+        }
+        if (person.isDenied()) {
+            holder.ll_measure.setVisibility(View.GONE);
+            holder.ll_denied.setVisibility(View.VISIBLE);
+        } else {
+            holder.ll_measure.setVisibility(View.VISIBLE);
+            holder.ll_denied.setVisibility(View.GONE);
         }
     }
 
@@ -160,6 +165,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
         public TextView txtWeight;
         public TextView txtHeight;
         private View contextMenu;
+        private LinearLayout ll_measure, ll_denied;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -170,6 +176,8 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
             txtWeight = itemView.findViewById(R.id.txtWeight);
             txtHeight = itemView.findViewById(R.id.txtHeight);
             contextMenu = itemView.findViewById(R.id.contextMenuButton);
+            ll_denied = itemView.findViewById(R.id.ll_denied);
+            ll_measure = itemView.findViewById(R.id.ll_measure);
         }
 
         void bindPersonDetail(int position) {
@@ -188,7 +196,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
 
     private void showContextMenu(int position) {
         Person person = getItem(position);
-        new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+        new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
                 new ContextMenuDialog.Item(R.string.show_details, R.drawable.ic_details),
                 new ContextMenuDialog.Item(R.string.delete_data, R.drawable.ic_delete),
                 new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),

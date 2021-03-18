@@ -17,35 +17,43 @@ cat $gsFile
 
 echo "Updated id!"
 
-APP_CONSTANT_FILE=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/helper/AppConstants.java
 APP_MANIFEST_FILE=$BUILD_REPOSITORY_LOCALPATH/app/src/main/AndroidManifest.xml
+APP_OAUTH_SANDBOX_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_sandbox.json
+APP_OAUTH_QA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_demoqa.json
+APP_OAUTH_PRODUCTION_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_inbmz.json
+APP_OAUTH_NAMIBIA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_namibia.json
+APP_CONSTANTS=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/AppConstants.java
 APP_SPLASH_ACTIVITY=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/ui/activities/SplashActivity.java
-APP_LOGIN_ACTIVITY=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/ui/activities/LoginActivity.java
 
+echo "Updating API KEYS"
+sed -i '' "s|{APP_CENTER_KEY}|$APP_CENTER_KEY|g" $APP_SPLASH_ACTIVITY
+sed -i '' "s|{GOOGLE_MAPS_KEY}|$GOOGLE_MAPS_KEY|g" $APP_MANIFEST_FILE
+sed -i '' "s|{OAUTH_PATH}|$OAUTH_PATH|g" $APP_MANIFEST_FILE
 
-echo "$APP_CONSTANT_FILE"
+echo "Updating API sandbox KEYS"
+sed -i '' "s|{OAUTH_CLIENT_ID_SANDBOX}|$OAUTH_CLIENT_ID_SANDBOX|g" $APP_OAUTH_SANDBOX_JSON
+sed -i '' "s|{OAUTH_REDIRECT_URL}|$OAUTH_REDIRECT_URL|g" $APP_OAUTH_SANDBOX_JSON
+sed -i '' "s|{OAUTH_URL_SANDBOX}|$OAUTH_URL_SANDBOX|g" $APP_OAUTH_SANDBOX_JSON
+sed -i '' "s|{OAUTH_SCOPE_SANDBOX}|$OAUTH_SCOPE_SANDBOX|g" $APP_CONSTANTS
+sed -i '' "s|{API_URL_SANDBOX}|$API_URL_SANDBOX|g" $APP_CONSTANTS
 
-if [ -e "$APP_CONSTANT_FILE" ]
-then
-    echo "Updating AZURE_ACCOUNT_NAME, AZURE_ACCOUNT_KEY"
+echo "Updating API demoqa KEYS"
+sed -i '' "s|{OAUTH_CLIENT_ID_QA}|$OAUTH_CLIENT_ID_QA|g" $APP_OAUTH_QA_JSON
+sed -i '' "s|{OAUTH_REDIRECT_URL}|$OAUTH_REDIRECT_URL|g" $APP_OAUTH_QA_JSON
+sed -i '' "s|{OAUTH_URL_QA}|$OAUTH_URL_QA|g" $APP_OAUTH_QA_JSON
+sed -i '' "s|{OAUTH_SCOPE_QA}|$OAUTH_SCOPE_QA|g" $APP_CONSTANTS
+sed -i '' "s|{API_URL_QA}|$API_URL_QA|g" $APP_CONSTANTS
 
-    # Key variable uses slashes /, therefore a different command seperator | is needed for sed
-    sed -i '' "s|{AZURE_ACCOUNT_NAME}|$AZURE_ACCOUNT_NAME|g" $APP_CONSTANT_FILE
-    sed -i '' "s|{AZURE_ACCOUNT_KEY}|$AZURE_ACCOUNT_KEY|g" $APP_CONSTANT_FILE
+echo "Updating API inbmz KEYS"
+sed -i '' "s|{OAUTH_CLIENT_ID_PRODUCTION}|$OAUTH_CLIENT_ID_PRODUCTION|g" $APP_OAUTH_PRODUCTION_JSON
+sed -i '' "s|{OAUTH_REDIRECT_URL}|$OAUTH_REDIRECT_URL|g" $APP_OAUTH_PRODUCTION_JSON
+sed -i '' "s|{OAUTH_URL_PRODUCTION}|$OAUTH_URL_PRODUCTION|g" $APP_OAUTH_PRODUCTION_JSON
+sed -i '' "s|{OAUTH_SCOPE_PRODUCTION}|$OAUTH_SCOPE_PRODUCTION|g" $APP_CONSTANTS
+sed -i '' "s|{API_URL_PRODUCTION}|$API_URL_PRODUCTION|g" $APP_CONSTANTS
 
-    sed -i '' "s|{GOOGLE_MAPS_KEY}|$GOOGLE_MAPS_KEY|g" $APP_MANIFEST_FILE
-
-    sed -i '' "s|{APP_CENTER_KEY}|$APP_CENTER_KEY|g" $APP_MANIFEST_FILE
-    sed -i '' "s|{APP_CENTER_KEY}|$APP_CENTER_KEY|g" $APP_SPLASH_ACTIVITY
-
-    sed -i '' "s|{B2C_TENANT}|$B2C_TENANT|g" $APP_LOGIN_ACTIVITY
-    sed -i '' "s|{B2C_CLIENT_ID}|$B2C_CLIENT_ID|g" $APP_LOGIN_ACTIVITY
-    sed -i '' "s|{B2C_RESPONSE_URL}|$B2C_RESPONSE_URL|g" $APP_LOGIN_ACTIVITY
-    sed -i '' "s|{B2C_SCOPE}|$B2C_SCOPE|g" $APP_LOGIN_ACTIVITY
-
-    echo "File content:"
-    cat $APP_CONSTANT_FILE
-
-else
-    echo "$APP_CONSTANT_FILE is not found"
-fi
+echo "Updating API namibia KEYS"
+sed -i '' "s|{OAUTH_CLIENT_ID_NAMIBIA}|$OAUTH_CLIENT_ID_NAMIBIA|g" $APP_OAUTH_NAMIBIA_JSON
+sed -i '' "s|{OAUTH_REDIRECT_URL}|$OAUTH_REDIRECT_URL|g" $APP_OAUTH_NAMIBIA_JSON
+sed -i '' "s|{OAUTH_URL_NAMIBIA}|$OAUTH_URL_NAMIBIA|g" $APP_OAUTH_NAMIBIA_JSON
+sed -i '' "s|{OAUTH_SCOPE_NAMIBIA}|$OAUTH_SCOPE_NAMIBIA|g" $APP_CONSTANTS
+sed -i '' "s|{API_URL_NAMIBIA}|$API_URL_NAMIBIA|g" $APP_CONSTANTS

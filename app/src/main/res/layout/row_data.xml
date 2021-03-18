@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.balysv.materialripple.MaterialRippleLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.balysv.materialripple.MaterialRippleLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="80dp"
@@ -10,76 +9,113 @@
         android:id="@+id/rytItem"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/colorWhite"
         android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:background="@color/colorWhite">
+        android:paddingRight="@dimen/activity_horizontal_margin">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical">
+
                 <TextView
                     android:id="@+id/txtName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:singleLine="true"
                     android:text=""
-                    android:textSize="20sp"
-                    android:textColor="@color/colorBlack"/>
+                    android:textColor="@color/colorBlack"
+                    android:textSize="20sp" />
+
                 <LinearLayout
+                    android:id="@+id/ll_measure"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:visibility="visible">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:singleLine="true"
-                        android:textSize="16sp"
-                        android:text="@string/label_height"/>
+                        android:text="@string/label_height"
+                        android:textSize="16sp" />
+
                     <TextView
                         android:id="@+id/txtHeight"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="8dp"
                         android:singleLine="true"
-                        android:textSize="16sp"
-                        android:text="0.0"/>
+                        android:text="0.0"
+                        android:textSize="16sp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:singleLine="true"
-                        android:textSize="16sp"
                         android:text="@string/unit_cm"
-                        android:textAllCaps="true"/>
+                        android:textAllCaps="true"
+                        android:textSize="16sp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="@dimen/activity_horizontal_margin"
                         android:singleLine="true"
-                        android:textSize="16sp"
-                        android:text="@string/label_weight"/>
+                        android:text="@string/label_weight"
+                        android:textSize="16sp" />
+
                     <TextView
                         android:id="@+id/txtWeight"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
                         android:singleLine="true"
-                        android:textSize="16sp"
-                        android:text="0.000"/>
+                        android:text="0.000"
+                        android:textSize="16sp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:singleLine="true"
-                        android:textSize="16sp"
                         android:text="@string/unit_kg"
-                        android:textAllCaps="true"/>
+                        android:textAllCaps="true"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ll_denied"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:id="@+id/iv_is_denied"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center_vertical"
+                        android:contentDescription="@string/content_image"
+                        android:src="@drawable/denied" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="7dp"
+                        android:maxLines="2"
+                        android:text="@string/data_not_synced"
+                        android:textColor="@color/colorRed"
+                        android:textSize="14sp" />
+
                 </LinearLayout>
             </LinearLayout>
 
@@ -87,9 +123,9 @@
                 android:id="@+id/contextMenuButton"
                 android:layout_width="18dp"
                 android:layout_height="18dp"
+                android:contentDescription="@string/content_image"
                 android:src="@drawable/ic_context_menu"
-                android:tint="@color/colorGreyDark"
-                android:contentDescription="@string/content_image"/>
+                android:tint="@color/colorGreyDark" />
 
         </LinearLayout>
 

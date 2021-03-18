@@ -16,22 +16,21 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
 import android.annotation.SuppressLint;
+
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
+
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
-import android.os.AsyncTask;
+
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatRatingBar;
 import androidx.recyclerview.widget.RecyclerView;
-import android.util.Log;
+
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -49,10 +48,10 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.ArtifactResultRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualDetailDialog;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
@@ -63,25 +62,14 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasureAdapter.ViewHolder> {
     private BaseActivity context;
-    private OnMeasureSelectListener listener;
-    private OnMeasureFeedbackListener feedbackListener;
     private ManualMeasureDialog.ManualMeasureListener manualMeasureListener;
     private List<Measure> measureList;
 
     private FileLogRepository artifactRepository;
-    private ArtifactResultRepository artifactResultRepository;
 
     private SessionManager session;
     private RecyclerView recyclerMeasure;
     private RemoteConfig config;
-
-    public interface OnMeasureSelectListener {
-        void onMeasureSelect(Measure measure);
-    }
-
-    public interface OnMeasureFeedbackListener {
-        void onMeasureFeedback(Measure measure, double overallScore);
-    }
 
     public RecyclerMeasureAdapter(BaseActivity ctx, RecyclerView recycler, ManualMeasureDialog.ManualMeasureListener listener) {
         context = ctx;
@@ -89,20 +77,11 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         recyclerMeasure = recycler;
 
         artifactRepository = FileLogRepository.getInstance(context);
-        artifactResultRepository = ArtifactResultRepository.getInstance(context);
 
         measureList = new ArrayList<>();
 
         session = new SessionManager(context);
         config = session.getRemoteConfig();
-    }
-
-    public void setMeasureSelectListener(OnMeasureSelectListener listener) {
-        this.listener = listener;
-    }
-
-    public void setMeasureFeedbackListener(OnMeasureFeedbackListener listener) {
-        this.feedbackListener = listener;
     }
 
     @Override
@@ -127,8 +106,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
         if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
             holder.imgType.setImageResource(R.drawable.manual);
-
-            holder.rateOverallScore.setVisibility(View.GONE);
         } else {
             holder.imgType.setImageResource(R.drawable.machine);
 
@@ -144,68 +121,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                 }
             };
             artifactRepository.getMeasureUploadProgress(measureId).observe((LifecycleOwner) context, statusObserver);
-
-            new AsyncTask<Void, Void, Boolean>() {
-                private double averagePointCountFront = 0;
-                private int pointCloudCountFront = 0;
-
-                private double averagePointCountSide = 0;
-                private int pointCloudCountSide = 0;
-
-                private double averagePointCountBack = 0;
-                private int pointCloudCountBack = 0;
-
-                @Override
-                protected Boolean doInBackground(Void... voids) {
-                    averagePointCountFront = artifactResultRepository.getAveragePointCountForFront(measure.getId());
-                    pointCloudCountFront = artifactResultRepository.getPointCloudCountForFront(measure.getId());
-
-                    averagePointCountSide = artifactResultRepository.getAveragePointCountForSide(measure.getId());
-                    pointCloudCountSide = artifactResultRepository.getPointCloudCountForSide(measure.getId());
-
-                    averagePointCountBack = artifactResultRepository.getAveragePointCountForBack(measure.getId());
-                    pointCloudCountBack = artifactResultRepository.getPointCloudCountForBack(measure.getId());
-                    return true;
-                }
-
-                public void onPostExecute(Boolean result) {
-                    double lightScoreFront = (Math.abs(averagePointCountFront / 38000 - 1.0) * 3);
-                    double durationScoreFront = Math.abs(1- Math.abs((double) pointCloudCountFront / 8 - 1));
-                    if (lightScoreFront > 1) lightScoreFront -= 1;
-                    if (durationScoreFront > 1) durationScoreFront -= 1;
-
-                    double lightScoreSide = (Math.abs(averagePointCountSide / 38000 - 1.0) * 3);
-                    double durationScoreSide = Math.abs(1- Math.abs((double) pointCloudCountSide / 24 - 1));
-                    if (lightScoreSide > 1) lightScoreSide -= 1;
-                    if (durationScoreSide > 1) durationScoreSide -= 1;
-
-                    double lightScoreBack = (Math.abs(averagePointCountBack / 38000 - 1.0) * 3);
-                    double durationScoreBack = Math.abs(1- Math.abs((double) pointCloudCountBack / 8 - 1));
-                    if (lightScoreBack > 1) lightScoreBack -= 1;
-                    if (durationScoreBack > 1) durationScoreBack -=  1;
-
-                    Log.e("front-light : ", String.valueOf(lightScoreFront));
-                    Log.e("side-light : ", String.valueOf(lightScoreSide));
-                    Log.e("back-light : ", String.valueOf(lightScoreBack));
-
-                    Log.e("front-duration : ", String.valueOf(durationScoreFront));
-                    Log.e("side-duration : ", String.valueOf(durationScoreSide));
-                    Log.e("back-duration : ", String.valueOf(durationScoreBack));
-
-                    double scoreFront = lightScoreFront * durationScoreFront;
-                    double scoreSide = lightScoreSide * durationScoreSide;
-                    double scoreBack = lightScoreBack * durationScoreBack;
-
-                    double overallScore = 0;
-                    if (scoreFront > overallScore) overallScore = scoreFront;
-                    if (scoreSide > overallScore) overallScore = scoreSide;
-                    if (scoreBack > overallScore) overallScore = scoreBack;
-
-                    holder.rateOverallScore.setRating(5 * (float)overallScore);
-
-                    if (feedbackListener != null) holder.bindScanFeedbackListener(measure, overallScore);
-                }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
 
         if (measure.isOedema()) {
@@ -214,12 +129,27 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.rytItem.setBackgroundResource(R.color.colorWhite);
         }
 
+        if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
+            if (measure.isSynced()) {
+                holder.iv_is_synced_corner.setVisibility(View.VISIBLE);
+            } else {
+                holder.iv_is_synced_corner.setVisibility(View.GONE);
+            }
+        } else {
+            if (measure.isSynced()) {
+                holder.iv_is_synced_centre.setVisibility(View.VISIBLE);
+            } else {
+                holder.iv_is_synced_centre.setVisibility(View.GONE);
+            }
+        }
+
+
         holder.txtDate.setText(DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE_AND_TIME, measure.getDate()));
         holder.txtAuthor.setText(Utils.getNameFromEmail(measure.getCreatedBy()));
 
         if (config.isMeasure_visibility()) {
-            int heightConfidence = (int)(measure.getHeightConfidence() * 100);
-            int weightConfidence = (int)(measure.getWeightConfidence() * 100);
+            int heightConfidence = (int) (measure.getHeightConfidence() * 100);
+            int weightConfidence = (int) (measure.getWeightConfidence() * 100);
 
             holder.txtHeight.setText(String.format(Locale.getDefault(), "%.2f%s", measure.getHeight(), context.getString(R.string.unit_cm)));
             holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f%s", measure.getWeight(), context.getString(R.string.unit_kg)));
@@ -237,19 +167,12 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.txtHeightConfidence.setVisibility(View.GONE);
             holder.txtWeightConfidence.setVisibility(View.GONE);
         }
-
-        if (listener != null) {
-            holder.bindSelectListener(position);
-        }
+        holder.bindSelectListener(measure);
     }
 
     @Override
     public int getItemCount() {
         return measureList.size();
-    }
-
-    public Measure getItem(int position) {
-        return measureList.get(position);
     }
 
     public void resetData(List<Measure> measureList) {
@@ -275,14 +198,14 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             text.setPaintFlags(Paint.ANTI_ALIAS_FLAG | Paint.STRIKE_THRU_TEXT_FLAG);
         }
 
-        percentage.setText(value + "%");
+        String label = value + "%";
+        percentage.setText(label);
         percentage.setVisibility(View.VISIBLE);
     }
 
-    public void deleteMeasure(int position) {
-        Measure measure = getItem(position);
+    private void deleteMeasure(Measure measure) {
         if (!config.isAllow_delete()) {
-            notifyItemChanged(position);
+            notifyDataSetChanged();
             Snackbar.make(recyclerMeasure, R.string.permission_delete, Snackbar.LENGTH_LONG).show();
         } else {
             ConfirmDialog dialog = new ConfirmDialog(context);
@@ -295,35 +218,40 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
                     removeMeasure(measure);
                 } else {
-                    notifyItemChanged(position);
+                    notifyDataSetChanged();
                 }
             });
             dialog.show();
         }
     }
 
-    public void editMeasure(int position) {
-        Measure measure = getItem(position);
+    private void editMeasure(Measure measure) {
         if (!config.isAllow_edit()) {
-            notifyItemChanged(position);
+            notifyDataSetChanged();
             Snackbar.make(recyclerMeasure, R.string.permission_edit, Snackbar.LENGTH_LONG).show();
         } else if (measure.getDate() < Utils.getUniversalTimestamp() - config.getTime_to_allow_editing() * 3600 * 1000) {
-            notifyItemChanged(position);
+            notifyDataSetChanged();
             Snackbar.make(recyclerMeasure, R.string.permission_expired, Snackbar.LENGTH_LONG).show();
         } else if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
             ManualMeasureDialog measureDialog = new ManualMeasureDialog(context);
             measureDialog.setManualMeasureListener(manualMeasureListener);
-            measureDialog.setCloseListener(result -> notifyItemChanged(position));
+            measureDialog.setCloseListener(result -> notifyDataSetChanged());
             measureDialog.setMeasure(measure);
             measureDialog.show();
         }
+    }
+
+    private void showMeasure(Measure measure) {
+        ManualDetailDialog detailDialog = new ManualDetailDialog(context);
+        detailDialog.setMeasure(measure);
+        detailDialog.show();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         RelativeLayout rytItem;
 
         ImageView imgType;
-
+        ImageView iv_is_synced_corner, iv_is_synced_centre;
         TextView txtDate;
         TextView txtAuthor;
         TextView txtHeight;
@@ -331,7 +259,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         TextView txtWeight;
         TextView txtWeightConfidence;
         ProgressBar progressUpload;
-        AppCompatRatingBar rateOverallScore;
         View contextMenu;
 
         public ViewHolder(View itemView) {
@@ -339,42 +266,33 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
             rytItem = itemView.findViewById(R.id.rytItem);
             imgType = itemView.findViewById(R.id.imgType);
+            iv_is_synced_corner = itemView.findViewById(R.id.iv_is_synced_corner);
+            iv_is_synced_centre = itemView.findViewById(R.id.iv_is_synced_centre);
             txtDate = itemView.findViewById(R.id.txtDate);
             txtAuthor = itemView.findViewById(R.id.txtAuthor);
             txtHeight = itemView.findViewById(R.id.txtHeight);
             txtHeightConfidence = itemView.findViewById(R.id.txtHeightConfidence);
             txtWeight = itemView.findViewById(R.id.txtWeight);
             txtWeightConfidence = itemView.findViewById(R.id.txtWeightConfidence);
-            rateOverallScore = itemView.findViewById(R.id.rateOverallScore);
             progressUpload = itemView.findViewById(R.id.progressUpload);
             contextMenu = itemView.findViewById(R.id.contextMenuButton);
         }
 
-        public void bindSelectListener(int position) {
-            rytItem.setOnClickListener(v -> listener.onMeasureSelect(getItem(position)));
+        public void bindSelectListener(Measure measure) {
+            rytItem.setOnClickListener(v -> showMeasure(measure));
             rytItem.setOnLongClickListener(view -> {
-                showContextMenu(position);
+                showContextMenu(measure);
                 return true;
             });
-            contextMenu.setOnClickListener(view -> showContextMenu(position));
-        }
-
-        public void bindScanFeedbackListener(Measure measure, double overallScore) {
-            rateOverallScore.setOnTouchListener((view, motionEvent) -> {
-                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    feedbackListener.onMeasureFeedback(measure, overallScore);
-                }
-                return true;
-            });
+            contextMenu.setOnClickListener(view -> showContextMenu(measure));
         }
     }
 
-    private void showContextMenu(int position) {
-        Measure measure = measureList.get(position);
+    private void showContextMenu(Measure measure) {
         String date = DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE_AND_TIME, measure.getDate());
 
-        if (getItem(position).getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
-            new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+        if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
+            new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
                     new ContextMenuDialog.Item(R.string.show_details, R.drawable.ic_details),
                     new ContextMenuDialog.Item(R.string.edit_data, R.drawable.ic_edit),
                     new ContextMenuDialog.Item(R.string.delete_data, R.drawable.ic_delete),
@@ -382,34 +300,34 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             }, which -> {
                 switch (which) {
                     case 0:
-                        listener.onMeasureSelect(getItem(position));
+                        showMeasure(measure);
                         break;
                     case 1:
-                        editMeasure(position);
+                        editMeasure(measure);
                         break;
                     case 2:
-                        deleteMeasure(position);
+                        deleteMeasure(measure);
                         break;
                     case 3:
-                        ContactSupportDialog.show(context, "measure " + date, "measureID:" + getItem(position).getId());
+                        ContactSupportDialog.show(context, "measure " + date, "measureID:" + measure.getId());
                         break;
                 }
             });
         } else {
-            new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+            new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
                     new ContextMenuDialog.Item(R.string.show_details, R.drawable.ic_details),
                     new ContextMenuDialog.Item(R.string.delete_data, R.drawable.ic_delete),
                     new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
             }, which -> {
                 switch (which) {
                     case 0:
-                        listener.onMeasureSelect(getItem(position));
+                        showMeasure(measure);
                         break;
                     case 1:
-                        deleteMeasure(position);
+                        deleteMeasure(measure);
                         break;
                     case 2:
-                        ContactSupportDialog.show(context, "measure " + date, "measureID:" + getItem(position).getId());
+                        ContactSupportDialog.show(context, "measure " + date, "measureID:" + measure.getId());
                         break;
                 }
             });

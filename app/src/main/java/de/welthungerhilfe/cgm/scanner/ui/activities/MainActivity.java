@@ -15,19 +15,21 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Activity;
+
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+
 import androidx.fragment.app.DialogFragment;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBar;
@@ -37,6 +39,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -57,30 +60,29 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
-import de.welthungerhilfe.cgm.scanner.helper.service.DeviceService;
-import de.welthungerhilfe.cgm.scanner.helper.service.UploadService;
-import de.welthungerhilfe.cgm.scanner.helper.syncdata.MeasureNotification;
+import de.welthungerhilfe.cgm.scanner.network.service.DeviceService;
+import de.welthungerhilfe.cgm.scanner.network.service.WifiStateChangereceiverHelperService;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
-    private final int REQUEST_LOCATION = 0x1000;
 
     private PersonListViewModel viewModel;
 
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
-        startActivity(new Intent(MainActivity.this, QRScanActivity.class));
+        startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.CONSENT_CAPTURED_REQUEST));
     }
 
     @BindView(R.id.recyclerData)
@@ -105,7 +107,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     private DialogPlus sortDialog;
 
     private SessionManager session;
-    private AccountManager accountManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,11 +116,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         ButterKnife.bind(this);
 
         session = new SessionManager(MainActivity.this);
-        accountManager = AccountManager.get(this);
+
 
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         final Observer<List<Person>> observer = list -> {
             Log.e("PersonRecycler", "Observer called");
+
             if (lytManager.getItemCount() == 0 && list != null && list.size() == 0) {
                 lytNoPerson.setVisibility(View.VISIBLE);
             } else {
@@ -149,6 +151,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         recyclerData.setAdapter(adapterData);
 
         startService(new Intent(this, DeviceService.class));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!WifiStateChangereceiverHelperService.isServiceRunning) {
+                startForegroundService(new Intent(this, WifiStateChangereceiverHelperService.class));
+            }
+        }
+        SyncingWorkManager.startSyncingWithWorkManager(MainActivity.this);
     }
 
     @Override
@@ -174,19 +182,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     break;
                 case R.id.menuLogout:
                     session.setSigned(false);
-                    session.setAzureAccountName("");
-                    session.setAzureAccountKey("");
-
-                    try {
-                        Account[] accounts = accountManager.getAccounts();
-                        for (Account account : accounts) {
-                            accountManager.removeAccount(account, MainActivity.this, null, null);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        if (WifiStateChangereceiverHelperService.isServiceRunning) {
+                            startForegroundService(new Intent(this, WifiStateChangereceiverHelperService.class)
+                                    .putExtra(AppConstants.STOP_SERVICE, true));
                         }
-                    } catch (Exception e) {
-                        //no rights to remove the account from system settings
-                        e.printStackTrace();
                     }
-
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();
                     break;
@@ -365,7 +366,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     private void doFilterByLocation() {
         Intent intent = new Intent(MainActivity.this, LocationSearchActivity.class);
-        startActivityForResult(intent, REQUEST_LOCATION);
+        startActivityForResult(intent, PERMISSION_LOCATION);
     }
 
     private void openSort() {
@@ -413,8 +414,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 openSearchBar();
                 break;
             case R.id.actionQr:
-                startActivity(new Intent(MainActivity.this, QRScanActivity.class));
-                //startActivity(new Intent(MainActivity.this, ConsentScanActivity.class));
+                startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
+                //   startActivity(new Intent(MainActivity.this, ConsentScanActivity.class));
                 break;
             case R.id.actionFilter:
                 openSort();
@@ -434,7 +435,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     @Override
     public void onActivityResult(int reqCode, int resCode, Intent result) {
         super.onActivityResult(reqCode, resCode, result);
-        if (reqCode == REQUEST_LOCATION && resCode == Activity.RESULT_OK) {
+        if (reqCode == PERMISSION_LOCATION && resCode == Activity.RESULT_OK) {
             int radius = result.getIntExtra(AppConstants.EXTRA_RADIUS, 0);
 
             adapterData.clear();
@@ -459,10 +460,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             viewModel.setFilterOwn();
             viewModel.setSortType(AppConstants.SORT_DATE);
             repository.setUpdated(false);
-        }
-
-        if (!AppController.getInstance().isUploadRunning()) {
-            startService(new Intent(getApplicationContext(), UploadService.class));
         }
     }
 }

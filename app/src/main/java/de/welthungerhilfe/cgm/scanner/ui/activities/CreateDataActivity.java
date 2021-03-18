@@ -20,7 +20,9 @@
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.Manifest;
-import androidx.lifecycle.ViewModelProviders;
+
+import androidx.lifecycle.ViewModelProvider;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -38,25 +40,21 @@ import android.view.MenuItem;
 
 import java.util.List;
 
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.GrowthDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasuresDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-/**
- * Created by Emerald on 2/19/2018.
- */
-
 public class CreateDataActivity extends BaseActivity {
-
-    private final int PERMISSION_LOCATION = 0x002;
 
     public String qrCode;
 
@@ -73,6 +71,12 @@ public class CreateDataActivity extends BaseActivity {
     MeasuresDataFragment measureFragment;
     GrowthDataFragment growthFragment;
 
+
+
+    ViewModelProvider.Factory factory;
+
+    CreateDataViewModel viewModel;
+
     public Loc location = null;
 
     @Override
@@ -81,6 +85,7 @@ public class CreateDataActivity extends BaseActivity {
         setContentView(R.layout.activity_create);
         ButterKnife.bind(this);
 
+
         getCurrentLocation();
 
         qrCode = getIntent().getStringExtra(AppConstants.EXTRA_QR);
@@ -88,7 +93,9 @@ public class CreateDataActivity extends BaseActivity {
         setupActionBar();
         initFragments();
 
-        CreateDataViewModel viewModel = ViewModelProviders.of(this).get(CreateDataViewModel.class);
+
+        factory = new CreateDataViewModelProvideFactory(this);
+        viewModel = new ViewModelProvider(this,factory).get(CreateDataViewModel.class);
         viewModel.getCurrentTab().observe(this, tab -> {
             viewpager.setCurrentItem(tab);
         });

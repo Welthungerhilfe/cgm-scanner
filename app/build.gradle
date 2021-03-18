@@ -6,8 +6,8 @@ android {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 315
-        versionName "3.1.5"
+        versionCode 400
+        versionName "4.0.0"
         manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", arengineValue:"optional", tangoRequired:"false"]
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         javaCompileOptions {
@@ -79,14 +79,14 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1' //support more dex files in one APK
     implementation 'com.jakewharton:butterknife:10.2.1' //helper to link UI item easily from code
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.1' //compiler to link UI item easily from code
-    implementation 'com.google.dagger:dagger:2.13' //dependecy injection helper
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.13' //dependency injection compiler
+    implementation 'io.reactivex.rxjava3:rxjava:3.0.0' //RxJava core
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0' //RxJava for Android
+    implementation 'androidx.work:work-runtime:2.3.3' //workmanager for background task
 
     // Camera
     implementation 'com.google.ar:core:1.18.0' //Google ARCore
     implementation 'com.google.tango:sdk-base:1.55' //Google Tango main
     implementation 'com.google.tango:support-base:1.54' //Google Tango helper
-    //implementation 'com.huawei.hms:arenginesdk:2.13.0.4' //Huawei AREngine
     implementation 'me.dm7.barcodescanner:zxing:1.9.8' //QR Code scanner
     implementation files('src/main/libs/HUAWEI AR Engine SDK_v1.7.0.aar') //Huawei AREngine
 
@@ -95,14 +95,18 @@ dependencies {
     implementation 'org.jcodec:jcodec-android:0.2.3'
 
     // Network
-    implementation "com.microsoft.appcenter:appcenter-auth:2.5.0" //AppCenter authorisation
     implementation "com.microsoft.appcenter:appcenter-analytics:2.5.0" //AppCenter analytics
     implementation "com.microsoft.appcenter:appcenter-crashes:2.5.0" //AppCenter crash reports
-    implementation 'com.microsoft.azure.android:azure-storage-android:2.0.0@aar' //Azure storage
     implementation 'com.novoda:merlin:1.1.7' //connection timestamping
     implementation 'androidx.room:room-runtime:2.2.5' //database syntax helper
+    implementation 'com.android.volley:volley:1.1.1' //Authentication answer parser
+    implementation 'com.microsoft.identity.client:msal:2.0.5' //Microsoft authentication
     annotationProcessor 'androidx.room:room-compiler:2.2.5' //database syntax compiler
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.4' //database debugging
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0' //RestAPI core package
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0' //RestAPI gson converter
+    implementation 'com.squareup.retrofit2:adapter-rxjava3:2.9.0' //RestAPI RxJava integration
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.0' //RestAPI interceptor
 
     // Tests
     testImplementation 'junit:junit:4.12' //java unit test
@@ -112,8 +116,6 @@ dependencies {
     testImplementation "org.robolectric:robolectric:4.4"//write unit tests and run them on a desktop JVM
     testImplementation 'androidx.test:core:1.3.0'
     testImplementation 'androidx.test.ext:junit:1.1.2'
-
-
 
     // UI items
     implementation 'com.balysv:material-ripple:1.0.2' //custom tab (e.g.in scan mode)
@@ -126,6 +128,8 @@ dependencies {
     implementation 'com.google.guava:guava:28.1-android' //growth chart data iterator
     implementation 'com.github.bumptech.glide:glide:4.11.0' //image preview
     implementation 'com.romandanylyk:pageindicatorview:1.0.2' //indicator of current page (in tutorial)
-    implementation 'com.shuhart.stepview:stepview:1.5.1' // for showing steps(in tutorial)
+    implementation 'com.shuhart.stepview:stepview:1.5.1' //for showing steps(in tutorial)
+    implementation 'id.zelory:compressor:2.1.0' //ImageCompression library
+
 }
 apply plugin: 'com.google.gms.google-services'

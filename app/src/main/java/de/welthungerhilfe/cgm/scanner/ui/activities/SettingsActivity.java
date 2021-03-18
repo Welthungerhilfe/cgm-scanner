@@ -1,8 +1,24 @@
+/*
+ * Child Growth Monitor - quick and accurate data on malnutrition
+ * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
+ * Copyright (c) 2018 Welthungerhilfe Innovation
+ * <p>
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p>
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.Manifest;
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -21,18 +37,20 @@ import android.widget.LinearLayout;
 
 import java.io.File;
 
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.datasource.models.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
+import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.BackupManager;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
-import de.welthungerhilfe.cgm.scanner.helper.camera.TangoUtils;
+import de.welthungerhilfe.cgm.scanner.datasource.database.BackupManager;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView;
 import de.welthungerhilfe.cgm.scanner.ui.views.ToggleView;
@@ -41,8 +59,6 @@ import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class SettingsActivity extends BaseActivity {
-
-    private final int PERMISSION_STORAGE = 0x0003;
 
     public static final String KEY_SHOW_DEPTH = "KEY_SHOW_DEPTH";
     public static final String KEY_UPLOAD_WIFI = "KEY_UPLOAD_WIFI";
@@ -98,7 +114,6 @@ public class SettingsActivity extends BaseActivity {
         setContentView(R.layout.activity_settings);
 
         ButterKnife.bind(this);
-
         session = new SessionManager(this);
         RemoteConfig config = session.getRemoteConfig();
 
@@ -124,8 +139,7 @@ public class SettingsActivity extends BaseActivity {
 
     @SuppressLint("StaticFieldLeak")
     private void initUI() {
-        String account = session.getAzureAccountName();
-        boolean devBackend = (account != null) && account.endsWith("dev");
+        boolean devBackend = false; //TODO:detect backend name
         boolean devVersion = BuildConfig.VERSION_NAME.endsWith("dev");
         boolean showQA = BuildConfig.DEBUG || devBackend || devVersion;
         layoutTestQA.setVisibility(showQA ? View.VISIBLE : View.GONE);
@@ -142,15 +156,8 @@ public class SettingsActivity extends BaseActivity {
         switchUploadOverWifi.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_UPLOAD_WIFI, value));
 
         txtSettingVersion.setText(2, Utils.getAppVersion(this));
-
-        AccountManager accountManager = AccountManager.get(this);
-        Account[] accounts = accountManager.getAccounts();
-
-        if (accounts.length > 0) {
-            txtSettingAccount.setText(1, accounts[0].name);
-        }
-
-        txtSettingAzureAccount.setText(1, session.getAzureAccountName());
+        txtSettingAccount.setText(1, session.getUserEmail());
+        txtSettingAzureAccount.setText(1, SyncingWorkManager.getAPI());
 
         String code = session.getLanguage();
         switch (code) {
@@ -168,8 +175,10 @@ public class SettingsActivity extends BaseActivity {
         radioGerman.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_GERMAN));
         radioHindi.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_HINDI));
 
-        if (session.getBackupTimestamp() == 0) txtSettingBackupDate.setText(2, getString(R.string.no_backups));
-        else txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, session.getBackupTimestamp()));
+        if (session.getBackupTimestamp() == 0)
+            txtSettingBackupDate.setText(2, getString(R.string.no_backups));
+        else
+            txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, session.getBackupTimestamp()));
 
         findViewById(R.id.btnBackupNow).setOnClickListener(view -> {
 
@@ -201,7 +210,7 @@ public class SettingsActivity extends BaseActivity {
     private void changeLanguage(String code) {
         session.setLanguage(code);
 
-        Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage( getBaseContext().getPackageName() );
+        Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(i);
         finish();
@@ -210,7 +219,7 @@ public class SettingsActivity extends BaseActivity {
     private void doBackup() {
         progressDialog.show();
         long timestamp = System.currentTimeMillis();
-        File dir = AppController.getInstance().getRootDirectory();
+        File dir = AppController.getInstance().getPublicAppDirectory(this);
         BackupManager.doBackup(this, dir, timestamp, () -> {
             session.setBackupTimestamp(timestamp);
             txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, timestamp));

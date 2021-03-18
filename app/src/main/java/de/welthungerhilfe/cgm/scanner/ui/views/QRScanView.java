@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.views;
 
 import android.content.Context;
@@ -50,10 +49,6 @@ import java.util.Map;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import me.dm7.barcodescanner.core.BarcodeScannerView;
 import me.dm7.barcodescanner.core.DisplayUtils;
-
-/**
- * Created by Emerald on 2/21/2018.
- */
 
 public class QRScanView extends BarcodeScannerView {
     private static final String TAG = QRScanView.class.getSimpleName();

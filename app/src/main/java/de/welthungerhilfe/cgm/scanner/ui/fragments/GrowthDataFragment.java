@@ -16,10 +16,11 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -34,13 +35,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.common.collect.Iterables;
@@ -49,6 +48,7 @@ import com.jaredrummler.materialspinner.MaterialSpinner;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,6 +59,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
@@ -68,8 +69,8 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 public class GrowthDataFragment extends Fragment {
     private Context context;
 
-    private String[] boys = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
-    private String[] girls = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
+    private final String[] boys_0_6 = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
+    private final String[] girls_0_6 = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
 
     private final String[] boys_0_2 = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfl_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
     private final String[] girls_0_2 = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfl_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
@@ -95,6 +96,10 @@ public class GrowthDataFragment extends Fragment {
     private Person person;
     private List<Measure> measures = new ArrayList<>();
 
+    ViewModelProvider.Factory factory;
+
+    CreateDataViewModel viewModel;
+
     public static GrowthDataFragment getInstance(String qrCode) {
         GrowthDataFragment fragment = new GrowthDataFragment();
         fragment.qrCode = qrCode;
@@ -111,7 +116,8 @@ public class GrowthDataFragment extends Fragment {
     public void onActivityCreated(Bundle instance) {
         super.onActivityCreated(instance);
 
-        CreateDataViewModel viewModel = ViewModelProviders.of(getActivity()).get(CreateDataViewModel.class);
+        factory = new CreateDataViewModelProvideFactory(getActivity());
+        viewModel = ViewModelProviders.of(this, factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
             setData();
@@ -152,11 +158,18 @@ public class GrowthDataFragment extends Fragment {
         });
 
         contextMenu = view.findViewById(R.id.contextMenuButton);
-        contextMenu.setOnClickListener(view12 -> new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
-                new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
-        }, which -> {
-            ContactSupportDialog.show((BaseActivity) getActivity(), "growth " + person.getQrcode(), "personID:" + person.getId());
-        }));
+        contextMenu.setOnClickListener(v -> {
+            if (person != null) {
+                String id = person.getId();
+                String qrCode = person.getQrcode();
+                BaseActivity activity = (BaseActivity) getActivity();
+                new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
+                        new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
+                }, which -> {
+                    ContactSupportDialog.show(activity, "growth " + qrCode, "personID:" + id);
+                });
+            }
+        });
 
         initChart();
         return view;
@@ -189,28 +202,21 @@ public class GrowthDataFragment extends Fragment {
         mChart.getXAxis().setDrawAxisLine(true);
         mChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         mChart.getXAxis().setDrawGridLines(true);
-        mChart.getXAxis().setValueFormatter(new MyAxisValueFormatter());
-    }
-
-    private class MyAxisValueFormatter implements IAxisValueFormatter{
-
-        @Override
-        public String getFormattedValue(float value, AxisBase axis) {
-            axis.setLabelCount(6,true);
-            return value+"";
-        }
+        mChart.getXAxis().setValueFormatter((value, axis) -> {
+            axis.setLabelCount(6, true);
+            return value + "";
+        });
     }
 
     public void setData() {
-        if (person == null || measures == null)
+        if (person == null || measures == null || measures.size() == 0) {
             return;
-
+        }
         Measure lastMeasure = null;
         if (measures.size() > 0)
             lastMeasure = measures.get(measures.size() - 1);
 
         txtLabel.setText(person.getSex());
-
 
 
         long birthday = person.getBirthday();
@@ -229,15 +235,19 @@ public class GrowthDataFragment extends Fragment {
         try {
             BufferedReader reader;
 
-            if(lastMeasure!=null && lastMeasure.getAge() / 30 < 24 && lastMeasure.getHeight()<=110){
-                    boys=boys_0_2;
-                    girls=girls_0_2;
+            String[] boys, girls;
+            if (lastMeasure != null && lastMeasure.getAge() < 365 * 2 && lastMeasure.getHeight() <= 110) {
+                boys = boys_0_2;
+                girls = girls_0_2;
+            } else {
+                boys = boys_0_6;
+                girls = girls_0_6;
             }
 
             if (person.getSex().equals("female"))
-                reader = new BufferedReader(new InputStreamReader(context.getAssets().open(girls[chartType]), "UTF-8"));
+                reader = new BufferedReader(new InputStreamReader(context.getAssets().open(girls[chartType]), StandardCharsets.UTF_8));
             else
-                reader = new BufferedReader(new InputStreamReader(context.getAssets().open(boys[chartType]), "UTF-8"));
+                reader = new BufferedReader(new InputStreamReader(context.getAssets().open(boys[chartType]), StandardCharsets.UTF_8));
 
             String mLine;
             while ((mLine = reader.readLine()) != null) {
@@ -248,14 +258,20 @@ public class GrowthDataFragment extends Fragment {
                 } catch (Exception e) {
                     continue;
                 }
-                if ((chartType == 0 || chartType == 1 ) && lastMeasure != null && rule == lastMeasure.getAge() / 30) {
-                    skew=Utils.parseDouble(arr[1]);
-                    median = Utils.parseDouble(arr[2]);
-                    coefficient = Utils.parseDouble(arr[3]);
-                } else if (chartType == 2 && lastMeasure != null && rule == lastMeasure.getHeight()) {
-                    skew = Utils.parseDouble(arr[1]);
-                    median = Utils.parseDouble(arr[2]);
-                    coefficient = Utils.parseDouble(arr[3]);
+                if (lastMeasure != null) {
+                    if ((chartType == 0 || chartType == 1)) {
+                        if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365)) {
+                            skew = Utils.parseDouble(arr[1]);
+                            median = Utils.parseDouble(arr[2]);
+                            coefficient = Utils.parseDouble(arr[3]);
+                        }
+                    } else if (chartType == 2) {
+                        if ((int) (rule * 2) == (int) (lastMeasure.getHeight() * 2)) {
+                            skew = Utils.parseDouble(arr[1]);
+                            median = Utils.parseDouble(arr[2]);
+                            coefficient = Utils.parseDouble(arr[3]);
+                        }
+                    }
                 }
 
                 SD3neg.add(new Entry(rule, Utils.parseFloat(arr[4])));
@@ -283,7 +299,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_weight);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore=newZscore(lastMeasure.getWeight(),median,skew,coefficient);
+                    zScore = newZScore(lastMeasure.getWeight(), median, skew, coefficient);
                 }
                 break;
             case 1:
@@ -291,7 +307,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_height);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore=newZscore(lastMeasure.getHeight(),median,skew,coefficient);
+                    zScore = newZScore(lastMeasure.getHeight(), median, skew, coefficient);
                 }
                 break;
             case 2:
@@ -299,7 +315,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_weight);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore=newZscore(lastMeasure.getWeight(),median,skew,coefficient);
+                    zScore = newZScore(lastMeasure.getWeight(), median, skew, coefficient);
                 }
                 break;
             case 3:
@@ -340,7 +356,7 @@ public class GrowthDataFragment extends Fragment {
 
             lytNotif.setBackgroundResource(R.color.colorRed);
             lytNotif.setVisibility(View.VISIBLE);
-        } else if (zScore < -2 && zScore >=-3) { // MAM
+        } else if (zScore < -2 && zScore >= -3) { // MAM
             switch (chartType) {
                 case 0: // weight for age
                     txtNotifTitle.setText(R.string.mam_wfa_title);
@@ -386,7 +402,7 @@ public class GrowthDataFragment extends Fragment {
                     y = (float) measure.getWeight();
                     break;
                 case 3:
-                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 /30;
+                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 / 30;
                     y = (float) measure.getMuac();
                     break;
             }
@@ -441,24 +457,20 @@ public class GrowthDataFragment extends Fragment {
         mChart.animateX(3000);
     }
 
-    private double newZscore(double value,double median,double skew,double coefficient) {
-        double zscore=(Math.pow(value/median,skew)-1)/(skew*coefficient);
-        double finalZscore=0.0;
-        double SD3pos=median*Math.pow((1+(skew*coefficient*3)),1/skew);
-        double SD3neg=median*Math.pow((1+(skew*coefficient*(-3))),1/skew);
-        double SD23pos=SD3pos-median*Math.pow((1+(skew*coefficient*2)),1/skew);
-        double SD23neg=median*Math.pow((1+(skew*coefficient*(-2))),1/skew)-SD3neg;
-        if(zscore>=-3 && zscore<=3){
-            finalZscore=zscore;
+    //Compute ZScore as defined in https://www.who.int/growthref/computation.pdf
+    private double newZScore(double y, double Mt, double Lt, double St) {
+        double Zind = (Math.pow(y / Mt, Lt) - 1) / (St * Lt);
+        if (Zind >= -3 && Zind <= 3) {
+            return Zind;
+        } else if (Zind > 3) {
+            double SD3pos = Mt * Math.pow(1 + Lt * St * 3, 1 / Lt);
+            double SD23pos = SD3pos - Mt * Math.pow(1 + Lt * St * 2, 1 / Lt);
+            return 3 + ((y - SD3pos) / SD23pos);
+        } else {
+            double SD3neg = Mt * Math.pow(1 + Lt * St * -3, 1 / Lt);
+            double SD23neg = Mt * Math.pow(1 + Lt * St * -2, 1 / Lt) - SD3neg;
+            return -3 + ((y - SD3neg) / SD23neg);
         }
-        else if(zscore>3){
-            finalZscore=3+((value-SD3pos)/SD23pos);
-        }
-        else{
-            finalZscore=-3+((value-SD3neg)/SD23neg);
-        }
-        return finalZscore;
-
     }
 
     protected LineDataSet createDataSet(ArrayList<Entry> values, String label, int color, float width, boolean circle) {

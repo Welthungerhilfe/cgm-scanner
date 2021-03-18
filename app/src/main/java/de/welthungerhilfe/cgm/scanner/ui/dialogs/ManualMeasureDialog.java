@@ -16,7 +16,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.dialogs;
 
 import android.app.Dialog;
@@ -24,6 +23,7 @@ import android.content.Context;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,16 +47,12 @@ import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.helper.AppConstants;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
 import de.welthungerhilfe.cgm.scanner.ui.views.UnitEditText;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-
-/**
- * Created by Emerald on 2/23/2018.
- */
 
 public class ManualMeasureDialog extends Dialog implements View.OnClickListener {
 
@@ -100,27 +96,35 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
             editManualLocation.setText(location.getAddress());
         });
     }
+
     @OnClick(R.id.txtCancel)
     void onCancel(TextView txtCancel) {
         dismiss();
     }
+
     @OnClick(R.id.btnOK)
     void OnConfirm(Button btnOK) {
+        String measureServerKey = null;
+        if(measure!=null)
+        {
+            measureServerKey = measure.getMeasureServerKey();
+        }
         if (validate() && measureListener != null) {
             if (!oedema) {
                 final TextView message = new TextView(mContext);
                 final SpannableString s = new SpannableString(mContext.getText(R.string.edema_link));
                 Linkify.addLinks(s, Linkify.WEB_URLS);
-                int p = Utils.dpToPx(25, getContext());
+                int p = (int) (25 * ((float) getContext().getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
                 message.setPadding(p, p, p, p);
                 message.setText(s);
-                message.setTextSize(TypedValue.COMPLEX_UNIT_SP,16);
+                message.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
                 message.setMovementMethod(LinkMovementMethod.getInstance());
                 AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                 builder.setTitle(R.string.edema_check);
                 builder.setView(message);
+                String finalMeasureServerKey = measureServerKey;
                 builder.setPositiveButton(R.string.selector_yes, (dialogInterface, i) -> {
-                    oedema=true;
+                    oedema = true;
                     measureListener.onManualMeasure(
                             measure != null ? measure.getId() : null,
                             Utils.parseDouble(editManualHeight.getText().toString()),
@@ -128,15 +132,15 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                             Utils.parseDouble(editManualMuac.getText().toString()),
                             0f,
                             location,
-                            oedema
+                            oedema,
+                            finalMeasureServerKey
                     );
                     dismiss();
                 });
                 builder.setNegativeButton(R.string.selector_no, (dialogInterface, i) -> show());
                 builder.show();
-            }
-            else{
-                oedema=false;
+            } else {
+                oedema = false;
                 measureListener.onManualMeasure(
                         measure != null ? measure.getId() : null,
                         Utils.parseDouble(editManualHeight.getText().toString()),
@@ -144,7 +148,8 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                         Utils.parseDouble(editManualMuac.getText().toString()),
                         0f,
                         location,
-                        oedema
+                        oedema,
+                       measureServerKey
                 );
                 dismiss();
             }
@@ -189,7 +194,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         super(context);
 
         mContext = context;
-        location = ((CreateDataActivity)mContext).location;
+        location = ((CreateDataActivity) mContext).location;
 
         this.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -275,7 +280,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         } else if (Utils.parseDouble(height) <= 45) {
             editManualHeight.setError(tooltipe_height_min);
             valid = false;
-        } else if (Utils.parseDouble(height) >= 120) {
+        } else if (Utils.parseDouble(height) >= 130) {
             editManualHeight.setError(tooltipe_height_max);
             valid = false;
         } else {
@@ -328,7 +333,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     }
 
     public interface ManualMeasureListener {
-        void onManualMeasure(String id, double height, double weight, double muac, double headCircumference, Loc location, boolean oedema);
+        void onManualMeasure(String id, double height, double weight, double muac, double headCircumference, Loc location, boolean oedema, String measureServerKey);
     }
 
     public interface CloseListener {

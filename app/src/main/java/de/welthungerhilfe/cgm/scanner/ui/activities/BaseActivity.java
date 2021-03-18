@@ -16,8 +16,8 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package de.welthungerhilfe.cgm.scanner.ui.activities;
+
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -32,10 +32,14 @@ import com.novoda.merlin.registerable.disconnection.Disconnectable;
 
 import java.util.HashMap;
 
-import de.welthungerhilfe.cgm.scanner.helper.LanguageHelper;
-import de.welthungerhilfe.cgm.scanner.helper.SessionManager;
+import de.welthungerhilfe.cgm.scanner.utils.LanguageHelper;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class BaseActivity extends AppCompatActivity implements Connectable, Disconnectable {
+
+    protected final int PERMISSION_LOCATION = 0x0001;
+    protected final int PERMISSION_CAMERA = 0x0002;
+    protected final int PERMISSION_STORAGE = 0x0003;
 
     public interface ResultListener {
         void onActivityResult(int requestCode, int resultCode, @Nullable Intent data);
