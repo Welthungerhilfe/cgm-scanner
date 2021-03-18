@@ -215,11 +215,20 @@ public abstract class AbstractARCamera {
             }
         }
 
+        //get lowest plane
+        float lowestPlane = Integer.MAX_VALUE;
+        for (Float f : planes) {
+            float value = f - 2.0f * position[1];
+            if (lowestPlane > value) {
+                lowestPlane = value;
+            }
+        }
+
         switch (mode) {
             case CENTER:
-                return getDepthPreviewCenter(depth, planes, calibration, matrixCalculate(position, rotation));
+                return getDepthPreviewCenter(depth, lowestPlane, calibration, matrixCalculate(position, rotation));
             case PLANE:
-                return getDepthPreviewPlane(depth, planes, calibration, matrixCalculate(position, rotation));
+                return getDepthPreviewPlane(depth, lowestPlane, calibration, matrixCalculate(position, rotation));
             case SOBEL:
                 return getDepthPreviewSobel(depth);
             default:
@@ -310,8 +319,11 @@ public abstract class AbstractARCamera {
         return output;
     }
 
-    private Bitmap getDepthPreviewCenter(float[][] depth, ArrayList<Float> planes, float[] calibration, float[] matrix) {
-        Bitmap bitmap = getDepthPreviewSobel(depth);
+    private Bitmap getDepthPreviewCenter(float[][] depth, float plane, float[] calibration, float[] matrix) {
+        Bitmap bitmap = getDepthPreviewPlane(depth, plane, calibration, matrix);
+        if (Math.abs(plane - Integer.MAX_VALUE) < 0.1f) {
+            return bitmap;
+        }
         int w = bitmap.getWidth();
         int h = bitmap.getHeight();
         int[] pixels = new int[w * h];
@@ -334,7 +346,7 @@ public abstract class AbstractARCamera {
             int g = Color.green(color);
             int b = Color.blue(color);
             int a = Color.alpha(color);
-            if ((r < 64) && (a != 255)) { //TODO:ignore plane data
+            if ((r < 64) && (a != 255)) {
                 pixels[index] = Color.argb(255, r, b, g);
 
                 for (Point d : dirs) {
@@ -351,7 +363,7 @@ public abstract class AbstractARCamera {
         return bitmap;
     }
 
-    private Bitmap getDepthPreviewPlane(float[][] depth, ArrayList<Float> planes, float[] calibration, float[] matrix) {
+    private Bitmap getDepthPreviewPlane(float[][] depth, float plane, float[] calibration, float[] matrix) {
         Bitmap bitmap = getDepthPreviewSobel(depth);
         int w = bitmap.getWidth();
         int h = bitmap.getHeight();
@@ -368,9 +380,8 @@ public abstract class AbstractARCamera {
                 if (z > 0) {
                     float tx = (x - cx) * z / fx;
                     float ty = (y - cy) * z / fy;
-                    float[] point = matrixTransformPoint(matrix, -tx, -ty, z);
-                    //TODO:remove
-                    if (Math.abs(point[1] - 0) < 0.1f) {
+                    float[] point = matrixTransformPoint(matrix, -tx, ty, z);
+                    if (Math.abs(point[1] + plane) < 0.1f) {
                         int index = y * w + x;
                         int color = pixels[index];
                         int r = Color.red(color);
@@ -378,18 +389,6 @@ public abstract class AbstractARCamera {
                         int b = Color.blue(color);
                         pixels[index] = Color.argb(255, b, g, r);
                     }
-                    //TODO:make this working (it seems the roll rotation is in wrong direction)
-                    /*for (Float f : planes) {
-                        if (Math.abs(point[1] - f) < 0.1f) {
-                            int index = y * w + x;
-                            int color = pixels[index];
-                            int r = Color.red(color);
-                            int g = Color.green(color);
-                            int b = Color.blue(color);
-                            pixels[index] = Color.argb(255, b, g, r);
-                            break;
-                        }
-                    }*/
                 }
             }
         }

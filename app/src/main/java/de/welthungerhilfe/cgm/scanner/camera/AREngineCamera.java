@@ -277,13 +277,13 @@ public class AREngineCamera extends AbstractARCamera {
 
       //get planes
       mPlanes.clear();
-      ARCamera camera = frame.getCamera();
       for (ARPlane plane : mSession.getAllPlanes()) {
         mPlanes.add(plane.getCenterPose().ty());
       }
 
       //get pose from AREngine
       synchronized (mLock) {
+        ARCamera camera = frame.getCamera();
         ARPose pose = camera.getPose();
         pose.getTranslation(mPosition, 0);
         pose.getRotationQuaternion(mRotation, 0);
