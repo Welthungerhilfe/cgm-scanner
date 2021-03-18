@@ -61,6 +61,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
@@ -70,6 +71,7 @@ import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
@@ -116,8 +118,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         ButterKnife.bind(this);
 
         session = new SessionManager(MainActivity.this);
-
-
+        LogFileUtils.startSession(session);
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         final Observer<List<Person>> observer = list -> {
             Log.e("PersonRecycler", "Observer called");
@@ -461,5 +462,11 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             viewModel.setSortType(AppConstants.SORT_DATE);
             repository.setUpdated(false);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        session.saveLogList(LogFileUtils.logList.subList(0, LogFileUtils.logLimit));
     }
 }

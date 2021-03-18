@@ -46,6 +46,7 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.utils.IO;
+import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ContactSupportDialog extends Dialog {
@@ -137,7 +138,7 @@ public class ContactSupportDialog extends Dialog {
         Intent sendIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         sendIntent.setType(SUPPORT_MIME);
         sendIntent.setPackage(SUPPORT_APP);
-        sendIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { SUPPORT_EMAIL });
+        sendIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{SUPPORT_EMAIL});
         sendIntent.putExtra(Intent.EXTRA_TEXT, message);
         sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
@@ -145,8 +146,14 @@ public class ContactSupportDialog extends Dialog {
         if (audioFile != null) uris.add(Uri.fromFile(audioFile));
         if (screenshot != null) uris.add(Uri.fromFile(screenshot));
         if (zip != null) uris.add(Uri.fromFile(zip));
+        File logFile = null;
+        if (LogFileUtils.logList != null && LogFileUtils.logList.size() > 0) {
+            logFile = LogFileUtils.getLogFiles(context);
+            uris.add(Uri.fromFile(logFile));
+        }
         sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
         context.startActivity(sendIntent);
+
     }
 
     @OnClick(R.id.txtCancel)
@@ -182,7 +189,9 @@ public class ContactSupportDialog extends Dialog {
         IO.zip(paths, zip.getAbsolutePath());
     }
 
-    public void setFooter(String value) { footer = value; }
+    public void setFooter(String value) {
+        footer = value;
+    }
 
     public void setType(String value) {
         type = value;
