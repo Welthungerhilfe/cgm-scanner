@@ -54,12 +54,14 @@ import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicke
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
@@ -118,7 +120,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         ButterKnife.bind(this);
 
         session = new SessionManager(MainActivity.this);
-        LogFileUtils.startSession(session);
+        LogFileUtils.initLogFile(session,MainActivity.this);
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         final Observer<List<Person>> observer = list -> {
             Log.e("PersonRecycler", "Observer called");
@@ -158,6 +160,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         }
         SyncingWorkManager.startSyncingWithWorkManager(MainActivity.this);
+        File log = new File(AppController.getInstance().getPublicAppDirectory(MainActivity.this)
+                + "/cgm");
     }
 
     @Override
@@ -183,6 +187,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     break;
                 case R.id.menuLogout:
                     session.setSigned(false);
+                    session.setCurrentLogFilePath(null);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         if (WifiStateChangereceiverHelperService.isServiceRunning) {
                             startForegroundService(new Intent(this, WifiStateChangereceiverHelperService.class)
@@ -462,11 +467,16 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             viewModel.setSortType(AppConstants.SORT_DATE);
             repository.setUpdated(false);
         }
+        //For testing of logfile
+        LogFileUtils.logInfo("this is data resume 1 " + System.currentTimeMillis());
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        session.saveLogList(LogFileUtils.logList.subList(0, LogFileUtils.logLimit));
+    protected void onPause() {
+        super.onPause();
+        //For testing of logfile
+        LogFileUtils.logInfo("this is data pause 2 " + System.currentTimeMillis());
+
+
     }
 }

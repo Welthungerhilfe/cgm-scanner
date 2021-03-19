@@ -18,6 +18,7 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
+import android.Manifest;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.content.Intent;
@@ -34,6 +35,8 @@ import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -47,21 +50,29 @@ import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.utils.LanguageHelper;
+import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 
 public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
+    private static final int STORAGE_PEMISSION = 100;
+
 
     @OnClick({R.id.btnLoginMicrosoft})
     void doSignIn() {
+        if (!checkStoragePermissions()) {
+            return;
+        }
         if (BuildConfig.DEBUG) {
             if (session.getEnvironment() == AppConstants.ENV_UNKNOWN) {
                 Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
                 return;
             }
             session.setSigned(true);
+            LogFileUtils.startSession(LoginActivity.this, session);
+
             startApp();
         } else {
             if (session.getEnvironment() != AppConstants.ENV_UNKNOWN) {
@@ -108,6 +119,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
+        checkStoragePermissions();
     }
 
 
@@ -164,6 +176,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                 //start the app
                 SyncAdapter.getInstance(getApplicationContext()).resetRetrofit();
                 UploadService.resetRetrofit();
+                LogFileUtils.startSession(LoginActivity.this, session);
                 startApp();
 
             } else if (feedback) {
@@ -197,5 +210,17 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                     break;
             }
         }
+    }
+
+    public boolean checkStoragePermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            requestStoragePermission();
+            return false;
+        }
+        return true;
+    }
+
+    private void requestStoragePermission() {
+        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PEMISSION);
     }
 }

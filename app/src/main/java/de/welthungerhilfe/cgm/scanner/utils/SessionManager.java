@@ -21,14 +21,12 @@ package de.welthungerhilfe.cgm.scanner.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -53,7 +51,7 @@ public class SessionManager {
     private final String KEY_TUTORIAL = "key_tutorial";
     private final String KEY_REMOTE_CONFIG = "key_remote_config";
     private final String SELECTED_ENVIRONMENT = "selected_environment";
-    private final String LOG_LIST = "log_list";
+    private final String LOG_FILE = "log_file";
 
 
     private SharedPreferences pref;
@@ -227,23 +225,12 @@ public class SessionManager {
         return pref.getInt(SELECTED_ENVIRONMENT, AppConstants.ENV_UNKNOWN);
     }
 
-    public List<String> getLogList() {
-        Gson gson = new Gson();
-        String json = pref.getString(LOG_LIST, null);
-        if (json == null) {
-            return new ArrayList<>();
-        } else {
-            Type type = new TypeToken<List<String>>() {
-            }.getType();
-            return gson.fromJson(json, type);
-
-        }
+    public String getCurrentLogFilePath() {
+       return pref.getString(LOG_FILE, null);
     }
 
-    public void saveLogList(List<String> data) {
-        Gson gson = new Gson();
-        String jsonText = gson.toJson(data);
-        editor.putString(LOG_LIST, jsonText);
+    public void setCurrentLogFilePath(String name) {
+        editor.putString(LOG_FILE, name);
         editor.commit();
     }
 

@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
@@ -146,14 +147,19 @@ public class ContactSupportDialog extends Dialog {
         if (audioFile != null) uris.add(Uri.fromFile(audioFile));
         if (screenshot != null) uris.add(Uri.fromFile(screenshot));
         if (zip != null) uris.add(Uri.fromFile(zip));
-        File logFile = null;
-        if (LogFileUtils.logList != null && LogFileUtils.logList.size() > 0) {
-            logFile = LogFileUtils.getLogFiles(context);
-            uris.add(Uri.fromFile(logFile));
-        }
+        addLoggingFilesZip(uris);
         sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
         context.startActivity(sendIntent);
 
+    }
+
+    void addLoggingFilesZip(ArrayList<Uri> uris) {
+        File extFileDir = AppController.getInstance().getRootDirectory(context);
+        File logFilesFolder = new File(extFileDir, AppConstants.LOG_FILE_FOLDER);
+        if (logFilesFolder.exists()) {
+            File file[] = logFilesFolder.listFiles();
+            uris.add(attachFiles(file));
+        }
     }
 
     @OnClick(R.id.txtCancel)
@@ -179,14 +185,14 @@ public class ContactSupportDialog extends Dialog {
         screenshot = file;
     }
 
-    public void attachFiles(File[] files) {
+    public Uri attachFiles(File[] files) {
         String[] paths = new String[files.length];
         for (int i = 0; i < files.length; i++) {
             paths[i] = files[i].getAbsolutePath();
         }
-
         zip = new File(AppController.getInstance().getPublicAppDirectory(context), "report.zip");
         IO.zip(paths, zip.getAbsolutePath());
+        return Uri.fromFile(zip);
     }
 
     public void setFooter(String value) {

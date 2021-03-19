@@ -8,59 +8,82 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
+import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 
 public class LogFileUtils {
     static File logFile;
-    public static List<String> logList;
-    public static final int logLimit = 10;
+    public static final int maxFiles = 10;
+    public static final String TAG = LogFileUtils.class.getSimpleName();
 
-    public static void startSession(SessionManager sessionManager) {
-        logList = sessionManager.getLogList();
-    }
+    public static void startSession(Context context, SessionManager sessionManager) {
 
-    public static void logInfo(String text) {
-        text = DataFormat.convertTimestampToDate(System.currentTimeMillis()) + ":" + text;
-        logList.add(0, text);
-    }
+        File extFileDir = AppController.getInstance().getRootDirectory(context);
+        File logFilesFolder = new File(extFileDir, AppConstants.LOG_FILE_FOLDER);
+        if (!logFilesFolder.exists()) {
+            logFilesFolder.mkdir();
+        }
+        String fileName = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss'.txt'").format(new Date());
 
-    public static File getLogFiles(Context context) {
+        logFile = new File(logFilesFolder, fileName);
         try {
-            File log = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
-                    + "/cgm/LogFileUtils");
-            if (!log.exists()) {
-                log.mkdir();
-            }
-
-            logFile = new File(AppController.getInstance().getPublicAppDirectory(context), "Logs_file.txt");
-
-            if (logFile.exists()) {
-                logFile.delete();
-            }
-            try {
+            if (!logFile.exists()) {
                 logFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-            //BufferedWriter for performance, true to set append to file flag
-            Log.i("LogFileUtils", "this is size " + logList.size());
-            int lines = logLimit;
-            if (logList.size() < logLimit) {
-                lines = logList.size();
-            }
+            sessionManager.setCurrentLogFilePath(logFile.getAbsolutePath());
+            maintainLogFiles(logFilesFolder);
 
-            for (int i = 0; i < lines; i++) {
-                BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-                buf.append(logList.get(i));
-                buf.newLine();
-                buf.close();
-            }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return logFile;
+    }
+
+    public static void initLogFile(SessionManager sessionManager, Context context) {
+        if (sessionManager.getCurrentLogFilePath() == null) {
+            startSession(context, sessionManager);
+        }
+        logFile = new File(sessionManager.getCurrentLogFilePath());
+        if (!logFile.exists()) {
+            startSession(context, sessionManager);
+        }
+    }
+
+    public static void logInfo(String text) {
+        text = DataFormat.convertTimestampToDate(System.currentTimeMillis()) + ":" + text;
+        try {
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            buf.append(text);
+            buf.newLine();
+            buf.close();
+        } catch (IOException e) {
+
+        }
+    }
+
+    public static void maintainLogFiles(File folder) {
+        final File[] sortedByDate = folder.listFiles();
+
+        if (sortedByDate != null && sortedByDate.length > 1) {
+            Arrays.sort(sortedByDate, (object1, object2) -> Long.compare(object2.lastModified(), object1.lastModified()));
+        }
+        if (sortedByDate.length > maxFiles) {
+            File deleteFile = null;
+            for (int i = maxFiles; i < sortedByDate.length; i++) {
+                deleteFile = new File(sortedByDate[i].getAbsolutePath());
+                if (deleteFile.exists()) {
+                    deleteFile.delete();
+                }
+            }
+        }
+        Log.i(TAG, "this is value of filles " + sortedByDate.length);
+
     }
 }
