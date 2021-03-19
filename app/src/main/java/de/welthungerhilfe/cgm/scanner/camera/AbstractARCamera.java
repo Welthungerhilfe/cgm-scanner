@@ -67,6 +67,7 @@ public abstract class AbstractARCamera {
     //AR status
     protected int mFrameIndex;
     protected float mPixelIntensity;
+    protected float mTargetHeight;
     protected DepthPreviewMode mDepthMode;
     protected LightConditions mLight;
     protected PlaneMode mPlaneMode;
@@ -98,6 +99,7 @@ public abstract class AbstractARCamera {
         mLastBright = 0;
         mLastDark = 0;
         mSessionStart = 0;
+        mTargetHeight = 0;
     }
 
     public void onCreate(int colorPreview, int depthPreview, int surfaceview) {
@@ -235,6 +237,10 @@ public abstract class AbstractARCamera {
             default:
                 return null;
         }
+    }
+
+    public float getTargetHeight() {
+        return mTargetHeight;
     }
 
     public void setPlaneMode(PlaneMode mode) {
@@ -379,6 +385,7 @@ public abstract class AbstractARCamera {
     }
 
     private Bitmap getDepthPreviewCenter(float[][] depth, float plane, float[] calibration, float[] matrix) {
+        float maxHeight = 0;
         Bitmap bitmap = getDepthPreviewPlane(depth, plane, calibration, matrix);
         if (Math.abs(plane - Integer.MAX_VALUE) < 0.1f) {
             return bitmap;
@@ -388,6 +395,10 @@ public abstract class AbstractARCamera {
         int[] pixels = new int[w * h];
         bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
 
+        float fx = calibration[0] * (float)w;
+        float fy = calibration[1] * (float)h;
+        float cx = calibration[2] * (float)w;
+        float cy = calibration[3] * (float)h;
         ArrayList<Point> dirs = new ArrayList<>();
         dirs.add(new Point(-1, 0));
         dirs.add(new Point(1, 0));
@@ -407,6 +418,16 @@ public abstract class AbstractARCamera {
             int a = Color.alpha(color);
             if ((r < 64) && (a != 255)) {
                 pixels[index] = Color.argb(255, r, b, g);
+                float z = depth[p.x][p.y] * 0.001f;
+                if (z > 0) {
+                    float tx = (p.x - cx) * z / fx;
+                    float ty = (p.y - cy) * z / fy;
+                    float[] point = matrixTransformPoint(matrix, -tx, ty, z);
+                    float height = Math.abs(point[1] + plane);
+                    if (maxHeight < height) {
+                        maxHeight = height;
+                    }
+                }
 
                 for (Point d : dirs) {
                     Point t = new Point(p.x + d.x, p.y + d.y);
@@ -417,6 +438,7 @@ public abstract class AbstractARCamera {
                 }
             }
         }
+        mTargetHeight = maxHeight;
 
         bitmap.setPixels(pixels, 0, w, 0, 0, w, h);
         return bitmap;

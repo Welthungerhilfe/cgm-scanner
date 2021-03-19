@@ -75,6 +75,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
+import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
@@ -283,6 +284,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private long mColorTime;
     private long mDepthSize;
     private long mDepthTime;
+    private boolean mShowDepth;
 
     private long age = 0;
 
@@ -727,14 +729,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private AbstractARCamera getCamera() {
         if (mCameraInstance == null) {
-            boolean showDepth = LocalPersistency.getBoolean(this, SettingsActivity.KEY_SHOW_DEPTH);
+            mShowDepth = LocalPersistency.getBoolean(this, SettingsActivity.KEY_SHOW_DEPTH);
 
             if (TangoUtils.isTangoSupported()) {
                 mCameraInstance = new TangoCamera(this);
             } else if (AREngineCamera.shouldUseAREngine()) {
-                mCameraInstance = new AREngineCamera(this, showDepth);
+                mCameraInstance = new AREngineCamera(this, mShowDepth);
             } else {
-                mCameraInstance = new ARCoreCamera(this, showDepth);
+                mCameraInstance = new ARCoreCamera(this, mShowDepth);
             }
         }
         return mCameraInstance;
@@ -800,8 +802,15 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         onLightUpdate(getCamera().getLightConditionState());
 
-        if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
+        if (BuildConfig.DEBUG && mShowDepth && (SCAN_MODE == AppConstants.SCAN_STANDING)) {
+            float height = getCamera().getTargetHeight();
+            runOnUiThread(() -> {
+                String text = getString(R.string.label_height) + " : " + String.format("%.2fm", height);
+                mTitleView.setText(text);
+            });
+        }
 
+        if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
             long profile = System.currentTimeMillis();
             Depthmap depthmap = getCamera().extractDepthmap(image, position, rotation, mCameraInstance instanceof AREngineCamera);
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
