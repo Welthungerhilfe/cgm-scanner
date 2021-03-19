@@ -45,6 +45,8 @@ public abstract class AbstractARCamera {
 
     public enum LightConditions { NORMAL, BRIGHT, DARK };
 
+    public enum PlaneMode { LOWEST, VISIBLE };
+
     //app connection
     protected Activity mActivity;
     protected ImageView mColorCameraPreview;
@@ -67,6 +69,7 @@ public abstract class AbstractARCamera {
     protected float mPixelIntensity;
     protected DepthPreviewMode mDepthMode;
     protected LightConditions mLight;
+    protected PlaneMode mPlaneMode;
     protected long mLastBright;
     protected long mLastDark;
     protected long mSessionStart;
@@ -91,6 +94,7 @@ public abstract class AbstractARCamera {
         mPixelIntensity = 0;
         mDepthMode = showDepth ? DepthPreviewMode.CENTER : DepthPreviewMode.OFF;
         mLight = LightConditions.NORMAL;
+        mPlaneMode = PlaneMode.LOWEST;
         mLastBright = 0;
         mLastDark = 0;
         mSessionStart = 0;
@@ -220,17 +224,21 @@ public abstract class AbstractARCamera {
         switch (mode) {
             case CENTER:
                 matrix = matrixCalculate(position, rotation);
-                bestPlane = getBestPlane(depth, planes, calibration, matrix, position);
+                bestPlane = getPlane(depth, planes, calibration, matrix, position);
                 return getDepthPreviewCenter(depth, bestPlane, calibration, matrix);
             case PLANE:
                 matrix = matrixCalculate(position, rotation);
-                bestPlane = getBestPlane(depth, planes, calibration, matrix, position);
+                bestPlane = getPlane(depth, planes, calibration, matrix, position);
                 return getDepthPreviewPlane(depth, bestPlane, calibration, matrix);
             case SOBEL:
                 return getDepthPreviewSobel(depth);
             default:
                 return null;
         }
+    }
+
+    public void setPlaneMode(PlaneMode mode) {
+        mPlaneMode = mode;
     }
 
     public LightConditions updateLight(LightConditions light, long lastBright, long lastDark, long sessionStart) {
@@ -316,7 +324,28 @@ public abstract class AbstractARCamera {
         return output;
     }
 
-    private float getBestPlane(float[][] depth, ArrayList<Float> planes, float[] calibration, float[] matrix, float[] position) {
+    private float getPlane(float[][] depth, ArrayList<Float> planes, float[] calibration, float[] matrix, float[] position) {
+        switch (mPlaneMode) {
+            case LOWEST:
+                return getPlaneLowest(planes, position);
+            case VISIBLE:
+                return getPlaneVisible(depth, planes, calibration, matrix, position);
+        }
+        return Integer.MAX_VALUE;
+    }
+
+    private float getPlaneLowest(ArrayList<Float> planes, float[] position) {
+        float bestValue = Integer.MAX_VALUE;
+        for (Float f : planes) {
+            float value = f - 2.0f * position[1];
+            if (bestValue > value) {
+                bestValue = value;
+            }
+        }
+        return bestValue;
+    }
+
+    private float getPlaneVisible(float[][] depth, ArrayList<Float> planes, float[] calibration, float[] matrix, float[] position) {
         int w = depth.length;
         int h = depth[0].length;
         float fx = calibration[0] * (float)w;

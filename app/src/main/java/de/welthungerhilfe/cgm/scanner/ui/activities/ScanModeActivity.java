@@ -471,10 +471,12 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             scanType1.setChildIcon(R.drawable.stand_front_active);
             scanType2.setChildIcon(R.drawable.stand_side_active);
             scanType3.setChildIcon(R.drawable.stand_back_active);
+            getCamera().setPlaneMode(AbstractARCamera.PlaneMode.LOWEST);
         } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
             scanType1.setChildIcon(R.drawable.lying_front_active);
             scanType2.setChildIcon(R.drawable.lying_side_active);
             scanType3.setChildIcon(R.drawable.lying_back_active);
+            getCamera().setPlaneMode(AbstractARCamera.PlaneMode.VISIBLE);
         }
     }
 
