@@ -41,11 +41,14 @@ public abstract class AbstractARCamera {
         void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex);
     }
 
-    public enum DepthPreviewMode { OFF, SOBEL, PLANE, CENTER };
+    public enum DepthPreviewMode { OFF, SOBEL, PLANE, CENTER, FOCUS };
 
     public enum LightConditions { NORMAL, BRIGHT, DARK };
 
     public enum PlaneMode { LOWEST, VISIBLE };
+
+    private final static int ALPHA_DEFAULT = 128;
+    private final static int ALPHA_FOCUS = 64;
 
     //app connection
     protected Activity mActivity;
@@ -67,6 +70,7 @@ public abstract class AbstractARCamera {
     //AR status
     protected int mFrameIndex;
     protected float mPixelIntensity;
+    protected float mTargetDistance;
     protected float mTargetHeight;
     protected DepthPreviewMode mDepthMode;
     protected LightConditions mLight;
@@ -93,13 +97,14 @@ public abstract class AbstractARCamera {
 
         mFrameIndex = 1;
         mPixelIntensity = 0;
-        mDepthMode = showDepth ? DepthPreviewMode.CENTER : DepthPreviewMode.OFF;
+        mDepthMode = showDepth ? DepthPreviewMode.FOCUS : DepthPreviewMode.OFF;
         mLight = LightConditions.NORMAL;
         mPlaneMode = PlaneMode.LOWEST;
         mLastBright = 0;
         mLastDark = 0;
         mSessionStart = 0;
         mTargetHeight = 0;
+        mTargetDistance = 1;
     }
 
     public void onCreate(int colorPreview, int depthPreview, int surfaceview) {
@@ -189,7 +194,7 @@ public abstract class AbstractARCamera {
         return mLight;
     }
 
-    public Bitmap getDepthPreview(Image image, boolean reorder, DepthPreviewMode mode, ArrayList<Float> planes, float[] calibration, float[] position, float[] rotation) {
+    public Bitmap getDepthPreview(Image image, boolean reorder, ArrayList<Float> planes, float[] calibration, float[] position, float[] rotation) {
 
         //get short buffer
         Image.Plane plane = image.getPlanes()[0];
@@ -206,6 +211,8 @@ public abstract class AbstractARCamera {
         }
 
         //get depthmap
+        float distance = 0;
+        int center = Integer.MAX_VALUE;
         int stride = plane.getRowStride();
         int width = image.getWidth();
         int height = image.getHeight();
@@ -217,17 +224,27 @@ public abstract class AbstractARCamera {
                 if ((x < 1) || (y < 1) || (x >= width - 1) || (y >= height - 1)) {
                     depthRange = 0;
                 }
+                if (depthRange > 0) {
+                    int value = Math.abs(x - width / 2) + Math.abs(y - height / 2);
+                    if (center > value) {
+                        center = value;
+                        distance = depthRange * 0.001f;
+                    }
+                }
                 depth[x][y] = depthRange;
             }
         }
+        mTargetDistance = mTargetDistance * 0.9f + distance * 0.1f;
 
         float bestPlane;
         float[] matrix;
-        switch (mode) {
+        switch (mDepthMode) {
             case CENTER:
+            case FOCUS:
+                boolean otherColors = mDepthMode == DepthPreviewMode.CENTER;
                 matrix = matrixCalculate(position, rotation);
                 bestPlane = getPlane(depth, planes, calibration, matrix, position);
-                return getDepthPreviewCenter(depth, bestPlane, calibration, matrix);
+                return getDepthPreviewCenter(depth, bestPlane, calibration, matrix, otherColors);
             case PLANE:
                 matrix = matrixCalculate(position, rotation);
                 bestPlane = getPlane(depth, planes, calibration, matrix, position);
@@ -237,6 +254,10 @@ public abstract class AbstractARCamera {
             default:
                 return null;
         }
+    }
+
+    public float getTargetDistance() {
+        return mTargetDistance;
     }
 
     public float getTargetHeight() {
@@ -384,61 +405,78 @@ public abstract class AbstractARCamera {
         return bestValue;
     }
 
-    private Bitmap getDepthPreviewCenter(float[][] depth, float plane, float[] calibration, float[] matrix) {
+    private Bitmap getDepthPreviewCenter(float[][] depth, float plane, float[] calibration, float[] matrix, boolean otherColors) {
         float maxHeight = 0;
         Bitmap bitmap = getDepthPreviewPlane(depth, plane, calibration, matrix);
-        if (Math.abs(plane - Integer.MAX_VALUE) < 0.1f) {
-            return bitmap;
-        }
         int w = bitmap.getWidth();
         int h = bitmap.getHeight();
         int[] pixels = new int[w * h];
         bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
 
-        float fx = calibration[0] * (float)w;
-        float fy = calibration[1] * (float)h;
-        float cx = calibration[2] * (float)w;
-        float cy = calibration[3] * (float)h;
-        ArrayList<Point> dirs = new ArrayList<>();
-        dirs.add(new Point(-1, 0));
-        dirs.add(new Point(1, 0));
-        dirs.add(new Point(0, -1));
-        dirs.add(new Point(0, 1));
-        Stack<Point> stack = new Stack<>();
-        Point p = new Point(w / 2, h / 2);
-        stack.push(p);
-        while (!stack.isEmpty()) {
-            p = stack.pop();
+        if (Math.abs(plane - Integer.MAX_VALUE) >= 0.1f) {
+            float fx = calibration[0] * (float)w;
+            float fy = calibration[1] * (float)h;
+            float cx = calibration[2] * (float)w;
+            float cy = calibration[3] * (float)h;
+            ArrayList<Point> dirs = new ArrayList<>();
+            dirs.add(new Point(-1, 0));
+            dirs.add(new Point(1, 0));
+            dirs.add(new Point(0, -1));
+            dirs.add(new Point(0, 1));
+            Stack<Point> stack = new Stack<>();
+            Point p = new Point(w / 2, h / 2);
+            stack.push(p);
+            while (!stack.isEmpty()) {
+                p = stack.pop();
 
-            int index = p.y * w + p.x;
-            int color = pixels[index];
-            int r = Color.red(color);
-            int g = Color.green(color);
-            int b = Color.blue(color);
-            int a = Color.alpha(color);
-            if ((r < 64) && (a != 255)) {
-                pixels[index] = Color.argb(255, r, b, g);
-                float z = depth[p.x][p.y] * 0.001f;
-                if (z > 0) {
-                    float tx = (p.x - cx) * z / fx;
-                    float ty = (p.y - cy) * z / fy;
-                    float[] point = matrixTransformPoint(matrix, -tx, ty, z);
-                    float height = Math.abs(point[1] + plane);
-                    if (maxHeight < height) {
-                        maxHeight = height;
+                int index = p.y * w + p.x;
+                int color = pixels[index];
+                int r = Color.red(color);
+                int g = Color.green(color);
+                int b = Color.blue(color);
+                int a = Color.alpha(color);
+                if ((r < 64) && (a != ALPHA_FOCUS)) {
+                    pixels[index] = Color.argb(ALPHA_FOCUS, r, b, g);
+                    float z = depth[p.x][p.y] * 0.001f;
+                    if (z > 0) {
+                        float tx = (p.x - cx) * z / fx;
+                        float ty = (p.y - cy) * z / fy;
+                        float[] point = matrixTransformPoint(matrix, -tx, ty, z);
+                        float height = Math.abs(point[1] + plane);
+                        if (maxHeight < height) {
+                            maxHeight = height;
+                        }
+                    }
+
+                    for (Point d : dirs) {
+                        Point t = new Point(p.x + d.x, p.y + d.y);
+                        if ((t.x < 0) || (t.y < 0) || (t.x >= w) || (t.y >= h)) {
+                            continue;
+                        }
+                        stack.add(t);
                     }
                 }
+            }
+            mTargetHeight = maxHeight;
+        }
 
-                for (Point d : dirs) {
-                    Point t = new Point(p.x + d.x, p.y + d.y);
-                    if ((t.x < 0) || (t.y < 0) || (t.x >= w) || (t.y >= h)) {
-                        continue;
+        if (!otherColors) {
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    int index = y * w + x;
+                    int color = pixels[index];
+                    int r = Color.red(color);
+                    int g = Color.green(color);
+                    int b = Color.blue(color);
+                    int a = Color.alpha(color);
+                    if ((b > g) || (r > g) || (a != ALPHA_FOCUS)) {
+                        pixels[index] = Color.TRANSPARENT;
+                    } else {
+                        pixels[index] = Color.argb(ALPHA_FOCUS, 255, 255, 255);
                     }
-                    stack.add(t);
                 }
             }
         }
-        mTargetHeight = maxHeight;
 
         bitmap.setPixels(pixels, 0, w, 0, 0, w, h);
         return bitmap;
@@ -468,7 +506,7 @@ public abstract class AbstractARCamera {
                         int r = Color.red(color);
                         int g = Color.green(color);
                         int b = Color.blue(color);
-                        pixels[index] = Color.argb(255, b, g, r);
+                        pixels[index] = Color.argb(ALPHA_DEFAULT, b, g, r);
                     }
                 }
             }
@@ -494,7 +532,7 @@ public abstract class AbstractARCamera {
                 int r = (int) Math.max(0, Math.min(1.0f * value, 255));
                 int g = (int) Math.max(0, Math.min(2.0f * value, 255));
                 int b = (int) Math.max(0, Math.min(3.0f * value, 255));
-                bitmap.setPixel(x, y, Color.argb(128, r, g, b));
+                bitmap.setPixel(x, y, Color.argb(ALPHA_DEFAULT, r, g, b));
             }
         }
         return bitmap;

@@ -262,7 +262,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private SessionManager session;
 
-    private TextView mTxtLightFeedback;
+    private TextView mTxtFeedback;
     private TextView mTitleView;
     private ProgressBar progressBar;
     private FloatingActionButton fab;
@@ -355,7 +355,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         ButterKnife.bind(this);
 
-        mTxtLightFeedback = findViewById(R.id.txtLightFeedback);
+        mTxtFeedback = findViewById(R.id.txtLightFeedback);
         mTitleView = findViewById(R.id.txtTitle);
         progressBar = findViewById(R.id.progressBar);
         fab = findViewById(R.id.fab_scan_result);
@@ -530,7 +530,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private void openScan() {
         fab.setImageResource(R.drawable.recorder);
         lytScanner.setVisibility(View.VISIBLE);
-        mTxtLightFeedback.setVisibility(View.GONE);
+        mTxtFeedback.setVisibility(View.GONE);
         mProgress = 0;
         progressBar.setProgress(0);
     }
@@ -800,8 +800,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex) {
 
-        onLightUpdate(getCamera().getLightConditionState());
-
         if (BuildConfig.DEBUG && mShowDepth && (SCAN_MODE == AppConstants.SCAN_STANDING)) {
             float height = getCamera().getTargetHeight();
             runOnUiThread(() -> {
@@ -809,6 +807,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 mTitleView.setText(text);
             });
         }
+        onFeedbackUpdate(getCamera().getLightConditionState());
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
             long profile = System.currentTimeMillis();
@@ -878,7 +877,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onTangoDepthData(TangoPointCloudData pointCloudData, float[] position, float[] rotation, TangoCameraIntrinsics[] calibration) {
 
-        onLightUpdate(getCamera().getLightConditionState());
+        onFeedbackUpdate(getCamera().getLightConditionState());
         boolean hasCameraCalibration = mCameraInstance.hasCameraCalibration();
         String cameraCalibration = mCameraInstance.getCameraCalibration();
 
@@ -947,20 +946,32 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onLightUpdate(AbstractARCamera.LightConditions state) {
+    private void onFeedbackUpdate(AbstractARCamera.LightConditions state) {
+        float distance = getCamera().getTargetDistance();
         runOnUiThread(() -> {
             switch (state) {
                 case NORMAL:
-                    mTxtLightFeedback.setVisibility(View.GONE);
+                    mTxtFeedback.setVisibility(View.GONE);
                     break;
                 case BRIGHT:
-                    mTxtLightFeedback.setText(R.string.score_light_bright);
-                    mTxtLightFeedback.setVisibility(View.VISIBLE);
+                    mTxtFeedback.setText(R.string.score_light_bright);
+                    mTxtFeedback.setVisibility(View.VISIBLE);
                     break;
                 case DARK:
-                    mTxtLightFeedback.setText(R.string.score_light_dark);
-                    mTxtLightFeedback.setVisibility(View.VISIBLE);
+                    mTxtFeedback.setText(R.string.score_light_dark);
+                    mTxtFeedback.setVisibility(View.VISIBLE);
                     break;
+            }
+
+            if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
+                if (distance < 1) {
+                    mTxtFeedback.setText("Too close");
+                    mTxtFeedback.setVisibility(View.VISIBLE);
+                }
+                if (distance > 1.5f) {
+                    mTxtFeedback.setText("Too far");
+                    mTxtFeedback.setVisibility(View.VISIBLE);
+                }
             }
         });
     }
