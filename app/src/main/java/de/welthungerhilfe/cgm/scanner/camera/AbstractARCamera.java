@@ -97,7 +97,7 @@ public abstract class AbstractARCamera {
 
         mFrameIndex = 1;
         mPixelIntensity = 0;
-        mDepthMode = showDepth ? DepthPreviewMode.FOCUS : DepthPreviewMode.OFF;
+        mDepthMode = showDepth ? DepthPreviewMode.CENTER : DepthPreviewMode.FOCUS;
         mLight = LightConditions.NORMAL;
         mPlaneMode = PlaneMode.LOWEST;
         mLastBright = 0;
@@ -460,20 +460,20 @@ public abstract class AbstractARCamera {
             mTargetHeight = maxHeight;
         }
 
-        if (!otherColors) {
-            for (int y = 0; y < h; y++) {
-                for (int x = 0; x < w; x++) {
-                    int index = y * w + x;
-                    int color = pixels[index];
-                    int r = Color.red(color);
-                    int g = Color.green(color);
-                    int b = Color.blue(color);
-                    int a = Color.alpha(color);
-                    if ((b > g) || (r > g) || (a != ALPHA_FOCUS)) {
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int index = y * w + x;
+                int color = pixels[index];
+                int r = Color.red(color);
+                int g = Color.green(color);
+                int b = Color.blue(color);
+                int a = Color.alpha(color);
+                if ((b > g) || (r > g) || (a != ALPHA_FOCUS)) {
+                    if (!otherColors) {
                         pixels[index] = Color.TRANSPARENT;
-                    } else {
-                        pixels[index] = Color.argb(ALPHA_FOCUS, 255, 255, 255);
                     }
+                } else {
+                    pixels[index] = Color.argb(ALPHA_FOCUS, 255, 255, 255);
                 }
             }
         }

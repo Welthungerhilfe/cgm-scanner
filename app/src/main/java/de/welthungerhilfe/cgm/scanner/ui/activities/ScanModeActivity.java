@@ -800,7 +800,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex) {
 
-        if (mShowDepth && (SCAN_MODE == AppConstants.SCAN_STANDING)) {
+        if (SCAN_MODE == AppConstants.SCAN_STANDING) {
             float height = getCamera().getTargetHeight();
             runOnUiThread(() -> {
                 String text = getString(R.string.label_height) + " : " + String.format("~%dcm", (int)(height * 100));
