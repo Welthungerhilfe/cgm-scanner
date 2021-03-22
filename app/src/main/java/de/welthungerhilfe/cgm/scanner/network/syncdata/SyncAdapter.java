@@ -493,9 +493,12 @@ public class SyncAdapter {
                             person.setSynced(true);
                             Loc location = new Loc();
                             person.setLastLocation(location);
-                            person.getLastLocation().setAddress(person1.getLastLocation().getAddress());
-                            person.getLastLocation().setLatitude(person1.getLastLocation().getLatitude());
-                            person.getLastLocation().setLongitude(person1.getLastLocation().getLongitude());
+                            location = person1.getLastLocation();
+                            if ((location != null) && (location.getAddress() != null)) {
+                                person.getLastLocation().setAddress(location.getAddress());
+                                person.getLastLocation().setLatitude(location.getLatitude());
+                                person.getLastLocation().setLongitude(location.getLongitude());
+                            }
                             person.setBirthday(person1.getBirthday());
                             personRepository.updatePerson(person);
                             updated = true;
