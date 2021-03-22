@@ -800,10 +800,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex) {
 
-        if (BuildConfig.DEBUG && mShowDepth && (SCAN_MODE == AppConstants.SCAN_STANDING)) {
+        if (mShowDepth && (SCAN_MODE == AppConstants.SCAN_STANDING)) {
             float height = getCamera().getTargetHeight();
             runOnUiThread(() -> {
-                String text = getString(R.string.label_height) + " : " + String.format("%.2fm", height);
+                String text = getString(R.string.label_height) + " : " + String.format("~%dcm", (int)(height * 100));
                 mTitleView.setText(text);
             });
         }
@@ -965,12 +965,13 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
             if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
                 if (distance < 1) {
-                    mTxtFeedback.setText("Too close");
+                    mTxtFeedback.setText(R.string.score_distance_close);
                     mTxtFeedback.setVisibility(View.VISIBLE);
-                }
-                if (distance > 1.5f) {
-                    mTxtFeedback.setText("Too far");
+                } else if (distance > 1.5f) {
+                    mTxtFeedback.setText(R.string.score_distance_far);
                     mTxtFeedback.setVisibility(View.VISIBLE);
+                } else {
+                    mTxtFeedback.setVisibility(View.GONE);
                 }
             }
         });

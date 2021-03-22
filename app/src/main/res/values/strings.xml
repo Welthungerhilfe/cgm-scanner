@@ -186,6 +186,8 @@
     <string name="score_light">Light Score : </string>
     <string name="score_light_bright">Too bright</string>
     <string name="score_light_dark">Too dark</string>
+    <string name="score_distance_close">Too close</string>
+    <string name="score_distance_far">Too far</string>
     <string name="capture_inside">Capture the child inside of outline</string>
     <string name="standup">Try to keep the child against a clear background and keep the whole child within the camera view</string>
     <string name="lyedown">Try to keep the child against a clear background and keep the whole child within the camera view</string>
