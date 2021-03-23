@@ -66,6 +66,11 @@ import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class GrowthDataFragment extends Fragment {
+
+    private final int ZSCORE_COLOR_0 = Color.rgb(55, 129, 69);
+    private final int ZSCORE_COLOR_2 = Color.rgb(230, 122, 58);
+    private final int ZSCORE_COLOR_3 = Color.rgb(212, 53, 62);
+
     private Context context;
 
     private final String[] boys_0_6 = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
@@ -272,11 +277,11 @@ public class GrowthDataFragment extends Fragment {
             }
             reader.close();
 
-            dataSets.add(createDataSet(SD3neg, "-3", Color.rgb(212, 53, 62), 1.5f, false));
-            dataSets.add(createDataSet(SD2neg, "-2", Color.rgb(230, 122, 58), 1.5f, false));
-            dataSets.add(createDataSet(SD0, "0", Color.rgb(55, 129, 69), 1.5f, false));
-            dataSets.add(createDataSet(SD2, "+2", Color.rgb(230, 122, 58), 1.5f, false));
-            dataSets.add(createDataSet(SD3, "+3", Color.rgb(212, 53, 62), 1.5f, false));
+            dataSets.add(createDataSet(SD3neg, "-3", ZSCORE_COLOR_3, 1.5f, false));
+            dataSets.add(createDataSet(SD2neg, "-2", ZSCORE_COLOR_2, 1.5f, false));
+            dataSets.add(createDataSet(SD0, "0", ZSCORE_COLOR_0, 1.5f, false));
+            dataSets.add(createDataSet(SD2, "+2", ZSCORE_COLOR_2, 1.5f, false));
+            dataSets.add(createDataSet(SD3, "+3", ZSCORE_COLOR_3, 1.5f, false));
 
 
         } catch (IOException e) {
@@ -401,35 +406,22 @@ public class GrowthDataFragment extends Fragment {
                 continue;
 
             final float fX = x;
-            Entry v3neg = Iterables.tryFind(SD3neg, input -> input.getX() == fX).orNull();
             try {
                 ArrayList<Entry> entry = new ArrayList<>();
                 entry.add(new Entry(x, y));
 
-                if (y <= v3neg.getY()) {
-                    dataSets.add(createDataSet(entry, "", Color.rgb(212, 53, 62), 5f, true));
+                if (y <= Iterables.find(SD3neg, input -> input.getX() == fX).getY()) {
+                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));
+                } else if (y <= Iterables.find(SD2neg, input -> input.getX() == fX).getY()) {
+                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
+                } else if (y <= Iterables.find(SD0, input -> input.getX() == fX).getY()) {
+                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
+                } else if (y <= Iterables.find(SD2, input -> input.getX() == fX).getY()) {
+                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
+                } else if (y <= Iterables.find(SD3, input -> input.getX() == fX).getY()) {
+                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
                 } else {
-                    Entry v2neg = Iterables.tryFind(SD2neg, input -> input.getX() == fX).orNull();
-                    if (y <= v2neg.getY()) {
-                        dataSets.add(createDataSet(entry, "", Color.rgb(230, 122, 58), 5f, true));
-                    } else {
-                        Entry v0 = Iterables.tryFind(SD0, input -> input.getX() == fX).orNull();
-                        if (y <= v0.getY()) {
-                            dataSets.add(createDataSet(entry, "", Color.rgb(55, 129, 69), 5f, true));
-                        } else {
-                            Entry v2 = Iterables.tryFind(SD2, input -> input.getX() == fX).orNull();
-                            if (y <= v2.getY()) {
-                                dataSets.add(createDataSet(entry, "", Color.rgb(230, 122, 58), 5f, true));
-                            } else {
-                                Entry v3 = Iterables.tryFind(SD3, input -> input.getX() == fX).orNull();
-                                if (y <= v3.getY()) {
-                                    dataSets.add(createDataSet(entry, "", Color.rgb(212, 53, 62), 5f, true));
-                                } else {
-                                    dataSets.add(createDataSet(entry, "", Color.rgb(0, 0, 0), 5f, true));
-                                }
-                            }
-                        }
-                    }
+                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));
                 }
                 entries.add(new Entry(x, y));
             } catch (NullPointerException ex) {
