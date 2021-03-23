@@ -73,8 +73,8 @@ public class MeasureRepository {
         return database.measureDao().getOwnMeasureCount(session.getUserEmail());
     }
 
-    public LiveData<List<Measure>> getManualMeasuresLiveData(String personId) {
-        return database.measureDao().getManualMeasuresLiveData(personId);
+    public List<Measure> getManualMeasures(String personId) {
+        return database.measureDao().getManualMeasures(personId);
     }
 
     public long getTotalMeasureCount() {
