@@ -63,7 +63,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
@@ -467,15 +466,24 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             viewModel.setSortType(AppConstants.SORT_DATE);
             repository.setUpdated(false);
         }
-        //For testing of logfile
+        //For testing of logfile on sandbox
         LogFileUtils.logInfo("this is data resume 1 " + System.currentTimeMillis());
+        LogFileUtils.logError("this is data resume 1 " + System.currentTimeMillis());
+        LogFileUtils.logException(new NullPointerException());
+
+
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        //For testing of logfile
+        //For testing of logfile on sandbox
         LogFileUtils.logInfo("this is data pause 2 " + System.currentTimeMillis());
+        LogFileUtils.logError("this is data pause 2 " + System.currentTimeMillis());
+        LogFileUtils.logException(new IllegalAccessException());
+
+
 
 
     }
