@@ -18,8 +18,7 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.annotation.Nullable;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -57,9 +56,9 @@ import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
@@ -93,13 +92,6 @@ public class GrowthDataFragment extends Fragment {
     TextView txtNotifMessage;
     View contextMenu;
 
-    private Person person;
-    private List<Measure> measures = new ArrayList<>();
-
-    ViewModelProvider.Factory factory;
-
-    CreateDataViewModel viewModel;
-
     public static GrowthDataFragment getInstance(String qrCode) {
         GrowthDataFragment fragment = new GrowthDataFragment();
         fragment.qrCode = qrCode;
@@ -107,31 +99,26 @@ public class GrowthDataFragment extends Fragment {
         return fragment;
     }
 
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
         this.context = context;
     }
 
-    public void onActivityCreated(Bundle instance) {
-        super.onActivityCreated(instance);
-
-        factory = new CreateDataViewModelProvideFactory(getActivity());
-        viewModel = ViewModelProviders.of(this, factory).get(CreateDataViewModel.class);
-        viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
-            this.person = person;
-            setData();
-        });
-        viewModel.getManualMeasuresLiveData().observe(getViewLifecycleOwner(), measures -> {
-            this.measures = measures;
-            setData();
-        });
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
     }
 
-    public void onResume() {
-        super.onResume();
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+            setData();
+        }
     }
 
     @Override
@@ -159,6 +146,7 @@ public class GrowthDataFragment extends Fragment {
 
         contextMenu = view.findViewById(R.id.contextMenuButton);
         contextMenu.setOnClickListener(v -> {
+            Person person = PersonRepository.getInstance(context).findPersonByQr(qrCode);
             if (person != null) {
                 String id = person.getId();
                 String qrCode = person.getQrcode();
@@ -209,6 +197,8 @@ public class GrowthDataFragment extends Fragment {
     }
 
     public void setData() {
+        Person person = PersonRepository.getInstance(context).findPersonByQr(qrCode);
+        List<Measure> measures = MeasureRepository.getInstance(context).getManualMeasures(person.getId());
         if (person == null || measures == null || measures.size() == 0) {
             return;
         }
