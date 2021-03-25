@@ -242,7 +242,7 @@ public class TangoCamera extends AbstractARCamera {
                             TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE,
                             TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
                             TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
-                            TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
+                            TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
                             TangoSupport.ROTATION_0);
                     mPosition[0] = (float) pose.translation[0];
                     mPosition[1] = (float) pose.translation[1];
