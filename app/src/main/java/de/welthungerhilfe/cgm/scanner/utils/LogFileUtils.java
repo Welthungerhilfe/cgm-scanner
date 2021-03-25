@@ -90,8 +90,6 @@ public class LogFileUtils {
                 }
             }
         }
-        Log.i(TAG, "this is value of files " + sortedByDate.length);
-
     }
 
     public static void startAsyncToWrite(String str) {
@@ -115,7 +113,6 @@ public class LogFileUtils {
 
         public synchronized void addTextToFile(String data) {
             try {
-                Log.i(TAG,"this is log-> "+data);
                 FileOutputStream output = new FileOutputStream(logFile, true);
                 byte[] array = data.getBytes();
                 String lineSeparator = System.getProperty("line.separator");
