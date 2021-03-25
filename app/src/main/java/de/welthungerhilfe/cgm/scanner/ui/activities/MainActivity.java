@@ -59,12 +59,14 @@ import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicke
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
@@ -75,6 +77,7 @@ import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
@@ -82,6 +85,8 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
+
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     private PersonListViewModel viewModel;
 
@@ -128,8 +133,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         ButterKnife.bind(this);
 
         session = new SessionManager(MainActivity.this);
-
-
+        LogFileUtils.initLogFile(session,MainActivity.this);
+        LogFileUtils.logInfo(TAG, "CGM-Scanner " + Utils.getAppVersion(this) + " started");
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         final Observer<List<Person>> observer = list -> {
             Log.e("PersonRecycler", "Observer called");
@@ -169,6 +174,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         }
         SyncingWorkManager.startSyncingWithWorkManager(MainActivity.this);
+        File log = new File(AppController.getInstance().getPublicAppDirectory(MainActivity.this)
+                + "/cgm");
     }
 
     @Override
@@ -194,6 +201,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     break;
                 case R.id.menuLogout:
                     session.setSigned(false);
+                    session.setCurrentLogFilePath(null);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         if (WifiStateChangereceiverHelperService.isServiceRunning) {
                             startForegroundService(new Intent(this, WifiStateChangereceiverHelperService.class)

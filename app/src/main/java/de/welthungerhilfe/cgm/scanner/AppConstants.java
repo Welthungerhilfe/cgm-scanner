@@ -115,4 +115,8 @@ public class AppConstants {
     //WifiStateChangereceiverHelperService
     public static final String STOP_SERVICE = "stop_service";
 
+    //LogFileUtils
+    public static final String LOG_FILE_FOLDER = "LogFileFolder";
+
+
 }

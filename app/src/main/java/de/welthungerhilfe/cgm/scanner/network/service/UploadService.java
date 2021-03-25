@@ -27,8 +27,6 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 
-import android.util.Log;
-
 import org.jcodec.common.io.IOUtils;
 
 import java.io.File;
@@ -49,6 +47,7 @@ import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
+import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -151,7 +150,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
 
     @Override
     public void onDestroy() {
-        Log.e(TAG, "Stopped");
+        LogFileUtils.logInfo(TAG, "Stopped");
         service = null;
         running = false;
         onErrorCount = 0;
@@ -164,7 +163,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
 
     private void loadQueueFileLogs() {
         if (!Utils.isUploadAllowed(this)) {
-            Log.e(TAG, "Skipped");
+            LogFileUtils.logInfo(TAG, "Skipped due to not available network");
             stopSelf();
             return;
         }
@@ -173,7 +172,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
             stopSelf();
             return;
         }
-        Log.e(TAG, "Started");
+        LogFileUtils.logInfo(TAG, "Started");
         running = true;
 
         repository.loadQueuedData(this, sessionManager);
@@ -184,8 +183,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
         synchronized (lock) {
             remainingCount = list.size();
         }
-        Log.e(TAG, String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
-        Log.i("UploadService ", "this is inside onFileLoaded  " + remainingCount);
+        LogFileUtils.logInfo(TAG, String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
 
         Context c = getApplicationContext();
         if (LocalPersistency.getBoolean(c, SettingsPerformanceActivity.KEY_TEST_RESULT)) {
@@ -216,7 +214,8 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                 try {
                     Runnable worker = new UploadThread(list.get(i));
                     executor.execute(worker);
-                } catch (Exception ex) {
+                } catch (Exception e) {
+                    LogFileUtils.logException(e);
                     remainingCount--;
                 }
             }
@@ -249,7 +248,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                     try {
                         lock.wait();
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        LogFileUtils.logException(e);
                     }
                 }
             }
@@ -272,7 +271,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                     //mime = "image/png";
                     break;
                 default:
-                    Log.e(TAG, "Data type not supported");
+                    LogFileUtils.logError(TAG, "Data type not supported");
             }
 
             Utils.sleep(1000);
@@ -310,7 +309,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
         updated = true;
         MultipartBody.Part body = null;
         final File file = new File(log.getPath());
-        Log.i(TAG, "this is file inside uploadFile " + file.getPath());
+        LogFileUtils.logInfo(TAG, "Uploading file " + file.getPath());
 
         try {
             FileInputStream inputStream = new FileInputStream(file);
@@ -319,14 +318,14 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
             inputStream.close();
             log.setCreateDate(Utils.getUniversalTimestamp());
         } catch (FileNotFoundException e) {
-            Log.i(TAG, "this is file inside FileNotFoundException " + e.getMessage());
+            LogFileUtils.logException(e);
 
             log.setDeleted(true);
             log.setStatus(FILE_NOT_FOUND);
             updateFileLog(log);
 
         } catch (Exception e) {
-            Log.i(TAG, "this is file inside exception " + e.getMessage());
+            LogFileUtils.logException(e);
 
             log.setStatus(UPLOAD_ERROR);
             updateFileLog(log);
@@ -345,7 +344,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
 
                     @Override
                     public void onNext(@NonNull String id) {
-                        Log.i(TAG, "this is file inside onNext " + id + file.getPath());
+                        LogFileUtils.logInfo(TAG, "File " + file.getPath() + " successfully uploaded");
 
                         log.setUploadDate(Utils.getUniversalTimestamp());
                         log.setServerId(id);
@@ -363,8 +362,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-
-                        Log.i(TAG, "this is file inside onError" + e.getMessage() + file.getPath());
+                        LogFileUtils.logError(TAG, "File " + file.getPath() + " upload fail - " + e.getMessage());
                         if (Utils.isExpiredToken(e.getMessage())) {
                             AuthenticationHandler.restoreToken(getBaseContext());
                             stopSelf();
@@ -392,13 +390,9 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
-                Log.i(TAG, "this is file saved " + log.getServerId() + log.getPath());
-
                 synchronized (lock) {
                     pendingArtefacts.remove(log.getId());
                     remainingCount--;
-                    Log.i(TAG, "this is artifacts in queue " + remainingCount);
-                    Log.e(TAG, String.format(Locale.US, "%d artifacts are in queue now", remainingCount));
                     if (remainingCount <= 0) {
                         loadQueueFileLogs();
                     }
