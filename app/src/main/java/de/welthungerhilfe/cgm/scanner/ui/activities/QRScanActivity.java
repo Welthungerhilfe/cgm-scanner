@@ -88,6 +88,9 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
 
     private static final int NO_QR_CODE_FOUND = 2;
 
+    private static final int EMPTY_QR_CODE_FOUND = 3;
+
+
 
     int CONFIRM_DIALOG_STEP = 0;
 
@@ -132,7 +135,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                 qrScanView.setResultHandler(this);
                 qrScanView.startCamera();
 
-            } else if (CONFIRM_DIALOG_STEP == NO_QR_CODE_FOUND) {
+            } else if (CONFIRM_DIALOG_STEP == NO_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == EMPTY_QR_CODE_FOUND) {
                 finish();
             } else {
                 startCaptureImage();
@@ -175,6 +178,10 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
 
     @Override
     public void handleQRResult(String qrCode, byte[] bitmap) {
+        if(qrCode.trim().isEmpty()) {
+            showConfirmDialog(R.string.empty_qr_code, EMPTY_QR_CODE_FOUND);
+            return;
+        }
 
         qrScanView.stopCameraPreview();
         qrScanView.stopCamera();
