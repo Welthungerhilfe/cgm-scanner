@@ -214,7 +214,8 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                 try {
                     Runnable worker = new UploadThread(list.get(i));
                     executor.execute(worker);
-                } catch (Exception ex) {
+                } catch (Exception e) {
+                    LogFileUtils.logException(e);
                     remainingCount--;
                 }
             }
@@ -247,7 +248,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                     try {
                         lock.wait();
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        LogFileUtils.logException(e);
                     }
                 }
             }
