@@ -466,25 +466,5 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             viewModel.setSortType(AppConstants.SORT_DATE);
             repository.setUpdated(false);
         }
-        //For testing of logfile on sandbox
-        LogFileUtils.logInfo("this is data resume 1 " + System.currentTimeMillis());
-        LogFileUtils.logError("this is data resume 1 " + System.currentTimeMillis());
-        LogFileUtils.logException(new NullPointerException());
-
-
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        //For testing of logfile on sandbox
-        LogFileUtils.logInfo("this is data pause 2 " + System.currentTimeMillis());
-        LogFileUtils.logError("this is data pause 2 " + System.currentTimeMillis());
-        LogFileUtils.logException(new IllegalAccessException());
-
-
-
-
     }
 }

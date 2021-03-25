@@ -53,15 +53,19 @@ public class LogFileUtils {
         }
     }
 
-    public static void logInfo(String text) {
-        text = DataFormat.convertTimestampToDate(System.currentTimeMillis()) + " :Info-> " + text;
-        startAsyncToWrite(text);
+    public static void logInfo(String tag, String text) {
+        Log.i(tag, text);
+        String message = DataFormat.convertTimestampToDate(System.currentTimeMillis());
+        message += " : Info-" + tag + " -> " + text;
+        startAsyncToWrite(message);
 
     }
 
-    public static void logError(String text) {
-        text = DataFormat.convertTimestampToDate(System.currentTimeMillis()) + " :Error-> " + text;
-        startAsyncToWrite(text);
+    public static void logError(String tag, String text) {
+        Log.e(tag, text);
+        String message = DataFormat.convertTimestampToDate(System.currentTimeMillis());
+        message += " : Error-" + tag + " -> " + text;
+        startAsyncToWrite(message);
     }
 
     public static void logException(Exception exception) {
@@ -71,20 +75,22 @@ public class LogFileUtils {
 
     public static void maintainLogFiles(File folder) {
         final File[] sortedByDate = folder.listFiles();
+        if (sortedByDate == null) {
+            return;
+        }
 
-        if (sortedByDate != null && sortedByDate.length > 1) {
+        if (sortedByDate.length > 1) {
             Arrays.sort(sortedByDate, (object1, object2) -> Long.compare(object2.lastModified(), object1.lastModified()));
         }
         if (sortedByDate.length > maxFiles) {
-            File deleteFile = null;
             for (int i = maxFiles; i < sortedByDate.length; i++) {
-                deleteFile = new File(sortedByDate[i].getAbsolutePath());
+                File deleteFile = new File(sortedByDate[i].getAbsolutePath());
                 if (deleteFile.exists()) {
                     deleteFile.delete();
                 }
             }
         }
-        Log.i(TAG, "this is value of filles " + sortedByDate.length);
+        Log.i(TAG, "this is value of files " + sortedByDate.length);
 
     }
 
@@ -118,6 +124,7 @@ public class LogFileUtils {
                 output.flush();
                 output.close();
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
