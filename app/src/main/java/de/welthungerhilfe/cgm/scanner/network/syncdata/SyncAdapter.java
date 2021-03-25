@@ -23,8 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.util.Log;
-
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -54,6 +52,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
+import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
@@ -138,7 +137,7 @@ public class SyncAdapter {
     }
 
     private synchronized void startSyncing() {
-        Log.i(TAG, "this is inside startSyncing ");
+        LogFileUtils.logInfo(TAG, "Start syncing requested");
 
         if (!session.isSigned()) {
             return;
@@ -159,7 +158,7 @@ public class SyncAdapter {
             }
 
             syncTask = new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            Log.i(TAG, "this is inside end startSynching");
+            LogFileUtils.logInfo(TAG, "Start syncing started");
         }
     }
 
@@ -176,48 +175,46 @@ public class SyncAdapter {
         @Override
         protected Void doInBackground(Void... voids) {
             if (!Utils.isUploadAllowed(context)) {
-                Log.d(TAG, "skipped due to missing connection");
+                LogFileUtils.logInfo(TAG, "skipped due to missing connection");
                 syncTask = null;
                 return null;
             }
 
-            Log.i(TAG, "this is inside before restApi ");
-            Log.d(TAG, "start updating");
             //REST API implementation
             updated = false;
             updateDelay = 60 * 60 * 1000;
+            LogFileUtils.logInfo(TAG, "start updating");
             synchronized (getLock()) {
                 try {
                     processPersonQueue();
                     processMeasureQueue();
                     processDeviceQueue();
                     processConsentSheet();
-                    processMeasureReasult();
+                    processMeasureResults();
 
                     session.setSyncTimestamp(currentTimestamp);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LogFileUtils.logException(e);
                 }
             }
-            Log.d(TAG, "end updating");
+            LogFileUtils.logInfo(TAG, "end updating");
             syncTask = null;
             onThreadChange(0);
             return null;
         }
 
-        private void processMeasureReasult() {
+        private void processMeasureResults() {
 
             try {
                 List<PostScanResult> syncablePostScanResult = postScanResultrepository.getSyncablePostScanResult(session.getEnvironment());
-                for (int i = 0; i < syncablePostScanResult.size(); i++) {
+                LogFileUtils.logInfo(TAG, syncablePostScanResult.size() + " scan results to update");
 
-                    PostScanResult postScanResult = syncablePostScanResult.get(i);
-                    Log.i("Syncadapter", "this is inside processMeasureReasult Queue " + postScanResult);
-                    getEstimates(postScanResult);
+                for (PostScanResult scanResult : syncablePostScanResult) {
+                    getEstimates(scanResult);
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
-                e.printStackTrace();
+                LogFileUtils.logException(e);
             }
 
         }
@@ -225,10 +222,9 @@ public class SyncAdapter {
         private void processPersonQueue() {
             try {
                 List<Person> syncablePersons = personRepository.getSyncablePerson(session.getEnvironment());
-                for (int i = 0; i < syncablePersons.size(); i++) {
+                LogFileUtils.logInfo(TAG, syncablePersons.size() + " persons to sync");
 
-                    Person person = syncablePersons.get(i);
-                    Log.i("Syncadapter", "this is inside processPerson Queue " + person);
+                for (Person person : syncablePersons) {
                     if (person.getServerId() == null || person.getServerId().isEmpty()) {
                         postPerson(person);
                     } else {
@@ -237,19 +233,17 @@ public class SyncAdapter {
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
-                e.printStackTrace();
+                LogFileUtils.logException(e);
             }
         }
 
 
         private void processMeasureQueue() {
             try {
-                Log.i("Syncadapter", "this is inside value of prevTimeStamp " + prevTimestamp);
-
                 List<Measure> syncableMeasures = measureRepository.getSyncableMeasure(session.getEnvironment());
+                LogFileUtils.logInfo(TAG, syncableMeasures.size() + " measures/scans to sync");
 
-                for (int i = 0; i < syncableMeasures.size(); i++) {
-                    Measure measure = syncableMeasures.get(i);
+                for (Measure measure : syncableMeasures) {
                     String localPersonId = measure.getPersonId();
                     Person person = personRepository.getPersonById(localPersonId);
                     String backendPersonId = person.getServerId();
@@ -267,24 +261,22 @@ public class SyncAdapter {
                     } else {
                         HashMap<Integer, Scan> scans = measure.split(fileLogRepository, session.getEnvironment());
                         if (!scans.isEmpty()) {
-                            Log.i(TAG, "this is values of scan " + scans);
                             postScans(scans, measure);
                         }
                     }
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
-                e.printStackTrace();
+                LogFileUtils.logException(e);
             }
         }
 
         private void processConsentSheet() {
             try {
-
                 List<FileLog> syncableConsent = fileLogRepository.loadConsentFile(session.getEnvironment());
+                LogFileUtils.logInfo(TAG, syncableConsent.size() + " consents to sync");
 
-                for (int i = 0; i < syncableConsent.size(); i++) {
-                    FileLog fileLog = syncableConsent.get(i);
+                for (FileLog fileLog : syncableConsent) {
                     if (!fileLog.isDeleted()) {
                         continue;
                     }
@@ -294,11 +286,10 @@ public class SyncAdapter {
                         continue;
                     }
                     postConsentSheet(fileLog, backendPersonId);
-
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
-                e.printStackTrace();
+                LogFileUtils.logException(e);
             }
         }
 
@@ -306,15 +297,17 @@ public class SyncAdapter {
         private void processDeviceQueue() {
             try {
                 List<Device> syncableDevices = deviceRepository.getSyncableDevice(prevTimestamp);
-                for (int i = 0; i < syncableDevices.size(); i++) {
+                LogFileUtils.logInfo(TAG, syncableDevices.size() + " devices to sync");
+
+                for (Device device : syncableDevices) {
 
                     //TODO:process by REST API
-                    syncableDevices.get(i).setSync_timestamp(prevTimestamp);
-                    deviceRepository.updateDevice(syncableDevices.get(i));
+                    device.setSync_timestamp(prevTimestamp);
+                    deviceRepository.updateDevice(device);
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
-                e.printStackTrace();
+                LogFileUtils.logException(e);
             }
         }
     }
@@ -328,9 +321,8 @@ public class SyncAdapter {
             final int[] count = {scans.values().size()};
             for (Scan scan : scans.values()) {
 
-                Log.i(TAG, "this is data of postScan " + (new JSONObject(gson.toJson(scan))).toString());
-
                 onThreadChange(1);
+                LogFileUtils.logInfo(TAG, "posting scan " + scan.getId());
                 RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(scan))).toString());
                 retrofit.create(ApiService.class).postScans(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -342,7 +334,7 @@ public class SyncAdapter {
 
                             @Override
                             public void onNext(@NonNull Scan scan) {
-                                Log.i(TAG, "this is response success postScan " + scan.toString());
+                                LogFileUtils.logInfo(TAG, "scan " +  scan.getId() + " successfully posted");
                                 PostScanResult postScanResult = new PostScanResult();
                                 postScanResult.setEnvironment(measure.getEnvironment());
                                 postScanResult.setId(scan.getId());
@@ -365,7 +357,7 @@ public class SyncAdapter {
 
                             @Override
                             public void onError(@NonNull Throwable e) {
-                                Log.i(TAG, "this is value of post " + e.getMessage());
+                                LogFileUtils.logError(TAG, "scan " +  scan.getId() + " posting failed " + e.getMessage());
                                 if (Utils.isExpiredToken(e.getMessage())) {
                                     AuthenticationHandler.restoreToken(context);
                                 }
@@ -380,7 +372,7 @@ public class SyncAdapter {
                         });
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogFileUtils.logException(e);
         }
     }
 
@@ -397,9 +389,8 @@ public class SyncAdapter {
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(person1))).toString());
 
-            Log.i(TAG, "this is data of person " + (new JSONObject(gson.toJson(person1))).toString());
-
             onThreadChange(1);
+            LogFileUtils.logInfo(TAG, "posting person " + person1.getQrcode());
             retrofit.create(ApiService.class).postPerson(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Person>() {
@@ -410,7 +401,7 @@ public class SyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Person person) {
-                            Log.i(TAG, "this is response success postPerson " + person);
+                            LogFileUtils.logInfo(TAG, "person " + person.getQrcode() + " successfully posted");
                             person.setTimestamp(prevTimestamp);
                             person.setId(person1.getId());
                             person.setCreatedBy(person1.getCreatedBy());
@@ -434,7 +425,7 @@ public class SyncAdapter {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is response error postperson" + e.getMessage());
+                            LogFileUtils.logError(TAG, "person " + person1.getQrcode() + " posting failed " + e.getMessage());
                             if (Utils.isDenied(e.getMessage())) {
                                 person1.setDenied(true);
                                 personRepository.updatePerson(person1);
@@ -451,7 +442,7 @@ public class SyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            e.printStackTrace();
+            LogFileUtils.logException(e);
         }
     }
 
@@ -472,9 +463,8 @@ public class SyncAdapter {
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(putPerson))).toString());
 
-            Log.i(TAG, "this is data of person " + (new JSONObject(gson.toJson(putPerson))).toString());
-
             onThreadChange(1);
+            LogFileUtils.logInfo(TAG, "putting person " + person1.getQrcode());
             retrofit.create(ApiService.class).putPerson(session.getAuthTokenWithBearer(), body, person1.getServerId()).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Person>() {
@@ -485,7 +475,7 @@ public class SyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Person person) {
-                            Log.i(TAG, "this is response success putPerson " + person);
+                            LogFileUtils.logInfo(TAG, "person " + person.getQrcode() + " successfully put");
                             person.setTimestamp(prevTimestamp);
                             person.setId(person1.getId());
                             person.setCreatedBy(person1.getCreatedBy());
@@ -508,8 +498,7 @@ public class SyncAdapter {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is response error putPerson" + e.getMessage());
-
+                            LogFileUtils.logError(TAG, "person " + person1.getQrcode() + " putting failed " + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
@@ -522,7 +511,7 @@ public class SyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            e.printStackTrace();
+            LogFileUtils.logException(e);
         }
     }
 
@@ -534,9 +523,9 @@ public class SyncAdapter {
             measure.setMeasured(DataFormat.convertTimestampToDate(measure.getDate()));
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(measure))).toString());
-            Log.i(TAG, "this is data of measure " + (new JSONObject(gson.toJson(measure))).toString());
 
             onThreadChange(1);
+            LogFileUtils.logInfo(TAG, "posting measure " + measure.getId());
             retrofit.create(ApiService.class).postMeasure(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Measure>() {
@@ -547,7 +536,7 @@ public class SyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Measure measure1) {
-                            Log.i(TAG, "this is response success postMeasure " + measure1);
+                            LogFileUtils.logInfo(TAG, "measure " + measure1.getId() + " successfully posted");
                             measure1.setTimestamp(prevTimestamp);
                             measure1.setId(measure.getId());
                             measure1.setPersonId(measure.getPersonId());
@@ -565,7 +554,7 @@ public class SyncAdapter {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is response error postMeasurements" + e.getMessage());
+                            LogFileUtils.logError(TAG, "measure " + measure.getId() + " posting failed " + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
@@ -578,7 +567,7 @@ public class SyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            e.printStackTrace();
+            LogFileUtils.logException(e);
         }
     }
 
@@ -590,9 +579,9 @@ public class SyncAdapter {
             measure.setMeasured(DataFormat.convertTimestampToDate(measure.getDate()));
             measure.setPersonServerKey(null);
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(measure))).toString());
-            Log.i(TAG, "this is data of measure " + (new JSONObject(gson.toJson(measure))).toString());
 
             onThreadChange(1);
+            LogFileUtils.logInfo(TAG, "putting measure " + measure.getId());
             retrofit.create(ApiService.class).putMeasure(session.getAuthTokenWithBearer(), body, measure.getMeasureServerKey()).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Measure>() {
@@ -603,7 +592,7 @@ public class SyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Measure measure1) {
-                            Log.i(TAG, "this is response success putMeasure " + measure1);
+                            LogFileUtils.logInfo(TAG, "measure " + measure1.getId() + " successfully put");
                             measure1.setTimestamp(prevTimestamp);
                             measure1.setId(measure.getId());
                             measure1.setPersonId(measure.getPersonId());
@@ -621,7 +610,7 @@ public class SyncAdapter {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is response error putMeasurements" + e.getMessage());
+                            LogFileUtils.logError(TAG, "measure " + measure.getId() + " putting failed " + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
@@ -634,7 +623,7 @@ public class SyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            e.printStackTrace();
+            LogFileUtils.logException(e);
         }
     }
 
@@ -649,9 +638,9 @@ public class SyncAdapter {
             consent.setScanned(DataFormat.convertTimestampToDate(fileLog.getCreateDate()));
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(consent))).toString());
-            Log.i(TAG, "this is data of postConsent " + (new JSONObject(gson.toJson(consent))).toString());
 
             onThreadChange(1);
+            LogFileUtils.logInfo(TAG, "posting consent " + consent.getId());
             retrofit.create(ApiService.class).postConsent(session.getAuthTokenWithBearer(), body, personId).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Consent>() {
@@ -662,7 +651,7 @@ public class SyncAdapter {
 
                         @Override
                         public void onNext(@NonNull Consent consent) {
-                            Log.i(TAG, "this is response success postConsentSheet " + consent);
+                            LogFileUtils.logInfo(TAG, "consent " + consent.getId() + " successfully posted");
                             fileLog.setStatus(AppConstants.CONSENT_UPLOADED);
                             fileLogRepository.updateFileLog(fileLog);
                             updated = true;
@@ -672,7 +661,7 @@ public class SyncAdapter {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is response error postConsentSheet" + e.getMessage());
+                            LogFileUtils.logError(TAG, "consent " + consent.getId() + " posting failed " + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
@@ -685,15 +674,15 @@ public class SyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            e.printStackTrace();
+            LogFileUtils.logException(e);
         }
     }
 
     public void getEstimates(PostScanResult postScanResult) {
         try {
-            Log.i(TAG, "this is data of postScanResulu " + postScanResult.getId());
 
             onThreadChange(1);
+            LogFileUtils.logInfo(TAG, "getting estimate for scan result " + postScanResult.getId());
             retrofit.create(ApiService.class).getEstimates(session.getAuthTokenWithBearer(), postScanResult.getId()).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<EstimatesResponse>() {
@@ -704,7 +693,7 @@ public class SyncAdapter {
 
                         @Override
                         public void onNext(@NonNull EstimatesResponse estimatesResponse) {
-                            Log.i(TAG, "this is response success getEstimation " + estimatesResponse);
+                            LogFileUtils.logInfo(TAG, "scan result " + postScanResult.getId() + " estimate successfully received");
                             //TODO : generate notification and store result based on confidence value
                             if (estimatesResponse != null) {
 
@@ -712,7 +701,6 @@ public class SyncAdapter {
                                 if (estimatesResponse.height != null && estimatesResponse.height.size() > 0) {
                                     Collections.sort(estimatesResponse.height);
                                     float height = estimatesResponse.height.get((estimatesResponse.height.size() / 2)).getValue();
-                                    Log.i(TAG, "this is value of height " + height);
 
                                     String qrCode = getQrCode(postScanResult.getMeasure_id());
                                     MeasureNotification notification = MeasureNotification.get(qrCode);
@@ -735,7 +723,6 @@ public class SyncAdapter {
                                 if (estimatesResponse.weight != null && estimatesResponse.weight.size() > 0) {
                                     Collections.sort(estimatesResponse.weight);
                                     float weight = estimatesResponse.weight.get((estimatesResponse.weight.size() / 2)).getValue();
-                                    Log.i(TAG, "this is value of weight " + weight);
 
                                     String qrCode = getQrCode(postScanResult.getMeasure_id());
                                     MeasureNotification notification = MeasureNotification.get(qrCode);
@@ -770,7 +757,7 @@ public class SyncAdapter {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG, "this is response error getEstimation" + e.getMessage());
+                            LogFileUtils.logError(TAG, "scan result " + postScanResult.getId() + " estimate receiving failed " + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
@@ -783,7 +770,7 @@ public class SyncAdapter {
                         }
                     });
         } catch (Exception e) {
-            e.printStackTrace();
+            LogFileUtils.logException(e);
         }
     }
 
@@ -791,7 +778,7 @@ public class SyncAdapter {
         try {
             return measureRepository.getMeasureById(measureId).getQrCode();
         } catch (Exception e) {
-            e.printStackTrace();
+            LogFileUtils.logException(e);
         }
         return null;
     }
