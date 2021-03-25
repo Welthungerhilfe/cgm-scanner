@@ -139,9 +139,9 @@ public class SettingsActivity extends BaseActivity {
 
     @SuppressLint("StaticFieldLeak")
     private void initUI() {
-        boolean devBackend = false; //TODO:detect backend name
+        boolean devUser = session.getUserEmail().endsWith("@childgrowthmonitor.org");
         boolean devVersion = BuildConfig.VERSION_NAME.endsWith("dev");
-        boolean showQA = BuildConfig.DEBUG || devBackend || devVersion;
+        boolean showQA = BuildConfig.DEBUG || devUser || devVersion;
         layoutTestQA.setVisibility(showQA ? View.VISIBLE : View.GONE);
 
         txtSettingUuid.setText(2, Utils.getAndroidID(getContentResolver()));
