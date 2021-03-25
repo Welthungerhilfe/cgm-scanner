@@ -81,6 +81,8 @@ import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
+
     private PersonListViewModel viewModel;
 
     @OnClick(R.id.fabCreate)
@@ -120,6 +122,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         session = new SessionManager(MainActivity.this);
         LogFileUtils.initLogFile(session,MainActivity.this);
+        LogFileUtils.logInfo(TAG, "CGM-Scanner " + Utils.getAppVersion(this) + " started");
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         final Observer<List<Person>> observer = list -> {
             Log.e("PersonRecycler", "Observer called");
