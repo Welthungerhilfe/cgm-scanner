@@ -20,10 +20,12 @@ package de.welthungerhilfe.cgm.scanner.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.opengl.GLES20;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.IntBuffer;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 
@@ -50,7 +52,24 @@ public class BitmapUtils {
         else
             return getResizedBitmap(bmp, (int)scaledWidth, (int)scaledHeight);
     }
+    public static Bitmap getBitmap(int w, int h){
+        int[] b = new int[w * h];
+        int[] bt = new int[w * h];
+        IntBuffer ib = IntBuffer.wrap(b);
+        ib.position(0);
+        GLES20.glReadPixels(0, 0, w, h, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, ib);
 
+        for (int i = 0, k = 0; i < h; i++, k++) {
+            for (int j = 0; j < w; j++) {
+                int pix = b[i * w + j];
+                int pb = (pix >> 16) & 0xff;
+                int pr = (pix << 16) & 0x00ff0000;
+                bt[(h - k - 1) * w + j] = (pix & 0xff00ff00) | pr | pb;
+            }
+        }
+
+        return Bitmap.createBitmap(bt, w, h, Bitmap.Config.ARGB_8888);
+    }
     public static byte[] getByteData(Bitmap bmp) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);

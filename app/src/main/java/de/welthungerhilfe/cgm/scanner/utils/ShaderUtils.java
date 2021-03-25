@@ -24,6 +24,27 @@ public class ShaderUtils {
 
     private static final String TAG = ShaderUtils.class.getSimpleName();
 
+    public static int createFBO(int width, int height) {
+
+        //Generate a new FBO. It will contain your texture.
+        int[] offscreen_framebuffer = new int[1];
+        GLES20.glGenFramebuffers(1, offscreen_framebuffer, 0);
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, offscreen_framebuffer[0]);
+
+        //Create the texture
+        int[] my_texture = new int[1];
+        GLES20.glGenTextures(1, my_texture, 0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, my_texture[0]);
+        GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA,  width, height, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, null);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+
+        //Bind the texture to your FBO
+        GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D, my_texture[0], 0);
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        return offscreen_framebuffer[0];
+    }
+
     public static int getProgram(String vShaderSrc, String fShaderSrc) {
         int program = GLES20.glCreateProgram();
         if (program == 0) {
@@ -61,5 +82,4 @@ public class ShaderUtils {
         }
         return shader;
     }
-
 }

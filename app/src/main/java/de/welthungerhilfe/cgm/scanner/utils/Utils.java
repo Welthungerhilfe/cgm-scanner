@@ -58,6 +58,8 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 
 public class Utils {
 
+    private static final String PACKAGE_GOOGLE_PLAY = "com.android.vending";
+
     private static MediaActionSound sound = null;
 
     public static long averageValue(ArrayList<Long> values) {
@@ -160,13 +162,15 @@ public class Utils {
         return number.length() - integerPlaces - 1;
     }
 
-    public static String getAddress(Context context, Loc location) {
+    public static String getAddress(Activity context, Loc location) {
         if (location != null) {
             Geocoder geocoder = new Geocoder(context, Locale.getDefault());
             List<Address> addresses = null;
 
             try {
-                addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                if (isPackageInstalled(context, PACKAGE_GOOGLE_PLAY)) {
+                    addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                }
             } catch (Exception ioException) {
                 Log.e("", "Error in getting address for the location");
             }
