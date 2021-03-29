@@ -63,6 +63,7 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
+import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class GrowthDataFragment extends Fragment {
@@ -405,27 +406,27 @@ public class GrowthDataFragment extends Fragment {
             if (x == 0 || y == 0)
                 continue;
 
-            final float fX = x;
+            final int fX = (int)x;
             try {
                 ArrayList<Entry> entry = new ArrayList<>();
                 entry.add(new Entry(x, y));
 
-                if (y <= Iterables.find(SD3neg, input -> input.getX() == fX).getY()) {
+                if (y <= Iterables.find(SD3neg, input -> (int)input.getX() == fX).getY()) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));
-                } else if (y <= Iterables.find(SD2neg, input -> input.getX() == fX).getY()) {
+                } else if (y <= Iterables.find(SD2neg, input -> (int)input.getX() == fX).getY()) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
-                } else if (y <= Iterables.find(SD0, input -> input.getX() == fX).getY()) {
+                } else if (y <= Iterables.find(SD0, input -> (int)input.getX() == fX).getY()) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
-                } else if (y <= Iterables.find(SD2, input -> input.getX() == fX).getY()) {
+                } else if (y <= Iterables.find(SD2, input -> (int)input.getX() == fX).getY()) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
-                } else if (y <= Iterables.find(SD3, input -> input.getX() == fX).getY()) {
+                } else if (y <= Iterables.find(SD3, input -> (int)input.getX() == fX).getY()) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
                 } else {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));
                 }
                 entries.add(new Entry(x, y));
-            } catch (NullPointerException ex) {
-                ex.printStackTrace();
+            } catch (Exception e) {
+                LogFileUtils.logException(e);
             }
         }
 
