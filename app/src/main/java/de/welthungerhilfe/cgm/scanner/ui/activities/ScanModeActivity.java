@@ -232,6 +232,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         measure.setSchema_version(CgmDatabase.version);
         measure.setScannedBy(session.getDevice());
 
+        if (!heights.isEmpty()) {
+            heights.sort((a, b) -> (int) (1000 * (a - b)));
+            measure.setHeight(heights.get(heights.size() / 2) * 100.0f);
+        }
+
         progressDialog.show();
 
         if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_RESULT)) {
@@ -261,6 +266,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private final Object lock = new Object();
 
     private SessionManager session;
+    private ArrayList<Float> heights;
 
     private TextView mTxtFeedback;
     private TextView mTitleView;
@@ -338,6 +344,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         mNowTimeString = String.valueOf(mNowTime);
 
         session = new SessionManager(this);
+        heights = new ArrayList<>();
 
         age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
 
@@ -800,10 +807,15 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
             float height = getCamera().getTargetHeight();
-            runOnUiThread(() -> {
+            if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
+                heights.add(height);
+            }
+
+            //realtime value
+            /*runOnUiThread(() -> {
                 String text = getString(R.string.label_height) + " : " + String.format("~%dcm", (int)(height * 100));
                 mTitleView.setText(text);
-            });
+            });*/
         }
         onFeedbackUpdate(getCamera().getLightConditionState());
 
