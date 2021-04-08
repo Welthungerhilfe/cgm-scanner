@@ -42,6 +42,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.SizeF;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -816,6 +817,17 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 String text = getString(R.string.label_height) + " : " + String.format("~%dcm", (int)(height * 100));
                 mTitleView.setText(text);
             });*/
+        }
+        SizeF calibration = getCamera().getCalibrationImageSize();
+        if (calibration != null) {
+            runOnUiThread(() -> {
+                String text = "Calibration image:\n";
+                text += String.format(Locale.US, "%.1f", calibration.getWidth() * 100.0f);
+                text += " x ";
+                text += String.format(Locale.US, "%.1f", calibration.getHeight() * 100.0f);
+                text += " cm";
+                mTitleView.setText(text);
+            });
         }
         onFeedbackUpdate(getCamera().getLightConditionState());
 

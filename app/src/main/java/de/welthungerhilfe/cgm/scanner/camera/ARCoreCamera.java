@@ -42,6 +42,7 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.util.Log;
 import android.util.Size;
+import android.util.SizeF;
 import android.view.Surface;
 
 import com.google.ar.core.ArCoreApk;
@@ -216,9 +217,8 @@ public class ARCoreCamera extends AbstractARCamera {
       rotation = mRotation;
     }
 
-    if (mDepthMode != DepthPreviewMode.OFF) {
-      mDepthCameraPreview.setImageBitmap(getDepthPreview(image, false, mPlanes, mDepthCameraIntrinsic, mPosition, mRotation));
-    }
+    Bitmap preview = getDepthPreview(image, false, mPlanes, mDepthCameraIntrinsic, mPosition, mRotation);
+    mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
 
     Bitmap bitmap = null;
     long bestDiff = Long.MAX_VALUE;
@@ -468,7 +468,8 @@ public class ARCoreCamera extends AbstractARCamera {
 
       //get calibration image dimension
       for (AugmentedImage img : frame.getUpdatedTrackables(AugmentedImage.class)) {
-        Log.d("XXX", img.getExtentX() + "x" + img.getExtentZ());
+        mCalibrationImage = new SizeF(img.getExtentX(), img.getExtentZ());
+        mDepthMode = DepthPreviewMode.OFF;
       }
 
       //get pose from ARCore

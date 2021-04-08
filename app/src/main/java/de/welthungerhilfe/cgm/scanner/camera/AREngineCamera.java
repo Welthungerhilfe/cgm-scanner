@@ -32,6 +32,7 @@ import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.util.Log;
 import android.util.Size;
+import android.util.SizeF;
 
 import com.huawei.hiar.ARAugmentedImage;
 import com.huawei.hiar.ARAugmentedImageDatabase;
@@ -169,9 +170,7 @@ public class AREngineCamera extends AbstractARCamera {
     }
 
     Bitmap preview = getDepthPreview(image, true, mPlanes, mDepthCameraIntrinsic, mPosition, mRotation);
-    if (mDepthMode != DepthPreviewMode.OFF) {
-      mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
-    }
+    mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
 
     if (mCache != null) {
       for (Object listener : mListeners) {
@@ -291,7 +290,8 @@ public class AREngineCamera extends AbstractARCamera {
 
       //get calibration image dimension
       for (ARAugmentedImage img : frame.getUpdatedTrackables(ARAugmentedImage.class)) {
-        Log.d("XXX", img.getExtentX() + "x" + img.getExtentZ());
+        mCalibrationImage = new SizeF(img.getExtentX(), img.getExtentZ());
+        mDepthMode = DepthPreviewMode.OFF;
       }
 
       //get planes

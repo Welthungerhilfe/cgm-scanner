@@ -24,6 +24,7 @@ import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.media.Image;
+import android.util.SizeF;
 import android.widget.ImageView;
 
 import java.nio.ByteBuffer;
@@ -72,6 +73,7 @@ public abstract class AbstractARCamera {
     protected float mPixelIntensity;
     protected float mTargetDistance;
     protected float mTargetHeight;
+    protected SizeF mCalibrationImage;
     protected DepthPreviewMode mDepthMode;
     protected LightConditions mLight;
     protected PlaneMode mPlaneMode;
@@ -185,6 +187,10 @@ public abstract class AbstractARCamera {
         return mHasCameraCalibration;
     }
 
+    public SizeF getCalibrationImageSize() {
+        return mCalibrationImage;
+    }
+
     public float getLightIntensity() {
         return mPixelIntensity;
     }
@@ -252,7 +258,7 @@ public abstract class AbstractARCamera {
             case SOBEL:
                 return getDepthPreviewSobel(depth);
             default:
-                return null;
+                return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
         }
     }
 
