@@ -83,6 +83,8 @@
     <string name="retake">फिर से लेना</string>
     <string name="label_continue">Continue</string>
     <string name="error">कुछ गलत हो गया</string>
+    <string name="empty_qr_code">क्यूआर कोड खाली है, कृपया उचित क्यूआर कोड का उपयोग करें।</string>
+
 
     <!-- Create person / Person details !-->
     <string name="name">बच्चे का नाम</string>

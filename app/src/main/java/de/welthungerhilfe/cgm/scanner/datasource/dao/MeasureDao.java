@@ -46,11 +46,11 @@ public interface MeasureDao {
     @Update(onConflict = REPLACE)
     void updateMeasure(Measure measure);
 
+    @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE personId=:personId AND deleted=0 AND (height!=0 OR weight!=0) AND type='manual' ORDER BY timestamp DESC")
+    List<Measure> getManualMeasures(String personId);
+
     @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE personId=:personId AND deleted=0 ORDER BY timestamp DESC Limit 1")
     LiveData<Measure> getLastMeasureLiveData(String personId);
-
-    @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE personId=:personId AND deleted=0 AND (height!=0 OR weight!=0) ORDER BY timestamp DESC")
-    LiveData<List<Measure>> getManualMeasuresLiveData(String personId);
 
     @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE personId=:personId AND deleted=0")
     LiveData<List<Measure>> getPersonMeasures(String personId);

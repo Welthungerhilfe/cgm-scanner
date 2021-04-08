@@ -49,7 +49,7 @@ public class AppConstants {
     public static final String VAL_SEX_MALE = "male";
 
     public static final String VAL_MEASURE_MANUAL = "manual";
-    public static final String VAL_MEASURE_AUTO = "v0.10";
+    public static final String VAL_MEASURE_AUTO = "v1.0";
 
     public static final String LANG_ENGLISH = "en";
     public static final String LANG_GERMAN = "de";
@@ -114,5 +114,9 @@ public class AppConstants {
 
     //WifiStateChangereceiverHelperService
     public static final String STOP_SERVICE = "stop_service";
+
+    //LogFileUtils
+    public static final String LOG_FILE_FOLDER = "LogFileFolder";
+
 
 }

@@ -17,12 +17,17 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
+import android.Manifest;
 import android.app.Activity;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -54,12 +59,14 @@ import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicke
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
@@ -70,6 +77,7 @@ import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
@@ -78,11 +86,19 @@ import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
+
     private PersonListViewModel viewModel;
 
     @OnClick(R.id.fabCreate)
     void createData(FloatingActionButton fabCreate) {
-        startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.CONSENT_CAPTURED_REQUEST));
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            runnable = () -> startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.CONSENT_CAPTURED_REQUEST));
+            addResultListener(PERMISSION_CAMERA, listener);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSION_CAMERA);
+        } else {
+            startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.CONSENT_CAPTURED_REQUEST));
+        }
     }
 
     @BindView(R.id.recyclerData)
@@ -106,6 +122,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     private DialogPlus sortDialog;
 
+    private Runnable runnable;
     private SessionManager session;
 
     @Override
@@ -116,8 +133,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         ButterKnife.bind(this);
 
         session = new SessionManager(MainActivity.this);
-
-
+        LogFileUtils.initLogFile(session,MainActivity.this);
+        LogFileUtils.logInfo(TAG, "CGM-Scanner " + Utils.getAppVersion(this) + " started");
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         final Observer<List<Person>> observer = list -> {
             Log.e("PersonRecycler", "Observer called");
@@ -157,6 +174,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         }
         SyncingWorkManager.startSyncingWithWorkManager(MainActivity.this);
+        File log = new File(AppController.getInstance().getPublicAppDirectory(MainActivity.this)
+                + "/cgm");
     }
 
     @Override
@@ -182,6 +201,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     break;
                 case R.id.menuLogout:
                     session.setSigned(false);
+                    session.setCurrentLogFilePath(null);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         if (WifiStateChangereceiverHelperService.isServiceRunning) {
                             startForegroundService(new Intent(this, WifiStateChangereceiverHelperService.class)
@@ -414,8 +434,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 openSearchBar();
                 break;
             case R.id.actionQr:
-                startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
-                //   startActivity(new Intent(MainActivity.this, ConsentScanActivity.class));
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    runnable = () -> startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
+                    addResultListener(PERMISSION_CAMERA, listener);
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSION_CAMERA);
+                } else {
+                    startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
+                }
                 break;
             case R.id.actionFilter:
                 openSort();
@@ -462,4 +487,20 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             repository.setUpdated(false);
         }
     }
+
+
+    private BaseActivity.ResultListener listener = new BaseActivity.ResultListener() {
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+
+        }
+
+        @Override
+        public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+            if (grantResults.length > 0) {
+                runnable.run();
+                runnable = null;
+            }
+        }
+    };
 }

@@ -83,6 +83,7 @@
     <string name="retake">Retake</string>
     <string name="label_continue">Fortsetzen</string>
     <string name="error">Etwas ist schief gelaufen</string>
+    <string name="empty_qr_code">Leerer QR-Code, bitte entsprechenden QR-Code verwenden.</string>
 
     <!-- Create person / Person details !-->
     <string name="name">Name des Kindes</string>

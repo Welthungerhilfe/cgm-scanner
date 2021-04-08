@@ -278,16 +278,16 @@ public class Utils {
         return false;
     }
 
+    public static boolean isStdTestQRCode(String qrcode) {
+        return qrcode.toUpperCase().contains("_TEST_");
+    }
+
     public static boolean isUploadAllowed(Context context) {
         boolean wifiOnly = LocalPersistency.getBoolean(context, SettingsActivity.KEY_UPLOAD_WIFI);
         if (wifiOnly) {
-            if (Utils.isWifiConnected(context)) {
-                return true;
-            }
-        } else if (Utils.isNetworkAvailable(context)) {
-            return true;
+            return Utils.isWifiConnected(context);
         }
-        return false;
+        return Utils.isNetworkAvailable(context);
     }
 
     public static void openPlayStore(Activity activity, String packageName) {

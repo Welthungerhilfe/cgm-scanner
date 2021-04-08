@@ -42,7 +42,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
 
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -88,6 +87,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.camera.AREngineCamera;
@@ -319,6 +319,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            LogFileUtils.logException(throwable);
             Crashes.trackError(throwable);
             finish();
         });
@@ -421,7 +422,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private void setupScanArtifacts() {
         File extFileDir = AppController.getInstance().getRootDirectory(this);
 
-        Log.e("Root Directory", extFileDir.getParent());
+        LogFileUtils.logInfo(TAG, "Using directory " + extFileDir.getParent());
         mScanArtefactsOutputFolder = new File(extFileDir, person.getQrcode() + "/measurements/" + mNowTimeString + "/");
         mDepthmapSaveFolder = new File(mScanArtefactsOutputFolder, "depth");
         mRgbSaveFolder = new File(mScanArtefactsOutputFolder, "rgb");
@@ -429,30 +430,30 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         if (!mDepthmapSaveFolder.exists()) {
             boolean created = mDepthmapSaveFolder.mkdirs();
             if (created) {
-                Log.i(TAG, "Folder: \"" + mDepthmapSaveFolder + "\" created\n");
+                LogFileUtils.logInfo(TAG, "Folder: \"" + mDepthmapSaveFolder + "\" created\n");
             } else {
-                Log.e(TAG, "Folder: \"" + mDepthmapSaveFolder + "\" could not be created!\n");
+                LogFileUtils.logError(TAG, "Folder: \"" + mDepthmapSaveFolder + "\" could not be created!\n");
             }
         }
 
         if (!mRgbSaveFolder.exists()) {
             boolean created = mRgbSaveFolder.mkdirs();
             if (created) {
-                Log.i(TAG, "Folder: \"" + mRgbSaveFolder + "\" created\n");
+                LogFileUtils.logInfo(TAG, "Folder: \"" + mRgbSaveFolder + "\" created\n");
             } else {
-                Log.e(TAG, "Folder: \"" + mRgbSaveFolder + "\" could not be created!\n");
+                LogFileUtils.logError(TAG, "Folder: \"" + mRgbSaveFolder + "\" could not be created!\n");
             }
         }
 
-        Log.v(TAG, "mDepthmapSaveFolder: " + mDepthmapSaveFolder);
-        Log.v(TAG, "mRgbSaveFolder: " + mRgbSaveFolder);
+        LogFileUtils.logInfo(TAG, "mDepthmapSaveFolder: " + mDepthmapSaveFolder);
+        LogFileUtils.logInfo(TAG, "mRgbSaveFolder: " + mRgbSaveFolder);
     }
 
     private void updateScanningProgress() {
         float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 24 : 8);
         float progressToAddFloat = 100.0f / cloudsToFinishScan;
         int progressToAdd = (int) progressToAddFloat;
-        Log.d(TAG, progressToAddFloat + " currentProgress: " + mProgress + " progressToAdd: " + progressToAdd);
+        LogFileUtils.logInfo(TAG, "currentProgress=" + mProgress + ", progressToAdd=" + progressToAdd);
         if (mProgress + progressToAdd > 100) {
             mProgress = 100;
             runOnUiThread(() -> {
@@ -462,9 +463,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         } else {
             mProgress = mProgress + progressToAdd;
         }
-
-        Log.d("scan_progress", String.valueOf(mProgress));
-        Log.d("scan_progress_step", String.valueOf(progressToAdd));
         progressBar.setProgress(mProgress);
     }
 
@@ -570,7 +568,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             @SuppressLint("DefaultLocale")
             public void onPostExecute(Boolean results) {
 
-                Log.e("ScanQuality", String.valueOf(lightScore));
+                LogFileUtils.logInfo(TAG, "LightScore=" + lightScore);
 
                 String issues = getString(R.string.scan_quality);
                 issues = String.format("%s\n - " + getString(R.string.score_light) + "%d%%", issues, Math.round(lightScore * 100));
@@ -722,7 +720,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 UploadService.forceResume();
                 activity.finish();
             } catch (Exception e) {
-                e.printStackTrace();
+                LogFileUtils.logException(e);
             }
         }
     }
@@ -782,12 +780,12 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                 onProcessArtifact(artifactFile, ArtifactType.CALIBRATION);
 
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                LogFileUtils.logException(e);
                             }
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LogFileUtils.logException(e);
                 }
 
                 onThreadChange(-1);
@@ -836,7 +834,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LogFileUtils.logException(e);
                 }
 
                 onThreadChange(-1);
@@ -926,7 +924,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                             onProcessArtifact(artifactFile, ArtifactType.CALIBRATION);
 
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            LogFileUtils.logException(e);
                         }
                     }
                 }
@@ -1019,15 +1017,15 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         synchronized (threadsLock) {
             threadsCount += diff;
             if (threadsCount == 0) {
-                Log.d("ScanModeActivity", "The last thread finished");
+                LogFileUtils.logInfo(TAG, "The last thread finished");
             } else {
-                Log.d("ScanModeActivity", "Amount of threads : " + threadsCount);
+                LogFileUtils.logInfo(TAG, "Amount of threads : " + threadsCount);
             }
         }
     }
 
     private void waitUntilFinished() {
-        Log.d("ScanModeActivity", "Start waiting on running threads");
+        LogFileUtils.logInfo(TAG, "Start waiting on running threads");
         while (true) {
             synchronized (threadsLock) {
                 if (threadsCount == 0) {
@@ -1036,6 +1034,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             }
             Utils.sleep(5);
         }
-        Log.d("ScanModeActivity", "Stop waiting on running threads");
+        LogFileUtils.logInfo(TAG, "Stop waiting on running threads");
     }
 }

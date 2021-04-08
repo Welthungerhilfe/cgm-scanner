@@ -80,12 +80,18 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
         holder.txtName.setText(person.getFullName());
 
         repository.getPersonLastMeasureLiveData(person.getId()).observe((LifecycleOwner) context, measure -> {
-            if (measure != null) {
-                holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f", measure.getWeight()));
-                holder.txtHeight.setText(String.format(Locale.getDefault(), "%.2f", measure.getHeight()));
+            if (Utils.isStdTestQRCode(person.getQrcode())) {
+                holder.txtHeight.setText(R.string.field_concealed);
+                holder.txtWeight.setText(R.string.field_concealed);
             } else {
-                holder.txtWeight.setText("0.0");
-                holder.txtHeight.setText("0.0");
+                double height = 0;
+                double weight = 0;
+                if (measure != null) {
+                    height = measure.getHeight();
+                    weight = measure.getWeight();
+                }
+                holder.txtHeight.setText(String.format(Locale.getDefault(), "%.2f", height) + context.getString(R.string.unit_cm));
+                holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f", weight) + context.getString(R.string.unit_kg));
             }
         });
 
