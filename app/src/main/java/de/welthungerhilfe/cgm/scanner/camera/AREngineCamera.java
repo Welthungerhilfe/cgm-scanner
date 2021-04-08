@@ -24,6 +24,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
@@ -32,6 +33,8 @@ import android.os.Build;
 import android.util.Log;
 import android.util.Size;
 
+import com.huawei.hiar.ARAugmentedImage;
+import com.huawei.hiar.ARAugmentedImageDatabase;
 import com.huawei.hiar.ARCamera;
 import com.huawei.hiar.ARCameraIntrinsics;
 import com.huawei.hiar.ARConfigBase;
@@ -46,6 +49,7 @@ import java.util.ArrayList;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.RenderToTexture;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -207,8 +211,18 @@ public class AREngineCamera extends AbstractARCamera {
         return;
       }
 
+      // Set calibration image
+      ARAugmentedImageDatabase db = new ARAugmentedImageDatabase(mSession);
+      try {
+        Bitmap b = BitmapFactory.decodeStream(mGLSurfaceView.getContext().getAssets().open("earth.jpg"));
+        db.addImage("earth", b);
+      } catch (Exception e) {
+        LogFileUtils.logException(e);
+      }
+
       // Enable auto focus mode while AREngine is running.
       ARWorldTrackingConfig config = new ARWorldTrackingConfig(mSession);
+      config.setAugmentedImageDatabase(db);
       config.setEnableItem(ARConfigBase.ENABLE_DEPTH);
       config.setFocusMode(ARConfigBase.FocusMode.AUTO_FOCUS);
       config.setLightingMode(ARConfigBase.LightingMode.AMBIENT_INTENSITY);
@@ -274,6 +288,11 @@ public class AREngineCamera extends AbstractARCamera {
       mColorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
       mDepthCameraIntrinsic = mColorCameraIntrinsic;
       mHasCameraCalibration = true;
+
+      //get calibration image dimension
+      for (ARAugmentedImage img : frame.getUpdatedTrackables(ARAugmentedImage.class)) {
+        Log.d("XXX", img.getExtentX() + "x" + img.getExtentZ());
+      }
 
       //get planes
       mPlanes.clear();

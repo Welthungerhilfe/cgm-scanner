@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -44,6 +45,8 @@ import android.util.Size;
 import android.view.Surface;
 
 import com.google.ar.core.ArCoreApk;
+import com.google.ar.core.AugmentedImage;
+import com.google.ar.core.AugmentedImageDatabase;
 import com.google.ar.core.Camera;
 import com.google.ar.core.CameraConfig;
 import com.google.ar.core.CameraIntrinsics;
@@ -62,6 +65,8 @@ import java.util.HashMap;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
+import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 
 public class ARCoreCamera extends AbstractARCamera {
 
@@ -279,8 +284,18 @@ public class ARCoreCamera extends AbstractARCamera {
         return;
       }
 
+      // Set calibration image
+      AugmentedImageDatabase db = new AugmentedImageDatabase(mSession);
+      try {
+        Bitmap b = BitmapFactory.decodeStream(mGLSurfaceView.getContext().getAssets().open("earth.jpg"));
+        db.addImage("earth", b);
+      } catch (Exception e) {
+        LogFileUtils.logException(e);
+      }
+
       // Enable auto focus mode while ARCore is running.
       Config config = mSession.getConfig();
+      config.setAugmentedImageDatabase(db);
       config.setFocusMode(Config.FocusMode.AUTO);
       config.setLightEstimationMode(Config.LightEstimationMode.AMBIENT_INTENSITY);
       config.setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL);
@@ -450,6 +465,11 @@ public class ARCoreCamera extends AbstractARCamera {
         mDepthCameraIntrinsic = mColorCameraIntrinsic;
       }
       mHasCameraCalibration = true;
+
+      //get calibration image dimension
+      for (AugmentedImage img : frame.getUpdatedTrackables(AugmentedImage.class)) {
+        Log.d("XXX", img.getExtentX() + "x" + img.getExtentZ());
+      }
 
       //get pose from ARCore
       synchronized (mLock) {
