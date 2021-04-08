@@ -35,6 +35,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ManualDetailDialog extends Dialog {
 
@@ -96,9 +97,18 @@ public class ManualDetailDialog extends Dialog {
             txtManualLocation.setText(measure.getLocation().getAddress());
         else
             txtManualLocation.setText(R.string.last_location_error);
-        txtManualHeight.setText(String.valueOf(measure.getHeight()));
-        txtManualWeight.setText(String.valueOf(measure.getWeight()));
-        txtManualMuac.setText(String.valueOf(measure.getMuac()));
+
+        boolean manual = measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0;
+        boolean stdtest = Utils.isStdTestQRCode(measure.getQrCode());
+        if (!stdtest || manual) {
+            txtManualHeight.setText(String.valueOf(measure.getHeight()));
+            txtManualWeight.setText(String.valueOf(measure.getWeight()));
+            txtManualMuac.setText(String.valueOf(measure.getMuac()));
+        } else {
+            txtManualHeight.setText(R.string.field_concealed);
+            txtManualWeight.setText(R.string.field_concealed);
+            txtManualMuac.setText(R.string.field_concealed);
+        }
         checkManualOedema.setChecked(!measure.isOedema());
         checkManualOedema.setEnabled(false);
     }

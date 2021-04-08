@@ -147,17 +147,19 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         holder.txtDate.setText(DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE_AND_TIME, measure.getDate()));
         holder.txtAuthor.setText(Utils.getNameFromEmail(measure.getCreatedBy()));
 
-        if (config.isMeasure_visibility()) {
-            int heightConfidence = (int) (measure.getHeightConfidence() * 100);
-            int weightConfidence = (int) (measure.getWeightConfidence() * 100);
+        boolean manual = measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0;
+        boolean stdtest = Utils.isStdTestQRCode(measure.getQrCode());
+        if (config.isMeasure_visibility() && (!stdtest || manual)) {
 
-            holder.txtHeight.setText(String.format(Locale.getDefault(), "%.2f%s", measure.getHeight(), context.getString(R.string.unit_cm)));
-            holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f%s", measure.getWeight(), context.getString(R.string.unit_kg)));
+            holder.txtHeight.setText(String.format(Locale.getDefault(), "%.2f", measure.getHeight()) + context.getString(R.string.unit_cm));
+            holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f", measure.getWeight()) + context.getString(R.string.unit_kg));
 
-            if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
+            if (manual) {
                 holder.txtHeightConfidence.setVisibility(View.GONE);
                 holder.txtWeightConfidence.setVisibility(View.GONE);
             } else {
+                int heightConfidence = (int) (measure.getHeightConfidence() * 100);
+                int weightConfidence = (int) (measure.getWeightConfidence() * 100);
                 setConfidence(holder.txtHeight, holder.txtHeightConfidence, heightConfidence);
                 setConfidence(holder.txtWeight, holder.txtWeightConfidence, weightConfidence);
             }

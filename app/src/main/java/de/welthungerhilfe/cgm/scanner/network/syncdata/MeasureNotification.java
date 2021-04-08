@@ -36,6 +36,7 @@ import java.util.Locale;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class MeasureNotification {
 
@@ -123,6 +124,10 @@ public class MeasureNotification {
 
         boolean valid = false;
         for (String qrCode : notifications.keySet()) {
+            if (Utils.isStdTestQRCode(qrCode)) {
+                continue;
+            }
+
             MeasureNotification n = get(qrCode);
             if (n.hasHeight()) {
                 if (valid) {
