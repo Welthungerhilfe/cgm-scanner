@@ -23,7 +23,11 @@ import android.content.SharedPreferences;
 import android.os.Build;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
@@ -47,6 +51,7 @@ public class SessionManager {
     private final String KEY_TUTORIAL = "key_tutorial";
     private final String KEY_REMOTE_CONFIG = "key_remote_config";
     private final String SELECTED_ENVIRONMENT = "selected_environment";
+    private final String LOG_FILE = "log_file";
 
 
     private SharedPreferences pref;
@@ -157,15 +162,6 @@ public class SessionManager {
         return pref.getLong(KEY_SYNC_TIMESTAMP, 0);
     }
 
-    public void setConnectionTimestamp(long timestamp) {
-        editor.putLong(KEY_CONNECTION_TIMESTAMP, timestamp);
-        editor.commit();
-    }
-
-    public long getConnectionTimestamp() {
-        return pref.getLong(KEY_CONNECTION_TIMESTAMP, 0);
-    }
-
     public void setTutorial(boolean tutorial) {
         editor.putBoolean(KEY_TUTORIAL, tutorial);
 
@@ -228,5 +224,15 @@ public class SessionManager {
     public int getEnvironment() {
         return pref.getInt(SELECTED_ENVIRONMENT, AppConstants.ENV_UNKNOWN);
     }
+
+    public String getCurrentLogFilePath() {
+       return pref.getString(LOG_FILE, null);
+    }
+
+    public void setCurrentLogFilePath(String name) {
+        editor.putString(LOG_FILE, name);
+        editor.commit();
+    }
+
 
 }

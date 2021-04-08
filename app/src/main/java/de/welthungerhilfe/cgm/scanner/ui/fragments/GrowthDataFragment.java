@@ -18,8 +18,7 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.annotation.Nullable;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -57,9 +56,9 @@ import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
-import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
@@ -67,6 +66,11 @@ import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class GrowthDataFragment extends Fragment {
+
+    private final int ZSCORE_COLOR_0 = Color.rgb(55, 129, 69);
+    private final int ZSCORE_COLOR_2 = Color.rgb(230, 122, 58);
+    private final int ZSCORE_COLOR_3 = Color.rgb(212, 53, 62);
+
     private Context context;
 
     private final String[] boys_0_6 = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
@@ -93,13 +97,6 @@ public class GrowthDataFragment extends Fragment {
     TextView txtNotifMessage;
     View contextMenu;
 
-    private Person person;
-    private List<Measure> measures = new ArrayList<>();
-
-    ViewModelProvider.Factory factory;
-
-    CreateDataViewModel viewModel;
-
     public static GrowthDataFragment getInstance(String qrCode) {
         GrowthDataFragment fragment = new GrowthDataFragment();
         fragment.qrCode = qrCode;
@@ -107,31 +104,26 @@ public class GrowthDataFragment extends Fragment {
         return fragment;
     }
 
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
         this.context = context;
     }
 
-    public void onActivityCreated(Bundle instance) {
-        super.onActivityCreated(instance);
-
-        factory = new CreateDataViewModelProvideFactory(getActivity());
-        viewModel = ViewModelProviders.of(this, factory).get(CreateDataViewModel.class);
-        viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
-            this.person = person;
-            setData();
-        });
-        viewModel.getManualMeasuresLiveData().observe(getViewLifecycleOwner(), measures -> {
-            this.measures = measures;
-            setData();
-        });
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
     }
 
-    public void onResume() {
-        super.onResume();
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+            setData();
+        }
     }
 
     @Override
@@ -159,6 +151,7 @@ public class GrowthDataFragment extends Fragment {
 
         contextMenu = view.findViewById(R.id.contextMenuButton);
         contextMenu.setOnClickListener(v -> {
+            Person person = PersonRepository.getInstance(context).findPersonByQr(qrCode);
             if (person != null) {
                 String id = person.getId();
                 String qrCode = person.getQrcode();
@@ -209,6 +202,8 @@ public class GrowthDataFragment extends Fragment {
     }
 
     public void setData() {
+        Person person = PersonRepository.getInstance(context).findPersonByQr(qrCode);
+        List<Measure> measures = MeasureRepository.getInstance(context).getManualMeasures(person.getId());
         if (person == null || measures == null || measures.size() == 0) {
             return;
         }
@@ -282,11 +277,11 @@ public class GrowthDataFragment extends Fragment {
             }
             reader.close();
 
-            dataSets.add(createDataSet(SD3neg, "-3", Color.rgb(212, 53, 62), 1.5f, false));
-            dataSets.add(createDataSet(SD2neg, "-2", Color.rgb(230, 122, 58), 1.5f, false));
-            dataSets.add(createDataSet(SD0, "0", Color.rgb(55, 129, 69), 1.5f, false));
-            dataSets.add(createDataSet(SD2, "+2", Color.rgb(230, 122, 58), 1.5f, false));
-            dataSets.add(createDataSet(SD3, "+3", Color.rgb(212, 53, 62), 1.5f, false));
+            dataSets.add(createDataSet(SD3neg, "-3", ZSCORE_COLOR_3, 1.5f, false));
+            dataSets.add(createDataSet(SD2neg, "-2", ZSCORE_COLOR_2, 1.5f, false));
+            dataSets.add(createDataSet(SD0, "0", ZSCORE_COLOR_0, 1.5f, false));
+            dataSets.add(createDataSet(SD2, "+2", ZSCORE_COLOR_2, 1.5f, false));
+            dataSets.add(createDataSet(SD3, "+3", ZSCORE_COLOR_3, 1.5f, false));
 
 
         } catch (IOException e) {
@@ -411,35 +406,22 @@ public class GrowthDataFragment extends Fragment {
                 continue;
 
             final float fX = x;
-            Entry v3neg = Iterables.tryFind(SD3neg, input -> input.getX() == fX).orNull();
             try {
                 ArrayList<Entry> entry = new ArrayList<>();
                 entry.add(new Entry(x, y));
 
-                if (y <= v3neg.getY()) {
-                    dataSets.add(createDataSet(entry, "", Color.rgb(212, 53, 62), 5f, true));
+                if (y <= Iterables.find(SD3neg, input -> input.getX() == fX).getY()) {
+                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));
+                } else if (y <= Iterables.find(SD2neg, input -> input.getX() == fX).getY()) {
+                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
+                } else if (y <= Iterables.find(SD0, input -> input.getX() == fX).getY()) {
+                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
+                } else if (y <= Iterables.find(SD2, input -> input.getX() == fX).getY()) {
+                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
+                } else if (y <= Iterables.find(SD3, input -> input.getX() == fX).getY()) {
+                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
                 } else {
-                    Entry v2neg = Iterables.tryFind(SD2neg, input -> input.getX() == fX).orNull();
-                    if (y <= v2neg.getY()) {
-                        dataSets.add(createDataSet(entry, "", Color.rgb(230, 122, 58), 5f, true));
-                    } else {
-                        Entry v0 = Iterables.tryFind(SD0, input -> input.getX() == fX).orNull();
-                        if (y <= v0.getY()) {
-                            dataSets.add(createDataSet(entry, "", Color.rgb(55, 129, 69), 5f, true));
-                        } else {
-                            Entry v2 = Iterables.tryFind(SD2, input -> input.getX() == fX).orNull();
-                            if (y <= v2.getY()) {
-                                dataSets.add(createDataSet(entry, "", Color.rgb(230, 122, 58), 5f, true));
-                            } else {
-                                Entry v3 = Iterables.tryFind(SD3, input -> input.getX() == fX).orNull();
-                                if (y <= v3.getY()) {
-                                    dataSets.add(createDataSet(entry, "", Color.rgb(212, 53, 62), 5f, true));
-                                } else {
-                                    dataSets.add(createDataSet(entry, "", Color.rgb(0, 0, 0), 5f, true));
-                                }
-                            }
-                        }
-                    }
+                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));
                 }
                 entries.add(new Entry(x, y));
             } catch (NullPointerException ex) {

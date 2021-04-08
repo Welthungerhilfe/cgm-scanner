@@ -230,7 +230,7 @@ public class TangoCamera extends AbstractARCamera {
         mTango.connectListener(framePairs, new Tango.TangoUpdateCallback() {
 
             @Override
-            public void onPoseAvailable(final TangoPoseData pose) {
+            public void onPoseAvailable(TangoPoseData pose) {
                 if (pose.statusCode == TangoPoseData.POSE_VALID) {
                     try {
                         mutex_on_mIsRecording.acquire();
@@ -238,6 +238,12 @@ public class TangoCamera extends AbstractARCamera {
                         e.printStackTrace();
                         Crashes.trackError(e);
                     }
+                    pose = TangoSupport.getPoseAtTime(0,
+                            TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE,
+                            TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
+                            TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
+                            TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
+                            TangoSupport.ROTATION_0);
                     mPosition[0] = (float) pose.translation[0];
                     mPosition[1] = (float) pose.translation[1];
                     mPosition[2] = (float) pose.translation[2];

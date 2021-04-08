@@ -211,10 +211,6 @@
                 android:resource="@xml/authenticator" />
         </service>
 
-        <service
-            android:name="com.novoda.merlin.service.MerlinService"
-            android:exported="false" />
-
         <provider
             android:name=".network.syncdata.StubProvider"
             android:authorities="de.welthungerhilfe.cgm.scanner"
