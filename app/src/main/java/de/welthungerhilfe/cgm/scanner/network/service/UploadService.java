@@ -92,13 +92,15 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
     private SessionManager sessionManager;
 
     public static void forceResume() {
-        if (service != null) {
-            synchronized (service.lock) {
-                if (!running) {
-                    service.loadQueueFileLogs();
+        new Thread(() -> {
+            if (service != null) {
+                synchronized (service.lock) {
+                    if (!running) {
+                        service.loadQueueFileLogs();
+                    }
                 }
             }
-        }
+        }).start();
     }
 
     public static void resetRetrofit() {
