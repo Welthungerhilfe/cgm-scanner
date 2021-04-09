@@ -468,8 +468,31 @@ public class ARCoreCamera extends AbstractARCamera {
 
       //get calibration image dimension
       for (AugmentedImage img : frame.getUpdatedTrackables(AugmentedImage.class)) {
-        mCalibrationImage = new SizeF(img.getExtentX(), img.getExtentZ());
-        mDepthMode = DepthPreviewMode.OFF;
+        Pose[] localBoundaryPoses = {
+                Pose.makeTranslation(
+                        -0.5f * img.getExtentX(),
+                        0.0f,
+                        -0.5f * img.getExtentZ()), // upper left
+                Pose.makeTranslation(
+                        0.5f * img.getExtentX(),
+                        0.0f,
+                        -0.5f * img.getExtentZ()), // upper right
+                Pose.makeTranslation(
+                        0.5f * img.getExtentX(),
+                        0.0f,
+                        0.5f * img.getExtentZ()), // lower right
+                Pose.makeTranslation(
+                        -0.5f * img.getExtentX(),
+                        0.0f,
+                        0.5f * img.getExtentZ()) // lower left
+        };
+        mCalibrationImageEdges = new Point3F[4];
+        for (int i = 0; i < 4; ++i) {
+          Pose p = img.getCenterPose().compose(localBoundaryPoses[i]);
+          mCalibrationImageEdges[i] = new Point3F(p.tx(), p.ty(), p.tz());
+        }
+        mCalibrationImageSize = new SizeF(img.getExtentX(), img.getExtentZ());
+        mDepthMode = DepthPreviewMode.CALIBRATION;
       }
 
       //get pose from ARCore

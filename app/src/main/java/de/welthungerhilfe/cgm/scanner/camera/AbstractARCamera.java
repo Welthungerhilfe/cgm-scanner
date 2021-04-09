@@ -20,10 +20,13 @@ package de.welthungerhilfe.cgm.scanner.camera;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.media.Image;
+import android.opengl.Matrix;
 import android.util.SizeF;
 import android.widget.ImageView;
 
@@ -35,6 +38,18 @@ import java.util.Stack;
 
 public abstract class AbstractARCamera {
 
+    public class Point3F {
+        float x;
+        float y;
+        float z;
+
+        public Point3F(float x, float y, float z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+    }
+
     public interface Camera2DataListener
     {
         void onColorDataReceived(Bitmap bitmap, int frameIndex);
@@ -42,7 +57,7 @@ public abstract class AbstractARCamera {
         void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex);
     }
 
-    public enum DepthPreviewMode { OFF, SOBEL, PLANE, CENTER, FOCUS };
+    public enum DepthPreviewMode { OFF, SOBEL, PLANE, CENTER, FOCUS, CALIBRATION };
 
     public enum LightConditions { NORMAL, BRIGHT, DARK };
 
@@ -73,7 +88,8 @@ public abstract class AbstractARCamera {
     protected float mPixelIntensity;
     protected float mTargetDistance;
     protected float mTargetHeight;
-    protected SizeF mCalibrationImage;
+    protected Point3F[] mCalibrationImageEdges;
+    protected SizeF mCalibrationImageSize;
     protected DepthPreviewMode mDepthMode;
     protected LightConditions mLight;
     protected PlaneMode mPlaneMode;
@@ -188,7 +204,7 @@ public abstract class AbstractARCamera {
     }
 
     public SizeF getCalibrationImageSize() {
-        return mCalibrationImage;
+        return mCalibrationImageSize;
     }
 
     public float getLightIntensity() {
@@ -245,6 +261,10 @@ public abstract class AbstractARCamera {
         float bestPlane;
         float[] matrix;
         switch (mDepthMode) {
+            case CALIBRATION:
+                matrix = matrixCalculate(position, rotation);
+                Matrix.invertM(matrix, 0, matrix, 0);
+                return getDepthPreviewCalibration(depth, calibration, matrix);
             case CENTER:
             case FOCUS:
                 boolean otherColors = mDepthMode == DepthPreviewMode.CENTER;
@@ -409,6 +429,32 @@ public abstract class AbstractARCamera {
             }
         }
         return bestValue;
+    }
+
+    private Bitmap getDepthPreviewCalibration(float[][] depth, float[] calibration, float[] matrix) {
+        int w = depth.length;
+        int h = depth[0].length;
+        float fx = calibration[0] * (float)w;
+        float fy = calibration[1] * (float)h;
+        float cx = calibration[2] * (float)w;
+        float cy = calibration[3] * (float)h;
+        Paint paint = new Paint();
+        paint.setColor(Color.RED);
+        Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        float lx = 0, ly = 0;
+        for (int i = 0; i < 5; i++) {
+            Point3F p = mCalibrationImageEdges[i % 4];
+            float[] point = matrixTransformPoint(matrix, p.x, p.y, p.z);
+            float tx = -point[0] * fx / point[2] + cx;
+            float ty = point[1] * fy / point[2] + cy;
+            if (i > 0) {
+                canvas.drawLine(tx, ty, lx, ly, paint);
+            }
+            lx = tx;
+            ly = ty;
+        }
+        return bitmap;
     }
 
     private Bitmap getDepthPreviewCenter(float[][] depth, float plane, float[] calibration, float[] matrix, boolean otherColors) {

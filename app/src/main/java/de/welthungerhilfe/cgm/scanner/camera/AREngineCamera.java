@@ -290,8 +290,31 @@ public class AREngineCamera extends AbstractARCamera {
 
       //get calibration image dimension
       for (ARAugmentedImage img : frame.getUpdatedTrackables(ARAugmentedImage.class)) {
-        mCalibrationImage = new SizeF(img.getExtentX(), img.getExtentZ());
-        mDepthMode = DepthPreviewMode.OFF;
+        ARPose[] localBoundaryPoses = {
+                ARPose.makeTranslation(
+                        -0.5f * img.getExtentX(),
+                        0.0f,
+                        -0.5f * img.getExtentZ()), // upper left
+                ARPose.makeTranslation(
+                        0.5f * img.getExtentX(),
+                        0.0f,
+                        -0.5f * img.getExtentZ()), // upper right
+                ARPose.makeTranslation(
+                        0.5f * img.getExtentX(),
+                        0.0f,
+                        0.5f * img.getExtentZ()), // lower right
+                ARPose.makeTranslation(
+                        -0.5f * img.getExtentX(),
+                        0.0f,
+                        0.5f * img.getExtentZ()) // lower left
+        };
+        mCalibrationImageEdges = new Point3F[4];
+        for (int i = 0; i < 4; ++i) {
+          ARPose p = img.getCenterPose().compose(localBoundaryPoses[i]);
+          mCalibrationImageEdges[i] = new Point3F(p.tx(), p.ty(), p.tz());
+        }
+        mCalibrationImageSize = new SizeF(img.getExtentX(), img.getExtentZ());
+        mDepthMode = DepthPreviewMode.CALIBRATION;
       }
 
       //get planes
