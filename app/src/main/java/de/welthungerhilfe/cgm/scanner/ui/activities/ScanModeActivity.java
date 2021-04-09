@@ -818,14 +818,21 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 mTitleView.setText(text);
             });*/
         }
-        SizeF calibration = getCamera().getCalibrationImageSize();
-        if (calibration != null) {
+        SizeF calibrationCV = getCamera().getCalibrationImageSize(false);
+        SizeF calibrationToF = getCamera().getCalibrationImageSize(true);
+        if (calibrationCV != null) {
             runOnUiThread(() -> {
-                String text = "Calibration image:\n";
-                text += String.format(Locale.US, "%.1f", calibration.getWidth() * 100.0f);
-                text += " x ";
-                text += String.format(Locale.US, "%.1f", calibration.getHeight() * 100.0f);
-                text += " cm";
+                String text = "Calibration image:\nCV: ";
+                text += String.format(Locale.US, "%.1f", calibrationCV.getWidth() * 100.0f);
+                text += "x";
+                text += String.format(Locale.US, "%.1f", calibrationCV.getHeight() * 100.0f);
+                if (calibrationToF != null) {
+                    text += ", ToF: ";
+                    text += String.format(Locale.US, "%.1f", calibrationToF.getWidth() * 100.0f);
+                    text += "x";
+                    text += String.format(Locale.US, "%.1f", calibrationToF.getHeight() * 100.0f);
+                }
+                text += "cm";
                 mTitleView.setText(text);
             });
         }

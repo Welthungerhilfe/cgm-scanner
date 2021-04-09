@@ -27,6 +27,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.media.Image;
 import android.opengl.Matrix;
+import android.util.Size;
 import android.util.SizeF;
 import android.widget.ImageView;
 
@@ -47,6 +48,13 @@ public abstract class AbstractARCamera {
             this.x = x;
             this.y = y;
             this.z = z;
+        }
+
+        public float distanceTo(Point3F p) {
+            float dx = x - p.x;
+            float dy = y - p.y;
+            float dz = z - p.z;
+            return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
         }
     }
 
@@ -89,7 +97,8 @@ public abstract class AbstractARCamera {
     protected float mTargetDistance;
     protected float mTargetHeight;
     protected Point3F[] mCalibrationImageEdges;
-    protected SizeF mCalibrationImageSize;
+    protected SizeF mCalibrationImageSizeCV;
+    protected SizeF mCalibrationImageSizeToF;
     protected DepthPreviewMode mDepthMode;
     protected LightConditions mLight;
     protected PlaneMode mPlaneMode;
@@ -203,8 +212,8 @@ public abstract class AbstractARCamera {
         return mHasCameraCalibration;
     }
 
-    public SizeF getCalibrationImageSize() {
-        return mCalibrationImageSize;
+    public SizeF getCalibrationImageSize(boolean tof) {
+        return tof ? mCalibrationImageSizeToF : mCalibrationImageSizeCV;
     }
 
     public float getLightIntensity() {
@@ -442,17 +451,34 @@ public abstract class AbstractARCamera {
         paint.setColor(Color.RED);
         Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        float lx = 0, ly = 0;
+        int lx = 0, ly = 0;
+        ArrayList<Point3F> edges = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             Point3F p = mCalibrationImageEdges[i % 4];
             float[] point = matrixTransformPoint(matrix, p.x, p.y, p.z);
-            float tx = -point[0] * fx / point[2] + cx;
-            float ty = point[1] * fy / point[2] + cy;
+            int tx = (int) (-point[0] * fx / point[2] + cx);
+            int ty = (int) (point[1] * fy / point[2] + cy);
+            if ((tx >= 0) && (ty >= 0) && (tx < w) && (ty < h)) {
+                float z = depth[tx][ty] * 0.001f;
+                if (z > 0) {
+                    float vx = (tx - cx) * z / fx;
+                    float vy = (ty - cy) * z / fy;
+                    edges.add(new Point3F(vx, vy, z));
+                }
+            }
             if (i > 0) {
                 canvas.drawLine(tx, ty, lx, ly, paint);
             }
             lx = tx;
             ly = ty;
+        }
+        mCalibrationImageSizeToF = null;
+        if (edges.size() >= 4) {
+            float x = edges.get(0).distanceTo(edges.get(1));
+            float y = edges.get(0).distanceTo(edges.get(3));
+            if ((x > 0) && (y > 0)) {
+                mCalibrationImageSizeToF = new SizeF(x, y);
+            }
         }
         return bitmap;
     }

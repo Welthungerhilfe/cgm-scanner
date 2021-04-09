@@ -289,6 +289,7 @@ public class AREngineCamera extends AbstractARCamera {
       mHasCameraCalibration = true;
 
       //get calibration image dimension
+      mCalibrationImageSizeCV = null;
       for (ARAugmentedImage img : frame.getUpdatedTrackables(ARAugmentedImage.class)) {
         ARPose[] localBoundaryPoses = {
                 ARPose.makeTranslation(
@@ -313,7 +314,7 @@ public class AREngineCamera extends AbstractARCamera {
           ARPose p = img.getCenterPose().compose(localBoundaryPoses[i]);
           mCalibrationImageEdges[i] = new Point3F(p.tx(), p.ty(), p.tz());
         }
-        mCalibrationImageSize = new SizeF(img.getExtentX(), img.getExtentZ());
+        mCalibrationImageSizeCV = new SizeF(img.getExtentX(), img.getExtentZ());
         mDepthMode = DepthPreviewMode.CALIBRATION;
       }
 
