@@ -809,7 +809,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
             float height = getCamera().getTargetHeight();
             if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
-                heights.add(height);
+                if (SCAN_STEP == AppConstants.SCAN_STANDING_FRONT) {
+                    heights.add(height);
+                }
             }
 
             //realtime value
