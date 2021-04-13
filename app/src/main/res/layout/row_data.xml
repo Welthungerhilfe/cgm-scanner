@@ -54,15 +54,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="8dp"
                         android:singleLine="true"
-                        android:text="0.0"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:text="@string/unit_cm"
-                        android:textAllCaps="true"
+                        android:text="-"
                         android:textSize="16sp" />
 
                     <TextView
@@ -79,15 +71,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
                         android:singleLine="true"
-                        android:text="0.000"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:text="@string/unit_kg"
-                        android:textAllCaps="true"
+                        android:text="-"
                         android:textSize="16sp" />
                 </LinearLayout>
 

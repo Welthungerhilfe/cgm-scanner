@@ -92,7 +92,6 @@ public class AREngineCamera extends AbstractARCamera {
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
         GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
         GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_NEAREST);
-        mRTT.init();
       }
 
       @Override
@@ -113,6 +112,7 @@ public class AREngineCamera extends AbstractARCamera {
   @Override
   public synchronized void onResume() {
     mGLSurfaceView.onResume();
+    mRTT.reset();
 
     if (mActivity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
       if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
@@ -207,6 +207,8 @@ public class AREngineCamera extends AbstractARCamera {
       config.setEnableItem(ARConfigBase.ENABLE_DEPTH);
       config.setFocusMode(ARConfigBase.FocusMode.AUTO_FOCUS);
       config.setLightingMode(ARConfigBase.LightingMode.AMBIENT_INTENSITY);
+      config.setPowerMode(ARConfigBase.PowerMode.PERFORMANCE_FIRST);
+      config.setUpdateMode(ARConfigBase.UpdateMode.BLOCKING);
       mSession.configure(config);
 
       // Get GPU image resolution

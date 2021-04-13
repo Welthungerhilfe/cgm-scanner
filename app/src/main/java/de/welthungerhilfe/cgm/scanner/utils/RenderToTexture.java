@@ -60,10 +60,31 @@ public class RenderToTexture {
     private FloatBuffer mTexBuffer;
 
     public RenderToTexture() {
+        reset();
+    }
+
+    public boolean isInitialized() {
+        return mFBO != -1;
+    }
+
+    public Bitmap renderData(int texture, Size resolution) {
+        if (!isInitialized()) {
+            init();
+            mFBO = ShaderUtils.createFBO(resolution.getWidth(), resolution.getHeight());
+        }
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mFBO);
+        GLES20.glViewport(0, 0, resolution.getWidth(), resolution.getHeight());
+        onDrawTexture(texture);
+        Bitmap output = BitmapUtils.getBitmap(resolution.getWidth(), resolution.getHeight());
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        return output;
+    }
+
+    public void reset() {
         mFBO = -1;
     }
 
-    public void init() {
+    private void init() {
 
         // Create shader program
         mProgram = ShaderUtils.getProgram(BASE_VERTEX, BASE_FRAGMENT);
@@ -83,18 +104,6 @@ public class RenderToTexture {
         mTexBuffer = byteBufferForTex.asFloatBuffer();
         mTexBuffer.put(COORD);
         mTexBuffer.position(0);
-    }
-
-    public Bitmap renderData(int texture, Size resolution) {
-        if (mFBO == -1) {
-            mFBO = ShaderUtils.createFBO(resolution.getWidth(), resolution.getHeight());
-        }
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mFBO);
-        GLES20.glViewport(0, 0, resolution.getWidth(), resolution.getHeight());
-        onDrawTexture(texture);
-        Bitmap output = BitmapUtils.getBitmap(resolution.getWidth(), resolution.getHeight());
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
-        return output;
     }
 
     private void onDrawTexture(int texture) {
