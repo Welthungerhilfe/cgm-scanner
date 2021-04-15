@@ -279,6 +279,9 @@ public class Utils {
     }
 
     public static boolean isStdTestQRCode(String qrcode) {
+        if (qrcode == null) {
+            return false;
+        }
         return qrcode.toUpperCase().contains("_TEST_");
     }
 
