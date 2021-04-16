@@ -226,6 +226,8 @@ public class AREngineCamera extends AbstractARCamera {
       config.setFocusMode(ARConfigBase.FocusMode.AUTO_FOCUS);
       config.setLightingMode(ARConfigBase.LightingMode.AMBIENT_INTENSITY);
       config.setPlaneFindingMode(ARConfigBase.PlaneFindingMode.HORIZONTAL_ONLY);
+      config.setPowerMode(ARConfigBase.PowerMode.PERFORMANCE_FIRST);
+      config.setUpdateMode(ARConfigBase.UpdateMode.BLOCKING);
       mSession.configure(config);
 
       // Get GPU image resolution
