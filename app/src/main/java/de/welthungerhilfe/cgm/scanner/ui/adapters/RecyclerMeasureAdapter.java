@@ -147,14 +147,13 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         holder.txtDate.setText(DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE_AND_TIME, measure.getDate()));
         holder.txtAuthor.setText(Utils.getNameFromEmail(measure.getCreatedBy()));
 
-        boolean manual = measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0;
         boolean stdtest = Utils.isStdTestQRCode(measure.getQrCode());
-        if (config.isMeasure_visibility() && (!stdtest || manual)) {
+        if (config.isMeasure_visibility() && !stdtest) {
 
             holder.txtHeight.setText(String.format(Locale.getDefault(), "%.2f", measure.getHeight()) + context.getString(R.string.unit_cm));
             holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f", measure.getWeight()) + context.getString(R.string.unit_kg));
 
-            if (manual) {
+            if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
                 holder.txtHeightConfidence.setVisibility(View.GONE);
                 holder.txtWeightConfidence.setVisibility(View.GONE);
             } else {
