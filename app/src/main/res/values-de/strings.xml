@@ -182,6 +182,8 @@
     <string name="score_light">Belichtung : </string>
     <string name="score_light_bright">Zu hell</string>
     <string name="score_light_dark">Zu dunkel</string>
+    <string name="score_distance_close">Zu nah</string>
+    <string name="score_distance_far">Zu weit</string>
     <string name="capture_inside">Erfassen Sie das Kind innerhalb der Kontur</string>
     <string name="standup">Stellen Sie sicher, dass der gesamte Körper des Kindes in der Kameransicht zu sehen ist und dass die Aufnahme vor einem klaren Hintergrund durchgeführt</string>
     <string name="lyedown">Stellen Sie sicher, dass der gesamte Körper des Kindes in der Kameransicht zu sehen ist und dass die Aufnahme vor einem klaren Hintergrund durchgeführt</string>

@@ -74,6 +74,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
+import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
@@ -231,6 +232,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         measure.setSchema_version(CgmDatabase.version);
         measure.setScannedBy(session.getDevice());
 
+        if (!heights.isEmpty()) {
+            heights.sort((a, b) -> (int) (1000 * (a - b)));
+            measure.setHeight(heights.get(heights.size() / 2) * 100.0f);
+        }
+
         progressDialog.show();
 
         if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_RESULT)) {
@@ -260,8 +266,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private final Object lock = new Object();
 
     private SessionManager session;
+    private ArrayList<Float> heights;
 
-    private TextView mTxtLightFeedback;
+    private TextView mTxtFeedback;
     private TextView mTitleView;
     private ProgressBar progressBar;
     private FloatingActionButton fab;
@@ -283,6 +290,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private long mColorTime;
     private long mDepthSize;
     private long mDepthTime;
+    private boolean mShowDepth;
 
     private long age = 0;
 
@@ -336,6 +344,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         mNowTimeString = String.valueOf(mNowTime);
 
         session = new SessionManager(this);
+        heights = new ArrayList<>();
 
         age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
 
@@ -354,7 +363,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         ButterKnife.bind(this);
 
-        mTxtLightFeedback = findViewById(R.id.txtLightFeedback);
+        mTxtFeedback = findViewById(R.id.txtLightFeedback);
         mTitleView = findViewById(R.id.txtTitle);
         progressBar = findViewById(R.id.progressBar);
         fab = findViewById(R.id.fab_scan_result);
@@ -469,10 +478,12 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             scanType1.setChildIcon(R.drawable.stand_front_active);
             scanType2.setChildIcon(R.drawable.stand_side_active);
             scanType3.setChildIcon(R.drawable.stand_back_active);
+            getCamera().setPlaneMode(AbstractARCamera.PlaneMode.LOWEST);
         } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
             scanType1.setChildIcon(R.drawable.lying_front_active);
             scanType2.setChildIcon(R.drawable.lying_side_active);
             scanType3.setChildIcon(R.drawable.lying_back_active);
+            getCamera().setPlaneMode(AbstractARCamera.PlaneMode.VISIBLE);
         }
     }
 
@@ -524,7 +535,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private void openScan() {
         fab.setImageResource(R.drawable.recorder);
         lytScanner.setVisibility(View.VISIBLE);
-        mTxtLightFeedback.setVisibility(View.GONE);
+        mTxtFeedback.setVisibility(View.GONE);
         mProgress = 0;
         progressBar.setProgress(0);
     }
@@ -723,14 +734,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private AbstractARCamera getCamera() {
         if (mCameraInstance == null) {
-            boolean showDepth = LocalPersistency.getBoolean(this, SettingsActivity.KEY_SHOW_DEPTH);
+            mShowDepth = LocalPersistency.getBoolean(this, SettingsActivity.KEY_SHOW_DEPTH);
 
             if (TangoUtils.isTangoSupported()) {
                 mCameraInstance = new TangoCamera(this);
             } else if (AREngineCamera.shouldUseAREngine()) {
-                mCameraInstance = new AREngineCamera(this, showDepth);
+                mCameraInstance = new AREngineCamera(this, mShowDepth);
             } else {
-                mCameraInstance = new ARCoreCamera(this, showDepth);
+                mCameraInstance = new ARCoreCamera(this, mShowDepth);
             }
         }
         return mCameraInstance;
@@ -794,10 +805,21 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex) {
 
-        onLightUpdate(getCamera().getLightConditionState());
+        if (SCAN_MODE == AppConstants.SCAN_STANDING) {
+            float height = getCamera().getTargetHeight();
+            if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
+                heights.add(height);
+            }
+
+            //realtime value
+            /*runOnUiThread(() -> {
+                String text = getString(R.string.label_height) + " : " + String.format("~%dcm", (int)(height * 100));
+                mTitleView.setText(text);
+            });*/
+        }
+        onFeedbackUpdate(getCamera().getLightConditionState());
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
-
             long profile = System.currentTimeMillis();
             Depthmap depthmap = getCamera().extractDepthmap(image, position, rotation, mCameraInstance instanceof AREngineCamera);
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
@@ -865,7 +887,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onTangoDepthData(TangoPointCloudData pointCloudData, float[] position, float[] rotation, TangoCameraIntrinsics[] calibration) {
 
-        onLightUpdate(getCamera().getLightConditionState());
+        onFeedbackUpdate(getCamera().getLightConditionState());
         boolean hasCameraCalibration = mCameraInstance.hasCameraCalibration();
         String cameraCalibration = mCameraInstance.getCameraCalibration();
 
@@ -934,20 +956,33 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onLightUpdate(AbstractARCamera.LightConditions state) {
+    private void onFeedbackUpdate(AbstractARCamera.LightConditions state) {
+        float distance = getCamera().getTargetDistance();
         runOnUiThread(() -> {
             switch (state) {
                 case NORMAL:
-                    mTxtLightFeedback.setVisibility(View.GONE);
+                    mTxtFeedback.setVisibility(View.GONE);
                     break;
                 case BRIGHT:
-                    mTxtLightFeedback.setText(R.string.score_light_bright);
-                    mTxtLightFeedback.setVisibility(View.VISIBLE);
+                    mTxtFeedback.setText(R.string.score_light_bright);
+                    mTxtFeedback.setVisibility(View.VISIBLE);
                     break;
                 case DARK:
-                    mTxtLightFeedback.setText(R.string.score_light_dark);
-                    mTxtLightFeedback.setVisibility(View.VISIBLE);
+                    mTxtFeedback.setText(R.string.score_light_dark);
+                    mTxtFeedback.setVisibility(View.VISIBLE);
                     break;
+            }
+
+            if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
+                if (distance < 1) {
+                    mTxtFeedback.setText(R.string.score_distance_close);
+                    mTxtFeedback.setVisibility(View.VISIBLE);
+                } else if (distance > 1.5f) {
+                    mTxtFeedback.setText(R.string.score_distance_far);
+                    mTxtFeedback.setVisibility(View.VISIBLE);
+                } else {
+                    mTxtFeedback.setVisibility(View.GONE);
+                }
             }
         });
     }

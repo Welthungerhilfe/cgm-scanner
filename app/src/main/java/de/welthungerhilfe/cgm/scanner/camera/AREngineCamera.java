@@ -36,9 +36,12 @@ import com.huawei.hiar.ARCamera;
 import com.huawei.hiar.ARCameraIntrinsics;
 import com.huawei.hiar.ARConfigBase;
 import com.huawei.hiar.ARFrame;
+import com.huawei.hiar.ARPlane;
 import com.huawei.hiar.ARPose;
 import com.huawei.hiar.ARSession;
 import com.huawei.hiar.ARWorldTrackingConfig;
+
+import java.util.ArrayList;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -60,6 +63,7 @@ public class AREngineCamera extends AbstractARCamera {
 
   //AREngine API
   private ARSession mSession;
+  private ArrayList<Float> mPlanes;
   private RenderToTexture mRTT;
   private Size mTextureRes;
   private boolean mFirstRequest;
@@ -70,6 +74,7 @@ public class AREngineCamera extends AbstractARCamera {
 
   public AREngineCamera(Activity activity, boolean showDepth) {
     super(activity, showDepth);
+    mPlanes = new ArrayList<>();
     mRTT = new RenderToTexture();
   }
 
@@ -152,16 +157,16 @@ public class AREngineCamera extends AbstractARCamera {
   }
 
   private void onProcessDepthData(Image image) {
-    if (mShowDepth) {
-      Bitmap preview = getDepthPreview(image, true);
-      mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
-    }
-
     float[] position;
     float[] rotation;
     synchronized (mLock) {
       position = mPosition;
       rotation = mRotation;
+    }
+
+    Bitmap preview = getDepthPreview(image, true, mPlanes, mDepthCameraIntrinsic, mPosition, mRotation);
+    if (mDepthMode != DepthPreviewMode.OFF) {
+      mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
     }
 
     if (mCache != null) {
@@ -207,6 +212,7 @@ public class AREngineCamera extends AbstractARCamera {
       config.setEnableItem(ARConfigBase.ENABLE_DEPTH);
       config.setFocusMode(ARConfigBase.FocusMode.AUTO_FOCUS);
       config.setLightingMode(ARConfigBase.LightingMode.AMBIENT_INTENSITY);
+      config.setPlaneFindingMode(ARConfigBase.PlaneFindingMode.HORIZONTAL_ONLY);
       config.setPowerMode(ARConfigBase.PowerMode.PERFORMANCE_FIRST);
       config.setUpdateMode(ARConfigBase.UpdateMode.BLOCKING);
       mSession.configure(config);
@@ -270,6 +276,12 @@ public class AREngineCamera extends AbstractARCamera {
       mColorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
       mDepthCameraIntrinsic = mColorCameraIntrinsic;
       mHasCameraCalibration = true;
+
+      //get planes
+      mPlanes.clear();
+      for (ARPlane plane : mSession.getAllPlanes()) {
+        mPlanes.add(plane.getCenterPose().ty());
+      }
 
       //get pose from AREngine
       synchronized (mLock) {
