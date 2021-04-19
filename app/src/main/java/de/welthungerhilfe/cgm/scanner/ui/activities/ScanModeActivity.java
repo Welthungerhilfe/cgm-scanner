@@ -974,7 +974,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             }
 
             if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
-                if (distance < 1) {
+                if (distance < 0.7) {
                     mTxtFeedback.setText(R.string.score_distance_close);
                     mTxtFeedback.setVisibility(View.VISIBLE);
                 } else if (distance > 1.5f) {
