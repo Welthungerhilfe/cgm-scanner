@@ -27,7 +27,6 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.media.Image;
 import android.opengl.Matrix;
-import android.util.Size;
 import android.util.SizeF;
 import android.widget.ImageView;
 
@@ -99,6 +98,7 @@ public abstract class AbstractARCamera {
     protected Point3F[] mCalibrationImageEdges;
     protected SizeF mCalibrationImageSizeCV;
     protected SizeF mCalibrationImageSizeToF;
+
     protected DepthPreviewMode mDepthMode;
     protected LightConditions mLight;
     protected PlaneMode mPlaneMode;
