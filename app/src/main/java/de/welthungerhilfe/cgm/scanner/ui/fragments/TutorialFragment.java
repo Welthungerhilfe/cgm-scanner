@@ -79,7 +79,7 @@ public class TutorialFragment extends Fragment implements CompoundButton.OnCheck
         fragmentTutorialBinding.stepView.go(tutorialData.getPosition(),true);
         if(tutorialData.getPosition() == 3)
         {
-            fragmentTutorialBinding.btnNext.setText("DONE");
+            fragmentTutorialBinding.btnNext.setText(getString(R.string.done).toUpperCase());
         }
     }
 

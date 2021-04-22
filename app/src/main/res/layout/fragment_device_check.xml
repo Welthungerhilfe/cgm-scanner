@@ -141,7 +141,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginRight="40dp"
                 android:gravity="center"
-                android:text="@string/tutorial1"
+                android:text="@string/device_check1"
                 android:textColor="@color/colorWhite"
                 android:textSize="26sp"
                 android:textStyle="bold" />
@@ -183,14 +183,16 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/tutorial11"
+                    android:autoLink="web"
+                    android:text="@string/device_check11"
                     android:textColor="@color/colorBlack"
                     android:textSize="22sp" />
 
                 <androidx.appcompat.widget.AppCompatCheckBox
                     android:id="@+id/guide1"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
 
             </LinearLayout>
 
@@ -208,7 +210,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/tutorial12"
+                    android:text="@string/device_check12"
                     android:textColor="@color/colorBlack"
                     android:textSize="22sp" />
 

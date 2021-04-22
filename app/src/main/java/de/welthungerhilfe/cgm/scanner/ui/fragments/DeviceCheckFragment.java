@@ -78,13 +78,13 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         fragmentDeviceCheckBinding.stepView.go(tutorialData.getPosition(),true);
         if(tutorialData.getPosition() == 3)
         {
-            fragmentDeviceCheckBinding.btnNext.setText("DONE");
+            fragmentDeviceCheckBinding.btnNext.setText(getString(R.string.done).toUpperCase());
         }
     }
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (fragmentDeviceCheckBinding.guide1.isChecked() && fragmentDeviceCheckBinding.guide2.isChecked()) {
+        if (canContinue()) {
             fragmentDeviceCheckBinding.btnNext.setBackgroundResource(R.drawable.button_green_circular);
         } else {
             fragmentDeviceCheckBinding.btnNext.setBackgroundResource(R.drawable.button_green_light_circular);
@@ -93,8 +93,15 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
 
     @Override
     public void onClick(View v) {
-        if (fragmentDeviceCheckBinding.guide1.isChecked() && fragmentDeviceCheckBinding.guide2.isChecked()) {
+        if (canContinue()) {
             ((DeviceCheckActivity)context).gotoNext();
         }
+    }
+
+    private boolean canContinue() {
+        if (fragmentDeviceCheckBinding.guide1.isChecked() || (fragmentDeviceCheckBinding.guide1.getVisibility() == View.GONE)) {
+            return fragmentDeviceCheckBinding.guide2.isChecked() || (fragmentDeviceCheckBinding.guide2.getVisibility() == View.GONE);
+        }
+        return false;
     }
 }

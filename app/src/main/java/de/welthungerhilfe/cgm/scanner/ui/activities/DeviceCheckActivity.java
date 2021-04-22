@@ -102,14 +102,10 @@ public class DeviceCheckActivity extends BaseActivity {
 
     private ArrayList<TutorialData> getTutorialData(Context context) {
         ArrayList<TutorialData> tutorialDataList = new ArrayList<>();
-        TutorialData tutorialData = new TutorialData(R.drawable.tutorial1,context.getResources().getString(R.string.tutorial1),context.getResources().getString(R.string.tutorial11),context.getResources().getString(R.string.tutorial12),0);
-        tutorialDataList.add(tutorialData);
-        tutorialData = new TutorialData(R.drawable.tutorial2,context.getResources().getString(R.string.tutorial2),context.getResources().getString(R.string.tutorial21),context.getResources().getString(R.string.tutorial22),1);
-        tutorialDataList.add(tutorialData);
-        tutorialData = new TutorialData(R.drawable.tutorial3,context.getResources().getString(R.string.tutorial3),context.getResources().getString(R.string.tutorial31),context.getResources().getString(R.string.tutorial32),2);
-        tutorialDataList.add(tutorialData);
-        tutorialData = new TutorialData(R.drawable.tutorial4,context.getResources().getString(R.string.tutorial4),context.getResources().getString(R.string.tutorial41),context.getResources().getString(R.string.tutorial42),3);
-        tutorialDataList.add(tutorialData);
+        tutorialDataList.add(new TutorialData(R.drawable.tutorial1,context.getResources().getString(R.string.device_check1),context.getResources().getString(R.string.device_check11),context.getResources().getString(R.string.device_check12),0));
+        tutorialDataList.add(new TutorialData(R.drawable.tutorial2,context.getResources().getString(R.string.tutorial2),context.getResources().getString(R.string.tutorial21),context.getResources().getString(R.string.tutorial22),1));
+        tutorialDataList.add(new TutorialData(R.drawable.tutorial3,context.getResources().getString(R.string.tutorial3),context.getResources().getString(R.string.tutorial31),context.getResources().getString(R.string.tutorial32),2));
+        tutorialDataList.add(new TutorialData(R.drawable.tutorial4,context.getResources().getString(R.string.tutorial4),context.getResources().getString(R.string.tutorial41),context.getResources().getString(R.string.tutorial42),3));
         return tutorialDataList;
     }
 }
