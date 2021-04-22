@@ -35,6 +35,7 @@
     <!-- Main screen !-->
     <string name="username">Username</string>
     <string name="menuScans">Scans</string>
+    <string name="menuDeviceCheck">Device Check</string>
     <string name="menuTutorial">Tutorial</string>
     <string name="menuSettings">Settings</string>
     <string name="menuLogout">Logout</string>

@@ -191,6 +191,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 case R.id.menuUploadManager:
                     startActivity(new Intent(MainActivity.this, UploadManagerActivity.class));
                     break;
+                case R.id.menuDeviceCheck:
+                    startActivity(new Intent(MainActivity.this, DeviceCheckActivity.class));
+                    break;
                 case R.id.menuTutorial:
                     Intent intent = new Intent(MainActivity.this, TutorialActivity.class);
                     intent.putExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, true);
