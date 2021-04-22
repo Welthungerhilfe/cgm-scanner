@@ -42,6 +42,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.SizeF;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -808,7 +809,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
             float height = getCamera().getTargetHeight();
             if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
-                heights.add(height);
+                if (SCAN_STEP == AppConstants.SCAN_STANDING_FRONT) {
+                    heights.add(height);
+                }
             }
 
             //realtime value
@@ -817,6 +820,26 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 mTitleView.setText(text);
             });*/
         }
+
+        SizeF calibrationCV = getCamera().getCalibrationImageSize(false);
+        SizeF calibrationToF = getCamera().getCalibrationImageSize(true);
+        if (calibrationCV != null) {
+            runOnUiThread(() -> {
+                String text = "Calibration image:\nCV: ";
+                text += String.format(Locale.US, "%.1f", calibrationCV.getWidth() * 100.0f);
+                text += "x";
+                text += String.format(Locale.US, "%.1f", calibrationCV.getHeight() * 100.0f);
+                if (calibrationToF != null) {
+                    text += ", ToF: ";
+                    text += String.format(Locale.US, "%.1f", calibrationToF.getWidth() * 100.0f);
+                    text += "x";
+                    text += String.format(Locale.US, "%.1f", calibrationToF.getHeight() * 100.0f);
+                }
+                text += "cm";
+                mTitleView.setText(text);
+            });
+        }
+
         onFeedbackUpdate(getCamera().getLightConditionState());
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
