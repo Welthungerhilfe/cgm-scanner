@@ -19,6 +19,7 @@
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,10 +70,18 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     public void onViewCreated(View view, Bundle savedInstanceState) {
 
         fragmentDeviceCheckBinding.tvTitle.setText(tutorialData.getTitle());
-        fragmentDeviceCheckBinding.ivTitle.setImageResource(tutorialData.getImage());
+        if (tutorialData.getImage() == 0) {
+            fragmentDeviceCheckBinding.ivTitle.setImageBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888));
+        } else {
+            fragmentDeviceCheckBinding.ivTitle.setImageResource(tutorialData.getImage());
+        }
         fragmentDeviceCheckBinding.tvInstruction1.setText(tutorialData.getInstruction1());
         fragmentDeviceCheckBinding.tvInstruction2.setText(tutorialData.getInstruction2());
-        fragmentDeviceCheckBinding.guide1.setOnCheckedChangeListener(this);
+        if (tutorialData.getInstruction2().length() == 0) {
+            fragmentDeviceCheckBinding.guide2.setVisibility(View.GONE);
+        } else {
+            fragmentDeviceCheckBinding.guide2.setVisibility(View.VISIBLE);
+        }
         fragmentDeviceCheckBinding.guide2.setOnCheckedChangeListener(this);
         fragmentDeviceCheckBinding.btnNext.setOnClickListener(this);
         fragmentDeviceCheckBinding.stepView.go(tutorialData.getPosition(),true);
@@ -99,9 +108,6 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     }
 
     private boolean canContinue() {
-        if (fragmentDeviceCheckBinding.guide1.isChecked() || (fragmentDeviceCheckBinding.guide1.getVisibility() == View.GONE)) {
-            return fragmentDeviceCheckBinding.guide2.isChecked() || (fragmentDeviceCheckBinding.guide2.getVisibility() == View.GONE);
-        }
-        return false;
+        return fragmentDeviceCheckBinding.guide2.isChecked() || (fragmentDeviceCheckBinding.guide2.getVisibility() == View.GONE);
     }
 }

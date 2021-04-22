@@ -63,7 +63,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/menuTutorial"
+                        android:text="@string/menuDeviceCheck"
                         android:textColor="@color/colorWhite"
                         android:textSize="22sp" />
                 </LinearLayout>
@@ -117,7 +117,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="@string/finish_tutorial"
+                    android:text="@string/device_check_finish"
                     android:textColor="@color/colorWhite"
                     android:textSize="18sp" />
 
@@ -150,7 +150,7 @@
                     android:layout_marginLeft="30dp"
                     android:layout_marginRight="30dp"
                     android:gravity="center"
-                    android:text="@string/tutorial5"
+                    android:text="@string/device_check5"
                     android:textColor="@color/colorBlack"
                     android:textSize="22sp" />
 

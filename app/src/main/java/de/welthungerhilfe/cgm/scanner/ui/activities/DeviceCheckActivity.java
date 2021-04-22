@@ -18,7 +18,6 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -37,7 +36,6 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.DeviceCheckFragment;
 import de.welthungerhilfe.cgm.scanner.ui.views.PagerView;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class DeviceCheckActivity extends BaseActivity {
     @BindView(R.id.viewPager)
@@ -51,24 +49,20 @@ public class DeviceCheckActivity extends BaseActivity {
 
     @OnClick(R.id.btnStart)
     void startWork() {
-        session.setTutorial(true);
         if (!again)
             startActivity(new Intent(this, MainActivity.class));
         finish();
     }
 
-    private SessionManager session;
     private boolean again;
 
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
-        setContentView(R.layout.activity_tutorial);
+        setContentView(R.layout.activity_device_check);
         ButterKnife.bind(this);
 
         again = getIntent().getBooleanExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, false);
-
-        session = new SessionManager(this);
-        dataList = getTutorialData(this);
+        dataList = getTutorialData();
 
         FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
 
@@ -99,13 +93,12 @@ public class DeviceCheckActivity extends BaseActivity {
                 .setDuration(500);
     }
 
-
-    private ArrayList<TutorialData> getTutorialData(Context context) {
+    private ArrayList<TutorialData> getTutorialData() {
         ArrayList<TutorialData> tutorialDataList = new ArrayList<>();
-        tutorialDataList.add(new TutorialData(R.drawable.tutorial1,context.getResources().getString(R.string.device_check1),context.getResources().getString(R.string.device_check11),context.getResources().getString(R.string.device_check12),0));
-        tutorialDataList.add(new TutorialData(R.drawable.tutorial2,context.getResources().getString(R.string.tutorial2),context.getResources().getString(R.string.tutorial21),context.getResources().getString(R.string.tutorial22),1));
-        tutorialDataList.add(new TutorialData(R.drawable.tutorial3,context.getResources().getString(R.string.tutorial3),context.getResources().getString(R.string.tutorial31),context.getResources().getString(R.string.tutorial32),2));
-        tutorialDataList.add(new TutorialData(R.drawable.tutorial4,context.getResources().getString(R.string.tutorial4),context.getResources().getString(R.string.tutorial41),context.getResources().getString(R.string.tutorial42),3));
+        tutorialDataList.add(new TutorialData(R.drawable.tutorial1, getString(R.string.device_check1), getString(R.string.device_check11), getString(R.string.device_check12),0));
+        tutorialDataList.add(new TutorialData(0, getString(R.string.device_check2),"","",1));
+        tutorialDataList.add(new TutorialData(R.drawable.device_check3, getString(R.string.device_check3),"","",2));
+        tutorialDataList.add(new TutorialData(R.drawable.device_check4, getString(R.string.device_check4),"", getString(R.string.device_check42),3));
         return tutorialDataList;
     }
 }

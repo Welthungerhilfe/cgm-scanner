@@ -187,13 +187,6 @@
                     android:text="@string/device_check11"
                     android:textColor="@color/colorBlack"
                     android:textSize="22sp" />
-
-                <androidx.appcompat.widget.AppCompatCheckBox
-                    android:id="@+id/guide1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone" />
-
             </LinearLayout>
 
             <LinearLayout

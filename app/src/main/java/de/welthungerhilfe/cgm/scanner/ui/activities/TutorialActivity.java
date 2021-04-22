@@ -18,7 +18,6 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -52,13 +51,12 @@ public class TutorialActivity extends BaseActivity {
 
     @OnClick(R.id.btnStart)
     void startWork() {
-        session.setTutorial(true);
+        new SessionManager(this).setTutorial(true);
         if (!again)
             startActivity(new Intent(this, MainActivity.class));
         finish();
     }
 
-    private SessionManager session;
     private boolean again;
 
     protected void onCreate(Bundle saveBundle) {
@@ -67,9 +65,7 @@ public class TutorialActivity extends BaseActivity {
         ButterKnife.bind(this);
 
         again = getIntent().getBooleanExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, false);
-
-        session = new SessionManager(this);
-        tutorialDataList = getTutorialData(this);
+        tutorialDataList = getTutorialData();
 
         FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
 
@@ -100,13 +96,12 @@ public class TutorialActivity extends BaseActivity {
                 .setDuration(500);
     }
 
-
-    private ArrayList<TutorialData> getTutorialData(Context context) {
+    private ArrayList<TutorialData> getTutorialData() {
         ArrayList<TutorialData> tutorialDataList = new ArrayList<>();
-        tutorialDataList.add(new TutorialData(R.drawable.tutorial1,context.getResources().getString(R.string.tutorial1),context.getResources().getString(R.string.tutorial11),context.getResources().getString(R.string.tutorial12),0));
-        tutorialDataList.add(new TutorialData(R.drawable.tutorial2,context.getResources().getString(R.string.tutorial2),context.getResources().getString(R.string.tutorial21),context.getResources().getString(R.string.tutorial22),1));
-        tutorialDataList.add(new TutorialData(R.drawable.tutorial3,context.getResources().getString(R.string.tutorial3),context.getResources().getString(R.string.tutorial31),context.getResources().getString(R.string.tutorial32),2));
-        tutorialDataList.add(new TutorialData(R.drawable.tutorial4,context.getResources().getString(R.string.tutorial4),context.getResources().getString(R.string.tutorial41),context.getResources().getString(R.string.tutorial42),3));
+        tutorialDataList.add(new TutorialData(R.drawable.tutorial1 ,getString(R.string.tutorial1), getString(R.string.tutorial11), getString(R.string.tutorial12),0));
+        tutorialDataList.add(new TutorialData(R.drawable.tutorial2 ,getString(R.string.tutorial2), getString(R.string.tutorial21), getString(R.string.tutorial22),1));
+        tutorialDataList.add(new TutorialData(R.drawable.tutorial3 ,getString(R.string.tutorial3), getString(R.string.tutorial31), getString(R.string.tutorial32),2));
+        tutorialDataList.add(new TutorialData(R.drawable.tutorial4 ,getString(R.string.tutorial4), getString(R.string.tutorial41), getString(R.string.tutorial42),3));
         return tutorialDataList;
     }
 }
