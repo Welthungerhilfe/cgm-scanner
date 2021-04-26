@@ -31,6 +31,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.media.Image;
 import android.media.MediaActionSound;
+import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -291,7 +292,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private long mColorTime;
     private long mDepthSize;
     private long mDepthTime;
-    private boolean mShowDepth;
 
     private long age = 0;
 
@@ -372,7 +372,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         findViewById(R.id.imgClose).setOnClickListener(this);
 
-        getCamera().onCreate(R.id.colorCameraPreview, R.id.depthCameraPreview, R.id.surfaceview);
+        ImageView colorCameraPreview = findViewById(R.id.colorCameraPreview);
+        ImageView depthCameraPreview = findViewById(R.id.depthCameraPreview);
+        GLSurfaceView glSurfaceView = findViewById(R.id.surfaceview);
+        getCamera().onCreate(colorCameraPreview, depthCameraPreview, glSurfaceView);
 
         measureRepository = MeasureRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
@@ -735,14 +738,18 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private AbstractARCamera getCamera() {
         if (mCameraInstance == null) {
-            mShowDepth = LocalPersistency.getBoolean(this, SettingsActivity.KEY_SHOW_DEPTH);
+            AbstractARCamera.DepthPreviewMode depthMode = AbstractARCamera.DepthPreviewMode.FOCUS;
+            AbstractARCamera.PreviewSize previewSize = AbstractARCamera.PreviewSize.CLIPPED;
+            if (LocalPersistency.getBoolean(this, SettingsActivity.KEY_SHOW_DEPTH)) {
+                depthMode = AbstractARCamera.DepthPreviewMode.CENTER;
+            }
 
             if (TangoUtils.isTangoSupported()) {
                 mCameraInstance = new TangoCamera(this);
             } else if (AREngineCamera.shouldUseAREngine()) {
-                mCameraInstance = new AREngineCamera(this, mShowDepth);
+                mCameraInstance = new AREngineCamera(this, depthMode, previewSize);
             } else {
-                mCameraInstance = new ARCoreCamera(this, mShowDepth);
+                mCameraInstance = new ARCoreCamera(this, depthMode, previewSize);
             }
         }
         return mCameraInstance;
@@ -820,26 +827,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 mTitleView.setText(text);
             });*/
         }
-
-        SizeF calibrationCV = getCamera().getCalibrationImageSize(false);
-        SizeF calibrationToF = getCamera().getCalibrationImageSize(true);
-        if (calibrationCV != null) {
-            runOnUiThread(() -> {
-                String text = "Calibration image:\nCV: ";
-                text += String.format(Locale.US, "%.1f", calibrationCV.getWidth() * 100.0f);
-                text += "x";
-                text += String.format(Locale.US, "%.1f", calibrationCV.getHeight() * 100.0f);
-                if (calibrationToF != null) {
-                    text += ", ToF: ";
-                    text += String.format(Locale.US, "%.1f", calibrationToF.getWidth() * 100.0f);
-                    text += "x";
-                    text += String.format(Locale.US, "%.1f", calibrationToF.getHeight() * 100.0f);
-                }
-                text += "cm";
-                mTitleView.setText(text);
-            });
-        }
-
         onFeedbackUpdate(getCamera().getLightConditionState());
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {

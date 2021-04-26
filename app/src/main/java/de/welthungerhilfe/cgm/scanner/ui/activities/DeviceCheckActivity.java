@@ -32,6 +32,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.DeviceCheckFragment;
@@ -71,7 +72,7 @@ public class DeviceCheckActivity extends BaseActivity {
         }
 
         viewPager.setAdapter(adapter);
-        viewPager.setOffscreenPageLimit(4);
+        viewPager.setOffscreenPageLimit(TangoUtils.isTangoSupported() ? 2 : 4);
         viewPager.setSwipeEnabled(false);
     }
 
@@ -95,8 +96,10 @@ public class DeviceCheckActivity extends BaseActivity {
 
     private ArrayList<TutorialData> getTutorialData() {
         ArrayList<TutorialData> tutorialDataList = new ArrayList<>();
-        tutorialDataList.add(new TutorialData(R.drawable.tutorial1, getString(R.string.device_check1), getString(R.string.device_check11), getString(R.string.device_check12),0));
-        tutorialDataList.add(new TutorialData(0, getString(R.string.device_check2),"","",1));
+        if (!TangoUtils.isTangoSupported()) {
+            tutorialDataList.add(new TutorialData(R.drawable.tutorial1, getString(R.string.device_check1), getString(R.string.device_check11), getString(R.string.device_check12),0));
+            tutorialDataList.add(new TutorialData(0, getString(R.string.device_check2),"","",1));
+        }
         tutorialDataList.add(new TutorialData(R.drawable.device_check3, getString(R.string.device_check3),"","",2));
         tutorialDataList.add(new TutorialData(R.drawable.device_check4, getString(R.string.device_check4),"", getString(R.string.device_check42),3));
         return tutorialDataList;

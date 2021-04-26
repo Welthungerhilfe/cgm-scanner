@@ -44,6 +44,7 @@ import android.util.Log;
 import android.util.Size;
 import android.util.SizeF;
 import android.view.Surface;
+import android.widget.ImageView;
 
 import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.AugmentedImage;
@@ -90,20 +91,18 @@ public class ARCoreCamera extends AbstractARCamera {
   private GLSurfaceView mGLSurfaceView;
   private final HashMap<Long, Bitmap> mCache;
 
-  public ARCoreCamera(Activity activity, boolean showDepth) {
-    super(activity, showDepth);
-
+  public ARCoreCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
+    super(activity, depthMode, previewSize);
     mCache = new HashMap<>();
     mLock = new Object();
     mPlanes = new ArrayList<>();
   }
 
   @Override
-  public void onCreate(int colorPreview, int depthPreview, int surfaceview) {
+  public void onCreate(ImageView colorPreview, ImageView depthPreview, GLSurfaceView surfaceview) {
     super.onCreate(colorPreview, depthPreview, surfaceview);
 
     //setup ARCore cycle
-    mGLSurfaceView = mActivity.findViewById(surfaceview);
     mGLSurfaceView.setRenderer(new GLSurfaceView.Renderer() {
       private int[] textures = new int[1];
       private int width, height;
@@ -191,8 +190,7 @@ public class ARCoreCamera extends AbstractARCamera {
 
     //update preview window
     mActivity.runOnUiThread(() -> {
-      float scale = bitmap.getWidth() / (float)bitmap.getHeight();
-      //scale *= mColorCameraPreview.getHeight() / (float)bitmap.getWidth();
+      float scale = getPreviewScale(bitmap);
       mColorCameraPreview.setImageBitmap(bitmap);
       mColorCameraPreview.setRotation(90);
       mColorCameraPreview.setScaleX(scale);
@@ -207,6 +205,11 @@ public class ARCoreCamera extends AbstractARCamera {
   private void onProcessDepthData(Image image) {
     if (image == null) {
       Log.w(TAG, "onImageAvailable: Skipping null image.");
+      return;
+    }
+
+    if (!hasCameraCalibration()) {
+      image.close();
       return;
     }
 
@@ -493,7 +496,6 @@ public class ARCoreCamera extends AbstractARCamera {
           mCalibrationImageEdges[i] = new Point3F(p.tx(), p.ty(), p.tz());
         }
         mCalibrationImageSizeCV = new SizeF(img.getExtentX(), img.getExtentZ());
-        mDepthMode = DepthPreviewMode.CALIBRATION;
       }
 
       //get pose from ARCore

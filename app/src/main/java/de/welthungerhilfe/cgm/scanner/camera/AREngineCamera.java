@@ -33,6 +33,7 @@ import android.os.Build;
 import android.util.Log;
 import android.util.Size;
 import android.util.SizeF;
+import android.widget.ImageView;
 
 import com.huawei.hiar.ARAugmentedImage;
 import com.huawei.hiar.ARAugmentedImageDatabase;
@@ -74,21 +75,19 @@ public class AREngineCamera extends AbstractARCamera {
   private boolean mFirstRequest;
 
   //App integration objects
-  private GLSurfaceView mGLSurfaceView;
   private Bitmap mCache;
 
-  public AREngineCamera(Activity activity, boolean showDepth) {
-    super(activity, showDepth);
+  public AREngineCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
+    super(activity, depthMode, previewSize);
     mPlanes = new ArrayList<>();
     mRTT = new RenderToTexture();
   }
 
   @Override
-  public void onCreate(int colorPreview, int depthPreview, int surfaceview) {
+  public void onCreate(ImageView colorPreview, ImageView depthPreview, GLSurfaceView surfaceview) {
     super.onCreate(colorPreview, depthPreview, surfaceview);
 
     //setup AREngine cycle
-    mGLSurfaceView = mActivity.findViewById(surfaceview);
     mGLSurfaceView.setEGLContextClientVersion(3);
     mGLSurfaceView.setRenderer(new GLSurfaceView.Renderer() {
       private final int[] textures = new int[1];
@@ -149,8 +148,7 @@ public class AREngineCamera extends AbstractARCamera {
 
     //update preview window
     mActivity.runOnUiThread(() -> {
-      float scale = bitmap.getWidth() / (float)bitmap.getHeight();
-      //scale *= mColorCameraPreview.getHeight() / (float)bitmap.getWidth();
+      float scale = getPreviewScale(bitmap);
       mColorCameraPreview.setImageBitmap(bitmap);
       mColorCameraPreview.setRotation(90);
       mColorCameraPreview.setScaleX(scale);
@@ -167,6 +165,11 @@ public class AREngineCamera extends AbstractARCamera {
     synchronized (mLock) {
       position = mPosition;
       rotation = mRotation;
+    }
+
+    if (!hasCameraCalibration()) {
+      image.close();
+      return;
     }
 
     Bitmap preview = getDepthPreview(image, true, mPlanes, mDepthCameraIntrinsic, mPosition, mRotation);
@@ -317,7 +320,6 @@ public class AREngineCamera extends AbstractARCamera {
           mCalibrationImageEdges[i] = new Point3F(p.tx(), p.ty(), p.tz());
         }
         mCalibrationImageSizeCV = new SizeF(img.getExtentX(), img.getExtentZ());
-        mDepthMode = DepthPreviewMode.CALIBRATION;
       }
 
       //get planes
