@@ -481,6 +481,7 @@ public class SyncAdapter {
                             person.setCreatedBy(person1.getCreatedBy());
                             person.setCreated(person1.getCreated());
                             person.setSynced(true);
+                            person.setEnvironment(person1.getEnvironment());
                             Loc location = new Loc();
                             person.setLastLocation(location);
                             location = person1.getLastLocation();

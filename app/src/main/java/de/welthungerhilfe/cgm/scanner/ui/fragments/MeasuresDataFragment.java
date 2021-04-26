@@ -200,7 +200,6 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setEnvironment(person.getEnvironment());
         measure.setSynced(false);
 
-
         viewModel.insertMeasure(measure);
     }
 }
