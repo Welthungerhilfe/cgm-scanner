@@ -18,10 +18,19 @@
     <string name="device_check11">There is needed a calibration image which you can get from www.childgrowthmonitor.org/calibration</string>
     <string name="device_check12">I have printed the calibration image and I am ready to scan it.</string>
     <string name="device_check2">Please point the camera on the calibration image.</string>
+    <string name="device_check21">RGB camera</string>
+    <string name="device_check22">ToF sensor</string>
     <string name="device_check3">Please wait until all the tests are done.</string>
+    <string name="device_check31">Battery</string>
+    <string name="device_check32">Device storage</string>
+    <string name="device_check33">GPS</string>
+    <string name="device_check34">Internet connection</string>
     <string name="device_check4">Tests ended with issues. Do you want to continue?</string>
     <string name="device_check42">I take responsibility for possible issues caused by the problems above.</string>
     <string name="device_check5">You can refer to the device check from <u color="#FF0000">Menu</u> any time!</string>
+    <string name="device_check_detecting_image">detecting image</string>
+    <string name="device_check_testing">testing</string>
+    <string name="device_check_failed">failed</string>
     <string name="device_check_finish">You finished the device check</string>
 
     <!-- Tutorial !-->

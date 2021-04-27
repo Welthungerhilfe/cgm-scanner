@@ -32,6 +32,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 
 import java.util.Locale;
+import java.util.Objects;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.camera.ARCoreCamera;
@@ -41,6 +42,7 @@ import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.databinding.FragmentDeviceCheckBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity;
+import de.welthungerhilfe.cgm.scanner.ui.views.TestView;
 
 public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener, AbstractARCamera.Camera2DataListener {
     private Context context;
@@ -98,6 +100,15 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         setCameraVisibility(View.GONE);
         switch (tutorialData.getPosition()) {
             case 1:
+                fragmentDeviceCheckBinding.test1.setTitle(getString(R.string.device_check21));
+                fragmentDeviceCheckBinding.test2.setTitle(getString(R.string.device_check22));
+                fragmentDeviceCheckBinding.test1.setResult(getString(R.string.device_check_detecting_image));
+                fragmentDeviceCheckBinding.test2.setResult(getString(R.string.device_check_detecting_image));
+                fragmentDeviceCheckBinding.test1.setResultColor(TestView.TestPhase.INITIALIZE);
+                fragmentDeviceCheckBinding.test2.setResultColor(TestView.TestPhase.INITIALIZE);
+                fragmentDeviceCheckBinding.test1.setVisibility(View.VISIBLE);
+                fragmentDeviceCheckBinding.test2.setVisibility(View.VISIBLE);
+
                 setCameraVisibility(View.VISIBLE);
                 AbstractARCamera.DepthPreviewMode depthMode = AbstractARCamera.DepthPreviewMode.CALIBRATION;
                 AbstractARCamera.PreviewSize previewSize = AbstractARCamera.PreviewSize.SMALL;
@@ -113,6 +124,24 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                                     fragmentDeviceCheckBinding.depthCameraPreview,
                                     fragmentDeviceCheckBinding.surfaceview);
                 }
+                break;
+            case 2:
+                fragmentDeviceCheckBinding.test1.setTitle(getString(R.string.device_check31));
+                fragmentDeviceCheckBinding.test2.setTitle(getString(R.string.device_check32));
+                fragmentDeviceCheckBinding.test3.setTitle(getString(R.string.device_check33));
+                fragmentDeviceCheckBinding.test4.setTitle(getString(R.string.device_check34));
+                fragmentDeviceCheckBinding.test1.setResult(getString(R.string.device_check_testing));
+                fragmentDeviceCheckBinding.test2.setResult(getString(R.string.device_check_testing));
+                fragmentDeviceCheckBinding.test3.setResult(getString(R.string.device_check_testing));
+                fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_testing));
+                fragmentDeviceCheckBinding.test1.setResultColor(TestView.TestPhase.TESTING);
+                fragmentDeviceCheckBinding.test2.setResultColor(TestView.TestPhase.TESTING);
+                fragmentDeviceCheckBinding.test3.setResultColor(TestView.TestPhase.TESTING);
+                fragmentDeviceCheckBinding.test4.setResultColor(TestView.TestPhase.TESTING);
+                fragmentDeviceCheckBinding.test1.setVisibility(View.VISIBLE);
+                fragmentDeviceCheckBinding.test2.setVisibility(View.VISIBLE);
+                fragmentDeviceCheckBinding.test3.setVisibility(View.VISIBLE);
+                fragmentDeviceCheckBinding.test4.setVisibility(View.VISIBLE);
                 break;
             case 3:
                 fragmentDeviceCheckBinding.btnNext.setText(getString(R.string.done).toUpperCase());
@@ -165,19 +194,19 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         SizeF calibrationCV = camera.getCalibrationImageSize(false);
         SizeF calibrationToF = camera.getCalibrationImageSize(true);
         if (calibrationCV != null) {
-            getActivity().runOnUiThread(() -> {
-                String text = "Calibration image:\nCV: ";
-                text += String.format(Locale.US, "%.1f", calibrationCV.getWidth() * 100.0f);
+            Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
+                String text = String.format(Locale.US, "%.1f", calibrationCV.getWidth() * 100.0f);
                 text += "x";
                 text += String.format(Locale.US, "%.1f", calibrationCV.getHeight() * 100.0f);
+                text += "cm";
+                fragmentDeviceCheckBinding.test1.setResult(text);
                 if (calibrationToF != null) {
-                    text += ", ToF: ";
-                    text += String.format(Locale.US, "%.1f", calibrationToF.getWidth() * 100.0f);
+                    text = String.format(Locale.US, "%.1f", calibrationToF.getWidth() * 100.0f);
                     text += "x";
                     text += String.format(Locale.US, "%.1f", calibrationToF.getHeight() * 100.0f);
+                    text += "cm";
+                    fragmentDeviceCheckBinding.test2.setResult(text);
                 }
-                text += "cm";
-                //mTitleView.setText(text);
             });
         }
     }
