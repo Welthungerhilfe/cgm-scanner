@@ -53,7 +53,6 @@ import de.welthungerhilfe.cgm.scanner.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.camera.AbstractARCamera;
 import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.databinding.FragmentDeviceCheckBinding;
-import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
@@ -72,8 +71,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener, AbstractARCamera.Camera2DataListener {
 
     private final int CALIBRATIONS_MIN = 10; //measures
-    private final float CALIBRATION_TOLERANCE_RGB = 0.04f; //meters
-    private final float CALIBRATION_TOLERANCE_TOF = 0.02f; //meters
+    private final float CALIBRATION_TOLERANCE_RGB = 0.05f; //meters
+    private final float CALIBRATION_TOLERANCE_TOF = 0.025f; //meters
     private final SizeF CALIBRATION_IMAGE_SIZE = new SizeF(0.35f, 0.35f); //meters
 
     private final int BATTERY_MIN = 50; //percent
@@ -435,8 +434,14 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                                         AuthenticationHandler.restoreToken(context);
                                         new Thread(internetConnectionCheck).start();
                                     } else {
-                                        fragmentDeviceCheckBinding.test4.setResult(e.getMessage());
-                                        fragmentDeviceCheckBinding.test4.setState(TestView.TestState.ERROR);
+                                        String message = e.getMessage();
+                                        if (message.startsWith("HTTP 2") || message.startsWith("HTTP 403")) {
+                                            fragmentDeviceCheckBinding.test4.setResult(getString(R.string.ok));
+                                            fragmentDeviceCheckBinding.test4.setState(TestView.TestState.SUCCESS);
+                                        } else {
+                                            fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_failed));
+                                            fragmentDeviceCheckBinding.test4.setState(TestView.TestState.ERROR);
+                                        }
                                         updateNextButton();
                                     }
                                 }
