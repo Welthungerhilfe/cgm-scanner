@@ -434,6 +434,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                                         AuthenticationHandler.restoreToken(context);
                                         new Thread(internetConnectionCheck).start();
                                     } else {
+                                        LogFileUtils.logException(e);
                                         fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_failed));
                                         fragmentDeviceCheckBinding.test4.setState(TestView.TestState.ERROR);
                                         updateNextButton();
