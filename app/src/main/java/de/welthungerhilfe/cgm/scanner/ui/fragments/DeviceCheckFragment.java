@@ -18,9 +18,12 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.Image;
 import android.os.BatteryManager;
@@ -34,6 +37,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 
@@ -41,15 +46,28 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.camera.AbstractARCamera;
 import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.databinding.FragmentDeviceCheckBinding;
+import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
+import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
+import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity;
 import de.welthungerhilfe.cgm.scanner.ui.views.TestView;
+import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener, AbstractARCamera.Camera2DataListener {
 
@@ -185,9 +203,17 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     @Override
     public void onResume() {
         super.onResume();
+        Activity activity = getActivity();
         if (camera != null) {
-            camera.onResume();
-            camera.addListener(this);
+            if (ActivityCompat.checkSelfPermission(Objects.requireNonNull(activity), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, BaseActivity.PERMISSION_CAMERA);
+            } else {
+                camera.onResume();
+                camera.addListener(this);
+            }
+        }
+        if (tutorialData.getPosition() == 2) {
+            new Thread(gpsCheck).start();
         }
     }
 
@@ -334,6 +360,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                     fragmentDeviceCheckBinding.test1.setResult(getString(R.string.device_check_too_low_energy));
                     fragmentDeviceCheckBinding.test1.setState(TestView.TestState.ERROR);
                 }
+                updateNextButton();
             });
         }
     };
@@ -351,9 +378,10 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                     fragmentDeviceCheckBinding.test2.setResult(getString(R.string.ok));
                     fragmentDeviceCheckBinding.test2.setState(TestView.TestState.SUCCESS);
                 } else {
-                    fragmentDeviceCheckBinding.test2.setResult(getString(R.string.device_check_not_enough_memory));
+                    fragmentDeviceCheckBinding.test2.setResult(getString(R.string.device_check_failed));
                     fragmentDeviceCheckBinding.test2.setState(TestView.TestState.ERROR);
                 }
+                updateNextButton();
             });
         }
     };
@@ -361,14 +389,72 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     private final Runnable gpsCheck = new Runnable() {
         @Override
         public void run() {
-
+            Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
+                Activity activity = getActivity();
+                if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, BaseActivity.PERMISSION_LOCATION);
+                }
+                if (Utils.getLastKnownLocation(getContext()) != null) {
+                    fragmentDeviceCheckBinding.test3.setResult(getString(R.string.ok));
+                    fragmentDeviceCheckBinding.test3.setState(TestView.TestState.SUCCESS);
+                } else {
+                    fragmentDeviceCheckBinding.test3.setResult(getString(R.string.device_check_failed));
+                    fragmentDeviceCheckBinding.test3.setState(TestView.TestState.ERROR);
+                }
+                updateNextButton();
+            });
         }
     };
 
     private final Runnable internetConnectionCheck = new Runnable() {
         @Override
         public void run() {
+            if (!BuildConfig.DEBUG) {
+                try {
+                    String dummyId = "";
+                    SessionManager session = new SessionManager(Objects.requireNonNull(getActivity()));
+                    SyncingWorkManager.provideRetrofit().create(ApiService.class).getEstimates(session.getAuthTokenWithBearer(), dummyId).subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Observer<EstimatesResponse>() {
+                                @Override
+                                public void onSubscribe(@NonNull Disposable d) {
 
+                                }
+
+                                @Override
+                                public void onNext(@NonNull EstimatesResponse estimatesResponse) {
+                                    fragmentDeviceCheckBinding.test4.setResult(getString(R.string.ok));
+                                    fragmentDeviceCheckBinding.test4.setState(TestView.TestState.SUCCESS);
+                                    updateNextButton();
+                                }
+
+                                @Override
+                                public void onError(@NonNull Throwable e) {
+                                    if (Utils.isExpiredToken(e.getMessage())) {
+                                        AuthenticationHandler.restoreToken(context);
+                                        new Thread(internetConnectionCheck).start();
+                                    } else {
+                                        fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_failed));
+                                        fragmentDeviceCheckBinding.test4.setState(TestView.TestState.ERROR);
+                                        updateNextButton();
+                                    }
+                                }
+
+                                @Override
+                                public void onComplete() {
+
+                                }
+                            });
+                } catch (Exception e) {
+                    LogFileUtils.logException(e);
+                }
+            } else {
+                Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
+                    fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_failed));
+                    fragmentDeviceCheckBinding.test4.setState(TestView.TestState.ERROR);
+                    updateNextButton();
+                });
+            }
         }
     };
 }
