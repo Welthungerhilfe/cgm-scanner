@@ -244,6 +244,15 @@
             android:layout_height="match_parent"
             android:visibility="gone"/>
 
+        <de.welthungerhilfe.cgm.scanner.ui.views.HandMotionView
+            android:id="@+id/ar_hand_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_hand_phone"
+            android:scaleType="center"
+            android:visibility="gone"/>
+
         <Button
             android:id="@+id/btnNext"
             android:layout_width="match_parent"

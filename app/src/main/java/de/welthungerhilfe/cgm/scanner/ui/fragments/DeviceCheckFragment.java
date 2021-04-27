@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.media.Image;
 import android.os.Bundle;
 import android.util.SizeF;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +32,7 @@ import android.widget.CompoundButton;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 
-import java.util.Locale;
+import java.util.ArrayList;
 import java.util.Objects;
 
 import de.welthungerhilfe.cgm.scanner.R;
@@ -45,8 +46,16 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity;
 import de.welthungerhilfe.cgm.scanner.ui.views.TestView;
 
 public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener, AbstractARCamera.Camera2DataListener {
-    private Context context;
 
+    private final int CALIBRATIONS_MIN = 10;
+    private final float CALIBRATION_TOLERANCE_RGB = 0.03f;
+    private final float CALIBRATION_TOLERANCE_TOF = 0.015f;
+    private final SizeF CALIBRATION_IMAGE_SIZE = new SizeF(0.35f, 0.35f);
+
+    private ArrayList<SizeF> calibrationsRGB;
+    private ArrayList<SizeF> calibrationsToF;
+
+    private Context context;
     private AbstractARCamera camera;
     private TutorialData tutorialData;
     private FragmentDeviceCheckBinding fragmentDeviceCheckBinding;
@@ -57,6 +66,8 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         args.putParcelable("TutorialData",tutorialData);
 
         DeviceCheckFragment fragment = new DeviceCheckFragment();
+        fragment.calibrationsRGB = new ArrayList<>();
+        fragment.calibrationsToF = new ArrayList<>();
         fragment.setArguments(args);
         return fragment;
     }
@@ -104,8 +115,8 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                 fragmentDeviceCheckBinding.test2.setTitle(getString(R.string.device_check22));
                 fragmentDeviceCheckBinding.test1.setResult(getString(R.string.device_check_detecting_image));
                 fragmentDeviceCheckBinding.test2.setResult(getString(R.string.device_check_detecting_image));
-                fragmentDeviceCheckBinding.test1.setResultColor(TestView.TestPhase.INITIALIZE);
-                fragmentDeviceCheckBinding.test2.setResultColor(TestView.TestPhase.INITIALIZE);
+                fragmentDeviceCheckBinding.test1.setState(TestView.TestState.INITIALIZE);
+                fragmentDeviceCheckBinding.test2.setState(TestView.TestState.INITIALIZE);
                 fragmentDeviceCheckBinding.test1.setVisibility(View.VISIBLE);
                 fragmentDeviceCheckBinding.test2.setVisibility(View.VISIBLE);
 
@@ -134,10 +145,10 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                 fragmentDeviceCheckBinding.test2.setResult(getString(R.string.device_check_testing));
                 fragmentDeviceCheckBinding.test3.setResult(getString(R.string.device_check_testing));
                 fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_testing));
-                fragmentDeviceCheckBinding.test1.setResultColor(TestView.TestPhase.TESTING);
-                fragmentDeviceCheckBinding.test2.setResultColor(TestView.TestPhase.TESTING);
-                fragmentDeviceCheckBinding.test3.setResultColor(TestView.TestPhase.TESTING);
-                fragmentDeviceCheckBinding.test4.setResultColor(TestView.TestPhase.TESTING);
+                fragmentDeviceCheckBinding.test1.setState(TestView.TestState.TESTING);
+                fragmentDeviceCheckBinding.test2.setState(TestView.TestState.TESTING);
+                fragmentDeviceCheckBinding.test3.setState(TestView.TestState.TESTING);
+                fragmentDeviceCheckBinding.test4.setState(TestView.TestState.TESTING);
                 fragmentDeviceCheckBinding.test1.setVisibility(View.VISIBLE);
                 fragmentDeviceCheckBinding.test2.setVisibility(View.VISIBLE);
                 fragmentDeviceCheckBinding.test3.setVisibility(View.VISIBLE);
@@ -169,11 +180,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (canContinue()) {
-            fragmentDeviceCheckBinding.btnNext.setBackgroundResource(R.drawable.button_green_circular);
-        } else {
-            fragmentDeviceCheckBinding.btnNext.setBackgroundResource(R.drawable.button_green_light_circular);
-        }
+        updateNextButton();
     }
 
     @Override
@@ -185,33 +192,49 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
 
     @Override
     public void onColorDataReceived(Bitmap bitmap, int frameIndex) {
-
+        //dummy
     }
 
     @Override
     public void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex) {
 
-        SizeF calibrationCV = camera.getCalibrationImageSize(false);
-        SizeF calibrationToF = camera.getCalibrationImageSize(true);
-        if (calibrationCV != null) {
-            Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
-                String text = String.format(Locale.US, "%.1f", calibrationCV.getWidth() * 100.0f);
-                text += "x";
-                text += String.format(Locale.US, "%.1f", calibrationCV.getHeight() * 100.0f);
-                text += "cm";
-                fragmentDeviceCheckBinding.test1.setResult(text);
-                if (calibrationToF != null) {
-                    text = String.format(Locale.US, "%.1f", calibrationToF.getWidth() * 100.0f);
-                    text += "x";
-                    text += String.format(Locale.US, "%.1f", calibrationToF.getHeight() * 100.0f);
-                    text += "cm";
-                    fragmentDeviceCheckBinding.test2.setResult(text);
-                }
-            });
+        if (frameIndex % 10 == 0) {
+            SizeF calibrationRGB = camera.getCalibrationImageSize(false);
+            SizeF calibrationToF = camera.getCalibrationImageSize(true);
+            if (calibrationRGB != null) {
+                Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
+                    updateCalibration(calibrationRGB, calibrationsRGB);
+                    updateCalibrationResult(calibrationsRGB, fragmentDeviceCheckBinding.test1, CALIBRATION_TOLERANCE_RGB);
+                    if (calibrationToF != null) {
+                        updateCalibration(calibrationToF, calibrationsToF);
+                        updateCalibrationResult(calibrationsToF, fragmentDeviceCheckBinding.test2, CALIBRATION_TOLERANCE_TOF);
+                    }
+                });
+            }
         }
     }
 
     private boolean canContinue() {
+        if (tutorialData.getPosition() == 1) {
+            if (fragmentDeviceCheckBinding.test1.isFinished()) {
+                if (fragmentDeviceCheckBinding.test2.isFinished()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (tutorialData.getPosition() == 2) {
+            if (fragmentDeviceCheckBinding.test1.isFinished()) {
+                if (fragmentDeviceCheckBinding.test2.isFinished()) {
+                    if (fragmentDeviceCheckBinding.test3.isFinished()) {
+                        if (fragmentDeviceCheckBinding.test4.isFinished()) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
         return fragmentDeviceCheckBinding.guide.isChecked() || (fragmentDeviceCheckBinding.guide.getVisibility() == View.GONE);
     }
 
@@ -221,6 +244,63 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
             fragmentDeviceCheckBinding.colorCameraPreview.setVisibility(visibility);
             fragmentDeviceCheckBinding.depthCameraPreview.setVisibility(visibility);
             fragmentDeviceCheckBinding.surfaceview.setVisibility(visibility);
+        }
+    }
+
+    private void updateCalibration(SizeF calibration, ArrayList<SizeF> calibrations) {
+        boolean valid = true;
+        for (SizeF s : calibrations) {
+            float dx = Math.abs(calibration.getWidth() - s.getWidth());
+            float dy = Math.abs(calibration.getHeight() - s.getHeight());
+            if (dx + dy < 0.00001f) {
+                valid = false;
+                break;
+            }
+        }
+        if (valid && (calibrations.size() < CALIBRATIONS_MIN)) {
+            calibrations.add(calibration);
+        }
+    }
+
+    private void updateCalibrationResult(ArrayList<SizeF> calibrations, TestView result, float tolerance) {
+        calibrations.sort((a, b) -> {
+            float dx = Math.abs(a.getWidth() - b.getWidth());
+            float dy = Math.abs(a.getHeight() - b.getHeight());
+            return (int)(dx + dy * 1000);
+        });
+
+        SizeF median = calibrations.get(calibrations.size() / 2);
+        if (calibrations.size() == 1) {
+            result.setResult(getString(R.string.device_check_testing));
+            result.setState(TestView.TestState.TESTING);
+
+            Display d = getActivity().getWindowManager().getDefaultDisplay();
+            fragmentDeviceCheckBinding.arHandImage.setVisibility(View.VISIBLE);
+            fragmentDeviceCheckBinding.arHandImage.getAnimation().setOffset(d.getWidth() / 2, d.getHeight() / 2);
+        } else if (calibrations.size() == CALIBRATIONS_MIN) {
+            float dx = Math.abs(median.getWidth() - CALIBRATION_IMAGE_SIZE.getWidth());
+            float dy = Math.abs(median.getHeight() - CALIBRATION_IMAGE_SIZE.getHeight());
+            float avg = (dx + dy) / 2.0f;
+            if (avg > tolerance) {
+                result.setResult(getString(R.string.device_check_failed));
+                result.setState(TestView.TestState.ERROR);
+            } else {
+                result.setResult(getString(R.string.ok));
+                result.setState(TestView.TestState.SUCCESS);
+            }
+            if (canContinue()) {
+                fragmentDeviceCheckBinding.arHandImage.getAnimation().setOffset(Integer.MAX_VALUE, Integer.MAX_VALUE);
+                fragmentDeviceCheckBinding.tvTitle.setText(R.string.device_check23);
+            }
+            updateNextButton();
+        }
+    }
+
+    private void updateNextButton() {
+        if (canContinue()) {
+            fragmentDeviceCheckBinding.btnNext.setBackgroundResource(R.drawable.button_green_circular);
+        } else {
+            fragmentDeviceCheckBinding.btnNext.setBackgroundResource(R.drawable.button_green_light_circular);
         }
     }
 }

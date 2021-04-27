@@ -29,8 +29,9 @@ import de.welthungerhilfe.cgm.scanner.R;
 
 public class TestView extends LinearLayout {
 
-    public enum TestPhase { INITIALIZE, TESTING, ERROR, SUCCESS };
+    public enum TestState { UNKNOWN, INITIALIZE, TESTING, ERROR, SUCCESS };
 
+    private TestState mState;
     private TextView mResult;
     private TextView mTitle;
 
@@ -48,12 +49,18 @@ public class TestView extends LinearLayout {
         super(context);
         initView();
     }
+
+    public boolean isFinished() {
+        return mState == TestState.SUCCESS || mState == TestState.ERROR;
+    }
+
     public void setResult(String text) {
         mResult.setText(text);
     }
 
-    public void setResultColor(TestPhase phase) {
-        switch (phase) {
+    public void setState(TestState state) {
+        mState = state;
+        switch (state) {
             case INITIALIZE:
                 mResult.setTextColor(Color.GRAY);
                 break;
@@ -75,6 +82,7 @@ public class TestView extends LinearLayout {
 
     private void initView() {
         View root = inflate(getContext(), R.layout.lv_test_view, this);
+        mState = TestState.UNKNOWN;
         mResult = root.findViewById(R.id.test_result);
         mTitle = root.findViewById(R.id.test_title);
     }
