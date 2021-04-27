@@ -413,18 +413,17 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         public void run() {
             if (!BuildConfig.DEBUG) {
                 try {
-                    String dummyId = "";
                     SessionManager session = new SessionManager(Objects.requireNonNull(getActivity()));
-                    SyncingWorkManager.provideRetrofit().create(ApiService.class).getEstimates(session.getAuthTokenWithBearer(), dummyId).subscribeOn(Schedulers.io())
+                    SyncingWorkManager.provideRetrofit().create(ApiService.class).test(session.getAuthTokenWithBearer()).subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Observer<EstimatesResponse>() {
+                            .subscribe(new Observer<String>() {
                                 @Override
                                 public void onSubscribe(@NonNull Disposable d) {
 
                                 }
 
                                 @Override
-                                public void onNext(@NonNull EstimatesResponse estimatesResponse) {
+                                public void onNext(@NonNull String response) {
                                     fragmentDeviceCheckBinding.test4.setResult(getString(R.string.ok));
                                     fragmentDeviceCheckBinding.test4.setState(TestView.TestState.SUCCESS);
                                     updateNextButton();
@@ -449,6 +448,9 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                             });
                 } catch (Exception e) {
                     LogFileUtils.logException(e);
+                    fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_failed));
+                    fragmentDeviceCheckBinding.test4.setState(TestView.TestState.ERROR);
+                    updateNextButton();
                 }
             } else {
                 Objects.requireNonNull(getActivity()).runOnUiThread(() -> {

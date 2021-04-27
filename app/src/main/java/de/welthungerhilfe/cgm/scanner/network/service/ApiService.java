@@ -62,5 +62,8 @@ public interface ApiService {
 
     @GET("scans/{scan_id}/estimates")
     Observable<EstimatesResponse> getEstimates(@Header("Authorization") String auth, @Path("scan_id") String scanId);
+
+    @GET("test")
+    Observable<String> test(@Header("Authorization") String auth);
 }
 
