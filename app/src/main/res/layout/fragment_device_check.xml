@@ -188,49 +188,21 @@
                 android:orientation="vertical"
                 android:padding="32dp">
 
-                <LinearLayout
-                    android:id="@+id/lytTutorial1"
+                <TextView
+                    android:id="@+id/instruction"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:autoLink="web"
+                    android:text="@string/device_check11"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="22sp" />
 
-                    <TextView
-                        android:id="@+id/tv_instruction1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:autoLink="web"
-                        android:text="@string/device_check11"
-                        android:textColor="@color/colorBlack"
-                        android:textSize="22sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/lytTutorial2"
+                <de.welthungerhilfe.cgm.scanner.ui.views.CheckboxView
+                    android:id="@+id/guide"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/lytTutorial1"
-                    android:layout_marginTop="16dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/tv_instruction2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/device_check12"
-                        android:textColor="@color/colorBlack"
-                        android:textSize="22sp" />
-
-                    <androidx.appcompat.widget.AppCompatCheckBox
-                        android:id="@+id/guide2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                </LinearLayout>
+                    app:checkboxText="@string/device_check12"/>
 
             </LinearLayout>
 

@@ -83,14 +83,14 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         } else {
             fragmentDeviceCheckBinding.ivTitle.setImageResource(tutorialData.getImage());
         }
-        fragmentDeviceCheckBinding.tvInstruction1.setText(tutorialData.getInstruction1());
-        fragmentDeviceCheckBinding.tvInstruction2.setText(tutorialData.getInstruction2());
+        fragmentDeviceCheckBinding.instruction.setText(tutorialData.getInstruction1());
+        fragmentDeviceCheckBinding.guide.setText(tutorialData.getInstruction2());
         if (tutorialData.getInstruction2().length() == 0) {
-            fragmentDeviceCheckBinding.guide2.setVisibility(View.GONE);
+            fragmentDeviceCheckBinding.guide.setVisibility(View.GONE);
         } else {
-            fragmentDeviceCheckBinding.guide2.setVisibility(View.VISIBLE);
+            fragmentDeviceCheckBinding.guide.setVisibility(View.VISIBLE);
         }
-        fragmentDeviceCheckBinding.guide2.setOnCheckedChangeListener(this);
+        fragmentDeviceCheckBinding.guide.setOnCheckedChangeListener(this);
         fragmentDeviceCheckBinding.btnNext.setOnClickListener(this);
         fragmentDeviceCheckBinding.stepView.go(tutorialData.getPosition(),true);
 
@@ -183,7 +183,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     }
 
     private boolean canContinue() {
-        return fragmentDeviceCheckBinding.guide2.isChecked() || (fragmentDeviceCheckBinding.guide2.getVisibility() == View.GONE);
+        return fragmentDeviceCheckBinding.guide.isChecked() || (fragmentDeviceCheckBinding.guide.getVisibility() == View.GONE);
     }
 
     private void setCameraVisibility(int visibility) {
