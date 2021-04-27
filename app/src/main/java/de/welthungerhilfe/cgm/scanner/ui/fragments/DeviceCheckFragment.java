@@ -329,7 +329,6 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
             }
             if (canContinue()) {
                 fragmentDeviceCheckBinding.arHandImage.getAnimation().setOffset(Integer.MAX_VALUE, Integer.MAX_VALUE);
-                fragmentDeviceCheckBinding.tvTitle.setText(R.string.device_check23);
             }
             updateNextButton();
         }
@@ -337,6 +336,9 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
 
     private void updateNextButton() {
         if (canContinue()) {
+            if ((tutorialData.getPosition() == 1) || (tutorialData.getPosition() == 2)) {
+                fragmentDeviceCheckBinding.tvTitle.setText(R.string.device_check_step_finished);
+            }
             fragmentDeviceCheckBinding.btnNext.setBackgroundResource(R.drawable.button_green_circular);
         } else {
             fragmentDeviceCheckBinding.btnNext.setBackgroundResource(R.drawable.button_green_light_circular);
@@ -434,8 +436,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                                         AuthenticationHandler.restoreToken(context);
                                         new Thread(internetConnectionCheck).start();
                                     } else {
-                                        LogFileUtils.logException(e);
-                                        fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_failed));
+                                        fragmentDeviceCheckBinding.test4.setResult(e.getMessage());
                                         fragmentDeviceCheckBinding.test4.setState(TestView.TestState.ERROR);
                                         updateNextButton();
                                     }
