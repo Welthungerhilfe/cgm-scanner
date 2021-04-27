@@ -26,6 +26,7 @@ import android.os.Build;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 
 import org.json.JSONObject;
 
@@ -67,7 +68,7 @@ import okhttp3.RequestBody;
 import retrofit2.Retrofit;
 
 
-public class SyncAdapter {
+public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
     private static SyncAdapter instance;
     private static final Object lock = new Object();
@@ -191,6 +192,7 @@ public class SyncAdapter {
                     processDeviceQueue();
                     processConsentSheet();
                     processMeasureResults();
+                    migrateEnvironmentColumns();
 
                     session.setSyncTimestamp(currentTimestamp);
                 } catch (Exception e) {
@@ -334,7 +336,7 @@ public class SyncAdapter {
 
                             @Override
                             public void onNext(@NonNull Scan scan) {
-                                LogFileUtils.logInfo(TAG, "scan " +  scan.getId() + " successfully posted");
+                                LogFileUtils.logInfo(TAG, "scan " + scan.getId() + " successfully posted");
                                 PostScanResult postScanResult = new PostScanResult();
                                 postScanResult.setEnvironment(measure.getEnvironment());
                                 postScanResult.setId(scan.getId());
@@ -357,7 +359,7 @@ public class SyncAdapter {
 
                             @Override
                             public void onError(@NonNull Throwable e) {
-                                LogFileUtils.logError(TAG, "scan " +  scan.getId() + " posting failed " + e.getMessage());
+                                LogFileUtils.logError(TAG, "scan " + scan.getId() + " posting failed " + e.getMessage());
                                 if (Utils.isExpiredToken(e.getMessage())) {
                                     AuthenticationHandler.restoreToken(context);
                                 }
@@ -827,4 +829,46 @@ public class SyncAdapter {
         }
     }
 
+    public void migrateEnvironmentColumns() {
+        List<Person> syncablePersons = personRepository.getSyncablePerson(AppConstants.ENV_UNKNOWN);
+        for (Person person : syncablePersons) {
+            person.setEnvironment(session.getEnvironment());
+            personRepository.updatePerson(person);
+        }
+
+        List<Measure> syncableMeasures = measureRepository.getSyncableMeasure(AppConstants.ENV_UNKNOWN);
+
+        for (Measure measure : syncableMeasures) {
+            measure.setEnvironment(session.getEnvironment());
+            measureRepository.updateMeasure(measure);
+        }
+
+        List<PostScanResult> syncablePostScanResult = postScanResultrepository.getSyncablePostScanResult(AppConstants.ENV_UNKNOWN);
+
+        for (PostScanResult scanResult : syncablePostScanResult) {
+            scanResult.setEnvironment(session.getEnvironment());
+            postScanResultrepository.updatePostScanResult(scanResult);
+        }
+
+        loadQueueFileLogs();
+    }
+
+    private void loadQueueFileLogs() {
+        fileLogRepository.loadQueuedData(this, AppConstants.ENV_UNKNOWN);
+    }
+
+    @Override
+    public void onFileLogsLoaded(List<FileLog> list) {
+        if (list.size() > 0) {
+            for (int i = 0; i < list.size(); i++) {
+                try {
+                    list.get(i).setEnvironment(session.getEnvironment());
+                    fileLogRepository.updateFileLog(list.get(i));
+                } catch (Exception e) {
+                    LogFileUtils.logException(e);
+                }
+            }
+            loadQueueFileLogs();
+        }
+    }
 }
