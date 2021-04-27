@@ -19,9 +19,14 @@
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.media.Image;
+import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.StatFs;
 import android.util.SizeF;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -32,6 +37,7 @@ import android.widget.CompoundButton;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -47,10 +53,13 @@ import de.welthungerhilfe.cgm.scanner.ui.views.TestView;
 
 public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener, AbstractARCamera.Camera2DataListener {
 
-    private final int CALIBRATIONS_MIN = 10;
-    private final float CALIBRATION_TOLERANCE_RGB = 0.03f;
-    private final float CALIBRATION_TOLERANCE_TOF = 0.015f;
-    private final SizeF CALIBRATION_IMAGE_SIZE = new SizeF(0.35f, 0.35f);
+    private final int CALIBRATIONS_MIN = 10; //measures
+    private final float CALIBRATION_TOLERANCE_RGB = 0.04f; //meters
+    private final float CALIBRATION_TOLERANCE_TOF = 0.02f; //meters
+    private final SizeF CALIBRATION_IMAGE_SIZE = new SizeF(0.35f, 0.35f); //meters
+
+    private final int BATTERY_MIN = 50; //percent
+    private final int STORAGE_MIN = 32; //gigabytes
 
     private ArrayList<SizeF> calibrationsRGB;
     private ArrayList<SizeF> calibrationsToF;
@@ -153,6 +162,10 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                 fragmentDeviceCheckBinding.test2.setVisibility(View.VISIBLE);
                 fragmentDeviceCheckBinding.test3.setVisibility(View.VISIBLE);
                 fragmentDeviceCheckBinding.test4.setVisibility(View.VISIBLE);
+                new Thread(batteryCheck).start();
+                new Thread(deviceStorageCheck).start();
+                new Thread(gpsCheck).start();
+                new Thread(internetConnectionCheck).start();
                 break;
             case 3:
                 fragmentDeviceCheckBinding.btnNext.setText(getString(R.string.done).toUpperCase());
@@ -303,4 +316,59 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
             fragmentDeviceCheckBinding.btnNext.setBackgroundResource(R.drawable.button_green_light_circular);
         }
     }
+
+    private final Runnable batteryCheck = new Runnable() {
+        @Override
+        public void run() {
+            IntentFilter iFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            Intent batteryStatus = context.registerReceiver(null, iFilter);
+            int level = batteryStatus != null ? batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) : -1;
+            int scale = batteryStatus != null ? batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1) : -1;
+            float batteryPct = 100 * level / (float) scale;
+
+            Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
+                if (batteryPct > BATTERY_MIN) {
+                    fragmentDeviceCheckBinding.test1.setResult(getString(R.string.ok));
+                    fragmentDeviceCheckBinding.test1.setState(TestView.TestState.SUCCESS);
+                } else {
+                    fragmentDeviceCheckBinding.test1.setResult(getString(R.string.device_check_too_low_energy));
+                    fragmentDeviceCheckBinding.test1.setState(TestView.TestState.ERROR);
+                }
+            });
+        }
+    };
+
+    private final Runnable deviceStorageCheck = new Runnable() {
+        @Override
+        public void run() {
+            File path = Environment.getDataDirectory();
+            StatFs stats = new StatFs(path.getAbsolutePath());
+            long bytes = stats.getAvailableBlocksLong() * stats.getBlockSizeLong();
+            int gigabytes = (int) (bytes / 1024 / 1024 / 1024);
+
+            Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
+                if (gigabytes > STORAGE_MIN) {
+                    fragmentDeviceCheckBinding.test2.setResult(getString(R.string.ok));
+                    fragmentDeviceCheckBinding.test2.setState(TestView.TestState.SUCCESS);
+                } else {
+                    fragmentDeviceCheckBinding.test2.setResult(getString(R.string.device_check_not_enough_memory));
+                    fragmentDeviceCheckBinding.test2.setState(TestView.TestState.ERROR);
+                }
+            });
+        }
+    };
+
+    private final Runnable gpsCheck = new Runnable() {
+        @Override
+        public void run() {
+
+        }
+    };
+
+    private final Runnable internetConnectionCheck = new Runnable() {
+        @Override
+        public void run() {
+
+        }
+    };
 }
