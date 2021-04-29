@@ -14,6 +14,7 @@
     <string name="login_error_invalid">Couldn\'t get user email, please try again</string>
 
     <!-- Device check !-->
+    <string name="device_check_reminder">There was no recent device check done on this device. Do you want to do it now?</string>
     <string name="device_check1">What is needed for device check?</string>
     <string name="device_check11">There is needed a calibration image which you can get from Child Growth Monitor support team.</string>
     <string name="device_check12">I have printed the calibration image and I am ready to scan it.</string>

@@ -38,8 +38,12 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.DeviceCheckFragment;
 import de.welthungerhilfe.cgm.scanner.ui.views.PagerView;
+import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 
 public class DeviceCheckActivity extends BaseActivity {
+
+    public static final String KEY_LAST_DEVICE_CHECK = "KEY_LAST_DEVICE_CHECK";
+
     @BindView(R.id.viewPager)
     PagerView viewPager;
     @BindView(R.id.lytStart)
@@ -53,12 +57,9 @@ public class DeviceCheckActivity extends BaseActivity {
 
     @OnClick(R.id.btnStart)
     void startWork() {
-        if (!again)
-            startActivity(new Intent(this, MainActivity.class));
+        LocalPersistency.setLong(this, KEY_LAST_DEVICE_CHECK, System.currentTimeMillis());
         finish();
     }
-
-    private boolean again;
 
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
@@ -66,7 +67,6 @@ public class DeviceCheckActivity extends BaseActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         ButterKnife.bind(this);
 
-        again = getIntent().getBooleanExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, false);
         dataList = getTutorialData();
         fragments = new ArrayList<>();
         issues = new ArrayList<>();
