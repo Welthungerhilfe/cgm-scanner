@@ -26,12 +26,12 @@
     <string name="device_check33">GPS</string>
     <string name="device_check34">Internet connection</string>
     <string name="device_check4">Tests ended with issues. Do you want to continue?</string>
-    <string name="device_check4_rgb">RGB_DEFECT</string>
-    <string name="device_check4_tof">TOF_DEFECT</string>
-    <string name="device_check4_battery">BATTERY_LOW</string>
-    <string name="device_check4_gps">GPS_FAILED</string>
-    <string name="device_check4_storage">STORAGE_LOW</string>
-    <string name="device_check4_backend">BACKEND_ERROR</string>
+    <string name="device_check4_rgb">Color camera detected a wrong dimensions of calibration image, this might be caused by a defect of the lenses.</string>
+    <string name="device_check4_tof">ToF sensor detected a wrong dimensions of calibration image, this might be caused by a defect of the lenses.</string>
+    <string name="device_check4_battery">The battery level is low, there might be not enough energy to capture a bigger amount of data.</string>
+    <string name="device_check4_gps">GPS sensor was not able to determine your position. The captured data won\'t be tracked.</string>
+    <string name="device_check4_storage">The device storage is low, there might be not enough space to capture a bigger amount of data.</string>
+    <string name="device_check4_backend">The device wasn\'t able to connect to CGM backend. There won\'t be possible to synchronise any data.</string>
     <string name="device_check42">I take responsibility for possible issues caused by the problems above.</string>
     <string name="device_check5">You can refer to the device check from <u color="#FF0000">Menu</u> any time!</string>
     <string name="device_check_step_finished">Check step finished</string>
