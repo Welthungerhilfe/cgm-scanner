@@ -47,7 +47,9 @@ public class DeviceCheckActivity extends BaseActivity {
     @BindView(R.id.stepView)
     StepView stepView;
 
-    ArrayList<TutorialData> dataList;
+    private ArrayList<TutorialData> dataList;
+    private ArrayList<DeviceCheckFragment> fragments;
+    private ArrayList<DeviceCheckFragment.IssueType> issues;
 
     @OnClick(R.id.btnStart)
     void startWork() {
@@ -66,16 +68,32 @@ public class DeviceCheckActivity extends BaseActivity {
 
         again = getIntent().getBooleanExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, false);
         dataList = getTutorialData();
+        fragments = new ArrayList<>();
+        issues = new ArrayList<>();
 
         FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
 
         for (int i = 0; i < dataList.size(); i++) {
-            adapter.addFragment(DeviceCheckFragment.newInstance(dataList.get(i)), "tutorial" + (i + 1));
+            DeviceCheckFragment fragment = DeviceCheckFragment.newInstance(dataList.get(i));
+            fragments.add(fragment);
+            adapter.addFragment(fragment, "tutorial" + (i + 1));
         }
 
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(TangoUtils.isTangoSupported() ? 2 : 4);
         viewPager.setSwipeEnabled(false);
+    }
+
+    public void addIssue(DeviceCheckFragment.IssueType issue) {
+        if (!issues.contains(issue)) {
+            issues.add(issue);
+            issues.sort((a, b) -> a.ordinal() - b.ordinal());
+            fragments.get(3).updateIssues(issues);
+        }
+    }
+
+    public boolean hasIssues() {
+        return issues.size() > 0;
     }
 
     public void gotoNext() {

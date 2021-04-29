@@ -50,13 +50,10 @@ public class TutorialFragment extends Fragment implements CompoundButton.OnCheck
         return fragment;
     }
 
-
     public void onAttach(Context context) {
         super.onAttach(context);
-
         this.context = context;
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -76,8 +73,7 @@ public class TutorialFragment extends Fragment implements CompoundButton.OnCheck
         fragmentTutorialBinding.guide2.setOnCheckedChangeListener(this);
         fragmentTutorialBinding.btnNext.setOnClickListener(this);
         fragmentTutorialBinding.stepView.go(tutorialData.getPosition(),true);
-        if(tutorialData.getPosition() == 3)
-        {
+        if(tutorialData.getPosition() == 3) {
             fragmentTutorialBinding.btnNext.setText(getString(R.string.done).toUpperCase());
         }
     }

@@ -74,7 +74,7 @@
                         app:sv_stepNumberTextSize="12sp"
                         app:sv_stepPadding="2dp"
                         app:sv_stepViewStyle="@style/StepView"
-                        app:sv_stepsNumber="4"></com.shuhart.stepview.StepView>
+                        app:sv_stepsNumber="4"/>
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -180,56 +180,61 @@
                 android:background="@color/colorPrimary"
                 android:visibility="gone"/>
 
-            <LinearLayout
+            <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@color/colorWhite"
-                android:orientation="vertical"
-                android:padding="32dp">
+                android:layout_marginBottom="110dp" >
 
-                <de.welthungerhilfe.cgm.scanner.ui.views.TestView
-                    android:id="@+id/test1"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"/>
+                    android:layout_height="match_parent"
+                    android:background="@color/colorWhite"
+                    android:orientation="vertical"
+                    android:padding="32dp">
 
-                <de.welthungerhilfe.cgm.scanner.ui.views.TestView
-                    android:id="@+id/test2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"/>
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TestView
+                        android:id="@+id/test1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"/>
 
-                <de.welthungerhilfe.cgm.scanner.ui.views.TestView
-                    android:id="@+id/test3"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"/>
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TestView
+                        android:id="@+id/test2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"/>
 
-                <de.welthungerhilfe.cgm.scanner.ui.views.TestView
-                    android:id="@+id/test4"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"/>
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TestView
+                        android:id="@+id/test3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"/>
 
-                <TextView
-                    android:id="@+id/instruction"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:autoLink="web"
-                    android:text="@string/device_check11"
-                    android:textColor="@color/colorBlack"
-                    android:textSize="22sp" />
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TestView
+                        android:id="@+id/test4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"/>
 
-                <de.welthungerhilfe.cgm.scanner.ui.views.CheckboxView
-                    android:id="@+id/guide"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:checkboxText="@string/device_check12"/>
+                    <TextView
+                        android:id="@+id/instruction"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:autoLink="web"
+                        android:text="@string/device_check11"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="22sp" />
 
-            </LinearLayout>
+                    <de.welthungerhilfe.cgm.scanner.ui.views.CheckboxView
+                        android:id="@+id/guide"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:checkboxText="@string/device_check12"/>
 
+                </LinearLayout>
+            </ScrollView>
         </LinearLayout>
 
         <ImageView

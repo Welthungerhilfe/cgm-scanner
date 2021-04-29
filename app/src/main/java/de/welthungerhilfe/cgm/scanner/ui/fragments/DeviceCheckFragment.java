@@ -70,6 +70,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener, AbstractARCamera.Camera2DataListener {
 
+    public enum IssueType { RGB_DEFECT, TOF_DEFECT, BATTERY_LOW, GPS_FAILED, STORAGE_LOW, BACKEND_ERROR };
+
     private final int CALIBRATIONS_MIN = 10; //measures
     private final float CALIBRATION_TOLERANCE_RGB = 0.04f; //meters
     private final float CALIBRATION_TOLERANCE_TOF = 0.02f; //meters
@@ -101,7 +103,6 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
 
     public void onAttach(Context context) {
         super.onAttach(context);
-
         this.context = context;
     }
 
@@ -224,7 +225,18 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     @Override
     public void onClick(View v) {
         if (canContinue()) {
-            ((DeviceCheckActivity)context).gotoNext();
+            int steps = 1;
+
+            //skip issue summary screen when there are no issues
+            DeviceCheckActivity activity = (DeviceCheckActivity)context;
+            if ((tutorialData.getPosition() == 2) && (!activity.hasIssues())) {
+                steps = 2;
+            }
+
+            //next screen
+            for (int i = 0; i < steps; i++) {
+                activity.gotoNext();
+            }
         }
     }
 
@@ -242,14 +254,25 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
             if (calibrationRGB != null) {
                 Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
                     updateCalibration(calibrationRGB, calibrationsRGB);
-                    updateCalibrationResult(calibrationsRGB, fragmentDeviceCheckBinding.test1, CALIBRATION_TOLERANCE_RGB);
+                    updateCalibrationResult(calibrationsRGB, fragmentDeviceCheckBinding.test1, CALIBRATION_TOLERANCE_RGB, IssueType.RGB_DEFECT);
                     if (calibrationToF != null) {
                         updateCalibration(calibrationToF, calibrationsToF);
-                        updateCalibrationResult(calibrationsToF, fragmentDeviceCheckBinding.test2, CALIBRATION_TOLERANCE_TOF);
+                        updateCalibrationResult(calibrationsToF, fragmentDeviceCheckBinding.test2, CALIBRATION_TOLERANCE_TOF, IssueType.TOF_DEFECT);
                     }
                 });
             }
         }
+    }
+
+    public void updateIssues(ArrayList<IssueType> issues) {
+        StringBuilder text = new StringBuilder();
+        for (IssueType issue : issues) {
+            if (text.length() > 0) {
+                text.append("\n\n");
+            }
+            text.append(getIssueDescription(issue));
+        }
+        fragmentDeviceCheckBinding.instruction.setText(text.toString());
     }
 
     private boolean canContinue() {
@@ -276,6 +299,11 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         return fragmentDeviceCheckBinding.guide.isChecked() || (fragmentDeviceCheckBinding.guide.getVisibility() == View.GONE);
     }
 
+    private String getIssueDescription(IssueType issue) {
+        //TODO:add descriptions
+        return issue.toString();
+    }
+
     private void setCameraVisibility(int visibility) {
         if (!TangoUtils.isTangoSupported()) {
             fragmentDeviceCheckBinding.cameraPreviewBackground.setVisibility(visibility);
@@ -300,7 +328,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         }
     }
 
-    private void updateCalibrationResult(ArrayList<SizeF> calibrations, TestView result, float tolerance) {
+    private void updateCalibrationResult(ArrayList<SizeF> calibrations, TestView result, float tolerance, IssueType onFail) {
         if (calibrations.size() == 1) {
             result.setResult(getString(R.string.device_check_testing));
             result.setState(TestView.TestState.TESTING);
@@ -326,6 +354,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
             } else {
                 result.setResult(getString(R.string.device_check_failed));
                 result.setState(TestView.TestState.ERROR);
+                addIssue(onFail);
             }
             if (canContinue()) {
                 fragmentDeviceCheckBinding.arHandImage.getAnimation().setOffset(Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -345,6 +374,11 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         }
     }
 
+    private void addIssue(IssueType issue) {
+        DeviceCheckActivity activity = (DeviceCheckActivity) getActivity();
+        Objects.requireNonNull(activity).addIssue(issue);
+    }
+
     private final Runnable batteryCheck = new Runnable() {
         @Override
         public void run() {
@@ -361,6 +395,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                 } else {
                     fragmentDeviceCheckBinding.test1.setResult(getString(R.string.device_check_too_low_energy));
                     fragmentDeviceCheckBinding.test1.setState(TestView.TestState.ERROR);
+                    addIssue(IssueType.BATTERY_LOW);
                 }
                 updateNextButton();
             });
@@ -382,6 +417,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                 } else {
                     fragmentDeviceCheckBinding.test2.setResult(getString(R.string.device_check_failed));
                     fragmentDeviceCheckBinding.test2.setState(TestView.TestState.ERROR);
+                    addIssue(IssueType.STORAGE_LOW);
                 }
                 updateNextButton();
             });
@@ -402,6 +438,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                 } else {
                     fragmentDeviceCheckBinding.test3.setResult(getString(R.string.device_check_failed));
                     fragmentDeviceCheckBinding.test3.setState(TestView.TestState.ERROR);
+                    addIssue(IssueType.GPS_FAILED);
                 }
                 updateNextButton();
             });
@@ -442,6 +479,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                                         } else {
                                             fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_failed));
                                             fragmentDeviceCheckBinding.test4.setState(TestView.TestState.ERROR);
+                                            addIssue(IssueType.BACKEND_ERROR);
                                         }
                                         updateNextButton();
                                     }
@@ -456,12 +494,14 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                     LogFileUtils.logException(e);
                     fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_failed));
                     fragmentDeviceCheckBinding.test4.setState(TestView.TestState.ERROR);
+                    addIssue(IssueType.BACKEND_ERROR);
                     updateNextButton();
                 }
             } else {
                 Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
                     fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_failed));
                     fragmentDeviceCheckBinding.test4.setState(TestView.TestState.ERROR);
+                    addIssue(IssueType.BACKEND_ERROR);
                     updateNextButton();
                 });
             }
