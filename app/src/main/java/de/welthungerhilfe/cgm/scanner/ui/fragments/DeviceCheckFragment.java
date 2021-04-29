@@ -71,8 +71,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener, AbstractARCamera.Camera2DataListener {
 
     private final int CALIBRATIONS_MIN = 10; //measures
-    private final float CALIBRATION_TOLERANCE_RGB = 0.05f; //meters
-    private final float CALIBRATION_TOLERANCE_TOF = 0.025f; //meters
+    private final float CALIBRATION_TOLERANCE_RGB = 0.04f; //meters
+    private final float CALIBRATION_TOLERANCE_TOF = 0.02f; //meters
     private final SizeF CALIBRATION_IMAGE_SIZE = new SizeF(0.35f, 0.35f); //meters
 
     private final int BATTERY_MIN = 50; //percent
@@ -301,13 +301,6 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     }
 
     private void updateCalibrationResult(ArrayList<SizeF> calibrations, TestView result, float tolerance) {
-        calibrations.sort((a, b) -> {
-            float dx = Math.abs(a.getWidth() - b.getWidth());
-            float dy = Math.abs(a.getHeight() - b.getHeight());
-            return (int)(dx + dy * 1000);
-        });
-
-        SizeF median = calibrations.get(calibrations.size() / 2);
         if (calibrations.size() == 1) {
             result.setResult(getString(R.string.device_check_testing));
             result.setState(TestView.TestState.TESTING);
@@ -316,15 +309,23 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
             fragmentDeviceCheckBinding.arHandImage.setVisibility(View.VISIBLE);
             fragmentDeviceCheckBinding.arHandImage.getAnimation().setOffset(d.getWidth() / 2, d.getHeight() / 2);
         } else if (calibrations.size() == CALIBRATIONS_MIN) {
-            float dx = Math.abs(median.getWidth() - CALIBRATION_IMAGE_SIZE.getWidth());
-            float dy = Math.abs(median.getHeight() - CALIBRATION_IMAGE_SIZE.getHeight());
-            float avg = (dx + dy) / 2.0f;
-            if (avg > tolerance) {
-                result.setResult(getString(R.string.device_check_failed));
-                result.setState(TestView.TestState.ERROR);
-            } else {
+            boolean valid = false;
+            for (int i = 2; i < calibrations.size(); i++) {
+                SizeF calibration = calibrations.get(i);
+                float dx = Math.abs(calibration.getWidth() - CALIBRATION_IMAGE_SIZE.getWidth());
+                float dy = Math.abs(calibration.getHeight() - CALIBRATION_IMAGE_SIZE.getHeight());
+                float avg = (dx + dy) / 2.0f;
+                if (avg <= tolerance) {
+                    valid = true;
+                    break;
+                }
+            }
+            if (valid) {
                 result.setResult(getString(R.string.ok));
                 result.setState(TestView.TestState.SUCCESS);
+            } else {
+                result.setResult(getString(R.string.device_check_failed));
+                result.setState(TestView.TestState.ERROR);
             }
             if (canContinue()) {
                 fragmentDeviceCheckBinding.arHandImage.getAnimation().setOffset(Integer.MAX_VALUE, Integer.MAX_VALUE);
