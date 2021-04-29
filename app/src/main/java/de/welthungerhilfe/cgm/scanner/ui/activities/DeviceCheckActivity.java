@@ -18,7 +18,6 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -31,7 +30,6 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
@@ -57,7 +55,6 @@ public class DeviceCheckActivity extends BaseActivity {
 
     @OnClick(R.id.btnStart)
     void startWork() {
-        LocalPersistency.setLong(this, KEY_LAST_DEVICE_CHECK, System.currentTimeMillis());
         finish();
     }
 
@@ -98,6 +95,9 @@ public class DeviceCheckActivity extends BaseActivity {
 
     public void gotoNext() {
         int curpos = viewPager.getCurrentItem();
+        if (curpos == 3) {
+            LocalPersistency.setLong(this, KEY_LAST_DEVICE_CHECK, System.currentTimeMillis());
+        }
         if (curpos + 1 >= viewPager.getOffscreenPageLimit()) {
             showCompleteView();
         } else {

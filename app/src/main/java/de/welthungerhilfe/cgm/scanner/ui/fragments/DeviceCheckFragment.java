@@ -78,7 +78,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     private final SizeF CALIBRATION_IMAGE_SIZE = new SizeF(0.35f, 0.35f); //meters
 
     private final int BATTERY_MIN = 50; //percent
-    private final int STORAGE_MIN = 32; //gigabytes
+    private final int STORAGE_MIN = 4; //gigabytes
 
     private ArrayList<SizeF> calibrationsRGB;
     private ArrayList<SizeF> calibrationsToF;
@@ -438,14 +438,15 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                 Activity activity = getActivity();
                 if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, BaseActivity.PERMISSION_LOCATION);
-                }
-                if (Utils.getLastKnownLocation(getContext()) != null) {
-                    fragmentDeviceCheckBinding.test3.setResult(getString(R.string.ok));
-                    fragmentDeviceCheckBinding.test3.setState(TestView.TestState.SUCCESS);
                 } else {
-                    fragmentDeviceCheckBinding.test3.setResult(getString(R.string.device_check_failed));
-                    fragmentDeviceCheckBinding.test3.setState(TestView.TestState.ERROR);
-                    addIssue(IssueType.GPS_FAILED);
+                    if (Utils.getLastKnownLocation(getContext()) != null) {
+                        fragmentDeviceCheckBinding.test3.setResult(getString(R.string.ok));
+                        fragmentDeviceCheckBinding.test3.setState(TestView.TestState.SUCCESS);
+                    } else {
+                        fragmentDeviceCheckBinding.test3.setResult(getString(R.string.device_check_failed));
+                        fragmentDeviceCheckBinding.test3.setState(TestView.TestState.ERROR);
+                        addIssue(IssueType.GPS_FAILED);
+                    }
                 }
                 updateNextButton();
             });
