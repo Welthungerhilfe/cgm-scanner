@@ -300,7 +300,14 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     }
 
     private String getIssueDescription(IssueType issue) {
-        //TODO:add descriptions
+        switch (issue) {
+            case RGB_DEFECT: return getString(R.string.device_check4_rgb);
+            case TOF_DEFECT: return getString(R.string.device_check4_tof);
+            case BATTERY_LOW: return getString(R.string.device_check4_battery);
+            case GPS_FAILED: return getString(R.string.device_check4_gps);
+            case STORAGE_LOW: return getString(R.string.device_check4_storage);
+            case BACKEND_ERROR: return getString(R.string.device_check4_backend);
+        }
         return issue.toString();
     }
 
