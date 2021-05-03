@@ -75,7 +75,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     private final int CALIBRATIONS_MIN = 10; //measures
     private final float CALIBRATION_TOLERANCE_RGB = 0.04f; //meters
     private final float CALIBRATION_TOLERANCE_TOF = 0.02f; //meters
-    private final SizeF CALIBRATION_IMAGE_SIZE = new SizeF(0.35f, 0.35f); //meters
+    private final SizeF CALIBRATION_IMAGE_SIZE = new SizeF(0.15f, 0.15f); //meters
 
     private final int BATTERY_MIN = 50; //percent
     private final int STORAGE_MIN = 4; //gigabytes

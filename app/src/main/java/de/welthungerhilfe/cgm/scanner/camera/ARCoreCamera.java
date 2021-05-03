@@ -290,8 +290,8 @@ public class ARCoreCamera extends AbstractARCamera {
       // Set calibration image
       AugmentedImageDatabase db = new AugmentedImageDatabase(mSession);
       try {
-        Bitmap b = BitmapFactory.decodeStream(mGLSurfaceView.getContext().getAssets().open("earth.jpg"));
-        db.addImage("earth", b);
+        Bitmap b = BitmapFactory.decodeStream(mGLSurfaceView.getContext().getAssets().open(CALIBRATION_IMAGE_FILE));
+        db.addImage("image", b);
       } catch (Exception e) {
         LogFileUtils.logException(e);
       }

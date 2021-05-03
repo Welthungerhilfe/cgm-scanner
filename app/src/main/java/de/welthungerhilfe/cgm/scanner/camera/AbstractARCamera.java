@@ -75,6 +75,7 @@ public abstract class AbstractARCamera {
 
     private final static int ALPHA_DEFAULT = 128;
     private final static int ALPHA_FOCUS = 64;
+    protected final String CALIBRATION_IMAGE_FILE = "plant.jpg";
 
     //app connection
     protected Activity mActivity;
