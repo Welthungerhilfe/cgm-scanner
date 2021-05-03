@@ -78,6 +78,7 @@ import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.ui.fragments.DeviceCheckFragment;
 import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
@@ -85,6 +86,8 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
+
+import static de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity.KEY_LAST_DEVICE_CHECK_ISSUES;
 
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
 
@@ -496,7 +499,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     }
 
 
-    private BaseActivity.ResultListener listener = new BaseActivity.ResultListener() {
+    private final BaseActivity.ResultListener listener = new BaseActivity.ResultListener() {
         @Override
         public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 
@@ -519,6 +522,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             confirmDialog.setConfirmListener(result -> {
                 if (result) {
                     startActivity(new Intent(MainActivity.this, DeviceCheckActivity.class));
+                } else {
+                    LocalPersistency.setString(this, KEY_LAST_DEVICE_CHECK_ISSUES, DeviceCheckFragment.IssueType.CHECK_REFUSED.toString());
                 }
             });
             confirmDialog.show();

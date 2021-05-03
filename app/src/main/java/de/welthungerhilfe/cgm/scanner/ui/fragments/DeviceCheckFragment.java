@@ -71,7 +71,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener, AbstractARCamera.Camera2DataListener {
 
-    public enum IssueType { RGB_DEFECT, TOF_DEFECT, BATTERY_LOW, GPS_FAILED, STORAGE_LOW, BACKEND_ERROR };
+    public enum IssueType { RGB_DEFECT, TOF_DEFECT, BATTERY_LOW, GPS_FAILED, STORAGE_LOW, BACKEND_ERROR, CHECK_REFUSED };
 
     private final int CALIBRATIONS_MIN = 10; //measures
     private final float CALIBRATION_TOLERANCE_RGB = 0.04f; //meters
@@ -320,7 +320,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                 DeviceCheckActivity activity = (DeviceCheckActivity)context;
                 for (IssueType issue : activity.getIssues()) {
                     if (footer.length() > 0) {
-                        footer.append(", ");
+                        footer.append(";");
                     }
                     footer.append(issue.toString());
                 }

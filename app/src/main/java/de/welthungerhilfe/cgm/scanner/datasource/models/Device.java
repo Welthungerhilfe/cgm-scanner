@@ -48,6 +48,7 @@ public class Device extends CsvExportableModel {
     private long total_persons;
     private String app_version;
     private int schema_version;
+    private String issues;
 
     public String getId() {
         return id;
@@ -177,14 +178,21 @@ public class Device extends CsvExportableModel {
         this.schema_version = schema_version;
     }
 
+    public String getIssues() { return issues; }
+
+    public void setIssues(String issues) { this.issues = issues; }
+
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%d,%d,%f,%d,%d,%f,%d,%d,%d,%s,%d,%d,%s,%d", id, uuid, create_timestamp, sync_timestamp, new_artifact_file_size_mb,
-                new_artifacts,deleted_artifacts,total_artifact_file_size_mb,total_artifacts,own_measures,own_persons,created_by,total_measures,total_persons,app_version,schema_version);
+        return String.format(Locale.US, "%s,%s,%d,%d,%f,%d,%d,%f,%d,%d,%d,%s,%d,%d,%s,%d,%s",
+                id, uuid, create_timestamp, sync_timestamp, new_artifact_file_size_mb,
+                new_artifacts,deleted_artifacts,total_artifact_file_size_mb,total_artifacts,
+                own_measures,own_persons,created_by,total_measures,total_persons,app_version,
+                schema_version, issues);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,uuid,create_timestamp,sync_timestamp,new_artifact_file_size_mb,new_artifacts,deleted_artifacts,total_artifact_file_size_mb,total_artifacts,own_measures,own_persons,created_by,total_measures,total_persons,app_version,schema_version";
+        return "id,uuid,create_timestamp,sync_timestamp,new_artifact_file_size_mb,new_artifacts,deleted_artifacts,total_artifact_file_size_mb,total_artifacts,own_measures,own_persons,created_by,total_measures,total_persons,app_version,schema_version,issues";
     }
 }

@@ -38,6 +38,9 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
+import de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity;
+import de.welthungerhilfe.cgm.scanner.ui.fragments.DeviceCheckFragment;
+import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -76,6 +79,7 @@ public class DeviceService extends Service {
                 device.setSync_timestamp(Utils.getUniversalTimestamp());
                 device.setCreated_by(session.getUserEmail());
                 device.setSchema_version(CgmDatabase.version);
+                device.setIssues(LocalPersistency.getString(getApplicationContext(), DeviceCheckActivity.KEY_LAST_DEVICE_CHECK_ISSUES));
 
                 try {
                     device.setApp_version(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);

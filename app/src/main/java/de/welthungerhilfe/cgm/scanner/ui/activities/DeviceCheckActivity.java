@@ -41,6 +41,7 @@ import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
 public class DeviceCheckActivity extends BaseActivity {
 
     public static final String KEY_LAST_DEVICE_CHECK = "KEY_LAST_DEVICE_CHECK";
+    public static final String KEY_LAST_DEVICE_CHECK_ISSUES = "KEY_LAST_DEVICE_CHECK_ISSUES";
 
     @BindView(R.id.viewPager)
     PagerView viewPager;
@@ -86,15 +87,18 @@ public class DeviceCheckActivity extends BaseActivity {
             issues.add(issue);
             issues.sort((a, b) -> a.ordinal() - b.ordinal());
             fragments.get(3).updateIssues(issues);
+            updateIssues();
         }
     }
 
     public DeviceCheckFragment.IssueType[] getIssues() {
+        updateIssues();
         return issues.toArray(new DeviceCheckFragment.IssueType[0]);
     }
 
     public boolean hasIssues() {
-        return issues.size() > 0;
+        updateIssues();
+        return !issues.isEmpty();
     }
 
     public void gotoNext() {
@@ -127,5 +131,16 @@ public class DeviceCheckActivity extends BaseActivity {
         tutorialDataList.add(new TutorialData(R.drawable.device_check3, getString(R.string.device_check3),"","",2));
         tutorialDataList.add(new TutorialData(R.drawable.device_check4, getString(R.string.device_check4),"", getString(R.string.device_check42),3));
         return tutorialDataList;
+    }
+
+    private void updateIssues() {
+        StringBuilder value = new StringBuilder();
+        for (DeviceCheckFragment.IssueType issue : issues) {
+            if (value.length() > 0) {
+                value.append(";");
+            }
+            value.append(issue.toString());
+        }
+        LocalPersistency.setString(this, KEY_LAST_DEVICE_CHECK_ISSUES, value.toString());
     }
 }
