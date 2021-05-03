@@ -59,6 +59,7 @@ import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.TestView;
 import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
@@ -135,58 +136,20 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         fragmentDeviceCheckBinding.stepView.go(tutorialData.getPosition(),true);
 
         camera = null;
-        setCameraVisibility(View.GONE);
         switch (tutorialData.getPosition()) {
             case 1:
-                fragmentDeviceCheckBinding.test1.setTitle(getString(R.string.device_check21));
-                fragmentDeviceCheckBinding.test2.setTitle(getString(R.string.device_check22));
-                fragmentDeviceCheckBinding.test1.setResult(getString(R.string.device_check_detecting_image));
-                fragmentDeviceCheckBinding.test2.setResult(getString(R.string.device_check_detecting_image));
-                fragmentDeviceCheckBinding.test1.setState(TestView.TestState.INITIALIZE);
-                fragmentDeviceCheckBinding.test2.setState(TestView.TestState.INITIALIZE);
-                fragmentDeviceCheckBinding.test1.setVisibility(View.VISIBLE);
-                fragmentDeviceCheckBinding.test2.setVisibility(View.VISIBLE);
-
-                setCameraVisibility(View.VISIBLE);
-                AbstractARCamera.DepthPreviewMode depthMode = AbstractARCamera.DepthPreviewMode.CALIBRATION;
-                AbstractARCamera.PreviewSize previewSize = AbstractARCamera.PreviewSize.SMALL;
-                if (TangoUtils.isTangoSupported()) {
-                    camera = null;
-                } else if (AREngineCamera.shouldUseAREngine()) {
-                    camera = new AREngineCamera(getActivity(), depthMode, previewSize);
-                } else {
-                    camera = new ARCoreCamera(getActivity(), depthMode, previewSize);
-                }
-                if (camera != null) {
-                    camera.onCreate(fragmentDeviceCheckBinding.colorCameraPreview,
-                                    fragmentDeviceCheckBinding.depthCameraPreview,
-                                    fragmentDeviceCheckBinding.surfaceview);
-                }
+                setCameraTestLayout();
+                startCamera();
                 break;
             case 2:
-                fragmentDeviceCheckBinding.test1.setTitle(getString(R.string.device_check31));
-                fragmentDeviceCheckBinding.test2.setTitle(getString(R.string.device_check32));
-                fragmentDeviceCheckBinding.test3.setTitle(getString(R.string.device_check33));
-                fragmentDeviceCheckBinding.test4.setTitle(getString(R.string.device_check34));
-                fragmentDeviceCheckBinding.test1.setResult(getString(R.string.device_check_testing));
-                fragmentDeviceCheckBinding.test2.setResult(getString(R.string.device_check_testing));
-                fragmentDeviceCheckBinding.test3.setResult(getString(R.string.device_check_testing));
-                fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_testing));
-                fragmentDeviceCheckBinding.test1.setState(TestView.TestState.TESTING);
-                fragmentDeviceCheckBinding.test2.setState(TestView.TestState.TESTING);
-                fragmentDeviceCheckBinding.test3.setState(TestView.TestState.TESTING);
-                fragmentDeviceCheckBinding.test4.setState(TestView.TestState.TESTING);
-                fragmentDeviceCheckBinding.test1.setVisibility(View.VISIBLE);
-                fragmentDeviceCheckBinding.test2.setVisibility(View.VISIBLE);
-                fragmentDeviceCheckBinding.test3.setVisibility(View.VISIBLE);
-                fragmentDeviceCheckBinding.test4.setVisibility(View.VISIBLE);
+                setDeviceTestLayout();
                 new Thread(batteryCheck).start();
                 new Thread(deviceStorageCheck).start();
                 new Thread(gpsCheck).start();
                 new Thread(internetConnectionCheck).start();
                 break;
             case 3:
-                fragmentDeviceCheckBinding.btnNext.setText(getString(R.string.done).toUpperCase());
+                setSummaryLayout();
                 break;
         }
     }
@@ -311,12 +274,76 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         return issue.toString();
     }
 
-    private void setCameraVisibility(int visibility) {
-        if (!TangoUtils.isTangoSupported()) {
-            fragmentDeviceCheckBinding.cameraPreviewBackground.setVisibility(visibility);
-            fragmentDeviceCheckBinding.colorCameraPreview.setVisibility(visibility);
-            fragmentDeviceCheckBinding.depthCameraPreview.setVisibility(visibility);
-            fragmentDeviceCheckBinding.surfaceview.setVisibility(visibility);
+    private void setCameraTestLayout() {
+        fragmentDeviceCheckBinding.test1.setTitle(getString(R.string.device_check21));
+        fragmentDeviceCheckBinding.test2.setTitle(getString(R.string.device_check22));
+        fragmentDeviceCheckBinding.test1.setResult(getString(R.string.device_check_detecting_image));
+        fragmentDeviceCheckBinding.test2.setResult(getString(R.string.device_check_detecting_image));
+        fragmentDeviceCheckBinding.test1.setState(TestView.TestState.INITIALIZE);
+        fragmentDeviceCheckBinding.test2.setState(TestView.TestState.INITIALIZE);
+        fragmentDeviceCheckBinding.test1.setVisibility(View.VISIBLE);
+        fragmentDeviceCheckBinding.test2.setVisibility(View.VISIBLE);
+
+        fragmentDeviceCheckBinding.scrollView.setVisibility(View.GONE);
+        fragmentDeviceCheckBinding.colorCameraPreview.setVisibility(View.VISIBLE);
+        fragmentDeviceCheckBinding.depthCameraPreview.setVisibility(View.VISIBLE);
+        fragmentDeviceCheckBinding.surfaceview.setVisibility(View.VISIBLE);
+    }
+
+    private void setDeviceTestLayout() {
+        fragmentDeviceCheckBinding.scrollView.setVisibility(View.GONE);
+        fragmentDeviceCheckBinding.test1.setTitle(getString(R.string.device_check31));
+        fragmentDeviceCheckBinding.test2.setTitle(getString(R.string.device_check32));
+        fragmentDeviceCheckBinding.test3.setTitle(getString(R.string.device_check33));
+        fragmentDeviceCheckBinding.test4.setTitle(getString(R.string.device_check34));
+        fragmentDeviceCheckBinding.test1.setResult(getString(R.string.device_check_testing));
+        fragmentDeviceCheckBinding.test2.setResult(getString(R.string.device_check_testing));
+        fragmentDeviceCheckBinding.test3.setResult(getString(R.string.device_check_testing));
+        fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_testing));
+        fragmentDeviceCheckBinding.test1.setState(TestView.TestState.TESTING);
+        fragmentDeviceCheckBinding.test2.setState(TestView.TestState.TESTING);
+        fragmentDeviceCheckBinding.test3.setState(TestView.TestState.TESTING);
+        fragmentDeviceCheckBinding.test4.setState(TestView.TestState.TESTING);
+        fragmentDeviceCheckBinding.test1.setVisibility(View.VISIBLE);
+        fragmentDeviceCheckBinding.test2.setVisibility(View.VISIBLE);
+        fragmentDeviceCheckBinding.test3.setVisibility(View.VISIBLE);
+        fragmentDeviceCheckBinding.test4.setVisibility(View.VISIBLE);
+    }
+
+    private void setSummaryLayout() {
+        fragmentDeviceCheckBinding.btnNext.setText(getString(R.string.done).toUpperCase());
+        fragmentDeviceCheckBinding.btnContactSupport.setVisibility(View.VISIBLE);
+        fragmentDeviceCheckBinding.btnContactSupport.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                StringBuilder footer = new StringBuilder();
+                DeviceCheckActivity activity = (DeviceCheckActivity)context;
+                for (IssueType issue : activity.getIssues()) {
+                    if (footer.length() > 0) {
+                        footer.append(", ");
+                    }
+                    footer.append(issue.toString());
+                }
+
+                ContactSupportDialog.show(activity, null, "Issues: " + footer.toString());
+            }
+        });
+    }
+
+    private void startCamera() {
+        AbstractARCamera.DepthPreviewMode depthMode = AbstractARCamera.DepthPreviewMode.CALIBRATION;
+        AbstractARCamera.PreviewSize previewSize = AbstractARCamera.PreviewSize.SMALL;
+        if (TangoUtils.isTangoSupported()) {
+            camera = null;
+        } else if (AREngineCamera.shouldUseAREngine()) {
+            camera = new AREngineCamera(getActivity(), depthMode, previewSize);
+        } else {
+            camera = new ARCoreCamera(getActivity(), depthMode, previewSize);
+        }
+        if (camera != null) {
+            camera.onCreate(fragmentDeviceCheckBinding.colorCameraPreview,
+                    fragmentDeviceCheckBinding.depthCameraPreview,
+                    fragmentDeviceCheckBinding.surfaceview);
         }
     }
 

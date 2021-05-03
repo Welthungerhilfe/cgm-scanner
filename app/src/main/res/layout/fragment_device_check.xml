@@ -172,50 +172,51 @@
 
             </LinearLayout>
 
-            <View
-                android:id="@+id/cameraPreviewBackground"
+            <de.welthungerhilfe.cgm.scanner.ui.views.TestView
+                android:id="@+id/test1"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="2.25"
-                android:background="@color/colorPrimary"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginRight="12dp"
+                android:visibility="gone"/>
+
+            <de.welthungerhilfe.cgm.scanner.ui.views.TestView
+                android:id="@+id/test2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="12dp"
+                android:visibility="gone"/>
+
+            <de.welthungerhilfe.cgm.scanner.ui.views.TestView
+                android:id="@+id/test3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="12dp"
+                android:visibility="gone"/>
+
+            <de.welthungerhilfe.cgm.scanner.ui.views.TestView
+                android:id="@+id/test4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="12dp"
                 android:visibility="gone"/>
 
             <ScrollView
+                android:id="@+id/scrollView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_marginBottom="110dp" >
+                android:layout_weight="1" >
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:background="@color/colorWhite"
                     android:orientation="vertical"
                     android:padding="32dp">
-
-                    <de.welthungerhilfe.cgm.scanner.ui.views.TestView
-                        android:id="@+id/test1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"/>
-
-                    <de.welthungerhilfe.cgm.scanner.ui.views.TestView
-                        android:id="@+id/test2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"/>
-
-                    <de.welthungerhilfe.cgm.scanner.ui.views.TestView
-                        android:id="@+id/test3"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"/>
-
-                    <de.welthungerhilfe.cgm.scanner.ui.views.TestView
-                        android:id="@+id/test4"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"/>
 
                     <TextView
                         android:id="@+id/instruction"
@@ -235,6 +236,38 @@
 
                 </LinearLayout>
             </ScrollView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginRight="12dp"
+                android:layout_marginBottom="40dp"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btnContactSupport"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    android:background="@drawable/button_green_circular"
+                    android:text="@string/contact_support"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btnNext"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/button_green_light_circular"
+                    android:text="@string/next_tutorial"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
         </LinearLayout>
 
         <ImageView
@@ -257,21 +290,5 @@
             android:src="@drawable/ic_hand_phone"
             android:scaleType="center"
             android:visibility="gone"/>
-
-        <Button
-            android:id="@+id/btnNext"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginRight="12dp"
-            android:layout_marginBottom="40dp"
-            android:layout_alignParentBottom="true"
-            android:background="@drawable/button_green_light_circular"
-            android:text="@string/next_tutorial"
-            android:textColor="@color/colorWhite"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
     </RelativeLayout>
 </layout>

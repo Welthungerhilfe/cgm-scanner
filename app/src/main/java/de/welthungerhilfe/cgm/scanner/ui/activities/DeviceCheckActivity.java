@@ -89,6 +89,10 @@ public class DeviceCheckActivity extends BaseActivity {
         }
     }
 
+    public DeviceCheckFragment.IssueType[] getIssues() {
+        return issues.toArray(new DeviceCheckFragment.IssueType[0]);
+    }
+
     public boolean hasIssues() {
         return issues.size() > 0;
     }
