@@ -1,6 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.utils;
 
 import android.content.Context;
+import android.os.Build;
 import android.text.format.DateFormat;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -9,13 +10,16 @@ import org.bouncycastle.util.test.FixedSecureRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 @RunWith(RobolectricTestRunner.class)
 public class DataFormatTest {
+
 
     private Context context;
 

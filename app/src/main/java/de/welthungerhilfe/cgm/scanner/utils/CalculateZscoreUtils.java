@@ -3,7 +3,6 @@ package de.welthungerhilfe.cgm.scanner.utils;
 import android.content.Context;
 import android.widget.Toast;
 
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,7 +13,7 @@ import java.util.ArrayList;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 
-class CalculateZscoreUtils {
+public class CalculateZscoreUtils {
     public static double newZScore(double y, double Mt, double Lt, double St) {
         double Zind = (Math.pow(y / Mt, Lt) - 1) / (St * Lt);
         if (Zind >= -3 && Zind <= 3) {
@@ -30,10 +29,8 @@ class CalculateZscoreUtils {
         }
     }
 
-    public static void setData(Context context, double height, double weight, Person person) {
+    public static double setData(Context context, double height, double weight, long age, String sex, int chartType) {
 
-        long birthday = person.getBirthday();
-        ArrayList<ILineDataSet> dataSets = new ArrayList<>();
 
         double zScore = 100, median = 10, skew = 10, coefficient = 10;
 
@@ -43,7 +40,6 @@ class CalculateZscoreUtils {
         final String[] boys_0_6 = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
         final String[] girls_0_6 = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
 
-        int chartType=0;
         Measure lastMeasure = null;
 
 
@@ -54,7 +50,6 @@ class CalculateZscoreUtils {
             lastMeasure =  new Measure();
             lastMeasure.setHeight(height);
             //change this
-            long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
             lastMeasure.setAge(age);
             lastMeasure.setWeight(weight);
 
@@ -68,7 +63,7 @@ class CalculateZscoreUtils {
             }
 
 
-            if (person.getSex().equals("female"))
+            if (sex.equals("female"))
                 reader = new BufferedReader(new InputStreamReader(context.getAssets().open(girls[chartType]), StandardCharsets.UTF_8));
             else
                 reader = new BufferedReader(new InputStreamReader(context.getAssets().open(boys[chartType]), StandardCharsets.UTF_8));
@@ -128,8 +123,8 @@ class CalculateZscoreUtils {
                 }
                 break;
         }
-
-        Toast.makeText(context,""+zScore, Toast.LENGTH_SHORT).show();
+        return zScore;
+       // Toast.makeText(context,""+zScore, Toast.LENGTH_SHORT).show();
         //  txtZScore.setText(String.format(Locale.getDefault(), "( z-score : %.2f )", zScore));
 
 

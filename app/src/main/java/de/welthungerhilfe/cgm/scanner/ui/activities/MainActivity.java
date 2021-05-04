@@ -77,6 +77,7 @@ import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -176,6 +177,11 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         SyncingWorkManager.startSyncingWithWorkManager(MainActivity.this);
         File log = new File(AppController.getInstance().getPublicAppDirectory(MainActivity.this)
                 + "/cgm");
+        double zScoreWTA = CalculateZscoreUtils.setData(getApplicationContext(),106.0,16.100,1616,"female",0);
+        double zScoreHTA = CalculateZscoreUtils.setData(getApplicationContext(),106.0,16.100,1616,"female",1);
+        double zScoreWTH = CalculateZscoreUtils.setData(getApplicationContext(),106.0,16.100,1616,"female",2);
+
+        Log.i("MainActivity","this is zscore "+zScoreHTA+" "+zScoreWTA+" "+zScoreWTH);
     }
 
     @Override
