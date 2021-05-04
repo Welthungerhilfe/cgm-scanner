@@ -26,6 +26,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,6 +68,8 @@ import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class GrowthDataFragment extends Fragment {
+
+    String TAG = GrowthDataFragment.class.getSimpleName();
 
     private final int ZSCORE_COLOR_0 = Color.rgb(55, 129, 69);
     private final int ZSCORE_COLOR_2 = Color.rgb(230, 122, 58);
@@ -210,8 +213,8 @@ public class GrowthDataFragment extends Fragment {
         }
         Measure lastMeasure = null;
         if (measures.size() > 0)
-            lastMeasure = measures.get(measures.size() - 1);
-
+            lastMeasure = measures.get(0);
+        Log.i(TAG,"this is value of lastmeasure H-> "+lastMeasure.getHeight()+" W-> "+lastMeasure.getWeight());
         txtLabel.setText(person.getSex());
 
 
