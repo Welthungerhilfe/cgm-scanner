@@ -15,9 +15,11 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(sdk = 28)
 public class DataFormatTest {
 
 
@@ -42,7 +44,6 @@ public class DataFormatTest {
 
         } else {
             assertThat("hh:mm", is(str));
-
         }
 
         //testing for TimestampFormat.DATE_AND_TIME
@@ -52,9 +53,7 @@ public class DataFormatTest {
 
         } else {
             assertThat("hh:mm dd-MM-yyyy", is(str));
-
         }
-
     }
 
     @Test

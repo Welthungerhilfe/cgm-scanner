@@ -17,6 +17,7 @@ android {
         }
     }
 
+
     allprojects {
         repositories {
             jcenter()
@@ -61,6 +62,8 @@ android {
             manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", arengineValue:"optional", tangoRequired:"false"]
         }
     }
+
+    testOptions.unitTests.includeAndroidResources = true
     sourceSets {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
@@ -113,7 +116,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:2.19.0' //app mocking
     androidTestImplementation 'androidx.room:room-testing:2.2.5' //database testing
     testImplementation 'org.hamcrest:hamcrest-library:1.3'//framework for software tests
-    testImplementation "org.robolectric:robolectric:4.4"//write unit tests and run them on a desktop JVM
+    testImplementation "org.robolectric:robolectric:4.2.1"//write unit tests and run them on a desktop JVM
     testImplementation 'androidx.test:core:1.3.0'
     testImplementation 'androidx.test.ext:junit:1.1.2'
 
@@ -130,6 +133,7 @@ dependencies {
     implementation 'com.romandanylyk:pageindicatorview:1.0.2' //indicator of current page (in tutorial)
     implementation 'com.shuhart.stepview:stepview:1.5.1' //for showing steps(in tutorial)
     implementation 'id.zelory:compressor:2.1.0' //ImageCompression library
+
 
 }
 apply plugin: 'com.google.gms.google-services'
