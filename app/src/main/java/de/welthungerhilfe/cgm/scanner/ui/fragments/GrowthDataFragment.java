@@ -64,6 +64,7 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
+import de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -298,7 +299,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_weight);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = newZScore(lastMeasure.getWeight(), median, skew, coefficient);
+                    zScore = CalculateZscoreUtils.newZScore(lastMeasure.getWeight(), median, skew, coefficient);
                 }
                 break;
             case 1:
@@ -306,7 +307,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_height);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = newZScore(lastMeasure.getHeight(), median, skew, coefficient);
+                    zScore = CalculateZscoreUtils.newZScore(lastMeasure.getHeight(), median, skew, coefficient);
                 }
                 break;
             case 2:
@@ -314,7 +315,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_weight);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = newZScore(lastMeasure.getWeight(), median, skew, coefficient);
+                    zScore = CalculateZscoreUtils.newZScore(lastMeasure.getWeight(), median, skew, coefficient);
                 }
                 break;
             case 3:
@@ -441,22 +442,6 @@ public class GrowthDataFragment extends Fragment {
 
         mChart.setData(new LineData(dataSets));
         mChart.animateX(3000);
-    }
-
-    //Compute ZScore as defined in https://www.who.int/growthref/computation.pdf
-    private double newZScore(double y, double Mt, double Lt, double St) {
-        double Zind = (Math.pow(y / Mt, Lt) - 1) / (St * Lt);
-        if (Zind >= -3 && Zind <= 3) {
-            return Zind;
-        } else if (Zind > 3) {
-            double SD3pos = Mt * Math.pow(1 + Lt * St * 3, 1 / Lt);
-            double SD23pos = SD3pos - Mt * Math.pow(1 + Lt * St * 2, 1 / Lt);
-            return 3 + ((y - SD3pos) / SD23pos);
-        } else {
-            double SD3neg = Mt * Math.pow(1 + Lt * St * -3, 1 / Lt);
-            double SD23neg = Mt * Math.pow(1 + Lt * St * -2, 1 / Lt) - SD3neg;
-            return -3 + ((y - SD3neg) / SD23neg);
-        }
     }
 
     protected LineDataSet createDataSet(ArrayList<Entry> values, String label, int color, float width, boolean circle) {
