@@ -7,11 +7,39 @@
     <string name="login_error_parse">Token-Analyse fehlgeschlagen</string>
     <string name="login_error_invalid">Benutzer-E-Mail konnte nicht abgerufen werden. Bitte versuchen Sie es erneut</string>
 
+    <!-- Device check !-->
+    <string name="device_check_reminder">Es wurde schon länger keine Prüfung Ihres Geräts mehr durchgeführt. Geräteprüfung jetzt starten?</string>
+    <string name="device_check1">Was wird für eine Geräteprüfung benötigt?</string>
+    <string name="device_check11">Es wird ein Bild zur Kalibrierung benötigt, das Sie vom Child Growth Monitor Support Team erhalten.</string>
+    <string name="device_check12">Ich habe das Bild zur Kalibrierung ausgedruckt, um es jetzt zu scannen.</string>
+    <string name="device_check2">Bitte richten Sie die Kamera auf das Kalibrierbild.</string>
+    <string name="device_check21">RGB Kamera</string>
+    <string name="device_check22">ToF Sensor</string>
+    <string name="device_check3">Bitte warten Sie bis alle Tests abgeschlossen sind.</string>
+    <string name="device_check31">Batterie</string>
+    <string name="device_check32">Gerätespeicher</string>
+    <string name="device_check33">GPS</string>
+    <string name="device_check34">Internetverbindung</string>
+    <string name="device_check4">Bei den Tests wurden Fehler gefunden. Möchten Sie fortfahren?</string>
+    <string name="device_check4_rgb">Die Farbkamera hat fehlerhafte Größen im Kalibrierbild erkannt. Das könnte auf eine defekte Kameralinse hindeuten.</string>
+    <string name="device_check4_tof">Der ToF Sensor hat fehlerhafte Größen im Kalibrierbild erkannt. Das könnte auf eine defekte Kameralinse hindeuten.</string>
+    <string name="device_check4_battery">Der Batterieladestatus ist niedrig und nicht ausreichend für die Aufnahme einer größeren Datenmenge.</string>
+    <string name="device_check4_gps">Der GPS Sensor konnte Ihre Position nicht bestimmen. Die aufgenommenen Daten werden nicht verfolgt.</string>
+    <string name="device_check4_storage">Der freie Gerätespeicher ist niedrig und nicht ausreichend für die Aufnahme einer größeren Datenmenge.</string>
+    <string name="device_check4_backend">Das Gerät konnte sich nicht mit dem CGM Backend verbinden. Die Synchronisierung von Daten ist nicht möglich.</string>
+    <string name="device_check42">Ich übernehme die Verantwortung für potentielle Probleme, die aus den oben genannten Gründen entstehen können.</string>
+    <string name="device_check5">Sie können sich jederzeit auf die Geräteprüfung beziehen:<u color="#FF0000">Menu</u></string>
+    <string name="device_check_step_finished">Teilprüfung abgeschlossen</string>
+    <string name="device_check_detecting_image">Bild-Erkennung läuft</string>
+    <string name="device_check_testing">Test läuft</string>
+    <string name="device_check_failed">fehlgeschlagen</string>
+    <string name="device_check_too_low_energy">Batterieladestatus zu niedrig</string>
+    <string name="device_check_finish">Die Geräteprüfung wurde abgeschlossen.</string>
+
     <!-- Tutorial !-->
+    <string name="tutorial1">Wie erstelle ich ein neues Profil für das Kind?</string>
     <string name="tutorial11">1-1. Scannen Sie den QR-Code, um das Profil des Kindes zu erstellen oder zu finden</string>
     <string name="tutorial12">1-2. Geben Sie die persönlichen Daten des Kindes ein, falls es noch nicht gescannt wurde</string>
-    <string name="next_tutorial">nächste</string>
-    <string name="tutorial1">Wie erstelle ich ein neues Profil für das Kind?</string>
     <string name="tutorial2">Wie scanne ich ein Kind, das steht?</string>
     <string name="tutorial21">2-1. Wählen Sie den Modus \"Stehend\", bevor Sie mit dem Scannen des Kindes beginnen</string>
     <string name="tutorial22">2-2. Machen Sie drei 5-Sekunden-Scans aus einer Vorderansicht, einer Rückansicht und einer 360\' Ansicht</string>
@@ -22,6 +50,7 @@
     <string name="tutorial41">4-1. Visualisieren Sie die Ergebnisse der Scan-Messungen in verschiedenen Diagrammen</string>
     <string name="tutorial42">4-2. Stellen Sie schnell und einfach fest, ob das Kind unterernährt ist</string>
     <string name="tutorial5">Sie können das Tutorial jederzeit über <u color="#FF0000">Menü</u> aufrufen!</string>
+    <string name="next_tutorial">nächste</string>
     <string name="congratulation">Herzliche Glückwünsche!</string>
     <string name="finish_tutorial">Sie haben das CGM Scanner Tutorial beendet</string>
     <string name="get_start">Los geht\'s</string>
@@ -31,6 +60,7 @@
     <!-- Main screen !-->
     <string name="username">Benutzername</string>
     <string name="menuScans">Scans</string>
+    <string name="menuDeviceCheck">Geräteprüfung</string>
     <string name="menuTutorial">Tutorial</string>
     <string name="menuSettings">Einstellungen</string>
     <string name="menuLogout">Ausloggen</string>

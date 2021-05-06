@@ -26,6 +26,7 @@ import java.util.ArrayList;
 
 public class LocalPersistency {
 
+    private static final String TAG = LocalPersistency.class.getSimpleName();
     private static final String COUNT_EXTENSION = "_COUNT";
 
     public static boolean getBoolean(Context context, String key) {
@@ -74,6 +75,7 @@ public class LocalPersistency {
         SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
         e.putBoolean(key, value);
         e.commit();
+        LogFileUtils.logInfo(TAG, key + " set to " + value);
     }
 
     public static void setBooleanArray(Context context, String key, ArrayList<Boolean> value) {
@@ -89,6 +91,7 @@ public class LocalPersistency {
         SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
         e.putLong(key, value);
         e.commit();
+        LogFileUtils.logInfo(TAG, key + " set to " + value);
     }
 
     public static void setLongArray(Context context, String key, ArrayList<Long> value) {
@@ -104,6 +107,7 @@ public class LocalPersistency {
         SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(context).edit();
         e.putString(key, value);
         e.commit();
+        LogFileUtils.logInfo(TAG, key + " set to " + value);
     }
 
     public static void setStringArray(Context context, String key, ArrayList<String> value) {
