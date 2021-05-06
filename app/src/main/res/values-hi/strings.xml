@@ -143,6 +143,7 @@
     <string name="measure_muac">05 एमयूएसी (मुआक)</string>
     <string name="measure_oedema">कोई एडिमा नहीं</string>
     <string name="edema_check">क्या आप सुनिश्चित हैं कि बच्चा एडेमा से पीड़ित है?</string>
+    <string name="invalid_zscore"> क्या आप दर्ज मूल्य के बारे में सुनिश्चित हैं?</string>
     <string name="edema_link">द्विपक्षीय एडिमा की जांच कैसे करें\nyoutu.be/hGTyk6CM-5A</string>
     <string name="selector_yes">हाँ</string>
     <string name="selector_no">नहीं</string>

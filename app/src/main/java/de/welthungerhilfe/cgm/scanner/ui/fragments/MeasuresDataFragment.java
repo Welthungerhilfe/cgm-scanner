@@ -113,6 +113,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         viewModel = new ViewModelProvider(getActivity(), factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
+            if(adapterMeasure!=null){
+                adapterMeasure.setPerson(person);
+            }
         });
         viewModel.getMeasuresLiveData().observe(getViewLifecycleOwner(), measures -> {
             if (measures != null)
@@ -153,6 +156,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                 case 0:
                     ManualMeasureDialog measureDialog = new ManualMeasureDialog(context);
                     measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
+                    measureDialog.setPerson(person);
                     measureDialog.show();
                     break;
                 case 1:

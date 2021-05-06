@@ -142,6 +142,7 @@
     <string name="measure_muac">05 MUAC</string>
     <string name="measure_oedema">Kein Ödem</string>
     <string name="edema_check">Sind Sie sicher, dass das Kind an Ödem leidet?</string>
+    <string name="invalid_zscore">Sind Sie sicher über eingegebene Werte?</string>
     <string name="edema_link">Wie auf bilaterale Ödeme prüfen\nyoutu.be/3pQUtOsjjSY?t=85</string>
     <string name="selector_yes" >Ja</string>
     <string name="selector_no" >Nein</string>
