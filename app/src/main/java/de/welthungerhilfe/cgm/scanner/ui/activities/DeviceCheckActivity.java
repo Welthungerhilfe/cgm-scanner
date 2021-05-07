@@ -26,6 +26,7 @@ import android.widget.LinearLayout;
 import com.shuhart.stepview.StepView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -85,7 +86,7 @@ public class DeviceCheckActivity extends BaseActivity {
     public void addIssue(DeviceCheckFragment.IssueType issue) {
         if (!issues.contains(issue)) {
             issues.add(issue);
-            issues.sort((a, b) -> a.ordinal() - b.ordinal());
+            Collections.sort(issues, (a, b) -> a.ordinal() - b.ordinal());
             fragments.get(3).updateIssues(issues);
             updateIssues();
         }
