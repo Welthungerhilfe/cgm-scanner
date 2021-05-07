@@ -43,7 +43,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
 
-import android.util.SizeF;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -66,6 +65,7 @@ import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -76,7 +76,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
-import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
@@ -235,7 +234,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         measure.setScannedBy(session.getDevice());
 
         if (!heights.isEmpty()) {
-            heights.sort((a, b) -> (int) (1000 * (a - b)));
+            Collections.sort(heights, (a, b) -> (int) (1000 * (a - b)));
             measure.setHeight(heights.get(heights.size() / 2) * 100.0f);
         }
 
