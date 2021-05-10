@@ -200,6 +200,8 @@
     <string name="filter_age_weight">1. Gewicht / Alter</string>
     <string name="filter_age_height">2. Größe / Alter</string>
     <string name="filter_height_weight">3. Gewicht / Größe</string>
+    <string name="filter_muac_age">4 MUAC / Alter</string>
+
 
     <!-- Diagnoses !-->
     <string name="sam_wfa_title">Kind ist stark untergewichtig</string>

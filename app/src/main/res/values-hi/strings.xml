@@ -201,6 +201,8 @@
     <string name="filter_age_weight">1 वजन / उम</string>
     <string name="filter_age_height">2 ऊंचाई / उम</string>
     <string name="filter_height_weight">3 वजन / ऊंचाई</string>
+    <string name="filter_muac_age">4 मुआक / उम</string>
+
 
     <!-- Diagnoses !-->
     <string name="sam_wfa_title">बच्चा गंभीर रूप से कम वजन का है</string>

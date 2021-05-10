@@ -259,7 +259,7 @@ public class GrowthDataFragment extends Fragment {
                     continue;
                 }
                 if (lastMeasure != null) {
-                    if ((chartType == 0 || chartType == 1)) {
+                    if ((chartType == 0 || chartType == 1 || chartType==3)) {
                         if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365)) {
                             skew = Utils.parseDouble(arr[1]);
                             median = Utils.parseDouble(arr[2]);
@@ -322,12 +322,8 @@ public class GrowthDataFragment extends Fragment {
                 txtXAxis.setText(R.string.axis_age);
                 txtYAxis.setText(R.string.axis_muac);
 
-                if (lastMeasure.getMuac() < 11.5) { // SAM (red)
-                    zScore = -3;
-                } else if (lastMeasure.getMuac() < 12.5) { // MAM (yellow)
-                    zScore = -2;
-                } else {
-                    zScore = 0;
+                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
+                    zScore = CalculateZscoreUtils.newZScore(lastMeasure.getMuac(), median, skew, coefficient);
                 }
                 break;
         }
