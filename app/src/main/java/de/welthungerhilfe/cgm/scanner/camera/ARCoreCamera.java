@@ -68,6 +68,7 @@ import java.util.HashMap;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
 import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 
 public class ARCoreCamera extends AbstractARCamera {
@@ -490,10 +491,10 @@ public class ARCoreCamera extends AbstractARCamera {
                         0.0f,
                         0.5f * img.getExtentZ()) // lower left
         };
-        mCalibrationImageEdges = new Point3F[4];
+        mCalibrationImageEdges = new ComputerVisionUtils.Point3F[4];
         for (int i = 0; i < 4; ++i) {
           Pose p = img.getCenterPose().compose(localBoundaryPoses[i]);
-          mCalibrationImageEdges[i] = new Point3F(p.tx(), p.ty(), p.tz());
+          mCalibrationImageEdges[i] = new ComputerVisionUtils.Point3F(p.tx(), p.ty(), p.tz());
         }
         mCalibrationImageSizeCV = new SizeF(img.getExtentX(), img.getExtentZ());
       }
