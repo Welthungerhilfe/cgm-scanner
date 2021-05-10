@@ -16,11 +16,6 @@ android {
             }
         }
     }
-    allprojects {
-        repositories {
-            jcenter()
-        }
-    }
     buildTypes {
         release {
             minifyEnabled false

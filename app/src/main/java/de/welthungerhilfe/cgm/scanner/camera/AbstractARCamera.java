@@ -305,7 +305,11 @@ public abstract class AbstractARCamera {
             case FULL:
                 return bitmapSize * mColorCameraPreview.getHeight() / (float)bitmap.getWidth();
             case SMALL:
-                return bitmapSize / mColorCameraPreview.getHeight() * (float)bitmap.getWidth();
+                if (this instanceof ARCoreCamera) {
+                    return bitmapSize / mColorCameraPreview.getHeight() * (float)bitmap.getHeight();
+                } else {
+                    return bitmapSize / mColorCameraPreview.getHeight() * (float)bitmap.getWidth();
+                }
         }
         return bitmapSize;
     }
