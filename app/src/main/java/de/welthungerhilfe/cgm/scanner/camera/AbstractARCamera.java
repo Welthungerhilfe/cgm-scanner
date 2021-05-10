@@ -88,7 +88,6 @@ public abstract class AbstractARCamera {
     //camera calibration
     protected float[] mColorCameraIntrinsic;
     protected float[] mDepthCameraIntrinsic;
-    protected float[] mDepthCameraTranslation;
     protected boolean mHasCameraCalibration;
 
     //camera pose
@@ -125,7 +124,6 @@ public abstract class AbstractARCamera {
 
         mColorCameraIntrinsic = new float[4];
         mDepthCameraIntrinsic = new float[4];
-        mDepthCameraTranslation = new float[3];
         mHasCameraCalibration = false;
 
         mFrameIndex = 1;
@@ -212,7 +210,7 @@ public abstract class AbstractARCamera {
         output += "Depth camera intrinsic:\n";
         output += mDepthCameraIntrinsic[0] + " " + mDepthCameraIntrinsic[1] + " " + mDepthCameraIntrinsic[2] + " " + mDepthCameraIntrinsic[3] + "\n";
         output += "Depth camera position:\n";
-        output += mDepthCameraTranslation[0] + " " + mDepthCameraTranslation[1] + " " + mDepthCameraTranslation[2] + "\n";
+        output += "0 0 0\n";
         return output;
     }
 

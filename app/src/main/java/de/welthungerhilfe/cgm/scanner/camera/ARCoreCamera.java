@@ -20,22 +20,12 @@ package de.welthungerhilfe.cgm.scanner.camera;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.ImageFormat;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CaptureRequest;
 import android.media.Image;
-import android.media.ImageReader;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.os.Build;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
@@ -43,7 +33,6 @@ import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.util.Log;
 import android.util.Size;
 import android.util.SizeF;
-import android.view.Surface;
 import android.widget.ImageView;
 
 import com.google.ar.core.ArCoreApk;
@@ -57,13 +46,9 @@ import com.google.ar.core.Frame;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
-import com.google.ar.core.SharedCamera;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -74,26 +59,13 @@ public class ARCoreCamera extends AbstractARCamera {
 
   private static final String TAG = ARCoreCamera.class.getSimpleName();
 
-  //Camera2 API
-  private ImageReader mImageReaderDepth16;
-  private CameraDevice mCameraDevice;
-  private String mColorCameraId;
-  private String mDepthCameraId;
-  private int mDepthWidth;
-  private int mDepthHeight;
-
   //ARCore API
   private ArrayList<Float> mPlanes;
   private Session mSession;
   private final Object mLock;
 
-  //App integration objects
-  private GLSurfaceView mGLSurfaceView;
-  private final HashMap<Long, Bitmap> mCache;
-
   public ARCoreCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
     super(activity, depthMode, previewSize);
-    mCache = new HashMap<>();
     mLock = new Object();
     mPlanes = new ArrayList<>();
   }
@@ -135,7 +107,6 @@ public class ARCoreCamera extends AbstractARCamera {
       if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
         if (mActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
           if (isARCoreSupportedAndUpToDate()) {
-            setupDepthSensor();
             openCamera();
           }
         }
@@ -164,25 +135,8 @@ public class ARCoreCamera extends AbstractARCamera {
     scriptYuvToRgb.forEach(allocationRgb);
     allocationRgb.copyTo(bitmap);
 
-    if (mDepthCameraId == null) {
-      float[] position;
-      float[] rotation;
-      synchronized (mLock) {
-        position = mPosition;
-        rotation = mRotation;
-      }
-
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onDepthDataReceived(null, position, rotation, mFrameIndex);
-      }
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onColorDataReceived(bitmap, mFrameIndex);
-      }
-      mFrameIndex++;
-    } else {
-      synchronized (mCache) {
-        mCache.put(image.getTimestamp(), bitmap);
-      }
+    for (Object listener : mListeners) {
+      ((Camera2DataListener)listener).onColorDataReceived(bitmap, mFrameIndex);
     }
     allocationYuv.destroy();
     allocationRgb.destroy();
@@ -220,50 +174,16 @@ public class ARCoreCamera extends AbstractARCamera {
       rotation = mRotation;
     }
 
-    Bitmap preview = getDepthPreview(image, false, mPlanes, mDepthCameraIntrinsic, mPosition, mRotation);
+    Bitmap preview = getDepthPreview(image, false, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
     mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
 
-    Bitmap bitmap = null;
-    long bestDiff = Long.MAX_VALUE;
-
-    synchronized (mCache) {
-      if (!mCache.isEmpty()) {
-        for (Long timestamp : mCache.keySet()) {
-          long diff = Math.abs(image.getTimestamp() - timestamp) / 1000; //in microseconds
-          if (bestDiff > diff) {
-            bestDiff = diff;
-            bitmap = mCache.get(timestamp);
-          }
-        }
-      }
-    }
-
-    if (bitmap != null && bestDiff < 50000) {
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, mFrameIndex);
-      }
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onColorDataReceived(bitmap, mFrameIndex);
-      }
-
-      synchronized (mCache) {
-        mCache.clear();
-        mFrameIndex++;
-      }
+    for (Object listener : mListeners) {
+      ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, mFrameIndex);
     }
     image.close();
   }
 
   private void closeCamera() {
-    if (mCameraDevice != null) {
-      mCameraDevice.close();
-      mCameraDevice = null;
-    }
-    if (mImageReaderDepth16 != null) {
-      mImageReaderDepth16.setOnImageAvailableListener(null, null);
-      mImageReaderDepth16.close();
-      mImageReaderDepth16 = null;
-    }
     if (mSession != null) {
       mSession.pause();
       mSession.close();
@@ -281,7 +201,7 @@ public class ARCoreCamera extends AbstractARCamera {
     if (mSession == null) {
       try {
         // Create ARCore session that supports camera sharing.
-        mSession = new Session(mActivity, EnumSet.of(Session.Feature.SHARED_CAMERA));
+        mSession = new Session(mActivity);
       } catch (Exception e) {
         Log.e(TAG, "Failed to create ARCore session that supports camera sharing", e);
         return;
@@ -299,6 +219,7 @@ public class ARCoreCamera extends AbstractARCamera {
       // Enable auto focus mode while ARCore is running.
       Config config = mSession.getConfig();
       config.setAugmentedImageDatabase(db);
+      config.setDepthMode(Config.DepthMode.AUTOMATIC);
       config.setFocusMode(Config.FocusMode.AUTO);
       config.setLightEstimationMode(Config.LightEstimationMode.AMBIENT_INTENSITY);
       config.setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL);
@@ -317,11 +238,8 @@ public class ARCoreCamera extends AbstractARCamera {
           if ((w > 1024) && (h > 1024)) {
             rank += 1;
           }
-          if (Math.abs(mDepthWidth / (float)mDepthHeight - w / (float)h) < 0.0001f) {
+          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.REQUIRE_AND_USE) {
             rank += 2;
-          }
-          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.DO_NOT_USE) {
-            rank += 4;
           }
 
           if (selectedRank < rank) {
@@ -334,83 +252,11 @@ public class ARCoreCamera extends AbstractARCamera {
       mSession.setCameraConfig(selectedConfig);
     }
 
-    // Store the ARCore shared camera reference.
-    SharedCamera sharedCamera = mSession.getSharedCamera();
-
-    // Store the ID of the camera used by ARCore.
-    mColorCameraId = mSession.getCameraConfig().getCameraId();
-
-    // When ARCore is running, make sure it also updates our CPU image surface.
-    if (mDepthCameraId != null) {
-      if (mColorCameraId.compareTo(mDepthCameraId) == 0) {
-        ArrayList<Surface> surfaces = new ArrayList<>();
-        surfaces.add(mImageReaderDepth16.getSurface());
-        sharedCamera.setAppSurfaces(mColorCameraId, surfaces);
-      } else {
-        CameraManager manager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
-        try {
-          manager.openCamera(mDepthCameraId, mSeparatedCameraCallback, null);
-        } catch (CameraAccessException e) {
-          e.printStackTrace();
-        } catch (Exception e) {
-          throw new RuntimeException("Interrupted while trying to lock camera opening.", e);
-        }
-      }
-    }
-
     try {
       mSession.resume();
     } catch (Exception e) {
       Log.e(TAG, "Failed to start ARCore", e);
     }
-  }
-
-  private void setupDepthSensor() {
-    //set depth camera resolution
-    mDepthWidth = 240;
-    mDepthHeight = 180;
-    if (Build.MANUFACTURER.toUpperCase().startsWith("SAMSUNG")) {
-      //all supported Samsung devices except S10 5G have VGA resolution
-      if (!Build.MODEL.startsWith("beyondx")) {
-        mDepthWidth = 320;
-        mDepthHeight = 240;
-      }
-    }
-
-    //detect depth camera
-    try {
-      CameraManager manager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
-      for (String cameraId : manager.getCameraIdList()) {
-        CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
-        Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
-        if (facing != null) {
-          if (facing == CameraCharacteristics.LENS_FACING_BACK) {
-            int[] ch = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
-            if (ch != null) {
-              for (int c : ch) {
-                if (c == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT) {
-                  mDepthCameraId = cameraId;
-                  mDepthCameraTranslation = characteristics.get(CameraCharacteristics.LENS_POSE_TRANSLATION);
-                  mDepthCameraIntrinsic = characteristics.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION);
-                  if (mDepthCameraIntrinsic != null) {
-                    mDepthCameraIntrinsic[0] /= (float)mDepthWidth;
-                    mDepthCameraIntrinsic[1] /= (float)mDepthHeight;
-                    mDepthCameraIntrinsic[2] /= (float)mDepthWidth;
-                    mDepthCameraIntrinsic[3] /= (float)mDepthHeight;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    //set image reader
-    mImageReaderDepth16 = ImageReader.newInstance(mDepthWidth, mDepthHeight, ImageFormat.DEPTH16, 5);
-    mImageReaderDepth16.setOnImageAvailableListener(imageReader -> onProcessDepthData(imageReader.acquireLatestImage()), null);
   }
 
   private boolean isARCoreSupportedAndUpToDate() {
@@ -464,9 +310,7 @@ public class ARCoreCamera extends AbstractARCamera {
       mColorCameraIntrinsic[1] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
       mColorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
       mColorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[1] / (float)intrinsics.getImageDimensions()[1];
-      if ((mDepthCameraId != null) && (mColorCameraId.compareTo(mDepthCameraId) == 0)) {
-        mDepthCameraIntrinsic = mColorCameraIntrinsic;
-      }
+      mDepthCameraIntrinsic = mColorCameraIntrinsic;
       mHasCameraCalibration = true;
 
       //get calibration image dimension
@@ -528,45 +372,11 @@ public class ARCoreCamera extends AbstractARCamera {
 
       //process camera data
       onProcessColorData(frame.acquireCameraImage());
+      onProcessDepthData(frame.acquireDepthImage());
+      mFrameIndex++;
 
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
-
-  private CameraDevice.StateCallback mSeparatedCameraCallback = new CameraDevice.StateCallback() {
-    @Override
-    public void onOpened(CameraDevice cameraDevice) {
-      Surface imageReaderSurface = mImageReaderDepth16.getSurface();
-      mCameraDevice = cameraDevice;
-
-      try {
-        final CaptureRequest.Builder requestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-        requestBuilder.addTarget(imageReaderSurface);
-
-        cameraDevice.createCaptureSession(Collections.singletonList(imageReaderSurface),new CameraCaptureSession.StateCallback() {
-
-          @Override
-          public void onConfigured(CameraCaptureSession cameraCaptureSession) {
-            try {
-              cameraCaptureSession.setRepeatingRequest(requestBuilder.build(),null,null);
-            } catch (CameraAccessException e) {
-              e.printStackTrace();
-            }
-          }
-          @Override
-          public void onConfigureFailed(CameraCaptureSession cameraCaptureSession) {
-          }
-        },null);
-      } catch (CameraAccessException e) {
-        e.printStackTrace();
-      }
-    }
-    @Override
-    public void onDisconnected(CameraDevice cameraDevice) {
-    }
-    @Override
-    public void onError(CameraDevice cameraDevice, int i) {
-    }
-  };
 }

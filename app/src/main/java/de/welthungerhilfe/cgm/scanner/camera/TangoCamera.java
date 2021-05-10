@@ -70,6 +70,7 @@ public class TangoCamera extends AbstractARCamera {
     private AtomicBoolean mIsFrameAvailableTangoThread;
 
     //App integration objects
+    protected float[] mDepthCameraIntrinsic;
     private TangoCameraRenderer mRenderer;
 
     public TangoCamera(Activity activity) {

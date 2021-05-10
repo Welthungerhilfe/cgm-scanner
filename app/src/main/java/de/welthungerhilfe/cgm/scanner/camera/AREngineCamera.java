@@ -172,7 +172,7 @@ public class AREngineCamera extends AbstractARCamera {
       return;
     }
 
-    Bitmap preview = getDepthPreview(image, true, mPlanes, mDepthCameraIntrinsic, mPosition, mRotation);
+    Bitmap preview = getDepthPreview(image, true, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
     mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
 
     if (mCache != null) {
