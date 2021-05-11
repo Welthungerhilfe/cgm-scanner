@@ -281,6 +281,13 @@ public abstract class AbstractARCamera {
                 bestPlane = getPlane(depth, planes, calibration, matrix, position);
                 Bitmap mask = mComputerVision.getDepthPreviewCenter(depth, bestPlane, calibration, matrix, otherColors);
                 mTargetHeight = mComputerVision.getCenterFocusHeight(mask, depth, bestPlane, calibration, matrix);
+                if (!otherColors) {
+                    if (!mComputerVision.isFocusValid(mask)) {
+                        mask = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+                    } else if (mTargetHeight < 0.45) {
+                        mask = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+                    }
+                }
                 return mask;
             case PLANE:
                 matrix = mComputerVision.matrixCalculate(position, rotation);

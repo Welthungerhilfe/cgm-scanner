@@ -29,6 +29,40 @@ import java.util.Stack;
 
 public class ComputerVisionUtils {
 
+    public static class AABB {
+        int maxX;
+        int maxY;
+        int minX;
+        int minY;
+
+        public AABB() {
+            maxX = Integer.MIN_VALUE;
+            maxY = Integer.MIN_VALUE;
+            minX = Integer.MAX_VALUE;
+            minY = Integer.MAX_VALUE;
+        }
+
+        public void addPoint(int x, int y) {
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+        }
+
+        public boolean isInside(AABB outside) {
+            if (maxX > outside.maxX) return false;
+            if (maxY > outside.maxY) return false;
+            if (minX < outside.minX) return false;
+            if (minY < outside.minY) return false;
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return minX + ":" + minY + "x" + maxX + ":" + maxY;
+        }
+    }
+
     public static class Point3F {
         float x;
         float y;
@@ -45,6 +79,11 @@ public class ComputerVisionUtils {
             float dy = y - p.y;
             float dz = z - p.z;
             return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+        }
+
+        @Override
+        public String toString() {
+            return x + "," + y + "," + z;
         }
     }
 
@@ -143,7 +182,6 @@ public class ComputerVisionUtils {
     }
 
     public Bitmap getDepthPreviewCenter(float[][] depth, float plane, float[] calibration, float[] matrix, boolean otherColors) {
-        float maxHeight = 0;
         Bitmap bitmap = getDepthPreviewPlane(depth, plane, calibration, matrix);
         int w = bitmap.getWidth();
         int h = bitmap.getHeight();
@@ -199,7 +237,6 @@ public class ComputerVisionUtils {
                 }
             }
         }
-
         bitmap.setPixels(pixels, 0, w, 0, 0, w, h);
         return bitmap;
     }
@@ -302,6 +339,31 @@ public class ComputerVisionUtils {
             }
         }
         return bestValue;
+    }
+
+    public boolean isFocusValid(Bitmap bitmap) {
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+        int[] pixels = new int[w * h];
+        bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
+
+        AABB focus = new AABB();
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int index = y * w + x;
+                int color = pixels[index];
+                if (Color.alpha(color) == ALPHA_FOCUS) {
+                    pixels[index] = Color.argb(ALPHA_FOCUS, 255, 255, 255);
+                    focus.addPoint(x, y);
+                }
+            }
+        }
+
+        int m = Math.max(w, h) / 10;
+        AABB valid = new AABB();
+        valid.addPoint(m, m);
+        valid.addPoint(w - m, h - m);
+        return focus.isInside(valid);
     }
 
     public float[] matrixCalculate(float[] position, float[] rotation) {
