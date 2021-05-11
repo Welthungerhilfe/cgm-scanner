@@ -363,7 +363,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         ButterKnife.bind(this);
 
-        mTxtFeedback = findViewById(R.id.txtLightFeedback);
+        mTxtFeedback = findViewById(R.id.txtFeedback);
         mTitleView = findViewById(R.id.txtTitle);
         progressBar = findViewById(R.id.progressBar);
         fab = findViewById(R.id.fab_scan_result);
@@ -536,6 +536,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void openScan() {
+        getCamera().resetTrackingState();
         fab.setImageResource(R.drawable.recorder);
         lytScanner.setVisibility(View.VISIBLE);
         mTxtFeedback.setVisibility(View.GONE);
@@ -826,7 +827,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 mTitleView.setText(text);
             });*/
         }
-        onFeedbackUpdate(getCamera().getLightConditionState());
+        onFeedbackUpdate();
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
             long profile = System.currentTimeMillis();
@@ -896,7 +897,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onTangoDepthData(TangoPointCloudData pointCloudData, float[] position, float[] rotation, TangoCameraIntrinsics[] calibration) {
 
-        onFeedbackUpdate(getCamera().getLightConditionState());
+        onFeedbackUpdate();
         boolean hasCameraCalibration = mCameraInstance.hasCameraCalibration();
         String cameraCalibration = mCameraInstance.getCameraCalibration();
 
@@ -965,21 +966,41 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onFeedbackUpdate(AbstractARCamera.LightConditions state) {
+    private void onFeedbackUpdate() {
+        AbstractARCamera.LightConditions light = getCamera().getLightConditionState();
+        AbstractARCamera.TrackingState tracking = getCamera().getTrackingState();
         float distance = getCamera().getTargetDistance();
         runOnUiThread(() -> {
-            switch (state) {
-                case NORMAL:
-                    mTxtFeedback.setVisibility(View.GONE);
-                    break;
-                case BRIGHT:
-                    mTxtFeedback.setText(R.string.score_light_bright);
-                    mTxtFeedback.setVisibility(View.VISIBLE);
-                    break;
-                case DARK:
-                    mTxtFeedback.setText(R.string.score_light_dark);
-                    mTxtFeedback.setVisibility(View.VISIBLE);
-                    break;
+
+            if (SCAN_MODE == AppConstants.SCAN_STANDING) {
+                switch (tracking) {
+                    case INIT:
+                    case TRACKED:
+                        mTxtFeedback.setVisibility(View.GONE);
+                        break;
+                    case LOST:
+                        mTxtFeedback.setText("Child not fully visible");
+                        mTxtFeedback.setVisibility(View.VISIBLE);
+                        break;
+                }
+            } else {
+                mTxtFeedback.setVisibility(View.GONE);
+            }
+
+            if (mTxtFeedback.getVisibility() == View.GONE) {
+                switch (light) {
+                    case NORMAL:
+                        mTxtFeedback.setVisibility(View.GONE);
+                        break;
+                    case BRIGHT:
+                        mTxtFeedback.setText(R.string.score_light_bright);
+                        mTxtFeedback.setVisibility(View.VISIBLE);
+                        break;
+                    case DARK:
+                        mTxtFeedback.setText(R.string.score_light_dark);
+                        mTxtFeedback.setVisibility(View.VISIBLE);
+                        break;
+                }
             }
 
             if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
