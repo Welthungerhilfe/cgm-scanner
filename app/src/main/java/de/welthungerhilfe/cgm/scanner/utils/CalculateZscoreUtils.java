@@ -79,7 +79,7 @@ public class CalculateZscoreUtils {
                 }
                 if (lastMeasure != null) {
                     if ((chartType == 0 || chartType == 1)) {
-                        if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365)) {
+                        if ((int) rule == Math.round(lastMeasure.getAge() * 12 / 365.0)) {
                             skew = Utils.parseDouble(arr[1]);
                             median = Utils.parseDouble(arr[2]);
                             coefficient = Utils.parseDouble(arr[3]);

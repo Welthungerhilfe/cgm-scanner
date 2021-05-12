@@ -134,8 +134,8 @@ public class CalculateZscoreUtilsTest {
         zScore = calculateAllZscore(context, 63.5, 7.199, 166, "male");
         System.out.println("ZscoreTest_8=> " + zScore[0] + " " + zScore[1] + " " + zScore[2]);
 
-        assertThat(zScore[0], closeTo(zScoreWFA, error));
-        assertThat(zScore[1], closeTo(zScoreHFA, error));
+        assertThat(zScore[0], closeTo(zScoreWFA, 0.3));
+        assertThat(zScore[1], closeTo(zScoreHFA, 0.4));
         assertThat(zScore[2], closeTo(zScoreWFH, error));
     }
 
