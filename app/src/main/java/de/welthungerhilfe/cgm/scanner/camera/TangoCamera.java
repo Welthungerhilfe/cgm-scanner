@@ -25,6 +25,7 @@ import android.opengl.GLSurfaceView;
 import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
+import android.widget.ImageView;
 
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
@@ -69,20 +70,20 @@ public class TangoCamera extends AbstractARCamera {
     private AtomicBoolean mIsFrameAvailableTangoThread;
 
     //App integration objects
-    private GLSurfaceView mCameraSurfaceView;
     private TangoCameraRenderer mRenderer;
 
     public TangoCamera(Activity activity) {
-        super(activity, false);
+        super(activity, DepthPreviewMode.OFF, PreviewSize.CLIPPED);
 
         mIsConnected = false;
         mIsFrameAvailableTangoThread = new AtomicBoolean(false);
     }
 
     @Override
-    public void onCreate(int colorPreview, int depthPreview, int surfaceview) {
-        mCameraSurfaceView = mActivity.findViewById(surfaceview);
-        mCameraSurfaceView.setEGLContextClientVersion(2);
+    public void onCreate(ImageView colorPreview, ImageView depthPreview, GLSurfaceView surfaceview) {
+        super.onCreate(colorPreview, depthPreview, surfaceview);
+
+        mGLSurfaceView.setEGLContextClientVersion(2);
         mRenderer = new TangoCameraRenderer(new TangoCameraRenderer.RenderCallback() {
 
             @Override
@@ -124,7 +125,7 @@ public class TangoCamera extends AbstractARCamera {
             }
         });
 
-        mCameraSurfaceView.setRenderer(mRenderer);
+        mGLSurfaceView.setRenderer(mRenderer);
     }
 
     @Override
@@ -133,8 +134,8 @@ public class TangoCamera extends AbstractARCamera {
             if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                 if (mActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                     startTango();
-                    mCameraSurfaceView.onResume();
-                    mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+                    mGLSurfaceView.onResume();
+                    mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
                 }
             }
         }
@@ -146,7 +147,7 @@ public class TangoCamera extends AbstractARCamera {
             return;
         }
 
-        mCameraSurfaceView.onPause();
+        mGLSurfaceView.onPause();
         // Synchronize against disconnecting while the service is being used in the OpenGL
         // thread or in the UI thread.
         // NOTE: DO NOT lock against this same object in the Tango callback thread.
@@ -306,8 +307,8 @@ public class TangoCamera extends AbstractARCamera {
                     // If you need to render at a higher rate (i.e., if you want to render complex
                     // animations smoothly) you  can use RENDERMODE_CONTINUOUSLY throughout the
                     // application lifecycle.
-                    if (mCameraSurfaceView.getRenderMode() != GLSurfaceView.RENDERMODE_WHEN_DIRTY) {
-                        mCameraSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+                    if (mGLSurfaceView.getRenderMode() != GLSurfaceView.RENDERMODE_WHEN_DIRTY) {
+                        mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
                     }
 
                     // Note that the RGB data is not passed as a parameter here.
@@ -321,7 +322,7 @@ public class TangoCamera extends AbstractARCamera {
                     // to run in synchrony with this requesting call.
                     mIsFrameAvailableTangoThread.set(true);
                     // Trigger an OpenGL render to update the OpenGL scene with the new RGB data.
-                    mCameraSurfaceView.requestRender();
+                    mGLSurfaceView.requestRender();
                 }
             }
 
@@ -359,7 +360,7 @@ public class TangoCamera extends AbstractARCamera {
 
         // We also need to update the camera texture UV coordinates. This must be run in the OpenGL
         // thread.
-        mCameraSurfaceView.queueEvent(() -> {
+        mGLSurfaceView.queueEvent(() -> {
             if (mIsConnected) {
                 mRenderer.updateColorCameraTextureUv(mDisplayRotation);
             }

@@ -288,9 +288,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setSchema_version(CgmDatabase.version);
                     person.setLastLocation(location);
                     person.setSynced(false);
-
                     viewModel.savePerson(person);
-
                 }
 
                 break;
