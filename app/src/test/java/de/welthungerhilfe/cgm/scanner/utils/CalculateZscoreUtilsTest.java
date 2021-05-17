@@ -2,6 +2,7 @@ package de.welthungerhilfe.cgm.scanner.utils;
 
 import android.content.Context;
 
+
 import androidx.test.core.app.ApplicationProvider;
 
 import org.junit.Before;
@@ -19,7 +20,7 @@ public class CalculateZscoreUtilsTest {
 
     double[] zScore = new double[3];
     private Context context;
-    double error = 0.2;
+    double error = 0.064;
     double zScoreWFA, zScoreHFA, zScoreWFH;
 
     @Before
@@ -100,7 +101,7 @@ public class CalculateZscoreUtilsTest {
     @Test
     public void ZscoreTest_6() {
         zScoreWFA = -0.38;
-        zScoreHFA = -0.07;
+        zScoreHFA = 0.07;
         zScoreWFH = -0.67;
 
         zScore = calculateAllZscore(context, 106.0, 16.100, 1616, "female");
@@ -117,7 +118,7 @@ public class CalculateZscoreUtilsTest {
         zScoreHFA = 0.85;
         zScoreWFH = -0.82;
 
-        zScore = calculateAllZscore(context, 55.299, 4.300, 30, "female");
+        zScore = calculateAllZscore(context, 55.2, 4.300, 30, "female");
         System.out.println("ZscoreTest_7=> " + zScore[0] + " " + zScore[1] + " " + zScore[2]);
 
         assertThat(zScore[0], closeTo(zScoreWFA, error));
@@ -134,8 +135,8 @@ public class CalculateZscoreUtilsTest {
         zScore = calculateAllZscore(context, 63.5, 7.199, 166, "male");
         System.out.println("ZscoreTest_8=> " + zScore[0] + " " + zScore[1] + " " + zScore[2]);
 
-        assertThat(zScore[0], closeTo(zScoreWFA, 0.3));
-        assertThat(zScore[1], closeTo(zScoreHFA, 0.4));
+        assertThat(zScore[0], closeTo(zScoreWFA, error));
+        assertThat(zScore[1], closeTo(zScoreHFA, error));
         assertThat(zScore[2], closeTo(zScoreWFH, error));
     }
 

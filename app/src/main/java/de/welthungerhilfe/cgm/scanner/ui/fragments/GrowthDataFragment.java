@@ -64,6 +64,7 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
+import de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -214,11 +215,14 @@ public class GrowthDataFragment extends Fragment {
         Measure lastMeasure = null;
         if (measures.size() > 0)
             lastMeasure = measures.get(0);
-        Log.i(TAG,"this is value of lastmeasure H-> "+lastMeasure.getHeight()+" W-> "+lastMeasure.getWeight());
         txtLabel.setText(person.getSex());
 
 
         long birthday = person.getBirthday();
+
+        long age = (System.currentTimeMillis() - birthday) / 1000 / 60 / 60 / 24;
+
+        lastMeasure.setAge(age);
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
 
@@ -248,6 +252,7 @@ public class GrowthDataFragment extends Fragment {
             else
                 reader = new BufferedReader(new InputStreamReader(context.getAssets().open(boys[chartType]), StandardCharsets.UTF_8));
 
+
             String mLine;
             while ((mLine = reader.readLine()) != null) {
                 String[] arr = mLine.split("\t");
@@ -257,7 +262,7 @@ public class GrowthDataFragment extends Fragment {
                 } catch (Exception e) {
                     continue;
                 }
-                if (lastMeasure != null) {
+                if (lastMeasure != null && chartType==3) {
                     if ((chartType == 0 || chartType == 1)) {
                         if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365)) {
                             skew = Utils.parseDouble(arr[1]);
@@ -272,6 +277,7 @@ public class GrowthDataFragment extends Fragment {
                         }
                     }
                 }
+
 
                 SD3neg.add(new Entry(rule, Utils.parseFloat(arr[4])));
                 SD2neg.add(new Entry(rule, Utils.parseFloat(arr[5])));
@@ -298,7 +304,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_weight);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = newZScore(lastMeasure.getWeight(), median, skew, coefficient);
+                    zScore = CalculateZscoreUtils.setData(context,lastMeasure.getHeight(),lastMeasure.getWeight(),lastMeasure.getAge(),person.getSex(),chartType);
                 }
                 break;
             case 1:
@@ -306,7 +312,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_height);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = newZScore(lastMeasure.getHeight(), median, skew, coefficient);
+                    zScore = CalculateZscoreUtils.setData(context,lastMeasure.getHeight(),lastMeasure.getWeight(),lastMeasure.getAge(),person.getSex(),chartType);
                 }
                 break;
             case 2:
@@ -314,7 +320,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_weight);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = newZScore(lastMeasure.getWeight(), median, skew, coefficient);
+                    zScore = CalculateZscoreUtils.setData(context,lastMeasure.getHeight(),lastMeasure.getWeight(),lastMeasure.getAge(),person.getSex(),chartType);
                 }
                 break;
             case 3:
