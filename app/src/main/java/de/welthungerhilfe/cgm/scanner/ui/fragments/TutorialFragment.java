@@ -35,11 +35,10 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.ui.activities.TutorialActivity;
 
 public class TutorialFragment extends Fragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener {
+
     private Context context;
-
-
-    TutorialData tutorialData;
-    FragmentTutorialBinding fragmentTutorialBinding;
+    private TutorialData tutorialData;
+    private FragmentTutorialBinding fragmentTutorialBinding;
 
     public static TutorialFragment newInstance(TutorialData tutorialData) {
 
@@ -51,13 +50,10 @@ public class TutorialFragment extends Fragment implements CompoundButton.OnCheck
         return fragment;
     }
 
-
     public void onAttach(Context context) {
         super.onAttach(context);
-
         this.context = context;
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -71,15 +67,14 @@ public class TutorialFragment extends Fragment implements CompoundButton.OnCheck
 
         fragmentTutorialBinding.tvTitle.setText(tutorialData.getTitle());
         fragmentTutorialBinding.ivTitle.setImageResource(tutorialData.getImage());
-        fragmentTutorialBinding.tvInstruction1.setText(tutorialData.getInstruction1());
-        fragmentTutorialBinding.tvInstruction2.setText(tutorialData.getInstruction2());
+        fragmentTutorialBinding.guide1.setText(tutorialData.getInstruction1());
+        fragmentTutorialBinding.guide2.setText(tutorialData.getInstruction2());
         fragmentTutorialBinding.guide1.setOnCheckedChangeListener(this);
         fragmentTutorialBinding.guide2.setOnCheckedChangeListener(this);
         fragmentTutorialBinding.btnNext.setOnClickListener(this);
         fragmentTutorialBinding.stepView.go(tutorialData.getPosition(),true);
-        if(tutorialData.getPosition() == 3)
-        {
-            fragmentTutorialBinding.btnNext.setText("DONE");
+        if(tutorialData.getPosition() == 3) {
+            fragmentTutorialBinding.btnNext.setText(getString(R.string.done).toUpperCase());
         }
     }
 
