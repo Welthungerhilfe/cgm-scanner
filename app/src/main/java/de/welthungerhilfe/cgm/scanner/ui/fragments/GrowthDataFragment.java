@@ -215,11 +215,14 @@ public class GrowthDataFragment extends Fragment {
         Measure lastMeasure = null;
         if (measures.size() > 0)
             lastMeasure = measures.get(0);
-        Log.i(TAG,"this is value of lastmeasure H-> "+lastMeasure.getHeight()+" W-> "+lastMeasure.getWeight());
         txtLabel.setText(person.getSex());
 
 
         long birthday = person.getBirthday();
+
+        long age = (System.currentTimeMillis() - birthday) / 1000 / 60 / 60 / 24;
+
+        lastMeasure.setAge(age);
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
 
@@ -249,6 +252,7 @@ public class GrowthDataFragment extends Fragment {
             else
                 reader = new BufferedReader(new InputStreamReader(context.getAssets().open(boys[chartType]), StandardCharsets.UTF_8));
 
+
             String mLine;
             while ((mLine = reader.readLine()) != null) {
                 String[] arr = mLine.split("\t");
@@ -259,7 +263,7 @@ public class GrowthDataFragment extends Fragment {
                     continue;
                 }
                 if (lastMeasure != null) {
-                    if ((chartType == 0 || chartType == 1 || chartType==3)) {
+                    if ((chartType == 0 || chartType == 1 || chartType == 3)) {
                         if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365)) {
                             skew = Utils.parseDouble(arr[1]);
                             median = Utils.parseDouble(arr[2]);
@@ -273,6 +277,7 @@ public class GrowthDataFragment extends Fragment {
                         }
                     }
                 }
+
 
                 SD3neg.add(new Entry(rule, Utils.parseFloat(arr[4])));
                 SD2neg.add(new Entry(rule, Utils.parseFloat(arr[5])));
@@ -299,7 +304,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_weight);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = CalculateZscoreUtils.newZScore(lastMeasure.getWeight(), median, skew, coefficient);
+                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getAge(), person.getSex(), chartType);
                 }
                 break;
             case 1:
@@ -307,7 +312,7 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_height);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = CalculateZscoreUtils.newZScore(lastMeasure.getHeight(), median, skew, coefficient);
+                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getAge(), person.getSex(), chartType);
                 }
                 break;
             case 2:
@@ -315,7 +320,8 @@ public class GrowthDataFragment extends Fragment {
                 txtYAxis.setText(R.string.axis_weight);
 
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = CalculateZscoreUtils.newZScore(lastMeasure.getWeight(), median, skew, coefficient);
+                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getAge(), person.getSex(), chartType);
+
                 }
                 break;
             case 3:
@@ -406,20 +412,20 @@ public class GrowthDataFragment extends Fragment {
             if (x == 0 || y == 0)
                 continue;
 
-            final int fX = (int)x;
+            final int fX = (int) x;
             try {
                 ArrayList<Entry> entry = new ArrayList<>();
                 entry.add(new Entry(x, y));
 
-                if (y <= Iterables.find(SD3neg, input -> (int)input.getX() == fX).getY()) {
+                if (y <= Iterables.find(SD3neg, input -> (int) input.getX() == fX).getY()) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));
-                } else if (y <= Iterables.find(SD2neg, input -> (int)input.getX() == fX).getY()) {
+                } else if (y <= Iterables.find(SD2neg, input -> (int) input.getX() == fX).getY()) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
-                } else if (y <= Iterables.find(SD0, input -> (int)input.getX() == fX).getY()) {
+                } else if (y <= Iterables.find(SD0, input -> (int) input.getX() == fX).getY()) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
-                } else if (y <= Iterables.find(SD2, input -> (int)input.getX() == fX).getY()) {
+                } else if (y <= Iterables.find(SD2, input -> (int) input.getX() == fX).getY()) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
-                } else if (y <= Iterables.find(SD3, input -> (int)input.getX() == fX).getY()) {
+                } else if (y <= Iterables.find(SD3, input -> (int) input.getX() == fX).getY()) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
                 } else {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));

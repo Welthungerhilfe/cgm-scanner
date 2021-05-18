@@ -54,11 +54,11 @@ public class FileLogRepository {
     }
 
     @SuppressLint("StaticFieldLeak")
-    public void loadQueuedData(OnFileLogsLoad listener, SessionManager session) {
+    public void loadQueuedData(OnFileLogsLoad listener, int environment) {
         new AsyncTask<Void, Void, List<FileLog>>() {
             @Override
             protected List<FileLog> doInBackground(Void... voids) {
-                return database.fileLogDao().loadQueuedData(session.getEnvironment());
+                return database.fileLogDao().loadQueuedData(environment);
             }
 
             @Override
@@ -67,7 +67,6 @@ public class FileLogRepository {
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
-
 
     public List<FileLog> loadConsentFile(int environment) {
         return database.fileLogDao().loadConsentFile(environment);

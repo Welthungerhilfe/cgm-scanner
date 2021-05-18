@@ -34,9 +34,9 @@ import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class BaseActivity extends AppCompatActivity {
 
-    protected final int PERMISSION_LOCATION = 0x0001;
-    protected final int PERMISSION_CAMERA = 0x0002;
-    protected final int PERMISSION_STORAGE = 0x0003;
+    public static final int PERMISSION_LOCATION = 0x0001;
+    public static final int PERMISSION_CAMERA = 0x0002;
+    public static final int PERMISSION_STORAGE = 0x0003;
 
     public interface ResultListener {
         void onActivityResult(int requestCode, int resultCode, @Nullable Intent data);

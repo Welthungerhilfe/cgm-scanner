@@ -13,11 +13,39 @@
     <string name="login_error_parse">Token Parse Failed</string>
     <string name="login_error_invalid">Couldn\'t get user email, please try again</string>
 
+    <!-- Device check !-->
+    <string name="device_check_reminder">There was no recent device check done on this device. Do you want to do it now?</string>
+    <string name="device_check1">What is needed for device check?</string>
+    <string name="device_check11">There is needed a calibration image which you can get from Child Growth Monitor support team.</string>
+    <string name="device_check12">I have printed the calibration image and I am ready to scan it.</string>
+    <string name="device_check2">Please point the camera on the calibration image.</string>
+    <string name="device_check21">RGB camera</string>
+    <string name="device_check22">ToF sensor</string>
+    <string name="device_check3">Please wait until all the tests are done.</string>
+    <string name="device_check31">Battery</string>
+    <string name="device_check32">Device storage</string>
+    <string name="device_check33">GPS</string>
+    <string name="device_check34">Internet connection</string>
+    <string name="device_check4">Tests ended with issues. Do you want to continue?</string>
+    <string name="device_check4_rgb">Color camera detected a wrong dimensions of calibration image, this might be caused by a defect of the lenses.</string>
+    <string name="device_check4_tof">ToF sensor detected a wrong dimensions of calibration image, this might be caused by a defect of the lenses.</string>
+    <string name="device_check4_battery">The battery level is low, there might be not enough energy to capture a bigger amount of data.</string>
+    <string name="device_check4_gps">GPS sensor was not able to determine your position. The captured data won\'t be tracked.</string>
+    <string name="device_check4_storage">The device storage is low, there might be not enough space to capture a bigger amount of data.</string>
+    <string name="device_check4_backend">The device wasn\'t able to connect to CGM backend. There won\'t be possible to synchronise any data.</string>
+    <string name="device_check42">I take responsibility for possible issues caused by the problems above.</string>
+    <string name="device_check5">You can refer to the device check from <u color="#FF0000">Menu</u> any time!</string>
+    <string name="device_check_step_finished">Check step finished</string>
+    <string name="device_check_detecting_image">detecting image</string>
+    <string name="device_check_testing">testing</string>
+    <string name="device_check_failed">failed</string>
+    <string name="device_check_too_low_energy">too low energy</string>
+    <string name="device_check_finish">You finished the device check</string>
+
     <!-- Tutorial !-->
+    <string name="tutorial1">How do I create a new profile for the child?</string>
     <string name="tutorial11">1-1. Scan the QR code to create or find the child\'s profile</string>
     <string name="tutorial12">1-2. Fill in their personal details if the child has not been scanned before</string>
-    <string name="next_tutorial">next</string>
-    <string name="tutorial1">How do I create a new profile for the child?</string>
     <string name="tutorial2">How do I scan a child that is standing up?</string>
     <string name="tutorial21">2-1. Chose \"Standing up\" mode before starting to scan child</string>
     <string name="tutorial22">2-2. Take three 5 second scans, from a front view, a back view and a 360\' view</string>
@@ -28,6 +56,7 @@
     <string name="tutorial41">4-1. Visualise the results of the scan measurements on different graphs</string>
     <string name="tutorial42">4-2. Quickly and easily identify whether the child is likely to be malnourished</string>
     <string name="tutorial5">You can refer to the tutorial from <u color="#FF0000">Menu</u> any time!</string>
+    <string name="next_tutorial">next</string>
     <string name="congratulation">Congratulations!</string>
     <string name="finish_tutorial">You finished CGM Scanner Tutorial</string>
     <string name="get_start">Get Started</string>
@@ -35,6 +64,7 @@
     <!-- Main screen !-->
     <string name="username">Username</string>
     <string name="menuScans">Scans</string>
+    <string name="menuDeviceCheck">Device Check</string>
     <string name="menuTutorial">Tutorial</string>
     <string name="menuSettings">Settings</string>
     <string name="menuLogout">Logout</string>

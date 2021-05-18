@@ -7,11 +7,39 @@
     <string name="login_error_parse">टोकन पार्स असफल</string>
     <string name="login_error_invalid">उपयोगकर्ता ईमेल प्राप्त नहीं कर सका, कृपया पुनः प्रयास करें</string>
 
+    <!-- Device check !-->
+    <string name="device_check_reminder">इस उपकरण पर हाल ही में कोई उपकरण जांच नहीं की गई थी। क्या आप इसे अभी करना चाहते हैं?</string>
+    <string name="device_check1">डिवाइस की जांच के लिए क्या आवश्यक है?</string>
+    <string name="device_check11">एक अंशांकन छवि की आवश्यकता है जिसे आप चाइल्ड ग्रोथ मॉनिटर सपोर्ट टीम से प्राप्त कर सकते हैं।</string>
+    <string name="device_check12">मैंने अंशांकन छवि मुद्रित की है और मैं इसे स्कैन करने के लिए तैयार हूं।</string>
+    <string name="device_check2">कृपया कैमरे को अंशांकन छवि पर इंगित करें।</string>
+    <string name="device_check21">RGB camera</string>
+    <string name="device_check22">ToF सेंसर</string>
+    <string name="device_check3">कृपया सभी परीक्षण किए जाने तक प्रतीक्षा करें।</string>
+    <string name="device_check31">बैटरी</string>
+    <string name="device_check32">डिवाइस स्टोरेज</string>
+    <string name="device_check33">GPS</string>
+    <string name="device_check34">इंटरनेट कनेक्शन</string>
+    <string name="device_check4">मुद्दों के साथ टेस्ट समाप्त हुए। क्या आप जारी रखना चाहते हैं?</string>
+    <string name="device_check4_rgb">रंगीन कैमरा ने अंशांकन छवि के एक गलत आयाम का पता लगाया, यह लेंस के दोष के कारण हो सकता है।</string>
+    <string name="device_check4_tof">ToF सेंसर ने अंशांकन छवि के एक गलत आयाम का पता लगाया, यह लेंस के दोष के कारण हो सकता है।</string>
+    <string name="device_check4_battery">बैटरी का स्तर कम है, डेटा की एक बड़ी मात्रा को पकड़ने के लिए पर्याप्त ऊर्जा नहीं हो सकती है।</string>
+    <string name="device_check4_gps">GPS सेंसर आपकी स्थिति निर्धारित करने में सक्षम नहीं था। कैप्चर किए गए डेटा को ट्रैक नहीं किया जाएगा।</string>
+    <string name="device_check4_storage">डिवाइस का भंडारण कम है, डेटा की एक बड़ी मात्रा को पकड़ने के लिए पर्याप्त स्थान नहीं हो सकता है.</string>
+    <string name="device_check4_backend">डिवाइस CGM बैकएंड से कनेक्ट करने में सक्षम नहीं था। यह किसी भी डेटा को सिंक्रनाइज़ करने के लिए संभव नहीं है।</string>
+    <string name="device_check42">मैं उपरोक्त समस्याओं के कारण संभावित मुद्दों की जिम्मेदारी लेता हूं।</string>
+    <string name="device_check5">आप किसी भी समय <u color="#FF0000"> मेनू </u> से डिवाइस की जांच का उल्लेख कर सकते हैं!</string>
+    <string name="device_check_step_finished">जाँच चरण समाप्त</string>
+    <string name="device_check_detecting_image">छवि का पता लगाना</string>
+    <string name="device_check_testing">परिक्षण</string>
+    <string name="device_check_failed">अनुत्तीर्ण</string>
+    <string name="device_check_too_low_energy">बहुत कम बैटरी</string>
+    <string name="device_check_finish">आपने डिवाइस की जांच पूरी कर ली</string>
+
     <!-- Tutorial !-->
+    <string name="tutorial1">मैं बच्चे की एक नई प्रोफ़ाइल कैसे बना सकता हूं?</string>
     <string name="tutorial11">1-1. बच्चे की प्रोफाइल बनाने या खोजने के लिए क्यूआर कोड स्कैन करें</string>
     <string name="tutorial12">1-2. अगर बच्चे को स्कैन नहीं किया गया है तो उनका व्यक्तिगत विवरण भरें</string>
-    <string name="next_tutorial">अगला</string>
-    <string name="tutorial1">मैं बच्चे की एक नई प्रोफ़ाइल कैसे बना सकता हूं?</string>
     <string name="tutorial2">मैं खड़े होने वाले बच्चे को कैसे स्कैन करूं?</string>
     <string name="tutorial21">2-1.  बच्चे को स्कैन करने से पहले  \"खड़े हो जाओ \" मोड चुनें</string>
     <string name="tutorial22">2-2. बच्चे को सामने से, पीछे से  और 360 डिग्री घुमा कर के 3 से 5 सेकंड तक स्कैन करे</string>
@@ -22,6 +50,7 @@
     <string name="tutorial41">4-1. विभिन्न ग्राफों पर स्कैन माप के परिणामों को दिखाये </string>
     <string name="tutorial42">4-2. जल्दी और आसानी से पहचानें कि बच्चे को कुपोषित होने की संभावना है या नहीं </string>
     <string name="tutorial5">आप किसी भी समय <b> मेनू </b> से ट्यूटोरियल का संदर्भ ले सकते हैं!</string>
+    <string name="next_tutorial">अगला</string>
     <string name="congratulation">बधाई हो!!</string>
     <string name="finish_tutorial">आपने सीजीएम स्कैनर के ट्यूटोरियल समाप्त किया</string>
     <string name="get_start">शुरू हो जाओ</string>
@@ -29,6 +58,7 @@
     <!-- Main screen !-->
     <string name="username">यूजरनेम</string>
     <string name="menuScans">स्कैन</string>
+    <string name="menuDeviceCheck">डिवाइस की जांच</string>
     <string name="menuTutorial">ट्यूटोरियल</string>
     <string name="menuSettings">सेटिंग्स</string>
     <string name="menuLogout">लोग आउट</string>

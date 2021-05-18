@@ -177,7 +177,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
         LogFileUtils.logInfo(TAG, "Started");
         running = true;
 
-        repository.loadQueuedData(this, sessionManager);
+        repository.loadQueuedData(this, sessionManager.getEnvironment());
     }
 
     @Override

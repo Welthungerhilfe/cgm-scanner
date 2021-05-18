@@ -282,7 +282,8 @@ public class Utils {
         if (qrcode == null) {
             return false;
         }
-        return qrcode.toUpperCase().contains("_TEST_");
+        String value = qrcode.toUpperCase();
+        return value.contains("_TEST_") || value.contains("_STD_TEST");
     }
 
     public static boolean isUploadAllowed(Context context) {

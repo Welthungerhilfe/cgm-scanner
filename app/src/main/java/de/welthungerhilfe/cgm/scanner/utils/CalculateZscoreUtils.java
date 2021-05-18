@@ -4,8 +4,12 @@ import android.content.Context;
 import android.widget.Toast;
 
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -29,75 +33,77 @@ public class CalculateZscoreUtils {
         }
     }
 
-    public static double setData(Context context, double height, double weight,long age, String sex, int chartType) {
-
+    public static double setData(Context context, double height, double weight, long age, String sex, int chartType) {
 
         double zScore = 100, median = 10, skew = 10, coefficient = 10;
 
-        final String[] boys_0_2 = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfl_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
-        final String[] girls_0_2 = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfl_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
+        final String[] boys_0_2 = {"wfa_boys_0_5_zscores.json", "lhfa_boys_0_5_zscores.json", "wfh_boys_0_5_zscores.json", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
+        final String[] girls_0_2 = {"wfa_girls_0_5_zscores.json", "lhfa_girls_0_5_zscores.json", "wfh_girls_0_5_zscores.json", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
 
-        final String[] boys_0_6 = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
-        final String[] girls_0_6 = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
-
+        final String[] boys_0_6 = {"wfa_boys_0_5_zscores.json", "lhfa_boys_0_5_zscores.json", "wfh_boys_0_5_zscores.json", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
+        final String[] girls_0_6 = {"wfa_girls_0_5_zscores.json", "lhfa_girls_0_5_zscores.json", "wfh_girls_0_5_zscores.json", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
         Measure lastMeasure = null;
 
 
         try {
-            BufferedReader reader;
-
-            String[] boys, girls;
-            lastMeasure =  new Measure();
+            lastMeasure = new Measure();
             lastMeasure.setHeight(height);
             //change this
             lastMeasure.setAge(age);
             lastMeasure.setWeight(weight);
 
 
-            if (lastMeasure != null && lastMeasure.getAge() < 365 * 2 && lastMeasure.getHeight() <= 110) {
-                boys = boys_0_2;
-                girls = girls_0_2;
+            String fileName = null;
+            if (sex.equals("female")) {
+                fileName = girls_0_6[chartType];
             } else {
-                boys = boys_0_6;
-                girls = girls_0_6;
+                fileName = boys_0_6[chartType];
             }
+            JSONObject jsonObject = null;
+            if (lastMeasure != null) {
+                if ((chartType == 0 || chartType == 1 || chartType == 2)) {
 
+                    if (chartType == 2) {
+                        jsonObject = loadJSONFromAsset(context, fileName, String.valueOf(lastMeasure.getHeight()));
+                    } else {
+                        jsonObject = loadJSONFromAsset(context, fileName, String.valueOf(lastMeasure.getAge()));
+                    }
+                    if (jsonObject == null) {
+                        return 0.0;
+                    }
+                    try {
+                        skew = Utils.parseDouble(jsonObject.getString("L"));
+                        median = Utils.parseDouble(jsonObject.getString("M"));
+                        coefficient = Utils.parseDouble(jsonObject.getString("S"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
 
-            if (sex.equals("female"))
-                reader = new BufferedReader(new InputStreamReader(context.getAssets().open(girls[chartType]), StandardCharsets.UTF_8));
-            else
-                reader = new BufferedReader(new InputStreamReader(context.getAssets().open(boys[chartType]), StandardCharsets.UTF_8));
-
-            String mLine;
-            while ((mLine = reader.readLine()) != null) {
-                String[] arr = mLine.split("\t");
-                float rule;
-                try {
-                    rule = Float.parseFloat(arr[0]);
-                } catch (Exception e) {
-                    continue;
-                }
-                if (lastMeasure != null) {
-                    if ((chartType == 0 || chartType == 1 || chartType==3)) {
-                        if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365)) {
-                            skew = Utils.parseDouble(arr[1]);
-                            median = Utils.parseDouble(arr[2]);
-                            coefficient = Utils.parseDouble(arr[3]);
+                } else if (chartType == 3) {
+                    BufferedReader reader = null;
+                    reader = new BufferedReader(new InputStreamReader(context.getAssets().open(fileName), StandardCharsets.UTF_8));
+                    String mLine;
+                    while ((mLine = reader.readLine()) != null) {
+                        String[] arr = mLine.split("\t");
+                        float rule;
+                        try {
+                            rule = Float.parseFloat(arr[0]);
+                        } catch (Exception e) {
+                            continue;
                         }
-                    } else if (chartType == 2) {
-                        if ((int) (rule * 2) == (int) (lastMeasure.getHeight() * 2)) {
-                            skew = Utils.parseDouble(arr[1]);
-                            median = Utils.parseDouble(arr[2]);
-                            coefficient = Utils.parseDouble(arr[3]);
+                        if (lastMeasure != null) {
+
+                            if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365.0)) {
+                                skew = Utils.parseDouble(arr[1]);
+                                median = Utils.parseDouble(arr[2]);
+                                coefficient = Utils.parseDouble(arr[3]);
+                                break;
+                            }
                         }
                     }
                 }
             }
-            reader.close();
-
-
-
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -122,5 +128,33 @@ public class CalculateZscoreUtils {
 
         }
         return zScore;
+    }
+
+    public static JSONObject loadJSONFromAsset(Context context, String fileName, String index) {
+        String json = null;
+        try {
+            InputStream is = context.getAssets().open(fileName);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        JSONObject obj = null;
+        try {
+            obj = new JSONObject(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            return obj.getJSONObject(index);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
