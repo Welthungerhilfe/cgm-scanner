@@ -33,16 +33,16 @@
     </group>
     <group>
         <item
+            android:id="@+id/menuDeviceCheck"
+            android:icon="@drawable/menu_device_check"
+            android:title="@string/menuDeviceCheck" />
+    </group>
+    <group>
+        <item
             android:id="@+id/menuTutorial"
             android:icon="@drawable/menu_tutorial"
             android:title="@string/menuTutorial" />
     </group>
-    <!--group>
-        <item
-            android:id="@+id/menuHelp"
-            android:icon="@drawable/menu_help"
-            android:title="@string/menuHelp" />
-    </group!-->
     <group>
         <item
             android:id="@+id/menuSettings"

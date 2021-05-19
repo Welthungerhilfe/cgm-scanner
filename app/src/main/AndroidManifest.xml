@@ -122,6 +122,10 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name=".ui.activities.DeviceCheckActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name=".ui.activities.TutorialActivity"
             android:screenOrientation="portrait" />
 
@@ -232,7 +236,7 @@
         <service
             android:name=".network.service.WifiStateChangereceiverHelperService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
     </application>
 
 </manifest>

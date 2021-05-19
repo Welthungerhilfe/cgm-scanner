@@ -24,6 +24,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
@@ -31,7 +32,11 @@ import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.util.Log;
 import android.util.Size;
+import android.util.SizeF;
+import android.widget.ImageView;
 
+import com.huawei.hiar.ARAugmentedImage;
+import com.huawei.hiar.ARAugmentedImageDatabase;
 import com.huawei.hiar.ARCamera;
 import com.huawei.hiar.ARCameraIntrinsics;
 import com.huawei.hiar.ARConfigBase;
@@ -46,6 +51,8 @@ import java.util.ArrayList;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
+import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.RenderToTexture;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -69,21 +76,19 @@ public class AREngineCamera extends AbstractARCamera {
   private boolean mFirstRequest;
 
   //App integration objects
-  private GLSurfaceView mGLSurfaceView;
   private Bitmap mCache;
 
-  public AREngineCamera(Activity activity, boolean showDepth) {
-    super(activity, showDepth);
+  public AREngineCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
+    super(activity, depthMode, previewSize);
     mPlanes = new ArrayList<>();
     mRTT = new RenderToTexture();
   }
 
   @Override
-  public void onCreate(int colorPreview, int depthPreview, int surfaceview) {
+  public void onCreate(ImageView colorPreview, ImageView depthPreview, GLSurfaceView surfaceview) {
     super.onCreate(colorPreview, depthPreview, surfaceview);
 
     //setup AREngine cycle
-    mGLSurfaceView = mActivity.findViewById(surfaceview);
     mGLSurfaceView.setEGLContextClientVersion(3);
     mGLSurfaceView.setRenderer(new GLSurfaceView.Renderer() {
       private final int[] textures = new int[1];
@@ -144,8 +149,7 @@ public class AREngineCamera extends AbstractARCamera {
 
     //update preview window
     mActivity.runOnUiThread(() -> {
-      float scale = bitmap.getWidth() / (float)bitmap.getHeight();
-      //scale *= mColorCameraPreview.getHeight() / (float)bitmap.getWidth();
+      float scale = getPreviewScale(bitmap);
       mColorCameraPreview.setImageBitmap(bitmap);
       mColorCameraPreview.setRotation(90);
       mColorCameraPreview.setScaleX(scale);
@@ -164,10 +168,13 @@ public class AREngineCamera extends AbstractARCamera {
       rotation = mRotation;
     }
 
-    Bitmap preview = getDepthPreview(image, true, mPlanes, mDepthCameraIntrinsic, mPosition, mRotation);
-    if (mDepthMode != DepthPreviewMode.OFF) {
-      mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
+    if (!hasCameraCalibration()) {
+      image.close();
+      return;
     }
+
+    Bitmap preview = getDepthPreview(image, true, mPlanes, mDepthCameraIntrinsic, mPosition, mRotation);
+    mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
 
     if (mCache != null) {
       for (Object listener : mListeners) {
@@ -207,8 +214,18 @@ public class AREngineCamera extends AbstractARCamera {
         return;
       }
 
+      // Set calibration image
+      ARAugmentedImageDatabase db = new ARAugmentedImageDatabase(mSession);
+      try {
+        Bitmap b = BitmapFactory.decodeStream(mGLSurfaceView.getContext().getAssets().open(CALIBRATION_IMAGE_FILE));
+        db.addImage("image", b);
+      } catch (Exception e) {
+        LogFileUtils.logException(e);
+      }
+
       // Enable auto focus mode while AREngine is running.
       ARWorldTrackingConfig config = new ARWorldTrackingConfig(mSession);
+      config.setAugmentedImageDatabase(db);
       config.setEnableItem(ARConfigBase.ENABLE_DEPTH);
       config.setFocusMode(ARConfigBase.FocusMode.AUTO_FOCUS);
       config.setLightingMode(ARConfigBase.LightingMode.AMBIENT_INTENSITY);
@@ -276,6 +293,35 @@ public class AREngineCamera extends AbstractARCamera {
       mColorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
       mDepthCameraIntrinsic = mColorCameraIntrinsic;
       mHasCameraCalibration = true;
+
+      //get calibration image dimension
+      mCalibrationImageSizeCV = null;
+      for (ARAugmentedImage img : frame.getUpdatedTrackables(ARAugmentedImage.class)) {
+        ARPose[] localBoundaryPoses = {
+                ARPose.makeTranslation(
+                        -0.5f * img.getExtentX(),
+                        0.0f,
+                        -0.5f * img.getExtentZ()), // upper left
+                ARPose.makeTranslation(
+                        0.5f * img.getExtentX(),
+                        0.0f,
+                        -0.5f * img.getExtentZ()), // upper right
+                ARPose.makeTranslation(
+                        0.5f * img.getExtentX(),
+                        0.0f,
+                        0.5f * img.getExtentZ()), // lower right
+                ARPose.makeTranslation(
+                        -0.5f * img.getExtentX(),
+                        0.0f,
+                        0.5f * img.getExtentZ()) // lower left
+        };
+        mCalibrationImageEdges = new ComputerVisionUtils.Point3F[4];
+        for (int i = 0; i < 4; ++i) {
+          ARPose p = img.getCenterPose().compose(localBoundaryPoses[i]);
+          mCalibrationImageEdges[i] = new ComputerVisionUtils.Point3F(p.tx(), p.ty(), p.tz());
+        }
+        mCalibrationImageSizeCV = new SizeF(img.getExtentX(), img.getExtentZ());
+      }
 
       //get planes
       mPlanes.clear();
