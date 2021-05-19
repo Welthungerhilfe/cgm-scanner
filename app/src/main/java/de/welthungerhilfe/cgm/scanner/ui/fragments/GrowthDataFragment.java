@@ -43,7 +43,11 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.common.collect.Iterables;
+import com.google.gson.JsonObject;
 import com.jaredrummler.materialspinner.MaterialSpinner;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -68,6 +72,8 @@ import de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
+import static de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils.loadJSONFromAsset;
+
 public class GrowthDataFragment extends Fragment {
 
     String TAG = GrowthDataFragment.class.getSimpleName();
@@ -78,12 +84,8 @@ public class GrowthDataFragment extends Fragment {
 
     private Context context;
 
-    private final String[] boys_0_6 = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
-    private final String[] girls_0_6 = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
-
-    private final String[] boys_0_2 = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfl_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
-    private final String[] girls_0_2 = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfl_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
-
+    final String[] boys_0_6 = {"wfa_boys_0_5_zscores.json", "lhfa_boys_0_5_zscores.json", "wfh_boys_0_5_zscores.json", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
+    final String[] girls_0_6 = {"wfa_girls_0_5_zscores.json", "lhfa_girls_0_5_zscores.json", "wfh_girls_0_5_zscores.json", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
 
     private LineChart mChart;
 
@@ -238,54 +240,79 @@ public class GrowthDataFragment extends Fragment {
         try {
             BufferedReader reader;
 
-            String[] boys, girls;
-            if (lastMeasure != null && lastMeasure.getAge() < 365 * 2 && lastMeasure.getHeight() <= 110) {
-                boys = boys_0_2;
-                girls = girls_0_2;
+            String fileName = null;
+            if (person.getSex().equals("female")) {
+                fileName = girls_0_6[chartType];
             } else {
-                boys = boys_0_6;
-                girls = girls_0_6;
+                fileName = boys_0_6[chartType];
             }
 
-            if (person.getSex().equals("female"))
-                reader = new BufferedReader(new InputStreamReader(context.getAssets().open(girls[chartType]), StandardCharsets.UTF_8));
-            else
-                reader = new BufferedReader(new InputStreamReader(context.getAssets().open(boys[chartType]), StandardCharsets.UTF_8));
+            if(chartType==3) {
+                reader = new BufferedReader(new InputStreamReader(context.getAssets().open(fileName), StandardCharsets.UTF_8));
 
 
-            String mLine;
-            while ((mLine = reader.readLine()) != null) {
-                String[] arr = mLine.split("\t");
-                float rule;
-                try {
-                    rule = Float.parseFloat(arr[0]);
-                } catch (Exception e) {
-                    continue;
+                String mLine;
+                while ((mLine = reader.readLine()) != null) {
+                    String[] arr = mLine.split("\t");
+                    float rule;
+                    try {
+                        rule = Float.parseFloat(arr[0]);
+                    } catch (Exception e) {
+                        continue;
+                    }
+                    if (lastMeasure != null) {
+                            if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365.0)) {
+                                skew = Utils.parseDouble(arr[1]);
+                                median = Utils.parseDouble(arr[2]);
+                                coefficient = Utils.parseDouble(arr[3]);
+                            }
+
+                    }
+
+                    SD3neg.add(new Entry(rule, Utils.parseFloat(arr[4])));
+                    SD2neg.add(new Entry(rule, Utils.parseFloat(arr[5])));
+                    SD0.add(new Entry(rule, Utils.parseFloat(arr[7])));
+                    SD2.add(new Entry(rule, Utils.parseFloat(arr[9])));
+                    SD3.add(new Entry(rule, Utils.parseFloat(arr[10])));
                 }
-                if (lastMeasure != null) {
-                    if ((chartType == 0 || chartType == 1 || chartType == 3)) {
-                        if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365)) {
-                            skew = Utils.parseDouble(arr[1]);
-                            median = Utils.parseDouble(arr[2]);
-                            coefficient = Utils.parseDouble(arr[3]);
-                        }
-                    } else if (chartType == 2) {
-                        if ((int) (rule * 2) == (int) (lastMeasure.getHeight() * 2)) {
-                            skew = Utils.parseDouble(arr[1]);
-                            median = Utils.parseDouble(arr[2]);
-                            coefficient = Utils.parseDouble(arr[3]);
+                reader.close();
+            }
+            else {
+                if(chartType==0 || chartType==1){
+                    int i = 0;
+                    JSONObject jsonObject = null;
+                    while(i < 31){
+                        try {
+                            jsonObject = loadJSONFromAsset(context, fileName, String.valueOf(i));
+                            SD3neg.add(new Entry((float) (i*30.0), Utils.parseFloat(jsonObject.getString("SD3neg"))));
+                            SD2neg.add(new Entry((float) (i*30.0), Utils.parseFloat(jsonObject.getString("SD2neg"))));
+                            SD0.add(new Entry((float) (i*30.0), Utils.parseFloat(jsonObject.getString("SD0"))));
+                            SD2.add(new Entry((float) (i*30.0), Utils.parseFloat(jsonObject.getString("SD2"))));
+                            SD3.add(new Entry((float) (i*30.0), Utils.parseFloat(jsonObject.getString("SD3"))));
+                            i += 1;
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
                 }
-
-
-                SD3neg.add(new Entry(rule, Utils.parseFloat(arr[4])));
-                SD2neg.add(new Entry(rule, Utils.parseFloat(arr[5])));
-                SD0.add(new Entry(rule, Utils.parseFloat(arr[7])));
-                SD2.add(new Entry(rule, Utils.parseFloat(arr[9])));
-                SD3.add(new Entry(rule, Utils.parseFloat(arr[10])));
+                else if(chartType==2){
+                    float i = 45.0f;
+                    JSONObject jsonObject = null;
+                    while(i < 120.5){
+                        try {
+                            jsonObject = loadJSONFromAsset(context, fileName, String.valueOf(i));
+                            SD3neg.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD3neg"))));
+                            SD2neg.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD2neg"))));
+                            SD0.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD0"))));
+                            SD2.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD2"))));
+                            SD3.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD3"))));
+                            i += 0.5;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
             }
-            reader.close();
 
             dataSets.add(createDataSet(SD3neg, "-3", ZSCORE_COLOR_3, 1.5f, false));
             dataSets.add(createDataSet(SD2neg, "-2", ZSCORE_COLOR_2, 1.5f, false));

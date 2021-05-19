@@ -37,9 +37,6 @@ public class CalculateZscoreUtils {
 
         double zScore = 100, median = 10, skew = 10, coefficient = 10;
 
-        final String[] boys_0_2 = {"wfa_boys_0_5_zscores.json", "lhfa_boys_0_5_zscores.json", "wfh_boys_0_5_zscores.json", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
-        final String[] girls_0_2 = {"wfa_girls_0_5_zscores.json", "lhfa_girls_0_5_zscores.json", "wfh_girls_0_5_zscores.json", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
-
         final String[] boys_0_6 = {"wfa_boys_0_5_zscores.json", "lhfa_boys_0_5_zscores.json", "wfh_boys_0_5_zscores.json", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
         final String[] girls_0_6 = {"wfa_girls_0_5_zscores.json", "lhfa_girls_0_5_zscores.json", "wfh_girls_0_5_zscores.json", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
         Measure lastMeasure = null;
