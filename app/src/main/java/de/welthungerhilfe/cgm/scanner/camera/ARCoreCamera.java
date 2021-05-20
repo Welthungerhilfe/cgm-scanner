@@ -18,24 +18,13 @@
  */
 package de.welthungerhilfe.cgm.scanner.camera;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.ImageFormat;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CaptureRequest;
 import android.media.Image;
-import android.media.ImageReader;
+import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.os.Build;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
@@ -43,7 +32,6 @@ import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.util.Log;
 import android.util.Size;
 import android.util.SizeF;
-import android.view.Surface;
 import android.widget.ImageView;
 
 import com.google.ar.core.ArCoreApk;
@@ -57,43 +45,32 @@ import com.google.ar.core.Frame;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
-import com.google.ar.core.SharedCamera;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
 import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 
-public class ARCoreCamera extends AbstractARCamera {
+public class ARCoreCamera extends AbstractARCamera implements GLSurfaceView.Renderer {
 
   private static final String TAG = ARCoreCamera.class.getSimpleName();
 
-  //Camera2 API
-  private ImageReader mImageReaderDepth16;
-  private CameraDevice mCameraDevice;
-  private String mColorCameraId;
-  private String mDepthCameraId;
-  private int mDepthWidth;
-  private int mDepthHeight;
-
   //ARCore API
+  private int mCameraTextureId;
+  private boolean mInstallRequested;
   private ArrayList<Float> mPlanes;
   private Session mSession;
+  private boolean mViewportChanged;
+  private int mViewportWidth;
+  private int mViewportHeight;
   private final Object mLock;
-
-  //App integration objects
-  private GLSurfaceView mGLSurfaceView;
-  private final HashMap<Long, Bitmap> mCache;
 
   public ARCoreCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
     super(activity, depthMode, previewSize);
-    mCache = new HashMap<>();
     mLock = new Object();
     mPlanes = new ArrayList<>();
   }
@@ -102,52 +79,100 @@ public class ARCoreCamera extends AbstractARCamera {
   public void onCreate(ImageView colorPreview, ImageView depthPreview, GLSurfaceView surfaceview) {
     super.onCreate(colorPreview, depthPreview, surfaceview);
 
-    //setup ARCore cycle
-    mGLSurfaceView.setRenderer(new GLSurfaceView.Renderer() {
-      private int[] textures = new int[1];
-      private int width, height;
-
-      @Override
-      public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        GLES20.glGenTextures(1, textures, 0);
-      }
-
-      @Override
-      public void onSurfaceChanged(GL10 gl10, int width, int height) {
-        this.width = width;
-        this.height = height;
-      }
-
-      @Override
-      public void onDrawFrame(GL10 gl10) {
-        synchronized (ARCoreCamera.this) {
-          updateFrame(textures[0], width, height);
-        }
-      }
-    });
+    // Set up renderer.
+    mGLSurfaceView.setPreserveEGLContextOnPause(true);
+    mGLSurfaceView.setEGLContextClientVersion(2);
+    mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Alpha used for plane blending.
+    mGLSurfaceView.setRenderer(this);
+    mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+    mGLSurfaceView.setWillNotDraw(false);
   }
 
   @Override
   public synchronized void onResume() {
-    mGLSurfaceView.onResume();
 
-    if (mActivity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-      if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-        if (mActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-          if (isARCoreSupportedAndUpToDate()) {
-            setupDepthSensor();
-            openCamera();
+    if (mSession == null) {
+      try {
+        switch (ArCoreApk.getInstance().requestInstall(mActivity, !mInstallRequested)) {
+          case INSTALL_REQUESTED:
+            mInstallRequested = true;
+            return;
+          case INSTALLED:
+            break;
+        }
+
+        mSession = new Session(/* context = */ mActivity);
+      } catch (Exception e) {
+        e.printStackTrace();
+        return;
+      }
+
+
+      // Set calibration image
+      AugmentedImageDatabase db = new AugmentedImageDatabase(mSession);
+      try {
+        Bitmap b = BitmapFactory.decodeStream(mGLSurfaceView.getContext().getAssets().open(CALIBRATION_IMAGE_FILE));
+        db.addImage("image", b);
+      } catch (Exception e) {
+        LogFileUtils.logException(e);
+      }
+
+      // Enable auto focus mode while ARCore is running.
+      Config config = mSession.getConfig();
+      config.setAugmentedImageDatabase(db);
+      if (mSession.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+        config.setDepthMode(Config.DepthMode.AUTOMATIC);
+      } else {
+        config.setDepthMode(Config.DepthMode.DISABLED);
+      }
+      config.setFocusMode(Config.FocusMode.AUTO);
+      config.setLightEstimationMode(Config.LightEstimationMode.AMBIENT_INTENSITY);
+      config.setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL);
+      mSession.configure(config);
+
+      // Choose the camera configuration
+      int selectedRank = -1;
+      CameraConfig selectedConfig = null;
+      for (CameraConfig cameraConfig : mSession.getSupportedCameraConfigs()) {
+        if (cameraConfig.getFacingDirection() == CameraConfig.FacingDirection.BACK) {
+          Size resolution = cameraConfig.getImageSize();
+          int w = resolution.getWidth();
+          int h = resolution.getHeight();
+
+          int rank = 0;
+          if ((w > 1024) && (h > 1024)) {
+            rank += 1;
+          }
+          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.REQUIRE_AND_USE) {
+            rank += 2;
+          }
+
+          if (selectedRank < rank) {
+            selectedRank = rank;
+            selectedConfig = cameraConfig;
           }
         }
       }
+      assert selectedConfig != null;
+      mSession.setCameraConfig(selectedConfig);
     }
+
+    // Note that order matters - see the note in onPause(), the reverse applies here.
+    try {
+      mSession.resume();
+    } catch (Exception e) {
+      mSession = null;
+      return;
+    }
+    mGLSurfaceView.onResume();
   }
 
   @Override
   public synchronized void onPause() {
-    mGLSurfaceView.onPause();
-
-    closeCamera();
+    if (mSession != null) {
+      mGLSurfaceView.onPause();
+      mSession.pause();
+    }
   }
 
   private void onProcessColorData(Image image) {
@@ -164,25 +189,8 @@ public class ARCoreCamera extends AbstractARCamera {
     scriptYuvToRgb.forEach(allocationRgb);
     allocationRgb.copyTo(bitmap);
 
-    if (mDepthCameraId == null) {
-      float[] position;
-      float[] rotation;
-      synchronized (mLock) {
-        position = mPosition;
-        rotation = mRotation;
-      }
-
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onDepthDataReceived(null, position, rotation, mFrameIndex);
-      }
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onColorDataReceived(bitmap, mFrameIndex);
-      }
-      mFrameIndex++;
-    } else {
-      synchronized (mCache) {
-        mCache.put(image.getTimestamp(), bitmap);
-      }
+    for (Object listener : mListeners) {
+      ((Camera2DataListener)listener).onColorDataReceived(bitmap, mFrameIndex);
     }
     allocationYuv.destroy();
     allocationRgb.destroy();
@@ -220,253 +228,24 @@ public class ARCoreCamera extends AbstractARCamera {
       rotation = mRotation;
     }
 
-    Bitmap preview = getDepthPreview(image, false, mPlanes, mDepthCameraIntrinsic, mPosition, mRotation);
+    Bitmap preview = getDepthPreview(image, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
     mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
 
-    Bitmap bitmap = null;
-    long bestDiff = Long.MAX_VALUE;
-
-    synchronized (mCache) {
-      if (!mCache.isEmpty()) {
-        for (Long timestamp : mCache.keySet()) {
-          long diff = Math.abs(image.getTimestamp() - timestamp) / 1000; //in microseconds
-          if (bestDiff > diff) {
-            bestDiff = diff;
-            bitmap = mCache.get(timestamp);
-          }
-        }
-      }
-    }
-
-    if (bitmap != null && bestDiff < 50000) {
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, mFrameIndex);
-      }
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onColorDataReceived(bitmap, mFrameIndex);
-      }
-
-      synchronized (mCache) {
-        mCache.clear();
-        mFrameIndex++;
-      }
+    for (Object listener : mListeners) {
+      ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, mFrameIndex);
     }
     image.close();
   }
 
-  private void closeCamera() {
-    if (mCameraDevice != null) {
-      mCameraDevice.close();
-      mCameraDevice = null;
-    }
-    if (mImageReaderDepth16 != null) {
-      mImageReaderDepth16.setOnImageAvailableListener(null, null);
-      mImageReaderDepth16.close();
-      mImageReaderDepth16 = null;
-    }
-    if (mSession != null) {
-      mSession.pause();
-      mSession.close();
-      mSession = null;
-    }
-  }
-
-  private void openCamera() {
-
-    //check permissions
-    if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-      return;
-    }
-
-    if (mSession == null) {
-      try {
-        // Create ARCore session that supports camera sharing.
-        mSession = new Session(mActivity, EnumSet.of(Session.Feature.SHARED_CAMERA));
-      } catch (Exception e) {
-        Log.e(TAG, "Failed to create ARCore session that supports camera sharing", e);
-        return;
-      }
-
-      // Set calibration image
-      AugmentedImageDatabase db = new AugmentedImageDatabase(mSession);
-      try {
-        Bitmap b = BitmapFactory.decodeStream(mGLSurfaceView.getContext().getAssets().open(CALIBRATION_IMAGE_FILE));
-        db.addImage("image", b);
-      } catch (Exception e) {
-        LogFileUtils.logException(e);
-      }
-
-      // Enable auto focus mode while ARCore is running.
-      Config config = mSession.getConfig();
-      config.setAugmentedImageDatabase(db);
-      config.setFocusMode(Config.FocusMode.AUTO);
-      config.setLightEstimationMode(Config.LightEstimationMode.AMBIENT_INTENSITY);
-      config.setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL);
-      mSession.configure(config);
-
-      // Choose the camera configuration
-      int selectedRank = -1;
-      CameraConfig selectedConfig = null;
-      for (CameraConfig cameraConfig : mSession.getSupportedCameraConfigs()) {
-        if (cameraConfig.getFacingDirection() == CameraConfig.FacingDirection.BACK) {
-          Size resolution = cameraConfig.getImageSize();
-          int w = resolution.getWidth();
-          int h = resolution.getHeight();
-
-          int rank = 0;
-          if ((w > 1024) && (h > 1024)) {
-            rank += 1;
-          }
-          if (Math.abs(mDepthWidth / (float)mDepthHeight - w / (float)h) < 0.0001f) {
-            rank += 2;
-          }
-          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.DO_NOT_USE) {
-            rank += 4;
-          }
-
-          if (selectedRank < rank) {
-            selectedRank = rank;
-            selectedConfig = cameraConfig;
-          }
-        }
-      }
-      assert selectedConfig != null;
-      mSession.setCameraConfig(selectedConfig);
-    }
-
-    // Store the ARCore shared camera reference.
-    SharedCamera sharedCamera = mSession.getSharedCamera();
-
-    // Store the ID of the camera used by ARCore.
-    mColorCameraId = mSession.getCameraConfig().getCameraId();
-
-    // When ARCore is running, make sure it also updates our CPU image surface.
-    if (mDepthCameraId != null) {
-      if (mColorCameraId.compareTo(mDepthCameraId) == 0) {
-        ArrayList<Surface> surfaces = new ArrayList<>();
-        surfaces.add(mImageReaderDepth16.getSurface());
-        sharedCamera.setAppSurfaces(mColorCameraId, surfaces);
-      } else {
-        CameraManager manager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
-        try {
-          manager.openCamera(mDepthCameraId, mSeparatedCameraCallback, null);
-        } catch (CameraAccessException e) {
-          e.printStackTrace();
-        } catch (Exception e) {
-          throw new RuntimeException("Interrupted while trying to lock camera opening.", e);
-        }
-      }
-    }
-
+  private void updateFrame(Frame frame) {
     try {
-      mSession.resume();
-    } catch (Exception e) {
-      Log.e(TAG, "Failed to start ARCore", e);
-    }
-  }
-
-  private void setupDepthSensor() {
-    //set depth camera resolution
-    mDepthWidth = 240;
-    mDepthHeight = 180;
-    if (Build.MANUFACTURER.toUpperCase().startsWith("SAMSUNG")) {
-      //all supported Samsung devices except S10 5G have VGA resolution
-      if (!Build.MODEL.startsWith("beyondx")) {
-        mDepthWidth = 320;
-        mDepthHeight = 240;
-      }
-    }
-
-    //detect depth camera
-    try {
-      CameraManager manager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
-      for (String cameraId : manager.getCameraIdList()) {
-        CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
-        Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
-        if (facing != null) {
-          if (facing == CameraCharacteristics.LENS_FACING_BACK) {
-            int[] ch = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
-            if (ch != null) {
-              for (int c : ch) {
-                if (c == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT) {
-                  mDepthCameraId = cameraId;
-                  mDepthCameraTranslation = characteristics.get(CameraCharacteristics.LENS_POSE_TRANSLATION);
-                  mDepthCameraIntrinsic = characteristics.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION);
-                  if (mDepthCameraIntrinsic != null) {
-                    mDepthCameraIntrinsic[0] /= (float)mDepthWidth;
-                    mDepthCameraIntrinsic[1] /= (float)mDepthHeight;
-                    mDepthCameraIntrinsic[2] /= (float)mDepthWidth;
-                    mDepthCameraIntrinsic[3] /= (float)mDepthHeight;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    //set image reader
-    mImageReaderDepth16 = ImageReader.newInstance(mDepthWidth, mDepthHeight, ImageFormat.DEPTH16, 5);
-    mImageReaderDepth16.setOnImageAvailableListener(imageReader -> onProcessDepthData(imageReader.acquireLatestImage()), null);
-  }
-
-  private boolean isARCoreSupportedAndUpToDate() {
-    // Make sure ARCore is installed and supported on this device.
-    ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(mActivity);
-    switch (availability) {
-      case SUPPORTED_INSTALLED:
-        break;
-      case SUPPORTED_APK_TOO_OLD:
-      case SUPPORTED_NOT_INSTALLED:
-        try {
-          // Request ARCore installation or update if needed.
-          ArCoreApk.InstallStatus installStatus =
-                  ArCoreApk.getInstance().requestInstall(mActivity, true);
-          switch (installStatus) {
-            case INSTALL_REQUESTED:
-              Log.e(TAG, "ARCore installation requested.");
-              return false;
-            case INSTALLED:
-              break;
-          }
-        } catch (Exception e) {
-          Log.e(TAG, "ARCore not installed", e);
-          mActivity.finish();
-          return false;
-        }
-        break;
-      case UNKNOWN_ERROR:
-      case UNKNOWN_CHECKING:
-      case UNKNOWN_TIMED_OUT:
-      case UNSUPPORTED_DEVICE_NOT_CAPABLE:
-        Log.e(TAG, "ARCore is not supported on this device, ArCoreApk.checkAvailability() returned " + availability);
-        mActivity.finish();
-        return false;
-    }
-    return true;
-  }
-
-  private void updateFrame(int texture, int width, int height) {
-    try {
-      if (mSession == null) {
-        return;
-      }
-
       //get calibration from ARCore
-      mSession.setCameraTextureName(texture);
-      mSession.setDisplayGeometry(0, width, height);
-      Frame frame = mSession.update();
       CameraIntrinsics intrinsics = frame.getCamera().getImageIntrinsics();
       mColorCameraIntrinsic[0] = intrinsics.getFocalLength()[0] / (float)intrinsics.getImageDimensions()[0];
       mColorCameraIntrinsic[1] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
       mColorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
       mColorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[1] / (float)intrinsics.getImageDimensions()[1];
-      if ((mDepthCameraId != null) && (mColorCameraId.compareTo(mDepthCameraId) == 0)) {
-        mDepthCameraIntrinsic = mColorCameraIntrinsic;
-      }
+      mDepthCameraIntrinsic = mColorCameraIntrinsic;
       mHasCameraCalibration = true;
 
       //get calibration image dimension
@@ -490,10 +269,10 @@ public class ARCoreCamera extends AbstractARCamera {
                         0.0f,
                         0.5f * img.getExtentZ()) // lower left
         };
-        mCalibrationImageEdges = new Point3F[4];
+        mCalibrationImageEdges = new ComputerVisionUtils.Point3F[4];
         for (int i = 0; i < 4; ++i) {
           Pose p = img.getCenterPose().compose(localBoundaryPoses[i]);
-          mCalibrationImageEdges[i] = new Point3F(p.tx(), p.ty(), p.tz());
+          mCalibrationImageEdges[i] = new ComputerVisionUtils.Point3F(p.tx(), p.ty(), p.tz());
         }
         mCalibrationImageSizeCV = new SizeF(img.getExtentX(), img.getExtentZ());
       }
@@ -528,45 +307,63 @@ public class ARCoreCamera extends AbstractARCamera {
 
       //process camera data
       onProcessColorData(frame.acquireCameraImage());
+      if (mSession.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+        onProcessDepthData(frame.acquireRawDepthImage());
+      }
+      mFrameIndex++;
 
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  private CameraDevice.StateCallback mSeparatedCameraCallback = new CameraDevice.StateCallback() {
-    @Override
-    public void onOpened(CameraDevice cameraDevice) {
-      Surface imageReaderSurface = mImageReaderDepth16.getSurface();
-      mCameraDevice = cameraDevice;
 
-      try {
-        final CaptureRequest.Builder requestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-        requestBuilder.addTarget(imageReaderSurface);
+  @Override
+  public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+    GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-        cameraDevice.createCaptureSession(Collections.singletonList(imageReaderSurface),new CameraCaptureSession.StateCallback() {
+    // Create the texture and pass it to ARCore session to be filled during update().
+    // Generate the background texture.
+    int[] textures = new int[1];
+    GLES20.glGenTextures(1, textures, 0);
+    mCameraTextureId = textures[0];
+    int textureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
+    GLES20.glBindTexture(textureTarget, mCameraTextureId);
+    GLES20.glTexParameteri(textureTarget, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+    GLES20.glTexParameteri(textureTarget, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+    GLES20.glTexParameteri(textureTarget, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+    GLES20.glTexParameteri(textureTarget, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+  }
 
-          @Override
-          public void onConfigured(CameraCaptureSession cameraCaptureSession) {
-            try {
-              cameraCaptureSession.setRepeatingRequest(requestBuilder.build(),null,null);
-            } catch (CameraAccessException e) {
-              e.printStackTrace();
-            }
-          }
-          @Override
-          public void onConfigureFailed(CameraCaptureSession cameraCaptureSession) {
-          }
-        },null);
-      } catch (CameraAccessException e) {
-        e.printStackTrace();
-      }
+  @Override
+  public void onSurfaceChanged(GL10 gl, int width, int height) {
+    GLES20.glViewport(0, 0, width, height);
+    mViewportWidth = width;
+    mViewportHeight = height;
+    mViewportChanged = true;
+  }
+
+  @Override
+  public void onDrawFrame(GL10 gl) {
+    // Clear screen to notify driver it should not load any pixels from previous frame.
+    GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+
+    if (mSession == null) {
+      return;
     }
-    @Override
-    public void onDisconnected(CameraDevice cameraDevice) {
+
+    if (mViewportChanged) {
+      mSession.setDisplayGeometry(0, mViewportWidth, mViewportHeight);
+      mViewportChanged = false;
     }
-    @Override
-    public void onError(CameraDevice cameraDevice, int i) {
+
+    try {
+      mSession.setCameraTextureName(mCameraTextureId);
+
+      updateFrame(mSession.update());
+    } catch (Throwable t) {
+      // Avoid crashing the application due to unhandled exceptions.
+      Log.e(TAG, "Exception on the OpenGL thread", t);
     }
-  };
+  }
 }

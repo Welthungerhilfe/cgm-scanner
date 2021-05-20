@@ -26,6 +26,7 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -37,12 +38,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
@@ -104,6 +113,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         viewModel = new ViewModelProvider(getActivity(), factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
+            if(adapterMeasure!=null){
+                adapterMeasure.setPerson(person);
+            }
         });
         viewModel.getMeasuresLiveData().observe(getViewLifecycleOwner(), measures -> {
             if (measures != null)
@@ -144,6 +156,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                 case 0:
                     ManualMeasureDialog measureDialog = new ManualMeasureDialog(context);
                     measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
+                    measureDialog.setPerson(person);
                     measureDialog.show();
                     break;
                 case 1:
@@ -202,4 +215,5 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
         viewModel.insertMeasure(measure);
     }
+
 }
