@@ -353,9 +353,10 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         String weight = editManualWeight.getText().toString();
         long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
         double zScoreWFA = CalculateZscoreUtils.setData(mContext,Utils.parseDouble(height),Utils.parseDouble(weight),age,person.getSex(),0);
-        double zScoreHFA = CalculateZscoreUtils.setData(mContext,Utils.parseDouble(height),Utils.parseDouble(weight),age,person.getSex(),0);
+        double zScoreHFA = CalculateZscoreUtils.setData(mContext,Utils.parseDouble(height),Utils.parseDouble(weight),age,person.getSex(),1);
+        double zScoreMUACFA = CalculateZscoreUtils.setData(mContext,Utils.parseDouble(height),Utils.parseDouble(weight),age,person.getSex(),3);
 
-        if(zScoreWFA < -3.0 || zScoreWFA > 3.0 || zScoreHFA < -3.0 || zScoreHFA > 3.0){
+        if(zScoreWFA < -3.0 || zScoreWFA > 3.0 || zScoreHFA < -3.0 || zScoreHFA > 3.0|| zScoreMUACFA < -3.0 || zScoreMUACFA > 3.0 ){
             return false;
         }
         return true;

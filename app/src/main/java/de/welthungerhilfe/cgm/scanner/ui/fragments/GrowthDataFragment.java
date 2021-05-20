@@ -247,7 +247,7 @@ public class GrowthDataFragment extends Fragment {
                 fileName = boys_0_6[chartType];
             }
 
-            if(chartType==3) {
+            if (chartType == 3) {
                 reader = new BufferedReader(new InputStreamReader(context.getAssets().open(fileName), StandardCharsets.UTF_8));
 
 
@@ -261,11 +261,11 @@ public class GrowthDataFragment extends Fragment {
                         continue;
                     }
                     if (lastMeasure != null) {
-                            if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365.0)) {
-                                skew = Utils.parseDouble(arr[1]);
-                                median = Utils.parseDouble(arr[2]);
-                                coefficient = Utils.parseDouble(arr[3]);
-                            }
+                        if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365.0)) {
+                            skew = Utils.parseDouble(arr[1]);
+                            median = Utils.parseDouble(arr[2]);
+                            coefficient = Utils.parseDouble(arr[3]);
+                        }
 
                     }
 
@@ -276,29 +276,31 @@ public class GrowthDataFragment extends Fragment {
                     SD3.add(new Entry(rule, Utils.parseFloat(arr[10])));
                 }
                 reader.close();
-            }
-            else {
-                if(chartType==0 || chartType==1){
+            } else {
+                if (chartType == 0 || chartType == 1) {
                     int i = 0;
                     JSONObject jsonObject = null;
-                    while(i < 31){
+                    int maxIterationLimit = 60;
+                    int multiplyBy = 30;
+                    while (i <= maxIterationLimit) {
                         try {
-                            jsonObject = loadJSONFromAsset(context, fileName, String.valueOf(i));
-                            SD3neg.add(new Entry((float) (i*30.0), Utils.parseFloat(jsonObject.getString("SD3neg"))));
-                            SD2neg.add(new Entry((float) (i*30.0), Utils.parseFloat(jsonObject.getString("SD2neg"))));
-                            SD0.add(new Entry((float) (i*30.0), Utils.parseFloat(jsonObject.getString("SD0"))));
-                            SD2.add(new Entry((float) (i*30.0), Utils.parseFloat(jsonObject.getString("SD2"))));
-                            SD3.add(new Entry((float) (i*30.0), Utils.parseFloat(jsonObject.getString("SD3"))));
+                            jsonObject = loadJSONFromAsset(context, fileName, String.valueOf(i * multiplyBy));
+                            SD3neg.add(new Entry((float) (i), Utils.parseFloat(jsonObject.getString("SD3neg"))));
+                            SD2neg.add(new Entry((float) (i), Utils.parseFloat(jsonObject.getString("SD2neg"))));
+                            SD0.add(new Entry((float) (i), Utils.parseFloat(jsonObject.getString("SD0"))));
+                            SD2.add(new Entry((float) (i), Utils.parseFloat(jsonObject.getString("SD2"))));
+                            SD3.add(new Entry((float) (i), Utils.parseFloat(jsonObject.getString("SD3"))));
                             i += 1;
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
-                }
-                else if(chartType==2){
+                } else if (chartType == 2) {
                     float i = 45.0f;
+                    float maxHeightLimit = 120.0f;
                     JSONObject jsonObject = null;
-                    while(i < 120.5){
+
+                    while (i <= maxHeightLimit) {
                         try {
                             jsonObject = loadJSONFromAsset(context, fileName, String.valueOf(i));
                             SD3neg.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD3neg"))));

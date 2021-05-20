@@ -41,14 +41,11 @@ public class CalculateZscoreUtils {
         final String[] girls_0_6 = {"wfa_girls_0_5_zscores.json", "lhfa_girls_0_5_zscores.json", "wfh_girls_0_5_zscores.json", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
         Measure lastMeasure = null;
 
-
         try {
             lastMeasure = new Measure();
             lastMeasure.setHeight(height);
-            //change this
             lastMeasure.setAge(age);
             lastMeasure.setWeight(weight);
-
 
             String fileName = null;
             if (sex.equals("female")) {
