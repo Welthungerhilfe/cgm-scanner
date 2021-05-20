@@ -67,7 +67,6 @@ public abstract class AbstractARCamera {
     //camera calibration
     protected float[] mColorCameraIntrinsic;
     protected float[] mDepthCameraIntrinsic;
-    protected float[] mDepthCameraTranslation;
     protected boolean mHasCameraCalibration;
 
     //camera pose
@@ -108,7 +107,6 @@ public abstract class AbstractARCamera {
 
         mColorCameraIntrinsic = new float[4];
         mDepthCameraIntrinsic = new float[4];
-        mDepthCameraTranslation = new float[3];
         mHasCameraCalibration = false;
 
         mFrameIndex = 1;
@@ -195,7 +193,7 @@ public abstract class AbstractARCamera {
         output += "Depth camera intrinsic:\n";
         output += mDepthCameraIntrinsic[0] + " " + mDepthCameraIntrinsic[1] + " " + mDepthCameraIntrinsic[2] + " " + mDepthCameraIntrinsic[3] + "\n";
         output += "Depth camera position:\n";
-        output += mDepthCameraTranslation[0] + " " + mDepthCameraTranslation[1] + " " + mDepthCameraTranslation[2] + "\n";
+        output += "0 0 0\n";
         return output;
     }
 
@@ -216,14 +214,12 @@ public abstract class AbstractARCamera {
         return mLight;
     }
 
-    public Bitmap getDepthPreview(Image image, boolean reorder, ArrayList<Float> planes, float[] calibration, float[] position, float[] rotation) {
+    public Bitmap getDepthPreview(Image image, ArrayList<Float> planes, float[] calibration, float[] position, float[] rotation) {
 
         //get short buffer
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
-        if (reorder) {
-            buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
-        }
+        buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
         ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
 
         //get buffer as array
@@ -310,7 +306,11 @@ public abstract class AbstractARCamera {
             case FULL:
                 return bitmapSize * mColorCameraPreview.getHeight() / (float)bitmap.getWidth();
             case SMALL:
-                return bitmapSize / mColorCameraPreview.getHeight() * (float)bitmap.getWidth();
+                if (this instanceof ARCoreCamera) {
+                    return bitmapSize / mColorCameraPreview.getHeight() * (float)bitmap.getHeight();
+                } else {
+                    return bitmapSize / mColorCameraPreview.getHeight() * (float)bitmap.getWidth();
+                }
         }
         return bitmapSize;
     }
