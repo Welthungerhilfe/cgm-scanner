@@ -109,10 +109,18 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         if(!validate()){
             return;
         }
-        if(validZscore()) {
+
+        boolean wfa = validZscore(CalculateZscoreUtils.ChartType.WEIGHT_FOR_AGE);
+        boolean hfa = validZscore(CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE);
+        boolean mfa = validZscore(CalculateZscoreUtils.ChartType.MUAC_FOR_AGE);
+
+        if (wfa && hfa && mfa) {
             updateManualMeasurements();
-        }
-        else {
+        } else {
+            if (wfa) editManualWeight.setError(mContext.getString(R.string.invalid_zscore));
+            if (hfa) editManualHeight.setError(mContext.getString(R.string.invalid_zscore));
+            if (mfa) editManualMuac.setError(mContext.getString(R.string.invalid_zscore));
+
             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
             builder.setTitle(R.string.invalid_zscore);
             builder.setPositiveButton(R.string.selector_yes, (dialogInterface, i) -> {
@@ -348,18 +356,12 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         return valid;
     }
 
-    private boolean validZscore(){
+    private boolean validZscore(CalculateZscoreUtils.ChartType chartType) {
         String height = editManualHeight.getText().toString();
         String weight = editManualWeight.getText().toString();
         long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
-        double zScoreWFA = CalculateZscoreUtils.setData(mContext,Utils.parseDouble(height),Utils.parseDouble(weight),age,person.getSex(),0);
-        double zScoreHFA = CalculateZscoreUtils.setData(mContext,Utils.parseDouble(height),Utils.parseDouble(weight),age,person.getSex(),1);
-        double zScoreMUACFA = CalculateZscoreUtils.setData(mContext,Utils.parseDouble(height),Utils.parseDouble(weight),age,person.getSex(),3);
-
-        if(zScoreWFA < -3.0 || zScoreWFA > 3.0 || zScoreHFA < -3.0 || zScoreHFA > 3.0|| zScoreMUACFA < -3.0 || zScoreMUACFA > 3.0 ){
-            return false;
-        }
-        return true;
+        double zScore = CalculateZscoreUtils.setData(mContext,Utils.parseDouble(height),Utils.parseDouble(weight),age,person.getSex(), chartType);
+        return Math.abs(zScore) < 3.0;
     }
 
     @Override

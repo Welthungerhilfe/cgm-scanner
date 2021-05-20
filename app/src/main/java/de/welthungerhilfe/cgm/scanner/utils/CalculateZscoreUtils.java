@@ -18,6 +18,9 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 
 public class CalculateZscoreUtils {
+
+    public enum ChartType { WEIGHT_FOR_AGE, HEIGHT_FOR_AGE, WEIGHT_FOR_HEIGHT, MUAC_FOR_AGE }
+
     public static double newZScore(double y, double Mt, double Lt, double St) {
         double Zind = (Math.pow(y / Mt, Lt) - 1) / (St * Lt);
         if (Zind >= -3 && Zind <= 3) {
@@ -33,7 +36,7 @@ public class CalculateZscoreUtils {
         }
     }
 
-    public static double setData(Context context, double height, double weight, long age, String sex, int chartType) {
+    public static double setData(Context context, double height, double weight, long age, String sex, ChartType chartType) {
 
         double zScore = 100, median = 10, skew = 10, coefficient = 10;
 
@@ -47,17 +50,19 @@ public class CalculateZscoreUtils {
             lastMeasure.setAge(age);
             lastMeasure.setWeight(weight);
 
-            String fileName = null;
+            String fileName;
             if (sex.equals("female")) {
-                fileName = girls_0_6[chartType];
+                fileName = girls_0_6[chartType.ordinal()];
             } else {
-                fileName = boys_0_6[chartType];
+                fileName = boys_0_6[chartType.ordinal()];
             }
-            JSONObject jsonObject = null;
-            if (lastMeasure != null) {
-                if ((chartType == 0 || chartType == 1 || chartType == 2)) {
 
-                    if (chartType == 2) {
+            if (lastMeasure != null) {
+
+                //detailed data, one value per day
+                if ((chartType != ChartType.MUAC_FOR_AGE)) {
+                    JSONObject jsonObject;
+                    if (chartType == ChartType.WEIGHT_FOR_HEIGHT) {
                         jsonObject = loadJSONFromAsset(context, fileName, String.valueOf(lastMeasure.getHeight()));
                     } else {
                         jsonObject = loadJSONFromAsset(context, fileName, String.valueOf(lastMeasure.getAge()));
@@ -73,8 +78,11 @@ public class CalculateZscoreUtils {
                         e.printStackTrace();
                     }
 
-                } else if (chartType == 3) {
-                    BufferedReader reader = null;
+                }
+
+                //low detailed data, one value per month
+                else {
+                    BufferedReader reader;
                     reader = new BufferedReader(new InputStreamReader(context.getAssets().open(fileName), StandardCharsets.UTF_8));
                     String mLine;
                     while ((mLine = reader.readLine()) != null) {
@@ -102,19 +110,18 @@ public class CalculateZscoreUtils {
         }
 
         switch (chartType) {
-            case 0:
-            case 2:
+            case WEIGHT_FOR_AGE:
+            case WEIGHT_FOR_HEIGHT:
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
                     zScore = newZScore(lastMeasure.getWeight(), median, skew, coefficient);
                 }
                 break;
-            case 1:
+            case HEIGHT_FOR_AGE:
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
                     zScore = newZScore(lastMeasure.getHeight(), median, skew, coefficient);
                 }
                 break;
-            case 3:
-
+            case MUAC_FOR_AGE:
                 if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
                     zScore = newZScore(lastMeasure.getMuac(), median, skew, coefficient);
                 }

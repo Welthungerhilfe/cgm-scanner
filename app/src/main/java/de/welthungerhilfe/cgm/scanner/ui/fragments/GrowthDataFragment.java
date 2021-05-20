@@ -319,59 +319,52 @@ public class GrowthDataFragment extends Fragment {
             e.printStackTrace();
         }
 
-        switch (chartType) {
-            case 0:
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_weight);
+        CalculateZscoreUtils.ChartType type = CalculateZscoreUtils.ChartType.values()[chartType];
+        if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
+            switch (type) {
+                case WEIGHT_FOR_AGE:
+                    txtXAxis.setText(R.string.axis_age);
+                    txtYAxis.setText(R.string.axis_weight);
+                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getAge(), person.getSex(), type);
+                    break;
 
-                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getAge(), person.getSex(), chartType);
-                }
-                break;
-            case 1:
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_height);
+                case HEIGHT_FOR_AGE:
+                    txtXAxis.setText(R.string.axis_age);
+                    txtYAxis.setText(R.string.axis_height);
+                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getAge(), person.getSex(), type);
+                    break;
 
-                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getAge(), person.getSex(), chartType);
-                }
-                break;
-            case 2:
-                txtXAxis.setText(R.string.axis_height);
-                txtYAxis.setText(R.string.axis_weight);
+                case WEIGHT_FOR_HEIGHT:
+                    txtXAxis.setText(R.string.axis_height);
+                    txtYAxis.setText(R.string.axis_weight);
+                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getAge(), person.getSex(), type);
+                    break;
 
-                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getAge(), person.getSex(), chartType);
-
-                }
-                break;
-            case 3:
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_muac);
-
-                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
+                case MUAC_FOR_AGE:
+                    txtXAxis.setText(R.string.axis_age);
+                    txtYAxis.setText(R.string.axis_muac);
                     zScore = CalculateZscoreUtils.newZScore(lastMeasure.getMuac(), median, skew, coefficient);
-                }
-                break;
+                    break;
+            }
         }
 
         txtZScore.setText(String.format(Locale.getDefault(), "( z-score : %.2f )", zScore));
 
         if (zScore < -3) { // SAM
-            switch (chartType) {
-                case 0: // weight for age
+            switch (type) {
+                case WEIGHT_FOR_AGE:
                     txtNotifTitle.setText(R.string.sam_wfa_title);
                     txtNotifMessage.setText(R.string.sam_wfa_message);
                     break;
-                case 1: // height for age
+                case HEIGHT_FOR_AGE:
                     txtNotifTitle.setText(R.string.sam_hfa_title);
                     txtNotifMessage.setText(R.string.sam_hfa_message);
                     break;
-                case 2: // weight for height
+                case WEIGHT_FOR_HEIGHT:
                     txtNotifTitle.setText(R.string.sam_wfh_title);
                     txtNotifMessage.setText(R.string.sam_wfh_message);
                     break;
-                case 3: // muac for age
+                case MUAC_FOR_AGE:
                     txtNotifTitle.setText(R.string.sam_acfa_title);
                     txtNotifMessage.setText(R.string.sam_acfa_message);
                     break;
@@ -380,20 +373,20 @@ public class GrowthDataFragment extends Fragment {
             lytNotif.setBackgroundResource(R.color.colorRed);
             lytNotif.setVisibility(View.VISIBLE);
         } else if (zScore < -2 && zScore >= -3) { // MAM
-            switch (chartType) {
-                case 0: // weight for age
+            switch (type) {
+                case WEIGHT_FOR_AGE:
                     txtNotifTitle.setText(R.string.mam_wfa_title);
                     txtNotifMessage.setText(R.string.mam_wfa_message);
                     break;
-                case 1: // height for age
+                case HEIGHT_FOR_AGE:
                     txtNotifTitle.setText(R.string.mam_hfa_title);
                     txtNotifMessage.setText(R.string.mam_hfa_message);
                     break;
-                case 2: // weight for height
+                case WEIGHT_FOR_HEIGHT:
                     txtNotifTitle.setText(R.string.mam_wfh_title);
                     txtNotifMessage.setText(R.string.mam_wfh_message);
                     break;
-                case 3: // muac for age
+                case MUAC_FOR_AGE:
                     txtNotifTitle.setText(R.string.mam_acfa_title);
                     txtNotifMessage.setText(R.string.mam_acfa_message);
                     break;
@@ -410,21 +403,21 @@ public class GrowthDataFragment extends Fragment {
 
         for (Measure measure : measures) {
             float x = 0, y = 0;
-            switch (chartType) {
-                case 0:
+            switch (type) {
+                case WEIGHT_FOR_AGE:
                     x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 / 30;
                     y = (float) measure.getWeight();
                     break;
-                case 1:
+                case HEIGHT_FOR_AGE:
                     x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 / 30;
                     y = (float) measure.getHeight();
                     break;
-                case 2:
+                case WEIGHT_FOR_HEIGHT:
                     DecimalFormat decimalFormat = new DecimalFormat("#.#");
                     x = Utils.parseFloat(decimalFormat.format(measure.getHeight()));
                     y = (float) measure.getWeight();
                     break;
-                case 3:
+                case MUAC_FOR_AGE:
                     x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 / 30;
                     y = (float) measure.getMuac();
                     break;
@@ -459,8 +452,8 @@ public class GrowthDataFragment extends Fragment {
 
         if (entries.size() > 1) {
             Collections.sort(entries, (o1, o2) -> Float.compare(o1.getX(), o2.getX()));
-            dataSets.add(createDataSet(entries, getString(R.string.manual_measure), MEASURE_COLOR, 1.5f, false));
         }
+        dataSets.add(0, createDataSet(entries, getString(R.string.tab_growth).toLowerCase(), MEASURE_COLOR, 1.5f, false));
 
 
         mChart.setData(new LineData(dataSets));
