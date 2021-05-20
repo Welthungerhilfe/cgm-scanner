@@ -223,7 +223,7 @@ public class ARCoreCamera extends AbstractARCamera implements GLSurfaceView.Rend
       rotation = mRotation;
     }
 
-    Bitmap preview = getDepthPreview(image, false, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
+    Bitmap preview = getDepthPreview(image, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
     mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
 
     for (Object listener : mListeners) {
@@ -302,7 +302,7 @@ public class ARCoreCamera extends AbstractARCamera implements GLSurfaceView.Rend
 
       //process camera data
       onProcessColorData(frame.acquireCameraImage());
-      onProcessDepthData(frame.acquireDepthImage());
+      onProcessDepthData(frame.acquireRawDepthImage());
       mFrameIndex++;
 
     } catch (Exception e) {

@@ -231,14 +231,12 @@ public abstract class AbstractARCamera {
         return mLight;
     }
 
-    public Bitmap getDepthPreview(Image image, boolean reorder, ArrayList<Float> planes, float[] calibration, float[] position, float[] rotation) {
+    public Bitmap getDepthPreview(Image image, ArrayList<Float> planes, float[] calibration, float[] position, float[] rotation) {
 
         //get short buffer
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
-        if (reorder) {
-            buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
-        }
+        buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
         ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
 
         //get buffer as array
