@@ -119,7 +119,11 @@ public class ARCoreCamera extends AbstractARCamera implements GLSurfaceView.Rend
       // Enable auto focus mode while ARCore is running.
       Config config = mSession.getConfig();
       config.setAugmentedImageDatabase(db);
-      config.setDepthMode(Config.DepthMode.AUTOMATIC);
+      if (mSession.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+        config.setDepthMode(Config.DepthMode.AUTOMATIC);
+      } else {
+        config.setDepthMode(Config.DepthMode.DISABLED);
+      }
       config.setFocusMode(Config.FocusMode.AUTO);
       config.setLightEstimationMode(Config.LightEstimationMode.AMBIENT_INTENSITY);
       config.setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL);
@@ -302,7 +306,9 @@ public class ARCoreCamera extends AbstractARCamera implements GLSurfaceView.Rend
 
       //process camera data
       onProcessColorData(frame.acquireCameraImage());
-      onProcessDepthData(frame.acquireRawDepthImage());
+      if (mSession.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+        onProcessDepthData(frame.acquireRawDepthImage());
+      }
       mFrameIndex++;
 
     } catch (Exception e) {
