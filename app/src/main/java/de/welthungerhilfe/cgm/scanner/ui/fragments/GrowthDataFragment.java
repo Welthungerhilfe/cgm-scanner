@@ -26,7 +26,6 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,9 +40,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.common.collect.Iterables;
-import com.google.gson.JsonObject;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
 import org.json.JSONException;
@@ -76,8 +73,7 @@ import static de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils.loadJSON
 
 public class GrowthDataFragment extends Fragment {
 
-    String TAG = GrowthDataFragment.class.getSimpleName();
-
+    private final int MEASURE_COLOR = Color.rgb(158, 232, 252);
     private final int ZSCORE_COLOR_0 = Color.rgb(55, 129, 69);
     private final int ZSCORE_COLOR_2 = Color.rgb(230, 122, 58);
     private final int ZSCORE_COLOR_3 = Color.rgb(212, 53, 62);
@@ -202,10 +198,6 @@ public class GrowthDataFragment extends Fragment {
         mChart.getXAxis().setDrawAxisLine(true);
         mChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         mChart.getXAxis().setDrawGridLines(true);
-        mChart.getXAxis().setValueFormatter((value, axis) -> {
-            axis.setLabelCount(6, true);
-            return value + "";
-        });
     }
 
     public void setData() {
@@ -467,7 +459,7 @@ public class GrowthDataFragment extends Fragment {
 
         if (entries.size() > 1) {
             Collections.sort(entries, (o1, o2) -> Float.compare(o1.getX(), o2.getX()));
-            dataSets.add(createDataSet(entries, "measure", Color.rgb(158, 232, 252), 1.5f, false));
+            dataSets.add(createDataSet(entries, getString(R.string.manual_measure), MEASURE_COLOR, 1.5f, false));
         }
 
 
@@ -478,17 +470,14 @@ public class GrowthDataFragment extends Fragment {
     protected LineDataSet createDataSet(ArrayList<Entry> values, String label, int color, float width, boolean circle) {
         LineDataSet dataSet = new LineDataSet(values, label);
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
-        dataSet.setColor(color);
-        dataSet.setValueTextColor(ColorTemplate.getHoloBlue());
+        dataSet.setColor(circle ? Color.TRANSPARENT : color);
         dataSet.setLineWidth(width);
         dataSet.setDrawCircles(circle);
         dataSet.setCircleColor(color);
         dataSet.setCircleRadius(3f);
         dataSet.setDrawValues(false);
-        dataSet.setFillAlpha(65);
-        dataSet.setFillColor(ColorTemplate.getHoloBlue());
-        dataSet.setHighLightColor(Color.rgb(244, 117, 117));
         dataSet.setDrawCircleHole(false);
+        dataSet.setHighLightColor(color);
 
         return dataSet;
     }
