@@ -48,9 +48,11 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
 import de.welthungerhilfe.cgm.scanner.ui.views.UnitEditText;
+import de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -104,12 +106,39 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
     @OnClick(R.id.btnOK)
     void OnConfirm(Button btnOK) {
+        if(!validate()){
+            return;
+        }
+
+        boolean wfa = validZscore(CalculateZscoreUtils.ChartType.WEIGHT_FOR_AGE);
+        boolean hfa = validZscore(CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE);
+        boolean mfa = validZscore(CalculateZscoreUtils.ChartType.MUAC_FOR_AGE);
+
+        if (wfa && hfa && mfa) {
+            updateManualMeasurements();
+        } else {
+            if (wfa) editManualWeight.setError(mContext.getString(R.string.invalid_zscore));
+            if (hfa) editManualHeight.setError(mContext.getString(R.string.invalid_zscore));
+            if (mfa) editManualMuac.setError(mContext.getString(R.string.invalid_zscore));
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setTitle(R.string.invalid_zscore);
+            builder.setPositiveButton(R.string.selector_yes, (dialogInterface, i) -> {
+                updateManualMeasurements();
+                dismiss();
+            });
+            builder.setNegativeButton(R.string.selector_no, (dialogInterface, i) -> show());
+            builder.show();
+        }
+    }
+
+    public void updateManualMeasurements(){
         String measureServerKey = null;
         if(measure!=null)
         {
             measureServerKey = measure.getMeasureServerKey();
         }
-        if (validate() && measureListener != null) {
+        if (measureListener != null) {
             if (!oedema) {
                 final TextView message = new TextView(mContext);
                 final SpannableString s = new SpannableString(mContext.getText(R.string.edema_link));
@@ -149,7 +178,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                         0f,
                         location,
                         oedema,
-                       measureServerKey
+                        measureServerKey
                 );
                 dismiss();
             }
@@ -185,6 +214,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
     private Context mContext;
     private Measure measure;
+    private Person person;
     private Loc location;
 
     private ManualMeasureListener measureListener;
@@ -234,6 +264,10 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         this.measure = measure;
 
         updateUI();
+    }
+
+    public void setPerson(Person person){
+        this.person = person;
     }
 
     private void updateUI() {
@@ -320,6 +354,14 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         }
 
         return valid;
+    }
+
+    private boolean validZscore(CalculateZscoreUtils.ChartType chartType) {
+        String height = editManualHeight.getText().toString();
+        String weight = editManualWeight.getText().toString();
+        long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
+        double zScore = CalculateZscoreUtils.setData(mContext,Utils.parseDouble(height),Utils.parseDouble(weight),age,person.getSex(), chartType);
+        return Math.abs(zScore) < 3.0;
     }
 
     @Override

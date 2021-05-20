@@ -40,9 +40,11 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.common.collect.Iterables;
 import com.jaredrummler.materialspinner.MaterialSpinner;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -63,23 +65,23 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
+import de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
+import static de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils.loadJSONFromAsset;
+
 public class GrowthDataFragment extends Fragment {
 
+    private final int MEASURE_COLOR = Color.rgb(158, 232, 252);
     private final int ZSCORE_COLOR_0 = Color.rgb(55, 129, 69);
     private final int ZSCORE_COLOR_2 = Color.rgb(230, 122, 58);
     private final int ZSCORE_COLOR_3 = Color.rgb(212, 53, 62);
 
     private Context context;
 
-    private final String[] boys_0_6 = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfh_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
-    private final String[] girls_0_6 = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfh_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
-
-    private final String[] boys_0_2 = {"wfa_boys_p_exp.txt", "lhfa_boys_p_exp.txt", "wfl_boys_p_exp.txt", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
-    private final String[] girls_0_2 = {"wfa_girls_p_exp.txt", "lhfa_girls_p_exp.txt", "wfl_girls_p_exp.txt", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
-
+    final String[] boys_0_6 = {"wfa_boys_0_5_zscores.json", "lhfa_boys_0_5_zscores.json", "wfh_boys_0_5_zscores.json", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
+    final String[] girls_0_6 = {"wfa_girls_0_5_zscores.json", "lhfa_girls_0_5_zscores.json", "wfh_girls_0_5_zscores.json", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
 
     private LineChart mChart;
 
@@ -196,10 +198,6 @@ public class GrowthDataFragment extends Fragment {
         mChart.getXAxis().setDrawAxisLine(true);
         mChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         mChart.getXAxis().setDrawGridLines(true);
-        mChart.getXAxis().setValueFormatter((value, axis) -> {
-            axis.setLabelCount(6, true);
-            return value + "";
-        });
     }
 
     public void setData() {
@@ -210,12 +208,15 @@ public class GrowthDataFragment extends Fragment {
         }
         Measure lastMeasure = null;
         if (measures.size() > 0)
-            lastMeasure = measures.get(measures.size() - 1);
-
+            lastMeasure = measures.get(0);
         txtLabel.setText(person.getSex());
 
 
         long birthday = person.getBirthday();
+
+        long age = (System.currentTimeMillis() - birthday) / 1000 / 60 / 60 / 24;
+
+        lastMeasure.setAge(age);
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
 
@@ -231,52 +232,81 @@ public class GrowthDataFragment extends Fragment {
         try {
             BufferedReader reader;
 
-            String[] boys, girls;
-            if (lastMeasure != null && lastMeasure.getAge() < 365 * 2 && lastMeasure.getHeight() <= 110) {
-                boys = boys_0_2;
-                girls = girls_0_2;
+            String fileName = null;
+            if (person.getSex().equals("female")) {
+                fileName = girls_0_6[chartType];
             } else {
-                boys = boys_0_6;
-                girls = girls_0_6;
+                fileName = boys_0_6[chartType];
             }
 
-            if (person.getSex().equals("female"))
-                reader = new BufferedReader(new InputStreamReader(context.getAssets().open(girls[chartType]), StandardCharsets.UTF_8));
-            else
-                reader = new BufferedReader(new InputStreamReader(context.getAssets().open(boys[chartType]), StandardCharsets.UTF_8));
+            if (chartType == 3) {
+                reader = new BufferedReader(new InputStreamReader(context.getAssets().open(fileName), StandardCharsets.UTF_8));
 
-            String mLine;
-            while ((mLine = reader.readLine()) != null) {
-                String[] arr = mLine.split("\t");
-                float rule;
-                try {
-                    rule = Float.parseFloat(arr[0]);
-                } catch (Exception e) {
-                    continue;
-                }
-                if (lastMeasure != null) {
-                    if ((chartType == 0 || chartType == 1)) {
-                        if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365)) {
+
+                String mLine;
+                while ((mLine = reader.readLine()) != null) {
+                    String[] arr = mLine.split("\t");
+                    float rule;
+                    try {
+                        rule = Float.parseFloat(arr[0]);
+                    } catch (Exception e) {
+                        continue;
+                    }
+                    if (lastMeasure != null) {
+                        if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365.0)) {
                             skew = Utils.parseDouble(arr[1]);
                             median = Utils.parseDouble(arr[2]);
                             coefficient = Utils.parseDouble(arr[3]);
                         }
-                    } else if (chartType == 2) {
-                        if ((int) (rule * 2) == (int) (lastMeasure.getHeight() * 2)) {
-                            skew = Utils.parseDouble(arr[1]);
-                            median = Utils.parseDouble(arr[2]);
-                            coefficient = Utils.parseDouble(arr[3]);
+
+                    }
+
+                    SD3neg.add(new Entry(rule, Utils.parseFloat(arr[4])));
+                    SD2neg.add(new Entry(rule, Utils.parseFloat(arr[5])));
+                    SD0.add(new Entry(rule, Utils.parseFloat(arr[7])));
+                    SD2.add(new Entry(rule, Utils.parseFloat(arr[9])));
+                    SD3.add(new Entry(rule, Utils.parseFloat(arr[10])));
+                }
+                reader.close();
+            } else {
+                if (chartType == 0 || chartType == 1) {
+                    int i = 0;
+                    JSONObject jsonObject = null;
+                    int maxIterationLimit = 60;
+                    int multiplyBy = 30;
+                    while (i <= maxIterationLimit) {
+                        try {
+                            jsonObject = loadJSONFromAsset(context, fileName, String.valueOf(i * multiplyBy));
+                            SD3neg.add(new Entry((float) (i), Utils.parseFloat(jsonObject.getString("SD3neg"))));
+                            SD2neg.add(new Entry((float) (i), Utils.parseFloat(jsonObject.getString("SD2neg"))));
+                            SD0.add(new Entry((float) (i), Utils.parseFloat(jsonObject.getString("SD0"))));
+                            SD2.add(new Entry((float) (i), Utils.parseFloat(jsonObject.getString("SD2"))));
+                            SD3.add(new Entry((float) (i), Utils.parseFloat(jsonObject.getString("SD3"))));
+                            i += 1;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else if (chartType == 2) {
+                    float i = 45.0f;
+                    float maxHeightLimit = 120.0f;
+                    JSONObject jsonObject = null;
+
+                    while (i <= maxHeightLimit) {
+                        try {
+                            jsonObject = loadJSONFromAsset(context, fileName, String.valueOf(i));
+                            SD3neg.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD3neg"))));
+                            SD2neg.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD2neg"))));
+                            SD0.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD0"))));
+                            SD2.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD2"))));
+                            SD3.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD3"))));
+                            i += 0.5;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
                     }
                 }
-
-                SD3neg.add(new Entry(rule, Utils.parseFloat(arr[4])));
-                SD2neg.add(new Entry(rule, Utils.parseFloat(arr[5])));
-                SD0.add(new Entry(rule, Utils.parseFloat(arr[7])));
-                SD2.add(new Entry(rule, Utils.parseFloat(arr[9])));
-                SD3.add(new Entry(rule, Utils.parseFloat(arr[10])));
             }
-            reader.close();
 
             dataSets.add(createDataSet(SD3neg, "-3", ZSCORE_COLOR_3, 1.5f, false));
             dataSets.add(createDataSet(SD2neg, "-2", ZSCORE_COLOR_2, 1.5f, false));
@@ -289,62 +319,52 @@ public class GrowthDataFragment extends Fragment {
             e.printStackTrace();
         }
 
-        switch (chartType) {
-            case 0:
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_weight);
+        CalculateZscoreUtils.ChartType type = CalculateZscoreUtils.ChartType.values()[chartType];
+        if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
+            switch (type) {
+                case WEIGHT_FOR_AGE:
+                    txtXAxis.setText(R.string.axis_age);
+                    txtYAxis.setText(R.string.axis_weight);
+                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getAge(), person.getSex(), type);
+                    break;
 
-                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = newZScore(lastMeasure.getWeight(), median, skew, coefficient);
-                }
-                break;
-            case 1:
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_height);
+                case HEIGHT_FOR_AGE:
+                    txtXAxis.setText(R.string.axis_age);
+                    txtYAxis.setText(R.string.axis_height);
+                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getAge(), person.getSex(), type);
+                    break;
 
-                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = newZScore(lastMeasure.getHeight(), median, skew, coefficient);
-                }
-                break;
-            case 2:
-                txtXAxis.setText(R.string.axis_height);
-                txtYAxis.setText(R.string.axis_weight);
+                case WEIGHT_FOR_HEIGHT:
+                    txtXAxis.setText(R.string.axis_height);
+                    txtYAxis.setText(R.string.axis_weight);
+                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getAge(), person.getSex(), type);
+                    break;
 
-                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = newZScore(lastMeasure.getWeight(), median, skew, coefficient);
-                }
-                break;
-            case 3:
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_muac);
-
-                if (lastMeasure.getMuac() < 11.5) { // SAM (red)
-                    zScore = -3;
-                } else if (lastMeasure.getMuac() < 12.5) { // MAM (yellow)
-                    zScore = -2;
-                } else {
-                    zScore = 0;
-                }
-                break;
+                case MUAC_FOR_AGE:
+                    txtXAxis.setText(R.string.axis_age);
+                    txtYAxis.setText(R.string.axis_muac);
+                    zScore = CalculateZscoreUtils.newZScore(lastMeasure.getMuac(), median, skew, coefficient);
+                    break;
+            }
         }
 
         txtZScore.setText(String.format(Locale.getDefault(), "( z-score : %.2f )", zScore));
 
         if (zScore < -3) { // SAM
-            switch (chartType) {
-                case 0: // weight for age
+            switch (type) {
+                case WEIGHT_FOR_AGE:
                     txtNotifTitle.setText(R.string.sam_wfa_title);
                     txtNotifMessage.setText(R.string.sam_wfa_message);
                     break;
-                case 1: // height for age
+                case HEIGHT_FOR_AGE:
                     txtNotifTitle.setText(R.string.sam_hfa_title);
                     txtNotifMessage.setText(R.string.sam_hfa_message);
                     break;
-                case 2: // weight for height
+                case WEIGHT_FOR_HEIGHT:
                     txtNotifTitle.setText(R.string.sam_wfh_title);
                     txtNotifMessage.setText(R.string.sam_wfh_message);
                     break;
-                case 3: // muac for age
+                case MUAC_FOR_AGE:
                     txtNotifTitle.setText(R.string.sam_acfa_title);
                     txtNotifMessage.setText(R.string.sam_acfa_message);
                     break;
@@ -353,20 +373,20 @@ public class GrowthDataFragment extends Fragment {
             lytNotif.setBackgroundResource(R.color.colorRed);
             lytNotif.setVisibility(View.VISIBLE);
         } else if (zScore < -2 && zScore >= -3) { // MAM
-            switch (chartType) {
-                case 0: // weight for age
+            switch (type) {
+                case WEIGHT_FOR_AGE:
                     txtNotifTitle.setText(R.string.mam_wfa_title);
                     txtNotifMessage.setText(R.string.mam_wfa_message);
                     break;
-                case 1: // height for age
+                case HEIGHT_FOR_AGE:
                     txtNotifTitle.setText(R.string.mam_hfa_title);
                     txtNotifMessage.setText(R.string.mam_hfa_message);
                     break;
-                case 2: // weight for height
+                case WEIGHT_FOR_HEIGHT:
                     txtNotifTitle.setText(R.string.mam_wfh_title);
                     txtNotifMessage.setText(R.string.mam_wfh_message);
                     break;
-                case 3: // muac for age
+                case MUAC_FOR_AGE:
                     txtNotifTitle.setText(R.string.mam_acfa_title);
                     txtNotifMessage.setText(R.string.mam_acfa_message);
                     break;
@@ -383,21 +403,21 @@ public class GrowthDataFragment extends Fragment {
 
         for (Measure measure : measures) {
             float x = 0, y = 0;
-            switch (chartType) {
-                case 0:
+            switch (type) {
+                case WEIGHT_FOR_AGE:
                     x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 / 30;
                     y = (float) measure.getWeight();
                     break;
-                case 1:
+                case HEIGHT_FOR_AGE:
                     x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 / 30;
                     y = (float) measure.getHeight();
                     break;
-                case 2:
+                case WEIGHT_FOR_HEIGHT:
                     DecimalFormat decimalFormat = new DecimalFormat("#.#");
                     x = Utils.parseFloat(decimalFormat.format(measure.getHeight()));
                     y = (float) measure.getWeight();
                     break;
-                case 3:
+                case MUAC_FOR_AGE:
                     x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 / 30;
                     y = (float) measure.getMuac();
                     break;
@@ -406,20 +426,20 @@ public class GrowthDataFragment extends Fragment {
             if (x == 0 || y == 0)
                 continue;
 
-            final int fX = (int)x;
+            final int fX = (int) x;
             try {
                 ArrayList<Entry> entry = new ArrayList<>();
                 entry.add(new Entry(x, y));
 
-                if (y <= Iterables.find(SD3neg, input -> (int)input.getX() == fX).getY()) {
+                if (y <= Iterables.find(SD3neg, input -> (int) input.getX() == fX).getY()) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));
-                } else if (y <= Iterables.find(SD2neg, input -> (int)input.getX() == fX).getY()) {
+                } else if (y <= Iterables.find(SD2neg, input -> (int) input.getX() == fX).getY()) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
-                } else if (y <= Iterables.find(SD0, input -> (int)input.getX() == fX).getY()) {
+                } else if (y <= Iterables.find(SD0, input -> (int) input.getX() == fX).getY()) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
-                } else if (y <= Iterables.find(SD2, input -> (int)input.getX() == fX).getY()) {
+                } else if (y <= Iterables.find(SD2, input -> (int) input.getX() == fX).getY()) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
-                } else if (y <= Iterables.find(SD3, input -> (int)input.getX() == fX).getY()) {
+                } else if (y <= Iterables.find(SD3, input -> (int) input.getX() == fX).getY()) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
                 } else {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));
@@ -432,44 +452,25 @@ public class GrowthDataFragment extends Fragment {
 
         if (entries.size() > 1) {
             Collections.sort(entries, (o1, o2) -> Float.compare(o1.getX(), o2.getX()));
-            dataSets.add(createDataSet(entries, "measure", Color.rgb(158, 232, 252), 1.5f, false));
         }
+        dataSets.add(0, createDataSet(entries, getString(R.string.tab_growth).toLowerCase(), MEASURE_COLOR, 1.5f, false));
 
 
         mChart.setData(new LineData(dataSets));
         mChart.animateX(3000);
     }
 
-    //Compute ZScore as defined in https://www.who.int/growthref/computation.pdf
-    private double newZScore(double y, double Mt, double Lt, double St) {
-        double Zind = (Math.pow(y / Mt, Lt) - 1) / (St * Lt);
-        if (Zind >= -3 && Zind <= 3) {
-            return Zind;
-        } else if (Zind > 3) {
-            double SD3pos = Mt * Math.pow(1 + Lt * St * 3, 1 / Lt);
-            double SD23pos = SD3pos - Mt * Math.pow(1 + Lt * St * 2, 1 / Lt);
-            return 3 + ((y - SD3pos) / SD23pos);
-        } else {
-            double SD3neg = Mt * Math.pow(1 + Lt * St * -3, 1 / Lt);
-            double SD23neg = Mt * Math.pow(1 + Lt * St * -2, 1 / Lt) - SD3neg;
-            return -3 + ((y - SD3neg) / SD23neg);
-        }
-    }
-
     protected LineDataSet createDataSet(ArrayList<Entry> values, String label, int color, float width, boolean circle) {
         LineDataSet dataSet = new LineDataSet(values, label);
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
-        dataSet.setColor(color);
-        dataSet.setValueTextColor(ColorTemplate.getHoloBlue());
+        dataSet.setColor(circle ? Color.TRANSPARENT : color);
         dataSet.setLineWidth(width);
         dataSet.setDrawCircles(circle);
         dataSet.setCircleColor(color);
         dataSet.setCircleRadius(3f);
         dataSet.setDrawValues(false);
-        dataSet.setFillAlpha(65);
-        dataSet.setFillColor(ColorTemplate.getHoloBlue());
-        dataSet.setHighLightColor(Color.rgb(244, 117, 117));
         dataSet.setDrawCircleHole(false);
+        dataSet.setHighLightColor(color);
 
         return dataSet;
     }

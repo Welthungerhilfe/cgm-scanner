@@ -46,6 +46,7 @@ import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
@@ -70,6 +71,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
     private SessionManager session;
     private RecyclerView recyclerMeasure;
     private RemoteConfig config;
+    private Person person;
 
     public RecyclerMeasureAdapter(BaseActivity ctx, RecyclerView recycler, ManualMeasureDialog.ManualMeasureListener listener) {
         context = ctx;
@@ -238,6 +240,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             measureDialog.setManualMeasureListener(manualMeasureListener);
             measureDialog.setCloseListener(result -> notifyDataSetChanged());
             measureDialog.setMeasure(measure);
+            measureDialog.setPerson(person);
             measureDialog.show();
         }
     }
@@ -333,5 +336,8 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                 }
             });
         }
+    }
+    public void setPerson(Person person){
+        this.person = person;
     }
 }
