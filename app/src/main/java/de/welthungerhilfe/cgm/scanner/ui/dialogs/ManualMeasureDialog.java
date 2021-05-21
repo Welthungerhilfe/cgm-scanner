@@ -117,9 +117,9 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         if (wfa && hfa && mfa) {
             updateManualMeasurements();
         } else {
-            if (wfa) editManualWeight.setError(mContext.getString(R.string.invalid_zscore));
-            if (hfa) editManualHeight.setError(mContext.getString(R.string.invalid_zscore));
-            if (mfa) editManualMuac.setError(mContext.getString(R.string.invalid_zscore));
+            if (!wfa) editManualWeight.setError(mContext.getString(R.string.invalid_zscore));
+            if (!hfa) editManualHeight.setError(mContext.getString(R.string.invalid_zscore));
+            if (!mfa) editManualMuac.setError(mContext.getString(R.string.invalid_zscore));
 
             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
             builder.setTitle(R.string.invalid_zscore);
