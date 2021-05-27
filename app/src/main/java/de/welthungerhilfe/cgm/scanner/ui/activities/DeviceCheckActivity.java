@@ -87,7 +87,7 @@ public class DeviceCheckActivity extends BaseActivity {
         if (!issues.contains(issue)) {
             issues.add(issue);
             Collections.sort(issues, (a, b) -> a.ordinal() - b.ordinal());
-            fragments.get(3).updateIssues(issues);
+            fragments.get(dataList.size()-1).updateIssues(issues);
             updateIssues();
         }
     }
@@ -104,7 +104,7 @@ public class DeviceCheckActivity extends BaseActivity {
 
     public void gotoNext() {
         int curpos = viewPager.getCurrentItem();
-        if (curpos == 3) {
+        if (curpos == dataList.size()-1) {
             LocalPersistency.setLong(this, KEY_LAST_DEVICE_CHECK, System.currentTimeMillis());
         }
         if (curpos + 1 >= viewPager.getOffscreenPageLimit()) {
