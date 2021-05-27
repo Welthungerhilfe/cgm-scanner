@@ -21,7 +21,6 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 
 import com.shuhart.stepview.StepView;
 
@@ -46,8 +45,6 @@ public class DeviceCheckActivity extends BaseActivity {
 
     @BindView(R.id.viewPager)
     PagerView viewPager;
-    @BindView(R.id.lytStart)
-    LinearLayout lytStart;
     @BindView(R.id.stepView)
     StepView stepView;
 
@@ -106,8 +103,6 @@ public class DeviceCheckActivity extends BaseActivity {
         int curpos = viewPager.getCurrentItem();
         if (curpos == dataList.size()-1) {
             LocalPersistency.setLong(this, KEY_LAST_DEVICE_CHECK, System.currentTimeMillis());
-        }
-        if (curpos + 1 >= viewPager.getOffscreenPageLimit()) {
             showCompleteView();
         } else {
             viewPager.setCurrentItem(curpos + 1);
@@ -115,12 +110,9 @@ public class DeviceCheckActivity extends BaseActivity {
     }
 
     private void showCompleteView() {
-        lytStart.setVisibility(View.VISIBLE);
-        stepView.go(3,false);
+        stepView.go(3, false);
         stepView.done(true);
-        lytStart.animate()
-                .translationY(0)
-                .setDuration(500);
+        viewPager.setVisibility(View.GONE);
     }
 
     private ArrayList<TutorialData> getTutorialData() {
