@@ -214,7 +214,7 @@ public class GrowthDataFragment extends Fragment {
 
         long birthday = person.getBirthday();
 
-        long age = (System.currentTimeMillis() - birthday) / 1000 / 60 / 60 / 24;
+        long age = (lastMeasure.getDate() - birthday) / 1000 / 60 / 60 / 24;
 
         lastMeasure.setAge(age);
 
