@@ -6,35 +6,12 @@
     android:layout_height="match_parent"
     android:background="@color/colorWhite">
 
-    <de.welthungerhilfe.cgm.scanner.ui.views.PagerView
-        android:id="@+id/viewPager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <com.rd.PageIndicatorView
-        android:id="@+id/indicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp"
-        app:piv_animationType="color"
-        app:piv_count="4"
-        app:piv_dynamicCount="false"
-        app:piv_interactiveAnimation="true"
-        app:piv_selectedColor="@color/colorGreyDark"
-        app:piv_unselectedColor="@color/colorGreyLight"
-        app:piv_viewPager="@id/viewPager"
-        attrs:piv_padding="12dp"
-        attrs:piv_radius="8dp" />
-
     <LinearLayout
         android:id="@+id/lytStart"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:animateLayoutChanges="true"
-        android:orientation="vertical"
-        android:visibility="gone">
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -173,5 +150,27 @@
             android:textStyle="bold" />
 
     </LinearLayout>
+
+    <de.welthungerhilfe.cgm.scanner.ui.views.PagerView
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <com.rd.PageIndicatorView
+        android:id="@+id/indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        app:piv_animationType="color"
+        app:piv_count="4"
+        app:piv_dynamicCount="false"
+        app:piv_interactiveAnimation="true"
+        app:piv_selectedColor="@color/colorGreyDark"
+        app:piv_unselectedColor="@color/colorGreyLight"
+        app:piv_viewPager="@id/viewPager"
+        attrs:piv_padding="12dp"
+        attrs:piv_radius="8dp" />
 
 </RelativeLayout>
