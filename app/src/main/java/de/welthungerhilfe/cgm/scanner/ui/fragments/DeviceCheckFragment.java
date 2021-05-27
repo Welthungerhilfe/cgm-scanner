@@ -431,11 +431,9 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
 
             Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
                 if (batteryPct > BATTERY_MIN) {
-                    fragmentDeviceCheckBinding.test1.setResult(getString(R.string.ok));
-                    fragmentDeviceCheckBinding.test1.setState(TestView.TestState.SUCCESS);
+                    setTestResult(fragmentDeviceCheckBinding.test1, R.string.ok, TestView.TestState.SUCCESS);
                 } else {
-                    fragmentDeviceCheckBinding.test1.setResult(getString(R.string.device_check_too_low_energy));
-                    fragmentDeviceCheckBinding.test1.setState(TestView.TestState.ERROR);
+                    setTestResult(fragmentDeviceCheckBinding.test1, R.string.device_check_too_low_energy, TestView.TestState.ERROR);
                     addIssue(IssueType.BATTERY_LOW);
                 }
                 updateNextButton();
@@ -453,11 +451,9 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
 
             Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
                 if (gigabytes > STORAGE_MIN) {
-                    fragmentDeviceCheckBinding.test2.setResult(getString(R.string.ok));
-                    fragmentDeviceCheckBinding.test2.setState(TestView.TestState.SUCCESS);
+                    setTestResult(fragmentDeviceCheckBinding.test2, R.string.ok, TestView.TestState.SUCCESS);
                 } else {
-                    fragmentDeviceCheckBinding.test2.setResult(getString(R.string.device_check_failed));
-                    fragmentDeviceCheckBinding.test2.setState(TestView.TestState.ERROR);
+                    setTestResult(fragmentDeviceCheckBinding.test2, R.string.device_check_failed, TestView.TestState.ERROR);
                     addIssue(IssueType.STORAGE_LOW);
                 }
                 updateNextButton();
@@ -474,11 +470,9 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                     ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, BaseActivity.PERMISSION_LOCATION);
                 } else {
                     if (Utils.getLastKnownLocation(getContext()) != null) {
-                        fragmentDeviceCheckBinding.test3.setResult(getString(R.string.ok));
-                        fragmentDeviceCheckBinding.test3.setState(TestView.TestState.SUCCESS);
+                        setTestResult(fragmentDeviceCheckBinding.test3, R.string.ok, TestView.TestState.SUCCESS);
                     } else {
-                        fragmentDeviceCheckBinding.test3.setResult(getString(R.string.device_check_failed));
-                        fragmentDeviceCheckBinding.test3.setState(TestView.TestState.ERROR);
+                        setTestResult(fragmentDeviceCheckBinding.test3, R.string.device_check_failed, TestView.TestState.ERROR);
                         addIssue(IssueType.GPS_FAILED);
                     }
                 }
@@ -503,8 +497,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
 
                                 @Override
                                 public void onNext(@NonNull String response) {
-                                    fragmentDeviceCheckBinding.test4.setResult(getString(R.string.ok));
-                                    fragmentDeviceCheckBinding.test4.setState(TestView.TestState.SUCCESS);
+                                    setTestResult(fragmentDeviceCheckBinding.test4, R.string.ok, TestView.TestState.SUCCESS);
                                     updateNextButton();
                                 }
 
@@ -516,11 +509,9 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                                     } else {
                                         String message = e.getMessage();
                                         if (message.startsWith("HTTP 2") || message.startsWith("HTTP 403")) {
-                                            fragmentDeviceCheckBinding.test4.setResult(getString(R.string.ok));
-                                            fragmentDeviceCheckBinding.test4.setState(TestView.TestState.SUCCESS);
+                                            setTestResult(fragmentDeviceCheckBinding.test4, R.string.ok, TestView.TestState.SUCCESS);
                                         } else {
-                                            fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_failed));
-                                            fragmentDeviceCheckBinding.test4.setState(TestView.TestState.ERROR);
+                                            setTestResult(fragmentDeviceCheckBinding.test4, R.string.device_check_failed, TestView.TestState.ERROR);
                                             addIssue(IssueType.BACKEND_ERROR);
                                         }
                                         updateNextButton();
@@ -534,19 +525,26 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                             });
                 } catch (Exception e) {
                     LogFileUtils.logException(e);
-                    fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_failed));
-                    fragmentDeviceCheckBinding.test4.setState(TestView.TestState.ERROR);
+                    setTestResult(fragmentDeviceCheckBinding.test4, R.string.device_check_failed, TestView.TestState.ERROR);
                     addIssue(IssueType.BACKEND_ERROR);
                     updateNextButton();
                 }
             } else {
                 Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
-                    fragmentDeviceCheckBinding.test4.setResult(getString(R.string.device_check_failed));
-                    fragmentDeviceCheckBinding.test4.setState(TestView.TestState.ERROR);
+                    setTestResult(fragmentDeviceCheckBinding.test4, R.string.device_check_failed, TestView.TestState.ERROR);
                     addIssue(IssueType.BACKEND_ERROR);
                     updateNextButton();
                 });
             }
         }
     };
+
+    private void setTestResult(TestView test, int text, TestView.TestState state) {
+        try {
+            test.setResult(getString(text));
+            test.setState(state);
+        } catch (Exception e) {
+            //expected if the result is updated after leaving the screen
+        }
+    }
 }
