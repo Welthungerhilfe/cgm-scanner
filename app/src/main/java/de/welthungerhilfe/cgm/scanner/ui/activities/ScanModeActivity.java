@@ -979,7 +979,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         mTxtFeedback.setVisibility(View.GONE);
                         break;
                     case LOST:
-                        mTxtFeedback.setText("Child not fully visible");
+                        mTxtFeedback.setText("Child not fully detected");
                         mTxtFeedback.setVisibility(View.VISIBLE);
                         break;
                 }
