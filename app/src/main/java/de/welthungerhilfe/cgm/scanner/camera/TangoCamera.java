@@ -68,9 +68,6 @@ public class TangoCamera extends AbstractARCamera {
     private int mDisplayRotation = Surface.ROTATION_0;
     private Semaphore mutex_on_mIsRecording;
     private AtomicBoolean mIsFrameAvailableTangoThread;
-
-    //App integration objects
-    protected float[] mDepthCameraIntrinsic;
     private TangoCameraRenderer mRenderer;
 
     public TangoCamera(Activity activity) {
