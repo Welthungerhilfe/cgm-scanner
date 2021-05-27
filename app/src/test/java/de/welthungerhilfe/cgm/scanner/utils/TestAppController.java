@@ -1,23 +1,15 @@
-package de.welthungerhilfe.cgm.scanner;
-
-import android.content.Context;
-
-import junit.framework.Assert;
+package de.welthungerhilfe.cgm.scanner.utils;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-@RunWith(MockitoJUnitRunner.class)
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
+
+
 public class TestAppController {
-    @Mock
-    Context context;
-
     @Test
     public void getPersonId() {
         //String validId = AppController.getInstance().getPersonId();
@@ -26,15 +18,15 @@ public class TestAppController {
 
         String[] array = valid.split("_");
 
-        Assert.assertEquals("Person ID schema is not correct, expect 3 underscores", 4, array.length);
-        Assert.assertEquals("Wrong object name, expected : person", "person", array[1]);
+        assertThat("Person ID schema is not correct, expect 3 underscores", 4, is(array.length));
+        assertThat("Wrong object name, expected : person", "person", is(array[1]));
         try {
             long timestamp = Long.parseLong(array[2]);
             //Assert.assertTrue("timestamp generated incorrectly", System.currentTimeMillis() < timestamp);
         } catch (NumberFormatException e) {
-            Assert.fail("timestamp is not correct format");
+            assertFalse("timestamp is not correct format",false);
         }
-        Assert.assertEquals("Random string generated incorrectly", 16, array[3].length());
+        assertThat("Random string generated incorrectly", 16, is(array[3].length()));
     }
 
     @Test
@@ -44,15 +36,15 @@ public class TestAppController {
 
         String[] array = valid.split("_");
 
-        Assert.assertEquals("Measure ID schema is not correct, expect 3 underscores", 4, array.length);
-        Assert.assertEquals("Wrong object name, expected : measure", "measure", array[1]);
+        assertThat("Measure ID schema is not correct, expect 3 underscores", 4, is(array.length));
+        assertThat("Wrong object name, expected : measure", "measure", is(array[1]));
         try {
             long timestamp = Long.parseLong(array[2]);
             //Assert.assertTrue("timestamp generated incorrectly", System.currentTimeMillis() < timestamp);
         } catch (NumberFormatException e) {
-            Assert.fail("timestamp is not correct format");
+            assertFalse("timestamp is not correct format",false);
         }
-        Assert.assertEquals("Random string generated incorrectly", 16, array[3].length());
+        assertThat("Random string generated incorrectly", 16, is(array[3].length()));
     }
 
     @Test
@@ -65,16 +57,16 @@ public class TestAppController {
         types.add("pcd");
         types.add("rgb");
 
-        Assert.assertEquals("Artifact ID schema is not correct, expect 3 underscores", 4, array.length);
-        Assert.assertEquals("Artifact type is missing", 2, array[1].split("-").length);
-        Assert.assertEquals("Wrong object name, expected : artifact", "artifact", array[1].split("-")[0]);
-        Assert.assertTrue("Wrong artifact type, expected : pcd or rgb", types.contains(array[1].split("-")[1]));
+        assertThat("Artifact ID schema is not correct, expect 3 underscores", 4, is(array.length));
+        assertThat("Artifact type is missing", 2, is(array[1].split("-").length));
+        assertThat("Wrong object name, expected : artifact", "artifact", is(array[1].split("-")[0]));
+        assertTrue("Wrong artifact type, expected : pcd or rgb", types.contains(array[1].split("-")[1]));
         try {
             long timestamp = Long.parseLong(array[2]);
             //Assert.assertTrue("timestamp generated incorrectly", System.currentTimeMillis() < timestamp);
         } catch (NumberFormatException e) {
-            Assert.fail("timestamp is not correct format");
+           assertFalse("timestamp is not correct format",false);
         }
-        Assert.assertEquals("Random string generated incorrectly", 16, array[3].length());
+        assertThat("Random string generated incorrectly", 16, is(array[3].length()));
     }
 }
