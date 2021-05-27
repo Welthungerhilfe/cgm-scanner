@@ -55,6 +55,7 @@ import de.welthungerhilfe.cgm.scanner.ui.views.UnitEditText;
 import de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import okhttp3.internal.Util;
 
 public class ManualMeasureDialog extends Dialog implements View.OnClickListener {
 
@@ -359,8 +360,9 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     private boolean validZscore(CalculateZscoreUtils.ChartType chartType) {
         String height = editManualHeight.getText().toString();
         String weight = editManualWeight.getText().toString();
+        String muac = editManualMuac.getText().toString();
         long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
-        double zScore = CalculateZscoreUtils.setData(mContext,Utils.parseDouble(height),Utils.parseDouble(weight),age,person.getSex(), chartType);
+        double zScore = CalculateZscoreUtils.setData(mContext,Utils.parseDouble(height),Utils.parseDouble(weight), Utils.parseDouble(muac),age,person.getSex(), chartType);
         return Math.abs(zScore) < 3.0;
     }
 

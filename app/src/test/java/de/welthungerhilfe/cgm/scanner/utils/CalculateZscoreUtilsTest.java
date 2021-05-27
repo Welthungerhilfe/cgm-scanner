@@ -183,9 +183,9 @@ public class CalculateZscoreUtilsTest {
     }
 
     public double[] calculateAllZscore(Context context, double height, double weight, long age, String sex) {
-        zScore[0] = CalculateZscoreUtils.setData(context, height, weight, age, sex, CalculateZscoreUtils.ChartType.WEIGHT_FOR_AGE);
-        zScore[1] = CalculateZscoreUtils.setData(context, height, weight, age, sex, CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE);
-        zScore[2] = CalculateZscoreUtils.setData(context, height, weight, age, sex, CalculateZscoreUtils.ChartType.WEIGHT_FOR_HEIGHT);
+        zScore[0] = CalculateZscoreUtils.setData(context, height, weight, 0.0,age, sex, CalculateZscoreUtils.ChartType.WEIGHT_FOR_AGE);
+        zScore[1] = CalculateZscoreUtils.setData(context, height, weight,0.0, age, sex, CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE);
+        zScore[2] = CalculateZscoreUtils.setData(context, height, weight,0.0, age, sex, CalculateZscoreUtils.ChartType.WEIGHT_FOR_HEIGHT);
         return zScore;
     }
 
