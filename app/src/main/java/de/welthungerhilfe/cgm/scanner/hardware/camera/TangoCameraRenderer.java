@@ -1,4 +1,4 @@
-package de.welthungerhilfe.cgm.scanner.camera;
+package de.welthungerhilfe.cgm.scanner.hardware.camera;
 
 /*
  * Child Growth Monitor - quick and accurate data on malnutrition
@@ -34,7 +34,7 @@ import java.nio.ShortBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import de.welthungerhilfe.cgm.scanner.utils.ShaderUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.gpu.GLSL;
 
 /**
  * Renderer object for our GLSurfaceView with the Camera Preview from Tango.
@@ -153,7 +153,7 @@ public class TangoCameraRenderer implements GLSurfaceView.Renderer {
                 "void main() {\n" +
                 "  gl_FragColor = texture2D(sTexture,texCoord);\n" +
                 "}";
-        mProgram = ShaderUtils.getProgram(vss, fss);
+        mProgram = GLSL.getProgram(vss, fss);
     }
 
     @Override

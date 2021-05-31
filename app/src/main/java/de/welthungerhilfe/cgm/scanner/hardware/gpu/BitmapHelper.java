@@ -16,7 +16,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package de.welthungerhilfe.cgm.scanner.utils;
+package de.welthungerhilfe.cgm.scanner.hardware.gpu;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -29,7 +29,7 @@ import java.nio.IntBuffer;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 
-public class BitmapUtils {
+public class BitmapHelper {
 
     public static final int JPG_COMPRESSION = 90;
 

@@ -15,14 +15,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.welthungerhilfe.cgm.scanner.utils;
+package de.welthungerhilfe.cgm.scanner.hardware.gpu;
 
 import android.opengl.GLES20;
 import android.util.Log;
 
-public class ShaderUtils {
+public class GLSL {
 
-    private static final String TAG = ShaderUtils.class.getSimpleName();
+    private static final String TAG = GLSL.class.getSimpleName();
 
     public static int createFBO(int width, int height) {
 
