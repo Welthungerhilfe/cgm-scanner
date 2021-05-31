@@ -1,4 +1,4 @@
-package de.welthungerhilfe.cgm.scanner.camera;
+package de.welthungerhilfe.cgm.scanner.hardware.camera;
 
 /*
  * Child Growth Monitor - quick and accurate data on malnutrition

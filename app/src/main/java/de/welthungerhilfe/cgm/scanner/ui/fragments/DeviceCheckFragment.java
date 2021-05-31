@@ -48,10 +48,10 @@ import java.util.Objects;
 
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.camera.ARCoreCamera;
-import de.welthungerhilfe.cgm.scanner.camera.AREngineCamera;
-import de.welthungerhilfe.cgm.scanner.camera.AbstractARCamera;
-import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.databinding.FragmentDeviceCheckBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;

@@ -16,7 +16,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package de.welthungerhilfe.cgm.scanner.camera;
+package de.welthungerhilfe.cgm.scanner.hardware.camera;
 
 import android.Manifest;
 import android.app.Activity;
