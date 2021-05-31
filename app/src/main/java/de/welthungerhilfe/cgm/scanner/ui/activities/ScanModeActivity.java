@@ -95,7 +95,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoCamera;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
-import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -769,7 +769,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
                     currentImgFilename = currentImgFilename.replace('/', '_');
                     File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
-                    BitmapUtils.writeBitmapToFile(bitmap, artifactFile);
+                    BitmapHelper.writeBitmapToFile(bitmap, artifactFile);
                     onProcessArtifact(artifactFile, ArtifactType.RGB);
 
                     //save RGB metadata

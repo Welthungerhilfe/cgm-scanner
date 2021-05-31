@@ -16,7 +16,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package de.welthungerhilfe.cgm.scanner.utils;
+package de.welthungerhilfe.cgm.scanner.hardware.gpu;
 
 import android.graphics.Bitmap;
 import android.opengl.GLES11Ext;
@@ -70,12 +70,12 @@ public class RenderToTexture {
     public Bitmap renderData(int texture, Size resolution) {
         if (!isInitialized()) {
             init();
-            mFBO = ShaderUtils.createFBO(resolution.getWidth(), resolution.getHeight());
+            mFBO = GLSL.createFBO(resolution.getWidth(), resolution.getHeight());
         }
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mFBO);
         GLES20.glViewport(0, 0, resolution.getWidth(), resolution.getHeight());
         onDrawTexture(texture);
-        Bitmap output = BitmapUtils.getBitmap(resolution.getWidth(), resolution.getHeight());
+        Bitmap output = BitmapHelper.getBitmap(resolution.getWidth(), resolution.getHeight());
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         return output;
     }
@@ -87,7 +87,7 @@ public class RenderToTexture {
     private void init() {
 
         // Create shader program
-        mProgram = ShaderUtils.getProgram(BASE_VERTEX, BASE_FRAGMENT);
+        mProgram = GLSL.getProgram(BASE_VERTEX, BASE_FRAGMENT);
         mTexturePos = GLES20.glGetAttribLocation(mProgram, "vPosition");
         mTextureCoord = GLES20.glGetAttribLocation(mProgram, "vCoord");
 

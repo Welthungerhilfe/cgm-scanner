@@ -53,7 +53,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
-import de.welthungerhilfe.cgm.scanner.utils.RenderToTexture;
+import de.welthungerhilfe.cgm.scanner.hardware.gpu.RenderToTexture;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AREngineCamera extends AbstractARCamera {
