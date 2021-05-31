@@ -33,7 +33,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.datasource.filter.PersonFilter;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonFilter;
 
 public class PersonRepository {
     private static PersonRepository instance;
