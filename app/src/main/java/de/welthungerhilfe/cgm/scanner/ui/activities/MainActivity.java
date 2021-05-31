@@ -75,7 +75,7 @@ import de.welthungerhilfe.cgm.scanner.network.service.DeviceService;
 import de.welthungerhilfe.cgm.scanner.network.service.WifiStateChangereceiverHelperService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
-import de.welthungerhilfe.cgm.scanner.ui.delegators.EndlessScrollListener;
+import de.welthungerhilfe.cgm.scanner.utils.EndlessScrollListener;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.DeviceCheckFragment;
