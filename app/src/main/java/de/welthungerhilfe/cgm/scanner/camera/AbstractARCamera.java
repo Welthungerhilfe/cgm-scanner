@@ -137,7 +137,7 @@ public abstract class AbstractARCamera {
         mListeners.remove(listener);
     }
 
-    public Depthmap extractDepthmap(Image image, float[] position, float[] rotation, boolean reorder) {
+    public Depthmap extractDepthmap(Image image, float[] position, float[] rotation) {
         if (image == null) {
             Depthmap depthmap = new Depthmap(0, 0);
             depthmap.position = position;
@@ -147,9 +147,7 @@ public abstract class AbstractARCamera {
         }
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
-        if (reorder) {
-            buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
-        }
+        buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
         ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
 
         ArrayList<Short> pixel = new ArrayList<>();
