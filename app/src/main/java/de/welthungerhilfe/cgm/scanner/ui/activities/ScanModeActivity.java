@@ -82,13 +82,13 @@ import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
-import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
@@ -97,7 +97,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoCamera;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoUtils;
-import de.welthungerhilfe.cgm.scanner.utils.IO;
+import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, TangoCamera.TangoCameraListener, ScanTypeView.ScanTypeListener {

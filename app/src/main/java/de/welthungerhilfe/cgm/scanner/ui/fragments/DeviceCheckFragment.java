@@ -61,7 +61,7 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.TestView;
-import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;

@@ -55,7 +55,7 @@ import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.views.QRScanView;
 import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
-import de.welthungerhilfe.cgm.scanner.utils.IO;
+import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import id.zelory.compressor.Compressor;

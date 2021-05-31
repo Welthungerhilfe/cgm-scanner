@@ -46,8 +46,7 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
-import de.welthungerhilfe.cgm.scanner.utils.IO;
-import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ContactSupportDialog extends Dialog {

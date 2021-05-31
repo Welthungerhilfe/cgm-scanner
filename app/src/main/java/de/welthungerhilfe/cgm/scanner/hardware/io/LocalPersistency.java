@@ -16,7 +16,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package de.welthungerhilfe.cgm.scanner.utils;
+package de.welthungerhilfe.cgm.scanner.hardware.io;
 
 import android.content.Context;
 import android.content.SharedPreferences;

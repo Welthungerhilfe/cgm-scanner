@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 

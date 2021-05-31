@@ -26,7 +26,6 @@ import android.os.Build;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 
 import org.json.JSONObject;
 
@@ -43,7 +42,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PostScanResultrepository;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
-import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
@@ -53,7 +52,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
-import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.network.service.ApiService;

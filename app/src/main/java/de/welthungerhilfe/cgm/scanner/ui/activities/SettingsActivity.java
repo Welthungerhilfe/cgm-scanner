@@ -45,7 +45,7 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
-import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.database.BackupManager;
 import de.welthungerhilfe.cgm.scanner.AppConstants;

@@ -36,7 +36,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.DeviceCheckFragment;
 import de.welthungerhilfe.cgm.scanner.ui.views.PagerView;
-import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 
 public class DeviceCheckActivity extends BaseActivity {
 

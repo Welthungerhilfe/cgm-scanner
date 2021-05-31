@@ -26,7 +26,7 @@ import java.io.File;
 import java.io.IOException;
 
 
-import de.welthungerhilfe.cgm.scanner.utils.IO;
+import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AppController extends Application {
