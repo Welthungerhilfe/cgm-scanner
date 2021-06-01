@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.welthungerhilfe.cgm.scanner.camera;
+package de.welthungerhilfe.cgm.scanner.hardware.camera;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -140,7 +140,7 @@ public abstract class AbstractARCamera {
         mListeners.remove(listener);
     }
 
-    public Depthmap extractDepthmap(Image image, float[] position, float[] rotation, boolean reorder) {
+    public Depthmap extractDepthmap(Image image, float[] position, float[] rotation) {
         if (image == null) {
             Depthmap depthmap = new Depthmap(0, 0);
             depthmap.position = position;
@@ -150,9 +150,7 @@ public abstract class AbstractARCamera {
         }
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
-        if (reorder) {
-            buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
-        }
+        buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
         ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
 
         ArrayList<Short> pixel = new ArrayList<>();

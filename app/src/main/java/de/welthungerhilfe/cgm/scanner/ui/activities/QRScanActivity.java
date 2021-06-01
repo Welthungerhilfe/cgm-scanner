@@ -54,8 +54,8 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.views.QRScanView;
-import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
-import de.welthungerhilfe.cgm.scanner.utils.IO;
+import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
+import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import id.zelory.compressor.Compressor;
@@ -250,7 +250,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                         Log.e(TAG, "Folder: \"" + consentFileFolder + "\" could not be created!\n");
                     }
 
-                    BitmapUtils.writeBitmapToFile(data1, consentFile);
+                    BitmapHelper.writeBitmapToFile(data1, consentFile);
 
 
                 }

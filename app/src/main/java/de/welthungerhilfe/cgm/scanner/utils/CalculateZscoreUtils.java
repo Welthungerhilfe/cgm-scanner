@@ -36,7 +36,7 @@ public class CalculateZscoreUtils {
         }
     }
 
-    public static double setData(Context context, double height, double weight, long age, String sex, ChartType chartType) {
+    public static double setData(Context context, double height, double weight,double muac, long age, String sex, ChartType chartType) {
 
         double zScore = 100, median = 10, skew = 10, coefficient = 10;
 
@@ -49,6 +49,7 @@ public class CalculateZscoreUtils {
             lastMeasure.setHeight(height);
             lastMeasure.setAge(age);
             lastMeasure.setWeight(weight);
+            lastMeasure.setMuac(muac);
 
             String fileName;
             if (sex.equals("female")) {

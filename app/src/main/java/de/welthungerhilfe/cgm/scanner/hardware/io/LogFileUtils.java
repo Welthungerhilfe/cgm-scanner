@@ -1,4 +1,4 @@
-package de.welthungerhilfe.cgm.scanner.utils;
+package de.welthungerhilfe.cgm.scanner.hardware.io;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -13,6 +13,8 @@ import java.util.Date;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
+import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class LogFileUtils {
     static File logFile;

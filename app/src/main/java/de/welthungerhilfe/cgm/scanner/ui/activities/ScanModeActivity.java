@@ -77,27 +77,27 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.camera.Depthmap;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
-import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.camera.ARCoreCamera;
-import de.welthungerhilfe.cgm.scanner.camera.AREngineCamera;
-import de.welthungerhilfe.cgm.scanner.camera.AbstractARCamera;
-import de.welthungerhilfe.cgm.scanner.camera.TangoCamera;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoCamera;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
-import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
-import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
-import de.welthungerhilfe.cgm.scanner.utils.IO;
+import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, TangoCamera.TangoCameraListener, ScanTypeView.ScanTypeListener {
@@ -770,7 +770,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
                     currentImgFilename = currentImgFilename.replace('/', '_');
                     File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
-                    BitmapUtils.writeBitmapToFile(bitmap, artifactFile);
+                    BitmapHelper.writeBitmapToFile(bitmap, artifactFile);
                     onProcessArtifact(artifactFile, ArtifactType.RGB);
 
                     //save RGB metadata
@@ -831,7 +831,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
             long profile = System.currentTimeMillis();
-            Depthmap depthmap = getCamera().extractDepthmap(image, position, rotation, mCameraInstance instanceof AREngineCamera);
+            Depthmap depthmap = getCamera().extractDepthmap(image, position, rotation);
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
             mNumberOfFilesWritten++;
 

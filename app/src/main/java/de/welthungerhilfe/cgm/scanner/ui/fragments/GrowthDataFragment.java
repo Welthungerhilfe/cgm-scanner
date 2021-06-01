@@ -66,7 +66,7 @@ import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
 import de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils;
-import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils.loadJSONFromAsset;
@@ -325,25 +325,25 @@ public class GrowthDataFragment extends Fragment {
                 case WEIGHT_FOR_AGE:
                     txtXAxis.setText(R.string.axis_age);
                     txtYAxis.setText(R.string.axis_weight);
-                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getAge(), person.getSex(), type);
+                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(),lastMeasure.getMuac(), lastMeasure.getAge(), person.getSex(), type);
                     break;
 
                 case HEIGHT_FOR_AGE:
                     txtXAxis.setText(R.string.axis_age);
                     txtYAxis.setText(R.string.axis_height);
-                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getAge(), person.getSex(), type);
+                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(),lastMeasure.getMuac(), lastMeasure.getAge(), person.getSex(), type);
                     break;
 
                 case WEIGHT_FOR_HEIGHT:
                     txtXAxis.setText(R.string.axis_height);
                     txtYAxis.setText(R.string.axis_weight);
-                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getAge(), person.getSex(), type);
+                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(),lastMeasure.getMuac(), lastMeasure.getAge(), person.getSex(), type);
                     break;
 
                 case MUAC_FOR_AGE:
                     txtXAxis.setText(R.string.axis_age);
                     txtYAxis.setText(R.string.axis_muac);
-                    zScore = CalculateZscoreUtils.newZScore(lastMeasure.getMuac(), median, skew, coefficient);
+                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(),lastMeasure.getMuac(), lastMeasure.getAge(), person.getSex(), type);
                     break;
             }
         }
