@@ -1,229 +1,234 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBar"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <LinearLayout
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="@dimen/activity_horizontal_margin">
+            android:theme="@style/AppTheme.AppBarOverlay">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/about"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="20sp" />
-
-                <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
-                    android:id="@+id/txtSettingVersion"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:firstText="@string/version"/>
-
-                <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
-                    android:id="@+id/txtSettingUuid"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:firstText="@string/uuid"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/activity_vertical_margin"
-                    android:text="@string/backup"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="20sp" />
-
-                <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
-                    android:id="@+id/txtSettingBackupDate"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:firstText="@string/last_backup_date"/>
+                android:orientation="vertical"
+                android:padding="@dimen/activity_horizontal_margin">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginBottom="15dp">
+                    android:orientation="vertical">
 
-                    <Button
-                        android:id="@+id/btnBackupNow"
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="15dp"
-                        android:background="@drawable/button_pink_round"
-                        android:text="@string/backup_now"
-                        android:textColor="@color/colorWhite"
-                        android:textSize="14sp" />
+                        android:text="@string/about"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="20sp" />
 
-                    <Button
-                        android:id="@+id/btnContactSupport"
-                        android:layout_width="wrap_content"
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                        android:id="@+id/txtSettingVersion"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="15dp"
-                        android:background="@drawable/button_pink_round"
-                        android:text="@string/contact_support"
-                        android:textColor="@color/colorWhite"
-                        android:textSize="14sp" />
+                        app:firstText="@string/version" />
+
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                        android:id="@+id/txtSettingUuid"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:firstText="@string/uuid" />
                 </LinearLayout>
-            </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/account"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="20sp" />
-
-                <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
-                    android:id="@+id/txtSettingAccount"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:secondText="@string/app_name_long"/>
+                    android:orientation="vertical">
 
-                <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
-                    android:id="@+id/txtSettingAzureAccount"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:secondText="@string/azure_account"/>
-            </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/activity_vertical_margin"
+                        android:text="@string/backup"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="20sp" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/language"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="20sp" />
-
-                <RadioGroup
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView
-                        android:id="@+id/radioEnglish"
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                        android:id="@+id/txtSettingBackupDate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:flagImage="@drawable/usa"
-                        app:language="@string/lang_english"/>
+                        app:firstText="@string/last_backup_date" />
 
-                    <de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView
-                        android:id="@+id/radioGerman"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:flagImage="@drawable/germany"
-                        app:language="@string/lang_german"/>
+                        android:orientation="horizontal"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginBottom="15dp">
 
-                    <de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView
-                        android:id="@+id/radioHindi"
+                        <Button
+                            android:id="@+id/btnBackupNow"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="15dp"
+                            android:background="@drawable/button_pink_round"
+                            android:text="@string/backup_now"
+                            android:textColor="@color/colorWhite"
+                            android:textSize="14sp" />
+
+                        <Button
+                            android:id="@+id/btnContactSupport"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="15dp"
+                            android:background="@drawable/button_pink_round"
+                            android:text="@string/contact_support"
+                            android:textColor="@color/colorWhite"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/account"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="20sp" />
+
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                        android:id="@+id/txtSettingAccount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:flagImage="@drawable/india"
-                        app:language="@string/lang_hindi"/>
-                </RadioGroup>
+                        app:secondText="@string/app_name_long" />
+
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                        android:id="@+id/txtSettingAzureAccount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:secondText="@string/azure_account" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/language"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="20sp" />
+
+                    <RadioGroup
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView
+                            android:id="@+id/radioEnglish"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:flagImage="@drawable/usa"
+                            app:language="@string/lang_english" />
+
+                        <de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView
+                            android:id="@+id/radioGerman"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:flagImage="@drawable/germany"
+                            app:language="@string/lang_german" />
+
+                        <de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView
+                            android:id="@+id/radioHindi"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:flagImage="@drawable/india"
+                            app:language="@string/lang_hindi" />
+                    </RadioGroup>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_settings"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="20sp" />
+
+                    <de.welthungerhilfe.cgm.scanner.ui.views.ToggleView
+                        android:id="@+id/upload_over_wifi"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:toggleText="@string/upload_over_wifi" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/testQAlayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/test_qa_environment"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="20sp" />
+
+                    <de.welthungerhilfe.cgm.scanner.ui.views.SubmenuButton
+                        android:id="@+id/submenu_performance_measurement"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:submenuText="@string/performance_measurement"
+                        android:onClick="openPerformanceMeasurement"/>
+
+                    <de.welthungerhilfe.cgm.scanner.ui.views.SubmenuButton
+                        android:id="@+id/submenu_remote_config"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:submenuText="@string/remote_config" />
+
+                    <de.welthungerhilfe.cgm.scanner.ui.views.ToggleView
+                        android:id="@+id/show_depth_data"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:toggleText="@string/show_depth_data"
+                        android:onClick="openRemoteConfig"/>
+                </LinearLayout>
+
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:orientation="vertical">
+        </androidx.core.widget.NestedScrollView>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_settings"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="20sp" />
-
-                <de.welthungerhilfe.cgm.scanner.ui.views.ToggleView
-                    android:id="@+id/upload_over_wifi"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:toggleText="@string/upload_over_wifi"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/testQAlayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/test_qa_environment"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="20sp" />
-
-                <de.welthungerhilfe.cgm.scanner.ui.views.SubmenuButton
-                    android:id="@+id/submenu_performance_measurement"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:submenuText="@string/performance_measurement"/>
-
-                <de.welthungerhilfe.cgm.scanner.ui.views.SubmenuButton
-                    android:id="@+id/submenu_remote_config"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:submenuText="@string/remote_config"/>
-
-                <de.welthungerhilfe.cgm.scanner.ui.views.ToggleView
-                    android:id="@+id/show_depth_data"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:toggleText="@string/show_depth_data"/>
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </androidx.core.widget.NestedScrollView>
-
-</LinearLayout>
+    </LinearLayout>
+</layout>
