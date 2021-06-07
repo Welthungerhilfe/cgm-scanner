@@ -25,24 +25,22 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.view.ViewCompat;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
+
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -52,10 +50,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.ActivityLocationDetectBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -64,14 +62,11 @@ public class LocationDetectActivity extends BaseActivity implements OnMapReadyCa
     public static final String EXTRA_LOCATION = "extra_location";
     public static final String KEY_TRANSITION = "key_transition";
 
-    @BindView(R.id.editAddress)
-    EditText editAddress;
-    @BindView(R.id.mapView)
-    MapView mapView;
     GoogleMap googleMap;
 
-    @OnClick(R.id.lytConfirm)
-    void onConfirm(LinearLayout lytConfirm) {
+    ActivityLocationDetectBinding activityLocationDetectBinding;
+
+    public void onConfirm(View view) {
         if (listener != null) {
             if (location != null) {
                 listener.onConfirm(location);
@@ -81,8 +76,7 @@ public class LocationDetectActivity extends BaseActivity implements OnMapReadyCa
         onBackPressed();
     }
 
-    @OnClick(R.id.fabLocation)
-    void onMyLocation(FloatingActionButton fabLocation) {
+    public void onMyLocation(View view) {
         Location location = googleMap.getMyLocation();
 
         if (location != null) {
@@ -94,7 +88,7 @@ public class LocationDetectActivity extends BaseActivity implements OnMapReadyCa
     }
 
     @OnClick(R.id.imgClose)
-    void onClose(ImageView imgClose) {
+    public void onClose(View view) {
         onBackPressed();
     }
 
@@ -112,59 +106,57 @@ public class LocationDetectActivity extends BaseActivity implements OnMapReadyCa
 
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
-        setContentView(R.layout.activity_location_detect);
-        ButterKnife.bind(this);
-
+        activityLocationDetectBinding = DataBindingUtil.setContentView(this,R.layout.activity_location_detect);
         ViewCompat.setTransitionName(findViewById(R.id.editAddress), KEY_TRANSITION);
         location = (Loc) getIntent().getSerializableExtra(EXTRA_LOCATION);
 
         if (location != null)
-            editAddress.setText(location.getAddress());
+            activityLocationDetectBinding.editAddress.setText(location.getAddress());
         else
             location = new Loc();
 
-        editAddress.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
-        editAddress.setRawInputType(InputType.TYPE_CLASS_TEXT);
-        editAddress.setOnEditorActionListener((v, actionId, event) -> {
+        activityLocationDetectBinding.editAddress.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+        activityLocationDetectBinding.editAddress.setRawInputType(InputType.TYPE_CLASS_TEXT);
+        activityLocationDetectBinding.editAddress.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                if (editAddress.getText().toString().isEmpty())
+                if (activityLocationDetectBinding.editAddress.getText().toString().isEmpty())
                     return false;
 
-                getLocationFromAddress(editAddress.getText().toString());
+                getLocationFromAddress(activityLocationDetectBinding.editAddress.getText().toString());
                 return true;
             }
             return false;
         });
 
-        mapView.onCreate(saveBundle);
-        mapView.onResume();
+        activityLocationDetectBinding.mapView.onCreate(saveBundle);
+        activityLocationDetectBinding.mapView.onResume();
         MapsInitializer.initialize(this);
-        mapView.getMapAsync(this);
+        activityLocationDetectBinding.mapView.getMapAsync(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mapView.onResume();
+        activityLocationDetectBinding.mapView.onResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mapView.onPause();
+        activityLocationDetectBinding.mapView.onPause();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mapView != null)
-            mapView.onDestroy();
+        if (activityLocationDetectBinding.mapView != null)
+            activityLocationDetectBinding.mapView.onDestroy();
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        mapView.onLowMemory();
+        activityLocationDetectBinding.mapView.onLowMemory();
     }
 
     @Override
@@ -209,11 +201,11 @@ public class LocationDetectActivity extends BaseActivity implements OnMapReadyCa
 
                     googleMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(addr.getLatitude(), addr.getLongitude())));
                 } else {
-                    Snackbar.make(mapView, R.string.error_location, Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(activityLocationDetectBinding.mapView, R.string.error_location, Snackbar.LENGTH_LONG).show();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                Snackbar.make(mapView, R.string.error_location, Snackbar.LENGTH_LONG).show();
+                Snackbar.make(activityLocationDetectBinding.mapView, R.string.error_location, Snackbar.LENGTH_LONG).show();
             }
         });
     }
@@ -237,7 +229,7 @@ public class LocationDetectActivity extends BaseActivity implements OnMapReadyCa
                 Log.e("Location Address Loader", "Unable connect to Geocoder", e);
             } finally {
                 location.setAddress(result);
-                editAddress.setText(result);
+                activityLocationDetectBinding.editAddress.setText(result);
             }
         });
     }
