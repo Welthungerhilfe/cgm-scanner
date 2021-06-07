@@ -23,6 +23,7 @@ import android.app.Activity;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -68,6 +69,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.ActivityMainBinding;
+import de.welthungerhilfe.cgm.scanner.databinding.ContentMainBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
@@ -96,8 +99,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     private PersonListViewModel viewModel;
 
-    @OnClick(R.id.fabCreate)
-    void createData(FloatingActionButton fabCreate) {
+    public void createData(View view) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             runnable = () -> startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.CONSENT_CAPTURED_REQUEST));
             addResultListener(PERMISSION_CAMERA, listener);
@@ -107,22 +109,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         }
     }
 
-    @BindView(R.id.recyclerData)
-    RecyclerView recyclerData;
     RecyclerPersonAdapter adapterData;
     LinearLayoutManager lytManager;
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-    @BindView(R.id.searchbar)
-    Toolbar searchbar;
-    @BindView(R.id.drawer)
-    DrawerLayout drawerLayout;
-    @BindView(R.id.navMenu)
-    NavigationView navMenu;
-    @BindView(R.id.lytNoPerson)
-    LinearLayout lytNoPerson;
-    @BindView(R.id.searchview)
-    SearchView searchView;
 
     private ActionBarDrawerToggle mDrawerToggle;
 
@@ -131,13 +119,15 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     private Runnable runnable;
     private SessionManager session;
 
+    private ActivityMainBinding activityMainBinding;
+
+    private ContentMainBinding contentMainBinding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        ButterKnife.bind(this);
-
+        activityMainBinding = DataBindingUtil.setContentView(this,R.layout.activity_main);
         session = new SessionManager(MainActivity.this);
         LogFileUtils.initLogFile(session,MainActivity.this);
         LogFileUtils.logInfo(TAG, "CGM-Scanner " + Utils.getAppVersion(this) + " started");
@@ -146,9 +136,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             Log.e("PersonRecycler", "Observer called");
 
             if (lytManager.getItemCount() == 0 && list != null && list.size() == 0) {
-                lytNoPerson.setVisibility(View.VISIBLE);
+                activityMainBinding.contentMain.lytNoPerson.setVisibility(View.VISIBLE);
             } else {
-                lytNoPerson.setVisibility(View.GONE);
+                activityMainBinding.contentMain.lytNoPerson.setVisibility(View.GONE);
                 adapterData.addPersons(list);
             }
         };
@@ -159,19 +149,19 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         setupSortDialog();
 
         lytManager = new LinearLayoutManager(MainActivity.this);
-        recyclerData.setLayoutManager(lytManager);
-        recyclerData.setItemAnimator(new DefaultItemAnimator());
-        recyclerData.setHasFixedSize(true);
-        recyclerData.addOnScrollListener(new EndlessScrollListener(lytManager) {
+        activityMainBinding.contentMain.recyclerData.setLayoutManager(lytManager);
+        activityMainBinding.contentMain.recyclerData.setItemAnimator(new DefaultItemAnimator());
+        activityMainBinding.contentMain.recyclerData.setHasFixedSize(true);
+        activityMainBinding.contentMain.recyclerData.addOnScrollListener(new EndlessScrollListener(lytManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
                 viewModel.setCurrentPage(page);
             }
         });
 
-        adapterData = new RecyclerPersonAdapter(this, recyclerData, viewModel);
+        adapterData = new RecyclerPersonAdapter(this, activityMainBinding.contentMain.recyclerData, viewModel);
         adapterData.setPersonDetailListener(this);
-        recyclerData.setAdapter(adapterData);
+        activityMainBinding.contentMain.recyclerData.setAdapter(adapterData);
 
         startService(new Intent(this, DeviceService.class));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -192,7 +182,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     }
 
     private void setupSidemenu() {
-        navMenu.setNavigationItemSelectedListener(menuItem -> {
+        activityMainBinding.navMenu.setNavigationItemSelectedListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menuUploadManager:
                     startActivity(new Intent(MainActivity.this, UploadManagerActivity.class));
@@ -221,17 +211,17 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     finish();
                     break;
             }
-            drawerLayout.closeDrawers();
+            activityMainBinding.drawer.closeDrawers();
             return true;
         });
-        View headerView = navMenu.getHeaderView(0);
+        View headerView = activityMainBinding.navMenu.getHeaderView(0);
         TextView txtUsername = headerView.findViewById(R.id.txtUsername);
         txtUsername.setText(session.getUserEmail());
     }
 
     private void setupActionBar() {
-        searchbar.setVisibility(View.GONE);
-        setSupportActionBar(toolbar);
+        activityMainBinding.contentMain.searchbar.setVisibility(View.GONE);
+        setSupportActionBar(activityMainBinding.contentMain.toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -240,7 +230,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             invalidateOptionsMenu();
         }
 
-        mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close) {
+        mDrawerToggle = new ActionBarDrawerToggle(this, activityMainBinding.drawer,activityMainBinding.contentMain.toolbar, R.string.drawer_open, R.string.drawer_close) {
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
             }
@@ -250,18 +240,18 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         };
 
-        drawerLayout.addDrawerListener(mDrawerToggle);
+        activityMainBinding.drawer.addDrawerListener(mDrawerToggle);
     }
 
     private void openSearchBar() {
-        searchbar.setVisibility(View.VISIBLE);
-        setSupportActionBar(searchbar);
+        activityMainBinding.contentMain.searchbar.setVisibility(View.VISIBLE);
+        setSupportActionBar(activityMainBinding.contentMain.searchbar);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
         invalidateOptionsMenu();
 
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        activityMainBinding.contentMain.searchview.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
@@ -275,14 +265,14 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         });
 
-        ImageView closeButton = searchView.findViewById(R.id.search_close_btn);
+        ImageView closeButton = activityMainBinding.contentMain.searchview.findViewById(R.id.search_close_btn);
         closeButton.setOnClickListener(v -> {
-            searchView.setQuery("", false);
+            activityMainBinding.contentMain.searchview.setQuery("", false);
 
             viewModel.clearFilterOwn();
         });
 
-        ImageView magImage = searchView.findViewById(R.id.search_mag_icon);
+        ImageView magImage = activityMainBinding.contentMain.searchview.findViewById(R.id.search_mag_icon);
         magImage.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
     }
 
@@ -427,7 +417,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
 
-        if (searchbar.getVisibility() == View.VISIBLE) {
+        if (activityMainBinding.contentMain.searchbar.getVisibility() == View.VISIBLE) {
             menuInflater.inflate(R.menu.menu_search, menu);
         } else {
             menuInflater.inflate(R.menu.menu_tool, menu);
@@ -455,7 +445,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 openSort();
                 break;
             case android.R.id.home:
-                if (searchbar.getVisibility() == View.VISIBLE) {
+                if (activityMainBinding.contentMain.searchbar.getVisibility() == View.VISIBLE) {
                     setupActionBar();
                 } else {
                     finish();

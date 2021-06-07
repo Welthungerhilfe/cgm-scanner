@@ -24,6 +24,8 @@ import android.os.Bundle;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.databinding.DataBindingUtil;
+
 import android.view.MenuItem;
 
 import com.bumptech.glide.Glide;
@@ -32,35 +34,33 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.databinding.ActivityImageDetailBinding;
 import de.welthungerhilfe.cgm.scanner.ui.views.ZoomImageView;
 
 public class ImageDetailActivity extends BaseActivity {
-    @BindView(R.id.zoomView)
-    ZoomImageView zoomView;
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
+
+    ActivityImageDetailBinding activityImageDetailBinding;
 
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
-        setContentView(R.layout.activity_image_detail);
+        activityImageDetailBinding = DataBindingUtil.setContentView(this,R.layout.activity_image_detail);
 
-        ButterKnife.bind(this);
 
         setupToolbar();
 
         byte[] bytes = getIntent().getByteArrayExtra(AppConstants.EXTRA_QR_BITMAP);
         String url = getIntent().getStringExtra(AppConstants.EXTRA_QR_URL);
-        zoomView.setZoomEnable(true);
+        activityImageDetailBinding.zoomView.setZoomEnable(true);
         if (bytes != null) {
             Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-            zoomView.setImageBitmap(bmp);
+            activityImageDetailBinding.zoomView.setImageBitmap(bmp);
         } else if (url != null && !url.equals("")) {
-            Glide.with(this).load(url).fitCenter().into(zoomView);
+            Glide.with(this).load(url).fitCenter().into(activityImageDetailBinding.zoomView);
         }
     }
 
     private void setupToolbar() {
-        setSupportActionBar(toolbar);
+        setSupportActionBar(activityImageDetailBinding.toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);

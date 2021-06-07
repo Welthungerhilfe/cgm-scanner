@@ -22,6 +22,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 
+import androidx.databinding.DataBindingUtil;
+
 import com.shuhart.stepview.StepView;
 
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.ActivityDeviceCheckBinding;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
@@ -43,25 +46,23 @@ public class DeviceCheckActivity extends BaseActivity {
     public static final String KEY_LAST_DEVICE_CHECK = "KEY_LAST_DEVICE_CHECK";
     public static final String KEY_LAST_DEVICE_CHECK_ISSUES = "KEY_LAST_DEVICE_CHECK_ISSUES";
 
-    @BindView(R.id.viewPager)
-    PagerView viewPager;
-    @BindView(R.id.stepView)
-    StepView stepView;
+
+   ;
 
     private ArrayList<TutorialData> dataList;
     private ArrayList<DeviceCheckFragment> fragments;
     private ArrayList<DeviceCheckFragment.IssueType> issues;
+    ActivityDeviceCheckBinding activityDeviceCheckBinding;
 
-    @OnClick(R.id.btnStart)
-    void startWork() {
+    public void startWork(View view) {
         finish();
     }
 
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
-        setContentView(R.layout.activity_device_check);
+        activityDeviceCheckBinding = DataBindingUtil.setContentView(this,R.layout.activity_device_check);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        ButterKnife.bind(this);
+
 
         dataList = getTutorialData();
         fragments = new ArrayList<>();
@@ -75,9 +76,9 @@ public class DeviceCheckActivity extends BaseActivity {
             adapter.addFragment(fragment, "tutorial" + (i + 1));
         }
 
-        viewPager.setAdapter(adapter);
-        viewPager.setOffscreenPageLimit(TangoUtils.isTangoSupported() ? 2 : 4);
-        viewPager.setSwipeEnabled(false);
+        activityDeviceCheckBinding.viewPager.setAdapter(adapter);
+        activityDeviceCheckBinding.viewPager.setOffscreenPageLimit(TangoUtils.isTangoSupported() ? 2 : 4);
+        activityDeviceCheckBinding.viewPager.setSwipeEnabled(false);
     }
 
     public void addIssue(DeviceCheckFragment.IssueType issue) {
@@ -100,19 +101,19 @@ public class DeviceCheckActivity extends BaseActivity {
     }
 
     public void gotoNext() {
-        int curpos = viewPager.getCurrentItem();
+        int curpos = activityDeviceCheckBinding.viewPager.getCurrentItem();
         if (curpos == dataList.size()-1) {
             LocalPersistency.setLong(this, KEY_LAST_DEVICE_CHECK, System.currentTimeMillis());
             showCompleteView();
         } else {
-            viewPager.setCurrentItem(curpos + 1);
+            activityDeviceCheckBinding.viewPager.setCurrentItem(curpos + 1);
         }
     }
 
     private void showCompleteView() {
-        stepView.go(3, false);
-        stepView.done(true);
-        viewPager.setVisibility(View.GONE);
+        activityDeviceCheckBinding.stepView.go(3, false);
+        activityDeviceCheckBinding.stepView.done(true);
+        activityDeviceCheckBinding.viewPager.setVisibility(View.GONE);
     }
 
     private ArrayList<TutorialData> getTutorialData() {
