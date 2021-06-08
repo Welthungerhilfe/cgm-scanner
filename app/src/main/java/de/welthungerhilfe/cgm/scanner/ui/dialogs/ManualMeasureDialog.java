@@ -25,6 +25,7 @@ import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -38,6 +39,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatCheckBox;
+import androidx.databinding.DataBindingUtil;
 
 import butterknife.BindString;
 import butterknife.BindView;
@@ -45,6 +47,7 @@ import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.DialogManualMeasureBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
@@ -59,54 +62,25 @@ import okhttp3.internal.Util;
 
 public class ManualMeasureDialog extends Dialog implements View.OnClickListener {
 
-    @BindView(R.id.imgType)
-    ImageView imgType;
-    @BindView(R.id.txtTitle)
-    TextView txtTitle;
-    @BindView(R.id.editManualDate)
-    EditText editManualDate;
-    @BindView(R.id.editManualHeight)
-    UnitEditText editManualHeight;
-    @BindView(R.id.editManualWeight)
-    UnitEditText editManualWeight;
-    @BindView(R.id.editManualMuac)
-    UnitEditText editManualMuac;
-    @BindView(R.id.editManualLocation)
-    EditText editManualLocation;
-    @BindView(R.id.btnOK)
-    Button btnOK;
-    @BindView(R.id.checkManualOedema)
-    AppCompatCheckBox checkManualOedema;
+
 
     private boolean oedema = false;
 
-    @OnCheckedChanged(R.id.checkManualOedema)
-    void onAlert(CompoundButton buttonView, boolean isChecked) {
-        if (!isChecked) {
-            buttonView.setBackgroundResource(R.color.colorPink);
-            buttonView.setTextColor(getContext().getColor(R.color.colorWhite));
-        } else {
-            buttonView.setBackgroundResource(R.color.colorWhite);
-            buttonView.setTextColor(getContext().getColor(R.color.colorBlack));
-        }
-        oedema = isChecked;
-    }
-
-    @OnClick(R.id.imgLocation)
-    void onLocation(ImageView imgLocation) {
-        LocationDetectActivity.navigate((AppCompatActivity) mContext, editManualLocation, location, location -> {
+  //  @OnClick(R.id.imgLocation)
+    public void onLocation() {
+        LocationDetectActivity.navigate((AppCompatActivity) mContext, dialogManualMeasureBinding.editManualLocation, location, location -> {
             ManualMeasureDialog.this.location = location;
-            editManualLocation.setText(location.getAddress());
+            dialogManualMeasureBinding.editManualLocation.setText(location.getAddress());
         });
     }
 
-    @OnClick(R.id.txtCancel)
-    void onCancel(TextView txtCancel) {
+   // @OnClick(R.id.txtCancel)
+    public void onCancel() {
         dismiss();
     }
 
-    @OnClick(R.id.btnOK)
-    void OnConfirm(Button btnOK) {
+    //@OnClick(R.id.btnOK)
+    public void OnConfirm() {
         if(!validate()){
             return;
         }
@@ -118,9 +92,9 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         if (wfa && hfa && mfa) {
             updateManualMeasurements();
         } else {
-            if (!wfa) editManualWeight.setError(mContext.getString(R.string.invalid_zscore));
-            if (!hfa) editManualHeight.setError(mContext.getString(R.string.invalid_zscore));
-            if (!mfa) editManualMuac.setError(mContext.getString(R.string.invalid_zscore));
+            if (!wfa) dialogManualMeasureBinding.editManualWeight.setError(mContext.getString(R.string.invalid_zscore));
+            if (!hfa) dialogManualMeasureBinding.editManualHeight.setError(mContext.getString(R.string.invalid_zscore));
+            if (!mfa) dialogManualMeasureBinding.editManualMuac.setError(mContext.getString(R.string.invalid_zscore));
 
             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
             builder.setTitle(R.string.invalid_zscore);
@@ -157,9 +131,9 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                     oedema = true;
                     measureListener.onManualMeasure(
                             measure != null ? measure.getId() : null,
-                            Utils.parseDouble(editManualHeight.getText().toString()),
-                            Utils.parseDouble(editManualWeight.getText().toString()),
-                            Utils.parseDouble(editManualMuac.getText().toString()),
+                            Utils.parseDouble(dialogManualMeasureBinding.editManualHeight.getText().toString()),
+                            Utils.parseDouble(dialogManualMeasureBinding.editManualWeight.getText().toString()),
+                            Utils.parseDouble(dialogManualMeasureBinding.editManualMuac.getText().toString()),
                             0f,
                             location,
                             oedema,
@@ -173,9 +147,9 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                 oedema = false;
                 measureListener.onManualMeasure(
                         measure != null ? measure.getId() : null,
-                        Utils.parseDouble(editManualHeight.getText().toString()),
-                        Utils.parseDouble(editManualWeight.getText().toString()),
-                        Utils.parseDouble(editManualMuac.getText().toString()),
+                        Utils.parseDouble(dialogManualMeasureBinding.editManualHeight.getText().toString()),
+                        Utils.parseDouble(dialogManualMeasureBinding.editManualWeight.getText().toString()),
+                        Utils.parseDouble(dialogManualMeasureBinding.editManualMuac.getText().toString()),
                         0f,
                         location,
                         oedema,
@@ -187,31 +161,6 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     }
 
 
-    @BindString(R.string.tooltip_kg)
-    String tooltip_kg;
-    @BindString(R.string.tooltip_kg_precision)
-    String tooltip_kg_precision;
-    @BindString(R.string.tooltip_decimal)
-    String tooltip_decimal;
-    @BindString(R.string.tooltip_weight_ex)
-    String tooltip_weight_ex;
-    @BindString(R.string.tooltip_cm)
-    String tooltip_cm;
-    @BindString(R.string.tooltip_height_ex)
-    String tooltip_height_ex;
-    @BindString(R.string.tooltipe_height_min)
-    String tooltipe_height_min;
-    @BindString(R.string.tooltipe_height_max)
-    String tooltipe_height_max;
-    @BindString(R.string.tooltipe_weight_min)
-    String tooltipe_weight_min;
-    @BindString(R.string.tooltipe_weight_max)
-    String tooltipe_weight_max;
-    @BindString(R.string.tooltipe_muac_min)
-    String tooltipe_muac_min;
-    @BindString(R.string.tooltipe_muac_max)
-    String tooltipe_muac_max;
-
 
     private Context mContext;
     private Measure measure;
@@ -221,6 +170,8 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     private ManualMeasureListener measureListener;
     private CloseListener closeListener;
 
+    DialogManualMeasureBinding dialogManualMeasureBinding;
+
     public ManualMeasureDialog(@NonNull Context context) {
         super(context);
 
@@ -229,17 +180,35 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
         this.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        this.setContentView(R.layout.dialog_manual_measure);
+        dialogManualMeasureBinding = DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.dialog_manual_measure,null,false);
+        this.setContentView(dialogManualMeasureBinding.getRoot());
         this.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         this.getWindow().getAttributes().windowAnimations = R.style.DialogAnimationScale;
         this.setCancelable(false);
 
         ButterKnife.bind(this);
 
-        editManualDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, System.currentTimeMillis()));
+        dialogManualMeasureBinding.editManualDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, System.currentTimeMillis()));
         if (location != null)
-            editManualLocation.setText(location.getAddress());
-        editManualLocation.setOnClickListener(this);
+            dialogManualMeasureBinding.editManualLocation.setText(location.getAddress());
+        dialogManualMeasureBinding.editManualLocation.setOnClickListener(this);
+        dialogManualMeasureBinding.imgLocation.setOnClickListener(this);
+        dialogManualMeasureBinding.txtCancel.setOnClickListener(this);
+        dialogManualMeasureBinding.btnOK.setOnClickListener(this);
+        dialogManualMeasureBinding.checkManualOedema.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (!isChecked) {
+                    buttonView.setBackgroundResource(R.color.colorPink);
+                    buttonView.setTextColor(getContext().getColor(R.color.colorWhite));
+                } else {
+                    buttonView.setBackgroundResource(R.color.colorWhite);
+                    buttonView.setTextColor(getContext().getColor(R.color.colorBlack));
+                }
+                oedema = isChecked;
+            }
+        });
+
     }
 
     public void show() {
@@ -250,10 +219,10 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     }
 
     public void dismiss() {
-        editManualHeight.setText("");
-        editManualWeight.setText("");
-        editManualMuac.setText("");
-        checkManualOedema.setChecked(false);
+        dialogManualMeasureBinding.editManualHeight.setText("");
+        dialogManualMeasureBinding.editManualWeight.setText("");
+        dialogManualMeasureBinding.editManualMuac.setText("");
+        dialogManualMeasureBinding.checkManualOedema.setChecked(false);
 
         super.dismiss();
 
@@ -273,20 +242,20 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
     private void updateUI() {
         if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
-            imgType.setImageResource(R.drawable.manual);
-            txtTitle.setText(R.string.manual_measure);
+            dialogManualMeasureBinding.imgType.setImageResource(R.drawable.manual);
+            dialogManualMeasureBinding.txtTitle.setText(R.string.manual_measure);
         } else {
-            imgType.setImageResource(R.drawable.machine);
-            txtTitle.setText(R.string.machine_measure);
+            dialogManualMeasureBinding.imgType.setImageResource(R.drawable.machine);
+            dialogManualMeasureBinding.txtTitle.setText(R.string.machine_measure);
         }
 
-        editManualDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, measure.getDate()));
+        dialogManualMeasureBinding.editManualDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, measure.getDate()));
         if (measure.getLocation() != null)
-            editManualLocation.setText(measure.getLocation().getAddress());
-        editManualHeight.setText(String.valueOf(measure.getHeight()));
-        editManualWeight.setText(String.valueOf(measure.getWeight()));
-        editManualMuac.setText(String.valueOf(measure.getMuac()));
-        checkManualOedema.setChecked(!measure.isOedema());
+            dialogManualMeasureBinding.editManualLocation.setText(measure.getLocation().getAddress());
+            dialogManualMeasureBinding.editManualHeight.setText(String.valueOf(measure.getHeight()));
+            dialogManualMeasureBinding.editManualWeight.setText(String.valueOf(measure.getWeight()));
+            dialogManualMeasureBinding.editManualMuac.setText(String.valueOf(measure.getMuac()));
+            dialogManualMeasureBinding.checkManualOedema.setChecked(!measure.isOedema());
 
         location = measure.getLocation();
     }
@@ -302,65 +271,69 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     private boolean validate() {
         boolean valid = true;
 
-        String height = editManualHeight.getText().toString();
-        String weight = editManualWeight.getText().toString();
-        String muac = editManualMuac.getText().toString();
+        String height = dialogManualMeasureBinding.editManualHeight.getText().toString();
+        String weight = dialogManualMeasureBinding.editManualWeight.getText().toString();
+        String muac = dialogManualMeasureBinding.editManualMuac.getText().toString();
 
         if (height.isEmpty()) {
-            editManualHeight.setError(tooltip_cm);
+            dialogManualMeasureBinding.editManualHeight.setError(getString(R.string.tooltip_cm));
             valid = false;
         } else if (Utils.checkDoubleDecimals(height) != 1) {
-            editManualHeight.setError(tooltip_decimal);
+            dialogManualMeasureBinding.editManualHeight.setError(getString(R.string.tooltip_decimal));
             valid = false;
         } else if (Utils.parseDouble(height) <= 45) {
-            editManualHeight.setError(tooltipe_height_min);
+            dialogManualMeasureBinding.editManualHeight.setError(getString(R.string.tooltipe_height_min));
             valid = false;
         } else if (Utils.parseDouble(height) >= 130) {
-            editManualHeight.setError(tooltipe_height_max);
+            dialogManualMeasureBinding.editManualHeight.setError(getString(R.string.tooltipe_height_max));
             valid = false;
         } else {
-            editManualHeight.setError(null);
+            dialogManualMeasureBinding.editManualHeight.setError(null);
         }
 
         if (weight.isEmpty()) {
-            editManualWeight.setError(tooltip_kg);
+            dialogManualMeasureBinding.editManualWeight.setError(getString(R.string.tooltip_kg));
             valid = false;
         } else if (Utils.checkDoubleDecimals(weight) != 3) {
-            editManualWeight.setError(tooltip_kg_precision);
+            dialogManualMeasureBinding.editManualWeight.setError(getString(R.string.tooltip_kg_precision));
             valid = false;
         } else if (Utils.parseDouble(weight) < 2) {
-            editManualWeight.setError(tooltipe_weight_min);
+            dialogManualMeasureBinding.editManualWeight.setError(getString(R.string.tooltipe_weight_min));
             valid = false;
         } else if (Utils.parseDouble(weight) > 30) {
-            editManualWeight.setError(tooltipe_weight_max);
+            dialogManualMeasureBinding.editManualWeight.setError(getString(R.string.tooltipe_weight_max));
             valid = false;
         } else {
-            editManualWeight.setError(null);
+            dialogManualMeasureBinding.editManualWeight.setError(null);
         }
 
         if (muac.isEmpty()) {
-            editManualMuac.setError(tooltip_cm);
+            dialogManualMeasureBinding.editManualMuac.setError(getString(R.string.tooltip_cm));
             valid = false;
         } else if (Utils.checkDoubleDecimals(muac) != 1) {
-            editManualMuac.setError(tooltip_decimal);
+            dialogManualMeasureBinding.editManualMuac.setError(getString(R.string.tooltip_decimal));
             valid = false;
         } else if (Utils.parseDouble(muac) < 7) {
-            editManualMuac.setError(tooltipe_muac_min);
+            dialogManualMeasureBinding.editManualMuac.setError(getString(R.string.tooltipe_muac_min));
             valid = false;
         } else if (Utils.parseDouble(muac) > 22) {
-            editManualMuac.setError(tooltipe_muac_max);
+            dialogManualMeasureBinding.editManualMuac.setError(getString(R.string.tooltipe_muac_max));
             valid = false;
         } else {
-            editManualMuac.setError(null);
+            dialogManualMeasureBinding.editManualMuac.setError(null);
         }
 
         return valid;
     }
 
+    private String getString(int string){
+        return mContext.getResources().getString(string);
+    }
+
     private boolean validZscore(CalculateZscoreUtils.ChartType chartType) {
-        String height = editManualHeight.getText().toString();
-        String weight = editManualWeight.getText().toString();
-        String muac = editManualMuac.getText().toString();
+        String height = dialogManualMeasureBinding.editManualHeight.getText().toString();
+        String weight = dialogManualMeasureBinding.editManualWeight.getText().toString();
+        String muac = dialogManualMeasureBinding.editManualMuac.getText().toString();
         long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
         double zScore = CalculateZscoreUtils.setData(mContext,Utils.parseDouble(height),Utils.parseDouble(weight), Utils.parseDouble(muac),age,person.getSex(), chartType);
         return Math.abs(zScore) < 3.0;
@@ -369,11 +342,18 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.editManualLocation) {
-            LocationDetectActivity.navigate((AppCompatActivity) mContext, editManualLocation, location, location -> {
+            LocationDetectActivity.navigate((AppCompatActivity) mContext, dialogManualMeasureBinding.editManualLocation, location, location -> {
                 ManualMeasureDialog.this.location = location;
-                editManualLocation.setText(location.getAddress());
+                dialogManualMeasureBinding.editManualLocation.setText(location.getAddress());
             });
+        } else if(v.getId() == R.id.imgLocation){
+            onLocation();
+        }else if(v.getId()== R.id.txtCancel){
+            onCancel();
+        }else if(v.getId() == R.id.btnOK){
+            OnConfirm();
         }
+
     }
 
     public interface ManualMeasureListener {
