@@ -28,20 +28,16 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
 
 import java.io.File;
 
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -54,9 +50,6 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
-import de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView;
-import de.welthungerhilfe.cgm.scanner.ui.views.ToggleView;
-import de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -71,14 +64,12 @@ public class SettingsActivity extends BaseActivity {
 
 
 
-    @OnClick(R.id.submenu_performance_measurement)
     public void openPerformanceMeasurement(View view) {
         Intent intent = new Intent(SettingsActivity.this, SettingsPerformanceActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
     }
 
-    @OnClick(R.id.submenu_remote_config)
     public void openRemoteConfig(View view) {
         Intent intent = new Intent(SettingsActivity.this, SettingsRemoteConfigActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);

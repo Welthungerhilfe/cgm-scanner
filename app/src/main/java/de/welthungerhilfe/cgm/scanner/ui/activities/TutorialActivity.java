@@ -31,7 +31,6 @@ import androidx.databinding.DataBindingUtil;
 import java.util.ArrayList;
 
 
-import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityTutorialBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
@@ -39,7 +38,6 @@ import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.TutorialFragment;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.ui.views.PagerView;
 
 public class TutorialActivity extends BaseActivity {
 

@@ -51,7 +51,6 @@ import java.util.List;
 import java.util.Locale;
 
 
-import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityLocationDetectBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
@@ -87,7 +86,6 @@ public class LocationDetectActivity extends BaseActivity implements OnMapReadyCa
         }
     }
 
-    @OnClick(R.id.imgClose)
     public void onClose(View view) {
         onBackPressed();
     }

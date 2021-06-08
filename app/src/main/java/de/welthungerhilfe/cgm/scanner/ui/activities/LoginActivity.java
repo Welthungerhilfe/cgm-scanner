@@ -35,8 +35,6 @@ import android.widget.Toast;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 
-
-import butterknife.OnCheckedChanged;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -51,7 +49,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 
-public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback {
+public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback, CompoundButton.OnCheckedChangeListener {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
     private static final int STORAGE_PEMISSION = 100;
@@ -109,6 +107,11 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             e.printStackTrace();
         }
         checkStoragePermissions();
+        activityLoginBinding.rbProdAah.setOnCheckedChangeListener(this);
+        activityLoginBinding.rbProdDarshna.setOnCheckedChangeListener(this);
+        activityLoginBinding.rbProdNamibia.setOnCheckedChangeListener(this);
+        activityLoginBinding.rbDemoQa.setOnCheckedChangeListener(this);
+        activityLoginBinding.rbSandbox.setOnCheckedChangeListener(this);
     }
 
 
@@ -180,8 +183,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         }
     }
 
-    @OnCheckedChanged({R.id.rb_prod_darshna, R.id.rb_prod_aah, R.id.rb_prod_namibia, R.id.rb_demo_qa, R.id.rb_sandbox})
-    public void onRadioButtonCheckChanged(CompoundButton button, boolean checked) {
+    @Override
+    public void onCheckedChanged(CompoundButton button, boolean checked) {
         if (checked) {
             switch (button.getId()) {
                 case R.id.rb_prod_aah:
@@ -212,4 +215,6 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     private void requestStoragePermission() {
         requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PEMISSION);
     }
+
+
 }

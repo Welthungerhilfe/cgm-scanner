@@ -216,7 +216,8 @@
                         android:id="@+id/submenu_remote_config"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:submenuText="@string/remote_config" />
+                        app:submenuText="@string/remote_config"
+                        android:onClick="openRemoteConfig"/>
 
                     <de.welthungerhilfe.cgm.scanner.ui.views.ToggleView
                         android:id="@+id/show_depth_data"

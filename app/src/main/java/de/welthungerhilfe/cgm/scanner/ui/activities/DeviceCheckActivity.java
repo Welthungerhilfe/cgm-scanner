@@ -24,21 +24,17 @@ import android.view.WindowManager;
 
 import androidx.databinding.DataBindingUtil;
 
-import com.shuhart.stepview.StepView;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityDeviceCheckBinding;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.DeviceCheckFragment;
-import de.welthungerhilfe.cgm.scanner.ui.views.PagerView;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 
 public class DeviceCheckActivity extends BaseActivity {

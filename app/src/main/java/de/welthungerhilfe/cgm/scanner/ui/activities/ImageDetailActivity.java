@@ -22,20 +22,17 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+
 import androidx.databinding.DataBindingUtil;
 
 import android.view.MenuItem;
 
 import com.bumptech.glide.Glide;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityImageDetailBinding;
-import de.welthungerhilfe.cgm.scanner.ui.views.ZoomImageView;
 
 public class ImageDetailActivity extends BaseActivity {
 
