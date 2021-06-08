@@ -29,23 +29,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.EditText;
-import android.widget.ImageView;
+
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.databinding.DataBindingUtil;
 
-import butterknife.BindString;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnCheckedChanged;
-import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.DialogManualMeasureBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
@@ -54,11 +46,9 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
-import de.welthungerhilfe.cgm.scanner.ui.views.UnitEditText;
 import de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-import okhttp3.internal.Util;
 
 public class ManualMeasureDialog extends Dialog implements View.OnClickListener {
 
@@ -66,7 +56,6 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
     private boolean oedema = false;
 
-  //  @OnClick(R.id.imgLocation)
     public void onLocation() {
         LocationDetectActivity.navigate((AppCompatActivity) mContext, dialogManualMeasureBinding.editManualLocation, location, location -> {
             ManualMeasureDialog.this.location = location;
@@ -74,12 +63,10 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         });
     }
 
-   // @OnClick(R.id.txtCancel)
     public void onCancel() {
         dismiss();
     }
 
-    //@OnClick(R.id.btnOK)
     public void OnConfirm() {
         if(!validate()){
             return;
@@ -186,7 +173,6 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         this.getWindow().getAttributes().windowAnimations = R.style.DialogAnimationScale;
         this.setCancelable(false);
 
-        ButterKnife.bind(this);
 
         dialogManualMeasureBinding.editManualDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, System.currentTimeMillis()));
         if (location != null)

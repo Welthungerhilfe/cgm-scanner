@@ -20,34 +20,40 @@ package de.welthungerhilfe.cgm.scanner.ui.dialogs;
 
 import android.app.Dialog;
 import android.content.Context;
+
 import androidx.annotation.NonNull;
+import androidx.databinding.DataBindingUtil;
+
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.TextView;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.DialogConfirmBinding;
 
-public class ConfirmDialog extends Dialog {
+public class ConfirmDialog extends Dialog implements View.OnClickListener {
 
-    @BindView(R.id.txtMessage)
-    TextView txtMessage;
-
-    @OnClick(R.id.txtOK)
-    void onConfirm(TextView txtOK) {
+    void onConfirm() {
         dismiss();
         if (confirmListener != null) {
             confirmListener.onConfirm(true);
         }
     }
 
-    @OnClick(R.id.txtCancel)
-    void onCancel(TextView txtCancel) {
+    void onCancel() {
         dismiss();
         if (confirmListener != null) {
             confirmListener.onConfirm(false);
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.txtOK) {
+            onConfirm();
+        } else if (v.getId() == R.id.txtCancel) {
+            onCancel();
         }
     }
 
@@ -56,18 +62,21 @@ public class ConfirmDialog extends Dialog {
     }
 
     private OnConfirmListener confirmListener;
+    private DialogConfirmBinding dialogConfirmBinding;
 
     public ConfirmDialog(@NonNull Context context) {
         super(context);
 
         this.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        this.setContentView(R.layout.dialog_confirm);
+        dialogConfirmBinding = DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.dialog_confirm, null, false);
+        this.setContentView(dialogConfirmBinding.getRoot());
         this.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         this.getWindow().getAttributes().windowAnimations = R.style.DialogAnimationScale;
         this.setCancelable(false);
+        dialogConfirmBinding.txtCancel.setOnClickListener(this);
+        dialogConfirmBinding.txtOK.setOnClickListener(this);
 
-        ButterKnife.bind(this);
     }
 
     public void setConfirmListener(OnConfirmListener confirmListener) {
@@ -75,11 +84,11 @@ public class ConfirmDialog extends Dialog {
     }
 
     public void setMessage(String message) {
-        txtMessage.setText(message);
+        dialogConfirmBinding.txtMessage.setText(message);
     }
 
     public void setMessage(int message) {
-        txtMessage.setText(message);
+        dialogConfirmBinding.txtMessage.setText(message);
     }
 
     public void show() {
