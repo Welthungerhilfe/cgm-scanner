@@ -21,60 +21,43 @@ package de.welthungerhilfe.cgm.scanner.ui.dialogs;
 import android.app.Dialog;
 import android.content.Context;
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatCheckBox;
+import androidx.databinding.DataBindingUtil;
+
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.databinding.DialogManualDetailBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ManualDetailDialog extends Dialog {
 
-    @BindView(R.id.imgType)
-    ImageView imgType;
-    @BindView(R.id.txtTitle)
-    TextView txtTitle;
-    @BindView(R.id.txtManualDate)
-    TextView txtManualDate;
-    @BindView(R.id.txtManualHeight)
-    TextView txtManualHeight;
-    @BindView(R.id.txtManualWeight)
-    TextView txtManualWeight;
-    @BindView(R.id.txtManualMuac)
-    TextView txtManualMuac;
-    @BindView(R.id.txtManualLocation)
-    TextView txtManualLocation;
-    @BindView(R.id.checkManualOedema)
-    AppCompatCheckBox checkManualOedema;
-
-
-    @OnClick(R.id.btnOK)
-    void OnConfirm(Button btnOK) {
-        dismiss();
-    }
-
     private Measure measure;
+
+    DialogManualDetailBinding dialogManualDetailBinding;
 
     public ManualDetailDialog(@NonNull Context context) {
         super(context);
 
         this.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        this.setContentView(R.layout.dialog_manual_detail);
+        dialogManualDetailBinding = DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.dialog_manual_detail,null,false);
+        this.setContentView(dialogManualDetailBinding.getRoot());
         this.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         this.getWindow().getAttributes().windowAnimations = R.style.DialogAnimationScale;
         this.setCancelable(false);
+        dialogManualDetailBinding.btnOK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismiss();
+            }
+        });
 
-        ButterKnife.bind(this);
     }
 
     public void setMeasure(Measure measure) {
@@ -85,30 +68,30 @@ public class ManualDetailDialog extends Dialog {
 
     private void updateUI() {
         if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
-            imgType.setImageResource(R.drawable.manual);
-            txtTitle.setText(R.string.manual_measure);
+            dialogManualDetailBinding.imgType.setImageResource(R.drawable.manual);
+            dialogManualDetailBinding.txtTitle.setText(R.string.manual_measure);
         } else {
-            imgType.setImageResource(R.drawable.machine);
-            txtTitle.setText(R.string.machine_measure);
+            dialogManualDetailBinding.imgType.setImageResource(R.drawable.machine);
+            dialogManualDetailBinding.txtTitle.setText(R.string.machine_measure);
         }
 
-        txtManualDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, measure.getDate()));
+        dialogManualDetailBinding.txtManualDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, measure.getDate()));
         if (measure.getLocation() != null)
-            txtManualLocation.setText(measure.getLocation().getAddress());
+            dialogManualDetailBinding.txtManualLocation.setText(measure.getLocation().getAddress());
         else
-            txtManualLocation.setText(R.string.last_location_error);
+            dialogManualDetailBinding.txtManualLocation.setText(R.string.last_location_error);
 
         boolean stdtest = Utils.isStdTestQRCode(measure.getQrCode());
         if (!stdtest) {
-            txtManualHeight.setText(String.valueOf(measure.getHeight()));
-            txtManualWeight.setText(String.valueOf(measure.getWeight()));
-            txtManualMuac.setText(String.valueOf(measure.getMuac()));
+            dialogManualDetailBinding.txtManualHeight.setText(String.valueOf(measure.getHeight()));
+            dialogManualDetailBinding.txtManualWeight.setText(String.valueOf(measure.getWeight()));
+            dialogManualDetailBinding.txtManualMuac.setText(String.valueOf(measure.getMuac()));
         } else {
-            txtManualHeight.setText(R.string.field_concealed);
-            txtManualWeight.setText(R.string.field_concealed);
-            txtManualMuac.setText(R.string.field_concealed);
+            dialogManualDetailBinding.txtManualHeight.setText(R.string.field_concealed);
+            dialogManualDetailBinding.txtManualWeight.setText(R.string.field_concealed);
+            dialogManualDetailBinding.txtManualMuac.setText(R.string.field_concealed);
         }
-        checkManualOedema.setChecked(!measure.isOedema());
-        checkManualOedema.setEnabled(false);
+        dialogManualDetailBinding.checkManualOedema.setChecked(!measure.isOedema());
+        dialogManualDetailBinding.checkManualOedema.setEnabled(false);
     }
 }

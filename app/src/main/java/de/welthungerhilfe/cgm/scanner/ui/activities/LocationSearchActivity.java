@@ -30,15 +30,14 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import androidx.core.app.ActivityCompat;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatSeekBar;
+import androidx.databinding.DataBindingUtil;
+
 import android.util.Log;
+import android.view.View;
 import android.widget.SeekBar;
-import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -51,10 +50,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.ActivityLocationSearchBinding;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
@@ -65,24 +62,17 @@ public class LocationSearchActivity extends BaseActivity implements OnMapReadyCa
     private Location location = null;
     private SessionManager session;
 
-    @BindView(R.id.txtAddress)
-    TextView txtAddress;
-    @BindView(R.id.txtRadius)
-    TextView txtRadius;
-    @BindView(R.id.seekRadius)
-    AppCompatSeekBar seekRadius;
-    @BindView(R.id.mapView)
-    MapView mapView;
+
     GoogleMap googleMap;
 
-    @OnClick(R.id.txtCancel)
-    void onCancel(TextView txtCancel) {
+    ActivityLocationSearchBinding activityLocationSearchBinding;
+
+    public void onCancel(View view) {
         setResult(Activity.RESULT_CANCELED);
         finish();
     }
 
-    @OnClick(R.id.txtOK)
-    void onOK(TextView txtOK) {
+    public void onOK(View view) {
         setResult(RESULT_OK, LocationSearchActivity.this.getIntent().putExtra(AppConstants.EXTRA_RADIUS, radius));
         finish();
     }
@@ -92,20 +82,17 @@ public class LocationSearchActivity extends BaseActivity implements OnMapReadyCa
 
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
-        setContentView(R.layout.activity_location_search);
-
-        ButterKnife.bind(this);
-
+        activityLocationSearchBinding = DataBindingUtil.setContentView(this,R.layout.activity_location_search);
         session = new SessionManager(LocationSearchActivity.this);
 
-        mapView.onCreate(saveBundle);
-        mapView.onResume();
+        activityLocationSearchBinding.mapView.onCreate(saveBundle);
+        activityLocationSearchBinding.mapView.onResume();
         MapsInitializer.initialize(this);
-        mapView.getMapAsync(this);
+        activityLocationSearchBinding.mapView.getMapAsync(this);
 
-        radius = seekRadius.getProgress();
-        txtRadius.setText(Integer.toString(radius));
-        seekRadius.setOnSeekBarChangeListener(this);
+        radius = activityLocationSearchBinding.seekRadius.getProgress();
+        activityLocationSearchBinding.txtRadius.setText(Integer.toString(radius));
+        activityLocationSearchBinding.seekRadius.setOnSeekBarChangeListener(this);
 
         getCurrentLocation();
     }
@@ -161,7 +148,7 @@ public class LocationSearchActivity extends BaseActivity implements OnMapReadyCa
             } catch (IOException e) {
                 Log.e("Location Address Loader", "Unable connect to Geocoder", e);
             } finally {
-                txtAddress.setText(result);
+                activityLocationSearchBinding.txtAddress.setText(result);
 
                 Loc loc = new Loc();
                 loc.setLatitude(location.getLatitude());
@@ -190,26 +177,26 @@ public class LocationSearchActivity extends BaseActivity implements OnMapReadyCa
     @Override
     public void onResume() {
         super.onResume();
-        mapView.onResume();
+        activityLocationSearchBinding.mapView.onResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mapView.onPause();
+        activityLocationSearchBinding.mapView.onPause();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mapView != null)
-            mapView.onDestroy();
+        if (activityLocationSearchBinding.mapView != null)
+            activityLocationSearchBinding.mapView.onDestroy();
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        mapView.onLowMemory();
+        activityLocationSearchBinding.mapView.onLowMemory();
     }
 
     @Override
@@ -224,7 +211,7 @@ public class LocationSearchActivity extends BaseActivity implements OnMapReadyCa
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
         radius = i == 0 ? 1 : i;
-        txtRadius.setText(Integer.toString(radius));
+        activityLocationSearchBinding.txtRadius.setText(Integer.toString(radius));
         if (circleRange != null) {
             circleRange.setRadius(radius * 1000);
         }

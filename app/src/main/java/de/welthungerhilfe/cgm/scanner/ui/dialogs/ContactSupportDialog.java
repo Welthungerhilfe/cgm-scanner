@@ -25,31 +25,30 @@ import android.content.pm.PackageManager;
 import android.media.MediaActionSound;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.databinding.DataBindingUtil;
 
 import java.io.File;
 import java.util.ArrayList;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.DialogContactSupportBinding;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class ContactSupportDialog extends Dialog {
+public class ContactSupportDialog extends Dialog implements View.OnClickListener {
 
     private static final int PERMISSION_STORAGE = 0x0003;
     private static final int PERMISSION_AUDIO = 0x0004;
@@ -69,15 +68,13 @@ public class ContactSupportDialog extends Dialog {
     private File screenshot;
     private File zip;
 
-    @BindView(R.id.inputMessage)
-    EditText inputMessage;
-    @BindView(R.id.recordAudio)
-    ImageView recordAudio;
 
-    @OnClick(R.id.recordAudio)
-    void onRecord(View record) {
+    DialogContactSupportBinding dialogContactSupportBinding;
+
+
+    void onRecord() {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            runnable = () -> onRecord(null);
+            runnable = () -> onRecord();
             context.addResultListener(PERMISSION_AUDIO, listener);
             ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSION_AUDIO);
             return;
@@ -85,7 +82,7 @@ public class ContactSupportDialog extends Dialog {
 
         if (!recording) {
             Utils.playShooterSound(context, MediaActionSound.START_VIDEO_RECORDING);
-            recordAudio.setImageDrawable(context.getDrawable(R.drawable.stop));
+            dialogContactSupportBinding.recordAudio.setImageDrawable(context.getDrawable(R.drawable.stop));
             recording = true;
 
             audioFile = new File(AppController.getInstance().getPublicAppDirectory(context), "voice_record.wav");
@@ -112,15 +109,15 @@ public class ContactSupportDialog extends Dialog {
             }
 
             Utils.playShooterSound(context, MediaActionSound.STOP_VIDEO_RECORDING);
-            recordAudio.setImageDrawable(context.getDrawable(R.drawable.ic_record_audio));
+            dialogContactSupportBinding.recordAudio.setImageDrawable(context.getDrawable(R.drawable.ic_record_audio));
             recording = false;
         }
     }
 
-    @OnClick(R.id.txtOK)
-    void onConfirm(TextView txtOK) {
+
+    void onConfirm() {
         if (recording) {
-            onRecord(null);
+            onRecord();
         }
         dismiss();
 
@@ -130,7 +127,7 @@ public class ContactSupportDialog extends Dialog {
             type = " - " + type;
         }
         String subject = "CGM-Scanner version " + Utils.getAppVersion(context) + type;
-        String message = inputMessage.getText().toString();
+        String message = dialogContactSupportBinding.inputMessage.getText().toString();
         if (footer != null) {
             message += "\n\n" + footer;
         }
@@ -161,8 +158,7 @@ public class ContactSupportDialog extends Dialog {
         }
     }
 
-    @OnClick(R.id.txtCancel)
-    void onCancel(TextView txtCancel) {
+    void onCancel() {
         dismiss();
     }
 
@@ -172,12 +168,15 @@ public class ContactSupportDialog extends Dialog {
 
         this.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        this.setContentView(R.layout.dialog_contact_support);
+        dialogContactSupportBinding = DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.dialog_contact_support,null,false);
+        this.setContentView(dialogContactSupportBinding.getRoot());
         this.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         this.getWindow().getAttributes().windowAnimations = R.style.DialogAnimationScale;
         this.setCancelable(false);
+        dialogContactSupportBinding.recordAudio.setOnClickListener(this);
+        dialogContactSupportBinding.txtCancel.setOnClickListener(this);
+        dialogContactSupportBinding.txtOK.setOnClickListener(this);
 
-        ButterKnife.bind(this);
     }
 
     public void attachScreenshot(File file) {
@@ -233,4 +232,15 @@ public class ContactSupportDialog extends Dialog {
             }
         }
     };
+
+    @Override
+    public void onClick(View v) {
+        if(v.getId() == R.id.recordAudio){
+            onRecord();
+        }else if(v.getId() == R.id.txtOK){
+            onConfirm();
+        }else if(v.getId() == R.id.txtCancel){
+            onCancel();
+        }
+    }
 }

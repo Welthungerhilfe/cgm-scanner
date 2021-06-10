@@ -18,108 +18,114 @@
   ~
   -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:elevation="5dp"
-        android:gravity="center_vertical"
-        android:padding="10dp"
-        android:background="@color/colorWhite"
-        android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/editAddress"
-            android:layout_width="0dp"
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/view_no_border"
-            android:inputType="textMultiLine"
-            android:text=""
-            android:textColor="@color/colorBlack"
-            android:textSize="16sp"
-            tools:ignore="LabelFor" />
+            android:layout_margin="5dp"
+            android:elevation="5dp"
+            android:gravity="center_vertical"
+            android:padding="10dp"
+            android:background="@color/colorWhite"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/editAddress"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/view_no_border"
+                android:inputType="textMultiLine"
+                android:text=""
+                android:textColor="@color/colorBlack"
+                android:textSize="16sp"
+                tools:ignore="LabelFor" />
+
+            <ImageView
+                android:id="@+id/imgClose"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="5dp"
+                android:src="@drawable/close"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="@string/content_image"
+                android:onClick="onClose"/>
+
+        </LinearLayout>
+
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/mapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <LinearLayout
+            android:id="@+id/lytConfirm"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:elevation="40dp"
+            android:layout_margin="20dp"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/button_blue_round"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:onClick="onConfirm">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/route"
+                android:contentDescription="@string/content_image" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/confirm"
+                android:textColor="@color/colorWhite"
+                android:textSize="18sp" />
+
+        </LinearLayout>
 
         <ImageView
-            android:id="@+id/imgClose"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginStart="5dp"
-            android:src="@drawable/close"
-            android:layout_gravity="center_vertical"
-            android:contentDescription="@string/content_image"/>
-
-    </LinearLayout>
-
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/mapView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-    <LinearLayout
-        android:id="@+id/lytConfirm"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:elevation="40dp"
-        android:layout_margin="20dp"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/button_blue_round"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginRight="5dp"
-            android:src="@drawable/route"
-            android:contentDescription="@string/content_image"/>
-
-        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/confirm"
-            android:textColor="@color/colorWhite"
-            android:textSize="18sp"/>
+            android:layout_centerInParent="true"
+            android:contentDescription="@string/content_image"
+            android:src="@drawable/location" />
 
-    </LinearLayout>
+        <View
+            android:layout_width="0.5dp"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:background="@color/colorPrimary" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:contentDescription="@string/content_image"
-        android:src="@drawable/location"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_centerVertical="true"
+            android:background="@color/colorPrimary" />
 
-    <View
-        android:layout_width="0.5dp"
-        android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
-        android:background="@color/colorPrimary" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:layout_centerVertical="true"
-        android:background="@color/colorPrimary" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabLocation"
-        android:layout_above="@+id/lytConfirm"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_alignParentEnd="true"
-        android:scaleType="center"
-        app:backgroundTint="@color/colorWhite"
-        app:fabSize="mini"
-        app:fabCustomSize="@dimen/design_fab_size_mini"
-        app:srcCompat="@drawable/gps" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabLocation"
+            android:layout_above="@+id/lytConfirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:layout_alignParentEnd="true"
+            android:scaleType="center"
+            app:backgroundTint="@color/colorWhite"
+            app:fabSize="mini"
+            app:fabCustomSize="@dimen/design_fab_size_mini"
+            app:srcCompat="@drawable/gps"
+            android:onClick="onMyLocation"/>
 
 
-</RelativeLayout>
+    </RelativeLayout>
+</layout>

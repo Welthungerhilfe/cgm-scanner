@@ -30,23 +30,22 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.databinding.DataBindingUtil;
 
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
+
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.ActivityScanQrBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
@@ -63,16 +62,12 @@ import id.zelory.compressor.Compressor;
 public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConfirmListener, QRScanView.QRScanHandler {
     private final String TAG = QRScanActivity.class.getSimpleName();
 
-    @BindView(R.id.qrScanView)
-    QRScanView qrScanView;
 
-    @OnClick(R.id.imgClose)
-    void close(ImageView imgClose) {
+    public void close(View view) {
         finish();
     }
 
-    @BindView(R.id.ll_qr_details)
-    LinearLayout ll_qr_details;
+
 
     String qrCode;
 
@@ -98,12 +93,14 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
 
     int activityBehaviourType = AppConstants.QR_SCAN_REQUEST;
 
+    ActivityScanQrBinding activityScanQrBinding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_scan_qr);
-        ButterKnife.bind(this);
+        activityScanQrBinding = DataBindingUtil.setContentView(this,R.layout.activity_scan_qr);
+
         fileLogRepository = FileLogRepository.getInstance(QRScanActivity.this);
         personRepository = PersonRepository.getInstance(QRScanActivity.this);
         activityBehaviourType = getIntent().getIntExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST);
@@ -122,7 +119,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
     @Override
     public void onPause() {
         super.onPause();
-        qrScanView.stopCamera();
+        activityScanQrBinding.qrScanView.stopCamera();
     }
 
     @Override
@@ -132,8 +129,8 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         if (result) {
             if (CONFIRM_DIALOG_STEP == SCAN_QR_CODE_STEP) {
 
-                qrScanView.setResultHandler(this);
-                qrScanView.startCamera();
+                activityScanQrBinding.qrScanView.setResultHandler(this);
+                activityScanQrBinding.qrScanView.startCamera();
 
             } else if (CONFIRM_DIALOG_STEP == NO_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == EMPTY_QR_CODE_FOUND) {
                 finish();
@@ -150,8 +147,8 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == IMAGE_CAPTURED_REQUEST && resultCode == RESULT_OK) {
             try {
-                ll_qr_details.setVisibility(View.GONE);
-                qrScanView.setVisibility(View.GONE);
+                activityScanQrBinding.llQrDetails.setVisibility(View.GONE);
+                activityScanQrBinding.qrScanView.setVisibility(View.GONE);
                 Bitmap capturedImageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
                 File file = new File(imageUri.getPath());
                 if (file.exists()) {
@@ -183,8 +180,8 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
             return;
         }
 
-        qrScanView.stopCameraPreview();
-        qrScanView.stopCamera();
+        activityScanQrBinding.qrScanView.stopCameraPreview();
+        activityScanQrBinding.qrScanView.stopCamera();
         this.qrCode = qrCode;
 
         if (activityBehaviourType == AppConstants.QR_SCAN_REQUEST) {

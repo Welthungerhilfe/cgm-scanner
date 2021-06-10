@@ -21,41 +21,25 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.Toolbar;
-import android.view.MenuItem;
-import android.widget.TextView;
+import androidx.databinding.DataBindingUtil;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import android.view.MenuItem;
+
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.ActivityTestRemoteconfigBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class SettingsRemoteConfigActivity extends BaseActivity {
 
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-
-    @BindView(R.id.txtSettingDebug)
-    TextView txtSettingDebug;
-    @BindView(R.id.txtSettingSyncPeriod)
-    TextView txtSettingSyncPeriod;
-    @BindView(R.id.txtSettingAllowDelete)
-    TextView txtSettingAllowDelete;
-    @BindView(R.id.txtSettingAllowEdit)
-    TextView txtSettingAllowEdit;
-    @BindView(R.id.txtSettingEditTime)
-    TextView txtSettingEditTime;
-    @BindView(R.id.txtSettingMeasureVisibility)
-    TextView txtSettingMeasureVisibility;
 
     private RemoteConfig config;
 
+    ActivityTestRemoteconfigBinding activityTestRemoteconfigBinding;
+
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
-        setContentView(R.layout.activity_test_remoteconfig);
-
-        ButterKnife.bind(this);
+        activityTestRemoteconfigBinding = DataBindingUtil.setContentView(this,R.layout.activity_test_remoteconfig);
 
         config = new SessionManager(this).getRemoteConfig();
 
@@ -65,7 +49,7 @@ public class SettingsRemoteConfigActivity extends BaseActivity {
     }
 
     private void setupActionBar() {
-        setSupportActionBar(toolbar);
+        setSupportActionBar(activityTestRemoteconfigBinding.toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -77,12 +61,12 @@ public class SettingsRemoteConfigActivity extends BaseActivity {
     @SuppressLint("StaticFieldLeak")
     private void initUI() {
 
-        txtSettingDebug.setText(String.valueOf(config.isDebug()));
-        txtSettingSyncPeriod.setText(String.valueOf(config.getSync_period()));
-        txtSettingAllowDelete.setText(String.valueOf(config.isAllow_delete()));
-        txtSettingAllowEdit.setText(String.valueOf(config.isAllow_edit()));
-        txtSettingEditTime.setText(String.valueOf(config.getTime_to_allow_editing()));
-        txtSettingMeasureVisibility.setText(String.valueOf(config.isMeasure_visibility()));
+        activityTestRemoteconfigBinding.txtSettingDebug.setText(String.valueOf(config.isDebug()));
+        activityTestRemoteconfigBinding.txtSettingSyncPeriod.setText(String.valueOf(config.getSync_period()));
+        activityTestRemoteconfigBinding.txtSettingAllowDelete.setText(String.valueOf(config.isAllow_delete()));
+        activityTestRemoteconfigBinding.txtSettingAllowEdit.setText(String.valueOf(config.isAllow_edit()));
+        activityTestRemoteconfigBinding.txtSettingEditTime.setText(String.valueOf(config.getTime_to_allow_editing()));
+        activityTestRemoteconfigBinding.txtSettingMeasureVisibility.setText(String.valueOf(config.isMeasure_visibility()));
     }
 
     @Override

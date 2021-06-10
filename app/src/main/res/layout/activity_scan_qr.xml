@@ -1,66 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <de.welthungerhilfe.cgm.scanner.ui.views.QRScanView
-        android:id="@+id/qrScanView"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:gravity="center_vertical">
+        <de.welthungerhilfe.cgm.scanner.ui.views.QRScanView
+            android:id="@+id/qrScanView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-        <ImageView
-            android:id="@+id/imgClose"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:padding="4dp"
-            android:src="@drawable/close"
-            android:tint="@color/colorWhite"
-            tools:ignore="ContentDescription" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/txtTitle"
-            android:layout_width="wrap_content"
+            <ImageView
+                android:id="@+id/imgClose"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:padding="4dp"
+                android:src="@drawable/close"
+                android:tint="@color/colorWhite"
+                tools:ignore="ContentDescription"
+                android:onClick="close"/>
+
+            <TextView
+                android:id="@+id/txtTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:text="@string/search_by_qr"
+                android:textColor="@color/colorWhite"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_qr_details"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:text="@string/search_by_qr"
-            android:textColor="@color/colorWhite"
-            android:textSize="20sp"/>
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:paddingBottom="400dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp">
 
-    </LinearLayout>
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/qr"
+                android:scaleType="fitXY"
+                tools:ignore="ContentDescription" />
 
-    <LinearLayout
-        android:id="@+id/ll_qr_details"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:paddingBottom="400dp"
-        android:layout_marginLeft="50dp"
-        android:layout_marginRight="50dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_group_margin"
+                android:text="@string/scan_qr_code_desc"
+                android:textColor="@color/colorWhite"
+                android:textSize="18sp" />
 
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/qr"
-            android:scaleType="fitXY"
-            tools:ignore="ContentDescription" />
+        </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/activity_group_margin"
-            android:text="@string/scan_qr_code_desc"
-            android:textColor="@color/colorWhite"
-            android:textSize="18sp"/>
-
-    </LinearLayout>
-
-</RelativeLayout>
+    </RelativeLayout>
+</layout>

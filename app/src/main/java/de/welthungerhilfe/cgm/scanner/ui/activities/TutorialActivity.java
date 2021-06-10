@@ -22,35 +22,30 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import android.view.View;
-import android.widget.LinearLayout;
 
-import com.shuhart.stepview.StepView;
+
+import androidx.databinding.DataBindingUtil;
+
+
 
 import java.util.ArrayList;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.ActivityTutorialBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.TutorialFragment;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.ui.views.PagerView;
 
 public class TutorialActivity extends BaseActivity {
-    @BindView(R.id.viewPager)
-    PagerView viewPager;
-    @BindView(R.id.lytStart)
-    LinearLayout lytStart;
-    @BindView(R.id.stepView)
-    StepView stepView;
 
     ArrayList<TutorialData> tutorialDataList;
 
-    @OnClick(R.id.btnStart)
-    void startWork() {
+    ActivityTutorialBinding activityTutorialBinding;
+
+    public void startWork(View view) {
         new SessionManager(this).setTutorial(true);
         if (!again)
             startActivity(new Intent(this, MainActivity.class));
@@ -61,8 +56,7 @@ public class TutorialActivity extends BaseActivity {
 
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
-        setContentView(R.layout.activity_tutorial);
-        ButterKnife.bind(this);
+        activityTutorialBinding = DataBindingUtil.setContentView(this,R.layout.activity_tutorial);
 
         again = getIntent().getBooleanExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, false);
         tutorialDataList = getTutorialData();
@@ -73,25 +67,25 @@ public class TutorialActivity extends BaseActivity {
             adapter.addFragment(TutorialFragment.newInstance(tutorialDataList.get(i)), "tutorial" + (i + 1));
         }
 
-        viewPager.setAdapter(adapter);
-        viewPager.setOffscreenPageLimit(4);
-        viewPager.setSwipeEnabled(false);
+        activityTutorialBinding.viewPager.setAdapter(adapter);
+        activityTutorialBinding.viewPager.setOffscreenPageLimit(4);
+        activityTutorialBinding.viewPager.setSwipeEnabled(false);
     }
 
     public void gotoNext() {
-        int curpos = viewPager.getCurrentItem();
-        if (curpos + 1 >= viewPager.getOffscreenPageLimit()) {
+        int curpos = activityTutorialBinding.viewPager.getCurrentItem();
+        if (curpos + 1 >= activityTutorialBinding.viewPager.getOffscreenPageLimit()) {
             showCompleteView();
         } else {
-            viewPager.setCurrentItem(curpos + 1);
+            activityTutorialBinding.viewPager.setCurrentItem(curpos + 1);
         }
     }
 
     private void showCompleteView() {
-        lytStart.setVisibility(View.VISIBLE);
-        stepView.go(3,false);
-        stepView.done(true);
-        lytStart.animate()
+        activityTutorialBinding.lytStart.setVisibility(View.VISIBLE);
+        activityTutorialBinding.stepView.go(3,false);
+        activityTutorialBinding.stepView.done(true);
+        activityTutorialBinding.lytStart.animate()
                 .translationY(0)
                 .setDuration(500);
     }

@@ -18,92 +18,94 @@
   ~
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/colorWhite"
-    android:orientation="vertical"
-    android:layout_margin="20dp"
-    android:padding="20dp">
-
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:layout_marginBottom="20dp">
-
-        <ImageView
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:src="@drawable/ic_contact_support"
-            android:contentDescription="@string/content_image"/>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="10dp"
-            android:text="@string/contact_support"
-            android:textSize="16sp"
-            android:textColor="@color/colorGreyDark"
-            android:textStyle="bold"/>
-
-        <ImageView
-            android:id="@+id/recordAudio"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:background="@drawable/button_grey_round"
-            android:src="@drawable/ic_record_audio"
-            android:contentDescription="@string/content_image"/>
-
-    </LinearLayout>
-
-    <EditText
-        android:id="@+id/inputMessage"
-        android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:gravity="top|start"
-        android:background="@drawable/background_border"
-        android:textColor="@color/colorBlack"
-        android:textAlignment="gravity"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:orientation="horizontal"
-        android:gravity="right">
+        android:background="@color/colorWhite"
+        android:orientation="vertical"
+        android:layout_margin="20dp"
+        android:padding="20dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="10dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:gravity="bottom|end">
+            android:layout_marginBottom="20dp">
+
+            <ImageView
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:src="@drawable/ic_contact_support"
+                android:contentDescription="@string/content_image" />
 
             <TextView
-                android:id="@+id/txtCancel"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="20dp"
-                android:text="@string/cancel"
-                android:textColor="@color/colorGreen"
-                android:textAllCaps="true"
-                android:textSize="18sp"/>
-
-            <Button
-                android:id="@+id/txtOK"
-                android:layout_width="wrap_content"
-                android:layout_height="30dp"
+                android:layout_weight="1"
                 android:layout_marginStart="10dp"
-                android:background="@color/colorPrimary"
-                android:text="@string/ok"
-                android:textColor="@color/colorWhite"
-                android:textSize="18sp"/>
+                android:text="@string/contact_support"
+                android:textSize="16sp"
+                android:textColor="@color/colorGreyDark"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/recordAudio"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/button_grey_round"
+                android:src="@drawable/ic_record_audio"
+                android:contentDescription="@string/content_image" />
 
         </LinearLayout>
 
+        <EditText
+            android:id="@+id/inputMessage"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:gravity="top|start"
+            android:background="@drawable/background_border"
+            android:textColor="@color/colorBlack"
+            android:textAlignment="gravity" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            android:gravity="right">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"
+                android:orientation="horizontal"
+                android:gravity="bottom|end">
+
+                <TextView
+                    android:id="@+id/txtCancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="20dp"
+                    android:text="@string/cancel"
+                    android:textColor="@color/colorGreen"
+                    android:textAllCaps="true"
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/txtOK"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="10dp"
+                    android:background="@color/colorPrimary"
+                    android:text="@string/ok"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</layout>
