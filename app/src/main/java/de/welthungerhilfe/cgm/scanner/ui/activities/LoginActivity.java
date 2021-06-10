@@ -30,20 +30,15 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RadioButton;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
+import androidx.databinding.DataBindingUtil;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnCheckedChanged;
-import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.ActivityLoginBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
@@ -54,14 +49,15 @@ import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 
-public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback {
+public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback, CompoundButton.OnCheckedChangeListener {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
     private static final int STORAGE_PEMISSION = 100;
 
+    ActivityLoginBinding activityLoginBinding;
 
-    @OnClick({R.id.btnLoginMicrosoft})
-    void doSignIn() {
+
+    public void doSignIn(View view) {
         if (!checkStoragePermissions()) {
             return;
         }
@@ -77,11 +73,11 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         } else {
             if (session.getEnvironment() != AppConstants.ENV_UNKNOWN) {
                 Log.d(TAG, "Login into " + SyncingWorkManager.getAPI());
-                layout_login.setVisibility(View.GONE);
-                progressBar.setVisibility(View.VISIBLE);
+                activityLoginBinding.layoutLogin.setVisibility(View.GONE);
+                activityLoginBinding.loginProgressbar.setVisibility(View.VISIBLE);
                 new AuthenticationHandler(this, this, () -> runOnUiThread(() -> {
-                    layout_login.setVisibility(View.VISIBLE);
-                    progressBar.setVisibility(View.GONE);
+                    activityLoginBinding.layoutLogin.setVisibility(View.VISIBLE);
+                    activityLoginBinding.loginProgressbar.setVisibility(View.GONE);
                 }));
             } else {
                 Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
@@ -91,35 +87,31 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
     private SessionManager session;
 
-    @BindView(R.id.rb_sandbox)
-    RadioButton rb_sandbox;
-
-    @BindView(R.id.layout_login)
-    LinearLayout layout_login;
-
-    @BindView(R.id.login_progressbar)
-    ProgressBar progressBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         LanguageHelper.onAttach(this);
-        setContentView(R.layout.activity_login);
 
-        ButterKnife.bind(this);
+       activityLoginBinding = DataBindingUtil.setContentView(this,R.layout.activity_login);
 
         session = new SessionManager(this);
         try {
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             String version = pInfo.versionName;
             if (version.contains("dev")) {
-                rb_sandbox.setVisibility(View.VISIBLE);
+                activityLoginBinding.rbSandbox.setVisibility(View.VISIBLE);
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
         checkStoragePermissions();
+        activityLoginBinding.rbProdAah.setOnCheckedChangeListener(this);
+        activityLoginBinding.rbProdDarshna.setOnCheckedChangeListener(this);
+        activityLoginBinding.rbProdNamibia.setOnCheckedChangeListener(this);
+        activityLoginBinding.rbDemoQa.setOnCheckedChangeListener(this);
+        activityLoginBinding.rbSandbox.setOnCheckedChangeListener(this);
     }
 
 
@@ -138,8 +130,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     }
 
     private void startApp() {
-        layout_login.setVisibility(View.GONE);
-        progressBar.setVisibility(View.VISIBLE);
+        activityLoginBinding.layoutLogin.setVisibility(View.GONE);
+        activityLoginBinding.loginProgressbar.setVisibility(View.VISIBLE);
 
         new Thread(() -> {
             AppController.getInstance().getRootDirectory(getApplicationContext());
@@ -191,8 +183,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         }
     }
 
-    @OnCheckedChanged({R.id.rb_prod_darshna, R.id.rb_prod_aah, R.id.rb_prod_namibia, R.id.rb_demo_qa, R.id.rb_sandbox})
-    public void onRadioButtonCheckChanged(CompoundButton button, boolean checked) {
+    @Override
+    public void onCheckedChanged(CompoundButton button, boolean checked) {
         if (checked) {
             switch (button.getId()) {
                 case R.id.rb_prod_aah:
@@ -223,4 +215,6 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     private void requestStoragePermission() {
         requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PEMISSION);
     }
+
+
 }

@@ -41,16 +41,14 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.Toolbar;
+import androidx.databinding.DataBindingUtil;
 
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -72,11 +70,10 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.ActivityScanModeBinding;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
@@ -104,66 +101,32 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private enum ArtifactType { CALIBRATION, DEPTH, RGB };
 
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-    @BindView(R.id.imgScanStanding)
-    ImageView imgScanStanding;
-    @BindView(R.id.imgScanStandingCheck)
-    ImageView imgScanStandingCheck;
-    @BindView(R.id.txtScanStanding)
-    TextView txtScanStanding;
+    ActivityScanModeBinding activityScanModeBinding;
 
-    @BindView(R.id.imgScanLying)
-    ImageView imgScanLying;
-    @BindView(R.id.imgScanLyingCheck)
-    ImageView imgScanLyingCheck;
-    @BindView(R.id.txtScanLying)
-    TextView txtScanLying;
-
-    @BindView(R.id.btnScanComplete)
-    Button btnScanComplete;
-
-    @BindView(R.id.lytSelectMode)
-    LinearLayout lytSelectMode;
-
-    @BindView(R.id.lytScanSteps)
-    LinearLayout lytScanSteps;
-    @BindView(R.id.lytScanner)
-    LinearLayout lytScanner;
-
-    @BindView(R.id.scanType1)
-    ScanTypeView scanType1;
-    @BindView(R.id.scanType2)
-    ScanTypeView scanType2;
-    @BindView(R.id.scanType3)
-    ScanTypeView scanType3;
-
-    @OnClick(R.id.lytScanStanding)
-    void scanStanding() {
+    public void scanStanding(View view) {
         SCAN_MODE = AppConstants.SCAN_STANDING;
 
-        imgScanStanding.setImageResource(R.drawable.standing_active);
-        imgScanStandingCheck.setImageResource(R.drawable.radio_active);
-        txtScanStanding.setTextColor(getResources().getColor(R.color.colorBlack, getTheme()));
+        activityScanModeBinding.imgScanStanding.setImageResource(R.drawable.standing_active);
+        activityScanModeBinding.imgScanStandingCheck.setImageResource(R.drawable.radio_active);
+        activityScanModeBinding.txtScanStanding.setTextColor(getResources().getColor(R.color.colorBlack, getTheme()));
 
-        imgScanLying.setImageResource(R.drawable.lying_inactive);
-        imgScanLyingCheck.setImageResource(R.drawable.radio_inactive);
-        txtScanLying.setTextColor(getResources().getColor(R.color.colorGreyDark, getTheme()));
+        activityScanModeBinding.imgScanLying.setImageResource(R.drawable.lying_inactive);
+        activityScanModeBinding.imgScanLyingCheck.setImageResource(R.drawable.radio_inactive);
+        activityScanModeBinding.txtScanLying.setTextColor(getResources().getColor(R.color.colorGreyDark, getTheme()));
 
         changeMode();
     }
 
-    @OnClick(R.id.lytScanLying)
-    void scanLying() {
+    public void scanLying(View view) {
         SCAN_MODE = AppConstants.SCAN_LYING;
 
-        imgScanLying.setImageResource(R.drawable.lying_active);
-        imgScanLyingCheck.setImageResource(R.drawable.radio_active);
-        txtScanLying.setTextColor(getResources().getColor(R.color.colorBlack, getTheme()));
+        activityScanModeBinding.imgScanLying.setImageResource(R.drawable.lying_active);
+        activityScanModeBinding.imgScanLyingCheck.setImageResource(R.drawable.radio_active);
+        activityScanModeBinding.txtScanLying.setTextColor(getResources().getColor(R.color.colorBlack, getTheme()));
 
-        imgScanStanding.setImageResource(R.drawable.standing_inactive);
-        imgScanStandingCheck.setImageResource(R.drawable.radio_inactive);
-        txtScanStanding.setTextColor(getResources().getColor(R.color.colorGreyDark, getTheme()));
+        activityScanModeBinding.imgScanStanding.setImageResource(R.drawable.standing_inactive);
+        activityScanModeBinding.imgScanStandingCheck.setImageResource(R.drawable.radio_inactive);
+        activityScanModeBinding.txtScanStanding.setTextColor(getResources().getColor(R.color.colorGreyDark, getTheme()));
 
         changeMode();
     }
@@ -216,8 +179,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         startActivity(intent);
     }
 
-    @OnClick(R.id.btnScanComplete)
-    void completeScan() {
+    public void completeScan(View view) {
         measure.setCreatedBy(session.getUserEmail());
         measure.setDate(Utils.getUniversalTimestamp());
         measure.setAge(age);
@@ -359,9 +321,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             measure.setEnvironment(session.getEnvironment());
         }
 
-        setContentView(R.layout.activity_scan_mode);
-
-        ButterKnife.bind(this);
+        activityScanModeBinding = DataBindingUtil.setContentView(this,R.layout.activity_scan_mode);
 
         mTxtFeedback = findViewById(R.id.txtLightFeedback);
         mTitleView = findViewById(R.id.txtTitle);
@@ -396,9 +356,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
         }
 
-        scanType1.setListener(1, this);
-        scanType2.setListener(2, this);
-        scanType3.setListener(3, this);
+        activityScanModeBinding.scanType1.setListener(1, this);
+        activityScanModeBinding.scanType2.setListener(2, this);
+        activityScanModeBinding.scanType3.setListener(3, this);
     }
 
     @Override
@@ -422,7 +382,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void setupToolbar() {
-        setSupportActionBar(toolbar);
+        setSupportActionBar(activityScanModeBinding.toolbar);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
@@ -478,14 +438,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private void changeMode() {
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-            scanType1.setChildIcon(R.drawable.stand_front_active);
-            scanType2.setChildIcon(R.drawable.stand_side_active);
-            scanType3.setChildIcon(R.drawable.stand_back_active);
+            activityScanModeBinding.scanType1.setChildIcon(R.drawable.stand_front_active);
+            activityScanModeBinding.scanType2.setChildIcon(R.drawable.stand_side_active);
+            activityScanModeBinding.scanType3.setChildIcon(R.drawable.stand_back_active);
             getCamera().setPlaneMode(AbstractARCamera.PlaneMode.LOWEST);
         } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
-            scanType1.setChildIcon(R.drawable.lying_front_active);
-            scanType2.setChildIcon(R.drawable.lying_side_active);
-            scanType3.setChildIcon(R.drawable.lying_back_active);
+            activityScanModeBinding.scanType1.setChildIcon(R.drawable.lying_front_active);
+            activityScanModeBinding.scanType2.setChildIcon(R.drawable.lying_side_active);
+            activityScanModeBinding.scanType3.setChildIcon(R.drawable.lying_back_active);
             getCamera().setPlaneMode(AbstractARCamera.PlaneMode.VISIBLE);
         }
     }
@@ -494,27 +454,27 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         closeScan();
 
         if (SCAN_STEP == AppConstants.SCAN_STANDING_FRONT || SCAN_STEP == AppConstants.SCAN_LYING_FRONT) {
-            scanType1.goToNextStep();
+            activityScanModeBinding.scanType1.goToNextStep();
         } else if (SCAN_STEP == AppConstants.SCAN_STANDING_SIDE || SCAN_STEP == AppConstants.SCAN_LYING_SIDE) {
-            scanType2.goToNextStep();
+            activityScanModeBinding.scanType2.goToNextStep();
         } else if (SCAN_STEP == AppConstants.SCAN_STANDING_BACK || SCAN_STEP == AppConstants.SCAN_LYING_BACK) {
-            scanType3.goToNextStep();
+            activityScanModeBinding.scanType3.goToNextStep();
         }
         getScanQuality(SCAN_STEP);
     }
 
     private void showCompleteButton() {
-        btnScanComplete.setVisibility(View.VISIBLE);
-        btnScanComplete.requestFocus();
+        activityScanModeBinding.btnScanComplete.setVisibility(View.VISIBLE);
+        activityScanModeBinding.btnScanComplete.requestFocus();
 
-        int cx = (btnScanComplete.getLeft() + btnScanComplete.getRight()) / 2;
-        int cy = (btnScanComplete.getTop() + btnScanComplete.getBottom()) / 2;
+        int cx = (activityScanModeBinding.btnScanComplete.getLeft() + activityScanModeBinding.btnScanComplete.getRight()) / 2;
+        int cy = (activityScanModeBinding.btnScanComplete.getTop() + activityScanModeBinding.btnScanComplete.getBottom()) / 2;
 
-        int dx = Math.max(cx, btnScanComplete.getWidth() - cx);
-        int dy = Math.max(cy, btnScanComplete.getHeight() - cy);
+        int dx = Math.max(cx, activityScanModeBinding.btnScanComplete.getWidth() - cx);
+        int dy = Math.max(cy, activityScanModeBinding.btnScanComplete.getHeight() - cy);
         float finalRadius = (float) Math.hypot(dx, dy);
 
-        Animator animator = ViewAnimationUtils.createCircularReveal(btnScanComplete, cx, cy, 0, finalRadius);
+        Animator animator = ViewAnimationUtils.createCircularReveal(activityScanModeBinding.btnScanComplete, cx, cy, 0, finalRadius);
         animator.setInterpolator(new AccelerateDecelerateInterpolator());
         animator.setDuration(300);
         animator.start();
@@ -537,7 +497,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private void openScan() {
         fab.setImageResource(R.drawable.recorder);
-        lytScanner.setVisibility(View.VISIBLE);
+        activityScanModeBinding.lytScanner.setVisibility(View.VISIBLE);
         mTxtFeedback.setVisibility(View.GONE);
         mProgress = 0;
         progressBar.setProgress(0);
@@ -548,7 +508,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             Utils.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
         }
         mIsRecording = false;
-        lytScanner.setVisibility(View.GONE);
+        activityScanModeBinding.lytScanner.setVisibility(View.GONE);
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -584,14 +544,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 issues = String.format("%s\n - " + getString(R.string.score_light) + "%d%%", issues, Math.round(lightScore * 100));
 
                 if (scanStep == AppConstants.SCAN_STANDING_FRONT || scanStep == AppConstants.SCAN_LYING_FRONT) {
-                    scanType1.finishStep(issues);
+                    activityScanModeBinding.scanType1.finishStep(issues);
                     step1 = true;
                 } else if (scanStep == AppConstants.SCAN_STANDING_SIDE || scanStep == AppConstants.SCAN_LYING_SIDE) {
-                    scanType2.finishStep(issues);
+                    activityScanModeBinding.scanType2.finishStep(issues);
                     step2 = true;
 
                 } else if (scanStep == AppConstants.SCAN_STANDING_BACK || scanStep == AppConstants.SCAN_LYING_BACK) {
-                    scanType3.finishStep(issues);
+                    activityScanModeBinding.scanType3.finishStep(issues);
                     step3 = true;
                 }
 
@@ -663,8 +623,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     public void onBackPressed() {
-        if (lytScanner.getVisibility() == View.VISIBLE) {
-            lytScanner.setVisibility(View.GONE);
+        if (activityScanModeBinding.lytScanner.getVisibility() == View.VISIBLE) {
+            activityScanModeBinding.lytScanner.setVisibility(View.GONE);
         } else {
             finish();
         }
