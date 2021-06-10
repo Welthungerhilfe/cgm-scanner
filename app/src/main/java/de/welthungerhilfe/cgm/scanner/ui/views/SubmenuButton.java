@@ -32,6 +32,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 public class SubmenuButton extends LinearLayout {
 
     private MaterialRippleLayout mLayout;
+    private OnClickListener mListener;
     private TextView mText;
 
     public SubmenuButton(Context context, AttributeSet attrs, int defStyle) {
@@ -53,12 +54,16 @@ public class SubmenuButton extends LinearLayout {
 
     @Override
     public void setOnClickListener(OnClickListener listener) {
-        mLayout.setOnClickListener(listener);
+        mListener = listener;
+        if (mLayout != null) {
+            mLayout.setOnClickListener(mListener);
+        }
     }
 
     private void initView() {
         View root = inflate(getContext(), R.layout.lv_submenu_button, this);
         mLayout = root.findViewById(R.id.submenu_layout);
+        mLayout.setOnClickListener(mListener);
         mText = root.findViewById(R.id.submenu_text);
     }
 
