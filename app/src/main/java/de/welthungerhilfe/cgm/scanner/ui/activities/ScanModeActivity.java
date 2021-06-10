@@ -709,7 +709,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             } else if (AREngineCamera.shouldUseAREngine()) {
                 mCameraInstance = new AREngineCamera(this, depthMode, previewSize);
             } else {
-                mCameraInstance = new ARCoreCamera(this, depthMode, previewSize);
+                mCameraInstance = new ARCoreCamera(this, AbstractARCamera.DepthPreviewMode.OFF, previewSize);
             }
         }
         return mCameraInstance;

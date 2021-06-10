@@ -42,6 +42,7 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivitySettingsBinding;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
@@ -114,7 +115,7 @@ public class SettingsActivity extends BaseActivity {
         activitySettingsBinding.testQAlayout.setVisibility(showQA ? View.VISIBLE : View.GONE);
 
         activitySettingsBinding.txtSettingUuid.setText(2, Utils.getAndroidID(getContentResolver()));
-        if (TangoUtils.isTangoSupported()) {
+        if (!AREngineCamera.shouldUseAREngine()) {
             activitySettingsBinding.showDepthData.setVisibility(View.GONE);
         } else {
             activitySettingsBinding.showDepthData.setChecked(LocalPersistency.getBoolean(this, KEY_SHOW_DEPTH));
