@@ -231,6 +231,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private SessionManager session;
     private ArrayList<Float> heights;
 
+    private long mLastFeedbackTime;
     private TextView mTxtFeedback;
     private TextView mTitleView;
     private ProgressBar progressBar;
@@ -323,7 +324,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         activityScanModeBinding = DataBindingUtil.setContentView(this,R.layout.activity_scan_mode);
 
-        mTxtFeedback = findViewById(R.id.txtLightFeedback);
+        mTxtFeedback = findViewById(R.id.txtFeedback);
         mTitleView = findViewById(R.id.txtTitle);
         progressBar = findViewById(R.id.progressBar);
         fab = findViewById(R.id.fab_scan_result);
@@ -496,6 +497,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void openScan() {
+        getCamera().resetTrackingState();
         fab.setImageResource(R.drawable.recorder);
         activityScanModeBinding.lytScanner.setVisibility(View.VISIBLE);
         mTxtFeedback.setVisibility(View.GONE);
@@ -708,7 +710,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             } else if (AREngineCamera.shouldUseAREngine()) {
                 mCameraInstance = new AREngineCamera(this, depthMode, previewSize);
             } else {
-                mCameraInstance = new ARCoreCamera(this, depthMode, previewSize);
+                mCameraInstance = new ARCoreCamera(this, AbstractARCamera.DepthPreviewMode.OFF, previewSize);
             }
         }
         return mCameraInstance;
@@ -786,7 +788,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 mTitleView.setText(text);
             });*/
         }
-        onFeedbackUpdate(getCamera().getLightConditionState());
+        onFeedbackUpdate();
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
             long profile = System.currentTimeMillis();
@@ -856,7 +858,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onTangoDepthData(TangoPointCloudData pointCloudData, float[] position, float[] rotation, TangoCameraIntrinsics[] calibration) {
 
-        onFeedbackUpdate(getCamera().getLightConditionState());
+        onFeedbackUpdate();
         boolean hasCameraCalibration = mCameraInstance.hasCameraCalibration();
         String cameraCalibration = mCameraInstance.getCameraCalibration();
 
@@ -925,35 +927,77 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onFeedbackUpdate(AbstractARCamera.LightConditions state) {
+    private void onFeedbackUpdate() {
+        AbstractARCamera.LightConditions light = getCamera().getLightConditionState();
+        AbstractARCamera.TrackingState tracking = getCamera().getTrackingState();
         float distance = getCamera().getTargetDistance();
         runOnUiThread(() -> {
-            switch (state) {
-                case NORMAL:
-                    mTxtFeedback.setVisibility(View.GONE);
-                    break;
-                case BRIGHT:
-                    mTxtFeedback.setText(R.string.score_light_bright);
-                    mTxtFeedback.setVisibility(View.VISIBLE);
-                    break;
-                case DARK:
-                    mTxtFeedback.setText(R.string.score_light_dark);
-                    mTxtFeedback.setVisibility(View.VISIBLE);
-                    break;
+
+            if (SCAN_MODE == AppConstants.SCAN_STANDING) {
+                switch (tracking) {
+                    case INIT:
+                    case TRACKED:
+                        setFeedback(null);
+                        break;
+                    case LOST:
+                        setFeedback(getString(R.string.score_not_detected));
+                        break;
+                }
+            } else {
+                setFeedback(null);
+            }
+
+            if (mTxtFeedback.getVisibility() == View.GONE) {
+                switch (light) {
+                    case NORMAL:
+                        setFeedback(null);
+                        break;
+                    case BRIGHT:
+                        setFeedback(getString(R.string.score_light_bright));
+                        break;
+                    case DARK:
+                        setFeedback(getString(R.string.score_light_dark));
+                        break;
+                }
             }
 
             if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
                 if (distance < 0.7) {
-                    mTxtFeedback.setText(R.string.score_distance_close);
-                    mTxtFeedback.setVisibility(View.VISIBLE);
+                    setFeedback(getString(R.string.score_distance_close));
                 } else if (distance > 1.5f) {
-                    mTxtFeedback.setText(R.string.score_distance_far);
-                    mTxtFeedback.setVisibility(View.VISIBLE);
+                    setFeedback(getString(R.string.score_distance_far));
                 } else {
-                    mTxtFeedback.setVisibility(View.GONE);
+                    setFeedback(null);
                 }
             }
         });
+    }
+
+    private void setFeedback(String feedback) {
+        //check if the feedback changed
+        String lastFeedback = null;
+        if (mTxtFeedback.getVisibility() == View.VISIBLE) {
+            lastFeedback = mTxtFeedback.getText().toString();
+        }
+        boolean updated;
+        if ((feedback != null) && (lastFeedback != null)) {
+            updated = feedback.compareTo(lastFeedback) != 0;
+        } else {
+            updated = (feedback == null) != (lastFeedback == null);
+        }
+
+        //update feedback only if the previous feedback was visible at least for 1s
+        if (updated) {
+            if (System.currentTimeMillis() - mLastFeedbackTime > 1000) {
+                if (feedback == null) {
+                    mTxtFeedback.setVisibility(View.GONE);
+                } else {
+                    mTxtFeedback.setText(feedback);
+                    mTxtFeedback.setVisibility(View.VISIBLE);
+                }
+                mLastFeedbackTime = System.currentTimeMillis();
+            }
+        }
     }
 
     private void onProcessArtifact(File artifactFile, ArtifactType type) {

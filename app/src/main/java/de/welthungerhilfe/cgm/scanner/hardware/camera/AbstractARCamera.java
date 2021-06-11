@@ -52,6 +52,8 @@ public abstract class AbstractARCamera {
 
     public enum PreviewSize { CLIPPED, FULL, SMALL };
 
+    public enum TrackingState { INIT, TRACKED, LOST };
+
     protected final String CALIBRATION_IMAGE_FILE = "plant.jpg";
 
     //app connection
@@ -86,6 +88,7 @@ public abstract class AbstractARCamera {
     protected LightConditions mLight;
     protected PlaneMode mPlaneMode;
     protected PreviewSize mPreviewSize;
+    protected TrackingState mTrackingState;
     protected long mLastBright;
     protected long mLastDark;
     protected long mSessionStart;
@@ -275,6 +278,12 @@ public abstract class AbstractARCamera {
                 bestPlane = getPlane(depth, planes, calibration, matrix, position);
                 Bitmap mask = mComputerVision.getDepthPreviewCenter(depth, bestPlane, calibration, matrix, otherColors);
                 mTargetHeight = mComputerVision.getCenterFocusHeight(mask, depth, bestPlane, calibration, matrix);
+
+                boolean valid = mComputerVision.isFocusValid(mask) && (mTargetHeight >= 0.45);
+                if (!otherColors && !valid) {
+                    mask = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+                }
+                updateTrackingState(valid);
                 return mask;
             case PLANE:
                 matrix = mComputerVision.matrixCalculate(position, rotation);
@@ -310,6 +319,14 @@ public abstract class AbstractARCamera {
 
     public float getTargetHeight() {
         return mTargetHeight;
+    }
+
+    public TrackingState getTrackingState() {
+        return mTrackingState;
+    }
+
+    public void resetTrackingState() {
+        mTrackingState = TrackingState.INIT;
     }
 
     public void setPlaneMode(PlaneMode mode) {
@@ -407,5 +424,21 @@ public abstract class AbstractARCamera {
                 return mComputerVision.getPlaneVisible(depth, planes, calibration, matrix, position);
         }
         return Integer.MAX_VALUE;
+    }
+
+    private void updateTrackingState(boolean valid) {
+        switch (mTrackingState) {
+            case INIT:
+            case LOST:
+                if (valid) {
+                    mTrackingState = TrackingState.TRACKED;
+                }
+                break;
+            case TRACKED:
+                if (!valid) {
+                    mTrackingState = TrackingState.LOST;
+                }
+                break;
+        }
     }
 }
