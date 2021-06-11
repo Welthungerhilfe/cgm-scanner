@@ -28,33 +28,29 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.databinding.DataBindingUtil;
 
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
 
 import java.io.File;
 
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.ActivitySettingsBinding;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
-import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.database.BackupManager;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
-import de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView;
-import de.welthungerhilfe.cgm.scanner.ui.views.ToggleView;
-import de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -63,44 +59,19 @@ public class SettingsActivity extends BaseActivity {
     public static final String KEY_SHOW_DEPTH = "KEY_SHOW_DEPTH";
     public static final String KEY_UPLOAD_WIFI = "KEY_UPLOAD_WIFI";
 
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-    @BindView(R.id.txtSettingVersion)
-    TwoLineTextView txtSettingVersion;
-    @BindView(R.id.txtSettingUuid)
-    TwoLineTextView txtSettingUuid;
-    @BindView(R.id.txtSettingAccount)
-    TwoLineTextView txtSettingAccount;
-    @BindView(R.id.txtSettingAzureAccount)
-    TwoLineTextView txtSettingAzureAccount;
 
-    @BindView(R.id.radioEnglish)
-    LanguageRadioView radioEnglish;
-    @BindView(R.id.radioGerman)
-    LanguageRadioView radioGerman;
-    @BindView(R.id.radioHindi)
-    LanguageRadioView radioHindi;
 
-    @BindView(R.id.txtSettingBackupDate)
-    TwoLineTextView txtSettingBackupDate;
 
-    @BindView(R.id.upload_over_wifi)
-    ToggleView switchUploadOverWifi;
 
-    @BindView(R.id.testQAlayout)
-    LinearLayout layoutTestQA;
-    @BindView(R.id.show_depth_data)
-    ToggleView switchShowDepth;
 
-    @OnClick(R.id.submenu_performance_measurement)
-    void openPerformanceMeasurement(View view) {
+
+    public void openPerformanceMeasurement(View view) {
         Intent intent = new Intent(SettingsActivity.this, SettingsPerformanceActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
     }
 
-    @OnClick(R.id.submenu_remote_config)
-    void openRemoteConfig(View view) {
+    public void openRemoteConfig(View view) {
         Intent intent = new Intent(SettingsActivity.this, SettingsRemoteConfigActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
@@ -108,12 +79,11 @@ public class SettingsActivity extends BaseActivity {
 
     private SessionManager session;
     private AlertDialog progressDialog;
+    ActivitySettingsBinding activitySettingsBinding;
 
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
-        setContentView(R.layout.activity_settings);
-
-        ButterKnife.bind(this);
+        activitySettingsBinding = DataBindingUtil.setContentView(this,R.layout.activity_settings);
         session = new SessionManager(this);
         RemoteConfig config = session.getRemoteConfig();
 
@@ -128,7 +98,7 @@ public class SettingsActivity extends BaseActivity {
     }
 
     private void setupActionBar() {
-        setSupportActionBar(toolbar);
+        setSupportActionBar(activitySettingsBinding.toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -142,43 +112,43 @@ public class SettingsActivity extends BaseActivity {
         boolean devUser = session.getUserEmail().endsWith("@childgrowthmonitor.org");
         boolean devVersion = BuildConfig.VERSION_NAME.endsWith("dev");
         boolean showQA = BuildConfig.DEBUG || devUser || devVersion;
-        layoutTestQA.setVisibility(showQA ? View.VISIBLE : View.GONE);
+        activitySettingsBinding.testQAlayout.setVisibility(showQA ? View.VISIBLE : View.GONE);
 
-        txtSettingUuid.setText(2, Utils.getAndroidID(getContentResolver()));
-        if (TangoUtils.isTangoSupported()) {
-            switchShowDepth.setVisibility(View.GONE);
+        activitySettingsBinding.txtSettingUuid.setText(2, Utils.getAndroidID(getContentResolver()));
+        if (!AREngineCamera.shouldUseAREngine()) {
+            activitySettingsBinding.showDepthData.setVisibility(View.GONE);
         } else {
-            switchShowDepth.setChecked(LocalPersistency.getBoolean(this, KEY_SHOW_DEPTH));
-            switchShowDepth.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_SHOW_DEPTH, value));
+            activitySettingsBinding.showDepthData.setChecked(LocalPersistency.getBoolean(this, KEY_SHOW_DEPTH));
+            activitySettingsBinding.showDepthData.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_SHOW_DEPTH, value));
         }
 
-        switchUploadOverWifi.setChecked(LocalPersistency.getBoolean(this, KEY_UPLOAD_WIFI));
-        switchUploadOverWifi.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_UPLOAD_WIFI, value));
+        activitySettingsBinding.uploadOverWifi.setChecked(LocalPersistency.getBoolean(this, KEY_UPLOAD_WIFI));
+        activitySettingsBinding.uploadOverWifi.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_UPLOAD_WIFI, value));
 
-        txtSettingVersion.setText(2, Utils.getAppVersion(this));
-        txtSettingAccount.setText(1, session.getUserEmail());
-        txtSettingAzureAccount.setText(1, SyncingWorkManager.getAPI());
+        activitySettingsBinding.txtSettingVersion.setText(2, Utils.getAppVersion(this));
+        activitySettingsBinding.txtSettingAccount.setText(1, session.getUserEmail());
+        activitySettingsBinding.txtSettingAzureAccount.setText(1, SyncingWorkManager.getAPI());
 
         String code = session.getLanguage();
         switch (code) {
             case AppConstants.LANG_ENGLISH:
-                radioEnglish.setChecked(true);
+                activitySettingsBinding.radioEnglish.setChecked(true);
                 break;
             case AppConstants.LANG_GERMAN:
-                radioGerman.setChecked(true);
+                activitySettingsBinding.radioGerman.setChecked(true);
                 break;
             case AppConstants.LANG_HINDI:
-                radioHindi.setChecked(true);
+                activitySettingsBinding.radioHindi.setChecked(true);
                 break;
         }
-        radioEnglish.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_ENGLISH));
-        radioGerman.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_GERMAN));
-        radioHindi.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_HINDI));
+        activitySettingsBinding.radioEnglish.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_ENGLISH));
+        activitySettingsBinding.radioGerman.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_GERMAN));
+        activitySettingsBinding.radioHindi.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_HINDI));
 
         if (session.getBackupTimestamp() == 0)
-            txtSettingBackupDate.setText(2, getString(R.string.no_backups));
+            activitySettingsBinding.txtSettingBackupDate.setText(2, getString(R.string.no_backups));
         else
-            txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, session.getBackupTimestamp()));
+            activitySettingsBinding.txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, session.getBackupTimestamp()));
 
         findViewById(R.id.btnBackupNow).setOnClickListener(view -> {
 
@@ -222,7 +192,7 @@ public class SettingsActivity extends BaseActivity {
         File dir = AppController.getInstance().getPublicAppDirectory(this);
         BackupManager.doBackup(this, dir, timestamp, () -> {
             session.setBackupTimestamp(timestamp);
-            txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, timestamp));
+            activitySettingsBinding.txtSettingBackupDate.setText(2, DataFormat.timestamp(getBaseContext(), DataFormat.TimestampFormat.DATE, timestamp));
             progressDialog.dismiss();
         });
     }

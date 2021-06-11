@@ -41,16 +41,14 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.Toolbar;
+import androidx.databinding.DataBindingUtil;
 
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -72,98 +70,63 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.camera.Depthmap;
+import de.welthungerhilfe.cgm.scanner.databinding.ActivityScanModeBinding;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
-import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.camera.ARCoreCamera;
-import de.welthungerhilfe.cgm.scanner.camera.AREngineCamera;
-import de.welthungerhilfe.cgm.scanner.camera.AbstractARCamera;
-import de.welthungerhilfe.cgm.scanner.camera.TangoCamera;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoCamera;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
-import de.welthungerhilfe.cgm.scanner.utils.BitmapUtils;
-import de.welthungerhilfe.cgm.scanner.camera.TangoUtils;
-import de.welthungerhilfe.cgm.scanner.utils.IO;
+import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, TangoCamera.TangoCameraListener, ScanTypeView.ScanTypeListener {
 
     private enum ArtifactType { CALIBRATION, DEPTH, RGB };
 
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-    @BindView(R.id.imgScanStanding)
-    ImageView imgScanStanding;
-    @BindView(R.id.imgScanStandingCheck)
-    ImageView imgScanStandingCheck;
-    @BindView(R.id.txtScanStanding)
-    TextView txtScanStanding;
+    ActivityScanModeBinding activityScanModeBinding;
 
-    @BindView(R.id.imgScanLying)
-    ImageView imgScanLying;
-    @BindView(R.id.imgScanLyingCheck)
-    ImageView imgScanLyingCheck;
-    @BindView(R.id.txtScanLying)
-    TextView txtScanLying;
-
-    @BindView(R.id.btnScanComplete)
-    Button btnScanComplete;
-
-    @BindView(R.id.lytSelectMode)
-    LinearLayout lytSelectMode;
-
-    @BindView(R.id.lytScanSteps)
-    LinearLayout lytScanSteps;
-    @BindView(R.id.lytScanner)
-    LinearLayout lytScanner;
-
-    @BindView(R.id.scanType1)
-    ScanTypeView scanType1;
-    @BindView(R.id.scanType2)
-    ScanTypeView scanType2;
-    @BindView(R.id.scanType3)
-    ScanTypeView scanType3;
-
-    @OnClick(R.id.lytScanStanding)
-    void scanStanding() {
+    public void scanStanding(View view) {
         SCAN_MODE = AppConstants.SCAN_STANDING;
 
-        imgScanStanding.setImageResource(R.drawable.standing_active);
-        imgScanStandingCheck.setImageResource(R.drawable.radio_active);
-        txtScanStanding.setTextColor(getResources().getColor(R.color.colorBlack, getTheme()));
+        activityScanModeBinding.imgScanStanding.setImageResource(R.drawable.standing_active);
+        activityScanModeBinding.imgScanStandingCheck.setImageResource(R.drawable.radio_active);
+        activityScanModeBinding.txtScanStanding.setTextColor(getResources().getColor(R.color.colorBlack, getTheme()));
 
-        imgScanLying.setImageResource(R.drawable.lying_inactive);
-        imgScanLyingCheck.setImageResource(R.drawable.radio_inactive);
-        txtScanLying.setTextColor(getResources().getColor(R.color.colorGreyDark, getTheme()));
+        activityScanModeBinding.imgScanLying.setImageResource(R.drawable.lying_inactive);
+        activityScanModeBinding.imgScanLyingCheck.setImageResource(R.drawable.radio_inactive);
+        activityScanModeBinding.txtScanLying.setTextColor(getResources().getColor(R.color.colorGreyDark, getTheme()));
 
         changeMode();
     }
 
-    @OnClick(R.id.lytScanLying)
-    void scanLying() {
+    public void scanLying(View view) {
         SCAN_MODE = AppConstants.SCAN_LYING;
 
-        imgScanLying.setImageResource(R.drawable.lying_active);
-        imgScanLyingCheck.setImageResource(R.drawable.radio_active);
-        txtScanLying.setTextColor(getResources().getColor(R.color.colorBlack, getTheme()));
+        activityScanModeBinding.imgScanLying.setImageResource(R.drawable.lying_active);
+        activityScanModeBinding.imgScanLyingCheck.setImageResource(R.drawable.radio_active);
+        activityScanModeBinding.txtScanLying.setTextColor(getResources().getColor(R.color.colorBlack, getTheme()));
 
-        imgScanStanding.setImageResource(R.drawable.standing_inactive);
-        imgScanStandingCheck.setImageResource(R.drawable.radio_inactive);
-        txtScanStanding.setTextColor(getResources().getColor(R.color.colorGreyDark, getTheme()));
+        activityScanModeBinding.imgScanStanding.setImageResource(R.drawable.standing_inactive);
+        activityScanModeBinding.imgScanStandingCheck.setImageResource(R.drawable.radio_inactive);
+        activityScanModeBinding.txtScanStanding.setTextColor(getResources().getColor(R.color.colorGreyDark, getTheme()));
 
         changeMode();
     }
@@ -216,8 +179,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         startActivity(intent);
     }
 
-    @OnClick(R.id.btnScanComplete)
-    void completeScan() {
+    public void completeScan(View view) {
         measure.setCreatedBy(session.getUserEmail());
         measure.setDate(Utils.getUniversalTimestamp());
         measure.setAge(age);
@@ -269,6 +231,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private SessionManager session;
     private ArrayList<Float> heights;
 
+    private long mLastFeedbackTime;
     private TextView mTxtFeedback;
     private TextView mTitleView;
     private ProgressBar progressBar;
@@ -359,11 +322,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             measure.setEnvironment(session.getEnvironment());
         }
 
-        setContentView(R.layout.activity_scan_mode);
+        activityScanModeBinding = DataBindingUtil.setContentView(this,R.layout.activity_scan_mode);
 
-        ButterKnife.bind(this);
-
-        mTxtFeedback = findViewById(R.id.txtLightFeedback);
+        mTxtFeedback = findViewById(R.id.txtFeedback);
         mTitleView = findViewById(R.id.txtTitle);
         progressBar = findViewById(R.id.progressBar);
         fab = findViewById(R.id.fab_scan_result);
@@ -396,9 +357,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
         }
 
-        scanType1.setListener(1, this);
-        scanType2.setListener(2, this);
-        scanType3.setListener(3, this);
+        activityScanModeBinding.scanType1.setListener(1, this);
+        activityScanModeBinding.scanType2.setListener(2, this);
+        activityScanModeBinding.scanType3.setListener(3, this);
     }
 
     @Override
@@ -422,7 +383,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void setupToolbar() {
-        setSupportActionBar(toolbar);
+        setSupportActionBar(activityScanModeBinding.toolbar);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
@@ -478,14 +439,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private void changeMode() {
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-            scanType1.setChildIcon(R.drawable.stand_front_active);
-            scanType2.setChildIcon(R.drawable.stand_side_active);
-            scanType3.setChildIcon(R.drawable.stand_back_active);
+            activityScanModeBinding.scanType1.setChildIcon(R.drawable.stand_front_active);
+            activityScanModeBinding.scanType2.setChildIcon(R.drawable.stand_side_active);
+            activityScanModeBinding.scanType3.setChildIcon(R.drawable.stand_back_active);
             getCamera().setPlaneMode(AbstractARCamera.PlaneMode.LOWEST);
         } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
-            scanType1.setChildIcon(R.drawable.lying_front_active);
-            scanType2.setChildIcon(R.drawable.lying_side_active);
-            scanType3.setChildIcon(R.drawable.lying_back_active);
+            activityScanModeBinding.scanType1.setChildIcon(R.drawable.lying_front_active);
+            activityScanModeBinding.scanType2.setChildIcon(R.drawable.lying_side_active);
+            activityScanModeBinding.scanType3.setChildIcon(R.drawable.lying_back_active);
             getCamera().setPlaneMode(AbstractARCamera.PlaneMode.VISIBLE);
         }
     }
@@ -494,27 +455,27 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         closeScan();
 
         if (SCAN_STEP == AppConstants.SCAN_STANDING_FRONT || SCAN_STEP == AppConstants.SCAN_LYING_FRONT) {
-            scanType1.goToNextStep();
+            activityScanModeBinding.scanType1.goToNextStep();
         } else if (SCAN_STEP == AppConstants.SCAN_STANDING_SIDE || SCAN_STEP == AppConstants.SCAN_LYING_SIDE) {
-            scanType2.goToNextStep();
+            activityScanModeBinding.scanType2.goToNextStep();
         } else if (SCAN_STEP == AppConstants.SCAN_STANDING_BACK || SCAN_STEP == AppConstants.SCAN_LYING_BACK) {
-            scanType3.goToNextStep();
+            activityScanModeBinding.scanType3.goToNextStep();
         }
         getScanQuality(SCAN_STEP);
     }
 
     private void showCompleteButton() {
-        btnScanComplete.setVisibility(View.VISIBLE);
-        btnScanComplete.requestFocus();
+        activityScanModeBinding.btnScanComplete.setVisibility(View.VISIBLE);
+        activityScanModeBinding.btnScanComplete.requestFocus();
 
-        int cx = (btnScanComplete.getLeft() + btnScanComplete.getRight()) / 2;
-        int cy = (btnScanComplete.getTop() + btnScanComplete.getBottom()) / 2;
+        int cx = (activityScanModeBinding.btnScanComplete.getLeft() + activityScanModeBinding.btnScanComplete.getRight()) / 2;
+        int cy = (activityScanModeBinding.btnScanComplete.getTop() + activityScanModeBinding.btnScanComplete.getBottom()) / 2;
 
-        int dx = Math.max(cx, btnScanComplete.getWidth() - cx);
-        int dy = Math.max(cy, btnScanComplete.getHeight() - cy);
+        int dx = Math.max(cx, activityScanModeBinding.btnScanComplete.getWidth() - cx);
+        int dy = Math.max(cy, activityScanModeBinding.btnScanComplete.getHeight() - cy);
         float finalRadius = (float) Math.hypot(dx, dy);
 
-        Animator animator = ViewAnimationUtils.createCircularReveal(btnScanComplete, cx, cy, 0, finalRadius);
+        Animator animator = ViewAnimationUtils.createCircularReveal(activityScanModeBinding.btnScanComplete, cx, cy, 0, finalRadius);
         animator.setInterpolator(new AccelerateDecelerateInterpolator());
         animator.setDuration(300);
         animator.start();
@@ -536,8 +497,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void openScan() {
+        getCamera().resetTrackingState();
         fab.setImageResource(R.drawable.recorder);
-        lytScanner.setVisibility(View.VISIBLE);
+        activityScanModeBinding.lytScanner.setVisibility(View.VISIBLE);
         mTxtFeedback.setVisibility(View.GONE);
         mProgress = 0;
         progressBar.setProgress(0);
@@ -548,7 +510,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             Utils.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
         }
         mIsRecording = false;
-        lytScanner.setVisibility(View.GONE);
+        activityScanModeBinding.lytScanner.setVisibility(View.GONE);
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -584,14 +546,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 issues = String.format("%s\n - " + getString(R.string.score_light) + "%d%%", issues, Math.round(lightScore * 100));
 
                 if (scanStep == AppConstants.SCAN_STANDING_FRONT || scanStep == AppConstants.SCAN_LYING_FRONT) {
-                    scanType1.finishStep(issues);
+                    activityScanModeBinding.scanType1.finishStep(issues);
                     step1 = true;
                 } else if (scanStep == AppConstants.SCAN_STANDING_SIDE || scanStep == AppConstants.SCAN_LYING_SIDE) {
-                    scanType2.finishStep(issues);
+                    activityScanModeBinding.scanType2.finishStep(issues);
                     step2 = true;
 
                 } else if (scanStep == AppConstants.SCAN_STANDING_BACK || scanStep == AppConstants.SCAN_LYING_BACK) {
-                    scanType3.finishStep(issues);
+                    activityScanModeBinding.scanType3.finishStep(issues);
                     step3 = true;
                 }
 
@@ -663,8 +625,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     public void onBackPressed() {
-        if (lytScanner.getVisibility() == View.VISIBLE) {
-            lytScanner.setVisibility(View.GONE);
+        if (activityScanModeBinding.lytScanner.getVisibility() == View.VISIBLE) {
+            activityScanModeBinding.lytScanner.setVisibility(View.GONE);
         } else {
             finish();
         }
@@ -748,7 +710,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             } else if (AREngineCamera.shouldUseAREngine()) {
                 mCameraInstance = new AREngineCamera(this, depthMode, previewSize);
             } else {
-                mCameraInstance = new ARCoreCamera(this, depthMode, previewSize);
+                mCameraInstance = new ARCoreCamera(this, AbstractARCamera.DepthPreviewMode.OFF, previewSize);
             }
         }
         return mCameraInstance;
@@ -769,7 +731,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
                     currentImgFilename = currentImgFilename.replace('/', '_');
                     File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
-                    BitmapUtils.writeBitmapToFile(bitmap, artifactFile);
+                    BitmapHelper.writeBitmapToFile(bitmap, artifactFile);
                     onProcessArtifact(artifactFile, ArtifactType.RGB);
 
                     //save RGB metadata
@@ -826,11 +788,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 mTitleView.setText(text);
             });*/
         }
-        onFeedbackUpdate(getCamera().getLightConditionState());
+        onFeedbackUpdate();
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
             long profile = System.currentTimeMillis();
-            Depthmap depthmap = getCamera().extractDepthmap(image, position, rotation, mCameraInstance instanceof AREngineCamera);
+            Depthmap depthmap = getCamera().extractDepthmap(image, position, rotation);
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
             mNumberOfFilesWritten++;
 
@@ -896,7 +858,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onTangoDepthData(TangoPointCloudData pointCloudData, float[] position, float[] rotation, TangoCameraIntrinsics[] calibration) {
 
-        onFeedbackUpdate(getCamera().getLightConditionState());
+        onFeedbackUpdate();
         boolean hasCameraCalibration = mCameraInstance.hasCameraCalibration();
         String cameraCalibration = mCameraInstance.getCameraCalibration();
 
@@ -965,35 +927,77 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onFeedbackUpdate(AbstractARCamera.LightConditions state) {
+    private void onFeedbackUpdate() {
+        AbstractARCamera.LightConditions light = getCamera().getLightConditionState();
+        AbstractARCamera.TrackingState tracking = getCamera().getTrackingState();
         float distance = getCamera().getTargetDistance();
         runOnUiThread(() -> {
-            switch (state) {
-                case NORMAL:
-                    mTxtFeedback.setVisibility(View.GONE);
-                    break;
-                case BRIGHT:
-                    mTxtFeedback.setText(R.string.score_light_bright);
-                    mTxtFeedback.setVisibility(View.VISIBLE);
-                    break;
-                case DARK:
-                    mTxtFeedback.setText(R.string.score_light_dark);
-                    mTxtFeedback.setVisibility(View.VISIBLE);
-                    break;
+
+            if (SCAN_MODE == AppConstants.SCAN_STANDING) {
+                switch (tracking) {
+                    case INIT:
+                    case TRACKED:
+                        setFeedback(null);
+                        break;
+                    case LOST:
+                        setFeedback(getString(R.string.score_not_detected));
+                        break;
+                }
+            } else {
+                setFeedback(null);
+            }
+
+            if (mTxtFeedback.getVisibility() == View.GONE) {
+                switch (light) {
+                    case NORMAL:
+                        setFeedback(null);
+                        break;
+                    case BRIGHT:
+                        setFeedback(getString(R.string.score_light_bright));
+                        break;
+                    case DARK:
+                        setFeedback(getString(R.string.score_light_dark));
+                        break;
+                }
             }
 
             if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
                 if (distance < 0.7) {
-                    mTxtFeedback.setText(R.string.score_distance_close);
-                    mTxtFeedback.setVisibility(View.VISIBLE);
+                    setFeedback(getString(R.string.score_distance_close));
                 } else if (distance > 1.5f) {
-                    mTxtFeedback.setText(R.string.score_distance_far);
-                    mTxtFeedback.setVisibility(View.VISIBLE);
+                    setFeedback(getString(R.string.score_distance_far));
                 } else {
-                    mTxtFeedback.setVisibility(View.GONE);
+                    setFeedback(null);
                 }
             }
         });
+    }
+
+    private void setFeedback(String feedback) {
+        //check if the feedback changed
+        String lastFeedback = null;
+        if (mTxtFeedback.getVisibility() == View.VISIBLE) {
+            lastFeedback = mTxtFeedback.getText().toString();
+        }
+        boolean updated;
+        if ((feedback != null) && (lastFeedback != null)) {
+            updated = feedback.compareTo(lastFeedback) != 0;
+        } else {
+            updated = (feedback == null) != (lastFeedback == null);
+        }
+
+        //update feedback only if the previous feedback was visible at least for 1s
+        if (updated) {
+            if (System.currentTimeMillis() - mLastFeedbackTime > 1000) {
+                if (feedback == null) {
+                    mTxtFeedback.setVisibility(View.GONE);
+                } else {
+                    mTxtFeedback.setText(feedback);
+                    mTxtFeedback.setVisibility(View.VISIBLE);
+                }
+                mLastFeedbackTime = System.currentTimeMillis();
+            }
+        }
     }
 
     private void onProcessArtifact(File artifactFile, ArtifactType type) {

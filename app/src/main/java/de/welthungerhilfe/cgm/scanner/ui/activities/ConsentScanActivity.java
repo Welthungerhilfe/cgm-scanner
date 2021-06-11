@@ -46,17 +46,17 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import androidx.annotation.NonNull;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.core.content.ContextCompat;
+import androidx.databinding.DataBindingUtil;
+
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+
 import android.widget.Toast;
 
 import com.google.zxing.BinaryBitmap;
@@ -78,18 +78,16 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.ActivityConsentScanBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
-import de.welthungerhilfe.cgm.scanner.utils.IO;
+import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ConsentScanActivity extends BaseActivity {
@@ -102,6 +100,8 @@ public class ConsentScanActivity extends BaseActivity {
     private QRCodeReader mQrCodeReader;
     private FileLogRepository fileLogRepository;
     SessionManager sessionManager;
+
+    ActivityConsentScanBinding activityConsentScanBinding;
 
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -281,15 +281,15 @@ public class ConsentScanActivity extends BaseActivity {
                     confirmDialog.setMessage(message);
                     confirmDialog.show();
 
-                    btnContinue.setVisibility(View.VISIBLE);
+                    activityConsentScanBinding.btnContinue.setVisibility(View.VISIBLE);
                 });
             } catch (ReaderException | ArrayIndexOutOfBoundsException e) {
                 e.printStackTrace();
                 Log.e("QR Result - ", "QR code is not readable");
                 runOnUiThread(() -> {
-                    txtAlert.setText(R.string.qr_not_readable);
-                    txtAlert.setVisibility(View.VISIBLE);
-                    btnContinue.setVisibility(View.GONE);
+                    activityConsentScanBinding.txtAlert.setText(R.string.qr_not_readable);
+                    activityConsentScanBinding.txtAlert.setVisibility(View.VISIBLE);
+                    activityConsentScanBinding.btnContinue.setVisibility(View.GONE);
                 });
             } finally {
                 mQrCodeReader.reset();
@@ -470,31 +470,24 @@ public class ConsentScanActivity extends BaseActivity {
         }
     }
 
-    @BindView(R.id.cameraPreview)
-    TextureView mTextureView;
-    @BindView(R.id.btnRetake)
-    Button btnRetake;
-    @BindView(R.id.btnContinue)
-    Button btnContinue;
-    @BindView(R.id.txtAlert)
-    TextView txtAlert;
 
-    @OnClick(R.id.fab_scan_result)
-    void onTakePicture(FloatingActionButton fab_scan_result) {
+
+
+    public void onTakePicture(View view) {
         takePicture();
     }
 
-    @OnClick(R.id.btnRetake)
-    void onRetake(Button btnRetake) {
-        txtAlert.setVisibility(View.GONE);
-        btnContinue.setVisibility(View.GONE);
+
+    public void onRetake(View view) {
+        activityConsentScanBinding.txtAlert.setVisibility(View.GONE);
+        activityConsentScanBinding.btnContinue.setVisibility(View.GONE);
         unlockFocus();
     }
 
     private String qrCode;
 
-    @OnClick(R.id.btnContinue)
-    void onContinue(Button btnContinue) {
+
+    public void onContinue(View view) {
         Intent intent = new Intent(this, CreateDataActivity.class);
         intent.putExtra(AppConstants.EXTRA_QR, qrCode);
         startActivity(intent);
@@ -504,8 +497,7 @@ public class ConsentScanActivity extends BaseActivity {
 
     protected void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
-        setContentView(R.layout.activity_consent_scan);
-        ButterKnife.bind(this);
+        activityConsentScanBinding = DataBindingUtil.setContentView(this,R.layout.activity_consent_scan);
         sessionManager = new SessionManager(this);
 
         initVariables();
@@ -525,10 +517,10 @@ public class ConsentScanActivity extends BaseActivity {
         // available, and "onSurfaceTextureAvailable" will not be called. In that case, we can open
         // a camera and start preview from here (otherwise, we wait until the surface is ready in
         // the SurfaceTextureListener).
-        if (mTextureView.isAvailable()) {
-            openCamera(mTextureView.getWidth(), mTextureView.getHeight());
+        if (activityConsentScanBinding.cameraPreview.isAvailable()) {
+            openCamera(activityConsentScanBinding.cameraPreview.getWidth(), activityConsentScanBinding.cameraPreview.getHeight());
         } else {
-            mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
+            activityConsentScanBinding.cameraPreview.setSurfaceTextureListener(mSurfaceTextureListener);
         }
     }
 
@@ -673,7 +665,7 @@ public class ConsentScanActivity extends BaseActivity {
      */
     private void createCameraPreviewSession() {
         try {
-            SurfaceTexture texture = mTextureView.getSurfaceTexture();
+            SurfaceTexture texture = activityConsentScanBinding.cameraPreview.getSurfaceTexture();
             assert texture != null;
 
             // We configure the size of default buffer to be the size of camera preview we want.
@@ -734,7 +726,7 @@ public class ConsentScanActivity extends BaseActivity {
      * @param viewHeight The height of `mTextureView`
      */
     private void configureTransform(int viewWidth, int viewHeight) {
-        if (null == mTextureView || null == mPreviewSize) {
+        if (null == activityConsentScanBinding.cameraPreview || null == mPreviewSize) {
             return;
         }
         int rotation = getWindowManager().getDefaultDisplay().getRotation();
@@ -754,7 +746,7 @@ public class ConsentScanActivity extends BaseActivity {
         } else if (Surface.ROTATION_180 == rotation) {
             matrix.postRotate(180, centerX, centerY);
         }
-        mTextureView.setTransform(matrix);
+        activityConsentScanBinding.cameraPreview.setTransform(matrix);
     }
 
     /**

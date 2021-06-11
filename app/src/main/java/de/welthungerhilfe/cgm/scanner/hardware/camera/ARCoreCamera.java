@@ -16,7 +16,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package de.welthungerhilfe.cgm.scanner.camera;
+package de.welthungerhilfe.cgm.scanner.hardware.camera;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -52,8 +52,9 @@ import java.util.ArrayList;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
-import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 
 public class ARCoreCamera extends AbstractARCamera implements GLSurfaceView.Renderer {
 
@@ -128,6 +129,7 @@ public class ARCoreCamera extends AbstractARCamera implements GLSurfaceView.Rend
       config.setFocusMode(Config.FocusMode.AUTO);
       config.setLightEstimationMode(Config.LightEstimationMode.AMBIENT_INTENSITY);
       config.setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL);
+      config.setUpdateMode(Config.UpdateMode.BLOCKING);
       mSession.configure(config);
 
       // Choose the camera configuration
@@ -308,7 +310,9 @@ public class ARCoreCamera extends AbstractARCamera implements GLSurfaceView.Rend
       //process camera data
       onProcessColorData(frame.acquireCameraImage());
       if (mSession.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
-        onProcessDepthData(frame.acquireRawDepthImage());
+        if ((mFrameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
+          onProcessDepthData(frame.acquireRawDepthImage());
+        }
       }
       mFrameIndex++;
 

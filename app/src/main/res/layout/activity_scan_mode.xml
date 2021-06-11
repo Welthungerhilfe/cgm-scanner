@@ -17,283 +17,293 @@
   ~     along with this program.  If not, see <http://www.gnu.org/licenses/>.
   ~
   -->
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorWhite">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout
-        android:id="@+id/lytScanSteps"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                android:paddingEnd="5dp"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
-
-        </com.google.android.material.appbar.AppBarLayout>
+        android:background="@color/colorWhite">
 
         <LinearLayout
-            android:id="@+id/lytSelectMode"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="false">
-
-            <com.balysv.materialripple.MaterialRippleLayout
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:layout_weight="1"
-                app:mrl_rippleOverlay="true">
-
-                <LinearLayout
-                    android:id="@+id/lytScanStanding"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:id="@+id/imgScanStanding"
-                        android:layout_width="wrap_content"
-                        android:layout_height="35dp"
-                        android:src="@drawable/standing_active"
-                        tools:ignore="ContentDescription" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_section_margin"
-                        android:gravity="center">
-                        <ImageView
-                            android:id="@+id/imgScanStandingCheck"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/radio_active"
-                            tools:ignore="ContentDescription" />
-                        <TextView
-                            android:id="@+id/txtScanStanding"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/activity_group_margin"
-                            android:text="@string/mode_standing"
-                            android:textColor="@color/colorBlack"/>
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </com.balysv.materialripple.MaterialRippleLayout>
-
-            <com.balysv.materialripple.MaterialRippleLayout
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:layout_weight="1"
-                app:mrl_rippleOverlay="true">
-
-                <LinearLayout
-                    android:id="@+id/lytScanLying"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:id="@+id/imgScanLying"
-                        android:layout_width="wrap_content"
-                        android:layout_height="35dp"
-                        android:src="@drawable/lying_inactive"
-                        tools:ignore="ContentDescription" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_section_margin"
-                        android:gravity="center">
-                        <ImageView
-                            android:id="@+id/imgScanLyingCheck"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/radio_inactive"
-                            tools:ignore="ContentDescription" />
-                        <TextView
-                            android:id="@+id/txtScanLying"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/activity_group_margin"
-                            android:text="@string/mode_lying"
-                            android:textColor="@color/colorGreyDark"/>
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </com.balysv.materialripple.MaterialRippleLayout>
-
-        </LinearLayout>
-
-        <androidx.core.widget.NestedScrollView
+            android:id="@+id/lytScanSteps"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/colorGreenDark">
+            android:orientation="vertical">
 
-            <LinearLayout
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/appBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:animateLayoutChanges="true"
-                android:orientation="vertical">
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-                <de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView
-                    android:id="@+id/scanType1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:scantypecolor="@color/colorGreenLight"
-                    app:scantypeicon="@drawable/stand_front_active"
-                    app:scantypetitle="@string/front_scan"
-                    app:scantypetext="@string/help_front_view_2" />
-
-                <de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView
-                    android:id="@+id/scanType2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:scantypecolor="@color/colorGreenMedium"
-                    app:scantypeicon="@drawable/stand_side_active"
-                    app:scantypetitle="@string/side_scan"
-                    app:scantypetext="@string/help_lateral_view" />
-
-                <de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView
-                    android:id="@+id/scanType3"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:scantypecolor="@color/colorGreenDark"
-                    app:scantypeicon="@drawable/stand_back_active"
-                    app:scantypetitle="@string/back_scan"
-                    app:scantypetext="@string/help_back_view" />
-
-                <Button
-                    android:id="@+id/btnScanComplete"
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginLeft="55dp"
-                    android:layout_marginRight="55dp"
-                    android:background="@drawable/button_pink_round"
-                    android:text="@string/complete_scan"
-                    android:textColor="@color/colorWhite"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:visibility="gone"/>
+                    android:background="?attr/colorPrimary"
+                    android:paddingEnd="5dp"
+                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+            </com.google.android.material.appbar.AppBarLayout>
+
+            <LinearLayout
+                android:id="@+id/lytSelectMode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+
+                <com.balysv.materialripple.MaterialRippleLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:layout_weight="1"
+                    app:mrl_rippleOverlay="true">
+
+                    <LinearLayout
+                        android:id="@+id/lytScanStanding"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:onClick="scanStanding">
+
+                        <ImageView
+                            android:id="@+id/imgScanStanding"
+                            android:layout_width="wrap_content"
+                            android:layout_height="35dp"
+                            android:src="@drawable/standing_active"
+                            tools:ignore="ContentDescription" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/activity_section_margin"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:id="@+id/imgScanStandingCheck"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/radio_active"
+                                tools:ignore="ContentDescription" />
+
+                            <TextView
+                                android:id="@+id/txtScanStanding"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/activity_group_margin"
+                                android:text="@string/mode_standing"
+                                android:textColor="@color/colorBlack" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </com.balysv.materialripple.MaterialRippleLayout>
+
+                <com.balysv.materialripple.MaterialRippleLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:layout_weight="1"
+                    app:mrl_rippleOverlay="true">
+
+                    <LinearLayout
+                        android:id="@+id/lytScanLying"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:onClick="scanLying">
+
+                        <ImageView
+                            android:id="@+id/imgScanLying"
+                            android:layout_width="wrap_content"
+                            android:layout_height="35dp"
+                            android:src="@drawable/lying_inactive"
+                            tools:ignore="ContentDescription" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/activity_section_margin"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:id="@+id/imgScanLyingCheck"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/radio_inactive"
+                                tools:ignore="ContentDescription" />
+
+                            <TextView
+                                android:id="@+id/txtScanLying"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/activity_group_margin"
+                                android:text="@string/mode_lying"
+                                android:textColor="@color/colorGreyDark" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </com.balysv.materialripple.MaterialRippleLayout>
 
             </LinearLayout>
 
-        </androidx.core.widget.NestedScrollView>
+            <androidx.core.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/colorGreenDark">
 
-    </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:animateLayoutChanges="true"
+                    android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/lytScanner"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone">
+                    <de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView
+                        android:id="@+id/scanType1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:scantypecolor="@color/colorGreenLight"
+                        app:scantypeicon="@drawable/stand_front_active"
+                        app:scantypetitle="@string/front_scan"
+                        app:scantypetext="@string/help_front_view_2" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:gravity="center_vertical"
-            android:background="@color/colorBlack">
+                    <de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView
+                        android:id="@+id/scanType2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:scantypecolor="@color/colorGreenMedium"
+                        app:scantypeicon="@drawable/stand_side_active"
+                        app:scantypetitle="@string/side_scan"
+                        app:scantypetext="@string/help_lateral_view" />
 
-            <ImageView
-                android:id="@+id/imgClose"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/close"
-                android:tint="@color/colorWhite"
-                tools:ignore="ContentDescription" />
+                    <de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView
+                        android:id="@+id/scanType3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:scantypecolor="@color/colorGreenDark"
+                        app:scantypeicon="@drawable/stand_back_active"
+                        app:scantypetitle="@string/back_scan"
+                        app:scantypetext="@string/help_back_view" />
 
-            <TextView
-                android:id="@+id/txtTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/activity_group_margin"
-                android:textColor="@color/colorWhite"
-                android:textSize="20sp"/>
+                    <Button
+                        android:id="@+id/btnScanComplete"
+                        android:layout_width="match_parent"
+                        android:layout_height="?attr/actionBarSize"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginBottom="15dp"
+                        android:layout_marginLeft="55dp"
+                        android:layout_marginRight="55dp"
+                        android:background="@drawable/button_pink_round"
+                        android:text="@string/complete_scan"
+                        android:textColor="@color/colorWhite"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:visibility="gone"
+                        android:onClick="completeScan"/>
+
+                </LinearLayout>
+
+            </androidx.core.widget.NestedScrollView>
 
         </LinearLayout>
 
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/lytScanner"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:visibility="gone">
 
-            <android.opengl.GLSurfaceView
-                android:id="@+id/surfaceview"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="?attr/actionBarSize"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:gravity="center_vertical"
+                android:background="@color/colorBlack">
 
-            <ImageView
-                android:id="@+id/colorCameraPreview"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                <ImageView
+                    android:id="@+id/imgClose"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/close"
+                    android:tint="@color/colorWhite"
+                    tools:ignore="ContentDescription" />
 
-            <ImageView
-                android:id="@+id/depthCameraPreview"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                <TextView
+                    android:id="@+id/txtTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/activity_group_margin"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/txtLightFeedback"
-                android:background="#80000000"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:padding="20dp"
-                android:textColor="@color/colorWhite"
-                android:textSize="40sp"
-                android:visibility="gone"/>
-
-            <ProgressBar
-                android:id="@+id/progressBar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="24dp"
-                android:layout_marginTop="-10dp"
-                android:progress="0"/>
+            </LinearLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
-                android:layout_alignParentBottom="true">
+                android:layout_height="match_parent">
 
-                <com.google.android.material.floatingactionbutton.FloatingActionButton
-                    android:id="@+id/fab_scan_result"
+                <android.opengl.GLSurfaceView
+                    android:id="@+id/surfaceview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <ImageView
+                    android:id="@+id/colorCameraPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <ImageView
+                    android:id="@+id/depthCameraPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:id="@+id/txtFeedback"
+                    android:background="#80000000"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    app:fabSize="mini"
-                    app:fabCustomSize="@dimen/design_fab_size_mini"
-                    app:srcCompat="@drawable/recorder"
-                    app:backgroundTint="@color/colorWhite" />
+                    android:gravity="center"
+                    android:padding="20dp"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="40sp"
+                    android:visibility="gone" />
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="24dp"
+                    android:layout_marginTop="-10dp"
+                    android:progress="0" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="32dp"
+                    android:layout_alignParentBottom="true">
+
+                    <com.google.android.material.floatingactionbutton.FloatingActionButton
+                        android:id="@+id/fab_scan_result"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        app:fabSize="mini"
+                        app:fabCustomSize="@dimen/design_fab_size_mini"
+                        app:srcCompat="@drawable/recorder"
+                        app:backgroundTint="@color/colorWhite" />
+
+                </RelativeLayout>
 
             </RelativeLayout>
 
-        </RelativeLayout>
 
-
-    </LinearLayout>
-</FrameLayout>
+        </LinearLayout>
+    </FrameLayout>
+</layout>

@@ -6,8 +6,8 @@ android {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 410
-        versionName "4.1.0"
+        versionCode 411
+        versionName "4.1.1"
         manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", arengineValue:"optional", tangoRequired:"false"]
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         javaCompileOptions {
@@ -81,8 +81,6 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0' //android lifecycle extensions
     implementation 'com.google.android.material:material:1.1.0' //app layout theme
     implementation 'androidx.multidex:multidex:2.0.1' //support more dex files in one APK
-    implementation 'com.jakewharton:butterknife:10.2.1' //helper to link UI item easily from code
-    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.1' //compiler to link UI item easily from code
     implementation 'io.reactivex.rxjava3:rxjava:3.0.0' //RxJava core
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0' //RxJava for Android
     implementation 'androidx.work:work-runtime:2.3.3' //workmanager for background task

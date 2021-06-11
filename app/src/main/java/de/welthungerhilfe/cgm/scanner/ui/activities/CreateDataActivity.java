@@ -21,6 +21,7 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.Manifest;
 
+import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Context;
@@ -30,20 +31,15 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import com.google.android.material.tabs.TabLayout;
 import androidx.core.app.ActivityCompat;
-import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 
 import java.util.List;
 
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.ActivityCreateBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
@@ -58,20 +54,9 @@ public class CreateDataActivity extends BaseActivity {
 
     public String qrCode;
 
-    @BindView(R.id.container)
-    CoordinatorLayout container;
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-    @BindView(R.id.tabs)
-    TabLayout tabs;
-    @BindView(R.id.viewpager)
-    ViewPager viewpager;
-
     PersonalDataFragment personalFragment;
     MeasuresDataFragment measureFragment;
     GrowthDataFragment growthFragment;
-
-
 
     ViewModelProvider.Factory factory;
 
@@ -79,11 +64,12 @@ public class CreateDataActivity extends BaseActivity {
 
     public Loc location = null;
 
+    ActivityCreateBinding activityCreateBinding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create);
-        ButterKnife.bind(this);
+        activityCreateBinding = DataBindingUtil.setContentView(this,R.layout.activity_create);
 
 
         getCurrentLocation();
@@ -97,12 +83,12 @@ public class CreateDataActivity extends BaseActivity {
         factory = new CreateDataViewModelProvideFactory(this);
         viewModel = new ViewModelProvider(this,factory).get(CreateDataViewModel.class);
         viewModel.getCurrentTab().observe(this, tab -> {
-            viewpager.setCurrentItem(tab);
+            activityCreateBinding.viewpager.setCurrentItem(tab);
         });
     }
 
     private void setupActionBar() {
-        setSupportActionBar(toolbar);
+        setSupportActionBar(activityCreateBinding.toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -120,10 +106,10 @@ public class CreateDataActivity extends BaseActivity {
         adapter.addFragment(personalFragment, getResources().getString(R.string.tab_personal));
         adapter.addFragment(measureFragment, getResources().getString(R.string.tab_measures));
         adapter.addFragment(growthFragment, getResources().getString(R.string.tab_growth));
-        viewpager.setOffscreenPageLimit(3);
-        viewpager.setAdapter(adapter);
+        activityCreateBinding.viewpager.setOffscreenPageLimit(3);
+        activityCreateBinding.viewpager.setAdapter(adapter);
 
-        tabs.setupWithViewPager(viewpager);
+        activityCreateBinding.tabs.setupWithViewPager(activityCreateBinding.viewpager);
     }
 
     @Override

@@ -21,18 +21,19 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.SwitchCompat;
-import androidx.appcompat.widget.Toolbar;
+
+import androidx.databinding.DataBindingUtil;
+
 import android.view.MenuItem;
 import android.widget.CompoundButton;
-import android.widget.TextView;
+
 
 import java.util.ArrayList;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.utils.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.databinding.ActivityTestPerformanceBinding;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -52,42 +53,13 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
     public static final String KEY_TEST_RESULT_RECEIVE = "KEY_TEST_RESULT_RECEIVE";
     public static final String KEY_TEST_RESULT_AVERAGE = "KEY_TEST_RESULT_AVERAGE";
 
-
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-
-    @BindView(R.id.profile_performance_switch)
-    SwitchCompat switchPerformance;
-    @BindView(R.id.profile_result_switch)
-    SwitchCompat switchResult;
-
-    @BindView(R.id.profile_performance_color_time)
-    TextView txtProfileColorTime;
-    @BindView(R.id.profile_performance_depth_time)
-    TextView txtProfileDepthTime;
-    @BindView(R.id.profile_performance_color_size)
-    TextView txtProfileColorSize;
-    @BindView(R.id.profile_performance_depth_size)
-    TextView txtProfileDepthSize;
-
-    @BindView(R.id.profile_result_timestamp_scan)
-    TextView txtResultScan;
-    @BindView(R.id.profile_result_timestamp_start)
-    TextView txtResultStart;
-    @BindView(R.id.profile_result_timestamp_end)
-    TextView txtResultEnd;
-    @BindView(R.id.profile_result_timestamp_receive)
-    TextView txtResultReceive;
-    @BindView(R.id.profile_result_timestamp_average)
-    TextView txtResultAverage;
-
     private boolean running = false;
+
+    ActivityTestPerformanceBinding activityTestPerformanceBinding;
 
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
-        setContentView(R.layout.activity_test_performance);
-
-        ButterKnife.bind(this);
+        activityTestPerformanceBinding = DataBindingUtil.setContentView(this,R.layout.activity_test_performance);
 
         setupActionBar();
 
@@ -95,7 +67,7 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
     }
 
     private void setupActionBar() {
-        setSupportActionBar(toolbar);
+        setSupportActionBar(activityTestPerformanceBinding.toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -106,11 +78,11 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
 
     @SuppressLint("StaticFieldLeak")
     private void initUI() {
-        switchPerformance.setChecked(LocalPersistency.getBoolean(this, KEY_TEST_PERFORMANCE));
-        switchResult.setChecked(LocalPersistency.getBoolean(this, KEY_TEST_RESULT));
+        activityTestPerformanceBinding.profilePerformanceSwitch.setChecked(LocalPersistency.getBoolean(this, KEY_TEST_PERFORMANCE));
+        activityTestPerformanceBinding.profileResultSwitch.setChecked(LocalPersistency.getBoolean(this, KEY_TEST_RESULT));
 
-        switchPerformance.setOnCheckedChangeListener(this);
-        switchResult.setOnCheckedChangeListener(this);
+        activityTestPerformanceBinding.profilePerformanceSwitch.setOnCheckedChangeListener(this);
+        activityTestPerformanceBinding.profileResultSwitch.setOnCheckedChangeListener(this);
     }
 
     @Override
@@ -184,15 +156,15 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
             //update UI
             runOnUiThread(() -> {
                 if (running) {
-                    txtProfileColorSize.setText(DataFormat.filesize(this, profileColorSize));
-                    txtProfileDepthSize.setText(DataFormat.filesize(this, profileDepthSize));
-                    txtProfileColorTime.setText(DataFormat.time(this, profileColorTime));
-                    txtProfileDepthTime.setText(DataFormat.time(this, profileDepthTime));
-                    txtResultScan.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultScan));
-                    txtResultStart.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultStart));
-                    txtResultEnd.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultEnd));
-                    txtResultReceive.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultReceive));
-                    txtResultAverage.setText(DataFormat.time(this, resultAverage));
+                    activityTestPerformanceBinding.profilePerformanceColorSize.setText(DataFormat.filesize(this, profileColorSize));
+                    activityTestPerformanceBinding.profilePerformanceDepthTime.setText(DataFormat.filesize(this, profileDepthSize));
+                    activityTestPerformanceBinding.profilePerformanceColorTime.setText(DataFormat.time(this, profileColorTime));
+                    activityTestPerformanceBinding.profilePerformanceDepthTime.setText(DataFormat.time(this, profileDepthTime));
+                    activityTestPerformanceBinding.profileResultTimestampScan.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultScan));
+                    activityTestPerformanceBinding.profileResultTimestampStart.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultStart));
+                    activityTestPerformanceBinding.profileResultTimestampEnd.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultEnd));
+                    activityTestPerformanceBinding.profileResultTimestampReceive.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultReceive));
+                    activityTestPerformanceBinding.profileResultTimestampAverage.setText(DataFormat.time(this, resultAverage));
                 }
             });
 

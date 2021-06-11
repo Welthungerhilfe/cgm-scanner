@@ -18,145 +18,151 @@
   ~
   -->
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-    
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorGreyLight"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorGreyXLight"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/txtAddress"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_toStartOf="@+id/imgLocation"
-                android:text=""
-                android:textSize="16sp"/>
-            <ImageView
-                android:id="@+id/imgLocation"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerInParent="true"
-                android:src="@drawable/location"
-                android:contentDescription="@string/content_image"/>
-        </RelativeLayout>
-
-    </LinearLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <com.google.android.gms.maps.MapView
-            android:id="@+id/mapView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@+id/lytBottom"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/view_round"
-            android:elevation="5dp"
-            android:orientation="vertical"
-            android:padding="10dp">
+            android:background="@color/colorGreyLight"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:background="@color/colorGreyXLight"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/txtAddress"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/circuit"
+                    android:layout_centerInParent="true"
+                    android:layout_toStartOf="@+id/imgLocation"
+                    android:text=""
                     android:textSize="16sp" />
 
-                <TextView
-                    android:id="@+id/txtRadius"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/txtUnit"
-                    android:text="0"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:id="@+id/txtUnit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <ImageView
+                    android:id="@+id/imgLocation"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_alignParentEnd="true"
-                    android:layout_marginStart="5dp"
-                    android:text="@string/unit_km"
-                    android:textAllCaps="true"
-                    android:textSize="16sp" />
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/location"
+                    android:contentDescription="@string/content_image" />
             </RelativeLayout>
 
-            <androidx.appcompat.widget.AppCompatSeekBar
-                android:id="@+id/seekRadius"
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.google.android.gms.maps.MapView
+                android:id="@+id/mapView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/lytBottom" />
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:max="30"
-                android:progress="0"
-                android:maxHeight="35dp"
-                android:minHeight="35dp" />
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/view_round"
+                android:elevation="5dp"
+                android:orientation="vertical"
+                android:padding="10dp">
 
-        </LinearLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-        <LinearLayout
-            android:id="@+id/lytBottom"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            android:background="@color/colorPrimary"
-            android:orientation="horizontal"
-            android:gravity="right">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/circuit"
+                        android:textSize="16sp" />
 
-            <TextView
-                android:id="@+id/txtCancel"
-                android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/txtRadius"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toStartOf="@+id/txtUnit"
+                        android:text="0"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/txtUnit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginStart="5dp"
+                        android:text="@string/unit_km"
+                        android:textAllCaps="true"
+                        android:textSize="16sp" />
+                </RelativeLayout>
+
+                <androidx.appcompat.widget.AppCompatSeekBar
+                    android:id="@+id/seekRadius"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:max="30"
+                    android:progress="0"
+                    android:maxHeight="35dp"
+                    android:minHeight="35dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/lytBottom"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
-                android:text="@string/cancel"
-                android:textSize="18sp"
-                android:textColor="@color/colorWhite"
-                android:textAllCaps="true"/>
+                android:layout_alignParentBottom="true"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:background="@color/colorPrimary"
+                android:orientation="horizontal"
+                android:gravity="right">
 
-            <TextView
-                android:id="@+id/txtOK"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ok"
-                android:textSize="18sp"
-                android:textColor="@color/colorWhite"
-                android:textAllCaps="true"/>
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/txtCancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="20dp"
+                    android:text="@string/cancel"
+                    android:textSize="18sp"
+                    android:textColor="@color/colorWhite"
+                    android:textAllCaps="true"
+                    android:onClick="onCancel"/>
 
-    </RelativeLayout>
+                <TextView
+                    android:id="@+id/txtOK"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ok"
+                    android:textSize="18sp"
+                    android:textColor="@color/colorWhite"
+                    android:textAllCaps="true"
+                    android:onClick="onOK"/>
+            </LinearLayout>
 
-</LinearLayout>
+        </RelativeLayout>
+
+    </LinearLayout>
+</layout>

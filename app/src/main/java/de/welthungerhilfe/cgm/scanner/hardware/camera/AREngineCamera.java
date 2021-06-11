@@ -16,7 +16,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package de.welthungerhilfe.cgm.scanner.camera;
+package de.welthungerhilfe.cgm.scanner.hardware.camera;
 
 import android.Manifest;
 import android.app.Activity;
@@ -52,8 +52,8 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
-import de.welthungerhilfe.cgm.scanner.utils.LogFileUtils;
-import de.welthungerhilfe.cgm.scanner.utils.RenderToTexture;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.gpu.RenderToTexture;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AREngineCamera extends AbstractARCamera {
