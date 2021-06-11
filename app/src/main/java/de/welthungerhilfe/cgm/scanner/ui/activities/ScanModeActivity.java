@@ -231,6 +231,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private SessionManager session;
     private ArrayList<Float> heights;
 
+    private long mLastFeedbackTime;
     private TextView mTxtFeedback;
     private TextView mTitleView;
     private ProgressBar progressBar;
@@ -936,45 +937,67 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 switch (tracking) {
                     case INIT:
                     case TRACKED:
-                        mTxtFeedback.setVisibility(View.GONE);
+                        setFeedback(null);
                         break;
                     case LOST:
-                        mTxtFeedback.setText("Child not fully detected");
-                        mTxtFeedback.setVisibility(View.VISIBLE);
+                        setFeedback(getString(R.string.score_not_detected));
                         break;
                 }
             } else {
-                mTxtFeedback.setVisibility(View.GONE);
+                setFeedback(null);
             }
 
             if (mTxtFeedback.getVisibility() == View.GONE) {
                 switch (light) {
                     case NORMAL:
-                        mTxtFeedback.setVisibility(View.GONE);
+                        setFeedback(null);
                         break;
                     case BRIGHT:
-                        mTxtFeedback.setText(R.string.score_light_bright);
-                        mTxtFeedback.setVisibility(View.VISIBLE);
+                        setFeedback(getString(R.string.score_light_bright));
                         break;
                     case DARK:
-                        mTxtFeedback.setText(R.string.score_light_dark);
-                        mTxtFeedback.setVisibility(View.VISIBLE);
+                        setFeedback(getString(R.string.score_light_dark));
                         break;
                 }
             }
 
             if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
                 if (distance < 0.7) {
-                    mTxtFeedback.setText(R.string.score_distance_close);
-                    mTxtFeedback.setVisibility(View.VISIBLE);
+                    setFeedback(getString(R.string.score_distance_close));
                 } else if (distance > 1.5f) {
-                    mTxtFeedback.setText(R.string.score_distance_far);
-                    mTxtFeedback.setVisibility(View.VISIBLE);
+                    setFeedback(getString(R.string.score_distance_far));
                 } else {
-                    mTxtFeedback.setVisibility(View.GONE);
+                    setFeedback(null);
                 }
             }
         });
+    }
+
+    private void setFeedback(String feedback) {
+        //check if the feedback changed
+        String lastFeedback = null;
+        if (mTxtFeedback.getVisibility() == View.VISIBLE) {
+            lastFeedback = mTxtFeedback.getText().toString();
+        }
+        boolean updated;
+        if ((feedback != null) && (lastFeedback != null)) {
+            updated = feedback.compareTo(lastFeedback) != 0;
+        } else {
+            updated = (feedback == null) != (lastFeedback == null);
+        }
+
+        //update feedback only if the previous feedback was visible at least for 1s
+        if (updated) {
+            if (System.currentTimeMillis() - mLastFeedbackTime > 1000) {
+                if (feedback == null) {
+                    mTxtFeedback.setVisibility(View.GONE);
+                } else {
+                    mTxtFeedback.setText(feedback);
+                    mTxtFeedback.setVisibility(View.VISIBLE);
+                }
+                mLastFeedbackTime = System.currentTimeMillis();
+            }
+        }
     }
 
     private void onProcessArtifact(File artifactFile, ArtifactType type) {
