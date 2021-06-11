@@ -417,7 +417,9 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
 
     private void addIssue(IssueType issue) {
         DeviceCheckActivity activity = (DeviceCheckActivity) getActivity();
-        Objects.requireNonNull(activity).addIssue(issue);
+        if (activity != null) {
+            activity.addIssue(issue);
+        }
     }
 
     private final Runnable batteryCheck = new Runnable() {
