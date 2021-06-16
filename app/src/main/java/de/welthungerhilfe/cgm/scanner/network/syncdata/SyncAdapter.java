@@ -40,6 +40,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
+import de.welthungerhilfe.cgm.scanner.datasource.models.SyncPersonsResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PostScanResultrepository;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
@@ -191,6 +192,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     processDeviceQueue();
                     processConsentSheet();
                     processMeasureResults();
+                    getSyncPersons();
                     migrateEnvironmentColumns();
 
                     session.setSyncTimestamp(currentTimestamp);
@@ -516,6 +518,52 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             LogFileUtils.logException(e);
         }
     }
+
+    public void getSyncPersons() {
+        try {
+
+            onThreadChange(1);
+            LogFileUtils.logInfo(TAG, "Syncing person... ");
+            retrofit.create(ApiService.class).getSyncPersons(session.getAuthTokenWithBearer())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<SyncPersonsResponse>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull SyncPersonsResponse syncPersonsResponse) {
+                            LogFileUtils.logInfo(TAG, "Sync person successfully fetch persons");
+                            if(syncPersonsResponse.persons !=null && syncPersonsResponse.persons.size() > 0) {
+                                for(int i=0; i<syncPersonsResponse.persons.size(); i++) {
+                                    personRepository.updatePerson(syncPersonsResponse.persons.get(i));
+                                }
+                            }
+                            updated = true;
+                            updateDelay = 0;
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            LogFileUtils.logError(TAG, "Sync person failed " + e.getMessage());
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(context);
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            LogFileUtils.logException(e);
+        }
+    }
+
 
     public void postMeasurement(Measure measure) {
         try {

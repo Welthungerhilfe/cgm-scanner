@@ -18,11 +18,14 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.service;
 
+import java.util.ArrayList;
+
 import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
+import de.welthungerhilfe.cgm.scanner.datasource.models.SyncPersonsResponse;
 import io.reactivex.rxjava3.core.Observable;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -37,12 +40,12 @@ import retrofit2.http.Path;
 
 public interface ApiService {
 
-    @POST("persons")
+  /*  @POST("persons")
     Observable<Person> postPerson(@Header("Authorization") String auth, @Body RequestBody person);
 
     @PUT("persons/{id}")
     Observable<Person> putPerson(@Header("Authorization") String auth, @Body RequestBody person, @Path("id") String id);
-
+*/
 
     @POST("measurements")
     Observable<Measure> postMeasure(@Header("Authorization") String auth, @Body RequestBody measure);
@@ -65,5 +68,15 @@ public interface ApiService {
 
     @GET("test")
     Observable<String> test(@Header("Authorization") String auth);
+
+    @POST("persons")
+    Observable<Person> postPerson(@Header("X-API-KEY") String auth, @Body RequestBody person);
+
+    @PUT("persons/{id}")
+    Observable<Person> putPerson(@Header("X-API-KEY") String auth, @Body RequestBody person, @Path("id") String id);
+
+    @GET("persons/sync_persons")
+    Observable<SyncPersonsResponse> getSyncPersons(@Header("X-API-KEY") String auth);
+
 }
 
