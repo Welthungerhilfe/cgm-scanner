@@ -202,13 +202,14 @@ public class GrowthDataFragment extends Fragment {
 
     public void setData() {
         Person person = PersonRepository.getInstance(context).findPersonByQr(qrCode);
-        List<Measure> measures = MeasureRepository.getInstance(context).getManualMeasures(person.getId());
-        if (person == null || measures == null || measures.size() == 0) {
+        if (person == null) {
             return;
         }
-        Measure lastMeasure = null;
-        if (measures.size() > 0)
-            lastMeasure = measures.get(0);
+        List<Measure> measures = MeasureRepository.getInstance(context).getManualMeasures(person.getId());
+        if (measures == null || measures.isEmpty()) {
+            return;
+        }
+        Measure lastMeasure = measures.get(0);
         txtLabel.setText(person.getSex());
 
 
