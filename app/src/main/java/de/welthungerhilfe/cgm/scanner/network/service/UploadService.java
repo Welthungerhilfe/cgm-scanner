@@ -265,19 +265,16 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                 case "depth":
                     mime = "application/zip";
                     break;
+                case "consent":
                 case "rgb":
                     mime = "image/jpeg";
-                    break;
-                case "consent":
-                    mime = "image/jpeg";
-                    //mime = "image/png";
                     break;
                 default:
                     LogFileUtils.logError(TAG, "Data type not supported");
             }
 
             Utils.sleep(1000);
-            while (!Utils.isUploadAllowed(getBaseContext())) {
+            while (!Utils.isUploadAllowed(getApplicationContext())) {
                 Utils.sleep(3000);
             }
 
@@ -366,7 +363,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                     public void onError(@NonNull Throwable e) {
                         LogFileUtils.logError(TAG, "File " + file.getPath() + " upload fail - " + e.getMessage());
                         if (Utils.isExpiredToken(e.getMessage())) {
-                            AuthenticationHandler.restoreToken(getBaseContext());
+                            AuthenticationHandler.restoreToken(getApplicationContext());
                             stopSelf();
                         } else {
                             updateFileLog(log);
