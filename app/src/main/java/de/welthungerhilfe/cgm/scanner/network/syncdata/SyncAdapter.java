@@ -636,8 +636,10 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     .create();
 
             Consent consent = new Consent();
+            consent.setId(fileLog.getPath());
             consent.setFile(fileLog.getServerId());
             consent.setScanned(DataFormat.convertTimestampToDate(fileLog.getCreateDate()));
+            consent.setStatus("");
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(consent))).toString());
 

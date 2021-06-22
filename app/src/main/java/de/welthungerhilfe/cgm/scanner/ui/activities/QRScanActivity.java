@@ -254,8 +254,6 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
 
                 FileOutputStream output = null;
                 try {
-                    consentFile = new Compressor(context).compressToFile(consentFile);
-
                     FileLog log = new FileLog();
                     log.setId(AppController.getInstance().getArtifactId("consent"));
                     log.setType("consent");
