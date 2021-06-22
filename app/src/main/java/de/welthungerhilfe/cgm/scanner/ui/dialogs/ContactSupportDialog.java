@@ -145,8 +145,13 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         if (zip != null) uris.add(Uri.fromFile(zip));
         addLoggingFilesZip(uris);
         sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-        context.startActivity(sendIntent);
 
+        try {
+            context.startActivity(sendIntent);
+        } catch (Exception e) {
+            sendIntent.setPackage(null);
+            context.startActivity(sendIntent);
+        }
     }
 
     void addLoggingFilesZip(ArrayList<Uri> uris) {
