@@ -42,9 +42,11 @@ public class WifiStateChangereceiverHelperService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        stopService = intent.getBooleanExtra(AppConstants.STOP_SERVICE, false);
-        if (stopService) {
-            stopSelf();
+        if (intent != null) {
+            stopService = intent.getBooleanExtra(AppConstants.STOP_SERVICE, false);
+            if (stopService) {
+                stopSelf();
+            }
         }
         return START_STICKY;
     }

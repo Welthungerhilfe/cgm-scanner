@@ -20,8 +20,6 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.Manifest;
 import android.animation.Animator;
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -32,7 +30,6 @@ import android.location.LocationManager;
 import android.media.Image;
 import android.media.MediaActionSound;
 import android.opengl.GLSurfaceView;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -200,8 +197,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             measure.setHeight(heights.get(heights.size() / 2) * 100.0f);
         }
 
-        progressDialog.show();
-
         if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_RESULT)) {
             LocalPersistency.setString(this, SettingsPerformanceActivity.KEY_TEST_RESULT_ID, measure.getId());
             LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_RESULT_SCAN, System.currentTimeMillis());
@@ -209,7 +204,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_RESULT_END, 0);
             LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_RESULT_RECEIVE, 0);
         }
-        new SaveMeasureTask(ScanModeActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        progressDialog.show();
+
+        new Thread(saveMeasure).start();
     }
 
     private static final String TAG = ScanModeActivity.class.getSimpleName();
@@ -461,7 +458,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         } else if (SCAN_STEP == AppConstants.SCAN_STANDING_BACK || SCAN_STEP == AppConstants.SCAN_LYING_BACK) {
             activityScanModeBinding.scanType3.goToNextStep();
         }
-        getScanQuality(SCAN_STEP);
+        new Thread(getScanQuality).start();
     }
 
     private void showCompleteButton() {
@@ -511,57 +508,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
         mIsRecording = false;
         activityScanModeBinding.lytScanner.setVisibility(View.GONE);
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private void getScanQuality(int scanStep) {
-        new AsyncTask<Void, Void, Boolean>() {
-            private double lightScore = 0;
-
-            @Override
-            protected Boolean doInBackground(Void... voids) {
-                synchronized (lock) {
-                    //get average light score
-                    if (lightScores.containsKey(SCAN_STEP)) {
-                        for (Float value : lightScores.get(SCAN_STEP)) {
-                            lightScore += value;
-                        }
-                        lightScore /= (float)lightScores.get(SCAN_STEP).size();
-                    }
-
-                    //too bright values are not over 100%
-                    if (lightScore > 1) {
-                        lightScore = 1.0f - (lightScore - 1.0f);
-                    }
-                }
-                return true;
-            }
-
-            @SuppressLint("DefaultLocale")
-            public void onPostExecute(Boolean results) {
-
-                LogFileUtils.logInfo(TAG, "LightScore=" + lightScore);
-
-                String issues = getString(R.string.scan_quality);
-                issues = String.format("%s\n - " + getString(R.string.score_light) + "%d%%", issues, Math.round(lightScore * 100));
-
-                if (scanStep == AppConstants.SCAN_STANDING_FRONT || scanStep == AppConstants.SCAN_LYING_FRONT) {
-                    activityScanModeBinding.scanType1.finishStep(issues);
-                    step1 = true;
-                } else if (scanStep == AppConstants.SCAN_STANDING_SIDE || scanStep == AppConstants.SCAN_LYING_SIDE) {
-                    activityScanModeBinding.scanType2.finishStep(issues);
-                    step2 = true;
-
-                } else if (scanStep == AppConstants.SCAN_STANDING_BACK || scanStep == AppConstants.SCAN_LYING_BACK) {
-                    activityScanModeBinding.scanType3.finishStep(issues);
-                    step3 = true;
-                }
-
-                if (step1 && step2 && step3) {
-                    showCompleteButton();
-                }
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void getCurrentLocation() {
@@ -649,51 +595,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             case R.id.imgClose:
                 closeScan();
                 break;
-        }
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    class SaveMeasureTask extends AsyncTask<Void, Void, Void> {
-        private Activity activity;
-
-        SaveMeasureTask(Activity act) {
-            activity = act;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-            //stop AR
-            getCamera().onPause();
-
-            //wait until everything is saved
-            waitUntilFinished();
-
-            //save metadata into DB
-            synchronized (lock) {
-                for (FileLog log : files) {
-                    fileLogRepository.insertFileLog(log);
-                }
-                measureRepository.insertMeasure(measure);
-            }
-
-            runOnUiThread(() -> {
-                if (!UploadService.isInitialized()) {
-                    startService(new Intent(getApplicationContext(), UploadService.class));
-                } else {
-                    UploadService.forceResume();
-                }
-            });
-            return null;
-        }
-
-        public void onPostExecute(Void result) {
-            try {
-                UploadService.forceResume();
-                activity.finish();
-            } catch (Exception e) {
-                LogFileUtils.logException(e);
-            }
         }
     }
 
@@ -1061,4 +962,80 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
         LogFileUtils.logInfo(TAG, "Stop waiting on running threads");
     }
+
+    private final Runnable getScanQuality = new Runnable() {
+        private double lightScore = 0;
+        private int scanStep = 0;
+
+        @Override
+        public void run() {
+            synchronized (lock) {
+                scanStep = SCAN_STEP;
+
+                //get average light score
+                if (lightScores.containsKey(SCAN_STEP)) {
+                    for (Float value : lightScores.get(SCAN_STEP)) {
+                        lightScore += value;
+                    }
+                    lightScore /= (float)lightScores.get(SCAN_STEP).size();
+                }
+
+                //too bright values are not over 100%
+                if (lightScore > 1) {
+                    lightScore = 1.0f - (lightScore - 1.0f);
+                }
+            }
+
+            runOnUiThread(() -> {
+                LogFileUtils.logInfo(TAG, "LightScore=" + lightScore);
+
+                String issues = getString(R.string.scan_quality);
+                issues = String.format("%s\n - " + getString(R.string.score_light) + "%d%%", issues, Math.round(lightScore * 100));
+
+                if (scanStep == AppConstants.SCAN_STANDING_FRONT || scanStep == AppConstants.SCAN_LYING_FRONT) {
+                    activityScanModeBinding.scanType1.finishStep(issues);
+                    step1 = true;
+                } else if (scanStep == AppConstants.SCAN_STANDING_SIDE || scanStep == AppConstants.SCAN_LYING_SIDE) {
+                    activityScanModeBinding.scanType2.finishStep(issues);
+                    step2 = true;
+
+                } else if (scanStep == AppConstants.SCAN_STANDING_BACK || scanStep == AppConstants.SCAN_LYING_BACK) {
+                    activityScanModeBinding.scanType3.finishStep(issues);
+                    step3 = true;
+                }
+
+                if (step1 && step2 && step3) {
+                    showCompleteButton();
+                }
+            });
+        }
+    };
+
+    private final Runnable saveMeasure = new Runnable() {
+        @Override
+        public void run() {
+            //stop receiving new data
+            getCamera().removeListener(this);
+
+            //wait until everything is saved
+            waitUntilFinished();
+
+            //save metadata into DB
+            synchronized (lock) {
+                for (FileLog log : files) {
+                    fileLogRepository.insertFileLog(log);
+                }
+                measureRepository.insertMeasure(measure);
+            }
+
+            runOnUiThread(() -> {
+                if (!UploadService.isInitialized()) {
+                    startService(new Intent(getApplicationContext(), UploadService.class));
+                } else {
+                    UploadService.forceResume();
+                }
+                finish();
+            });
+        }
+    };
 }
