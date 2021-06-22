@@ -26,6 +26,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.view.MenuItem;
+import android.view.View;
 
 
 import java.util.ArrayList;
@@ -38,6 +39,8 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.UploadManagerViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerUploadAdapter;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 
 public class UploadManagerActivity extends BaseActivity implements Runnable {
 
@@ -72,6 +75,16 @@ public class UploadManagerActivity extends BaseActivity implements Runnable {
         MeasureRepository repository = MeasureRepository.getInstance(this);
         repository.getUploadMeasures().observe(this, measures -> {
             adapter.setData(measures);
+        });
+
+        View contextMenu = activityUploadManagerBinding.contextMenuButton;
+        contextMenu.setOnClickListener(v -> {
+            BaseActivity activity = UploadManagerActivity.this;
+            new ContextMenuDialog(activity, new ContextMenuDialog.Item[] {
+                    new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
+            }, which -> {
+                ContactSupportDialog.show(activity, null, null);
+            });
         });
     }
 
