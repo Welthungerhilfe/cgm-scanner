@@ -36,9 +36,7 @@ public class DataFormat {
         DATE,
         DATE_AND_TIME,
         TIME
-    }
-
-    ;
+    };
 
     public static String convertFormat(Context context, TimestampFormat format) {
         switch (format) {

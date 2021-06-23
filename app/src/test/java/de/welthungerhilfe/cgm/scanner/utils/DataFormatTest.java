@@ -27,31 +27,6 @@ public class DataFormatTest {
         context = ApplicationProvider.getApplicationContext();
     }
 
-
-    @Test
-    public void testDateToMilliSecond() {
-        long result = DataFormat.convertBirthDateToMilliSeconds("2021-03-10");
-        System.out.println("result => " + result);
-        assertThat(1615314600000L, is(result));
-    }
-
-    @Test
-    public void testMilliSecondToDate() {
-        String str = DataFormat.convertMilliSecondToBirthDay(1615314600000L);
-        System.out.println("result data => " + str);
-        assertThat("2021-03-10", is(str));
-    }
-
-    @Test
-    public void showBirthdate() {
-        long birthday = DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE, "06-06-2021");
-        System.out.println("birthday=> " + birthday);
-
-        String str = DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE, 1622917800000L);
-        System.out.println("result data => " + str);
-        assertThat("06-06-2021", is(str));
-    }
-
     @Test
     public void convertFormat() {
 
