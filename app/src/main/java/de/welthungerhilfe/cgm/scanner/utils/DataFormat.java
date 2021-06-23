@@ -22,8 +22,11 @@ import android.content.Context;
 import android.os.Build;
 import android.text.format.DateFormat;
 
+import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -33,7 +36,9 @@ public class DataFormat {
         DATE,
         DATE_AND_TIME,
         TIME
-    };
+    }
+
+    ;
 
     public static String convertFormat(Context context, TimestampFormat format) {
         switch (format) {
@@ -48,11 +53,51 @@ public class DataFormat {
         }
     }
 
-    public static String convertTimestampToDate(Long timeStamp) {
+    public static String convertMilliSeconsToServerDate(Long timeStamp) {
         TimeZone timeZone = TimeZone.getTimeZone("UTC");
         Calendar cal = Calendar.getInstance(timeZone);
         cal.setTimeInMillis(timeStamp);
         return DateFormat.format("yyyy-MM-dd HH:mm:ss", cal).toString();
+    }
+
+    public static String convertMilliSecondToBirthDay(Long timeStamp) {
+        return DateFormat.format("yyyy-MM-dd", timeStamp).toString();
+    }
+
+    public static long convertServerDateToMilliSeconds(String str) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date date = null;
+        if (str.contains("T")) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            try {
+                date = dateFormat.parse(str);//You will get date object relative to server/client timezone wherever it is parsed
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            str = format.format(date);
+        }
+
+        try {
+            date = format.parse(str);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date.getTime();
+
+    }
+
+    public static long convertBirthDateToMilliSeconds(String str) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = null;
+        try {
+            date = format.parse(str);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date.getTime();
+
     }
 
     public static String filesize(Context context, long bytes) {
@@ -62,9 +107,9 @@ public class DataFormat {
         if (bytes > 10 * MB) {
             return String.format(getCurrentLocale(context), "%dMB", bytes / MB);
         } else if (bytes > 0.1 * MB) {
-            return String.format(getCurrentLocale(context), "%.1fMB", bytes / (float)MB);
+            return String.format(getCurrentLocale(context), "%.1fMB", bytes / (float) MB);
         } else if (bytes > 0) {
-            return String.format(getCurrentLocale(context), "%.1fKB", bytes / (float)kB);
+            return String.format(getCurrentLocale(context), "%.1fKB", bytes / (float) kB);
         } else {
             return "-";
         }
@@ -86,7 +131,7 @@ public class DataFormat {
 
     public static long timestamp(Context context, TimestampFormat format, String value) {
         try {
-            SimpleDateFormat parser = new SimpleDateFormat(convertFormat(context, format), Locale.US);;
+            SimpleDateFormat parser = new SimpleDateFormat(convertFormat(context, format), Locale.US);
             return parser.parse(value).getTime();
         } catch (Exception e) {
         }
@@ -101,7 +146,7 @@ public class DataFormat {
     }
 
     private static Locale getCurrentLocale(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             return context.getResources().getConfiguration().getLocales().get(0);
         } else {
             //noinspection deprecation

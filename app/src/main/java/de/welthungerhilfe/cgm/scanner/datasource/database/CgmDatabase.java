@@ -230,7 +230,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final Migration MIGRATION_20_21 = new Migration(20, 21) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE persons ADD COLUMN device_updated_at TEXT;");
+            database.execSQL("ALTER TABLE persons ADD COLUMN device_updated_at_timestamp INTEGER NOT NULL DEFAULT 0;");
         }
     };
 

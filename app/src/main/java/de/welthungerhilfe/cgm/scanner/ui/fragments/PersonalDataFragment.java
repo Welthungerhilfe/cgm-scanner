@@ -35,8 +35,6 @@ import androidx.appcompat.widget.AppCompatRadioButton;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.format.DateFormat;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -287,7 +285,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setTimestamp(Utils.getUniversalTimestamp());
                     person.setCreatedBy(session.getUserEmail());
                     person.setSchema_version(CgmDatabase.version);
-                    person.setDevice_updated_at(DataFormat.convertTimestampToDate(System.currentTimeMillis()));
+                    person.setDevice_updated_at_timestamp(System.currentTimeMillis());
                     person.setLastLocation(location);
                     person.setSynced(false);
                     viewModel.savePerson(person);

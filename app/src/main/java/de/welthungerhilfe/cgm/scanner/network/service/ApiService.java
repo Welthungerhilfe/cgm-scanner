@@ -37,6 +37,7 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface ApiService {
 
@@ -45,7 +46,9 @@ public interface ApiService {
 
     @PUT("persons/{id}")
     Observable<Person> putPerson(@Header("Authorization") String auth, @Body RequestBody person, @Path("id") String id);
-*/
+
+    @GET("persons/sync_persons")
+    Observable<SyncPersonsResponse> getSyncPersons(@Header("Authorization") String auth, @Query("sync_date") String sync_date);*/
 
     @POST("measurements")
     Observable<Measure> postMeasure(@Header("Authorization") String auth, @Body RequestBody measure);
@@ -76,7 +79,8 @@ public interface ApiService {
     Observable<Person> putPerson(@Header("X-API-KEY") String auth, @Body RequestBody person, @Path("id") String id);
 
     @GET("persons/sync_persons")
-    Observable<SyncPersonsResponse> getSyncPersons(@Header("X-API-KEY") String auth);
+    Observable<SyncPersonsResponse> getSyncPersons(@Header("X-API-KEY") String auth, @Query("sync_date") String sync_date);
+
 
 }
 
