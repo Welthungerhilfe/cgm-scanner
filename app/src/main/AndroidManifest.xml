@@ -134,10 +134,6 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".ui.activities.ConsentScanActivity"
-            android:screenOrientation="portrait" />
-
-        <activity
             android:name=".ui.activities.CreateDataActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateAlwaysHidden">

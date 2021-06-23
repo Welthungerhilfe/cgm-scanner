@@ -137,7 +137,9 @@ public abstract class AbstractARCamera {
     }
 
     public void removeListener(Object listener) {
-        mListeners.remove(listener);
+        if (mListeners.contains(listener)) {
+            mListeners.remove(listener);
+        }
     }
 
     public Depthmap extractDepthmap(Image image, float[] position, float[] rotation) {

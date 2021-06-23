@@ -51,20 +51,27 @@ public class SyncingWorkManager extends Worker {
                 SyncingWorkManager);
     }
 
-    public static Gson provideGson() {
-        GsonBuilder gsonBuilder = new GsonBuilder().setLenient();
-        gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
-        gsonBuilder.excludeFieldsWithoutExposeAnnotation();
-        return gsonBuilder.serializeNulls().create();
-    }
-
     public static Retrofit provideRetrofit() {
-        Gson gson = provideGson();
+
+        //build gson
+        Gson gson = new GsonBuilder().setLenient()
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .excludeFieldsWithoutExposeAnnotation()
+                .serializeNulls().create();
+
+        //build http client
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .readTimeout(120, TimeUnit.SECONDS)
+                .writeTimeout(120, TimeUnit.SECONDS)
+                .connectTimeout(120, TimeUnit.SECONDS)
+                .build();
+
+        //build retrofit
         return new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
                 .baseUrl(getUrl())
-                .client(new OkHttpClient())
+                .client(okHttpClient)
                 .build();
     }
 

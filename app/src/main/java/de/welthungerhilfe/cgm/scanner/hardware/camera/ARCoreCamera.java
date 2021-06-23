@@ -230,13 +230,33 @@ public class ARCoreCamera extends AbstractARCamera implements GLSurfaceView.Rend
       rotation = mRotation;
     }
 
-    Bitmap preview = getDepthPreview(image, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
-    mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
+    //get one frame per two seconds to calculate height
+    if (mFrameIndex % 60 == 0) {
+      DepthPreviewMode mode = mDepthMode;
+      mDepthMode = DepthPreviewMode.FOCUS;
+      getDepthPreview(image, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
+      mDepthMode = mode;
+    } else {
+      Bitmap preview = getDepthPreview(image, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
+      mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
+    }
 
     for (Object listener : mListeners) {
       ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, mFrameIndex);
     }
     image.close();
+  }
+
+  @Override
+  public float getTargetDistance() {
+    //unsupported on ARCore
+    return 0;
+  }
+
+  @Override
+  public TrackingState getTrackingState() {
+    //unsupported on ARCore
+    return TrackingState.INIT;
   }
 
   private void updateFrame(Frame frame) {
