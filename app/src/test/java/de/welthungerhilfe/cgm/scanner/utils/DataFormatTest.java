@@ -39,7 +39,7 @@ public class DataFormatTest {
     public void testMilliSecondToDate() {
         String str = DataFormat.convertMilliSecondToBirthDay(1615314600000L);
         System.out.println("result data => " + str);
-        assertThat("2021-06-21 10:19:48", is(str));
+        assertThat("2021-03-10", is(str));
     }
 
     @Test
