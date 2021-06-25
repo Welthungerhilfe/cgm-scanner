@@ -653,7 +653,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onNext(@NonNull Consent consent) {
-                            LogFileUtils.logInfo(TAG, "consent " + consent.getId() + " successfully posted");
+                            LogFileUtils.logInfo(TAG, "consent " + fileLog.getPath() + " successfully posted");
                             fileLog.setStatus(AppConstants.CONSENT_UPLOADED);
                             fileLogRepository.updateFileLog(fileLog);
                             updated = true;
