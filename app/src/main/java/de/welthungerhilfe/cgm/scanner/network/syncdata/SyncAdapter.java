@@ -636,15 +636,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     .create();
 
             Consent consent = new Consent();
-            consent.setId(fileLog.getPath());
             consent.setFile(fileLog.getServerId());
             consent.setScanned(DataFormat.convertTimestampToDate(fileLog.getCreateDate()));
-            consent.setStatus("");
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(consent))).toString());
 
             onThreadChange(1);
-            LogFileUtils.logInfo(TAG, "posting consent " + consent.getId());
+            LogFileUtils.logInfo(TAG, "posting consent " + fileLog.getPath());
             retrofit.create(ApiService.class).postConsent(session.getAuthTokenWithBearer(), body, personId).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Consent>() {
