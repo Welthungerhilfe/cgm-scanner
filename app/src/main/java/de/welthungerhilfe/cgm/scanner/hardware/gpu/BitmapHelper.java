@@ -19,6 +19,7 @@
 package de.welthungerhilfe.cgm.scanner.hardware.gpu;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.opengl.GLES20;
 
@@ -74,6 +75,23 @@ public class BitmapHelper {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
         return stream.toByteArray();
+    }
+
+    public static float getPixelIntensity(Bitmap bitmap) {
+        int max = 0;
+        int summary = 0;
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        for (int x = 0; x < width; x += width / 20) {
+            for (int y = 0; y < height; y += height / 20) {
+                int color = bitmap.getPixel(x, y);
+                max += 3 * 255;
+                summary += Color.red(color);
+                summary += Color.green(color);
+                summary += Color.blue(color);
+            }
+        }
+        return summary / (float)max * 1.5f;
     }
 
     public static Bitmap getResizedBitmap(Bitmap bm, int w, int h) {
