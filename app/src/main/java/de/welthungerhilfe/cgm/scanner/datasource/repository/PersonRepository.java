@@ -139,20 +139,17 @@ public class PersonRepository {
                     double lon = filter.getFromLOC().getLongitude();
                     orderByClause = "distance ASC";
                     selectClause += String.format(Locale.US, ", ((p.latitude-%.8f)*(p.latitude-%.8f)+(p.longitude-%.8f)*(p.longitude-%.8f)) AS distance", lat, lat, lon, lon);
-                    whereClause += " AND p.latitude!=0 AND p.longitude!=0";
                 }
                 break;
             case AppConstants.SORT_WASTING:
-                orderByClause = "w/h ASC";
-                selectClause += String.format(Locale.US, ", (SELECT m.weight FROM %s m WHERE m.weight>0 AND m.personId=p.id ORDER BY m.timestamp DESC LIMIT 1) AS w", CgmDatabase.TABLE_MEASURE);
-                selectClause += String.format(Locale.US, ", (SELECT m.height FROM %s m WHERE m.height>0 AND m.personId=p.id ORDER BY m.timestamp DESC LIMIT 1) AS h", CgmDatabase.TABLE_MEASURE);
-                whereClause += " AND w>0 AND h>0";
+                orderByClause = "w/max(1,h) ASC"; //max prevents 0 division
+                selectClause += String.format(Locale.US, ", (SELECT m.weight FROM %s m WHERE m.personId=p.id ORDER BY m.timestamp DESC LIMIT 1) AS w", CgmDatabase.TABLE_MEASURE);
+                selectClause += String.format(Locale.US, ", (SELECT m.height FROM %s m WHERE m.personId=p.id ORDER BY m.timestamp DESC LIMIT 1) AS h", CgmDatabase.TABLE_MEASURE);
                 break;
             case AppConstants.SORT_STUNTING:
-                orderByClause = "h/age ASC";
+                orderByClause = "h/max(1,age) ASC"; //max prevents 0 division
                 selectClause += String.format(Locale.US, ", (%d - birthday) / 1000 / 60 / 60 / 24 / 365 AS age", System.currentTimeMillis());
-                selectClause += String.format(Locale.US, ", (SELECT m.height FROM %s m WHERE m.height>0 AND m.personId=p.id ORDER BY m.timestamp DESC LIMIT 1) AS h", CgmDatabase.TABLE_MEASURE);
-                whereClause += " AND age>0 AND h>0";
+                selectClause += String.format(Locale.US, ", (SELECT m.height FROM %s m WHERE m.personId=p.id ORDER BY m.timestamp DESC LIMIT 1) AS h", CgmDatabase.TABLE_MEASURE);
                 break;
         }
 
