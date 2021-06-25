@@ -18,6 +18,8 @@
  */
 package de.welthungerhilfe.cgm.scanner.hardware.camera;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
@@ -26,6 +28,7 @@ import android.os.Build;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -34,38 +37,6 @@ import java.nio.ByteBuffer;
 public class TangoUtils {
 
     private static final int JPG_COMPRESSION = 90;
-
-    public static float getPixelIntensity(TangoImageBuffer imageBuffer) {
-        int max = 0;
-        int summary = 0;
-        byte[] array = TangoUtils.copyImageBuffer(imageBuffer).data.array();
-        int width = imageBuffer.width;
-        int height = imageBuffer.height;
-        for (int x = 0; x < width; x += width / 20) {
-            for (int y = 0; y < height; y += height / 20) {
-                int UVIndex = width * height + 2 * (x / 2) + (y / 2) * width;
-                int Y = array[y * width + x] & 0xff;
-                float U = (float)(array[UVIndex] & 0xff) - 128.0f;
-                float V = (float)(array[UVIndex + 1] & 0xff) - 128.0f;
-
-                //do the YUV -> RGB conversion
-                float Yf = 1.164f*((float)Y) - 16.0f;
-                int R = (int)(Yf + 1.596f*V);
-                int G = (int)(Yf - 0.813f*V - 0.391f*U);
-                int B = (int)(Yf            + 2.018f*U);
-
-                //clip rgb values to 0-255
-                R = Math.min(Math.max(R, 0), 255);
-                G = Math.min(Math.max(G, 0), 255);
-                B = Math.min(Math.max(B, 0), 255);
-
-                //update pixel intensity
-                max += 3 * 255;
-                summary += R + G + B;
-            }
-        }
-        return summary / (float)max * 1.5f;
-    }
 
     public static TangoImageBuffer copyImageBuffer(TangoImageBuffer imageBuffer) {
         ByteBuffer clone = ByteBuffer.allocateDirect(imageBuffer.data.capacity());
@@ -104,6 +75,19 @@ public class TangoUtils {
         return depthmap;
     }
 
+    public static Bitmap imageBuffer2Bitmap(TangoImageBuffer imageBuffer) {
+        imageBuffer = TangoUtils.copyImageBuffer(imageBuffer);
+        byte[] data = imageBuffer.data.array();
+        int width = imageBuffer.width;
+        int height = imageBuffer.height;
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        YuvImage yuvImage = new YuvImage(data, ImageFormat.NV21, width, height, null);
+        yuvImage.compressToJpeg(new Rect(0, 0, width, height), 50, out);
+        byte[] imageBytes = out.toByteArray();
+        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+    }
+
     public static boolean isTangoSupported() {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
             String device = Build.DEVICE.toUpperCase();
@@ -112,7 +96,7 @@ public class TangoUtils {
             if (device.compareTo("ASUS_A002") == 0) return true;
             if (device.compareTo("ASUS_A002_1") == 0) return true;
             //Lenovo Phab 2 Pro
-            if (device.compareTo("PB2PRO") == 0) return true;
+            return device.compareTo("PB2PRO") == 0;
         }
 
         return false;
