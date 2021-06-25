@@ -150,6 +150,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                 activityScanQrBinding.llQrDetails.setVisibility(View.GONE);
                 activityScanQrBinding.qrScanView.setVisibility(View.GONE);
                 Bitmap capturedImageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+                capturedImageBitmap = BitmapHelper.getAcceptableBitmap(capturedImageBitmap);
                 File file = new File(imageUri.getPath());
                 if (file.exists()) {
                     file.delete();
