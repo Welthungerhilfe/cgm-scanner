@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -34,29 +35,32 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.AppController;
+import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
-import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
-import de.welthungerhilfe.cgm.scanner.datasource.repository.PostScanResultrepository;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
-import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
+import de.welthungerhilfe.cgm.scanner.datasource.models.SyncPersonsResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
-import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PostScanResultrepository;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
+import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
+import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
@@ -191,6 +195,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     processDeviceQueue();
                     processConsentSheet();
                     processMeasureResults();
+                    getSyncPersons();
                     migrateEnvironmentColumns();
 
                     session.setSyncTimestamp(currentTimestamp);
@@ -384,9 +389,9 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
 
-            person1.setBirthdayString(DataFormat.convertTimestampToDate(person1.getBirthday()));
-            person1.setQr_scanned(DataFormat.convertTimestampToDate(person1.getCreated()));
-
+            person1.setBirthdayString(DataFormat.convertMilliSecondToBirthDay(person1.getBirthday()));
+            person1.setQr_scanned(DataFormat.convertMilliSeconsToServerDate(person1.getCreated()));
+            person1.setDevice_updated_at(DataFormat.convertMilliSeconsToServerDate(person1.getDevice_updated_at_timestamp()));
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(person1))).toString());
 
@@ -410,6 +415,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             person.setSynced(true);
                             person.setEnvironment(person1.getEnvironment());
                             person.setDenied(false);
+                            person.setDevice_updated_at_timestamp(DataFormat.convertServerDateToMilliSeconds(person1.getDevice_updated_at()));
                             Loc location = new Loc();
                             person.setLastLocation(location);
                             if (person1.getLastLocation() != null) {
@@ -452,11 +458,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             Person putPerson = new Person();
 
-            putPerson.setBirthdayString(DataFormat.convertTimestampToDate(person1.getBirthday()));
+            putPerson.setBirthdayString(DataFormat.convertMilliSecondToBirthDay(person1.getBirthday()));
             putPerson.setGuardian(person1.getGuardian());
             putPerson.setAgeEstimated(person1.isAgeEstimated());
             putPerson.setName(person1.getName());
             putPerson.setSex(person1.getSex());
+            putPerson.setDevice_updated_at(DataFormat.convertMilliSeconsToServerDate(person1.getDevice_updated_at_timestamp()));
+
 
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
@@ -492,6 +500,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 person.getLastLocation().setLongitude(location.getLongitude());
                             }
                             person.setBirthday(person1.getBirthday());
+                            person.setDevice_updated_at_timestamp(DataFormat.convertServerDateToMilliSeconds(person.getDevice_updated_at()));
                             personRepository.updatePerson(person);
                             updated = true;
                             updateDelay = 0;
@@ -517,12 +526,90 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         }
     }
 
+    public void getSyncPersons() {
+        try {
+            Log.i(TAG,"this is values of time "+System.currentTimeMillis()+" "+session.getLastPersonSyncTimestamp()+ " "+(System.currentTimeMillis() - session.getLastPersonSyncTimestamp()));
+
+            if((System.currentTimeMillis() - session.getLastPersonSyncTimestamp()) < 10000L ){
+                return;
+            }
+
+            String lastPersonSyncTime = null;
+            if(session.getLastPersonSyncTimestamp() > 0){
+                lastPersonSyncTime = DataFormat.convertMilliSeconsToServerDate(session.getLastPersonSyncTimestamp());
+            }
+            Log.i(TAG,"this is inside getSyncPersons "+lastPersonSyncTime);
+            onThreadChange(1);
+            LogFileUtils.logInfo(TAG, "Syncing person... ");
+            retrofit.create(ApiService.class).getSyncPersons(session.getAuthTokenWithBearer(), lastPersonSyncTime)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<SyncPersonsResponse>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull SyncPersonsResponse syncPersonsResponse) {
+                            Log.i(TAG,"this is inside getSyncPersons success"+syncPersonsResponse.persons.size());
+
+                            LogFileUtils.logInfo(TAG, "Sync person successfully fetch persons");
+                            session.setPersonSyncTimestamp(System.currentTimeMillis());
+                            if(syncPersonsResponse.persons !=null && syncPersonsResponse.persons.size() > 0) {
+                                for(int i=0; i<syncPersonsResponse.persons.size(); i++) {
+                                    Person person = syncPersonsResponse.persons.get(i);
+                                    Person existingPerson = personRepository.findPersonByQr(person.getQrcode());
+                                    person.setSynced(true);
+                                    person.setEnvironment(session.getEnvironment());
+                                    person.setBirthday(DataFormat.convertBirthDateToMilliSeconds(person.getBirthdayString()));
+                                    person.setCreated(DataFormat.convertServerDateToMilliSeconds(person.getQr_scanned()));
+                                    person.setCreatedBy(session.getUserEmail());
+                                    person.setDeleted(false);
+                                    person.setSchema_version(CgmDatabase.version);
+                                    person.setDevice_updated_at_timestamp(DataFormat.convertServerDateToMilliSeconds(person.getDevice_updated_at()));
+                                    person.setLastLocation(null);
+                                    if(existingPerson!=null){
+                                        person.setId(existingPerson.getId());
+                                        personRepository.updatePerson(person);
+
+                                    } else{
+                                        person.setId(AppController.getInstance().getPersonId());
+                                        personRepository.insertPerson(person);
+                                    }
+                                }
+                            }
+                            updated = true;
+                            updateDelay = 0;
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            Log.i(TAG,"this is inside getSyncPersons error "+e.getMessage());
+                            LogFileUtils.logError(TAG, "Sync person failed " + e.getMessage());
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(context);
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            LogFileUtils.logException(e);
+        }
+    }
+
+
     public void postMeasurement(Measure measure) {
         try {
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
-            measure.setMeasured(DataFormat.convertTimestampToDate(measure.getDate()));
+            measure.setMeasured(DataFormat.convertMilliSeconsToServerDate(measure.getDate()));
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(measure))).toString());
 
@@ -578,7 +665,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
-            measure.setMeasured(DataFormat.convertTimestampToDate(measure.getDate()));
+            measure.setMeasured(DataFormat.convertMilliSeconsToServerDate(measure.getDate()));
             measure.setPersonServerKey(null);
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(measure))).toString());
 
@@ -637,7 +724,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             Consent consent = new Consent();
             consent.setFile(fileLog.getServerId());
-            consent.setScanned(DataFormat.convertTimestampToDate(fileLog.getCreateDate()));
+            consent.setScanned(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(consent))).toString());
 

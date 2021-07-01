@@ -88,6 +88,12 @@ public class Person extends CsvExportableModel implements Serializable {
     private String qr_scanned;
 
     @Expose
+    @Ignore
+    private String device_updated_at;
+
+    private long device_updated_at_timestamp;
+
+    @Expose
     private long timestamp;
 
     @Expose
@@ -289,6 +295,22 @@ public class Person extends CsvExportableModel implements Serializable {
         isDenied = denied;
     }
 
+    public String getDevice_updated_at() {
+        return device_updated_at;
+    }
+
+    public void setDevice_updated_at(String device_updated_at) {
+        this.device_updated_at = device_updated_at;
+    }
+
+    public long getDevice_updated_at_timestamp() {
+        return device_updated_at_timestamp;
+    }
+
+    public void setDevice_updated_at_timestamp(long device_updated_at_timestamp) {
+        this.device_updated_at_timestamp = device_updated_at_timestamp;
+    }
+
     public String getFullName() {
         String fullname = getName();
         if (getSurname() != null && !getSurname().isEmpty()) {
@@ -299,11 +321,11 @@ public class Person extends CsvExportableModel implements Serializable {
 
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%s,%d,%s,%s,%b,%s,%d,%d,%s,%b,%s,%d,%s,%d,%b", id, name, surname, birthday, sex, guardian, isAgeEstimated, qrcode, created, timestamp, createdBy, deleted, deletedBy, schema_version, serverId, environment, isDenied);
+        return String.format(Locale.US, "%s,%s,%s,%d,%s,%s,%b,%s,%d,%d,%s,%b,%s,%d,%s,%d,%b,%s,%d", id, name, surname, birthday, sex, guardian, isAgeEstimated, qrcode, created, timestamp, createdBy, deleted, deletedBy, schema_version, serverId, environment, isDenied, device_updated_at,device_updated_at_timestamp);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,name,surname,birthday,sex,guardian,isAgeEstimated,qrcode,created,timestamp,createdBy,deleted,deletedBy,schema_version,serverId,environment,isDenied";
+        return "id,name,surname,birthday,sex,guardian,isAgeEstimated,qrcode,created,timestamp,createdBy,deleted,deletedBy,schema_version,serverId,environment,isDenied,device_updated_at";
     }
 }
