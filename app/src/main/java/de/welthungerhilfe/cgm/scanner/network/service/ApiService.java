@@ -25,6 +25,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
+import de.welthungerhilfe.cgm.scanner.datasource.models.SyncManualMeasureResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.SyncPersonsResponse;
 import io.reactivex.rxjava3.core.Observable;
 import okhttp3.MultipartBody;
@@ -41,7 +42,7 @@ import retrofit2.http.Query;
 
 public interface ApiService {
 
-    @POST("persons")
+   /* @POST("persons")
     Observable<Person> postPerson(@Header("Authorization") String auth, @Body RequestBody person);
 
     @PUT("persons/{id}")
@@ -55,6 +56,9 @@ public interface ApiService {
 
     @PUT("measurements/{id}")
     Observable<Measure> putMeasure(@Header("Authorization") String auth, @Body RequestBody measure, @Path("id") String id);
+
+    @GET("persons/persons/{person_id}/sync_measurement")
+    Observable<SyncManualMeasureResponse> getSyncManualMeasure(@Header("Authorization") String auth, @Query("sync_date") String sync_date);*/
 
     @POST("scans")
     Observable<Scan> postScans(@Header("Authorization") String auth, @Body RequestBody scan);
@@ -71,6 +75,25 @@ public interface ApiService {
 
     @GET("test")
     Observable<String> test(@Header("Authorization") String auth);
+
+    @POST("persons")
+    Observable<Person> postPerson(@Header("X-API-KEY") String auth, @Body RequestBody person);
+
+    @PUT("persons/{id}")
+    Observable<Person> putPerson(@Header("X-API-KEY") String auth, @Body RequestBody person, @Path("id") String id);
+
+    @GET("persons/sync_persons")
+    Observable<SyncPersonsResponse> getSyncPersons(@Header("X-API-KEY") String auth, @Query("sync_date") String sync_date);
+
+    @POST("measurements")
+    Observable<Measure> postMeasure(@Header("X-API-KEY") String auth, @Body RequestBody measure);
+
+    @PUT("measurements/{id}")
+    Observable<Measure> putMeasure(@Header("X-API-KEY") String auth, @Body RequestBody measure, @Path("id") String id);
+
+    @GET("persons/{person_id}/sync_measurement")
+    Observable<SyncManualMeasureResponse> getSyncManualMeasure(@Header("X-API-KEY") String auth,@Path("person_id") String person_id, @Query("sync_date") String sync_date);
+
 
 }
 

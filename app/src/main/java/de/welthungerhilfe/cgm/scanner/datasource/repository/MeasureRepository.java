@@ -88,4 +88,8 @@ public class MeasureRepository {
     public LiveData<List<Measure>> getUploadMeasures() {
         return database.measureDao().getUploadMeasures();
     }
+
+    public Measure getMeasureByMeasureServerKey(String measureServerKey){
+        return database.measureDao().getMeasureByMeasureServerKey(measureServerKey);
+    }
 }

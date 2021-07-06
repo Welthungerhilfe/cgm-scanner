@@ -36,6 +36,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncManualMeasureAdapter;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 
 
@@ -100,6 +101,11 @@ public class CreateDataViewModel extends ViewModel {
         return lastMeasureLiveData;
     }
 
+    public void syncManualMeasurements(String qrCode){
+        Person person = personRepository.findPersonByQr(qrCode);
+        SyncManualMeasureAdapter syncManualMeasureAdapter = SyncManualMeasureAdapter.getInstance(context);
+        syncManualMeasureAdapter.getSyncManualMeasure(person);
+    }
     @SuppressLint("StaticFieldLeak")
     public void savePerson(Person person) {
         new AsyncTask<Void, Void, Void>() {

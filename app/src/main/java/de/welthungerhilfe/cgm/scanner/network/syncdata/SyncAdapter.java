@@ -417,13 +417,6 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             person.setEnvironment(person1.getEnvironment());
                             person.setDenied(false);
                             person.setDevice_updated_at_timestamp(DataFormat.convertServerDateToMilliSeconds(person1.getDevice_updated_at()));
-                            Loc location = new Loc();
-                            person.setLastLocation(location);
-                            if (person1.getLastLocation() != null) {
-                                person.getLastLocation().setAddress(person1.getLastLocation().getAddress());
-                                person.getLastLocation().setLatitude(person1.getLastLocation().getLatitude());
-                                person.getLastLocation().setLongitude(person1.getLastLocation().getLongitude());
-                            }
                             person.setBirthday(person1.getBirthday());
                             personRepository.updatePerson(person);
                             updated = true;
@@ -492,14 +485,6 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             person.setCreated(person1.getCreated());
                             person.setSynced(true);
                             person.setEnvironment(person1.getEnvironment());
-                            Loc location = new Loc();
-                            person.setLastLocation(location);
-                            location = person1.getLastLocation();
-                            if ((location != null) && (location.getAddress() != null)) {
-                                person.getLastLocation().setAddress(location.getAddress());
-                                person.getLastLocation().setLatitude(location.getLatitude());
-                                person.getLastLocation().setLongitude(location.getLongitude());
-                            }
                             person.setBirthday(person1.getBirthday());
                             person.setDevice_updated_at_timestamp(DataFormat.convertServerDateToMilliSeconds(person.getDevice_updated_at()));
                             personRepository.updatePerson(person);
@@ -568,7 +553,6 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                     person.setDeleted(false);
                                     person.setSchema_version(CgmDatabase.version);
                                     person.setDevice_updated_at_timestamp(DataFormat.convertServerDateToMilliSeconds(person.getDevice_updated_at()));
-                                    person.setLastLocation(null);
                                     if(existingPerson!=null){
                                         person.setId(existingPerson.getId());
                                         personRepository.updatePerson(person);
@@ -611,6 +595,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
             measure.setMeasured(DataFormat.convertMilliSeconsToServerDate(measure.getDate()));
+            measure.setMeasure_updated(DataFormat.convertMilliSeconsToServerDate(measure.getTimestamp()));
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(measure))).toString());
 
@@ -627,7 +612,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         @Override
                         public void onNext(@NonNull Measure measure1) {
                             LogFileUtils.logInfo(TAG, "measure " + measure1.getId() + " successfully posted");
-                            measure1.setTimestamp(prevTimestamp);
+                            measure1.setTimestamp(DataFormat.convertServerDateToMilliSeconds(measure.getMeasure_updated()));
                             measure1.setId(measure.getId());
                             measure1.setPersonId(measure.getPersonId());
                             measure1.setType(AppConstants.VAL_MEASURE_MANUAL);
@@ -636,6 +621,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             measure1.setUploaded_at(session.getSyncTimestamp());
                             measure1.setSynced(true);
                             measure1.setEnvironment(measure.getEnvironment());
+                            measure1.setQrCode(measure.getQrCode());
                             measureRepository.updateMeasure(measure1);
                             updated = true;
                             updateDelay = 0;
@@ -667,6 +653,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
             measure.setMeasured(DataFormat.convertMilliSeconsToServerDate(measure.getDate()));
+            measure.setMeasure_updated(DataFormat.convertMilliSeconsToServerDate(measure.getTimestamp()));
             measure.setPersonServerKey(null);
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(measure))).toString());
 
@@ -683,7 +670,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         @Override
                         public void onNext(@NonNull Measure measure1) {
                             LogFileUtils.logInfo(TAG, "measure " + measure1.getId() + " successfully put");
-                            measure1.setTimestamp(prevTimestamp);
+                            measure1.setTimestamp(DataFormat.convertServerDateToMilliSeconds(measure.getMeasure_updated()));
                             measure1.setId(measure.getId());
                             measure1.setPersonId(measure.getPersonId());
                             measure1.setType(AppConstants.VAL_MEASURE_MANUAL);
@@ -692,6 +679,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             measure1.setUploaded_at(session.getSyncTimestamp());
                             measure1.setEnvironment(measure.getEnvironment());
                             measure1.setSynced(true);
+                            measure1.setQrCode(measure.getQrCode());
                             measureRepository.updateMeasure(measure1);
                             updated = true;
                             updateDelay = 0;

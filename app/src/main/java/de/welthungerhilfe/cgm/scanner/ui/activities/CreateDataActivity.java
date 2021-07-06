@@ -33,6 +33,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.ActionBar;
+
+import android.util.Log;
 import android.view.MenuItem;
 
 import java.util.List;
@@ -51,6 +53,8 @@ import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class CreateDataActivity extends BaseActivity {
+
+    String TAG = CreateDataActivity.class.getSimpleName();
 
     public String qrCode;
 
@@ -85,6 +89,8 @@ public class CreateDataActivity extends BaseActivity {
         viewModel.getCurrentTab().observe(this, tab -> {
             activityCreateBinding.viewpager.setCurrentItem(tab);
         });
+        viewModel.syncManualMeasurements(qrCode);
+
     }
 
     private void setupActionBar() {
