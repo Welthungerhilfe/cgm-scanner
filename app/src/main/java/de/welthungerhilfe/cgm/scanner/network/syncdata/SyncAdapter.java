@@ -712,7 +712,6 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     .create();
 
             Consent consent = new Consent();
-            consent.setId(fileLog.getPath());
             consent.setFile(fileLog.getServerId());
             consent.setScanned(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
             consent.setStatus("");
@@ -720,7 +719,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(consent))).toString());
 
             onThreadChange(1);
-            LogFileUtils.logInfo(TAG, "posting consent " + consent.getId());
+            LogFileUtils.logInfo(TAG, "posting consent " + fileLog.getPath());
             retrofit.create(ApiService.class).postConsent(session.getAuthTokenWithBearer(), body, personId).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Consent>() {
@@ -731,7 +730,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onNext(@NonNull Consent consent) {
-                            LogFileUtils.logInfo(TAG, "consent " + consent.getId() + " successfully posted");
+                            LogFileUtils.logInfo(TAG, "consent " + fileLog.getPath() + " successfully posted");
                             fileLog.setStatus(AppConstants.CONSENT_UPLOADED);
                             fileLogRepository.updateFileLog(fileLog);
                             updated = true;
@@ -741,7 +740,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            LogFileUtils.logError(TAG, "consent " + consent.getId() + " posting failed " + e.getMessage());
+                            LogFileUtils.logError(TAG, "consent " + fileLog.getPath() + " posting failed " + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
