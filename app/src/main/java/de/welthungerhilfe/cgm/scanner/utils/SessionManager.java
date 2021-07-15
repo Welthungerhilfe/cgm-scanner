@@ -208,7 +208,7 @@ public class SessionManager {
 
         if (BuildConfig.DEBUG) {
             // on Localhost authorazation must be null, it's not accepting bearer also
-            return null;
+            return "admin_secret";
         } else {
             return "bearer " + getAuthToken();
         }
