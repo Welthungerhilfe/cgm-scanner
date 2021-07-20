@@ -115,6 +115,9 @@
     <string name="qr_not_readable">QR Code is not readable</string>
     <string name="search_by_qr">Search by QR</string>
     <string name="scan_qr_code_desc">Scan QR code in the consent form to search a profile</string>
+    <string name="std_scan_qr_code_desc">To start standardisation test, scan QR code provided by your enumerator.</string>
+    <string name="std_test_will_start">This action will start standardisation test. Do you want to continue?</string>
+    <string name="std_test_started">Standardisation test on this device is activatd.</string>
     <string name="retake">Retake</string>
     <string name="label_continue">Continue</string>
     <string name="error">Something went wrong</string>
