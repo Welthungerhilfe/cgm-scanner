@@ -46,8 +46,10 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -284,7 +286,26 @@ public class Utils {
             return false;
         }
         String value = qrcode.toUpperCase();
-        return value.contains("_TEST_") || value.contains("_STD_TEST");
+        return value.contains("_TEST_") || value.contains("STD_TEST_");
+    }
+
+    public static String extractDatesFromStdTestQrCode(String qrcode) {
+        String[] arrOfStr = qrcode.split("_", 5);
+        return arrOfStr[2];
+    }
+
+    public static boolean isValidateStdTestQrCode(String qrcode) {
+        String date = extractDatesFromStdTestQrCode(qrcode);
+        Date c = Calendar.getInstance().getTime();
+
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
+        String formattedDate = df.format(c);
+
+        if (date.equals(formattedDate)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public static boolean isUploadAllowed(Context context) {

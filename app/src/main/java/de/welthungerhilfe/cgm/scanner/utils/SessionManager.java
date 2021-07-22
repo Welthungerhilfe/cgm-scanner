@@ -52,6 +52,7 @@ public class SessionManager {
     private final String KEY_REMOTE_CONFIG = "key_remote_config";
     private final String SELECTED_ENVIRONMENT = "selected_environment";
     private final String LOG_FILE = "log_file";
+    private final String KEY_STD_TEST_QR_CODE = "key_std_test_qr_code";
 
 
     private SharedPreferences pref;
@@ -208,7 +209,7 @@ public class SessionManager {
 
         if (BuildConfig.DEBUG) {
             // on Localhost authorazation must be null, it's not accepting bearer also
-            return null;
+            return "q#Pq%Q$A67jnAh26P6M8hET!UTP%SDZ^xQW&";
         } else {
             return "bearer " + getAuthToken();
         }
@@ -231,6 +232,15 @@ public class SessionManager {
 
     public void setCurrentLogFilePath(String name) {
         editor.putString(LOG_FILE, name);
+        editor.commit();
+    }
+
+    public String getStdTestQrCode() {
+        return pref.getString(KEY_STD_TEST_QR_CODE, null);
+    }
+
+    public void setStdTestQrCode(String qrCode) {
+        editor.putString(KEY_STD_TEST_QR_CODE, qrCode);
         editor.commit();
     }
 

@@ -57,7 +57,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
 import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-import id.zelory.compressor.Compressor;
+import okhttp3.internal.Util;
 
 public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConfirmListener, QRScanView.QRScanHandler {
     private final String TAG = QRScanActivity.class.getSimpleName();
@@ -96,6 +96,8 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
 
     ActivityScanQrBinding activityScanQrBinding;
 
+    SessionManager sessionManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,7 +107,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         fileLogRepository = FileLogRepository.getInstance(QRScanActivity.this);
         personRepository = PersonRepository.getInstance(QRScanActivity.this);
         activityBehaviourType = getIntent().getIntExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST);
-
+        sessionManager = new SessionManager(this);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -130,6 +132,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
 
         if (result) {
             if (CONFIRM_DIALOG_STEP == STD_TEST_WILL_STARTED) {
+                sessionManager.setStdTestQrCode(qrCode);
                 showConfirmDialog(R.string.std_test_started, STD_TEST_START_CONFIRM);
             } else if (CONFIRM_DIALOG_STEP == NO_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == EMPTY_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == STD_TEST_START_CONFIRM) {
                 finish();
@@ -182,8 +185,10 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         activityScanQrBinding.qrScanView.stopCamera();
         this.qrCode = qrCode;
 
-        if (qrCode.contains("STD_TEST_")) {
-            showConfirmDialog(R.string.std_test_will_start, STD_TEST_WILL_STARTED);
+        if (Utils.isStdTestQRCode(qrCode)) {
+            if (Utils.isValidateStdTestQrCode(qrCode)) {
+                showConfirmDialog(R.string.std_test_will_start, STD_TEST_WILL_STARTED);
+            }
             return;
         }
 

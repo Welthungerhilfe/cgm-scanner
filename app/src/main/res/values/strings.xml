@@ -118,6 +118,7 @@
     <string name="std_scan_qr_code_desc">To start standardisation test, scan QR code provided by your enumerator.</string>
     <string name="std_test_will_start">This action will start standardisation test. Do you want to continue?</string>
     <string name="std_test_started">Standardisation test on this device is activatd.</string>
+    <string name="std_test_deactivate">Are you sure you want to deactivate the standardization test?</string>
     <string name="retake">Retake</string>
     <string name="label_continue">Continue</string>
     <string name="error">Something went wrong</string>

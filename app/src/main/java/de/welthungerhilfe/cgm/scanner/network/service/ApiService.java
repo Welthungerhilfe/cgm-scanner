@@ -37,7 +37,7 @@ import retrofit2.http.Path;
 
 public interface ApiService {
 
-    @POST("persons")
+/*    @POST("persons")
     Observable<Person> postPerson(@Header("Authorization") String auth, @Body RequestBody person);
 
     @PUT("persons/{id}")
@@ -64,6 +64,35 @@ public interface ApiService {
     Observable<EstimatesResponse> getEstimates(@Header("Authorization") String auth, @Path("scan_id") String scanId);
 
     @GET("test")
-    Observable<String> test(@Header("Authorization") String auth);
+    Observable<String> test(@Header("Authorization") String auth);*/
+
+    @POST("persons")
+    Observable<Person> postPerson(@Header("X-API-KEY") String auth, @Body RequestBody person);
+
+    @PUT("persons/{id}")
+    Observable<Person> putPerson(@Header("X-API-KEY") String auth, @Body RequestBody person, @Path("id") String id);
+
+    @POST("measurements")
+    Observable<Measure> postMeasure(@Header("X-API-KEY") String auth, @Body RequestBody measure);
+
+    @PUT("measurements/{id}")
+    Observable<Measure> putMeasure(@Header("X-API-KEY") String auth, @Body RequestBody measure, @Path("id") String id);
+
+    @POST("scans")
+    Observable<Scan> postScans(@Header("X-API-KEY") String auth, @Body RequestBody scan);
+
+    @Multipart
+    @POST("files")
+    Observable<String> uploadFiles(@Header("X-API-KEY") String auth, @Part MultipartBody.Part file, @Part("filename") RequestBody id);
+
+    @POST("persons/{person_id}/consent")
+    Observable<Consent> postConsent(@Header("X-API-KEY") String auth, @Body RequestBody personConsent, @Path("person_id") String id);
+
+    @GET("scans/{scan_id}/estimates")
+    Observable<EstimatesResponse> getEstimates(@Header("X-API-KEY") String auth, @Path("scan_id") String scanId);
+
+    @GET("test")
+    Observable<String> test(@Header("\"X-API-KEY") String auth);
+
 }
 
