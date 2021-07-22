@@ -18,8 +18,6 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.service;
 
-import java.util.ArrayList;
-
 import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
@@ -77,4 +75,5 @@ public interface ApiService {
     Observable<String> test(@Header("Authorization") String auth);
 
 }
+
 
