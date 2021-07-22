@@ -19,7 +19,6 @@
 package de.welthungerhilfe.cgm.scanner.datasource.models;
 
 import android.os.Build;
-import android.util.Log;
 
 import androidx.room.Embedded;
 import androidx.room.Entity;
@@ -34,7 +33,6 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -421,7 +419,7 @@ public class Measure extends CsvExportableModel implements Serializable {
                     artifact.setFormat(log.getType());
                     artifact.setOrder(diff);
                     artifact.setTimestamp(log.getCreateDate());
-                    artifact.setTimestampString(DataFormat.convertTimestampToDate(log.getCreateDate()));
+                    artifact.setTimestampString(DataFormat.convertMilliSeconsToServerDate(log.getCreateDate()));
                     scanArtifacts.add(artifact);
                 }
             }
@@ -453,8 +451,8 @@ public class Measure extends CsvExportableModel implements Serializable {
             scan.setArtifacts(scanArtifacts);
             scan.setLocation(getLocation());
             scan.setPersonServerKey(getPersonServerKey());
-            scan.setScan_start(DataFormat.convertTimestampToDate(getTimestamp()));
-            scan.setScan_end(DataFormat.convertTimestampToDate(getDate()));
+            scan.setScan_start(DataFormat.convertMilliSeconsToServerDate(getTimestamp()));
+            scan.setScan_end(DataFormat.convertMilliSeconsToServerDate(getDate()));
             scan.setType(key);
             scan.setVersion(getType());
             DeviceInfo deviceInfo = new DeviceInfo();
