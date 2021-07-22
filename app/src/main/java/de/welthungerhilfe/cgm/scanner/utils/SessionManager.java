@@ -209,8 +209,6 @@ public class SessionManager {
     public String getAuthTokenWithBearer() {
 
         if (BuildConfig.DEBUG) {
-            // on Localhost authorazation must be null, it's not accepting bearer also
-
             /*Or for testing authorazation like sandbox, demo/qa, pass X-API-KEY with "admin_secret"
             in header*/
             return "admin_secret";

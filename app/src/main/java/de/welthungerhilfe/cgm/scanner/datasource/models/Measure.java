@@ -455,6 +455,9 @@ public class Measure extends CsvExportableModel implements Serializable {
             scan.setScan_end(DataFormat.convertMilliSeconsToServerDate(getDate()));
             scan.setType(key);
             scan.setVersion(getType());
+            DeviceInfo deviceInfo = new DeviceInfo();
+            deviceInfo.setModel(getScannedBy());
+            scan.setDevice_info(deviceInfo);
             output.put(key, scan);
         }
         return output;

@@ -58,6 +58,10 @@ public class Scan implements Serializable {
     @Expose
     private String personServerKey;
 
+    @SerializedName("device_info")
+    @Expose
+    private DeviceInfo device_info;
+
     public String getId() {
         return id;
     }
@@ -120,5 +124,13 @@ public class Scan implements Serializable {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public DeviceInfo getDevice_info() {
+        return device_info;
+    }
+
+    public void setDevice_info(DeviceInfo device_info) {
+        this.device_info = device_info;
     }
 }
