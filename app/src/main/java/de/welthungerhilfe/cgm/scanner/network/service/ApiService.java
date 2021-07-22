@@ -65,5 +65,7 @@ public interface ApiService {
 
     @GET("test")
     Observable<String> test(@Header("Authorization") String auth);
+
 }
+
 
