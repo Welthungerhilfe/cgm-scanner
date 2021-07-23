@@ -137,10 +137,4 @@ public class UtilsTest {
         decimalNumber = Utils.checkDoubleDecimals(str);
         assertThat(1, is(decimalNumber));
     }
-
-    @Test
-    public void validateStdTestQrCodeTest() {
-        boolean isValid = Utils.isValidateStdTestQrCode("STD_TEST_20210721");
-        assertThat(true, isValid);
-    }
 }
