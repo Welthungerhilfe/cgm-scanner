@@ -52,8 +52,8 @@ public class SessionManager {
     private final String KEY_REMOTE_CONFIG = "key_remote_config";
     private final String SELECTED_ENVIRONMENT = "selected_environment";
     private final String LOG_FILE = "log_file";
+    private final String KEY_STD_TEST_QR_CODE = "key_std_test_qr_code";
     private final String KEY_PERSON_SYNC_TIMESTAMP = "person_sync_timestamp";
-
 
 
     private SharedPreferences pref;
@@ -209,9 +209,10 @@ public class SessionManager {
     public String getAuthTokenWithBearer() {
 
         if (BuildConfig.DEBUG) {
+            return "q#Pq%Q$A67jnAh26P6M8hET!UTP%SDZ^xQW&";
             /*Or for testing authorazation like sandbox, demo/qa, pass X-API-KEY with "admin_secret"
             in header*/
-            return "admin_secret";
+            //return "admin_secret";
         } else {
             return "bearer " + getAuthToken();
         }
@@ -237,6 +238,15 @@ public class SessionManager {
         editor.commit();
     }
 
+    public String getStdTestQrCode() {
+        return pref.getString(KEY_STD_TEST_QR_CODE, null);
+    }
+
+    public void setStdTestQrCode(String qrCode) {
+        editor.putString(KEY_STD_TEST_QR_CODE, qrCode);
+        editor.commit();
+    }
+
     public void setPersonSyncTimestamp(long timestamp) {
         editor.putLong(KEY_PERSON_SYNC_TIMESTAMP, timestamp);
 
@@ -246,5 +256,4 @@ public class SessionManager {
     public long getLastPersonSyncTimestamp() {
         return pref.getLong(KEY_PERSON_SYNC_TIMESTAMP, 0);
     }
-
 }

@@ -36,6 +36,7 @@ import java.util.Locale;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class MeasureNotification {
@@ -123,8 +124,9 @@ public class MeasureNotification {
         StringBuilder text = new StringBuilder();
 
         boolean valid = false;
+        SessionManager sessionManager = new SessionManager(context);
         for (String qrCode : notifications.keySet()) {
-            if (Utils.isStdTestQRCode(qrCode)) {
+            if (sessionManager.getStdTestQrCode() != null) {
                 continue;
             }
 
