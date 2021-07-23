@@ -141,6 +141,6 @@ public class UtilsTest {
     @Test
     public void validateStdTestQrCodeTest() {
         boolean isValid = Utils.isValidateStdTestQrCode("STD_TEST_20210721");
-        assertThat(true, is(isValid));
+        assertThat(true, isValid);
     }
 }
