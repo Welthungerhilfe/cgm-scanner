@@ -188,8 +188,8 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         if (Utils.isStdTestQRCode(qrCode)) {
             if (Utils.isValidateStdTestQrCode(qrCode)) {
                 showConfirmDialog(R.string.std_test_will_start, STD_TEST_WILL_STARTED);
+                return;
             }
-            return;
         }
 
         if (activityBehaviourType == AppConstants.QR_SCAN_REQUEST) {

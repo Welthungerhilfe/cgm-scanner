@@ -289,21 +289,22 @@ public class Utils {
         return value.contains("_TEST_") || value.contains("STD_TEST_");
     }
 
-    public static String extractDatesFromStdTestQrCode(String qrcode) {
-        String[] arrOfStr = qrcode.split("_", 5);
-        return arrOfStr[2];
-    }
-
     public static boolean isValidateStdTestQrCode(String qrcode) {
-        String date = extractDatesFromStdTestQrCode(qrcode);
-        Date c = Calendar.getInstance().getTime();
+        try {
+            String[] arrOfStr = qrcode.split("_", 5);
+            String date = arrOfStr[2];
+            Date c = Calendar.getInstance().getTime();
 
-        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
-        String formattedDate = df.format(c);
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
+            String formattedDate = df.format(c);
 
-        if (date.equals(formattedDate)) {
-            return true;
-        } else {
+            if (date.equals(formattedDate)) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }

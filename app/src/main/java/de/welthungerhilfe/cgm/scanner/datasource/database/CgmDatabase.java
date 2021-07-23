@@ -239,7 +239,7 @@ public abstract class CgmDatabase extends RoomDatabase {
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE measures ADD COLUMN std_test_qr_code TEXT;");
         }
-    }
+    };
 
     public static CgmDatabase getInstance(Context context) {
         synchronized (sLock) {
