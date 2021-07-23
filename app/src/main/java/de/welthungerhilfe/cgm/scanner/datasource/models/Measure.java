@@ -73,6 +73,10 @@ public class Measure extends CsvExportableModel implements Serializable {
     @Ignore
     private String measured;
 
+    @Expose
+    @Ignore
+    private String measure_updated;
+
     private boolean isSynced = false;
 
     private String type;
@@ -97,6 +101,8 @@ public class Measure extends CsvExportableModel implements Serializable {
     private String createdBy;
     private boolean deleted;
     private String deletedBy;
+    @SerializedName("qr_code")
+    @Expose
     private String qrCode;
     private int schema_version;
     private boolean artifact_synced;
@@ -366,6 +372,14 @@ public class Measure extends CsvExportableModel implements Serializable {
         this.environment = environment;
     }
 
+    public String getMeasure_updated() {
+        return measure_updated;
+    }
+
+    public void setMeasure_updated(String measure_updated) {
+        this.measure_updated = measure_updated;
+    }
+
     public String getStd_test_qr_code() {
         return std_test_qr_code;
     }
@@ -376,14 +390,14 @@ public class Measure extends CsvExportableModel implements Serializable {
 
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d,%d,%f,%f,%s,%d,%s", id, personId, date, type, age, height, weight,
+        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d,%d,%f,%f,%s,%d,%s,%s", id, personId, date, type, age, height, weight,
                 muac, headCircumference, artifact, visible, oedema, timestamp, createdBy, deleted, deletedBy, qrCode, schema_version, artifact_synced, uploaded_at, resulted_at, received_at,
-                heightConfidence, weightConfidence, scannedBy, environment, std_test_qr_code);
+                heightConfidence, weightConfidence, scannedBy, environment, std_test_qr_code, measure_updated);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at,heightConfidence,weightConfidence,scannedBy,environment,st_qr_code";
+        return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at,heightConfidence,weightConfidence,scannedBy,environment,st_qr_code,measure_updated";
     }
 
     public HashMap<Integer, Scan> split(FileLogRepository fileLogRepository, int environment) {
@@ -469,6 +483,7 @@ public class Measure extends CsvExportableModel implements Serializable {
             DeviceInfo deviceInfo = new DeviceInfo();
             deviceInfo.setModel(getScannedBy());
             scan.setDevice_info(deviceInfo);
+            scan.setStd_test_qr_code(getStd_test_qr_code());
             output.put(key, scan);
         }
         return output;

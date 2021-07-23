@@ -58,6 +58,8 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class CreateDataActivity extends BaseActivity {
 
+    String TAG = CreateDataActivity.class.getSimpleName();
+
     public String qrCode;
 
     PersonalDataFragment personalFragment;
@@ -98,6 +100,8 @@ public class CreateDataActivity extends BaseActivity {
         viewModel.getCurrentTab().observe(this, tab -> {
             activityCreateBinding.viewpager.setCurrentItem(tab);
         });
+        viewModel.syncManualMeasurements(qrCode);
+
     }
 
     private void setupActionBar() {

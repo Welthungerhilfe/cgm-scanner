@@ -93,6 +93,9 @@ public class Person extends CsvExportableModel implements Serializable {
 
     private long device_updated_at_timestamp;
 
+    //below fileld is used for geeting info about-> when last time manual measurments synced with persons.
+    private long last_sync_measurments;
+
     @Expose
     private long timestamp;
 
@@ -109,6 +112,8 @@ public class Person extends CsvExportableModel implements Serializable {
     private int schema_version;
 
 
+    @SerializedName("lastLocation")
+    @Expose
     @Embedded
     private Loc lastLocation;
 
@@ -311,6 +316,14 @@ public class Person extends CsvExportableModel implements Serializable {
         this.device_updated_at_timestamp = device_updated_at_timestamp;
     }
 
+    public long getLast_sync_measurments() {
+        return last_sync_measurments;
+    }
+
+    public void setLast_sync_measurments(long last_sync_measurments) {
+        this.last_sync_measurments = last_sync_measurments;
+    }
+
     public String getFullName() {
         String fullname = getName();
         if (getSurname() != null && !getSurname().isEmpty()) {
@@ -321,11 +334,11 @@ public class Person extends CsvExportableModel implements Serializable {
 
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%s,%d,%s,%s,%b,%s,%d,%d,%s,%b,%s,%d,%s,%d,%b,%s,%d", id, name, surname, birthday, sex, guardian, isAgeEstimated, qrcode, created, timestamp, createdBy, deleted, deletedBy, schema_version, serverId, environment, isDenied, device_updated_at,device_updated_at_timestamp);
+        return String.format(Locale.US, "%s,%s,%s,%d,%s,%s,%b,%s,%d,%d,%s,%b,%s,%d,%s,%d,%b,%s,%d,%d", id, name, surname, birthday, sex, guardian, isAgeEstimated, qrcode, created, timestamp, createdBy, deleted, deletedBy, schema_version, serverId, environment, isDenied, device_updated_at,device_updated_at_timestamp,last_sync_measurments);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,name,surname,birthday,sex,guardian,isAgeEstimated,qrcode,created,timestamp,createdBy,deleted,deletedBy,schema_version,serverId,environment,isDenied,device_updated_at";
+        return "id,name,surname,birthday,sex,guardian,isAgeEstimated,qrcode,created,timestamp,createdBy,deleted,deletedBy,schema_version,serverId,environment,isDenied,device_updated_at,last_sync_measurments";
     }
 }

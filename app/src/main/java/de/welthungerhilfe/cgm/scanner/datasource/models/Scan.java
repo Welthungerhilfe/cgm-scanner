@@ -62,6 +62,10 @@ public class Scan implements Serializable {
     @Expose
     private DeviceInfo device_info;
 
+    @SerializedName("std_test_qr_code")
+    @Expose
+    private String std_test_qr_code;
+
     public String getId() {
         return id;
     }
@@ -132,5 +136,13 @@ public class Scan implements Serializable {
 
     public void setDevice_info(DeviceInfo device_info) {
         this.device_info = device_info;
+    }
+
+    public String getStd_test_qr_code() {
+        return std_test_qr_code;
+    }
+
+    public void setStd_test_qr_code(String std_test_qr_code) {
+        this.std_test_qr_code = std_test_qr_code;
     }
 }
