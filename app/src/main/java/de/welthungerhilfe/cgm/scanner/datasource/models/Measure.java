@@ -66,7 +66,7 @@ public class Measure extends CsvExportableModel implements Serializable {
 
     private long date;
 
-    private int environment=0;
+    private int environment = 0;
 
     @SerializedName("measured")
     @Expose
@@ -106,6 +106,9 @@ public class Measure extends CsvExportableModel implements Serializable {
     private double heightConfidence;
     private double weightConfidence;
     private String scannedBy;
+
+    @Expose
+    private String std_test_qr_code;
 
 
     @Embedded
@@ -363,23 +366,31 @@ public class Measure extends CsvExportableModel implements Serializable {
         this.environment = environment;
     }
 
+    public String getStd_test_qr_code() {
+        return std_test_qr_code;
+    }
+
+    public void setStd_test_qr_code(String std_test_qr_code) {
+        this.std_test_qr_code = std_test_qr_code;
+    }
+
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d,%d,%f,%f,%s,%d", id, personId, date, type, age, height, weight,
+        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d,%d,%f,%f,%s,%d,%s", id, personId, date, type, age, height, weight,
                 muac, headCircumference, artifact, visible, oedema, timestamp, createdBy, deleted, deletedBy, qrCode, schema_version, artifact_synced, uploaded_at, resulted_at, received_at,
-                heightConfidence, weightConfidence, scannedBy, environment);
+                heightConfidence, weightConfidence, scannedBy, environment, std_test_qr_code);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at,heightConfidence,weightConfidence,scannedBy,environment";
+        return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at,heightConfidence,weightConfidence,scannedBy,environment,st_qr_code";
     }
 
-    public HashMap<Integer, Scan> split(FileLogRepository fileLogRepository,int environment) {
+    public HashMap<Integer, Scan> split(FileLogRepository fileLogRepository, int environment) {
 
         //check if measure is ready to be synced
         HashMap<Integer, Scan> output = new HashMap<>();
-        List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(getId(),environment);
+        List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(getId(), environment);
         for (FileLog log : measureArtifacts) {
             if (log.getServerId() == null) {
                 return output;

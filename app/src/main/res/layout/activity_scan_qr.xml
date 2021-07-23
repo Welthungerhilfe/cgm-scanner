@@ -12,6 +12,7 @@
             android:layout_height="match_parent" />
 
         <LinearLayout
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -43,11 +44,12 @@
             android:id="@+id/ll_qr_details"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
             android:gravity="center"
-            android:paddingBottom="400dp"
             android:layout_marginLeft="50dp"
-            android:layout_marginRight="50dp">
+            android:layout_marginTop="30dp"
+            android:layout_marginRight="50dp"
+            android:layout_below="@+id/toolbar"
+            >
 
             <ImageView
                 android:layout_width="50dp"
@@ -61,6 +63,33 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/activity_group_margin"
                 android:text="@string/scan_qr_code_desc"
+                android:textColor="@color/colorWhite"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_qr_details_std_test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginTop="15dp"
+            android:layout_below="@+id/ll_qr_details">
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/qr"
+                android:scaleType="fitXY"
+                tools:ignore="ContentDescription" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_group_margin"
+                android:text="@string/std_scan_qr_code_desc"
                 android:textColor="@color/colorWhite"
                 android:textSize="18sp" />
 

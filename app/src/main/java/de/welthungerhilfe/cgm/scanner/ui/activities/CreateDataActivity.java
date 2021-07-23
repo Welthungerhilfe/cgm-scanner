@@ -30,9 +30,13 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.ActionBar;
+
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import java.util.List;
@@ -45,9 +49,11 @@ import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.GrowthDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasuresDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class CreateDataActivity extends BaseActivity {
@@ -66,12 +72,19 @@ public class CreateDataActivity extends BaseActivity {
 
     ActivityCreateBinding activityCreateBinding;
 
+    boolean isMenuVisible = true;
+
+    SessionManager sessionManager;
+
+    private static final int STD_TEST_DEACTIVE = 1;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        activityCreateBinding = DataBindingUtil.setContentView(this,R.layout.activity_create);
+        activityCreateBinding = DataBindingUtil.setContentView(this, R.layout.activity_create);
 
-
+        sessionManager = new SessionManager(this);
         getCurrentLocation();
 
         qrCode = getIntent().getStringExtra(AppConstants.EXTRA_QR);
@@ -81,7 +94,7 @@ public class CreateDataActivity extends BaseActivity {
 
 
         factory = new CreateDataViewModelProvideFactory(this);
-        viewModel = new ViewModelProvider(this,factory).get(CreateDataViewModel.class);
+        viewModel = new ViewModelProvider(this, factory).get(CreateDataViewModel.class);
         viewModel.getCurrentTab().observe(this, tab -> {
             activityCreateBinding.viewpager.setCurrentItem(tab);
         });
@@ -94,6 +107,7 @@ public class CreateDataActivity extends BaseActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
             actionBar.setTitle("ID: " + qrCode);
+            invalidateOptionsMenu();
         }
     }
 
@@ -112,22 +126,12 @@ public class CreateDataActivity extends BaseActivity {
         activityCreateBinding.tabs.setupWithViewPager(activityCreateBinding.viewpager);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
-        if (menuItem.getItemId() == android.R.id.home) {
-            finish();
-
-            return true;
-        }
-        return super.onOptionsItemSelected(menuItem);
-    }
-
     private void getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, PERMISSION_LOCATION);
         } else {
             Utils.openLocationSettings(this, PERMISSION_LOCATION);
-            LocationManager lm = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+            LocationManager lm = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
             boolean isGPSEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
             boolean isNetworkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -165,6 +169,48 @@ public class CreateDataActivity extends BaseActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PERMISSION_LOCATION) {
             getCurrentLocation();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+
+        if (sessionManager.getStdTestQrCode() != null) {
+            menuInflater.inflate(R.menu.menu_std_test, menu);
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        if (menuItem.getItemId() == R.id.std_test_active) {
+            showConfirmDialog(R.string.std_test_deactivate, STD_TEST_DEACTIVE);
+            isMenuVisible = false;
+            invalidateOptionsMenu();
+        }
+
+        return super.onOptionsItemSelected(menuItem);
+    }
+
+    private void showConfirmDialog(int message, int step) {
+        try {
+            ConfirmDialog confirmDialog = new ConfirmDialog(this);
+            confirmDialog.setMessage(message);
+            confirmDialog.setConfirmListener(result -> {
+                if (result) {
+                    sessionManager.setStdTestQrCode(null);
+                    invalidateOptionsMenu();
+                    int tab = activityCreateBinding.viewpager.getCurrentItem();
+                    initFragments();
+                    activityCreateBinding.viewpager.setCurrentItem(tab);
+                }
+            });
+            confirmDialog.show();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

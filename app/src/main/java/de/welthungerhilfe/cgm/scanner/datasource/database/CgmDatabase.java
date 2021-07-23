@@ -39,7 +39,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
 
-@Database(entities = {Person.class, Measure.class, FileLog.class, Device.class, PostScanResult.class}, version = 21)
+@Database(entities = {Person.class, Measure.class, FileLog.class, Device.class, PostScanResult.class}, version = 22)
 public abstract class CgmDatabase extends RoomDatabase {
     private static final Object sLock = new Object();
 
@@ -55,7 +55,7 @@ public abstract class CgmDatabase extends RoomDatabase {
 
     public abstract PostScanResultDao postScanResultDao();
 
-    public static final int version = 21;
+    public static final int version = 22;
 
     public static final String DATABASE = "offline_db";
 
@@ -234,6 +234,13 @@ public abstract class CgmDatabase extends RoomDatabase {
         }
     };
 
+    public static final Migration MIGRATION_21_22 = new Migration(21, 22) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE measures ADD COLUMN std_test_qr_code TEXT;");
+        }
+    };
+
     public static CgmDatabase getInstance(Context context) {
         synchronized (sLock) {
             if (instance == null) {
@@ -241,7 +248,8 @@ public abstract class CgmDatabase extends RoomDatabase {
                         .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_4,
                                 MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10,
                                 MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15,
-                                MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18,MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21)
+                                MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18,MIGRATION_18_19, MIGRATION_19_20,
+                                MIGRATION_20_21, MIGRATION_21_22)
                         .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
                         .allowMainThreadQueries()
                         .build();
