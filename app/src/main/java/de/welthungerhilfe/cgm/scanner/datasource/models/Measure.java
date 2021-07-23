@@ -483,6 +483,7 @@ public class Measure extends CsvExportableModel implements Serializable {
             DeviceInfo deviceInfo = new DeviceInfo();
             deviceInfo.setModel(getScannedBy());
             scan.setDevice_info(deviceInfo);
+            scan.setStd_test_qr_code(getStd_test_qr_code());
             output.put(key, scan);
         }
         return output;
