@@ -285,8 +285,7 @@ public class Utils {
         if (qrcode == null) {
             return false;
         }
-        String value = qrcode.toUpperCase();
-        return value.contains("_TEST_") || value.contains("STD_TEST_");
+        return qrcode.toUpperCase().contains("STD_TEST_");
     }
 
     public static boolean isValidateStdTestQrCode(String qrcode) {

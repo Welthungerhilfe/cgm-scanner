@@ -33,6 +33,7 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.databinding.DialogManualDetailBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ManualDetailDialog extends Dialog {
@@ -81,7 +82,8 @@ public class ManualDetailDialog extends Dialog {
         else
             dialogManualDetailBinding.txtManualLocation.setText(R.string.last_location_error);
 
-        boolean stdtest = Utils.isStdTestQRCode(measure.getQrCode());
+        SessionManager sessionManager = new SessionManager(getContext());
+        boolean stdtest = sessionManager.getStdTestQrCode() != null;
         if (!stdtest) {
             dialogManualDetailBinding.txtManualHeight.setText(String.valueOf(measure.getHeight()));
             dialogManualDetailBinding.txtManualWeight.setText(String.valueOf(measure.getWeight()));

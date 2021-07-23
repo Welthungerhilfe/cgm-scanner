@@ -3,6 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/std_test_active"
         android:title="@string/menu_qr"
-        android:icon="@drawable/qr"
+        android:icon="@drawable/ic_std_test"
         app:showAsAction="always"/>
 </menu>

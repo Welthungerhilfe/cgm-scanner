@@ -35,7 +35,6 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.ActionBar;
 
-import android.se.omapi.Session;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -57,7 +56,7 @@ import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class CreateDataActivity extends BaseActivity implements ConfirmDialog.OnConfirmListener {
+public class CreateDataActivity extends BaseActivity {
 
     public String qrCode;
 
@@ -187,34 +186,31 @@ public class CreateDataActivity extends BaseActivity implements ConfirmDialog.On
 
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
-        switch (menuItem.getItemId()) {
-            case R.id.std_test_active:
-                showConfirmDialog(R.string.std_test_deactivate, STD_TEST_DEACTIVE);
-                isMenuVisible = false;
-                invalidateOptionsMenu();
-                break;
-
+        if (menuItem.getItemId() == R.id.std_test_active) {
+            showConfirmDialog(R.string.std_test_deactivate, STD_TEST_DEACTIVE);
+            isMenuVisible = false;
+            invalidateOptionsMenu();
         }
 
         return super.onOptionsItemSelected(menuItem);
-    }
-
-    @Override
-    public void onConfirm(boolean result) {
-        if (result) {
-            sessionManager.setStdTestQrCode(null);
-            invalidateOptionsMenu();
-        }
     }
 
     private void showConfirmDialog(int message, int step) {
         try {
             ConfirmDialog confirmDialog = new ConfirmDialog(this);
             confirmDialog.setMessage(message);
-            confirmDialog.setConfirmListener(this);
+            confirmDialog.setConfirmListener(result -> {
+                if (result) {
+                    sessionManager.setStdTestQrCode(null);
+                    invalidateOptionsMenu();
+                    int tab = activityCreateBinding.viewpager.getCurrentItem();
+                    initFragments();
+                    activityCreateBinding.viewpager.setCurrentItem(tab);
+                }
+            });
             confirmDialog.show();
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 }
