@@ -720,7 +720,6 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             Consent consent = new Consent();
             consent.setFile(fileLog.getServerId());
             consent.setScanned(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
-            consent.setStatus("");
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(consent))).toString());
 
