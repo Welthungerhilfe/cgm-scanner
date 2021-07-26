@@ -522,8 +522,6 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
     public void getSyncPersons() {
         try {
-            Log.i(TAG,"this is values of time "+System.currentTimeMillis()+" "+session.getLastPersonSyncTimestamp()+ " "+(System.currentTimeMillis() - session.getLastPersonSyncTimestamp()));
-
             if((System.currentTimeMillis() - session.getLastPersonSyncTimestamp()) < 10000L ){
                 return;
             }
@@ -531,10 +529,11 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             String lastPersonSyncTime = null;
             if(session.getLastPersonSyncTimestamp() > 0){
                 lastPersonSyncTime = DataFormat.convertMilliSeconsToServerDate(session.getLastPersonSyncTimestamp());
+                LogFileUtils.logInfo(TAG, "Syncing persons, the last sync was " + lastPersonSyncTime);
+            } else {
+                LogFileUtils.logInfo(TAG, "Syncing persons for the first time");
             }
-            Log.i(TAG,"this is inside getSyncPersons "+lastPersonSyncTime);
             onThreadChange(1);
-            LogFileUtils.logInfo(TAG, "Syncing person... ");
             retrofit.create(ApiService.class).getSyncPersons(session.getAuthTokenWithBearer(), lastPersonSyncTime)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<SyncPersonsResponse>() {
@@ -545,9 +544,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onNext(@NonNull SyncPersonsResponse syncPersonsResponse) {
-                            Log.i(TAG,"this is inside getSyncPersons success"+syncPersonsResponse.persons.size());
-
-                            LogFileUtils.logInfo(TAG, "Sync person successfully fetch persons");
+                            LogFileUtils.logInfo(TAG, "Sync persons successfully fetch " + syncPersonsResponse.persons.size() + " person(s)");
                             session.setPersonSyncTimestamp(System.currentTimeMillis());
                             if(syncPersonsResponse.persons !=null && syncPersonsResponse.persons.size() > 0) {
                                 for(int i=0; i<syncPersonsResponse.persons.size(); i++) {
@@ -580,7 +577,6 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            Log.i(TAG,"this is inside getSyncPersons error "+e.getMessage());
                             LogFileUtils.logError(TAG, "Sync person failed " + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
