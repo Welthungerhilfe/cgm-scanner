@@ -22,8 +22,6 @@ import android.content.Context;
 import android.os.Build;
 import android.text.format.DateFormat;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -63,39 +61,42 @@ public class DataFormat {
     }
 
     public static long convertServerDateToMilliSeconds(String str) {
+        if (str == null) {
+            return 0;
+        }
+
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date date = null;
         if (str.contains("T")) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
             dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             try {
-                date = dateFormat.parse(str);//You will get date object relative to server/client timezone wherever it is parsed
-            } catch (ParseException e) {
+                Date date = dateFormat.parse(str);//You will get date object relative to server/client timezone wherever it is parsed
+                str = format.format(date);
+            } catch (Exception e) {
                 e.printStackTrace();
+                return 0;
             }
-            str = format.format(date);
         }
 
         try {
-            date = format.parse(str);
-        } catch (ParseException e) {
+            Date date = format.parse(str);
+            return date.getTime();
+        } catch (Exception e) {
             e.printStackTrace();
+            return 0;
         }
-        return date.getTime();
-
     }
 
     public static long convertBirthDateToMilliSeconds(String str) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        Date date = null;
         try {
-            date = format.parse(str);
-        } catch (ParseException e) {
+            Date date = format.parse(str);
+            return date.getTime();
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return date.getTime();
-
+        return 0;
     }
 
     public static String filesize(Context context, long bytes) {
