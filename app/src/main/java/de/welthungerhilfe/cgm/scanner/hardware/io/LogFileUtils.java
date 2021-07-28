@@ -30,7 +30,7 @@ public class LogFileUtils {
         if (!logFilesFolder.exists()) {
             logFilesFolder.mkdir();
         }
-        String fileName = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss'.txt'").format(new Date());
+        String fileName = new SimpleDateFormat("yyyy-MM-dd'.txt'").format(new Date());
 
         logFile = new File(logFilesFolder, fileName);
         try {
@@ -42,16 +42,6 @@ public class LogFileUtils {
 
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    public static void initLogFile(SessionManager sessionManager, Context context) {
-        if (sessionManager.getCurrentLogFilePath() == null) {
-            startSession(context, sessionManager);
-        }
-        logFile = new File(sessionManager.getCurrentLogFilePath());
-        if (!logFile.exists()) {
-            startSession(context, sessionManager);
         }
     }
 
