@@ -122,7 +122,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         activityMainBinding = DataBindingUtil.setContentView(this,R.layout.activity_main);
         session = new SessionManager(MainActivity.this);
-        LogFileUtils.initLogFile(session,MainActivity.this);
+        LogFileUtils.startSession(MainActivity.this,session);
         LogFileUtils.logInfo(TAG, "CGM-Scanner " + Utils.getAppVersion(this) + " started");
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
 
