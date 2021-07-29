@@ -31,6 +31,8 @@ public class Loc implements Serializable {
     @SerializedName("lng")
     @Expose
     private double longitude;
+
+    @Expose
     private String address;
 
     public double getLatitude() {

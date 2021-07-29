@@ -18,9 +18,6 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
-import androidx.lifecycle.LifecycleOwner;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +25,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -40,11 +39,11 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAdapter.ViewHolder> {
@@ -79,8 +78,9 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
         Person person = getItem(position);
         holder.txtName.setText(person.getFullName());
 
-        repository.getPersonLastMeasureLiveData(person.getId()).observe((LifecycleOwner) context, measure -> {
-            if (Utils.isStdTestQRCode(person.getQrcode())) {
+        repository.getPersonLastMeasureLiveData(person.getId()).observe(context, measure -> {
+            SessionManager sessionManager = new SessionManager(context);
+            if (sessionManager.getStdTestQrCode() != null) {
                 holder.txtHeight.setText(R.string.field_concealed);
                 holder.txtWeight.setText(R.string.field_concealed);
             } else {

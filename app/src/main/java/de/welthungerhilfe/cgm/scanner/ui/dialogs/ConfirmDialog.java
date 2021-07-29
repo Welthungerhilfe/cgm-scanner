@@ -91,6 +91,10 @@ public class ConfirmDialog extends Dialog implements View.OnClickListener {
         dialogConfirmBinding.txtMessage.setText(message);
     }
 
+    public void setCancleButtonInvisible(){
+        dialogConfirmBinding.txtCancel.setVisibility(View.GONE);
+    }
+
     public void show() {
         super.show();
     }

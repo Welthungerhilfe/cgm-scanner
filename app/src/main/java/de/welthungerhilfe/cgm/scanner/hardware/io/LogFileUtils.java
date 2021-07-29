@@ -30,7 +30,7 @@ public class LogFileUtils {
         if (!logFilesFolder.exists()) {
             logFilesFolder.mkdir();
         }
-        String fileName = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss'.txt'").format(new Date());
+        String fileName = new SimpleDateFormat("yyyy-MM-dd'.txt'").format(new Date());
 
         logFile = new File(logFilesFolder, fileName);
         try {
@@ -45,19 +45,9 @@ public class LogFileUtils {
         }
     }
 
-    public static void initLogFile(SessionManager sessionManager, Context context) {
-        if (sessionManager.getCurrentLogFilePath() == null) {
-            startSession(context, sessionManager);
-        }
-        logFile = new File(sessionManager.getCurrentLogFilePath());
-        if (!logFile.exists()) {
-            startSession(context, sessionManager);
-        }
-    }
-
     public static void logInfo(String tag, String text) {
         Log.i(tag, text);
-        String message = DataFormat.convertTimestampToDate(System.currentTimeMillis());
+        String message = DataFormat.convertMilliSeconsToServerDate(System.currentTimeMillis());
         message += " : Info-" + tag + " -> " + text;
         startAsyncToWrite(message);
 
@@ -65,13 +55,13 @@ public class LogFileUtils {
 
     public static void logError(String tag, String text) {
         Log.e(tag, text);
-        String message = DataFormat.convertTimestampToDate(System.currentTimeMillis());
+        String message = DataFormat.convertMilliSeconsToServerDate(System.currentTimeMillis());
         message += " : Error-" + tag + " -> " + text;
         startAsyncToWrite(message);
     }
 
     public static void logException(Throwable exception) {
-        String text = DataFormat.convertTimestampToDate(System.currentTimeMillis()) + " :Exception-> " + Log.getStackTraceString(exception);
+        String text = DataFormat.convertMilliSeconsToServerDate(System.currentTimeMillis()) + " :Exception-> " + Log.getStackTraceString(exception);
         startAsyncToWrite(text);
     }
 

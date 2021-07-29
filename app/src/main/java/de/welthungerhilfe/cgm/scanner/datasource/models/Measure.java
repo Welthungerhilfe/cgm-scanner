@@ -19,7 +19,6 @@
 package de.welthungerhilfe.cgm.scanner.datasource.models;
 
 import android.os.Build;
-import android.util.Log;
 
 import androidx.room.Embedded;
 import androidx.room.Entity;
@@ -34,7 +33,6 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -68,12 +66,16 @@ public class Measure extends CsvExportableModel implements Serializable {
 
     private long date;
 
-    private int environment=0;
+    private int environment = 0;
 
     @SerializedName("measured")
     @Expose
     @Ignore
     private String measured;
+
+    @Expose
+    @Ignore
+    private String measure_updated;
 
     private boolean isSynced = false;
 
@@ -99,6 +101,8 @@ public class Measure extends CsvExportableModel implements Serializable {
     private String createdBy;
     private boolean deleted;
     private String deletedBy;
+    @SerializedName("qr_code")
+    @Expose
     private String qrCode;
     private int schema_version;
     private boolean artifact_synced;
@@ -108,6 +112,9 @@ public class Measure extends CsvExportableModel implements Serializable {
     private double heightConfidence;
     private double weightConfidence;
     private String scannedBy;
+
+    @Expose
+    private String std_test_qr_code;
 
 
     @Embedded
@@ -365,23 +372,39 @@ public class Measure extends CsvExportableModel implements Serializable {
         this.environment = environment;
     }
 
+    public String getMeasure_updated() {
+        return measure_updated;
+    }
+
+    public void setMeasure_updated(String measure_updated) {
+        this.measure_updated = measure_updated;
+    }
+
+    public String getStd_test_qr_code() {
+        return std_test_qr_code;
+    }
+
+    public void setStd_test_qr_code(String std_test_qr_code) {
+        this.std_test_qr_code = std_test_qr_code;
+    }
+
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d,%d,%f,%f,%s,%d", id, personId, date, type, age, height, weight,
+        return String.format(Locale.US, "%s,%s,%d,%s,%d,%f,%f,%f,%f,%s,%b,%b,%d,%s,%b,%s,%s,%d,%b,%d,%d,%d,%f,%f,%s,%d,%s,%s", id, personId, date, type, age, height, weight,
                 muac, headCircumference, artifact, visible, oedema, timestamp, createdBy, deleted, deletedBy, qrCode, schema_version, artifact_synced, uploaded_at, resulted_at, received_at,
-                heightConfidence, weightConfidence, scannedBy, environment);
+                heightConfidence, weightConfidence, scannedBy, environment, std_test_qr_code, measure_updated);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at,heightConfidence,weightConfidence,scannedBy,environment";
+        return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at,heightConfidence,weightConfidence,scannedBy,environment,st_qr_code,measure_updated";
     }
 
-    public HashMap<Integer, Scan> split(FileLogRepository fileLogRepository,int environment) {
+    public HashMap<Integer, Scan> split(FileLogRepository fileLogRepository, int environment) {
 
         //check if measure is ready to be synced
         HashMap<Integer, Scan> output = new HashMap<>();
-        List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(getId(),environment);
+        List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(getId(), environment);
         for (FileLog log : measureArtifacts) {
             if (log.getServerId() == null) {
                 return output;
@@ -421,7 +444,7 @@ public class Measure extends CsvExportableModel implements Serializable {
                     artifact.setFormat(log.getType());
                     artifact.setOrder(diff);
                     artifact.setTimestamp(log.getCreateDate());
-                    artifact.setTimestampString(DataFormat.convertTimestampToDate(log.getCreateDate()));
+                    artifact.setTimestampString(DataFormat.convertMilliSeconsToServerDate(log.getCreateDate()));
                     scanArtifacts.add(artifact);
                 }
             }
@@ -453,10 +476,14 @@ public class Measure extends CsvExportableModel implements Serializable {
             scan.setArtifacts(scanArtifacts);
             scan.setLocation(getLocation());
             scan.setPersonServerKey(getPersonServerKey());
-            scan.setScan_start(DataFormat.convertTimestampToDate(getTimestamp()));
-            scan.setScan_end(DataFormat.convertTimestampToDate(getDate()));
+            scan.setScan_start(DataFormat.convertMilliSeconsToServerDate(getTimestamp()));
+            scan.setScan_end(DataFormat.convertMilliSeconsToServerDate(getDate()));
             scan.setType(key);
             scan.setVersion(getType());
+            DeviceInfo deviceInfo = new DeviceInfo();
+            deviceInfo.setModel(getScannedBy());
+            scan.setDevice_info(deviceInfo);
+            scan.setStd_test_qr_code(getStd_test_qr_code());
             output.put(key, scan);
         }
         return output;

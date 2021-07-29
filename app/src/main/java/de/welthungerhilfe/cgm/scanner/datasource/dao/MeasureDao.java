@@ -66,4 +66,7 @@ public interface MeasureDao {
 
     @Query("SELECT * FROM measures WHERE id IN (SELECT measureId FROM file_logs WHERE status=0 GROUP BY measureId)")
     LiveData<List<Measure>> getUploadMeasures();
+
+    @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE measureServerKey=:measureServerKey")
+    Measure getMeasureByMeasureServerKey(String measureServerKey);
 }

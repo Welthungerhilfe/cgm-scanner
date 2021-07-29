@@ -191,6 +191,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         measure.setQrCode(person.getQrcode());
         measure.setSchema_version(CgmDatabase.version);
         measure.setScannedBy(session.getDevice());
+        measure.setStd_test_qr_code(session.getStdTestQrCode());
 
         if (!heights.isEmpty()) {
             Collections.sort(heights, (a, b) -> (int) (1000 * (a - b)));

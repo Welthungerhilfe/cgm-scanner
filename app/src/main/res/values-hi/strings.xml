@@ -110,6 +110,10 @@
     <string name="qr_not_readable">क्यूआर कोड पठनीय नहीं है</string>
     <string name="search_by_qr">क्यूआर द्वारा खोजें</string>
     <string name="scan_qr_code_desc">प्रोफ़ाइल खोजने के लिए सहमति फ़ॉर्म में QR कोड स्कैन करें</string>
+    <string name="std_scan_qr_code_desc">मानकीकरण परीक्षण शुरू करने के लिए, अपने प्रगणक द्वारा प्रदान किए गए क्यूआर कोड को स्कैन करें।</string>
+    <string name="std_test_will_start">यह क्रिया मानकीकरण परीक्षण शुरू करेगी। क्या आप जारी रखना चाहते हैं?</string>
+    <string name="std_test_started">इस उपकरण पर मानकीकरण परीक्षण सक्रिय है।</string>
+    <string name="std_test_deactivate">क्या आप वाकई मानकीकरण परीक्षण को निष्क्रिय करना चाहते हैं?</string>
     <string name="retake">फिर से लेना</string>
     <string name="label_continue">Continue</string>
     <string name="error">कुछ गलत हो गया</string>

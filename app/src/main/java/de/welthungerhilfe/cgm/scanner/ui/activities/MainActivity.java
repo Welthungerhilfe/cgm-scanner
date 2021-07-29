@@ -81,6 +81,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
+import okhttp3.internal.Util;
 
 import static de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity.KEY_LAST_DEVICE_CHECK_ISSUES;
 
@@ -121,9 +122,15 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         activityMainBinding = DataBindingUtil.setContentView(this,R.layout.activity_main);
         session = new SessionManager(MainActivity.this);
-        LogFileUtils.initLogFile(session,MainActivity.this);
+        LogFileUtils.startSession(MainActivity.this,session);
         LogFileUtils.logInfo(TAG, "CGM-Scanner " + Utils.getAppVersion(this) + " started");
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
+
+        if(session.getStdTestQrCode()!=null){
+            if(!Utils.isValidateStdTestQrCode(session.getStdTestQrCode())){
+                session.setStdTestQrCode(null);
+            }
+        }
         final Observer<List<Person>> observer = list -> {
             Log.e("PersonRecycler", "Observer called");
 
