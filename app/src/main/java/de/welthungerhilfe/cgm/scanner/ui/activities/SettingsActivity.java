@@ -59,12 +59,6 @@ public class SettingsActivity extends BaseActivity {
     public static final String KEY_SHOW_DEPTH = "KEY_SHOW_DEPTH";
     public static final String KEY_UPLOAD_WIFI = "KEY_UPLOAD_WIFI";
 
-
-
-
-
-
-
     public void openPerformanceMeasurement(View view) {
         Intent intent = new Intent(SettingsActivity.this, SettingsPerformanceActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
@@ -208,5 +202,15 @@ public class SettingsActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(session.getStdTestQrCode()!=null){
+            activitySettingsBinding.toolbar.setBackgroundResource(R.color.colorPink);
+        } else {
+            activitySettingsBinding.toolbar.setBackgroundResource(R.color.colorPrimary);
+        }
     }
 }

@@ -62,6 +62,7 @@
     <string name="menuTutorial">ट्यूटोरियल</string>
     <string name="menuSettings">सेटिंग्स</string>
     <string name="menuLogout">लोग आउट</string>
+    <string name="menuStdTest">एसटीडी टेस्ट छोड़ें</string>
     <string name="menu_qr">क्यूआर खोजे </string>
     <string name="menu_search">खोजे </string>
     <string name="menu_filter">सॉर्ट करें और फ़िल्टर करें</string>

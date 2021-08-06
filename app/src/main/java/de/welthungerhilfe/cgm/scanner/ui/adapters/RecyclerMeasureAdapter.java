@@ -126,7 +126,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         }
 
         if (measure.isOedema()) {
-            holder.rytItem.setBackgroundResource(R.color.colorPink);
+            holder.rytItem.setBackgroundResource(R.color.colorLightPink);
         } else {
             holder.rytItem.setBackgroundResource(R.color.colorWhite);
         }

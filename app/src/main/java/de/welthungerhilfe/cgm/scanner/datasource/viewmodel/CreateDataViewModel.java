@@ -101,11 +101,12 @@ public class CreateDataViewModel extends ViewModel {
         return lastMeasureLiveData;
     }
 
-    public void syncManualMeasurements(String qrCode){
+    public void syncManualMeasurements(String qrCode) {
         Person person = personRepository.findPersonByQr(qrCode);
         SyncManualMeasureAdapter syncManualMeasureAdapter = SyncManualMeasureAdapter.getInstance(context);
         syncManualMeasureAdapter.getSyncManualMeasure(person);
     }
+
     @SuppressLint("StaticFieldLeak")
     public void savePerson(Person person) {
         new AsyncTask<Void, Void, Void>() {
@@ -113,6 +114,7 @@ public class CreateDataViewModel extends ViewModel {
             protected Void doInBackground(Void... voids) {
 
                 personRepository.insertPerson(person);
+                startSyncImmediate();
                 return null;
             }
 
@@ -128,10 +130,7 @@ public class CreateDataViewModel extends ViewModel {
             @Override
             protected Void doInBackground(Void... voids) {
                 measureRepository.insertMeasure(measure);
-
-                Context appContext = context.getApplicationContext();
-                SyncingWorkManager.startSyncingWithWorkManager(appContext);
-
+                startSyncImmediate();
                 return null;
             }
 
@@ -139,5 +138,10 @@ public class CreateDataViewModel extends ViewModel {
                 setActiveTab(2);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void startSyncImmediate() {
+        Context appContext = context.getApplicationContext();
+        SyncingWorkManager.startSyncingWithWorkManager(appContext);
     }
 }
