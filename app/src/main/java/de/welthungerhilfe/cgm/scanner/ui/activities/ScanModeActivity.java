@@ -365,6 +365,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         super.onResume();
         getCamera().onResume();
         getCamera().addListener(this);
+        if(session.getStdTestQrCode()!=null){
+            activityScanModeBinding.toolbar.setBackgroundResource(R.color.colorPink);
+        } else {
+            activityScanModeBinding.toolbar.setBackgroundResource(R.color.colorPrimary);
+        }
     }
 
     @Override

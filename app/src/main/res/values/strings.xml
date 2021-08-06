@@ -68,6 +68,7 @@
     <string name="menuTutorial">Tutorial</string>
     <string name="menuSettings">Settings</string>
     <string name="menuLogout">Logout</string>
+    <string name="menuStdTest">Quit Std Test</string>
     <string name="menu_qr">QR Search</string>
     <string name="menu_search">Search</string>
     <string name="menu_filter">Sort and Filter</string>
