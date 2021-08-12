@@ -291,6 +291,12 @@ public class AREngineCamera extends AbstractARCamera {
       mColorCameraIntrinsic[1] = intrinsics.getFocalLength()[0] / (float)intrinsics.getImageDimensions()[0];
       mColorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[1] / (float)intrinsics.getImageDimensions()[1];
       mColorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
+      if (Build.MODEL.startsWith("VOG") && (Build.VERSION.SDK_INT <= 28)) {
+        mColorCameraIntrinsic[0] = 0.77124846f;
+        mColorCameraIntrinsic[1] = 1.0283293f;
+        mColorCameraIntrinsic[2] = 0.4991906f;
+        mColorCameraIntrinsic[3] = 0.5016229f;
+      }
       mDepthCameraIntrinsic = mColorCameraIntrinsic;
       mHasCameraCalibration = true;
 
