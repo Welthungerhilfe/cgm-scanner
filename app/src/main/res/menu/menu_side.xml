@@ -51,6 +51,12 @@
     </group>
     <group>
         <item
+            android:id="@+id/menuQuitStdTest"
+            android:icon="@drawable/ic_std_test"
+            android:title="@string/menuStdTest"/>
+    </group>
+    <group>
+        <item
             android:id="@+id/menuLogout"
             android:icon="@drawable/menu_logout"
             android:title="@string/menuLogout"/>

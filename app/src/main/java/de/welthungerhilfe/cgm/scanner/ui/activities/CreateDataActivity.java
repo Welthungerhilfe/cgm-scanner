@@ -35,10 +35,6 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.ActionBar;
 
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-
 import java.util.List;
 
 
@@ -49,7 +45,6 @@ import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.GrowthDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasuresDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
@@ -74,11 +69,7 @@ public class CreateDataActivity extends BaseActivity {
 
     ActivityCreateBinding activityCreateBinding;
 
-    boolean isMenuVisible = true;
-
     SessionManager sessionManager;
-
-    private static final int STD_TEST_DEACTIVE = 1;
 
 
     @Override
@@ -177,44 +168,15 @@ public class CreateDataActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater = getMenuInflater();
-
+    protected void onResume() {
+        super.onResume();
         if (sessionManager.getStdTestQrCode() != null) {
-            menuInflater.inflate(R.menu.menu_std_test, menu);
-        }
-
-        return true;
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
-        if (menuItem.getItemId() == R.id.std_test_active) {
-            showConfirmDialog(R.string.std_test_deactivate, STD_TEST_DEACTIVE);
-            isMenuVisible = false;
-            invalidateOptionsMenu();
-        }
-
-        return super.onOptionsItemSelected(menuItem);
-    }
-
-    private void showConfirmDialog(int message, int step) {
-        try {
-            ConfirmDialog confirmDialog = new ConfirmDialog(this);
-            confirmDialog.setMessage(message);
-            confirmDialog.setConfirmListener(result -> {
-                if (result) {
-                    sessionManager.setStdTestQrCode(null);
-                    invalidateOptionsMenu();
-                    int tab = activityCreateBinding.viewpager.getCurrentItem();
-                    initFragments();
-                    activityCreateBinding.viewpager.setCurrentItem(tab);
-                }
-            });
-            confirmDialog.show();
-        } catch (Exception e) {
-            e.printStackTrace();
+            activityCreateBinding.toolbar.setBackgroundResource(R.color.colorPink);
+            activityCreateBinding.tabs.setBackgroundResource(R.color.colorPink);
+        } else {
+            activityCreateBinding.toolbar.setBackgroundResource(R.color.colorPrimary);
+            activityCreateBinding.tabs.setBackgroundResource(R.color.colorPrimary);
         }
     }
+
 }

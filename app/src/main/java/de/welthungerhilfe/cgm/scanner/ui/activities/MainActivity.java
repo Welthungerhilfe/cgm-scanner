@@ -38,7 +38,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
 
 import android.util.Log;
@@ -70,7 +69,6 @@ import de.welthungerhilfe.cgm.scanner.network.service.DeviceService;
 import de.welthungerhilfe.cgm.scanner.network.service.WifiStateChangereceiverHelperService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
-import de.welthungerhilfe.cgm.scanner.utils.EndlessScrollListener;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.DeviceCheckFragment;
@@ -81,7 +79,6 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
-import okhttp3.internal.Util;
 
 import static de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity.KEY_LAST_DEVICE_CHECK_ISSUES;
 
@@ -89,6 +86,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final long REQUEST_DEVICE_CHECK_TIME = 1000 * 3600 * 12; //12h
+
+    private static final int STD_TEST_DEACTIVE = 1;
+
 
     private PersonListViewModel viewModel;
 
@@ -120,15 +120,16 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        activityMainBinding = DataBindingUtil.setContentView(this,R.layout.activity_main);
+        activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         session = new SessionManager(MainActivity.this);
-        LogFileUtils.startSession(MainActivity.this,session);
+        LogFileUtils.startSession(MainActivity.this, session);
         LogFileUtils.logInfo(TAG, "CGM-Scanner " + Utils.getAppVersion(this) + " started");
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
 
-        if(session.getStdTestQrCode()!=null){
-            if(!Utils.isValidateStdTestQrCode(session.getStdTestQrCode())){
+        if (session.getStdTestQrCode() != null) {
+            if (!Utils.isValidateStdTestQrCode(session.getStdTestQrCode())) {
                 session.setStdTestQrCode(null);
+                showStdTestButtonInMenu(false);
             }
         }
         final Observer<List<Person>> observer = list -> {
@@ -138,6 +139,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 activityMainBinding.contentMain.lytNoPerson.setVisibility(View.VISIBLE);
             } else {
                 activityMainBinding.contentMain.lytNoPerson.setVisibility(View.GONE);
+                adapterData.clear();
                 adapterData.addPersons(list);
             }
         };
@@ -151,12 +153,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         activityMainBinding.contentMain.recyclerData.setLayoutManager(lytManager);
         activityMainBinding.contentMain.recyclerData.setItemAnimator(new DefaultItemAnimator());
         activityMainBinding.contentMain.recyclerData.setHasFixedSize(true);
-        activityMainBinding.contentMain.recyclerData.addOnScrollListener(new EndlessScrollListener(lytManager) {
-            @Override
-            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                viewModel.setCurrentPage(page);
-            }
-        });
+
 
         adapterData = new RecyclerPersonAdapter(this, activityMainBinding.contentMain.recyclerData, viewModel);
         adapterData.setPersonDetailListener(this);
@@ -171,6 +168,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         SyncingWorkManager.startSyncingWithWorkManager(MainActivity.this);
         File log = new File(AppController.getInstance().getPublicAppDirectory(MainActivity.this)
                 + "/cgm");
+        showStdTestButtonInMenu(false);
     }
 
     @Override
@@ -209,6 +207,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();
                     break;
+                case R.id.menuQuitStdTest:
+                    showConfirmDialog(R.string.std_test_deactivate, STD_TEST_DEACTIVE);
+                    break;
             }
             activityMainBinding.drawer.closeDrawers();
             return true;
@@ -229,7 +230,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             invalidateOptionsMenu();
         }
 
-        mDrawerToggle = new ActionBarDrawerToggle(this, activityMainBinding.drawer,activityMainBinding.contentMain.toolbar, R.string.drawer_open, R.string.drawer_close) {
+        mDrawerToggle = new ActionBarDrawerToggle(this, activityMainBinding.drawer, activityMainBinding.contentMain.toolbar, R.string.drawer_open, R.string.drawer_close) {
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
             }
@@ -258,7 +259,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
             @Override
             public boolean onQueryTextChange(String query) {
-                adapterData.clear();
+
                 viewModel.setFilterQuery(query);
                 return false;
             }
@@ -285,7 +286,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
                     switch (view.getId()) {
                         case R.id.rytFilterData:
-                            adapterData.clear();
                             viewModel.setFilterOwn();
                             break;
                         case R.id.rytFilterDate:
@@ -295,11 +295,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                             doFilterByLocation();
                             break;
                         case R.id.rytFilterClear:
-                            adapterData.clear();
                             viewModel.setFilterNo();
                             break;
                         case R.id.rytSortDate:
-                            adapterData.clear();
                             viewModel.setSortType(AppConstants.SORT_DATE);
                             break;
                         case R.id.rytSortLocation:
@@ -311,11 +309,11 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                             }
                             break;
                         case R.id.rytSortWasting:
-                            adapterData.clear();
+
                             viewModel.setSortType(AppConstants.SORT_WASTING);
                             break;
                         case R.id.rytSortStunting:
-                            adapterData.clear();
+
                             viewModel.setSortType(AppConstants.SORT_STUNTING);
                             break;
                     }
@@ -408,7 +406,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         end.set(Calendar.MILLISECOND, 999);
         long endDate = end.getTimeInMillis();
 
-        adapterData.clear();
+
         viewModel.setFilterDate(startDate, endDate);
     }
 
@@ -461,7 +459,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         if (reqCode == PERMISSION_LOCATION && resCode == Activity.RESULT_OK) {
             int radius = result.getIntExtra(AppConstants.EXTRA_RADIUS, 0);
 
-            adapterData.clear();
+
             viewModel.setFilterLocation(session.getLocation(), radius);
         }
     }
@@ -479,12 +477,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         MeasureNotification.dismissNotification(this);
         PersonRepository repository = PersonRepository.getInstance(this);
         if (repository.isUpdated()) {
-            adapterData.clear();
             viewModel.setFilterOwn();
             viewModel.setSortType(AppConstants.SORT_DATE);
             repository.setUpdated(false);
         }
         deviceCheckPopup();
+        checkIfStdTestActive();
     }
 
 
@@ -518,4 +516,36 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             confirmDialog.show();
         }
     }
+
+    private void showStdTestButtonInMenu(boolean visible) {
+        activityMainBinding.navMenu.getMenu().findItem(R.id.menuQuitStdTest).setVisible(visible);
+    }
+
+    private void checkIfStdTestActive() {
+        if (session.getStdTestQrCode() != null) {
+            activityMainBinding.contentMain.toolbar.setBackgroundResource(R.color.colorPink);
+            showStdTestButtonInMenu(true);
+        } else {
+            activityMainBinding.contentMain.toolbar.setBackgroundResource(R.color.colorPrimary);
+            showStdTestButtonInMenu(false);
+        }
+    }
+
+    private void showConfirmDialog(int message, int step) {
+        try {
+            ConfirmDialog confirmDialog = new ConfirmDialog(this);
+            confirmDialog.setMessage(message);
+            confirmDialog.setConfirmListener(result -> {
+                if (result) {
+                    session.setStdTestQrCode(null);
+                    adapterData.notifyDataSetChanged();
+                    checkIfStdTestActive();
+                }
+            });
+            confirmDialog.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

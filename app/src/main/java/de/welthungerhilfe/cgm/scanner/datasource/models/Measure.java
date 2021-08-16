@@ -412,11 +412,14 @@ public class Measure extends CsvExportableModel implements Serializable {
         }
 
         //create structure to split artifacts by scan step
+        FileLog calibration = null;
         for (FileLog log : measureArtifacts) {
             if (log.getStep() != 0) {
                 if (!output.containsKey(log.getStep())) {
                     output.put(log.getStep(), new Scan());
                 }
+            } else {
+                calibration = log;
             }
         }
 
@@ -485,6 +488,19 @@ public class Measure extends CsvExportableModel implements Serializable {
             scan.setDevice_info(deviceInfo);
             scan.setStd_test_qr_code(getStd_test_qr_code());
             output.put(key, scan);
+        }
+
+        //add calibration file
+        if (calibration != null) {
+            for (Scan scan : output.values()) {
+                Artifact artifact = new Artifact();
+                artifact.setFile(calibration.getServerId());
+                artifact.setFormat(calibration.getType());
+                artifact.setOrder(0);
+                artifact.setTimestamp(calibration.getCreateDate());
+                artifact.setTimestampString(DataFormat.convertMilliSeconsToServerDate(calibration.getCreateDate()));
+                scan.getArtifacts().add(0, artifact);
+            }
         }
         return output;
     }

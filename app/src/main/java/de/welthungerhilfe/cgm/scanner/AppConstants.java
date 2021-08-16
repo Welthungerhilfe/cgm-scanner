@@ -29,6 +29,7 @@ public class AppConstants {
     public static final String API_URL_IN_BMZ = "{API_URL_PRODUCTION}/";
     public static final String API_URL_NAMIBIA = "{API_URL_NAMIBIA}/";
     public static final String API_TESTING_URL = "http://192.168.43.252:5001/api/";
+
     //Environments Type
     public static final int ENV_UNKNOWN = 0;
     public static final int ENV_SANDBOX = 1;
@@ -48,7 +49,7 @@ public class AppConstants {
     public static final String VAL_SEX_MALE = "male";
 
     public static final String VAL_MEASURE_MANUAL = "manual";
-    public static final String VAL_MEASURE_AUTO = "v1.0.3";
+    public static final String VAL_MEASURE_AUTO = "v1.1.0";
 
     public static final String LANG_ENGLISH = "en";
     public static final String LANG_GERMAN = "de";
