@@ -165,7 +165,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 startForegroundService(new Intent(this, WifiStateChangereceiverHelperService.class));
             }
         }
-        SyncingWorkManager.startSyncingWithWorkManager(MainActivity.this);
+
         File log = new File(AppController.getInstance().getPublicAppDirectory(MainActivity.this)
                 + "/cgm");
         showStdTestButtonInMenu(false);
@@ -481,6 +481,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             viewModel.setSortType(AppConstants.SORT_DATE);
             repository.setUpdated(false);
         }
+        SyncingWorkManager.startSyncingWithWorkManager(getApplicationContext());
         deviceCheckPopup();
         checkIfStdTestActive();
     }
