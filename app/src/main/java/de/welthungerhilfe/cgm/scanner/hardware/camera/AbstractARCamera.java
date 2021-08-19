@@ -263,12 +263,22 @@ public abstract class AbstractARCamera {
                 ArrayList<ComputerVisionUtils.Point3F> edges;
                 edges = mComputerVision.getCalibrationToFEdges(depth, calibration, matrix, mCalibrationImageEdges);
 
+                mCalibrationImageSizeCV = null;
+                if (mCalibrationImageEdges.length >= 4) {
+                    float x = mCalibrationImageEdges[0].distanceTo(mCalibrationImageEdges[1]);
+                    float y = mCalibrationImageEdges[0].distanceTo(mCalibrationImageEdges[3]);
+                    if ((x > 0) && (y > 0)) {
+                        mCalibrationImageSizeCV = new SizeF(x, y);
+                    }
+                }
+
                 mCalibrationImageSizeToF = null;
                 if (edges.size() >= 4) {
                     float x = edges.get(0).distanceTo(edges.get(1));
                     float y = edges.get(0).distanceTo(edges.get(3));
                     if ((x > 0) && (y > 0)) {
                         mCalibrationImageSizeToF = new SizeF(x, y);
+                        mCalibrationImageSizeCV = mCalibrationImageSizeToF;
                     }
                 }
 
