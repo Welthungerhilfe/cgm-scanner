@@ -271,7 +271,6 @@ public class ARCoreCamera extends AbstractARCamera implements GLSurfaceView.Rend
       mHasCameraCalibration = true;
 
       //get calibration image dimension
-      mCalibrationImageSizeCV = null;
       for (AugmentedImage img : frame.getUpdatedTrackables(AugmentedImage.class)) {
         Pose[] localBoundaryPoses = {
                 Pose.makeTranslation(
@@ -296,7 +295,6 @@ public class ARCoreCamera extends AbstractARCamera implements GLSurfaceView.Rend
           Pose p = img.getCenterPose().compose(localBoundaryPoses[i]);
           mCalibrationImageEdges[i] = new ComputerVisionUtils.Point3F(p.tx(), p.ty(), p.tz());
         }
-        mCalibrationImageSizeCV = new SizeF(img.getExtentX(), img.getExtentZ());
       }
 
       //get pose from ARCore
