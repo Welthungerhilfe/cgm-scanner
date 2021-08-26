@@ -910,6 +910,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private void onProcessArtifact(File artifactFile, ArtifactType type) {
         if (artifactFile.exists()) {
             FileLog log = new FileLog();
+
+            //set type specific information
             switch (type) {
                 case CALIBRATION:
                     log.setStep(0);
@@ -927,6 +929,16 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     log.setType("rgb");
                     break;
             }
+
+            //set information if child is detected (note: this is unsupported on ARCore devices and for lying children)
+            boolean childDetected = false;
+            if (SCAN_MODE == AppConstants.SCAN_STANDING) {
+                AbstractARCamera.TrackingState tracking = getCamera().getTrackingState();
+                childDetected = tracking == AbstractARCamera.TrackingState.TRACKED;
+            }
+            log.setChildDetected(childDetected);
+
+            //set metadata
             log.setPath(artifactFile.getPath());
             log.setHashValue(IO.getMD5(artifactFile.getPath()));
             log.setFileSize(artifactFile.length());

@@ -35,7 +35,7 @@ public class FileLog extends CsvExportableModel implements Serializable {
     @NonNull
     private String id;
     private String serverId;
-    private String type; // consent, pcd, rgb
+    private String type; // calibration, consent, depth, rgb
     private String path;
     private String hashValue;
     private long fileSize;
@@ -50,7 +50,7 @@ public class FileLog extends CsvExportableModel implements Serializable {
     private String measureId;
     private int step;
     private int environment;
-
+    private boolean childDetected;
 
     @NonNull
     public String getId() {
@@ -189,13 +189,21 @@ public class FileLog extends CsvExportableModel implements Serializable {
         this.environment = environment;
     }
 
+    public boolean getChildDetected() {
+        return childDetected;
+    }
+
+    public void setChildDetected(boolean childDetected) {
+        this.childDetected = childDetected;
+    }
+
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%s,%s,%d,%d,%b,%s,%d,%s,%d,%d,%d,%s,%d,%s,%d",id,type,path,hashValue.replace("\n", "").replace("\r", ""),fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId,step,serverId,environment);
+        return String.format(Locale.US, "%s,%s,%s,%s,%d,%d,%b,%s,%d,%s,%d,%d,%d,%s,%d,%s,%d,%s",id,type,path,hashValue.replace("\n", "").replace("\r", ""),fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId,step,serverId,environment,childDetected);
     }
 
     @Override
     public String getCsvHeaderString() {
-        return "id,type,path,hashValue,fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId,step,serverId,environment";
+        return "id,type,path,hashValue,fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId,step,serverId,environment,childDetected";
     }
 }
