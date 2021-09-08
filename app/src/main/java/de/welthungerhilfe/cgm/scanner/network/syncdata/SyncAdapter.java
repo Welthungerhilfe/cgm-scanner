@@ -48,11 +48,14 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
 import de.welthungerhilfe.cgm.scanner.datasource.models.SyncPersonsResponse;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Workflow;
+import de.welthungerhilfe.cgm.scanner.datasource.models.WorkflowsResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PostScanResultrepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.WorkflowRepository;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
@@ -90,6 +93,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     private DeviceRepository deviceRepository;
     private FileLogRepository fileLogRepository;
     private PostScanResultrepository postScanResultrepository;
+    private WorkflowRepository workflowRepository;
 
     private SessionManager session;
     private AsyncTask<Void, Void, Void> syncTask;
@@ -103,6 +107,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         deviceRepository = DeviceRepository.getInstance(context);
         fileLogRepository = FileLogRepository.getInstance(context);
         postScanResultrepository = PostScanResultrepository.getInstance(context);
+        workflowRepository = WorkflowRepository.getInstance(context);
 
         activeThreads = 0;
         session = new SessionManager(context);
@@ -197,6 +202,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     processMeasureResults();
                     getSyncPersons();
                     migrateEnvironmentColumns();
+                    getWorkflows();
 
                     session.setSyncTimestamp(currentTimestamp);
                 } catch (Exception e) {
@@ -522,12 +528,12 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
     public void getSyncPersons() {
         try {
-            if((System.currentTimeMillis() - session.getLastPersonSyncTimestamp()) < 10000L ){
+            if ((System.currentTimeMillis() - session.getLastPersonSyncTimestamp()) < 10000L) {
                 return;
             }
 
             String lastPersonSyncTime = null;
-            if(session.getLastPersonSyncTimestamp() > 0){
+            if (session.getLastPersonSyncTimestamp() > 0) {
                 lastPersonSyncTime = DataFormat.convertMilliSeconsToServerDate(session.getLastPersonSyncTimestamp());
                 LogFileUtils.logInfo(TAG, "Syncing persons, the last sync was " + lastPersonSyncTime);
             } else {
@@ -546,8 +552,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         public void onNext(@NonNull SyncPersonsResponse syncPersonsResponse) {
                             LogFileUtils.logInfo(TAG, "Sync persons successfully fetch " + syncPersonsResponse.persons.size() + " person(s)");
                             session.setPersonSyncTimestamp(System.currentTimeMillis());
-                            if(syncPersonsResponse.persons !=null && syncPersonsResponse.persons.size() > 0) {
-                                for(int i=0; i<syncPersonsResponse.persons.size(); i++) {
+                            if (syncPersonsResponse.persons != null && syncPersonsResponse.persons.size() > 0) {
+                                for (int i = 0; i < syncPersonsResponse.persons.size(); i++) {
                                     Person person = syncPersonsResponse.persons.get(i);
                                     Person existingPerson = personRepository.findPersonByQr(person.getQrcode());
                                     person.setSynced(true);
@@ -560,11 +566,11 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                     person.setDevice_updated_at_timestamp(DataFormat.convertServerDateToMilliSeconds(person.getDevice_updated_at()));
                                     person.setLastLocation(null);
 
-                                    if(existingPerson!=null){
+                                    if (existingPerson != null) {
                                         person.setId(existingPerson.getId());
                                         personRepository.updatePerson(person);
 
-                                    } else{
+                                    } else {
                                         person.setId(AppController.getInstance().getPersonId());
                                         personRepository.insertPerson(person);
                                     }
@@ -951,5 +957,38 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             }
             loadQueueFileLogs();
         }
+    }
+
+    public void getWorkflows() {
+
+        LogFileUtils.logInfo(TAG, "getting workflow lists... ");
+        retrofit.create(ApiService.class).getWorkflows(session.getAuthTokenWithBearer()).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<WorkflowsResponse>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull WorkflowsResponse workflowsResponse) {
+                        Log.i(TAG, "this is response of getWorkflow " + workflowsResponse);
+                        if (workflowsResponse != null && workflowsResponse.getWorkflows() != null && workflowsResponse.getWorkflows().size() > 0) {
+                            for (Workflow workflow : workflowsResponse.getWorkflows()) {
+                                workflowRepository.insertWorkflow(workflow);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        LogFileUtils.logError(TAG, "error getting workflow lists... " + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 }
