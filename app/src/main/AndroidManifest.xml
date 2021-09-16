@@ -72,10 +72,6 @@
         android:windowSoftInputMode="adjustResize"
         tools:replace="android:allowBackup">
 
-        <uses-library
-            android:name="com.projecttango.libtango_device2"
-            android:required="${tangoRequired}" />
-
         <meta-data
             android:name="com.google.ar.core"
             android:value="${arcoreValue}" />
