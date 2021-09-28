@@ -114,6 +114,16 @@ public class DataFormat {
         }
     }
 
+    public static String formatValue(Context context, double value, int units) {
+        String format = "%.2f";
+        if (value >= 10) {
+            format = "%.1f";
+        } else if (value >= 100) {
+            format = "%.0f";
+        }
+        return String.format(Locale.getDefault(), format, value) + context.getString(units);
+    }
+
     public static String time(Context context, long milliSeconds) {
         if (milliSeconds >= 3600000) {
             return String.format(getCurrentLocale(context), "%.1fh", milliSeconds / 3600000.0f);

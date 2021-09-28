@@ -99,7 +99,8 @@ public class AppConstants {
     public static final int SORT_WASTING = 2;
     public static final int SORT_STUNTING = 3;
 
-    public static final int MIN_CONFIDENCE = 100;
+    public static final double MAX_HEIGHT_ERROR = 1.2;
+    public static final double MAX_WEIGHT_ERROR = 0.21;
 
     public static final int SCAN_FRAMESKIP = 6;
 

@@ -105,17 +105,17 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="@dimen/activity_section_margin"
                     android:text="@string/abbr_height"
-                    android:textSize="18sp" />
+                    android:textSize="15sp" />
 
                 <TextView
                     android:id="@+id/txtHeight"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/activity_group_margin"
-                    android:textSize="18sp" />
+                    android:layout_marginEnd="@dimen/activity_section_margin"
+                    android:textSize="15sp" />
 
                 <TextView
-                    android:id="@+id/txtHeightConfidence"
+                    android:id="@+id/txtHeightAccuracy"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingStart="@dimen/activity_section_margin"
@@ -130,17 +130,17 @@
                     android:layout_marginStart="@dimen/activity_group_margin"
                     android:layout_marginEnd="@dimen/activity_section_margin"
                     android:text="@string/abbr_weight"
-                    android:textSize="18sp" />
+                    android:textSize="15sp" />
 
                 <TextView
                     android:id="@+id/txtWeight"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/activity_group_margin"
-                    android:textSize="18sp" />
+                    android:layout_marginEnd="@dimen/activity_section_margin"
+                    android:textSize="15sp" />
 
                 <TextView
-                    android:id="@+id/txtWeightConfidence"
+                    android:id="@+id/txtWeightAccuracy"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingStart="@dimen/activity_section_margin"

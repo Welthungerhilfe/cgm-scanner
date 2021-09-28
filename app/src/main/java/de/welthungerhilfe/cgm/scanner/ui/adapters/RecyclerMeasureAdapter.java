@@ -157,19 +157,32 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f", measure.getWeight()) + context.getString(R.string.unit_kg));
 
             if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
-                holder.txtHeightConfidence.setVisibility(View.GONE);
-                holder.txtWeightConfidence.setVisibility(View.GONE);
+                holder.txtHeightAccuracy.setVisibility(View.GONE);
+                holder.txtWeightAccuracy.setVisibility(View.GONE);
             } else {
-                int heightConfidence = (int) (measure.getHeightConfidence() * 100);
-                int weightConfidence = (int) (measure.getWeightConfidence() * 100);
-                setConfidence(holder.txtHeight, holder.txtHeightConfidence, heightConfidence);
-                setConfidence(holder.txtWeight, holder.txtWeightConfidence, weightConfidence);
+                Measure closest = getClosestManualMeasure(measure);
+                if ((closest != null) && (measure.getHeight() > 0)) {
+                    double heightError = Math.abs(closest.getHeight() - measure.getHeight());
+                    boolean heightValid = heightError < AppConstants.MAX_HEIGHT_ERROR;
+                    String heightValue = DataFormat.formatValue(context, heightError, R.string.unit_cm);
+                    setAccuracy(holder.txtHeight, holder.txtHeightAccuracy, heightValue, heightValid);
+                } else {
+                    holder.txtHeightAccuracy.setVisibility(View.GONE);
+                }
+                if ((closest != null) && (measure.getWeight() > 0)) {
+                    double weightError = Math.abs(closest.getWeight() - measure.getWeight());
+                    boolean weightValid = weightError < AppConstants.MAX_WEIGHT_ERROR;
+                    String weightValue = DataFormat.formatValue(context, weightError, R.string.unit_kg);
+                    setAccuracy(holder.txtWeight, holder.txtWeightAccuracy, weightValue, weightValid);
+                } else {
+                    holder.txtWeightAccuracy.setVisibility(View.GONE);
+                }
             }
         } else {
             holder.txtHeight.setText(R.string.field_concealed);
             holder.txtWeight.setText(R.string.field_concealed);
-            holder.txtHeightConfidence.setVisibility(View.GONE);
-            holder.txtWeightConfidence.setVisibility(View.GONE);
+            holder.txtHeightAccuracy.setVisibility(View.GONE);
+            holder.txtWeightAccuracy.setVisibility(View.GONE);
         }
         holder.bindSelectListener(measure);
     }
@@ -190,11 +203,26 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         notifyItemRemoved(index);
     }
 
-    private void setConfidence(TextView text, TextView percentage, int value) {
+    private Measure getClosestManualMeasure(Measure measure) {
+        Measure output = null;
+        long best = Integer.MAX_VALUE;
+        for (Measure m : measureList) {
+            if (m.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
+                long diff = Math.abs(m.getAge() - measure.getAge());
+                if (best > diff) {
+                    best = diff;
+                    output = m;
+                }
+            }
+        }
+        return output;
+    }
+
+    private void setAccuracy(TextView text, TextView percentage, String value, boolean valid) {
         percentage.setBackgroundResource(R.drawable.tags_rounded_corners);
         GradientDrawable drawable = (GradientDrawable) percentage.getBackground();
 
-        if (value >= AppConstants.MIN_CONFIDENCE) {
+        if (valid) {
             drawable.setColor(text.getResources().getColor(R.color.colorPrimary));
             text.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
         } else {
@@ -202,7 +230,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             text.setPaintFlags(Paint.ANTI_ALIAS_FLAG | Paint.STRIKE_THRU_TEXT_FLAG);
         }
 
-        String label = value + "%";
+        String label = "\u00B1" + value;
         percentage.setText(label);
         percentage.setVisibility(View.VISIBLE);
     }
@@ -260,9 +288,9 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         TextView txtDate;
         TextView txtAuthor;
         TextView txtHeight;
-        TextView txtHeightConfidence;
+        TextView txtHeightAccuracy;
         TextView txtWeight;
-        TextView txtWeightConfidence;
+        TextView txtWeightAccuracy;
         ProgressBar progressUpload;
         View contextMenu;
 
@@ -276,9 +304,9 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             txtDate = itemView.findViewById(R.id.txtDate);
             txtAuthor = itemView.findViewById(R.id.txtAuthor);
             txtHeight = itemView.findViewById(R.id.txtHeight);
-            txtHeightConfidence = itemView.findViewById(R.id.txtHeightConfidence);
+            txtHeightAccuracy = itemView.findViewById(R.id.txtHeightAccuracy);
             txtWeight = itemView.findViewById(R.id.txtWeight);
-            txtWeightConfidence = itemView.findViewById(R.id.txtWeightConfidence);
+            txtWeightAccuracy = itemView.findViewById(R.id.txtWeightAccuracy);
             progressUpload = itemView.findViewById(R.id.progressUpload);
             contextMenu = itemView.findViewById(R.id.contextMenuButton);
         }
