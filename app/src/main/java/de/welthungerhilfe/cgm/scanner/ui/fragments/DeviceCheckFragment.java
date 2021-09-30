@@ -354,16 +354,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     }
 
     private void updateCalibration(SizeF calibration, ArrayList<SizeF> calibrations) {
-        boolean valid = true;
-        for (SizeF s : calibrations) {
-            float dx = Math.abs(calibration.getWidth() - s.getWidth());
-            float dy = Math.abs(calibration.getHeight() - s.getHeight());
-            if (dx + dy < 0.00001f) {
-                valid = false;
-                break;
-            }
-        }
-        if (valid && (calibrations.size() < CALIBRATIONS_MIN)) {
+        if (calibrations.size() < CALIBRATIONS_MIN) {
             calibrations.add(calibration);
         }
     }
