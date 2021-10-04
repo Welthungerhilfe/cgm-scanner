@@ -497,8 +497,8 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                                 @Override
                                 public void onError(@NonNull Throwable e) {
                                     if (Utils.isExpiredToken(e.getMessage())) {
-                                        AuthenticationHandler.restoreToken(context);
-                                        new Thread(internetConnectionCheck).start();
+                                        setTestResult(fragmentDeviceCheckBinding.test4, R.string.ok, TestView.TestState.SUCCESS);
+                                        updateNextButton();
                                     } else {
                                         String message = e.getMessage();
                                         if (message.startsWith("HTTP 2") || message.startsWith("HTTP 403")) {
