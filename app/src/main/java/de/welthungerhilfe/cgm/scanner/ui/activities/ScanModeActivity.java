@@ -639,7 +639,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     currentImgFilename = currentImgFilename.replace('/', '_');
                     File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
                     BitmapHelper.writeBitmapToFile(bitmap, artifactFile);
-                    onProcessArtifact(artifactFile, ArtifactType.RGB);
+                    onProcessArtifact(artifactFile, ArtifactType.RGB, 0);
 
                     //save RGB metadata
                     if (artifactFile.exists()) {
@@ -660,7 +660,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                 fileOutputStream.write(cameraCalibration.getBytes());
                                 fileOutputStream.flush();
                                 fileOutputStream.close();
-                                onProcessArtifact(artifactFile, ArtifactType.CALIBRATION);
+                                onProcessArtifact(artifactFile, ArtifactType.CALIBRATION, 0);
 
                             } catch (Exception e) {
                                 LogFileUtils.logException(e);
@@ -681,8 +681,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex) {
 
+        float height = 0;
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-            float height = getCamera().getTargetHeight();
+            height = getCamera().getTargetHeight();
             if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
                 if (SCAN_STEP == AppConstants.SCAN_STANDING_FRONT) {
                     heights.add(height);
@@ -706,13 +707,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             updateScanningProgress();
             onLightScore(getCamera().getLightIntensity());
 
+            float finalHeight = height * 100.0f;
             Runnable thread = () -> {
                 try {
 
                     //write depthmap
                     File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                     depthmap.save(artifactFile);
-                    onProcessArtifact(artifactFile, ArtifactType.DEPTH);
+                    onProcessArtifact(artifactFile, ArtifactType.DEPTH, finalHeight);
 
                     //profile process
                     if (artifactFile.exists()) {
@@ -746,7 +748,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         Runnable thread = () -> {
             long profile = System.currentTimeMillis();
             TangoUtils.writeImageToFile(tangoImageBuffer, artifactFile);
-            onProcessArtifact(artifactFile, ArtifactType.RGB);
+            onProcessArtifact(artifactFile, ArtifactType.RGB, 0);
 
             if (artifactFile.exists()) {
                 mColorSize += artifactFile.length();
@@ -790,7 +792,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 Depthmap depthmap = TangoUtils.extractDepthmap(buffer, numPoints, position, rotation, timestamp, calibration[1]);
                 File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                 depthmap.save(artifactFile);
-                onProcessArtifact(artifactFile, ArtifactType.DEPTH);
+                onProcessArtifact(artifactFile, ArtifactType.DEPTH, 0);
 
                 //profile process
                 if (artifactFile.exists()) {
@@ -811,7 +813,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                             fileOutputStream.write(cameraCalibration.getBytes());
                             fileOutputStream.flush();
                             fileOutputStream.close();
-                            onProcessArtifact(artifactFile, ArtifactType.CALIBRATION);
+                            onProcessArtifact(artifactFile, ArtifactType.CALIBRATION, 0);
 
                         } catch (Exception e) {
                             LogFileUtils.logException(e);
@@ -907,7 +909,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onProcessArtifact(File artifactFile, ArtifactType type) {
+    private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight) {
         if (artifactFile.exists()) {
             FileLog log = new FileLog();
 
@@ -937,6 +939,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 childDetected = tracking == AbstractARCamera.TrackingState.TRACKED;
             }
             log.setChildDetected(childDetected);
+            log.setChildHeight(childHeight);
 
             //set metadata
             log.setPath(artifactFile.getPath());
