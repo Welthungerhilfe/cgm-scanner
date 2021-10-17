@@ -29,4 +29,8 @@ public class WorkflowRepository {
         database.workfolwDao().insertPerson(workflow);
     }
 
+    public String getWorkFlowId(String name, String version){
+        return database.workfolwDao().getWorkFlowId(name,version);
+    }
+
 }

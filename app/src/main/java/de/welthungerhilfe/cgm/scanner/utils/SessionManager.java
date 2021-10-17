@@ -209,7 +209,7 @@ public class SessionManager {
     public String getAuthTokenWithBearer() {
 
         if (BuildConfig.DEBUG) {
-            return null;
+            return "q#Pq%Q$A67jnAh26P6M8hET!UTP%SDZ^xQW& ";
             /*Or for testing authorazation like sandbox, demo/qa, pass X-API-KEY with "admin_secret"
             in header*/
             //return "admin_secret";
@@ -221,7 +221,6 @@ public class SessionManager {
 
     public void setEnvironment(int environment) {
         editor.putInt(SELECTED_ENVIRONMENT, environment);
-
         editor.commit();
     }
 
@@ -230,7 +229,7 @@ public class SessionManager {
     }
 
     public String getCurrentLogFilePath() {
-       return pref.getString(LOG_FILE, null);
+        return pref.getString(LOG_FILE, null);
     }
 
     public void setCurrentLogFilePath(String name) {
@@ -249,11 +248,20 @@ public class SessionManager {
 
     public void setPersonSyncTimestamp(long timestamp) {
         editor.putLong(KEY_PERSON_SYNC_TIMESTAMP, timestamp);
-
         editor.commit();
     }
 
     public long getLastPersonSyncTimestamp() {
         return pref.getLong(KEY_PERSON_SYNC_TIMESTAMP, 0);
+    }
+
+    //Store and retrive workflows ids
+    public String getWorkFlowId(String key) {
+        return pref.getString(key, null);
+    }
+
+    public void setWorkFlowId(String key, String values) {
+        editor.putString(key, values);
+        editor.commit();
     }
 }

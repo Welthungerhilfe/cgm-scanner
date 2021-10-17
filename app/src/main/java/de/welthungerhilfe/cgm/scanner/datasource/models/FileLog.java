@@ -52,6 +52,10 @@ public class FileLog extends CsvExportableModel implements Serializable {
     private int environment;
     private boolean childDetected;
     private float childHeight;
+    private String scanServerId;
+    private String artifactId;
+    private boolean autoDetectSynced;
+    private boolean childHeightSynced;
 
     @NonNull
     public String getId() {
@@ -206,17 +210,49 @@ public class FileLog extends CsvExportableModel implements Serializable {
         this.childHeight = childHeight;
     }
 
+
+    public String getScanServerId() {
+        return scanServerId;
+    }
+
+    public void setScanServerId(String scanServerId) {
+        this.scanServerId = scanServerId;
+    }
+
+    public String getArtifactId() {
+        return artifactId;
+    }
+
+    public void setArtifactId(String artifactId) {
+        this.artifactId = artifactId;
+    }
+
+    public boolean getAutoDetectSynced() {
+        return autoDetectSynced;
+    }
+
+    public void setAutoDetectSynced(boolean autoDetectSynced) {
+        this.autoDetectSynced = autoDetectSynced;
+    }
+    public void setChildHeightSynced(boolean childHeightSynced) {
+        this.childHeightSynced = childHeightSynced;
+    }
+
+    public boolean isChildHeightSynced() {
+        return childHeightSynced;
+    }
+
     @Override
     public String getCsvFormattedString() {
-        return String.format(Locale.US, "%s,%s,%s,%s,%d,%d,%b,%s,%d,%s,%d,%d,%d,%s,%d,%s,%d,%s,%f",
+        return String.format(Locale.US, "%s,%s,%s,%s,%d,%d,%b,%s,%d,%s,%d,%d,%d,%s,%d,%s,%d,%s,%f,%s,%s,%b",
                 id,type,path,hashValue.replace("\n", "").replace("\r", ""),
                 fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age,schema_version,measureId,
-                step,serverId,environment,childDetected,childHeight);
+                step,serverId,environment,childDetected,childHeight,scanServerId,artifactId,autoDetectSynced);
     }
 
     @Override
     public String getCsvHeaderString() {
         return "id,type,path,hashValue,fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age," +
-               "schema_version,measureId,step,serverId,environment,childDetected,childHeight";
+               "schema_version,measureId,step,serverId,environment,childDetected,childHeight,scanServerId,artifactId,autoDetectSynced";
     }
 }

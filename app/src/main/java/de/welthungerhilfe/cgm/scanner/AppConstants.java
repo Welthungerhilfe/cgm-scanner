@@ -118,5 +118,13 @@ public class AppConstants {
     //LogFileUtils
     public static final String LOG_FILE_FOLDER = "LogFileFolder";
 
+    //Workflows list for result generation
+
+    public static final String APP_AUTO_DETECT_1_0 = "app_auto_detect-1.0";
+
+    public static final String APP_HEIGHT_1_0 = "app_height-1.0";
+
+    public static final String[] workflowsList = {APP_AUTO_DETECT_1_0, APP_HEIGHT_1_0};
+
 
 }

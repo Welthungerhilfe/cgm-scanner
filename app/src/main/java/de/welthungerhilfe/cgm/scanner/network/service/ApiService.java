@@ -22,6 +22,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ResultsData;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
 import de.welthungerhilfe.cgm.scanner.datasource.models.SyncManualMeasureResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.SyncPersonsResponse;
@@ -74,8 +75,12 @@ public interface ApiService {
     @GET("workflows")
     Observable<WorkflowsResponse> getWorkflows(@Header("Authorization") String auth);
 
+    @POST("results")
+    Observable<ResultsData> postWorkFlowsResult(@Header("Authorization") String auth, @Body RequestBody result);
+
     @GET("test")
     Observable<String> test(@Header("Authorization") String auth);
+
 }
 
 
