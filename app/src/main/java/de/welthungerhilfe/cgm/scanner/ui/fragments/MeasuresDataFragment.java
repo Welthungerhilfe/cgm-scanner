@@ -28,6 +28,7 @@ import androidx.annotation.Nullable;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -45,6 +46,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
+import de.welthungerhilfe.cgm.scanner.utils.FirebaseUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
@@ -69,6 +71,8 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     private Person person;
 
     ViewModelProvider.Factory factory;
+
+    FirebaseAnalytics firebaseAnalytics;
 
 
     public static MeasuresDataFragment getInstance(String qrCode) {
@@ -99,7 +103,6 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     public void onActivityCreated(Bundle instance) {
         super.onActivityCreated(instance);
 
-
         factory = new CreateDataViewModelProvideFactory(getActivity());
         viewModel = new ViewModelProvider(getActivity(), factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
@@ -108,6 +111,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                 adapterMeasure.setPerson(person);
             }
         });
+        firebaseAnalytics = FirebaseUtils.getFirebaseAnalyticsInstance(getActivity());
         viewModel.getMeasuresLiveData().observe(getViewLifecycleOwner(), measures -> {
             if (measures != null)
                 adapterMeasure.resetData(measures);
@@ -149,6 +153,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                     measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
                     measureDialog.setPerson(person);
                     measureDialog.show();
+                    firebaseAnalytics.logEvent(FirebaseUtils.MANUAL_MEASURE_START,null);
                     break;
                 case 1:
                     Intent intent = new Intent(getContext(), ScanModeActivity.class);
@@ -206,6 +211,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setStd_test_qr_code(session.getStdTestQrCode());
 
         viewModel.insertMeasure(measure);
+        firebaseAnalytics.logEvent(FirebaseUtils.MANUAL_MEASURE_STOP,null);
     }
 
 }
