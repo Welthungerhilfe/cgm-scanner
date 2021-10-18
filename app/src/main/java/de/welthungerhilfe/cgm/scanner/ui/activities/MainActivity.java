@@ -116,6 +116,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     private ContentMainBinding contentMainBinding;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
