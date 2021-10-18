@@ -53,6 +53,7 @@ import android.widget.Toast;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.experimental.TangoImageBuffer;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.microsoft.appcenter.crashes.Crashes;
 
 import java.io.File;
@@ -83,6 +84,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
@@ -99,6 +101,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private enum ArtifactType { CALIBRATION, DEPTH, RGB };
 
     ActivityScanModeBinding activityScanModeBinding;
+
+    FirebaseAnalytics firebaseAnalytics;
+    boolean scanCompleted = false;
+    boolean scanStarted = false;
 
     public void scanStanding(View view) {
         SCAN_MODE = AppConstants.SCAN_STANDING;
@@ -284,7 +290,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     protected void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
+        firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             LogFileUtils.logException(throwable);
             Crashes.trackError(throwable);
@@ -383,6 +389,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     public void onDestroy() {
         super.onDestroy();
         progressDialog.dismiss();
+        if(scanStarted && !scanCompleted){
+            firebaseAnalytics.logEvent(FirebaseService.SCAN_CANCELED,null);
+        }
     }
 
     private void setupToolbar() {
@@ -1027,6 +1036,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
                 if (step1 && step2 && step3) {
                     showCompleteButton();
+                    firebaseAnalytics.logEvent(FirebaseService.SCAN_START,null);
+                    scanStarted = true;
                 }
             });
         }
@@ -1055,6 +1066,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 } else {
                     UploadService.forceResume();
                 }
+                scanCompleted = true;
+                firebaseAnalytics.logEvent(FirebaseService.SCAN_SUCCESSFUL,null);
                 finish();
             });
         }
