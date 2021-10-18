@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -34,10 +33,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Artifact;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
@@ -46,13 +47,19 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ResultInputData;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Results;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ResultsData;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
 import de.welthungerhilfe.cgm.scanner.datasource.models.SyncPersonsResponse;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Workflow;
+import de.welthungerhilfe.cgm.scanner.datasource.models.WorkflowsResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PostScanResultrepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.WorkflowRepository;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
@@ -90,6 +97,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     private DeviceRepository deviceRepository;
     private FileLogRepository fileLogRepository;
     private PostScanResultrepository postScanResultrepository;
+    private WorkflowRepository workflowRepository;
 
     private SessionManager session;
     private AsyncTask<Void, Void, Void> syncTask;
@@ -103,6 +111,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         deviceRepository = DeviceRepository.getInstance(context);
         fileLogRepository = FileLogRepository.getInstance(context);
         postScanResultrepository = PostScanResultrepository.getInstance(context);
+        workflowRepository = WorkflowRepository.getInstance(context);
 
         activeThreads = 0;
         session = new SessionManager(context);
@@ -197,6 +206,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     processMeasureResults();
                     getSyncPersons();
                     migrateEnvironmentColumns();
+                    getWorkflows();
+                    postWorkFlowsResult();
 
                     session.setSyncTimestamp(currentTimestamp);
                 } catch (Exception e) {
@@ -347,6 +358,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 postScanResult.setMeasure_id(measure.getId());
                                 postScanResult.setTimestamp(prevTimestamp);
                                 postScanResultrepository.insertPostScanResult(postScanResult);
+                                addScanDataToFileLogs(scan.getId(), scan.getArtifacts());
 
                                 count[0]--;
                                 if (count[0] == 0) {
@@ -379,6 +391,15 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             }
         } catch (Exception e) {
             LogFileUtils.logException(e);
+        }
+    }
+
+    public void addScanDataToFileLogs(String scanServerId, List<Artifact> artifactsList) {
+        for (Artifact artifact : artifactsList) {
+            FileLog fileLog = fileLogRepository.getFileLogByFileId(artifact.getFile());
+            fileLog.setArtifactId(artifact.getId());
+            fileLog.setScanServerId(scanServerId);
+            fileLogRepository.updateFileLog(fileLog);
         }
     }
 
@@ -522,12 +543,12 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
     public void getSyncPersons() {
         try {
-            if((System.currentTimeMillis() - session.getLastPersonSyncTimestamp()) < 10000L ){
+            if ((System.currentTimeMillis() - session.getLastPersonSyncTimestamp()) < 10000L) {
                 return;
             }
 
             String lastPersonSyncTime = null;
-            if(session.getLastPersonSyncTimestamp() > 0){
+            if (session.getLastPersonSyncTimestamp() > 0) {
                 lastPersonSyncTime = DataFormat.convertMilliSeconsToServerDate(session.getLastPersonSyncTimestamp());
                 LogFileUtils.logInfo(TAG, "Syncing persons, the last sync was " + lastPersonSyncTime);
             } else {
@@ -546,8 +567,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         public void onNext(@NonNull SyncPersonsResponse syncPersonsResponse) {
                             LogFileUtils.logInfo(TAG, "Sync persons successfully fetch " + syncPersonsResponse.persons.size() + " person(s)");
                             session.setPersonSyncTimestamp(System.currentTimeMillis());
-                            if(syncPersonsResponse.persons !=null && syncPersonsResponse.persons.size() > 0) {
-                                for(int i=0; i<syncPersonsResponse.persons.size(); i++) {
+                            if (syncPersonsResponse.persons != null && syncPersonsResponse.persons.size() > 0) {
+                                for (int i = 0; i < syncPersonsResponse.persons.size(); i++) {
                                     Person person = syncPersonsResponse.persons.get(i);
                                     Person existingPerson = personRepository.findPersonByQr(person.getQrcode());
                                     person.setSynced(true);
@@ -560,11 +581,11 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                     person.setDevice_updated_at_timestamp(DataFormat.convertServerDateToMilliSeconds(person.getDevice_updated_at()));
                                     person.setLastLocation(null);
 
-                                    if(existingPerson!=null){
+                                    if (existingPerson != null) {
                                         person.setId(existingPerson.getId());
                                         personRepository.updatePerson(person);
 
-                                    } else{
+                                    } else {
                                         person.setId(AppController.getInstance().getPersonId());
                                         personRepository.insertPerson(person);
                                     }
@@ -952,4 +973,218 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             loadQueueFileLogs();
         }
     }
+
+    public void getWorkflows() {
+
+        for (String workflow : AppConstants.workflowsList) {
+            String[] data = workflow.split("-");
+            if (workflowRepository.getWorkFlowId(data[0], data[1]) == null) {
+                getWorkFlowsFromServer();
+                break;
+            }
+        }
+    }
+
+    public void getWorkFlowsFromServer() {
+        LogFileUtils.logInfo(TAG, "getting workflow lists... ");
+        retrofit.create(ApiService.class).getWorkflows(session.getAuthTokenWithBearer()).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<WorkflowsResponse>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull WorkflowsResponse workflowsResponse) {
+                        LogFileUtils.logInfo(TAG, "WorkFlowsList successfully fetched... ");
+
+                        if (workflowsResponse != null && workflowsResponse.getWorkflows() != null && workflowsResponse.getWorkflows().size() > 0) {
+                            for (Workflow workflow : workflowsResponse.getWorkflows()) {
+                                workflowRepository.insertWorkflow(workflow);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        LogFileUtils.logError(TAG, "error getting workflow lists... " + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    public void postWorkFlowsResult() {
+        postAutoDetectResult();
+        postAppHeightResult();
+    }
+
+    public void postAutoDetectResult() {
+        try {
+            Gson gson = new GsonBuilder()
+                    .excludeFieldsWithoutExposeAnnotation()
+                    .create();
+            List<FileLog> fileLogsList = fileLogRepository.loadAutoDetectedFileLog();
+            if (fileLogsList.size() == 0) {
+                return;
+            }
+            String workflow[] = AppConstants.APP_AUTO_DETECT_1_0.split("-");
+            String appAutoDetectWorkflowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1]);
+
+            ArrayList<Results> resultList = new ArrayList();
+            for (FileLog fileLog : fileLogsList) {
+                Results results = new Results();
+                results.setId(UUID.randomUUID().toString());
+                results.setGenerated(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
+                results.setScan(fileLog.getScanServerId());
+                results.setWorkflow(appAutoDetectWorkflowId
+                );
+                ArrayList<String> sourceArtifacts = new ArrayList<>();
+                sourceArtifacts.add(fileLog.getArtifactId());
+                results.setSource_artifacts(sourceArtifacts);
+                ArrayList<String> sourceResults = new ArrayList<>();
+                results.setSource_results(sourceResults);
+                ResultInputData resultInputData = new ResultInputData();
+                resultInputData.setAuto_detect(fileLog.getChildDetected());
+                results.setData(resultInputData);
+                resultList.add(results);
+            }
+            ResultsData resultsData = new ResultsData();
+            resultsData.setResults(resultList);
+
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
+
+            onThreadChange(1);
+            LogFileUtils.logInfo(TAG, "posting autoDetect workflows... ");
+            retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<ResultsData>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull ResultsData resultsData1) {
+                            LogFileUtils.logInfo(TAG, "AutoDetect Workflow successfully posted...");
+                            for (Results results : resultsData1.getResults()) {
+                                FileLog fileLog = fileLogRepository.getFileLogByArtifactId(results.getSource_artifacts().get(0));
+                                fileLog.setAutoDetectSynced(true);
+                                fileLogRepository.updateFileLog(fileLog);
+                            }
+
+
+                            updated = true;
+                            updateDelay = 0;
+                            onThreadChange(-1);
+                            if (fileLogRepository.loadAutoDetectedFileLog().size() > 0) {
+                                postAutoDetectResult();
+                            }
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            LogFileUtils.logError(TAG, "Autodetect Workflow posting failed " + e.getMessage());
+
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(context);
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            LogFileUtils.logException(e);
+        }
+    }
+
+    public void postAppHeightResult() {
+        try {
+            Gson gson = new GsonBuilder()
+                    .excludeFieldsWithoutExposeAnnotation()
+                    .create();
+            List<FileLog> fileLogsList = fileLogRepository.loadAppHeightFileLog();
+            if (fileLogsList.size() == 0) {
+                return;
+            }
+            String workflow[] = AppConstants.APP_HEIGHT_1_0.split("-");
+            String appHeightWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1]);
+            ArrayList<Results> resultList = new ArrayList();
+            for (FileLog fileLog : fileLogsList) {
+                Results results = new Results();
+                results.setId(UUID.randomUUID().toString());
+                results.setGenerated(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
+                results.setScan(fileLog.getScanServerId());
+                results.setWorkflow(appHeightWorkFlowId);
+                ArrayList<String> sourceArtifacts = new ArrayList<>();
+                sourceArtifacts.add(fileLog.getArtifactId());
+                results.setSource_artifacts(sourceArtifacts);
+                ResultInputData resultInputData = new ResultInputData();
+                ArrayList<String> sourceResults = new ArrayList<>();
+                results.setSource_results(sourceResults);
+                resultInputData.setAuto_detect(fileLog.getChildDetected());
+                results.setData(resultInputData);
+                resultList.add(results);
+            }
+            ResultsData resultsData = new ResultsData();
+            resultsData.setResults(resultList);
+
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
+
+            onThreadChange(1);
+            LogFileUtils.logInfo(TAG, "posting appHeight workflows... ");
+            retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<ResultsData>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull ResultsData resultsData1) {
+                            LogFileUtils.logInfo(TAG, "AppHeight workflow successfully posted...");
+                            for (Results results : resultsData1.getResults()) {
+                                FileLog fileLog = fileLogRepository.getFileLogByArtifactId(results.getSource_artifacts().get(0));
+                                fileLog.setChildHeightSynced(true);
+                                fileLogRepository.updateFileLog(fileLog);
+                            }
+
+
+                            updated = true;
+                            updateDelay = 0;
+                            onThreadChange(-1);
+                            if (fileLogRepository.loadAppHeightFileLog().size() > 0) {
+                                postAppHeightResult();
+                            }
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            LogFileUtils.logError(TAG, "AppHeight workflow posting failed " + e.getMessage());
+
+                            if (Utils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(context);
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            LogFileUtils.logException(e);
+        }
+    }
+
 }
