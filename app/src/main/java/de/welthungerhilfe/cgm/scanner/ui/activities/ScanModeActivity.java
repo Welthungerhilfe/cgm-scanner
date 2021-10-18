@@ -84,7 +84,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
-import de.welthungerhilfe.cgm.scanner.utils.FirebaseUtils;
+import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
@@ -290,7 +290,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     protected void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        firebaseAnalytics = FirebaseUtils.getFirebaseAnalyticsInstance(this);
+        firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             LogFileUtils.logException(throwable);
             Crashes.trackError(throwable);
@@ -390,7 +390,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         super.onDestroy();
         progressDialog.dismiss();
         if(scanStarted && !scanCompleted){
-            firebaseAnalytics.logEvent(FirebaseUtils.SCAN_CANCELED,null);
+            firebaseAnalytics.logEvent(FirebaseService.SCAN_CANCELED,null);
         }
     }
 
@@ -1021,7 +1021,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
                 if (step1 && step2 && step3) {
                     showCompleteButton();
-                    firebaseAnalytics.logEvent(FirebaseUtils.SCAN_START,null);
+                    firebaseAnalytics.logEvent(FirebaseService.SCAN_START,null);
                     scanStarted = true;
                 }
             });
@@ -1052,7 +1052,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     UploadService.forceResume();
                 }
                 scanCompleted = true;
-                firebaseAnalytics.logEvent(FirebaseUtils.SCAN_SUCCESSFUL,null);
+                firebaseAnalytics.logEvent(FirebaseService.SCAN_SUCCESSFUL,null);
                 finish();
             });
         }

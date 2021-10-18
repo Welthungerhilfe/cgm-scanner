@@ -1,4 +1,4 @@
-package de.welthungerhilfe.cgm.scanner.utils;
+package de.welthungerhilfe.cgm.scanner.network.service;
 
 import android.content.Context;
 
@@ -6,7 +6,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 
-public class FirebaseUtils {
+public class FirebaseService {
 
     public static FirebaseAnalytics firebaseAnalytics;
 

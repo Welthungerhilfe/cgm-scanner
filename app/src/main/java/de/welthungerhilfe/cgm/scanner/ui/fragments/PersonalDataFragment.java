@@ -58,7 +58,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.utils.FirebaseUtils;
+import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
@@ -124,7 +124,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             if (measure != null)
                 setLocation(measure.getLocation());
         });
-        firebaseAnalytics = FirebaseUtils.getFirebaseAnalyticsInstance(getActivity());
+        firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(getActivity());
 
         view.findViewById(R.id.rytConsentDetail).setOnClickListener(this);
         view.findViewById(R.id.imgBirth).setOnClickListener(this);
@@ -175,7 +175,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void initUI() {
         if (person == null) {
             setLocation(((CreateDataActivity) getActivity()).location);
-            firebaseAnalytics.logEvent(FirebaseUtils.CREATE_PERSON_START,null);
+            firebaseAnalytics.logEvent(FirebaseService.CREATE_PERSON_START,null);
             return;
         } else {
             setLocation(person.getLastLocation());
@@ -280,7 +280,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         person.setQrcode(qrCode);
                         person.setEnvironment(session.getEnvironment());
                         person.setCreated(System.currentTimeMillis());
-                        firebaseAnalytics.logEvent(FirebaseUtils.CREATE_PERSON_STOP,null);
+                        firebaseAnalytics.logEvent(FirebaseService.CREATE_PERSON_STOP,null);
 
                     }
 

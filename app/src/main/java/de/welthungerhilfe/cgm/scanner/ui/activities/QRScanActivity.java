@@ -57,10 +57,9 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.views.QRScanView;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
 import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
-import de.welthungerhilfe.cgm.scanner.utils.FirebaseUtils;
+import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-import okhttp3.internal.Util;
 
 public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConfirmListener, QRScanView.QRScanHandler {
     private final String TAG = QRScanActivity.class.getSimpleName();
@@ -113,7 +112,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         personRepository = PersonRepository.getInstance(QRScanActivity.this);
         activityBehaviourType = getIntent().getIntExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST);
         sessionManager = new SessionManager(this);
-        firebaseAnalytics = FirebaseUtils.getFirebaseAnalyticsInstance(this);
+        firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_CAMERA);
@@ -142,7 +141,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
             } else if (CONFIRM_DIALOG_STEP == NO_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == EMPTY_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == STD_TEST_START_CONFIRM) {
                 finish();
             } else {
-                firebaseAnalytics.logEvent(FirebaseUtils.SCAN_INFORM_CONSENT_START,null);
+                firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_START,null);
                 startCaptureImage();
             }
         } else {
@@ -169,7 +168,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                 e.printStackTrace();
             }
         }
-        firebaseAnalytics.logEvent(FirebaseUtils.SCAN_INFORM_CONSENT_STOP,null);
+        firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_STOP,null);
         finish();
     }
 

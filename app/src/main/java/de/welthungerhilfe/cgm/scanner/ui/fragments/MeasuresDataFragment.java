@@ -46,7 +46,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
-import de.welthungerhilfe.cgm.scanner.utils.FirebaseUtils;
+import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
@@ -111,7 +111,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                 adapterMeasure.setPerson(person);
             }
         });
-        firebaseAnalytics = FirebaseUtils.getFirebaseAnalyticsInstance(getActivity());
+        firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(getActivity());
         viewModel.getMeasuresLiveData().observe(getViewLifecycleOwner(), measures -> {
             if (measures != null)
                 adapterMeasure.resetData(measures);
@@ -153,7 +153,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                     measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
                     measureDialog.setPerson(person);
                     measureDialog.show();
-                    firebaseAnalytics.logEvent(FirebaseUtils.MANUAL_MEASURE_START,null);
+                    firebaseAnalytics.logEvent(FirebaseService.MANUAL_MEASURE_START,null);
                     break;
                 case 1:
                     Intent intent = new Intent(getContext(), ScanModeActivity.class);
@@ -211,7 +211,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setStd_test_qr_code(session.getStdTestQrCode());
 
         viewModel.insertMeasure(measure);
-        firebaseAnalytics.logEvent(FirebaseUtils.MANUAL_MEASURE_STOP,null);
+        firebaseAnalytics.logEvent(FirebaseService.MANUAL_MEASURE_STOP,null);
     }
 
 }
