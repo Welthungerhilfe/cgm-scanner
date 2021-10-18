@@ -111,4 +111,20 @@ public class FileLogRepository {
     public LiveData<UploadStatus> getMeasureUploadProgress(String measureId) {
         return database.fileLogDao().getMeasureUploadProgress(measureId);
     }
+
+    public FileLog getFileLogByFileId(String fileserverId){
+        return database.fileLogDao().getFileLogByFileServerId(fileserverId);
+    }
+
+    public FileLog getFileLogByArtifactId(String artifactId){
+        return database.fileLogDao().getFileLogByArtifactId(artifactId);
+    }
+
+    public List<FileLog> loadAutoDetectedFileLog() {
+        return database.fileLogDao().loadAutoDetectedFileLog();
+    }
+
+    public List<FileLog> loadAppHeightFileLog() {
+        return database.fileLogDao().loadAppHeightFileLog();
+    }
 }
