@@ -51,7 +51,6 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
-import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.databinding.FragmentDeviceCheckBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
@@ -339,9 +338,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     private void startCamera() {
         AbstractARCamera.DepthPreviewMode depthMode = AbstractARCamera.DepthPreviewMode.CALIBRATION;
         AbstractARCamera.PreviewSize previewSize = AbstractARCamera.PreviewSize.SMALL;
-        if (TangoUtils.isTangoSupported()) {
-            camera = null;
-        } else if (AREngineCamera.shouldUseAREngine()) {
+        if (AREngineCamera.shouldUseAREngine()) {
             camera = new AREngineCamera(getActivity(), depthMode, previewSize);
         } else {
             camera = new ARCoreCamera(getActivity(), depthMode, previewSize);
@@ -497,8 +494,8 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                                 @Override
                                 public void onError(@NonNull Throwable e) {
                                     if (Utils.isExpiredToken(e.getMessage())) {
-                                        AuthenticationHandler.restoreToken(context);
-                                        new Thread(internetConnectionCheck).start();
+                                        setTestResult(fragmentDeviceCheckBinding.test4, R.string.ok, TestView.TestState.SUCCESS);
+                                        updateNextButton();
                                     } else {
                                         String message = e.getMessage();
                                         if (message.startsWith("HTTP 2") || message.startsWith("HTTP 403")) {

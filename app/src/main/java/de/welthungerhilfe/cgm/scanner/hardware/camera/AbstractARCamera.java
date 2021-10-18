@@ -291,7 +291,7 @@ public abstract class AbstractARCamera {
                 Bitmap mask = mComputerVision.getDepthPreviewCenter(depth, bestPlane, calibration, matrix, otherColors);
                 mTargetHeight = mComputerVision.getCenterFocusHeight(mask, depth, bestPlane, calibration, matrix);
 
-                boolean valid = mComputerVision.isFocusValid(mask) && (mTargetHeight >= 0.45);
+                boolean valid = mComputerVision.isFocusValid(mask) && (mTargetHeight >= 0.45) && (mTargetHeight <= 1.3);
                 if (!otherColors && !valid) {
                     mask = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
                 }
