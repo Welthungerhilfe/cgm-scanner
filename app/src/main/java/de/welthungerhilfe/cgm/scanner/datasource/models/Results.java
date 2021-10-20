@@ -31,10 +31,6 @@ public class Results {
     @Expose
     ArrayList<String> source_results;
 
-    @SerializedName("data")
-    @Expose
-    ResultInputData data;
-
     public String getId() {
         return id;
     }
@@ -73,14 +69,6 @@ public class Results {
 
     public void setGenerated(String generated) {
         this.generated = generated;
-    }
-
-    public ResultInputData getData() {
-        return data;
-    }
-
-    public void setData(ResultInputData data) {
-        this.data = data;
     }
 
     public ArrayList<String> getSource_results() {

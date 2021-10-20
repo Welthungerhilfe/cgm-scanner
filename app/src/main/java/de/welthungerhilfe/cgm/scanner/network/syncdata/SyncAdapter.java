@@ -47,7 +47,8 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
-import de.welthungerhilfe.cgm.scanner.datasource.models.ResultInputData;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAppHeight;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAutoDetect;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Results;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultsData;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
@@ -1037,21 +1038,20 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             ArrayList<Results> resultList = new ArrayList();
             for (FileLog fileLog : fileLogsList) {
-                Results results = new Results();
-                results.setId(UUID.randomUUID().toString());
-                results.setGenerated(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
-                results.setScan(fileLog.getScanServerId());
-                results.setWorkflow(appAutoDetectWorkflowId
-                );
+                ResultAutoDetect resultAutoDetect = new ResultAutoDetect();
+                resultAutoDetect.setId(UUID.randomUUID().toString());
+                resultAutoDetect.setGenerated(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
+                resultAutoDetect.setScan(fileLog.getScanServerId());
+                resultAutoDetect.setWorkflow(appAutoDetectWorkflowId);
                 ArrayList<String> sourceArtifacts = new ArrayList<>();
                 sourceArtifacts.add(fileLog.getArtifactId());
-                results.setSource_artifacts(sourceArtifacts);
+                resultAutoDetect.setSource_artifacts(sourceArtifacts);
                 ArrayList<String> sourceResults = new ArrayList<>();
-                results.setSource_results(sourceResults);
-                ResultInputData resultInputData = new ResultInputData();
-                resultInputData.setAuto_detect(fileLog.getChildDetected());
-                results.setData(resultInputData);
-                resultList.add(results);
+                resultAutoDetect.setSource_results(sourceResults);
+                ResultAutoDetect.Data data = new ResultAutoDetect.Data();
+                data.setAuto_detect(fileLog.getChildDetected());
+                resultAutoDetect.setData(data);
+                resultList.add(resultAutoDetect);
             }
             ResultsData resultsData = new ResultsData();
             resultsData.setResults(resultList);
@@ -1119,20 +1119,20 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             String appHeightWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1]);
             ArrayList<Results> resultList = new ArrayList();
             for (FileLog fileLog : fileLogsList) {
-                Results results = new Results();
-                results.setId(UUID.randomUUID().toString());
-                results.setGenerated(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
-                results.setScan(fileLog.getScanServerId());
-                results.setWorkflow(appHeightWorkFlowId);
+                ResultAppHeight resultAppHeight = new ResultAppHeight();
+                resultAppHeight.setId(UUID.randomUUID().toString());
+                resultAppHeight.setGenerated(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
+                resultAppHeight.setScan(fileLog.getScanServerId());
+                resultAppHeight.setWorkflow(appHeightWorkFlowId);
                 ArrayList<String> sourceArtifacts = new ArrayList<>();
                 sourceArtifacts.add(fileLog.getArtifactId());
-                results.setSource_artifacts(sourceArtifacts);
-                ResultInputData resultInputData = new ResultInputData();
+                resultAppHeight.setSource_artifacts(sourceArtifacts);
                 ArrayList<String> sourceResults = new ArrayList<>();
-                results.setSource_results(sourceResults);
-                resultInputData.setAuto_detect(fileLog.getChildDetected());
-                results.setData(resultInputData);
-                resultList.add(results);
+                resultAppHeight.setSource_results(sourceResults);
+                ResultAppHeight.Data data = new ResultAppHeight.Data();
+                data.setHeight(fileLog.getChildHeight());
+                resultAppHeight.setData(data);
+                resultList.add(resultAppHeight);
             }
             ResultsData resultsData = new ResultsData();
             resultsData.setResults(resultList);
