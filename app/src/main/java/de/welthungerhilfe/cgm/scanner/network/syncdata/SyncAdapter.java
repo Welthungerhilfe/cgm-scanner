@@ -1020,6 +1020,11 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void postWorkFlowsResult() {
+        long diffTime = currentTimestamp - session.getSyncResultTimeStamp();
+        if(diffTime < 15000){
+            return;
+        }
+        session.setSyncResultTimeStamp(currentTimestamp);
         postAutoDetectResult();
         postAppHeightResult();
     }

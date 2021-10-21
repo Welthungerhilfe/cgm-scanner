@@ -54,6 +54,8 @@ public class SessionManager {
     private final String LOG_FILE = "log_file";
     private final String KEY_STD_TEST_QR_CODE = "key_std_test_qr_code";
     private final String KEY_PERSON_SYNC_TIMESTAMP = "person_sync_timestamp";
+    private final String KEY_RESULT_SYNC_TIMESTAMP = "result_sync_timestamp";
+
 
 
     private SharedPreferences pref;
@@ -256,12 +258,12 @@ public class SessionManager {
     }
 
     //Store and retrive workflows ids
-    public String getWorkFlowId(String key) {
-        return pref.getString(key, null);
+    public long getSyncResultTimeStamp() {
+        return pref.getLong(KEY_RESULT_SYNC_TIMESTAMP, 0L);
     }
 
-    public void setWorkFlowId(String key, String values) {
-        editor.putString(key, values);
+    public void setSyncResultTimeStamp(long time) {
+        editor.putLong(KEY_RESULT_SYNC_TIMESTAMP, time);
         editor.commit();
     }
 }
