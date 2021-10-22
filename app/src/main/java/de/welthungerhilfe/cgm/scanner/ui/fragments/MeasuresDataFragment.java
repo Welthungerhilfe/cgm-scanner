@@ -149,11 +149,11 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         }, which -> {
             switch (which) {
                 case 0:
+                    firebaseAnalytics.logEvent(FirebaseService.MANUAL_MEASURE_START,null);
                     ManualMeasureDialog measureDialog = new ManualMeasureDialog(context);
                     measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
                     measureDialog.setPerson(person);
                     measureDialog.show();
-                    firebaseAnalytics.logEvent(FirebaseService.MANUAL_MEASURE_START,null);
                     break;
                 case 1:
                     Intent intent = new Intent(getContext(), ScanModeActivity.class);

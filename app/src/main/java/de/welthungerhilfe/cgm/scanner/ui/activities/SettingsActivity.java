@@ -34,6 +34,8 @@ import androidx.databinding.DataBindingUtil;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
 import java.io.File;
 
 
@@ -43,6 +45,7 @@ import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivitySettingsBinding;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
+import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
@@ -58,6 +61,7 @@ public class SettingsActivity extends BaseActivity {
 
     public static final String KEY_SHOW_DEPTH = "KEY_SHOW_DEPTH";
     public static final String KEY_UPLOAD_WIFI = "KEY_UPLOAD_WIFI";
+    FirebaseAnalytics firebaseAnalytics;
 
     public void openPerformanceMeasurement(View view) {
         Intent intent = new Intent(SettingsActivity.this, SettingsPerformanceActivity.class);
@@ -80,7 +84,7 @@ public class SettingsActivity extends BaseActivity {
         activitySettingsBinding = DataBindingUtil.setContentView(this,R.layout.activity_settings);
         session = new SessionManager(this);
         RemoteConfig config = session.getRemoteConfig();
-
+        firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         setupActionBar();
 
         initUI();
@@ -168,6 +172,7 @@ public class SettingsActivity extends BaseActivity {
 
         findViewById(R.id.btnContactSupport).setOnClickListener(view -> {
             ContactSupportDialog.show(this, null, null);
+            firebaseAnalytics.logEvent("contact_support",null);
         });
     }
 
