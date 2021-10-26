@@ -22,9 +22,11 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ResultsData;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
 import de.welthungerhilfe.cgm.scanner.datasource.models.SyncManualMeasureResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.SyncPersonsResponse;
+import de.welthungerhilfe.cgm.scanner.datasource.models.WorkflowsResponse;
 import io.reactivex.rxjava3.core.Observable;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -39,7 +41,8 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {
-  /*  @POST("persons")
+
+   /* @POST("persons")
     Observable<Person> postPerson(@Header("Authorization") String auth, @Body RequestBody person);
 
     @PUT("persons/{id}")
@@ -70,10 +73,14 @@ public interface ApiService {
     @GET("scans/{scan_id}/estimates")
     Observable<EstimatesResponse> getEstimates(@Header("Authorization") String auth, @Path("scan_id") String scanId);
 
+    @GET("workflows")
+    Observable<WorkflowsResponse> getWorkflows(@Header("Authorization") String auth);
+
+    @POST("results")
+    Observable<ResultsData> postWorkFlowsResult(@Header("Authorization") String auth, @Body RequestBody result);
+
     @GET("test")
     Observable<String> test(@Header("Authorization") String auth);*/
-
-    //sandbox
 
     @POST("persons")
     Observable<Person> postPerson(@Header("X-API-KEY") String auth, @Body RequestBody person);
@@ -106,8 +113,15 @@ public interface ApiService {
     @GET("scans/{scan_id}/estimates")
     Observable<EstimatesResponse> getEstimates(@Header("X-API-KEY") String auth, @Path("scan_id") String scanId);
 
+    @GET("workflows")
+    Observable<WorkflowsResponse> getWorkflows(@Header("X-API-KEY") String auth);
+
+    @POST("results")
+    Observable<ResultsData> postWorkFlowsResult(@Header("X-API-KEY") String auth, @Body RequestBody result);
+
     @GET("test")
     Observable<String> test(@Header("X-API-KEY") String auth);
+
 }
 
 

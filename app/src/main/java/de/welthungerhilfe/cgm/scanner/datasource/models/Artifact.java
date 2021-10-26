@@ -25,6 +25,10 @@ public class Artifact {
 
     private long timestamp;
 
+    @SerializedName("id")
+    @Expose
+    private String id;
+
     @SerializedName("timestamp")
     @Expose
     private String timestampString;
@@ -79,5 +83,13 @@ public class Artifact {
 
     public void setFormat(String format) {
         this.format = format;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

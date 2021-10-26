@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.appcompat.widget.SearchView;
 
+import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -119,6 +120,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     private ContentMainBinding contentMainBinding;
 
     FirebaseAnalytics firebaseAnalytics;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

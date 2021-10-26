@@ -169,6 +169,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                 e.printStackTrace();
             }
         }
+        firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_STOP,null);
         finish();
     }
 
