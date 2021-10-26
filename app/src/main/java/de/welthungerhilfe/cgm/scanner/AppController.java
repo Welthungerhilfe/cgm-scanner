@@ -41,6 +41,7 @@ public class AppController extends Application {
         Utils.overrideFont(getApplicationContext(), "SERIF", "roboto.ttf");
 
         mInstance = this;
+
     }
 
     public boolean isAdmin() {

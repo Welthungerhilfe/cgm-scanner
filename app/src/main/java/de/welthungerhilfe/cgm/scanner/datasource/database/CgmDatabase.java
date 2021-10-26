@@ -41,7 +41,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Workflow;
 
-@Database(entities = {Person.class, Measure.class, FileLog.class, Device.class, PostScanResult.class, Workflow.class}, version = 28)
+@Database(entities = {Person.class, Measure.class, FileLog.class, Device.class, PostScanResult.class, Workflow.class}, version = 24)
 public abstract class CgmDatabase extends RoomDatabase {
     private static final Object sLock = new Object();
 
@@ -59,7 +59,7 @@ public abstract class CgmDatabase extends RoomDatabase {
 
     public abstract WorkfolwDao workfolwDao();
 
-    public static final int version = 28;
+    public static final int version = 24;
 
     public static final String DATABASE = "offline_db";
 
@@ -257,42 +257,18 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final Migration MIGRATION_23_24 = new Migration(23, 24) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE file_logs ADD COLUMN childDetected BIT NOT NULL DEFAULT 0;");
-        }
-    };
-
-    public static final Migration MIGRATION_24_25 = new Migration(24, 25) {
-        @Override
-        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE file_logs ADD COLUMN childDetected INTEGER NOT NULL DEFAULT 0;");
             database.execSQL("CREATE TABLE IF NOT EXISTS `workflows` (`id` TEXT PRIMARY KEY NOT NULL, `eligible` INTEGER NOT NULL DEFAULT 0, `name` TEXT, `result_binding` TEXT, `result_format` TEXT, `version` TEXT, `input_format` TEXT, `model` TEXT)");
-        }
-    };
-
-    public static final Migration MIGRATION_25_26 = new Migration(25, 26) {
-        @Override
-        public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE file_logs ADD COLUMN childHeight REAL NOT NULL DEFAULT 0;");
-        }
-    };
-
-    public static final Migration MIGRATION_26_27 = new Migration(26, 27) {
-        @Override
-        public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE file_logs ADD COLUMN scanServerId TEXT;");
             database.execSQL("ALTER TABLE file_logs ADD COLUMN artifactId TEXT;");
-            database.execSQL("ALTER TABLE file_logs ADD COLUMN autoDetectSynced BIT NOT NULL DEFAULT 0;");
-
-        }
-    };
-
-    public static final Migration MIGRATION_27_28 = new Migration(27, 28) {
-        @Override
-        public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE file_logs ADD COLUMN childHeightSynced BIT NOT NULL DEFAULT 0;");
+            database.execSQL("ALTER TABLE file_logs ADD COLUMN autoDetectSynced INTEGER NOT NULL DEFAULT 0;");
+            database.execSQL("ALTER TABLE file_logs ADD COLUMN childHeightSynced INTEGER NOT NULL DEFAULT 0;");
 
 
         }
     };
+
 
     public static CgmDatabase getInstance(Context context) {
         synchronized (sLock) {
@@ -302,8 +278,7 @@ public abstract class CgmDatabase extends RoomDatabase {
                                 MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10,
                                 MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15,
                                 MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18,MIGRATION_18_19, MIGRATION_19_20,
-                                MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25,
-                                MIGRATION_25_26,MIGRATION_26_27,MIGRATION_27_28)
+                                MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24)
                         .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
                         .allowMainThreadQueries()
                         .build();

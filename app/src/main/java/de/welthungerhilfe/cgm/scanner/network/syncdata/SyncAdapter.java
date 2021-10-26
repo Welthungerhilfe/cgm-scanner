@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -47,7 +48,8 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
-import de.welthungerhilfe.cgm.scanner.datasource.models.ResultInputData;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAppHeight;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAutoDetect;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Results;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultsData;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
@@ -103,6 +105,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     private AsyncTask<Void, Void, Void> syncTask;
     private Retrofit retrofit;
     private Context context;
+    private long lastSyncResultTimeStamp = 0L;
 
     public SyncAdapter(Context context) {
         this.context = context;
@@ -1019,8 +1022,12 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void postWorkFlowsResult() {
+        if (System.currentTimeMillis() - lastSyncResultTimeStamp < 15000) {
+            return;
+        }
+        lastSyncResultTimeStamp = System.currentTimeMillis();
         postAutoDetectResult();
-        postAppHeightResult();
+        //postAppHeightResult();
     }
 
     public void postAutoDetectResult() {
@@ -1032,30 +1039,35 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             if (fileLogsList.size() == 0) {
                 return;
             }
+            Log.i(TAG, "this is size of fileloglist " + fileLogsList.size());
+
+            for (FileLog fileLog : fileLogsList) {
+                Log.i(TAG, "this is list of fileloglist " + fileLog.getArtifactId() + " " + fileLog.getUploadDate());
+            }
             String workflow[] = AppConstants.APP_AUTO_DETECT_1_0.split("-");
             String appAutoDetectWorkflowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1]);
 
             ArrayList<Results> resultList = new ArrayList();
             for (FileLog fileLog : fileLogsList) {
-                Results results = new Results();
-                results.setId(UUID.randomUUID().toString());
-                results.setGenerated(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
-                results.setScan(fileLog.getScanServerId());
-                results.setWorkflow(appAutoDetectWorkflowId
-                );
+                ResultAutoDetect resultAutoDetect = new ResultAutoDetect();
+                resultAutoDetect.setId(UUID.randomUUID().toString());
+                resultAutoDetect.setGenerated(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
+                resultAutoDetect.setScan(fileLog.getScanServerId());
+                resultAutoDetect.setWorkflow(appAutoDetectWorkflowId);
                 ArrayList<String> sourceArtifacts = new ArrayList<>();
                 sourceArtifacts.add(fileLog.getArtifactId());
-                results.setSource_artifacts(sourceArtifacts);
+                resultAutoDetect.setSource_artifacts(sourceArtifacts);
+                Log.i(TAG, "this is list of artifact " + fileLog.getArtifactId() + " " + fileLog.getUploadDate());
                 ArrayList<String> sourceResults = new ArrayList<>();
-                results.setSource_results(sourceResults);
-                ResultInputData resultInputData = new ResultInputData();
-                resultInputData.setAuto_detect(fileLog.getChildDetected());
-                results.setData(resultInputData);
-                resultList.add(results);
+                resultAutoDetect.setSource_results(sourceResults);
+                ResultAutoDetect.Data data = new ResultAutoDetect.Data();
+                data.setAuto_detected(fileLog.getChildDetected());
+                resultAutoDetect.setData(data);
+                resultList.add(resultAutoDetect);
             }
             ResultsData resultsData = new ResultsData();
             resultsData.setResults(resultList);
-
+            Log.i(TAG, "this is size of resultlist " + resultsData.getResults().size());
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
 
             onThreadChange(1);
@@ -1081,9 +1093,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             updated = true;
                             updateDelay = 0;
                             onThreadChange(-1);
-                            if (fileLogRepository.loadAutoDetectedFileLog().size() > 0) {
-                                postAutoDetectResult();
-                            }
+
                         }
 
                         @Override
@@ -1119,20 +1129,20 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             String appHeightWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1]);
             ArrayList<Results> resultList = new ArrayList();
             for (FileLog fileLog : fileLogsList) {
-                Results results = new Results();
-                results.setId(UUID.randomUUID().toString());
-                results.setGenerated(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
-                results.setScan(fileLog.getScanServerId());
-                results.setWorkflow(appHeightWorkFlowId);
+                ResultAppHeight resultAppHeight = new ResultAppHeight();
+                resultAppHeight.setId(UUID.randomUUID().toString());
+                resultAppHeight.setGenerated(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
+                resultAppHeight.setScan(fileLog.getScanServerId());
+                resultAppHeight.setWorkflow(appHeightWorkFlowId);
                 ArrayList<String> sourceArtifacts = new ArrayList<>();
                 sourceArtifacts.add(fileLog.getArtifactId());
-                results.setSource_artifacts(sourceArtifacts);
-                ResultInputData resultInputData = new ResultInputData();
+                resultAppHeight.setSource_artifacts(sourceArtifacts);
                 ArrayList<String> sourceResults = new ArrayList<>();
-                results.setSource_results(sourceResults);
-                resultInputData.setAuto_detect(fileLog.getChildDetected());
-                results.setData(resultInputData);
-                resultList.add(results);
+                resultAppHeight.setSource_results(sourceResults);
+                ResultAppHeight.Data data = new ResultAppHeight.Data();
+                data.setHeight(fileLog.getChildHeight());
+                resultAppHeight.setData(data);
+                resultList.add(resultAppHeight);
             }
             ResultsData resultsData = new ResultsData();
             resultsData.setResults(resultList);
@@ -1162,9 +1172,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             updated = true;
                             updateDelay = 0;
                             onThreadChange(-1);
-                            if (fileLogRepository.loadAppHeightFileLog().size() > 0) {
-                                postAppHeightResult();
-                            }
+
                         }
 
                         @Override
@@ -1186,5 +1194,6 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             LogFileUtils.logException(e);
         }
     }
+
 
 }
