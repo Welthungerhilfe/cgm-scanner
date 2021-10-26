@@ -19,6 +19,7 @@ package de.welthungerhilfe.cgm.scanner;
 
 import android.app.Application;
 import android.content.Context;
+import android.os.Build;
 import android.os.Environment;
 import android.os.StrictMode;
 
@@ -81,7 +82,7 @@ public class AppController extends Application {
     }
 
     public File getRootDirectory(Context c) {
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG && (Build.VERSION.SDK_INT < 30)) {
             return getPublicAppDirectory(c);
         }
 
