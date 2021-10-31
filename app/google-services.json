@@ -1,41 +1,33 @@
 {
   "project_info": {
-    "project_number": "968998952109",
-    "project_id": "childgrowthmonitor-10426",
-    "storage_bucket": "childgrowthmonitor-10426.appspot.com"
+    "project_number": "455578210800",
+    "project_id": "cgm-analytics",
+    "storage_bucket": "cgm-analytics.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:968998952109:android:26c1b1c85a0a516126ba24",
+        "mobilesdk_app_id": "1:455578210800:android:37ed31a85714784dee0d35",
         "android_client_info": {
           "package_name": "de.welthungerhilfe.cgm.scanner"
         }
       },
       "oauth_client": [
         {
-          "client_id": "968998952109-ijdsk8ag09ti46b5cc3s3m3pg4uhi3fh.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "de.welthungerhilfe.cgm.scanner",
-            "certificate_hash": "d727f4a4b71892394b20793896799333637b0f6c"
-          }
-        },
-        {
-          "client_id": "968998952109-n86mul49o7hllunpnm3g9unhlkjdncoe.apps.googleusercontent.com",
+          "client_id": "455578210800-c1lu45er409tpev55jrsgmh3od9u5e32.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBF7pFf8lMb4c0gN2rD9axrANl0JJIFEbU"
+          "current_key": "AIzaSyDCQ1C0nhwVz3Yn_n7TlkkwNe5e9-QZQqw"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "968998952109-n86mul49o7hllunpnm3g9unhlkjdncoe.apps.googleusercontent.com",
+              "client_id": "455578210800-c1lu45er409tpev55jrsgmh3od9u5e32.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

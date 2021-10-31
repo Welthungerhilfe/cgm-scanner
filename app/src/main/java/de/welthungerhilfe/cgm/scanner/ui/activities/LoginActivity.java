@@ -68,6 +68,9 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         if (!checkStoragePermissions()) {
             return;
         }
+        Bundle bundle = new Bundle();
+        bundle.putString("backend_selected",selectedBackend);
+        firebaseAnalytics.logEvent("signin_started",bundle);
 
         if (BuildConfig.DEBUG) {
             if (session.getEnvironment() == AppConstants.ENV_UNKNOWN) {
@@ -76,9 +79,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             }
             session.setSigned(true);
             LogFileUtils.startSession(LoginActivity.this, session);
-            Bundle bundle = new Bundle();
-            bundle.putString("backend_selected",selectedBackend);
-            firebaseAnalytics.logEvent("signin_started",bundle);
+
 
             startApp();
         } else {

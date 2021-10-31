@@ -546,7 +546,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     session.setStdTestQrCode(null);
                     adapterData.notifyDataSetChanged();
                     checkIfStdTestActive();
-                    firebaseAnalytics.logEvent("std_test_event_finished",null);
+                    firebaseAnalytics.logEvent(FirebaseService.STD_TEST_STOP,null);
                 }
             });
             confirmDialog.show();

@@ -857,7 +857,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 if (measure != null) {
                                     if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
                                         postScanResult.setSynced(true);
-                                        firebaseAnalytics.logEvent("scan_result_received",null);
+                                        firebaseAnalytics.logEvent(FirebaseService.RESULT_RECEIVED,null);
                                         onResultReceived(postScanResult.getMeasure_id());
                                     }
                                 }

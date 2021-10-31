@@ -138,7 +138,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
             if (CONFIRM_DIALOG_STEP == STD_TEST_WILL_STARTED) {
                 sessionManager.setStdTestQrCode(qrCode);
                 showConfirmDialog(R.string.std_test_started, STD_TEST_START_CONFIRM);
-                firebaseAnalytics.logEvent("std_test_event_started",null);
+                firebaseAnalytics.logEvent(FirebaseService.STD_TEST_START,null);
             } else if (CONFIRM_DIALOG_STEP == NO_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == EMPTY_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == STD_TEST_START_CONFIRM) {
                 finish();
             } else {
@@ -169,7 +169,6 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                 e.printStackTrace();
             }
         }
-        firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_STOP,null);
         finish();
     }
 
@@ -206,7 +205,6 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                 Intent intent = new Intent(QRScanActivity.this, CreateDataActivity.class);
                 intent.putExtra(AppConstants.EXTRA_QR, qrCode);
                 startActivity(intent);
-                firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_STOP,null);
                 finish();
             }
         } else {
@@ -312,6 +310,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                     Intent intent = new Intent(QRScanActivity.this, CreateDataActivity.class);
                     intent.putExtra(AppConstants.EXTRA_QR, qrCode);
                     startActivity(intent);
+                    firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_STOP,null);
                     finish();
                 } else {
                     Toast.makeText(context, R.string.error, Toast.LENGTH_LONG).show();
