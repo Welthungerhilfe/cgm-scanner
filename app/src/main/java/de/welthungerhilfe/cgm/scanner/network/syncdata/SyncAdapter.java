@@ -1027,7 +1027,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         }
         lastSyncResultTimeStamp = System.currentTimeMillis();
         postAutoDetectResult();
-        //postAppHeightResult();
+        postAppHeightResult();
     }
 
     public void postAutoDetectResult() {

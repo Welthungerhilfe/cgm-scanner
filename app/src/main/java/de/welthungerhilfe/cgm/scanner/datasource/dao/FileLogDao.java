@@ -76,9 +76,9 @@ public interface FileLogDao {
     @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE artifactId=:artifactId")
     public FileLog getFileLogByArtifactId(String artifactId);
 
-    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND autoDetectSynced=0 AND childDetected=1 ORDER BY createDate")
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND autoDetectSynced=0 ORDER BY createDate")
     List<FileLog> loadAutoDetectedFileLog();
 
-    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND childHeightSynced=0 AND childHeight>0.0 ORDER BY createDate")
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND childHeightSynced=0 ORDER BY createDate")
     List<FileLog> loadAppHeightFileLog();
 }
