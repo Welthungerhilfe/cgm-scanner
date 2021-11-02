@@ -857,7 +857,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 if (measure != null) {
                                     if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
                                         postScanResult.setSynced(true);
-                                        firebaseAnalytics.logEvent(FirebaseService.RESULT_RECEIVED,null);
+                                        firebaseAnalytics.logEvent(FirebaseService.RESULT_RECEIVED, null);
                                         onResultReceived(postScanResult.getMeasure_id());
                                     }
                                 }
@@ -1047,7 +1047,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             Log.i(TAG, "this is size of fileloglist " + fileLogsList.size());
 
             for (FileLog fileLog : fileLogsList) {
-                Log.i(TAG, "this is list of fileloglist " + fileLog.getArtifactId() + " " + fileLog.getUploadDate()+" "+fileLog.getType());
+                Log.i(TAG, "this is list of fileloglist " + fileLog.getArtifactId() + " " + fileLog.getUploadDate() + " " + fileLog.getType());
             }
             String workflow[] = AppConstants.APP_AUTO_DETECT_1_0.split("-");
             String appAutoDetectWorkflowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1]);

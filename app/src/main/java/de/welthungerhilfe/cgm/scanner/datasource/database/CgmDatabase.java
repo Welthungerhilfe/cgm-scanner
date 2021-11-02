@@ -264,8 +264,6 @@ public abstract class CgmDatabase extends RoomDatabase {
             database.execSQL("ALTER TABLE file_logs ADD COLUMN artifactId TEXT;");
             database.execSQL("ALTER TABLE file_logs ADD COLUMN autoDetectSynced INTEGER NOT NULL DEFAULT 0;");
             database.execSQL("ALTER TABLE file_logs ADD COLUMN childHeightSynced INTEGER NOT NULL DEFAULT 0;");
-
-
         }
     };
 
