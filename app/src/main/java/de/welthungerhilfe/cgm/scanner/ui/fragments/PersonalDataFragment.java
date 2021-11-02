@@ -174,8 +174,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     public void initUI() {
         if (person == null) {
-            setLocation(((CreateDataActivity) getActivity()).location);
             firebaseAnalytics.logEvent(FirebaseService.CREATE_PERSON_START,null);
+            setLocation(((CreateDataActivity) getActivity()).location);
             return;
         } else {
             setLocation(person.getLastLocation());

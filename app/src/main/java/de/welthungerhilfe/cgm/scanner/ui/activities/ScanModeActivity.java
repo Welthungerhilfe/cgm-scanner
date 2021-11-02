@@ -49,7 +49,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.microsoft.appcenter.crashes.Crashes;
 

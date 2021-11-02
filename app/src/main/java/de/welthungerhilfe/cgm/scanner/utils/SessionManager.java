@@ -200,7 +200,7 @@ public class SessionManager {
 
     public String getAuthToken() {
         if (BuildConfig.DEBUG) {
-            return null;
+            return "q#Pq%Q$A67jnAh26P6M8hET!UTP%SDZ^xQW&?";
         } else {
             return pref.getString(KEY_USER_TOKEN, null);
         }

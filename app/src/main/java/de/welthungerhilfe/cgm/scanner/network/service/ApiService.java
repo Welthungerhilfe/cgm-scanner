@@ -41,6 +41,7 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {
+
    /* @POST("persons")
     Observable<Person> postPerson(@Header("Authorization") String auth, @Body RequestBody person);
 
@@ -81,7 +82,6 @@ public interface ApiService {
     @GET("test")
     Observable<String> test(@Header("Authorization") String auth);*/
 
-
     @POST("persons")
     Observable<Person> postPerson(@Header("X-API-KEY") String auth, @Body RequestBody person);
 
@@ -121,6 +121,7 @@ public interface ApiService {
 
     @GET("test")
     Observable<String> test(@Header("X-API-KEY") String auth);
+
 }
 
 

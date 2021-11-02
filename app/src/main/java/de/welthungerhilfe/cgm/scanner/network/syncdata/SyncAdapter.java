@@ -25,6 +25,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -66,6 +67,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
+import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
@@ -105,7 +107,9 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     private AsyncTask<Void, Void, Void> syncTask;
     private Retrofit retrofit;
     private Context context;
+    FirebaseAnalytics firebaseAnalytics;
     private long lastSyncResultTimeStamp = 0L;
+
 
     public SyncAdapter(Context context) {
         this.context = context;
@@ -114,8 +118,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         deviceRepository = DeviceRepository.getInstance(context);
         fileLogRepository = FileLogRepository.getInstance(context);
         postScanResultrepository = PostScanResultrepository.getInstance(context);
+        firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(context);
         workflowRepository = WorkflowRepository.getInstance(context);
-
         activeThreads = 0;
         session = new SessionManager(context);
     }
@@ -853,6 +857,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 if (measure != null) {
                                     if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
                                         postScanResult.setSynced(true);
+                                        firebaseAnalytics.logEvent(FirebaseService.RESULT_RECEIVED,null);
                                         onResultReceived(postScanResult.getMeasure_id());
                                     }
                                 }
