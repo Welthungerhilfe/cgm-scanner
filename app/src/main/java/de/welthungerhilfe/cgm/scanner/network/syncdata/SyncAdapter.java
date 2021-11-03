@@ -1093,12 +1093,9 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 fileLog.setAutoDetectSynced(true);
                                 fileLogRepository.updateFileLog(fileLog);
                             }
-
-
                             updated = true;
                             updateDelay = 0;
                             onThreadChange(-1);
-
                         }
 
                         @Override
@@ -1172,12 +1169,9 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 fileLog.setChildHeightSynced(true);
                                 fileLogRepository.updateFileLog(fileLog);
                             }
-
-
                             updated = true;
                             updateDelay = 0;
                             onThreadChange(-1);
-
                         }
 
                         @Override
