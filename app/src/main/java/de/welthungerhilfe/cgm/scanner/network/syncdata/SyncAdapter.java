@@ -994,7 +994,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void getWorkFlowsFromServer() {
-        LogFileUtils.logInfo(TAG, "getting workflow lists... ");
+        LogFileUtils.logInfo(TAG, "Workflow lists featching... ");
         retrofit.create(ApiService.class).getWorkflows(session.getAuthTokenWithBearer()).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<WorkflowsResponse>() {
@@ -1005,7 +1005,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                     @Override
                     public void onNext(@NonNull WorkflowsResponse workflowsResponse) {
-                        LogFileUtils.logInfo(TAG, "WorkFlowsList successfully fetched... ");
+                        LogFileUtils.logInfo(TAG, "Workflow list successfully fetched... ");
 
                         if (workflowsResponse != null && workflowsResponse.getWorkflows() != null && workflowsResponse.getWorkflows().size() > 0) {
                             for (Workflow workflow : workflowsResponse.getWorkflows()) {
@@ -1044,11 +1044,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             if (fileLogsList.size() == 0) {
                 return;
             }
-            Log.i(TAG, "this is size of fileloglist " + fileLogsList.size());
+            LogFileUtils.logInfo(TAG, "Autodetect results posting... ");
 
-            for (FileLog fileLog : fileLogsList) {
-                Log.i(TAG, "this is list of fileloglist " + fileLog.getArtifactId() + " " + fileLog.getUploadDate() + " " + fileLog.getType());
-            }
             String workflow[] = AppConstants.APP_AUTO_DETECT_1_0.split("-");
             String appAutoDetectWorkflowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1]);
 
@@ -1062,7 +1059,6 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 ArrayList<String> sourceArtifacts = new ArrayList<>();
                 sourceArtifacts.add(fileLog.getArtifactId());
                 resultAutoDetect.setSource_artifacts(sourceArtifacts);
-                Log.i(TAG, "this is list of artifact " + fileLog.getArtifactId() + " " + fileLog.getUploadDate());
                 ArrayList<String> sourceResults = new ArrayList<>();
                 resultAutoDetect.setSource_results(sourceResults);
                 ResultAutoDetect.Data data = new ResultAutoDetect.Data();
@@ -1072,11 +1068,9 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             }
             ResultsData resultsData = new ResultsData();
             resultsData.setResults(resultList);
-            Log.i(TAG, "this is size of resultlist " + resultsData.getResults().size());
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
 
             onThreadChange(1);
-            LogFileUtils.logInfo(TAG, "posting autoDetect workflows... ");
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<ResultsData>() {
@@ -1087,7 +1081,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onNext(@NonNull ResultsData resultsData1) {
-                            LogFileUtils.logInfo(TAG, "AutoDetect Workflow successfully posted...");
+                            LogFileUtils.logInfo(TAG, "Autodetect workflow successfully posted...");
                             for (Results results : resultsData1.getResults()) {
                                 FileLog fileLog = fileLogRepository.getFileLogByArtifactId(results.getSource_artifacts().get(0));
                                 fileLog.setAutoDetectSynced(true);
@@ -1100,7 +1094,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            LogFileUtils.logError(TAG, "Autodetect Workflow posting failed " + e.getMessage());
+                            LogFileUtils.logError(TAG, "Autodetect workflow posting failed " + e.getMessage());
 
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
