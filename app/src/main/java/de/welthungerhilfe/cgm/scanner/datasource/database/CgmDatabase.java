@@ -280,17 +280,14 @@ public abstract class CgmDatabase extends RoomDatabase {
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE file_logs ADD COLUMN scanServerId TEXT;");
             database.execSQL("ALTER TABLE file_logs ADD COLUMN artifactId TEXT;");
-            database.execSQL("ALTER TABLE file_logs ADD COLUMN autoDetectSynced BIT NOT NULL DEFAULT 0;");
-
+            database.execSQL("ALTER TABLE file_logs ADD COLUMN autoDetectSynced INTEGER NOT NULL DEFAULT 0;");
         }
     };
 
     public static final Migration MIGRATION_27_28 = new Migration(27, 28) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE file_logs ADD COLUMN childHeightSynced BIT NOT NULL DEFAULT 0;");
-
-
+            database.execSQL("ALTER TABLE file_logs ADD COLUMN childHeightSynced INTEGER NOT NULL DEFAULT 0;");
         }
     };
 
