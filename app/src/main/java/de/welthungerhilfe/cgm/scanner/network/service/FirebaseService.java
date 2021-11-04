@@ -19,6 +19,13 @@ public class FirebaseService {
     public static final String  SCAN_CANCELED = "scan_canceled";
     public static final String  MANUAL_MEASURE_START = "manual_measure_started";
     public static final String  MANUAL_MEASURE_STOP = "manual_measure_finished";
+    public static final String  STD_TEST_START = "std_test_started";
+    public static final String  STD_TEST_STOP = "std_test_finished";
+    public static final String  RESULT_RECEIVED = "scan_result_received";
+    public static final String  SIGN_IN_STARTED = "signin_started";
+    public static final String  SIGN_IN_FINISHED = "signin_finished";
+
+
     public static final int ENV_DEMO_QA = 2;
     public static final int ENV_IN_BMZ = 3;
     public static final int ENV_NAMIBIA = 4;

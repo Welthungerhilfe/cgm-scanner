@@ -257,7 +257,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final Migration MIGRATION_23_24 = new Migration(23, 24) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE file_logs ADD COLUMN childDetected BIT NOT NULL DEFAULT 0;");
+            database.execSQL("ALTER TABLE file_logs ADD COLUMN childDetected INTEGER NOT NULL DEFAULT 0;");
         }
     };
 
