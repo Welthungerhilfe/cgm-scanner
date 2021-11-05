@@ -209,7 +209,7 @@ public class SessionManager {
     public String getAuthTokenWithBearer() {
 
         if (BuildConfig.DEBUG) {
-            return "q#Pq%Q$A67jnAh26P6M8hET!UTP%SDZ^xQW& ";
+            return null;
             /*Or for testing authorazation like sandbox, demo/qa, pass X-API-KEY with "admin_secret"
             in header*/
             //return "admin_secret";
