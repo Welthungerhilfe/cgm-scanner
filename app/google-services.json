@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "455578210800-pabrhkq9m86o5s7f1hdemj3d6sq4ej5n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "de.welthungerhilfe.cgm.scanner",
+            "certificate_hash": "05777e3b414a21ecaffddf86f664f9de74c242b4"
+          }
+        },
+        {
           "client_id": "455578210800-c1lu45er409tpev55jrsgmh3od9u5e32.apps.googleusercontent.com",
           "client_type": 3
         }
