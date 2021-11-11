@@ -694,7 +694,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 mTitleView.setText(text);
             });*/
         }
-        onFeedbackUpdate();
+        //onFeedbackUpdate();
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
             long profile = System.currentTimeMillis();

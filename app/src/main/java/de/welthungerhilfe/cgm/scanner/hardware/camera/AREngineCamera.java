@@ -25,6 +25,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.media.Image;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
@@ -32,28 +35,31 @@ import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.util.Log;
 import android.util.Size;
-import android.util.SizeF;
 import android.widget.ImageView;
 
 import com.huawei.hiar.ARAugmentedImage;
 import com.huawei.hiar.ARAugmentedImageDatabase;
+import com.huawei.hiar.ARBody;
 import com.huawei.hiar.ARCamera;
 import com.huawei.hiar.ARCameraIntrinsics;
 import com.huawei.hiar.ARConfigBase;
+import com.huawei.hiar.ARCoordinateSystemType;
 import com.huawei.hiar.ARFrame;
 import com.huawei.hiar.ARPlane;
 import com.huawei.hiar.ARPose;
 import com.huawei.hiar.ARSession;
-import com.huawei.hiar.ARWorldTrackingConfig;
+import com.huawei.hiar.ARTrackable;
+import com.huawei.hiar.ARWorldBodyTrackingConfig;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
-import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.RenderToTexture;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AREngineCamera extends AbstractARCamera {
@@ -224,8 +230,8 @@ public class AREngineCamera extends AbstractARCamera {
       }
 
       // Enable auto focus mode while AREngine is running.
-      ARWorldTrackingConfig config = new ARWorldTrackingConfig(mSession);
-      config.setAugmentedImageDatabase(db);
+      ARWorldBodyTrackingConfig config = new ARWorldBodyTrackingConfig(mSession);
+      //TODO:config.setAugmentedImageDatabase(db);
       config.setEnableItem(ARConfigBase.ENABLE_DEPTH);
       config.setFocusMode(ARConfigBase.FocusMode.AUTO_FOCUS);
       config.setLightingMode(ARConfigBase.LightingMode.AMBIENT_INTENSITY);
@@ -364,6 +370,47 @@ public class AREngineCamera extends AbstractARCamera {
       } catch (Exception e) {
         e.printStackTrace();
         installAREngine();
+      }
+
+      //get body skeleton
+      ArrayList<Integer> skeleton = new ArrayList<>();
+      Collection<ARBody> bodies = mSession.getAllTrackables(ARBody.class);
+      for (ARBody body : bodies) {
+        if (body.getTrackingState() != ARTrackable.TrackingState.TRACKING) {
+          continue;
+        }
+        if (body.getCoordinateSystemType() != ARCoordinateSystemType.COORDINATE_SYSTEM_TYPE_3D_CAMERA) {
+          continue;
+        }
+
+        float[] points = body.getSkeletonPoint2D();
+        for (int i : body.getBodySkeletonConnection()) {
+          float x = points[i * 3 + 1] * -0.5f + 0.5f;
+          float y = points[i * 3] * -0.5f + 0.66f;//TODO:why?
+          skeleton.add((int) (x * color.getWidth()));
+          skeleton.add((int) (y * color.getHeight() * 0.75f));//TODO:why?
+        }
+        break;
+      }
+
+      //TODO:do not render skeleton into RGB frame
+      if (!skeleton.isEmpty()) {
+        color = color.copy(Bitmap.Config.ARGB_8888, true);
+        Canvas c = new Canvas(color);
+        Paint p = new Paint();
+        p.setColor(Color.RED);
+        p.setStrokeWidth(3);
+        for (int i = 0; i < skeleton.size(); i += 4) {
+          boolean ok = true;
+          for (int j = 0; j < 4; j++) {
+            if (skeleton.get(i + j) == 0) {
+              ok = false;
+            }
+          }
+          if (ok) {
+            c.drawLine(skeleton.get(i), skeleton.get(i + 1), skeleton.get(i + 2), skeleton.get(i + 3), p);
+          }
+        }
       }
 
       //process camera data
