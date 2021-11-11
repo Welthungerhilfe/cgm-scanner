@@ -818,12 +818,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                     MeasureNotification notification = MeasureNotification.get(qrCode);
 
                                     if (measure != null) {
-                                        boolean hadHeight = measure.getHeight() > 0;
+                                        boolean hadHeight = measure.getHeightConfidence() > 0;
                                         measure.setHeight(height);
-                                        measure.setHeightConfidence(0);
+                                        measure.setHeightConfidence(0.1);
                                         measure.setResulted_at(postScanResult.getTimestamp());
                                         measure.setReceived_at(System.currentTimeMillis());
                                         measureRepository.updateMeasure(measure);
+
 
                                         if ((notification != null) && !hadHeight) {
                                             notification.setHeight(height);
