@@ -27,7 +27,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.media.Image;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
@@ -35,6 +37,7 @@ import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.util.Log;
 import android.util.Size;
+import android.view.OrientationEventListener;
 import android.widget.ImageView;
 
 import com.huawei.hiar.ARAugmentedImage;
@@ -57,6 +60,7 @@ import java.util.Collection;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import de.welthungerhilfe.cgm.scanner.hardware.gpu.FastBlur;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.RenderToTexture;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
@@ -83,11 +87,25 @@ public class AREngineCamera extends AbstractARCamera {
 
   //App integration objects
   private Bitmap mCache;
+  private int mOrientation;
 
   public AREngineCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
     super(activity, depthMode, previewSize);
     mPlanes = new ArrayList<>();
     mRTT = new RenderToTexture();
+
+    OrientationEventListener orientationEventListener = new OrientationEventListener(mActivity)
+    {
+      @Override
+      public void onOrientationChanged(int orientation)
+      {
+        mOrientation = orientation;
+      }
+    };
+
+    if (orientationEventListener.canDetectOrientation()) {
+      orientationEventListener.enable();
+    }
   }
 
   @Override
@@ -372,45 +390,65 @@ public class AREngineCamera extends AbstractARCamera {
         installAREngine();
       }
 
-      //get body skeleton
-      ArrayList<Integer> skeleton = new ArrayList<>();
-      Collection<ARBody> bodies = mSession.getAllTrackables(ARBody.class);
-      for (ARBody body : bodies) {
-        if (body.getTrackingState() != ARTrackable.TrackingState.TRACKING) {
-          continue;
-        }
-        if (body.getCoordinateSystemType() != ARCoordinateSystemType.COORDINATE_SYSTEM_TYPE_3D_CAMERA) {
-          continue;
-        }
+      //get face position
+      boolean valid = true;
+      ArrayList<Integer> faces = new ArrayList<>();
+      if ((mOrientation < 45) || (mOrientation > 315)) {
+        Collection<ARBody> bodies = mSession.getAllTrackables(ARBody.class);
+        for (ARBody body : bodies) {
+          if (body.getTrackingState() != ARTrackable.TrackingState.TRACKING) {
+            continue;
+          }
+          if (body.getCoordinateSystemType() != ARCoordinateSystemType.COORDINATE_SYSTEM_TYPE_3D_CAMERA) {
+            continue;
+          }
+          float avg = 0;
+          float[] confidence = body.getSkeletonConfidence();
+          for (float c : confidence) {
+            avg += c / (float)confidence.length;
+          }
+          if (avg < 0.5f) {
+            valid = false;
+            continue;
+          }
 
-        float[] points = body.getSkeletonPoint2D();
-        for (int i : body.getBodySkeletonConnection()) {
-          float x = points[i * 3 + 1] * -0.5f + 0.5f;
-          float y = points[i * 3] * -0.5f + 0.66f;//TODO:why?
-          skeleton.add((int) (x * color.getWidth()));
-          skeleton.add((int) (y * color.getHeight() * 0.75f));//TODO:why?
+          float[] points = body.getSkeletonPoint2D();
+          for (int i = 0; i < 6; i += 3) {
+            float x = points[i + 1] * -0.5f + 0.5f;
+            float y = points[i] * -0.5f + 0.66f;//TODO:why?
+            faces.add((int) (x * color.getWidth()));
+            faces.add((int) (y * color.getHeight() * 0.75f));//TODO:why?
+          }
         }
-        break;
       }
 
-      //TODO:do not render skeleton into RGB frame
-      if (!skeleton.isEmpty()) {
-        color = color.copy(Bitmap.Config.ARGB_8888, true);
-        Canvas c = new Canvas(color);
-        Paint p = new Paint();
-        p.setColor(Color.RED);
-        p.setStrokeWidth(3);
-        for (int i = 0; i < skeleton.size(); i += 4) {
-          boolean ok = true;
-          for (int j = 0; j < 4; j++) {
-            if (skeleton.get(i + j) == 0) {
-              ok = false;
-            }
-          }
-          if (ok) {
-            c.drawLine(skeleton.get(i), skeleton.get(i + 1), skeleton.get(i + 2), skeleton.get(i + 3), p);
-          }
+      //blurring
+      float scale = 160.0f / (float)Math.max(color.getWidth(), color.getHeight());
+      Bitmap blur = FastBlur.blur(color, scale, 3);
+      if (valid && (faces.size() == 4)) { // 1 face has 4 coordinates
+        int x1 = Math.min(faces.get(0), faces.get(2));
+        int y1 = Math.min(faces.get(1), faces.get(3));
+        int x2 = Math.max(faces.get(0), faces.get(2));
+        int y2 = Math.max(faces.get(1), faces.get(3));
+        int dx = x2 - x1;
+        int dy = y2 - y1;
+        if (dx > dy) {
+          y1 -= dx / 2;
+          y2 += dx / 2;
+        } else {
+          x1 -= dy / 2;
+          x2 += dy / 2;
         }
+        if ((x1 < 0) || (y1 < 0) || (x2 >= color.getWidth()) || (y2 >= color.getHeight())) {
+          color = blur;
+        } else {
+          color = color.copy(Bitmap.Config.ARGB_8888, true);
+          Rect src = new Rect((int) (x1 * scale), (int) (y1 * scale), (int) (x2 * scale), (int) (y2 * scale));
+          Rect dst = new Rect(x1, y1, x2, y2);
+          new Canvas(color).drawBitmap(blur, src, dst, new Paint());
+        }
+      } else {
+        color = blur;
       }
 
       //process camera data
