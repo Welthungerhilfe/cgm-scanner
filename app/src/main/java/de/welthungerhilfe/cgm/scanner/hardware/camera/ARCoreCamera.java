@@ -31,7 +31,6 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.util.Log;
 import android.util.Size;
-import android.util.SizeF;
 import android.widget.ImageView;
 
 import com.google.ar.core.ArCoreApk;
@@ -192,7 +191,7 @@ public class ARCoreCamera extends AbstractARCamera implements GLSurfaceView.Rend
     allocationRgb.copyTo(bitmap);
 
     for (Object listener : mListeners) {
-      ((Camera2DataListener)listener).onColorDataReceived(bitmap, mFrameIndex);
+      ((Camera2DataListener)listener).onColorDataReceived(bitmap, -1);
     }
     allocationYuv.destroy();
     allocationRgb.destroy();
@@ -242,7 +241,7 @@ public class ARCoreCamera extends AbstractARCamera implements GLSurfaceView.Rend
     }
 
     for (Object listener : mListeners) {
-      ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, mFrameIndex);
+      ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, -1);
     }
     image.close();
   }

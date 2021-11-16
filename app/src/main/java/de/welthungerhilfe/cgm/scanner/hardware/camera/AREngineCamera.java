@@ -184,7 +184,7 @@ public class AREngineCamera extends AbstractARCamera {
     });
   }
 
-  private void onProcessDepthData(Image image) {
+  private void onProcessDepthData(Image image, boolean isValid) {
     float[] position;
     float[] rotation;
     synchronized (mLock) {
@@ -201,11 +201,13 @@ public class AREngineCamera extends AbstractARCamera {
     mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
 
     if (mCache != null) {
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, mFrameIndex);
-      }
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onColorDataReceived(mCache, mFrameIndex);
+      if (isValid) {
+        for (Object listener : mListeners) {
+          ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, mFrameIndex);
+        }
+        for (Object listener : mListeners) {
+          ((Camera2DataListener)listener).onColorDataReceived(mCache, mFrameIndex);
+        }
       }
 
       mCache = null;
@@ -412,17 +414,21 @@ public class AREngineCamera extends AbstractARCamera {
             continue;
           }
 
+          //TODO:apply frame.transformDisplayUvCoords instead of yOffset and yScale
+          float yOffset = 0.16f;
+          float yScale = 0.75f;
           float[] points = body.getSkeletonPoint2D();
           for (int i = 0; i < 6; i += 3) {
             float x = points[i + 1] * -0.5f + 0.5f;
-            float y = points[i] * -0.5f + 0.66f;//TODO:why?
+            float y = points[i] * -0.5f + 0.5f + yOffset;
             faces.add((int) (x * color.getWidth()));
-            faces.add((int) (y * color.getHeight() * 0.75f));//TODO:why?
+            faces.add((int) (y * color.getHeight() * yScale));
           }
         }
       }
 
       //blurring
+      boolean isValid = false;
       float scale = 160.0f / (float)Math.max(color.getWidth(), color.getHeight());
       Bitmap blur = FastBlur.blur(color, scale, 3);
       if (valid && (faces.size() == 4)) { // 1 face has 4 coordinates
@@ -433,11 +439,11 @@ public class AREngineCamera extends AbstractARCamera {
         int dx = x2 - x1;
         int dy = y2 - y1;
         if (dx > dy) {
-          y1 -= dx / 2;
-          y2 += dx / 2;
+          y1 -= (dx - dy) / 2;
+          y2 += (dx - dy) / 2;
         } else {
-          x1 -= dy / 2;
-          x2 += dy / 2;
+          x1 -= (dy - dx) / 2;
+          x2 += (dy - dx) / 2;
         }
         if ((x1 < 0) || (y1 < 0) || (x2 >= color.getWidth()) || (y2 >= color.getHeight())) {
           color = blur;
@@ -446,6 +452,7 @@ public class AREngineCamera extends AbstractARCamera {
           Rect src = new Rect((int) (x1 * scale), (int) (y1 * scale), (int) (x2 * scale), (int) (y2 * scale));
           Rect dst = new Rect(x1, y1, x2, y2);
           new Canvas(color).drawBitmap(blur, src, dst, new Paint());
+          isValid = true;
         }
       } else {
         color = blur;
@@ -453,7 +460,7 @@ public class AREngineCamera extends AbstractARCamera {
 
       //process camera data
       onProcessColorData(color);
-      onProcessDepthData(depth);
+      onProcessDepthData(depth, isValid);
     } catch (Exception e) {
       e.printStackTrace();
     }
