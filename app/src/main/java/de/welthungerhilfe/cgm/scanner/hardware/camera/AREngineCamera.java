@@ -35,6 +35,7 @@ import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.util.Log;
 import android.util.Size;
+import android.view.OrientationEventListener;
 import android.widget.ImageView;
 
 import com.huawei.hiar.ARAugmentedImage;
@@ -83,11 +84,29 @@ public class AREngineCamera extends AbstractARCamera {
 
   //App integration objects
   private Bitmap mCache;
+  private int mOrientation;
+  private int mPersonCount = 0;
+  private ArrayList<Float> mSkeleton;
+  private boolean mSkeletonValid = true;
 
   public AREngineCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
     super(activity, depthMode, previewSize);
     mPlanes = new ArrayList<>();
     mRTT = new RenderToTexture();
+    mSkeleton = new ArrayList<>();
+
+    OrientationEventListener orientationEventListener = new OrientationEventListener(mActivity)
+    {
+      @Override
+      public void onOrientationChanged(int orientation)
+      {
+        mOrientation = orientation;
+      }
+    };
+
+    if (orientationEventListener.canDetectOrientation()) {
+      orientationEventListener.enable();
+    }
   }
 
   @Override
@@ -180,7 +199,30 @@ public class AREngineCamera extends AbstractARCamera {
     }
 
     Bitmap preview = getDepthPreview(image, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
-    mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
+
+    //skeleton visualisation
+    if (mSkeletonValid && (mPersonCount == 1)) {
+      if (preview.getWidth() == 1) {
+        preview = Bitmap.createBitmap(240, 180, Bitmap.Config.ARGB_8888);
+      }
+      preview = preview.copy(Bitmap.Config.ARGB_8888, true);
+      Canvas c = new Canvas(preview);
+      Paint p = new Paint();
+      p.setColor(Color.RED);
+      p.setStrokeWidth(1);
+      for (int i = 0; i < mSkeleton.size(); i += 4) {
+        int x1 = (int) (mSkeleton.get(i) * (float)preview.getWidth());
+        int y1 = (int) (mSkeleton.get(i + 1) * (float)preview.getHeight());
+        int x2 = (int) (mSkeleton.get(i + 2) * (float)preview.getWidth());
+        int y2 = (int) (mSkeleton.get(i + 3) * (float)preview.getHeight());
+        if ((x1 != 0) && (y1 != 0) && (x2 != 0) && (y2 != 0)) {
+          c.drawLine(x1, y1, x2, y2, p);
+        }
+      }
+    }
+
+    Bitmap finalPreview = preview;
+    mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(finalPreview));
 
     if (mCache != null) {
       for (Object listener : mListeners) {
@@ -373,42 +415,37 @@ public class AREngineCamera extends AbstractARCamera {
       }
 
       //get body skeleton
-      ArrayList<Integer> skeleton = new ArrayList<>();
-      Collection<ARBody> bodies = mSession.getAllTrackables(ARBody.class);
-      for (ARBody body : bodies) {
-        if (body.getTrackingState() != ARTrackable.TrackingState.TRACKING) {
-          continue;
-        }
-        if (body.getCoordinateSystemType() != ARCoordinateSystemType.COORDINATE_SYSTEM_TYPE_3D_CAMERA) {
-          continue;
-        }
-
-        float[] points = body.getSkeletonPoint2D();
-        for (int i : body.getBodySkeletonConnection()) {
-          float x = points[i * 3 + 1] * -0.5f + 0.5f;
-          float y = points[i * 3] * -0.5f + 0.66f;//TODO:why?
-          skeleton.add((int) (x * color.getWidth()));
-          skeleton.add((int) (y * color.getHeight() * 0.75f));//TODO:why?
-        }
-        break;
-      }
-
-      //TODO:do not render skeleton into RGB frame
-      if (!skeleton.isEmpty()) {
-        color = color.copy(Bitmap.Config.ARGB_8888, true);
-        Canvas c = new Canvas(color);
-        Paint p = new Paint();
-        p.setColor(Color.RED);
-        p.setStrokeWidth(3);
-        for (int i = 0; i < skeleton.size(); i += 4) {
-          boolean ok = true;
-          for (int j = 0; j < 4; j++) {
-            if (skeleton.get(i + j) == 0) {
-              ok = false;
-            }
+      mPersonCount = 0;
+      mSkeletonValid = true;
+      mSkeleton.clear();
+      if ((mOrientation < 45) || (mOrientation > 315)) {
+        Collection<ARBody> bodies = mSession.getAllTrackables(ARBody.class);
+        for (ARBody body : bodies) {
+          if (body.getTrackingState() != ARTrackable.TrackingState.TRACKING) {
+            continue;
           }
-          if (ok) {
-            c.drawLine(skeleton.get(i), skeleton.get(i + 1), skeleton.get(i + 2), skeleton.get(i + 3), p);
+          if (body.getCoordinateSystemType() != ARCoordinateSystemType.COORDINATE_SYSTEM_TYPE_3D_CAMERA) {
+            continue;
+          }
+          mPersonCount++;
+
+          float avg = 0;
+          float[] confidence = body.getSkeletonConfidence();
+          for (float c : confidence) {
+            avg += c / (float) confidence.length;
+          }
+          if (avg < 0.5f) {
+            mSkeletonValid = false;
+            continue;
+          }
+
+          //TODO:apply frame.transformDisplayUvCoords instead of yOffset and yScale
+          float yOffset = 0.16f;
+          float yScale = 0.75f;
+          float[] points = body.getSkeletonPoint2D();
+          for (int i : body.getBodySkeletonConnection()) {
+            mSkeleton.add(points[i * 3 + 1] * -0.5f + 0.5f);
+            mSkeleton.add((points[i * 3] * -0.5f + 0.5f + yOffset) * yScale);
           }
         }
       }
