@@ -55,7 +55,7 @@ public class CalculateZscoreUtils {
         if (data != null) {
             int target;
             if (chartType == ChartType.WEIGHT_FOR_HEIGHT) {
-                target = (int) height;
+                target = (int) (height * 1000.0f);
             } else {
                 target = (int) age;
                 if (age > 5 * 365 + 2) {
@@ -102,7 +102,7 @@ public class CalculateZscoreUtils {
 
         //detailed data, one value per day
         if (filename.endsWith("json")) {
-            return parseJson(context, filename);
+            return parseJson(context, filename, chartType);
         }
 
         //low detailed data, one value per month
@@ -111,7 +111,7 @@ public class CalculateZscoreUtils {
         }
     }
 
-    private static HashMap<Integer, ZScoreData> parseJson(Context context, String filename) {
+    private static HashMap<Integer, ZScoreData> parseJson(Context context, String filename, ChartType chartType) {
         HashMap<Integer, ZScoreData> output = new HashMap<>();
         try {
             InputStream is = context.getAssets().open(filename);
@@ -136,8 +136,12 @@ public class CalculateZscoreUtils {
                 value.SD2 = Utils.parseFloat(jsonObject.getString("SD2"));
                 value.SD3 = Utils.parseFloat(jsonObject.getString("SD3"));
 
-                int key = (int)Utils.parseFloat(jsonKey);
-                output.put(key, value);
+                float key = Utils.parseFloat(jsonKey);
+                if (chartType == ChartType.WEIGHT_FOR_HEIGHT) {
+                    output.put((int) (key * 1000), value);
+                } else {
+                    output.put((int) key, value);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -166,7 +170,7 @@ public class CalculateZscoreUtils {
 
                     float key = Utils.parseFloat(arr[0]);
                     if (chartType == ChartType.WEIGHT_FOR_HEIGHT) {
-                        output.put((int) key, value);
+                        output.put((int) (key * 1000), value);
                     } else {
                         output.put((int) (key * 365 / 12), value);
                     }

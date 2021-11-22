@@ -244,7 +244,9 @@ public class GrowthDataFragment extends Fragment {
             Collections.sort(sortedKeys);
             for (Integer key : sortedKeys) {
                 float x = key;
-                if (chartType != CalculateZscoreUtils.ChartType.WEIGHT_FOR_HEIGHT) {
+                if (chartType == CalculateZscoreUtils.ChartType.WEIGHT_FOR_HEIGHT) {
+                    x /= 1000.0f;
+                } else {
                     x *= 12.0f / 365.0f;
                 }
                 CalculateZscoreUtils.ZScoreData item = data.get(key);
