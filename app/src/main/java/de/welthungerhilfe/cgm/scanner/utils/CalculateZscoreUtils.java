@@ -53,20 +53,20 @@ public class CalculateZscoreUtils {
 
     public static ZScoreData getClosestData(HashMap<Integer, ZScoreData> data, double height, long age, ChartType chartType) {
         if (data != null) {
-            double target;
+            int target;
             if (chartType == ChartType.WEIGHT_FOR_HEIGHT) {
-                target = height;
+                target = (int) height;
             } else {
-                target = age * 12 / 365.0;
-                if (target > 60) {
+                target = (int) age;
+                if (age > 5 * 365 + 2) {
                     return null;
                 }
             }
 
-            double best = Integer.MAX_VALUE;
+            int best = Integer.MAX_VALUE;
             ZScoreData zscoreData = null;
             for (Integer key : data.keySet()) {
-                double diff = Math.abs(key - target);
+                int diff = Math.abs(key - target);
                 if (best > diff) {
                     best = diff;
                     zscoreData = data.get(key);
@@ -102,7 +102,7 @@ public class CalculateZscoreUtils {
 
         //detailed data, one value per day
         if (filename.endsWith("json")) {
-            return parseJson(context, filename, chartType);
+            return parseJson(context, filename);
         }
 
         //low detailed data, one value per month
@@ -111,7 +111,7 @@ public class CalculateZscoreUtils {
         }
     }
 
-    private static HashMap<Integer, ZScoreData> parseJson(Context context, String filename, ChartType chartType) {
+    private static HashMap<Integer, ZScoreData> parseJson(Context context, String filename) {
         HashMap<Integer, ZScoreData> output = new HashMap<>();
         try {
             InputStream is = context.getAssets().open(filename);
@@ -136,15 +136,8 @@ public class CalculateZscoreUtils {
                 value.SD2 = Utils.parseFloat(jsonObject.getString("SD2"));
                 value.SD3 = Utils.parseFloat(jsonObject.getString("SD3"));
 
-                int key;
-                if (chartType == ChartType.WEIGHT_FOR_HEIGHT) {
-                    key = (int)Utils.parseFloat(jsonKey);
-                } else {
-                    key = (int)(Utils.parseFloat(jsonKey) * 12 / 365.0f);
-                }
-                if (!output.containsKey(key)) {
-                    output.put(key, value);
-                }
+                int key = (int)Utils.parseFloat(jsonKey);
+                output.put(key, value);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -160,7 +153,7 @@ public class CalculateZscoreUtils {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] arr = line.split("\t");
-                if (Utils.isIntegerNumber(arr[0])) {
+                if (Utils.isNumber(arr[0])) {
                     ZScoreData value = new ZScoreData();
                     value.skew = Utils.parseFloat(arr[1]);
                     value.median = Utils.parseFloat(arr[2]);
@@ -171,11 +164,11 @@ public class CalculateZscoreUtils {
                     value.SD2 = Utils.parseFloat(arr[9]);
                     value.SD3 = Utils.parseFloat(arr[10]);
 
-                    int key = Integer.parseInt(arr[0]);
+                    float key = Utils.parseFloat(arr[0]);
                     if (chartType == ChartType.WEIGHT_FOR_HEIGHT) {
-                        output.put(key, value);
+                        output.put((int) key, value);
                     } else {
-                        output.put(key, value);
+                        output.put((int) (key * 365 / 12), value);
                     }
                 }
             }

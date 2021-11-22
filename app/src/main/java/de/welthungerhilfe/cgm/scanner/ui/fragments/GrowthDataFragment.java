@@ -45,7 +45,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -217,18 +216,20 @@ public class GrowthDataFragment extends Fragment {
 
         HashMap<Integer, CalculateZscoreUtils.ZScoreData> data = CalculateZscoreUtils.parseData(getContext(), person.getSex(), chartType);
         if (data != null) {
-            HashSet<Integer> processed = new HashSet<>();
-            for (Integer i : data.keySet()) {
-                if (!processed.contains(i)) {
-                    CalculateZscoreUtils.ZScoreData item = data.get(i);
-                    if (item != null) {
-                        SD3neg.add(new Entry((float) (i), item.SD3neg));
-                        SD2neg.add(new Entry((float) (i), item.SD2neg));
-                        SD0.add(new Entry((float) (i), item.SD0));
-                        SD2.add(new Entry((float) (i), item.SD2));
-                        SD3.add(new Entry((float) (i), item.SD3));
-                        processed.add(i);
-                    }
+            List<Integer> sortedKeys = new ArrayList<>(data.keySet());
+            Collections.sort(sortedKeys);
+            for (Integer key : sortedKeys) {
+                float x = key;
+                if (chartType != CalculateZscoreUtils.ChartType.WEIGHT_FOR_HEIGHT) {
+                    x *= 12.0f / 365.0f;
+                }
+                CalculateZscoreUtils.ZScoreData item = data.get(key);
+                if (item != null) {
+                    SD3neg.add(new Entry(x, item.SD3neg));
+                    SD2neg.add(new Entry(x, item.SD2neg));
+                    SD0.add(new Entry(x, item.SD0));
+                    SD2.add(new Entry(x, item.SD2));
+                    SD3.add(new Entry(x, item.SD3));
                 }
             }
         }
