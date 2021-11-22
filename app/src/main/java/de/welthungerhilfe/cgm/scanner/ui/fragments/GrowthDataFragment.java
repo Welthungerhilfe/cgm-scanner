@@ -68,37 +68,27 @@ public class GrowthDataFragment extends Fragment {
     private final int ZSCORE_COLOR_2 = Color.rgb(230, 122, 58);
     private final int ZSCORE_COLOR_3 = Color.rgb(212, 53, 62);
 
-    private Context context;
-
     private LineChart mChart;
-
     private VerticalTextView txtYAxis;
     private TextView txtXAxis;
-
     private TextView txtLabel;
     private TextView txtZScore;
+    private LinearLayout lytNotif;
+    private TextView txtNotifTitle;
+    private TextView txtNotifMessage;
 
     private CalculateZscoreUtils.ChartType chartType = CalculateZscoreUtils.ChartType.WEIGHT_FOR_AGE;
 
-    public String qrCode;
+    private String qrCode;
 
-    LinearLayout lytNotif;
-    TextView txtNotifTitle;
-    TextView txtNotifMessage;
-    View contextMenu;
+    private ArrayList<Entry> SD3neg, SD2neg;
+    private ArrayList<Entry> SD0, SD2, SD3;
 
     public static GrowthDataFragment getInstance(String qrCode) {
         GrowthDataFragment fragment = new GrowthDataFragment();
         fragment.qrCode = qrCode;
 
         return fragment;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        this.context = context;
     }
 
     @Override
@@ -139,14 +129,14 @@ public class GrowthDataFragment extends Fragment {
             setData();
         });
 
-        contextMenu = view.findViewById(R.id.contextMenuButton);
+        View contextMenu = view.findViewById(R.id.contextMenuButton);
         contextMenu.setOnClickListener(v -> {
-            Person person = PersonRepository.getInstance(context).findPersonByQr(qrCode);
+            Person person = PersonRepository.getInstance(getContext()).findPersonByQr(qrCode);
             if (person != null) {
                 String id = person.getId();
                 String qrCode = person.getQrcode();
                 BaseActivity activity = (BaseActivity) getActivity();
-                new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
+                new ContextMenuDialog(getContext(), new ContextMenuDialog.Item[]{
                         new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
                 }, which -> {
                     ContactSupportDialog.show(activity, "growth " + qrCode, "personID:" + id);
@@ -188,11 +178,11 @@ public class GrowthDataFragment extends Fragment {
     }
 
     public void setData() {
-        Person person = PersonRepository.getInstance(context).findPersonByQr(qrCode);
+        Person person = PersonRepository.getInstance(getContext()).findPersonByQr(qrCode);
         if (person == null) {
             return;
         }
-        List<Measure> measures = MeasureRepository.getInstance(context).getManualMeasures(person.getId());
+        List<Measure> measures = MeasureRepository.getInstance(getContext()).getManualMeasures(person.getId());
         if (measures == null || measures.isEmpty()) {
             return;
         }
@@ -204,17 +194,51 @@ public class GrowthDataFragment extends Fragment {
         long age = (lastMeasure.getDate() - birthday) / 1000 / 60 / 60 / 24;
         lastMeasure.setAge(age);
 
+        //get data
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
-
-
-        // ------------------------- Line for ruler values ---------------------------------- //
-        ArrayList<Entry> SD3neg = new ArrayList<>();
-        ArrayList<Entry> SD2neg = new ArrayList<>();
-        ArrayList<Entry> SD0 = new ArrayList<>();
-        ArrayList<Entry> SD2 = new ArrayList<>();
-        ArrayList<Entry> SD3 = new ArrayList<>();
-
         HashMap<Integer, CalculateZscoreUtils.ZScoreData> data = CalculateZscoreUtils.parseData(getContext(), person.getSex(), chartType);
+        CalculateZscoreUtils.ZScoreData zscoreData = CalculateZscoreUtils.getClosestData(data, lastMeasure.getHeight(), lastMeasure.getAge(), chartType);
+
+        //show data
+        showAxisLegend();
+        showData(data, dataSets);
+        showManualMeasures(measures, dataSets);
+        showZScore(zscoreData, lastMeasure);
+        mChart.setData(new LineData(dataSets));
+        mChart.animateX(3000);
+    }
+
+    private void showAxisLegend() {
+        switch (chartType) {
+            case WEIGHT_FOR_AGE:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_weight);
+                break;
+
+            case HEIGHT_FOR_AGE:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_height);
+                break;
+
+            case WEIGHT_FOR_HEIGHT:
+                txtXAxis.setText(R.string.axis_height);
+                txtYAxis.setText(R.string.axis_weight);
+                break;
+
+            case MUAC_FOR_AGE:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_muac);
+                break;
+        }
+    }
+
+    private void showData(HashMap<Integer, CalculateZscoreUtils.ZScoreData> data, ArrayList<ILineDataSet> dataSets) {
+
+        SD3neg = new ArrayList<>();
+        SD2neg = new ArrayList<>();
+        SD0 = new ArrayList<>();
+        SD2 = new ArrayList<>();
+        SD3 = new ArrayList<>();
         if (data != null) {
             List<Integer> sortedKeys = new ArrayList<>(data.keySet());
             Collections.sort(sortedKeys);
@@ -239,44 +263,61 @@ public class GrowthDataFragment extends Fragment {
         dataSets.add(createDataSet(SD0, "0", ZSCORE_COLOR_0, 1.5f, false));
         dataSets.add(createDataSet(SD2, "+2", ZSCORE_COLOR_2, 1.5f, false));
         dataSets.add(createDataSet(SD3, "+3", ZSCORE_COLOR_3, 1.5f, false));
+    }
 
-        CalculateZscoreUtils.ZScoreData zscoreData = CalculateZscoreUtils.getClosestData(data, lastMeasure.getHeight(), lastMeasure.getAge(), chartType);
-        if (zscoreData != null) {
-            double zScore = 100;
+    private void showDiagnose(double zScore) {
+
+        if (zScore < -3) { // SAM
             switch (chartType) {
                 case WEIGHT_FOR_AGE:
-                    txtXAxis.setText(R.string.axis_age);
-                    txtYAxis.setText(R.string.axis_weight);
-                    zScore = CalculateZscoreUtils.getZScore(zscoreData, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getMuac(), chartType);
+                    txtNotifTitle.setText(R.string.sam_wfa_title);
+                    txtNotifMessage.setText(R.string.sam_wfa_message);
                     break;
-
                 case HEIGHT_FOR_AGE:
-                    txtXAxis.setText(R.string.axis_age);
-                    txtYAxis.setText(R.string.axis_height);
-                    zScore = CalculateZscoreUtils.getZScore(zscoreData, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getMuac(), chartType);
+                    txtNotifTitle.setText(R.string.sam_hfa_title);
+                    txtNotifMessage.setText(R.string.sam_hfa_message);
                     break;
-
                 case WEIGHT_FOR_HEIGHT:
-                    txtXAxis.setText(R.string.axis_height);
-                    txtYAxis.setText(R.string.axis_weight);
-                    zScore = CalculateZscoreUtils.getZScore(zscoreData, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getMuac(), chartType);
+                    txtNotifTitle.setText(R.string.sam_wfh_title);
+                    txtNotifMessage.setText(R.string.sam_wfh_message);
                     break;
-
                 case MUAC_FOR_AGE:
-                    txtXAxis.setText(R.string.axis_age);
-                    txtYAxis.setText(R.string.axis_muac);
-                    zScore = CalculateZscoreUtils.getZScore(zscoreData, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getMuac(), chartType);
+                    txtNotifTitle.setText(R.string.sam_acfa_title);
+                    txtNotifMessage.setText(R.string.sam_acfa_message);
                     break;
             }
-            txtZScore.setText(String.format(Locale.getDefault(), "( z-score : %.2f )", zScore));
-            txtZScore.setVisibility(View.VISIBLE);
-            showDiagnose(zScore);
-        } else {
-            txtZScore.setVisibility(View.GONE);
+
+            lytNotif.setBackgroundResource(R.color.colorRed);
+            lytNotif.setVisibility(View.VISIBLE);
+        } else if (zScore < -2 && zScore >= -3) { // MAM
+            switch (chartType) {
+                case WEIGHT_FOR_AGE:
+                    txtNotifTitle.setText(R.string.mam_wfa_title);
+                    txtNotifMessage.setText(R.string.mam_wfa_message);
+                    break;
+                case HEIGHT_FOR_AGE:
+                    txtNotifTitle.setText(R.string.mam_hfa_title);
+                    txtNotifMessage.setText(R.string.mam_hfa_message);
+                    break;
+                case WEIGHT_FOR_HEIGHT:
+                    txtNotifTitle.setText(R.string.mam_wfh_title);
+                    txtNotifMessage.setText(R.string.mam_wfh_message);
+                    break;
+                case MUAC_FOR_AGE:
+                    txtNotifTitle.setText(R.string.mam_acfa_title);
+                    txtNotifMessage.setText(R.string.mam_acfa_message);
+                    break;
+            }
+
+            lytNotif.setBackgroundResource(R.color.colorYellow);
+            lytNotif.setVisibility(View.VISIBLE);
+        } else { // Healthy
             lytNotif.setVisibility(View.GONE);
         }
+    }
 
-        // ----------------------- Line for manual measures -------------------------- //
+    private void showManualMeasures(List<Measure> measures, ArrayList<ILineDataSet> dataSets) {
+
         ArrayList<Entry> entries = new ArrayList<>();
 
         for (Measure measure : measures) {
@@ -329,62 +370,19 @@ public class GrowthDataFragment extends Fragment {
         }
 
         if (entries.size() > 1) {
-            Collections.sort(entries, (o1, o2) -> Float.compare(o1.getX(), o2.getX()));
+            entries.sort((o1, o2) -> Float.compare(o1.getX(), o2.getX()));
         }
         dataSets.add(0, createDataSet(entries, getString(R.string.tab_growth).toLowerCase(), MEASURE_COLOR, 1.5f, false));
-
-
-        mChart.setData(new LineData(dataSets));
-        mChart.animateX(3000);
     }
 
-    private void showDiagnose(double zScore) {
-
-        if (zScore < -3) { // SAM
-            switch (chartType) {
-                case WEIGHT_FOR_AGE:
-                    txtNotifTitle.setText(R.string.sam_wfa_title);
-                    txtNotifMessage.setText(R.string.sam_wfa_message);
-                    break;
-                case HEIGHT_FOR_AGE:
-                    txtNotifTitle.setText(R.string.sam_hfa_title);
-                    txtNotifMessage.setText(R.string.sam_hfa_message);
-                    break;
-                case WEIGHT_FOR_HEIGHT:
-                    txtNotifTitle.setText(R.string.sam_wfh_title);
-                    txtNotifMessage.setText(R.string.sam_wfh_message);
-                    break;
-                case MUAC_FOR_AGE:
-                    txtNotifTitle.setText(R.string.sam_acfa_title);
-                    txtNotifMessage.setText(R.string.sam_acfa_message);
-                    break;
-            }
-
-            lytNotif.setBackgroundResource(R.color.colorRed);
-            lytNotif.setVisibility(View.VISIBLE);
-        } else if (zScore < -2 && zScore >= -3) { // MAM
-            switch (chartType) {
-                case WEIGHT_FOR_AGE:
-                    txtNotifTitle.setText(R.string.mam_wfa_title);
-                    txtNotifMessage.setText(R.string.mam_wfa_message);
-                    break;
-                case HEIGHT_FOR_AGE:
-                    txtNotifTitle.setText(R.string.mam_hfa_title);
-                    txtNotifMessage.setText(R.string.mam_hfa_message);
-                    break;
-                case WEIGHT_FOR_HEIGHT:
-                    txtNotifTitle.setText(R.string.mam_wfh_title);
-                    txtNotifMessage.setText(R.string.mam_wfh_message);
-                    break;
-                case MUAC_FOR_AGE:
-                    txtNotifTitle.setText(R.string.mam_acfa_title);
-                    txtNotifMessage.setText(R.string.mam_acfa_message);
-                    break;
-            }
-
-            lytNotif.setBackgroundResource(R.color.colorYellow);
-            lytNotif.setVisibility(View.VISIBLE);
-        } else { // Healthy
+    private void showZScore(CalculateZscoreUtils.ZScoreData zscoreData, Measure lastMeasure) {
+        if (zscoreData != null) {
+            double zScore = CalculateZscoreUtils.getZScore(zscoreData, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getMuac(), chartType);
+            txtZScore.setText(String.format(Locale.getDefault(), "( z-score : %.2f )", zScore));
+            txtZScore.setVisibility(View.VISIBLE);
+            showDiagnose(zScore);
+        } else {
+            txtZScore.setVisibility(View.GONE);
             lytNotif.setVisibility(View.GONE);
         }
     }
