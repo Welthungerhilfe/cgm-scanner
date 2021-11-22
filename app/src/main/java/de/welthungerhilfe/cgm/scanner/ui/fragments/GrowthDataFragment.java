@@ -198,14 +198,43 @@ public class GrowthDataFragment extends Fragment {
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
         HashMap<Integer, CalculateZscoreUtils.ZScoreData> data = CalculateZscoreUtils.parseData(getContext(), person.getSex(), chartType);
         CalculateZscoreUtils.ZScoreData zscoreData = CalculateZscoreUtils.getClosestData(data, lastMeasure.getHeight(), lastMeasure.getAge(), chartType);
+        convertData(data);
 
         //show data
         showAxisLegend();
-        showData(data, dataSets);
+        showData(dataSets);
         showManualMeasures(measures, dataSets);
         showZScore(zscoreData, lastMeasure);
         mChart.setData(new LineData(dataSets));
         mChart.animateX(3000);
+    }
+
+    private void convertData(HashMap<Integer, CalculateZscoreUtils.ZScoreData> data) {
+        SD3neg = new ArrayList<>();
+        SD2neg = new ArrayList<>();
+        SD0 = new ArrayList<>();
+        SD2 = new ArrayList<>();
+        SD3 = new ArrayList<>();
+        if (data != null) {
+            List<Integer> sortedKeys = new ArrayList<>(data.keySet());
+            Collections.sort(sortedKeys);
+            for (Integer key : sortedKeys) {
+                float x = key;
+                if (chartType == CalculateZscoreUtils.ChartType.WEIGHT_FOR_HEIGHT) {
+                    x /= 1000.0f;
+                } else {
+                    x *= 12.0f / 365.0f;
+                }
+                CalculateZscoreUtils.ZScoreData item = data.get(key);
+                if (item != null) {
+                    SD3neg.add(new Entry(x, item.SD3neg));
+                    SD2neg.add(new Entry(x, item.SD2neg));
+                    SD0.add(new Entry(x, item.SD0));
+                    SD2.add(new Entry(x, item.SD2));
+                    SD3.add(new Entry(x, item.SD3));
+                }
+            }
+        }
     }
 
     private void showAxisLegend() {
@@ -232,34 +261,7 @@ public class GrowthDataFragment extends Fragment {
         }
     }
 
-    private void showData(HashMap<Integer, CalculateZscoreUtils.ZScoreData> data, ArrayList<ILineDataSet> dataSets) {
-
-        SD3neg = new ArrayList<>();
-        SD2neg = new ArrayList<>();
-        SD0 = new ArrayList<>();
-        SD2 = new ArrayList<>();
-        SD3 = new ArrayList<>();
-        if (data != null) {
-            List<Integer> sortedKeys = new ArrayList<>(data.keySet());
-            Collections.sort(sortedKeys);
-            for (Integer key : sortedKeys) {
-                float x = key;
-                if (chartType == CalculateZscoreUtils.ChartType.WEIGHT_FOR_HEIGHT) {
-                    x /= 1000.0f;
-                } else {
-                    x *= 12.0f / 365.0f;
-                }
-                CalculateZscoreUtils.ZScoreData item = data.get(key);
-                if (item != null) {
-                    SD3neg.add(new Entry(x, item.SD3neg));
-                    SD2neg.add(new Entry(x, item.SD2neg));
-                    SD0.add(new Entry(x, item.SD0));
-                    SD2.add(new Entry(x, item.SD2));
-                    SD3.add(new Entry(x, item.SD3));
-                }
-            }
-        }
-
+    private void showData(ArrayList<ILineDataSet> dataSets) {
         dataSets.add(createDataSet(SD3neg, "-3", ZSCORE_COLOR_3, 1.5f, false));
         dataSets.add(createDataSet(SD2neg, "-2", ZSCORE_COLOR_2, 1.5f, false));
         dataSets.add(createDataSet(SD0, "0", ZSCORE_COLOR_0, 1.5f, false));
@@ -400,7 +402,6 @@ public class GrowthDataFragment extends Fragment {
         dataSet.setDrawValues(false);
         dataSet.setDrawCircleHole(false);
         dataSet.setHighLightColor(color);
-
         return dataSet;
     }
 }

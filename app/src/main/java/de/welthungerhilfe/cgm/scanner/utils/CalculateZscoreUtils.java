@@ -45,10 +45,25 @@ public class CalculateZscoreUtils {
         }
     }
 
-    public static double getZScoreSlow(Context context, double height, double weight, double muac, long age, String sex, CalculateZscoreUtils.ChartType chartType) {
-        HashMap<Integer, CalculateZscoreUtils.ZScoreData> data = CalculateZscoreUtils.parseData(context, sex, chartType);
-        CalculateZscoreUtils.ZScoreData zscoreData = CalculateZscoreUtils.getClosestData(data, height, age, chartType);
-        return CalculateZscoreUtils.getZScore(zscoreData, height, weight, muac, chartType);
+    public static double getZScore(ZScoreData zscoreData, double height, double weight, double muac, ChartType chartType) {
+        if (zscoreData != null) {
+            switch (chartType) {
+                case WEIGHT_FOR_AGE:
+                case WEIGHT_FOR_HEIGHT:
+                    return getZScore(weight, zscoreData.median, zscoreData.skew, zscoreData.coefficient);
+                case HEIGHT_FOR_AGE:
+                    return getZScore(height, zscoreData.median, zscoreData.skew, zscoreData.coefficient);
+                case MUAC_FOR_AGE:
+                    return getZScore(muac, zscoreData.median, zscoreData.skew, zscoreData.coefficient);
+            }
+        }
+        return 100;
+    }
+
+    public static double getZScoreSlow(Context context, double height, double weight, double muac, long age, String sex, ChartType chartType) {
+        HashMap<Integer, ZScoreData> data = parseData(context, sex, chartType);
+        ZScoreData zscoreData = getClosestData(data, height, age, chartType);
+        return getZScore(zscoreData, height, weight, muac, chartType);
     }
 
     public static ZScoreData getClosestData(HashMap<Integer, ZScoreData> data, double height, long age, ChartType chartType) {
@@ -75,21 +90,6 @@ public class CalculateZscoreUtils {
             return zscoreData;
         }
         return null;
-    }
-
-    public static double getZScore(ZScoreData zscoreData, double height, double weight, double muac, ChartType chartType) {
-        if (zscoreData != null) {
-            switch (chartType) {
-                case WEIGHT_FOR_AGE:
-                case WEIGHT_FOR_HEIGHT:
-                    return getZScore(weight, zscoreData.median, zscoreData.skew, zscoreData.coefficient);
-                case HEIGHT_FOR_AGE:
-                    return getZScore(height, zscoreData.median, zscoreData.skew, zscoreData.coefficient);
-                case MUAC_FOR_AGE:
-                    return getZScore(muac, zscoreData.median, zscoreData.skew, zscoreData.coefficient);
-            }
-        }
-        return 100;
     }
 
     public static HashMap<Integer, ZScoreData> parseData(Context context, String sex, ChartType chartType) {
