@@ -354,4 +354,14 @@ public class Utils {
     public static boolean isDenied(String message) {
         return message.contains("403");
     }
+
+    public static boolean isIntegerNumber(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if ((c < '0') || (c > '9')) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

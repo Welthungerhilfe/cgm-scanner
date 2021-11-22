@@ -18,20 +18,18 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
-import androidx.annotation.Nullable;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -43,33 +41,26 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.google.common.collect.Iterables;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
 import de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils;
-import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
-
-import static de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils.loadJSONFromAsset;
 
 public class GrowthDataFragment extends Fragment {
 
@@ -80,9 +71,6 @@ public class GrowthDataFragment extends Fragment {
 
     private Context context;
 
-    final String[] boys_0_6 = {"wfa_boys_0_5_zscores.json", "lhfa_boys_0_5_zscores.json", "wfh_boys_0_5_zscores.json", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
-    final String[] girls_0_6 = {"wfa_girls_0_5_zscores.json", "lhfa_girls_0_5_zscores.json", "wfh_girls_0_5_zscores.json", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
-
     private LineChart mChart;
 
     private VerticalTextView txtYAxis;
@@ -91,7 +79,7 @@ public class GrowthDataFragment extends Fragment {
     private TextView txtLabel;
     private TextView txtZScore;
 
-    private int chartType = 0;
+    private CalculateZscoreUtils.ChartType chartType = CalculateZscoreUtils.ChartType.WEIGHT_FOR_AGE;
 
     public String qrCode;
 
@@ -148,7 +136,7 @@ public class GrowthDataFragment extends Fragment {
         String[] filters = getResources().getStringArray(R.array.filters);
         dropChart.setItems(filters);
         dropChart.setOnItemSelectedListener((MaterialSpinner.OnItemSelectedListener<String>) (view1, position, id, item) -> {
-            chartType = position;
+            chartType = CalculateZscoreUtils.ChartType.values()[position];
             setData();
         });
 
@@ -212,14 +200,13 @@ public class GrowthDataFragment extends Fragment {
         Measure lastMeasure = measures.get(0);
         txtLabel.setText(person.getSex());
 
-
+        //fix age of the last measurement
         long birthday = person.getBirthday();
-
         long age = (lastMeasure.getDate() - birthday) / 1000 / 60 / 60 / 24;
-
         lastMeasure.setAge(age);
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
+
 
         // ------------------------- Line for ruler values ---------------------------------- //
         ArrayList<Entry> SD3neg = new ArrayList<>();
@@ -228,174 +215,63 @@ public class GrowthDataFragment extends Fragment {
         ArrayList<Entry> SD2 = new ArrayList<>();
         ArrayList<Entry> SD3 = new ArrayList<>();
 
-        double zScore = 100, median = 10, skew = 10, coefficient = 10;
-
-        try {
-            BufferedReader reader;
-
-            String fileName = null;
-            if (person.getSex().equals("female")) {
-                fileName = girls_0_6[chartType];
-            } else {
-                fileName = boys_0_6[chartType];
-            }
-
-            if (chartType == 3) {
-                reader = new BufferedReader(new InputStreamReader(context.getAssets().open(fileName), StandardCharsets.UTF_8));
-
-
-                String mLine;
-                while ((mLine = reader.readLine()) != null) {
-                    String[] arr = mLine.split("\t");
-                    float rule;
-                    try {
-                        rule = Float.parseFloat(arr[0]);
-                    } catch (Exception e) {
-                        continue;
-                    }
-                    if (lastMeasure != null) {
-                        if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365.0)) {
-                            skew = Utils.parseDouble(arr[1]);
-                            median = Utils.parseDouble(arr[2]);
-                            coefficient = Utils.parseDouble(arr[3]);
-                        }
-
-                    }
-
-                    SD3neg.add(new Entry(rule, Utils.parseFloat(arr[4])));
-                    SD2neg.add(new Entry(rule, Utils.parseFloat(arr[5])));
-                    SD0.add(new Entry(rule, Utils.parseFloat(arr[7])));
-                    SD2.add(new Entry(rule, Utils.parseFloat(arr[9])));
-                    SD3.add(new Entry(rule, Utils.parseFloat(arr[10])));
-                }
-                reader.close();
-            } else {
-                if (chartType == 0 || chartType == 1) {
-                    int i = 0;
-                    JSONObject jsonObject = null;
-                    int maxIterationLimit = 60;
-                    int multiplyBy = 30;
-                    while (i <= maxIterationLimit) {
-                        try {
-                            jsonObject = loadJSONFromAsset(context, fileName, String.valueOf(i * multiplyBy));
-                            SD3neg.add(new Entry((float) (i), Utils.parseFloat(jsonObject.getString("SD3neg"))));
-                            SD2neg.add(new Entry((float) (i), Utils.parseFloat(jsonObject.getString("SD2neg"))));
-                            SD0.add(new Entry((float) (i), Utils.parseFloat(jsonObject.getString("SD0"))));
-                            SD2.add(new Entry((float) (i), Utils.parseFloat(jsonObject.getString("SD2"))));
-                            SD3.add(new Entry((float) (i), Utils.parseFloat(jsonObject.getString("SD3"))));
-                            i += 1;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } else if (chartType == 2) {
-                    float i = 45.0f;
-                    float maxHeightLimit = 120.0f;
-                    JSONObject jsonObject = null;
-
-                    while (i <= maxHeightLimit) {
-                        try {
-                            jsonObject = loadJSONFromAsset(context, fileName, String.valueOf(i));
-                            SD3neg.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD3neg"))));
-                            SD2neg.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD2neg"))));
-                            SD0.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD0"))));
-                            SD2.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD2"))));
-                            SD3.add(new Entry(i, Utils.parseFloat(jsonObject.getString("SD3"))));
-                            i += 0.5;
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+        HashMap<Integer, CalculateZscoreUtils.ZScoreData> data = CalculateZscoreUtils.parseData(getContext(), person.getSex(), chartType);
+        if (data != null) {
+            HashSet<Integer> processed = new HashSet<>();
+            for (Integer i : data.keySet()) {
+                if (!processed.contains(i)) {
+                    CalculateZscoreUtils.ZScoreData item = data.get(i);
+                    if (item != null) {
+                        SD3neg.add(new Entry((float) (i), item.SD3neg));
+                        SD2neg.add(new Entry((float) (i), item.SD2neg));
+                        SD0.add(new Entry((float) (i), item.SD0));
+                        SD2.add(new Entry((float) (i), item.SD2));
+                        SD3.add(new Entry((float) (i), item.SD3));
+                        processed.add(i);
                     }
                 }
             }
-
-            dataSets.add(createDataSet(SD3neg, "-3", ZSCORE_COLOR_3, 1.5f, false));
-            dataSets.add(createDataSet(SD2neg, "-2", ZSCORE_COLOR_2, 1.5f, false));
-            dataSets.add(createDataSet(SD0, "0", ZSCORE_COLOR_0, 1.5f, false));
-            dataSets.add(createDataSet(SD2, "+2", ZSCORE_COLOR_2, 1.5f, false));
-            dataSets.add(createDataSet(SD3, "+3", ZSCORE_COLOR_3, 1.5f, false));
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
-        CalculateZscoreUtils.ChartType type = CalculateZscoreUtils.ChartType.values()[chartType];
-        if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-            switch (type) {
+        dataSets.add(createDataSet(SD3neg, "-3", ZSCORE_COLOR_3, 1.5f, false));
+        dataSets.add(createDataSet(SD2neg, "-2", ZSCORE_COLOR_2, 1.5f, false));
+        dataSets.add(createDataSet(SD0, "0", ZSCORE_COLOR_0, 1.5f, false));
+        dataSets.add(createDataSet(SD2, "+2", ZSCORE_COLOR_2, 1.5f, false));
+        dataSets.add(createDataSet(SD3, "+3", ZSCORE_COLOR_3, 1.5f, false));
+
+        CalculateZscoreUtils.ZScoreData zscoreData = CalculateZscoreUtils.getClosestData(data, lastMeasure.getHeight(), lastMeasure.getAge(), chartType);
+        if (zscoreData != null) {
+            double zScore = 100;
+            switch (chartType) {
                 case WEIGHT_FOR_AGE:
                     txtXAxis.setText(R.string.axis_age);
                     txtYAxis.setText(R.string.axis_weight);
-                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(),lastMeasure.getMuac(), lastMeasure.getAge(), person.getSex(), type);
+                    zScore = CalculateZscoreUtils.getZScore(zscoreData, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getMuac(), chartType);
                     break;
 
                 case HEIGHT_FOR_AGE:
                     txtXAxis.setText(R.string.axis_age);
                     txtYAxis.setText(R.string.axis_height);
-                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(),lastMeasure.getMuac(), lastMeasure.getAge(), person.getSex(), type);
+                    zScore = CalculateZscoreUtils.getZScore(zscoreData, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getMuac(), chartType);
                     break;
 
                 case WEIGHT_FOR_HEIGHT:
                     txtXAxis.setText(R.string.axis_height);
                     txtYAxis.setText(R.string.axis_weight);
-                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(),lastMeasure.getMuac(), lastMeasure.getAge(), person.getSex(), type);
+                    zScore = CalculateZscoreUtils.getZScore(zscoreData, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getMuac(), chartType);
                     break;
 
                 case MUAC_FOR_AGE:
                     txtXAxis.setText(R.string.axis_age);
                     txtYAxis.setText(R.string.axis_muac);
-                    zScore = CalculateZscoreUtils.setData(context, lastMeasure.getHeight(), lastMeasure.getWeight(),lastMeasure.getMuac(), lastMeasure.getAge(), person.getSex(), type);
+                    zScore = CalculateZscoreUtils.getZScore(zscoreData, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getMuac(), chartType);
                     break;
             }
-        }
-
-        txtZScore.setText(String.format(Locale.getDefault(), "( z-score : %.2f )", zScore));
-
-        if (zScore < -3) { // SAM
-            switch (type) {
-                case WEIGHT_FOR_AGE:
-                    txtNotifTitle.setText(R.string.sam_wfa_title);
-                    txtNotifMessage.setText(R.string.sam_wfa_message);
-                    break;
-                case HEIGHT_FOR_AGE:
-                    txtNotifTitle.setText(R.string.sam_hfa_title);
-                    txtNotifMessage.setText(R.string.sam_hfa_message);
-                    break;
-                case WEIGHT_FOR_HEIGHT:
-                    txtNotifTitle.setText(R.string.sam_wfh_title);
-                    txtNotifMessage.setText(R.string.sam_wfh_message);
-                    break;
-                case MUAC_FOR_AGE:
-                    txtNotifTitle.setText(R.string.sam_acfa_title);
-                    txtNotifMessage.setText(R.string.sam_acfa_message);
-                    break;
-            }
-
-            lytNotif.setBackgroundResource(R.color.colorRed);
-            lytNotif.setVisibility(View.VISIBLE);
-        } else if (zScore < -2 && zScore >= -3) { // MAM
-            switch (type) {
-                case WEIGHT_FOR_AGE:
-                    txtNotifTitle.setText(R.string.mam_wfa_title);
-                    txtNotifMessage.setText(R.string.mam_wfa_message);
-                    break;
-                case HEIGHT_FOR_AGE:
-                    txtNotifTitle.setText(R.string.mam_hfa_title);
-                    txtNotifMessage.setText(R.string.mam_hfa_message);
-                    break;
-                case WEIGHT_FOR_HEIGHT:
-                    txtNotifTitle.setText(R.string.mam_wfh_title);
-                    txtNotifMessage.setText(R.string.mam_wfh_message);
-                    break;
-                case MUAC_FOR_AGE:
-                    txtNotifTitle.setText(R.string.mam_acfa_title);
-                    txtNotifMessage.setText(R.string.mam_acfa_message);
-                    break;
-            }
-
-            lytNotif.setBackgroundResource(R.color.colorYellow);
-            lytNotif.setVisibility(View.VISIBLE);
-        } else { // Healthy
+            txtZScore.setText(String.format(Locale.getDefault(), "( z-score : %.2f )", zScore));
+            txtZScore.setVisibility(View.VISIBLE);
+            showDiagnose(zScore);
+        } else {
+            txtZScore.setVisibility(View.GONE);
             lytNotif.setVisibility(View.GONE);
         }
 
@@ -404,13 +280,13 @@ public class GrowthDataFragment extends Fragment {
 
         for (Measure measure : measures) {
             float x = 0, y = 0;
-            switch (type) {
+            switch (chartType) {
                 case WEIGHT_FOR_AGE:
-                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 / 30;
+                    x = measure.getAge() * 12 / 365.0f;
                     y = (float) measure.getWeight();
                     break;
                 case HEIGHT_FOR_AGE:
-                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 / 30;
+                    x = measure.getAge() * 12 / 365.0f;
                     y = (float) measure.getHeight();
                     break;
                 case WEIGHT_FOR_HEIGHT:
@@ -419,7 +295,7 @@ public class GrowthDataFragment extends Fragment {
                     y = (float) measure.getWeight();
                     break;
                 case MUAC_FOR_AGE:
-                    x = (measure.getDate() - birthday) / 1000 / 60 / 60 / 24 / 30;
+                    x = measure.getAge() * 12 / 365.0f;
                     y = (float) measure.getMuac();
                     break;
             }
@@ -459,6 +335,57 @@ public class GrowthDataFragment extends Fragment {
 
         mChart.setData(new LineData(dataSets));
         mChart.animateX(3000);
+    }
+
+    private void showDiagnose(double zScore) {
+
+        if (zScore < -3) { // SAM
+            switch (chartType) {
+                case WEIGHT_FOR_AGE:
+                    txtNotifTitle.setText(R.string.sam_wfa_title);
+                    txtNotifMessage.setText(R.string.sam_wfa_message);
+                    break;
+                case HEIGHT_FOR_AGE:
+                    txtNotifTitle.setText(R.string.sam_hfa_title);
+                    txtNotifMessage.setText(R.string.sam_hfa_message);
+                    break;
+                case WEIGHT_FOR_HEIGHT:
+                    txtNotifTitle.setText(R.string.sam_wfh_title);
+                    txtNotifMessage.setText(R.string.sam_wfh_message);
+                    break;
+                case MUAC_FOR_AGE:
+                    txtNotifTitle.setText(R.string.sam_acfa_title);
+                    txtNotifMessage.setText(R.string.sam_acfa_message);
+                    break;
+            }
+
+            lytNotif.setBackgroundResource(R.color.colorRed);
+            lytNotif.setVisibility(View.VISIBLE);
+        } else if (zScore < -2 && zScore >= -3) { // MAM
+            switch (chartType) {
+                case WEIGHT_FOR_AGE:
+                    txtNotifTitle.setText(R.string.mam_wfa_title);
+                    txtNotifMessage.setText(R.string.mam_wfa_message);
+                    break;
+                case HEIGHT_FOR_AGE:
+                    txtNotifTitle.setText(R.string.mam_hfa_title);
+                    txtNotifMessage.setText(R.string.mam_hfa_message);
+                    break;
+                case WEIGHT_FOR_HEIGHT:
+                    txtNotifTitle.setText(R.string.mam_wfh_title);
+                    txtNotifMessage.setText(R.string.mam_wfh_message);
+                    break;
+                case MUAC_FOR_AGE:
+                    txtNotifTitle.setText(R.string.mam_acfa_title);
+                    txtNotifMessage.setText(R.string.mam_acfa_message);
+                    break;
+            }
+
+            lytNotif.setBackgroundResource(R.color.colorYellow);
+            lytNotif.setVisibility(View.VISIBLE);
+        } else { // Healthy
+            lytNotif.setVisibility(View.GONE);
+        }
     }
 
     protected LineDataSet createDataSet(ArrayList<Entry> values, String label, int color, float width, boolean circle) {
