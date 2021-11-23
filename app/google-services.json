@@ -1,52 +1,44 @@
 {
   "project_info": {
-    "project_number": "871268328496",
-    "firebase_url": "https://child-growth-monitor-dev.firebaseio.com",
-    "project_id": "child-growth-monitor-dev",
-    "storage_bucket": "child-growth-monitor-dev.appspot.com"
+    "project_number": "455578210800",
+    "project_id": "cgm-analytics",
+    "storage_bucket": "cgm-analytics.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:871268328496:android:739dcaee1e669c8b",
+        "mobilesdk_app_id": "1:455578210800:android:37ed31a85714784dee0d35",
         "android_client_info": {
           "package_name": "de.welthungerhilfe.cgm.scanner"
         }
       },
       "oauth_client": [
         {
-          "client_id": "871268328496-cbhvt88h537c2hbp680nbqoig42pfbom.apps.googleusercontent.com",
+          "client_id": "455578210800-pabrhkq9m86o5s7f1hdemj3d6sq4ej5n.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "de.welthungerhilfe.cgm.scanner",
-            "certificate_hash": "1637921c2d0b0d73091498f8df59775ffbaa2177"
+            "certificate_hash": "05777e3b414a21ecaffddf86f664f9de74c242b4"
           }
         },
         {
-          "client_id": "871268328496-cq4i119d4mmu3pnd8n7uudqq1fmdti6o.apps.googleusercontent.com",
+          "client_id": "455578210800-c1lu45er409tpev55jrsgmh3od9u5e32.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBZxawsd8CydxF3_2NoddVCde_zkGmGozI"
+          "current_key": "AIzaSyDCQ1C0nhwVz3Yn_n7TlkkwNe5e9-QZQqw"
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "871268328496-cq4i119d4mmu3pnd8n7uudqq1fmdti6o.apps.googleusercontent.com",
+              "client_id": "455578210800-c1lu45er409tpev55jrsgmh3od9u5e32.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
-        },
-        "ads_service": {
-          "status": 2
         }
       }
     }

@@ -65,16 +65,13 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
+        android:preserveLegacyExternalStorage="true"
         android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar"
         android:usesCleartextTraffic="true"
         android:windowSoftInputMode="adjustResize"
         tools:replace="android:allowBackup">
-
-        <uses-library
-            android:name="com.projecttango.libtango_device2"
-            android:required="${tangoRequired}" />
 
         <meta-data
             android:name="com.google.ar.core"

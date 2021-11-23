@@ -46,6 +46,7 @@ import android.widget.TextView;
 
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.Date;
 
@@ -57,6 +58,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
@@ -90,6 +92,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private Loc location;
 
     ViewModelProvider.Factory factory;
+    FirebaseAnalytics firebaseAnalytics;
 
     public static PersonalDataFragment getInstance(String qrCode) {
         PersonalDataFragment fragment = new PersonalDataFragment();
@@ -121,6 +124,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             if (measure != null)
                 setLocation(measure.getLocation());
         });
+        firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(getActivity());
 
         view.findViewById(R.id.rytConsentDetail).setOnClickListener(this);
         view.findViewById(R.id.imgBirth).setOnClickListener(this);
@@ -170,6 +174,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     public void initUI() {
         if (person == null) {
+            firebaseAnalytics.logEvent(FirebaseService.CREATE_PERSON_START,null);
             setLocation(((CreateDataActivity) getActivity()).location);
             return;
         } else {
@@ -275,6 +280,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         person.setQrcode(qrCode);
                         person.setEnvironment(session.getEnvironment());
                         person.setCreated(System.currentTimeMillis());
+                        firebaseAnalytics.logEvent(FirebaseService.CREATE_PERSON_STOP,null);
+
                     }
 
                     person.setName(editName.getText().toString());

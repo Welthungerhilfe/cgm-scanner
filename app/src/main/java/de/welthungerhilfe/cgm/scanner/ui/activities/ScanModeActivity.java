@@ -49,21 +49,15 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.atap.tangoservice.TangoCameraIntrinsics;
-import com.google.atap.tangoservice.TangoPointCloudData;
-import com.google.atap.tangoservice.experimental.TangoImageBuffer;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.microsoft.appcenter.crashes.Crashes;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -83,22 +77,25 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
-import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoCamera;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
-import de.welthungerhilfe.cgm.scanner.hardware.camera.TangoUtils;
 import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, TangoCamera.TangoCameraListener, ScanTypeView.ScanTypeListener {
+public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, ScanTypeView.ScanTypeListener {
 
     private enum ArtifactType { CALIBRATION, DEPTH, RGB };
 
     ActivityScanModeBinding activityScanModeBinding;
+
+    FirebaseAnalytics firebaseAnalytics;
+    boolean scanCompleted = false;
+    boolean scanStarted = false;
 
     public void scanStanding(View view) {
         SCAN_MODE = AppConstants.SCAN_STANDING;
@@ -284,7 +281,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     protected void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
+        firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             LogFileUtils.logException(throwable);
             Crashes.trackError(throwable);
@@ -352,7 +349,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 .create();
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
         }
 
         activityScanModeBinding.scanType1.setListener(1, this);
@@ -383,6 +380,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     public void onDestroy() {
         super.onDestroy();
         progressDialog.dismiss();
+        if(scanStarted && !scanCompleted){
+            firebaseAnalytics.logEvent(FirebaseService.SCAN_CANCELED,null);
+        }
     }
 
     private void setupToolbar() {
@@ -612,9 +612,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 depthMode = AbstractARCamera.DepthPreviewMode.CENTER;
             }
 
-            if (TangoUtils.isTangoSupported()) {
-                mCameraInstance = new TangoCamera(this);
-            } else if (AREngineCamera.shouldUseAREngine()) {
+            if (AREngineCamera.shouldUseAREngine()) {
                 mCameraInstance = new AREngineCamera(this, depthMode, previewSize);
             } else {
                 mCameraInstance = new ARCoreCamera(this, AbstractARCamera.DepthPreviewMode.OFF, previewSize);
@@ -639,7 +637,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     currentImgFilename = currentImgFilename.replace('/', '_');
                     File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
                     BitmapHelper.writeBitmapToFile(bitmap, artifactFile);
-                    onProcessArtifact(artifactFile, ArtifactType.RGB);
+                    onProcessArtifact(artifactFile, ArtifactType.RGB, 0);
 
                     //save RGB metadata
                     if (artifactFile.exists()) {
@@ -660,7 +658,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                 fileOutputStream.write(cameraCalibration.getBytes());
                                 fileOutputStream.flush();
                                 fileOutputStream.close();
-                                onProcessArtifact(artifactFile, ArtifactType.CALIBRATION);
+                                onProcessArtifact(artifactFile, ArtifactType.CALIBRATION, 0);
 
                             } catch (Exception e) {
                                 LogFileUtils.logException(e);
@@ -681,8 +679,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex) {
 
+        float height = 0;
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-            float height = getCamera().getTargetHeight();
+            height = getCamera().getTargetHeight();
             if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
                 if (SCAN_STEP == AppConstants.SCAN_STANDING_FRONT) {
                     heights.add(height);
@@ -706,13 +705,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             updateScanningProgress();
             onLightScore(getCamera().getLightIntensity());
 
+            float finalHeight = height * 100.0f;
             Runnable thread = () -> {
                 try {
 
                     //write depthmap
                     File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                     depthmap.save(artifactFile);
-                    onProcessArtifact(artifactFile, ArtifactType.DEPTH);
+                    onProcessArtifact(artifactFile, ArtifactType.DEPTH, finalHeight);
 
                     //profile process
                     if (artifactFile.exists()) {
@@ -727,97 +727,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     LogFileUtils.logException(e);
                 }
 
-                onThreadChange(-1);
-            };
-            onThreadChange(1);
-            executor.execute(thread);
-        }
-    }
-
-    @Override
-    public void onTangoColorData(TangoImageBuffer tangoImageBuffer) {
-        if (!mIsRecording) {
-            return;
-        }
-
-        String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + String.format(Locale.US, "%f", tangoImageBuffer.timestamp) + ".jpg";
-        File artifactFile = new File(mRgbSaveFolder.getPath(), currentImgFilename);
-
-        Runnable thread = () -> {
-            long profile = System.currentTimeMillis();
-            TangoUtils.writeImageToFile(tangoImageBuffer, artifactFile);
-            onProcessArtifact(artifactFile, ArtifactType.RGB);
-
-            if (artifactFile.exists()) {
-                mColorSize += artifactFile.length();
-                mColorTime += System.currentTimeMillis() - profile;
-                if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
-                    LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_SIZE, mColorSize);
-                    LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, mColorTime);
-                }
-            }
-            onThreadChange(-1);
-        };
-        onThreadChange(1);
-        executor.execute(thread);
-    }
-
-    @Override
-    public void onTangoDepthData(TangoPointCloudData pointCloudData, float[] position, float[] rotation, TangoCameraIntrinsics[] calibration) {
-
-        onFeedbackUpdate();
-        boolean hasCameraCalibration = mCameraInstance.hasCameraCalibration();
-        String cameraCalibration = mCameraInstance.getCameraCalibration();
-
-        // Saving the frame or not, depending on the current mode.
-        if (mIsRecording) {
-            long profile = System.currentTimeMillis();
-            int numPoints = pointCloudData.numPoints;
-            double timestamp = pointCloudData.timestamp;
-            ByteBuffer buffer = ByteBuffer.allocate(pointCloudData.numPoints * 4 * 4);
-            buffer.order(ByteOrder.LITTLE_ENDIAN);
-            buffer.asFloatBuffer().put(pointCloudData.points);
-
-            updateScanningProgress();
-            onLightScore(getCamera().getLightIntensity());
-
-            String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP +
-                    "_" + mNumberOfFilesWritten++ + "_" + String.format(Locale.US, "%f", pointCloudData.timestamp) + ".depth";
-
-            Runnable thread = () -> {
-
-                //write depthmap
-                Depthmap depthmap = TangoUtils.extractDepthmap(buffer, numPoints, position, rotation, timestamp, calibration[1]);
-                File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
-                depthmap.save(artifactFile);
-                onProcessArtifact(artifactFile, ArtifactType.DEPTH);
-
-                //profile process
-                if (artifactFile.exists()) {
-                    mDepthSize += artifactFile.length();
-                    mDepthTime += System.currentTimeMillis() - profile;
-                    if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
-                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_SIZE, mDepthSize);
-                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_DEPTH_TIME, mDepthTime);
-                    }
-                }
-
-                //save calibration data
-                artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
-                if (!artifactFile.exists()) {
-                    if (hasCameraCalibration) {
-                        try {
-                            FileOutputStream fileOutputStream = new FileOutputStream(artifactFile.getAbsolutePath());
-                            fileOutputStream.write(cameraCalibration.getBytes());
-                            fileOutputStream.flush();
-                            fileOutputStream.close();
-                            onProcessArtifact(artifactFile, ArtifactType.CALIBRATION);
-
-                        } catch (Exception e) {
-                            LogFileUtils.logException(e);
-                        }
-                    }
-                }
                 onThreadChange(-1);
             };
             onThreadChange(1);
@@ -907,9 +816,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onProcessArtifact(File artifactFile, ArtifactType type) {
+    private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight) {
         if (artifactFile.exists()) {
             FileLog log = new FileLog();
+
+            //set type specific information
             switch (type) {
                 case CALIBRATION:
                     log.setStep(0);
@@ -927,6 +838,17 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     log.setType("rgb");
                     break;
             }
+
+            //set information if child is detected (note: this is unsupported on ARCore devices and for lying children)
+            boolean childDetected = false;
+            if (SCAN_MODE == AppConstants.SCAN_STANDING) {
+                AbstractARCamera.TrackingState tracking = getCamera().getTrackingState();
+                childDetected = tracking == AbstractARCamera.TrackingState.TRACKED;
+            }
+            log.setChildDetected(childDetected);
+            log.setChildHeight(childHeight);
+
+            //set metadata
             log.setPath(artifactFile.getPath());
             log.setHashValue(IO.getMD5(artifactFile.getPath()));
             log.setFileSize(artifactFile.length());
@@ -1012,6 +934,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
                 if (step1 && step2 && step3) {
                     showCompleteButton();
+                    firebaseAnalytics.logEvent(FirebaseService.SCAN_START,null);
+                    scanStarted = true;
                 }
             });
         }
@@ -1040,6 +964,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 } else {
                     UploadService.forceResume();
                 }
+                scanCompleted = true;
+                firebaseAnalytics.logEvent(FirebaseService.SCAN_SUCCESSFUL,null);
                 finish();
             });
         }

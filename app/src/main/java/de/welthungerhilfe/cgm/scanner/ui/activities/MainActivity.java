@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.appcompat.widget.SearchView;
 
+import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -51,6 +52,7 @@ import android.widget.TextView;
 
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 
@@ -66,6 +68,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
 import de.welthungerhilfe.cgm.scanner.network.service.DeviceService;
+import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.service.WifiStateChangereceiverHelperService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
@@ -116,6 +119,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     private ContentMainBinding contentMainBinding;
 
+    FirebaseAnalytics firebaseAnalytics;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,7 +130,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         LogFileUtils.startSession(MainActivity.this, session);
         LogFileUtils.logInfo(TAG, "CGM-Scanner " + Utils.getAppVersion(this) + " started");
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
-
+        firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         if (session.getStdTestQrCode() != null) {
             if (!Utils.isValidateStdTestQrCode(session.getStdTestQrCode())) {
                 session.setStdTestQrCode(null);
@@ -541,6 +546,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     session.setStdTestQrCode(null);
                     adapterData.notifyDataSetChanged();
                     checkIfStdTestActive();
+                    firebaseAnalytics.logEvent(FirebaseService.STD_TEST_STOP,null);
                 }
             });
             confirmDialog.show();

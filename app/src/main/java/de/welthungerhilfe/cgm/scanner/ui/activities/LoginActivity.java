@@ -35,12 +35,15 @@ import android.widget.Toast;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityLoginBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
@@ -56,11 +59,19 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
     ActivityLoginBinding activityLoginBinding;
 
+    FirebaseAnalytics firebaseAnalytics;
+
+    String selectedBackend;
+
 
     public void doSignIn(View view) {
         if (!checkStoragePermissions()) {
             return;
         }
+        Bundle bundle = new Bundle();
+        bundle.putString("backend_selected",selectedBackend);
+        firebaseAnalytics.logEvent("signin_started",bundle);
+
         if (BuildConfig.DEBUG) {
             if (session.getEnvironment() == AppConstants.ENV_UNKNOWN) {
                 Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
@@ -68,6 +79,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             }
             session.setSigned(true);
             LogFileUtils.startSession(LoginActivity.this, session);
+
 
             startApp();
         } else {
@@ -95,7 +107,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         LanguageHelper.onAttach(this);
 
        activityLoginBinding = DataBindingUtil.setContentView(this,R.layout.activity_login);
-
+       firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         session = new SessionManager(this);
         try {
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
@@ -140,6 +152,9 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                     startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 else
                     startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
+                Bundle bundle = new Bundle();
+                bundle.putString("backend_selected",selectedBackend);
+                firebaseAnalytics.logEvent("signin_finished",bundle);
                 finish();
             });
         }).start();
@@ -190,15 +205,19 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                 case R.id.rb_prod_aah:
                 case R.id.rb_prod_darshna:
                     session.setEnvironment(AppConstants.ENV_IN_BMZ);
+                    selectedBackend = "in_bmz";
                     break;
                 case R.id.rb_prod_namibia:
                     session.setEnvironment(AppConstants.ENV_NAMIBIA);
+                    selectedBackend = "namibia";
                     break;
                 case R.id.rb_demo_qa:
                     session.setEnvironment(AppConstants.ENV_DEMO_QA);
+                    selectedBackend = "demo_qa";
                     break;
                 case R.id.rb_sandbox:
                     session.setEnvironment(AppConstants.ENV_SANDBOX);
+                    selectedBackend = "sandbox";
                     break;
             }
         }
