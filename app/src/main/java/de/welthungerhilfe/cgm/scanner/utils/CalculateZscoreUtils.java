@@ -1,27 +1,36 @@
 package de.welthungerhilfe.cgm.scanner.utils;
 
 import android.content.Context;
-import android.widget.Toast;
 
-
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-
-import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class CalculateZscoreUtils {
 
+    public static class ZScoreData {
+        public float median;
+        public float skew;
+        public float coefficient;
+
+        public float SD3neg;
+        public float SD2neg;
+        public float SD0;
+        public float SD2;
+        public float SD3;
+    }
+
+    private static final String[] BOYS = {"wfa_boys_0_5_zscores.json", "lhfa_boys_0_5_zscores.json", "wfh_boys_0_5_zscores.json", "acfa_boys_p_exp.txt"};
+    private static final String[] GIRLS = {"wfa_girls_0_5_zscores.json", "lhfa_girls_0_5_zscores.json", "wfh_girls_0_5_zscores.json", "acfa_girls_p_exp.txt"};
+
     public enum ChartType { WEIGHT_FOR_AGE, HEIGHT_FOR_AGE, WEIGHT_FOR_HEIGHT, MUAC_FOR_AGE }
 
-    public static double newZScore(double y, double Mt, double Lt, double St) {
+    public static double getZScore(double y, double Mt, double Lt, double St) {
         double Zind = (Math.pow(y / Mt, Lt) - 1) / (St * Lt);
         if (Zind >= -3 && Zind <= 3) {
             return Zind;
@@ -36,127 +45,140 @@ public class CalculateZscoreUtils {
         }
     }
 
-    public static double setData(Context context, double height, double weight,double muac, long age, String sex, ChartType chartType) {
+    public static double getZScore(ZScoreData zscoreData, double height, double weight, double muac, ChartType chartType) {
+        if (zscoreData != null) {
+            switch (chartType) {
+                case WEIGHT_FOR_AGE:
+                case WEIGHT_FOR_HEIGHT:
+                    return getZScore(weight, zscoreData.median, zscoreData.skew, zscoreData.coefficient);
+                case HEIGHT_FOR_AGE:
+                    return getZScore(height, zscoreData.median, zscoreData.skew, zscoreData.coefficient);
+                case MUAC_FOR_AGE:
+                    return getZScore(muac, zscoreData.median, zscoreData.skew, zscoreData.coefficient);
+            }
+        }
+        return 100;
+    }
 
-        double zScore = 100, median = 10, skew = 10, coefficient = 10;
+    public static double getZScoreSlow(Context context, double height, double weight, double muac, long age, String sex, ChartType chartType) {
+        HashMap<Integer, ZScoreData> data = parseData(context, sex, chartType);
+        ZScoreData zscoreData = getClosestData(data, height, age, chartType);
+        return getZScore(zscoreData, height, weight, muac, chartType);
+    }
 
-        final String[] boys_0_6 = {"wfa_boys_0_5_zscores.json", "lhfa_boys_0_5_zscores.json", "wfh_boys_0_5_zscores.json", "acfa_boys_p_exp.txt", "hcfa_boys_p_exp.txt"};
-        final String[] girls_0_6 = {"wfa_girls_0_5_zscores.json", "lhfa_girls_0_5_zscores.json", "wfh_girls_0_5_zscores.json", "acfa_girls_p_exp.txt", "hcfa_girls_p_exp.txt"};
-        Measure lastMeasure = null;
-
-        try {
-            lastMeasure = new Measure();
-            lastMeasure.setHeight(height);
-            lastMeasure.setAge(age);
-            lastMeasure.setWeight(weight);
-            lastMeasure.setMuac(muac);
-
-            String fileName;
-            if (sex.equals("female")) {
-                fileName = girls_0_6[chartType.ordinal()];
+    public static ZScoreData getClosestData(HashMap<Integer, ZScoreData> data, double height, long age, ChartType chartType) {
+        if (data != null) {
+            int target;
+            if (chartType == ChartType.WEIGHT_FOR_HEIGHT) {
+                target = (int) (height * 1000.0f);
             } else {
-                fileName = boys_0_6[chartType.ordinal()];
+                target = (int) age;
+                if (age > 5 * 365 + 2) {
+                    return null;
+                }
             }
 
-            if (lastMeasure != null) {
-
-                //detailed data, one value per day
-                if ((chartType != ChartType.MUAC_FOR_AGE)) {
-                    JSONObject jsonObject;
-                    if (chartType == ChartType.WEIGHT_FOR_HEIGHT) {
-                        jsonObject = loadJSONFromAsset(context, fileName, String.valueOf(lastMeasure.getHeight()));
-                    } else {
-                        jsonObject = loadJSONFromAsset(context, fileName, String.valueOf(lastMeasure.getAge()));
-                    }
-                    if (jsonObject == null) {
-                        return 0.0;
-                    }
-                    try {
-                        skew = Utils.parseDouble(jsonObject.getString("L"));
-                        median = Utils.parseDouble(jsonObject.getString("M"));
-                        coefficient = Utils.parseDouble(jsonObject.getString("S"));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
+            int best = Integer.MAX_VALUE;
+            ZScoreData zscoreData = null;
+            for (Integer key : data.keySet()) {
+                int diff = Math.abs(key - target);
+                if (best > diff) {
+                    best = diff;
+                    zscoreData = data.get(key);
                 }
+            }
+            return zscoreData;
+        }
+        return null;
+    }
 
-                //low detailed data, one value per month
-                else {
-                    BufferedReader reader;
-                    reader = new BufferedReader(new InputStreamReader(context.getAssets().open(fileName), StandardCharsets.UTF_8));
-                    String mLine;
-                    while ((mLine = reader.readLine()) != null) {
-                        String[] arr = mLine.split("\t");
-                        float rule;
-                        try {
-                            rule = Float.parseFloat(arr[0]);
-                        } catch (Exception e) {
-                            continue;
-                        }
-                        if (lastMeasure != null) {
+    public static HashMap<Integer, ZScoreData> parseData(Context context, String sex, ChartType chartType) {
+        String filename;
+        if (sex.equals("female")) {
+            filename = GIRLS[chartType.ordinal()];
+        } else {
+            filename = BOYS[chartType.ordinal()];
+        }
 
-                            if ((int) rule == (int) (lastMeasure.getAge() * 12 / 365.0)) {
-                                skew = Utils.parseDouble(arr[1]);
-                                median = Utils.parseDouble(arr[2]);
-                                coefficient = Utils.parseDouble(arr[3]);
-                                break;
-                            }
-                        }
+        //detailed data, one value per day
+        if (filename.endsWith("json")) {
+            return parseJson(context, filename, chartType);
+        }
+
+        //low detailed data, one value per month
+        else {
+            return parseTxt(context, filename, chartType);
+        }
+    }
+
+    private static HashMap<Integer, ZScoreData> parseJson(Context context, String filename, ChartType chartType) {
+        HashMap<Integer, ZScoreData> output = new HashMap<>();
+        try {
+            InputStream is = context.getAssets().open(filename);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            int read = is.read(buffer);
+            is.close();
+            String json = new String(buffer, StandardCharsets.UTF_8);
+            JSONObject obj = new JSONObject(json);
+
+            Iterator<String> keys = obj.keys();
+            while (keys.hasNext()) {
+                String jsonKey = keys.next();
+                JSONObject jsonObject = obj.getJSONObject(jsonKey);
+                ZScoreData value = new ZScoreData();
+                value.skew = Utils.parseFloat(jsonObject.getString("L"));
+                value.median = Utils.parseFloat(jsonObject.getString("M"));
+                value.coefficient = Utils.parseFloat(jsonObject.getString("S"));
+                value.SD3neg = Utils.parseFloat(jsonObject.getString("SD3neg"));
+                value.SD2neg = Utils.parseFloat(jsonObject.getString("SD2neg"));
+                value.SD0 = Utils.parseFloat(jsonObject.getString("SD0"));
+                value.SD2 = Utils.parseFloat(jsonObject.getString("SD2"));
+                value.SD3 = Utils.parseFloat(jsonObject.getString("SD3"));
+
+                float key = Utils.parseFloat(jsonKey);
+                if (chartType == ChartType.WEIGHT_FOR_HEIGHT) {
+                    output.put((int) (key * 1000), value);
+                } else {
+                    output.put((int) key, value);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return output;
+    }
+
+    private static HashMap<Integer, ZScoreData> parseTxt(Context context, String filename, ChartType chartType) {
+        HashMap<Integer, ZScoreData> output = new HashMap<>();
+        try {
+            BufferedReader reader;
+            reader = new BufferedReader(new InputStreamReader(context.getAssets().open(filename), StandardCharsets.UTF_8));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] arr = line.split("\t");
+                if (Utils.isNumber(arr[0])) {
+                    ZScoreData value = new ZScoreData();
+                    value.skew = Utils.parseFloat(arr[1]);
+                    value.median = Utils.parseFloat(arr[2]);
+                    value.coefficient = Utils.parseFloat(arr[3]);
+                    value.SD3neg = Utils.parseFloat(arr[4]);
+                    value.SD2neg = Utils.parseFloat(arr[5]);
+                    value.SD0 = Utils.parseFloat(arr[7]);
+                    value.SD2 = Utils.parseFloat(arr[9]);
+                    value.SD3 = Utils.parseFloat(arr[10]);
+
+                    float key = Utils.parseFloat(arr[0]);
+                    if (chartType == ChartType.WEIGHT_FOR_HEIGHT) {
+                        output.put((int) (key * 1000), value);
+                    } else {
+                        output.put((int) (key * 365 / 12), value);
                     }
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        switch (chartType) {
-            case WEIGHT_FOR_AGE:
-            case WEIGHT_FOR_HEIGHT:
-                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = newZScore(lastMeasure.getWeight(), median, skew, coefficient);
-                }
-                break;
-            case HEIGHT_FOR_AGE:
-                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = newZScore(lastMeasure.getHeight(), median, skew, coefficient);
-                }
-                break;
-            case MUAC_FOR_AGE:
-                if (lastMeasure != null && median != 0 && coefficient != 0 && skew != 0) {
-                    zScore = newZScore(lastMeasure.getMuac(), median, skew, coefficient);
-                }
-                break;
-
-        }
-        return zScore;
-    }
-
-    public static JSONObject loadJSONFromAsset(Context context, String fileName, String index) {
-        String json = null;
-        try {
-            InputStream is = context.getAssets().open(fileName);
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            json = new String(buffer, "UTF-8");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-        JSONObject obj = null;
-        try {
-            obj = new JSONObject(json);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            return obj.getJSONObject(index);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return output;
     }
 }

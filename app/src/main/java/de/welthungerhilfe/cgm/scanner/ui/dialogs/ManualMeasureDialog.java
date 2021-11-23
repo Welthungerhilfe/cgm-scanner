@@ -321,7 +321,7 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         String weight = dialogManualMeasureBinding.editManualWeight.getText().toString();
         String muac = dialogManualMeasureBinding.editManualMuac.getText().toString();
         long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
-        double zScore = CalculateZscoreUtils.setData(mContext,Utils.parseDouble(height),Utils.parseDouble(weight), Utils.parseDouble(muac),age,person.getSex(), chartType);
+        double zScore = CalculateZscoreUtils.getZScoreSlow(mContext,Utils.parseDouble(height),Utils.parseDouble(weight), Utils.parseDouble(muac),age,person.getSex(), chartType);
         return Math.abs(zScore) < 3.0;
     }
 
