@@ -238,13 +238,13 @@
     <string name="axis_height">height in cm</string>
     <string name="axis_weight">weight in kg</string>
     <string name="axis_muac">MUAC in cm</string>
-    <string name="filter_age_weight">1. Weight-for-age</string>
-    <string name="filter_age_height">2. Height-for-age</string>
-    <string name="filter_height_weight">3. Weight-for-height</string>
-    <string name="filter_muac_age">4. MUAC-for-age</string>
+    <string name="filter_age_weight">Weight-for-age</string>
+    <string name="filter_age_height">Height-for-age</string>
+    <string name="filter_height_weight">Weight-for-height</string>
+    <string name="filter_muac_age">MUAC-for-age</string>
     <string-array name="filters" translatable="false">
-        <item>@string/filter_age_weight</item>
         <item>@string/filter_age_height</item>
+        <item>@string/filter_age_weight</item>
         <item>@string/filter_height_weight</item>
         <item>@string/filter_muac_age</item>
     </string-array>

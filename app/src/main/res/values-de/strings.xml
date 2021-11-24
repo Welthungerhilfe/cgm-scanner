@@ -235,10 +235,10 @@
     <string name="axis_height">Größe</string>
     <string name="axis_weight">Gewicht</string>
     <string name="axis_muac">MUAC in cm</string>
-    <string name="filter_age_weight">1. Gewicht / Alter</string>
-    <string name="filter_age_height">2. Größe / Alter</string>
-    <string name="filter_height_weight">3. Gewicht / Größe</string>
-    <string name="filter_muac_age">4 MUAC / Alter</string>
+    <string name="filter_age_weight">Gewicht / Alter</string>
+    <string name="filter_age_height">Größe / Alter</string>
+    <string name="filter_height_weight">Gewicht / Größe</string>
+    <string name="filter_muac_age">MUAC / Alter</string>
 
 
     <!-- Diagnoses !-->

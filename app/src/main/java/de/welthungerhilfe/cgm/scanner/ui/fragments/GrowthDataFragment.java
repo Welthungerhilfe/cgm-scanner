@@ -80,7 +80,7 @@ public class GrowthDataFragment extends Fragment {
     private TextView txtNotifTitle;
     private TextView txtNotifMessage;
 
-    private CalculateZscoreUtils.ChartType chartType = CalculateZscoreUtils.ChartType.WEIGHT_FOR_AGE;
+    private CalculateZscoreUtils.ChartType chartType = CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE;
 
     private String qrCode;
 
@@ -248,14 +248,14 @@ public class GrowthDataFragment extends Fragment {
 
     private void showAxisLegend() {
         switch (chartType) {
-            case WEIGHT_FOR_AGE:
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_weight);
-                break;
-
             case HEIGHT_FOR_AGE:
                 txtXAxis.setText(R.string.axis_age);
                 txtYAxis.setText(R.string.axis_height);
+                break;
+
+            case WEIGHT_FOR_AGE:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_weight);
                 break;
 
             case WEIGHT_FOR_HEIGHT:
@@ -282,13 +282,13 @@ public class GrowthDataFragment extends Fragment {
 
         if (zScore < -3) { // SAM
             switch (chartType) {
-                case WEIGHT_FOR_AGE:
-                    txtNotifTitle.setText(R.string.sam_wfa_title);
-                    txtNotifMessage.setText(R.string.sam_wfa_message);
-                    break;
                 case HEIGHT_FOR_AGE:
                     txtNotifTitle.setText(R.string.sam_hfa_title);
                     txtNotifMessage.setText(R.string.sam_hfa_message);
+                    break;
+                case WEIGHT_FOR_AGE:
+                    txtNotifTitle.setText(R.string.sam_wfa_title);
+                    txtNotifMessage.setText(R.string.sam_wfa_message);
                     break;
                 case WEIGHT_FOR_HEIGHT:
                     txtNotifTitle.setText(R.string.sam_wfh_title);
@@ -304,13 +304,13 @@ public class GrowthDataFragment extends Fragment {
             lytNotif.setVisibility(View.VISIBLE);
         } else if (zScore < -2 && zScore >= -3) { // MAM
             switch (chartType) {
-                case WEIGHT_FOR_AGE:
-                    txtNotifTitle.setText(R.string.mam_wfa_title);
-                    txtNotifMessage.setText(R.string.mam_wfa_message);
-                    break;
                 case HEIGHT_FOR_AGE:
                     txtNotifTitle.setText(R.string.mam_hfa_title);
                     txtNotifMessage.setText(R.string.mam_hfa_message);
+                    break;
+                case WEIGHT_FOR_AGE:
+                    txtNotifTitle.setText(R.string.mam_wfa_title);
+                    txtNotifMessage.setText(R.string.mam_wfa_message);
                     break;
                 case WEIGHT_FOR_HEIGHT:
                     txtNotifTitle.setText(R.string.mam_wfh_title);
@@ -336,13 +336,13 @@ public class GrowthDataFragment extends Fragment {
         for (Measure measure : measures) {
             float x = 0, y = 0;
             switch (chartType) {
-                case WEIGHT_FOR_AGE:
-                    x = measure.getAge() * 12 / 365.0f;
-                    y = (float) measure.getWeight();
-                    break;
                 case HEIGHT_FOR_AGE:
                     x = measure.getAge() * 12 / 365.0f;
                     y = (float) measure.getHeight();
+                    break;
+                case WEIGHT_FOR_AGE:
+                    x = measure.getAge() * 12 / 365.0f;
+                    y = (float) measure.getWeight();
                     break;
                 case WEIGHT_FOR_HEIGHT:
                     DecimalFormat decimalFormat = new DecimalFormat("#.#");
