@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -67,6 +68,8 @@ public class GrowthDataFragment extends Fragment {
     private final int ZSCORE_COLOR_0 = Color.rgb(55, 129, 69);
     private final int ZSCORE_COLOR_2 = Color.rgb(230, 122, 58);
     private final int ZSCORE_COLOR_3 = Color.rgb(212, 53, 62);
+    private final int BLUE_COLOR_DOT = Color.rgb(0, 0, 122);
+
 
     private LineChart mChart;
     private VerticalTextView txtYAxis;
@@ -182,7 +185,13 @@ public class GrowthDataFragment extends Fragment {
         if (person == null) {
             return;
         }
-        List<Measure> measures = MeasureRepository.getInstance(getContext()).getManualMeasures(person.getId());
+        List<Measure> measures = null;
+        if(chartType == CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE) {
+            measures = MeasureRepository.getInstance(getContext()).getAllMeasuresByPersonId(person.getId());
+        }
+        else{
+            measures = MeasureRepository.getInstance(getContext()).getManualMeasures(person.getId());
+        }
         if (measures == null || measures.isEmpty()) {
             return;
         }
@@ -352,31 +361,53 @@ public class GrowthDataFragment extends Fragment {
             final int fX = (int) x;
             try {
                 ArrayList<Entry> entry = new ArrayList<>();
-                entry.add(new Entry(x, y));
-
-                if (y <= Iterables.find(SD3neg, input -> (int) input.getX() == fX).getY()) {
-                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));
-                } else if (y <= Iterables.find(SD2neg, input -> (int) input.getX() == fX).getY()) {
-                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
-                } else if (y <= Iterables.find(SD0, input -> (int) input.getX() == fX).getY()) {
-                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
-                } else if (y <= Iterables.find(SD2, input -> (int) input.getX() == fX).getY()) {
-                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
-                } else if (y <= Iterables.find(SD3, input -> (int) input.getX() == fX).getY()) {
-                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
-                } else {
-                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));
+                if(chartType != CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE) {
+                    entry.add(new Entry(x, y));
+                    if (y <= Iterables.find(SD3neg, input -> (int) input.getX() == fX).getY()) {
+                        dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));
+                    } else if (y <= Iterables.find(SD2neg, input -> (int) input.getX() == fX).getY()) {
+                        dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
+                    } else if (y <= Iterables.find(SD0, input -> (int) input.getX() == fX).getY()) {
+                        dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
+                    } else if (y <= Iterables.find(SD2, input -> (int) input.getX() == fX).getY()) {
+                        dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
+                    } else if (y <= Iterables.find(SD3, input -> (int) input.getX() == fX).getY()) {
+                        dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
+                    } else {
+                        dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));
+                    }
+                    entries.add(new Entry(x, y));
                 }
-                entries.add(new Entry(x, y));
+                else{
+                    entry.add(new Entry(x, y));
+                    if(measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)){
+                        dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
+                    } else {
+                        dataSets.add(createDataSet(entry, "",BLUE_COLOR_DOT, 5f, true));
+
+                        ArrayList<Entry> errorEntry = new ArrayList<>();
+                        ArrayList<Entry> posErrorEntry = new ArrayList<>();
+                        ArrayList<Entry> negativeErrorEntry = new ArrayList<>();
+
+                        posErrorEntry.add(new Entry(x, (float) (y+measure.getPositive_height_error())));
+                        negativeErrorEntry.add(new Entry(x, (float) (y-measure.getNegative_height_error())));
+                        errorEntry.addAll(posErrorEntry);
+                        errorEntry.addAll(negativeErrorEntry);
+                        dataSets.add(createBubbleCircle(posErrorEntry, "",BLUE_COLOR_DOT, 5f));
+                        dataSets.add(createBubbleCircle(negativeErrorEntry, "",BLUE_COLOR_DOT, 5f));
+                        dataSets.add(createDataSet(errorEntry, "scan height", BLUE_COLOR_DOT, 1.5f, false));
+                    }
+                }
             } catch (Exception e) {
                 LogFileUtils.logException(e);
             }
         }
-
-        if (entries.size() > 1) {
-            entries.sort((o1, o2) -> Float.compare(o1.getX(), o2.getX()));
+        if(chartType!= CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE) {
+            if (entries.size() > 1) {
+                entries.sort((o1, o2) -> Float.compare(o1.getX(), o2.getX()));
+            }
+            dataSets.add(0, createDataSet(entries, getString(R.string.tab_growth).toLowerCase(), MEASURE_COLOR, 1.5f, false));
         }
-        dataSets.add(0, createDataSet(entries, getString(R.string.tab_growth).toLowerCase(), MEASURE_COLOR, 1.5f, false));
     }
 
     private void showZScore(CalculateZscoreUtils.ZScoreData zscoreData, Measure lastMeasure) {
@@ -395,12 +426,27 @@ public class GrowthDataFragment extends Fragment {
         LineDataSet dataSet = new LineDataSet(values, label);
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
         dataSet.setColor(circle ? Color.TRANSPARENT : color);
-        dataSet.setLineWidth(width);
+        if(!circle) {
+            dataSet.setLineWidth(width);
+        }
         dataSet.setDrawCircles(circle);
         dataSet.setCircleColor(color);
         dataSet.setCircleRadius(3f);
         dataSet.setDrawValues(false);
         dataSet.setDrawCircleHole(false);
+        dataSet.setHighLightColor(color);
+        return dataSet;
+    }
+
+    protected LineDataSet createBubbleCircle(ArrayList<Entry> values, String label, int color, float width) {
+        LineDataSet dataSet = new LineDataSet(values, "percentile error");
+        dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+        dataSet.setColor(true ? Color.TRANSPARENT : color);
+        dataSet.setDrawCircles(true);
+        dataSet.setCircleColor(color);
+        dataSet.setCircleRadius(3f);
+        dataSet.setDrawValues(false);
+        dataSet.setDrawCircleHole(true);
         dataSet.setHighLightColor(color);
         return dataSet;
     }
