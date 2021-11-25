@@ -71,6 +71,7 @@ public class CheckboxView extends LinearLayout {
         View root = inflate(getContext(), R.layout.lv_checkbox_view, this);
         mSwitch = root.findViewById(R.id.checkbox_switch);
         mText = root.findViewById(R.id.checkbox_text);
+        mText.setOnClickListener(v -> mSwitch.setChecked(!mSwitch.isChecked()));
     }
 
     private void getAttributes(Context context, AttributeSet attrs, int defStyleAttr) {
