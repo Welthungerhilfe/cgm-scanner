@@ -63,6 +63,7 @@ import java.util.concurrent.Executors;
 
 
 import de.welthungerhilfe.cgm.scanner.AppController;
+import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityScanModeBinding;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
@@ -688,13 +689,25 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 }
             }
 
-            //realtime value
-            /*runOnUiThread(() -> {
-                String text = getString(R.string.label_height) + " : " + String.format("~%dcm", (int)(height * 100));
-                mTitleView.setText(text);
-            });*/
+            //realtime feedback
+            if (BuildConfig.DEBUG) {
+                int angle = (int) getCamera().calculateAngle();
+                runOnUiThread(() -> {
+                    if (angle >= 90) {
+                        mTitleView.setText("Initializing camera");
+                    } else if (angle >= -10) {
+                        mTitleView.setText("Angle: " + angle + "° -> a bad scan");
+                    } else if (angle >= -50) {
+                        mTitleView.setText("Angle: " + angle + "° -> standing scan");
+                    } else if (angle >= -70) {
+                        mTitleView.setText("Angle: " + angle + "° -> a bad scan");
+                    } else {
+                        mTitleView.setText("Angle: " + angle + "° -> lying scan");
+                    }
+                });
+            }
         }
-        onFeedbackUpdate();
+        //onFeedbackUpdate();
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
             long profile = System.currentTimeMillis();

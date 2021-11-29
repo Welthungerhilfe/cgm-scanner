@@ -403,7 +403,7 @@ public class ComputerVisionUtils {
         return matrix;
     }
 
-    private float[] matrixTransformPoint(float[] matrix, float x, float y, float z) {
+    public float[] matrixTransformPoint(float[] matrix, float x, float y, float z) {
         float[] output = {0, 0, 0, 1};
         output[0] = x * matrix[0] + y * matrix[4] + z * matrix[8] + matrix[12];
         output[1] = x * matrix[1] + y * matrix[5] + z * matrix[9] + matrix[13];

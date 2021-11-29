@@ -142,6 +142,13 @@ public abstract class AbstractARCamera {
         }
     }
 
+    public float calculateAngle() {
+        float[] matrix = mComputerVision.matrixCalculate(mPosition, mRotation);
+        float[] forward = mComputerVision.matrixTransformPoint(matrix, 0, 0, 1);
+        float[] camera = mComputerVision.matrixTransformPoint(matrix, 0, 0, 0);
+        return (float) Math.toDegrees(Math.asin(camera[1] - forward[1]));
+    }
+
     public Depthmap extractDepthmap(Image image, float[] position, float[] rotation) {
         if (image == null) {
             Depthmap depthmap = new Depthmap(0, 0);
