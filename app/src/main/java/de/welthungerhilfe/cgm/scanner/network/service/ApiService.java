@@ -75,7 +75,7 @@ public interface ApiService {
     Observable<EstimatesResponse> getEstimates(@Header("Authorization") String auth, @Path("scan_id") String scanId);
 
     @GET("scans/estimate")
-    Observable<ReceivedResult> getEstimatesAll(@Header("X-API-KEY") String auth, @Query("scan_ids") String scan_ids);
+    Observable<ReceivedResult> getEstimatesAll(@Header("Authorization") String auth, @Query("scan_ids") String scan_ids);
 
     @GET("workflows")
     Observable<WorkflowsResponse> getWorkflows(@Header("Authorization") String auth);
