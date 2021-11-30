@@ -24,4 +24,7 @@ public interface PostScanResultDao {
 
     @Query("SELECT * FROM " + TABLE_POST_SCAN_RESULT + " WHERE isSynced=0 And environment=:environment ORDER By timestamp")
     List<PostScanResult> getSyncablePostScanResult(int environment);
+
+    @Query("SELECT id FROM " + TABLE_POST_SCAN_RESULT + " WHERE measure_id=:measureId  ORDER By timestamp")
+    List<String> getScanIdsFromMeasureId(String measureId);
 }

@@ -94,4 +94,8 @@ public class MeasureRepository {
     public Measure getMeasureByMeasureServerKey(String measureServerKey){
         return database.measureDao().getMeasureByMeasureServerKey(measureServerKey);
     }
+
+    public List<Measure> getMeasureWithoutScanResult(){
+        return database.measureDao().getMeasureWithoutScanResult();
+    }
 }

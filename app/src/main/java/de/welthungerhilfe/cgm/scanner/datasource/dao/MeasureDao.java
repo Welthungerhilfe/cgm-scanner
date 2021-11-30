@@ -72,4 +72,6 @@ public interface MeasureDao {
 
     @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE measureServerKey=:measureServerKey")
     Measure getMeasureByMeasureServerKey(String measureServerKey);
+    @Query("SELECT * FROM " + TABLE_MEASURE + " WHERE received_at=0 AND isSynced=1 AND type!='manual'")
+    List<Measure> getMeasureWithoutScanResult();
 }

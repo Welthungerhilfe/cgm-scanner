@@ -242,6 +242,13 @@
     <string name="filter_age_height">Height-for-age</string>
     <string name="filter_height_weight">Weight-for-height</string>
     <string name="filter_muac_age">MUAC-for-age</string>
+    <string name="height_for_age_manual">Height(Manual)</string>
+    <string name="height_for_age_scan">Height(Scan)</string>
+    <string name="weight_for_age_manual">Weight(Manual)</string>
+    <string name="weight_for_age_scan">Weight(Scan)</string>
+    <string name="muac_for_age_manual">MUAC(Manual)</string>
+    <string name="muac_for_age_scan">MUAC(Scan)</string>
+    <string name="percentile_error">Percentile Error</string>
     <string-array name="filters" translatable="false">
         <item>@string/filter_age_height</item>
         <item>@string/filter_age_weight</item>

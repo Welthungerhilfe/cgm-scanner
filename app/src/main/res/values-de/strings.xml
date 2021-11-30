@@ -239,6 +239,13 @@
     <string name="filter_age_height">Größe / Alter</string>
     <string name="filter_height_weight">Gewicht / Größe</string>
     <string name="filter_muac_age">MUAC / Alter</string>
+    <string name="height_for_age_manual">Größe(manuelle)</string>
+    <string name="height_for_age_scan">Größe(Scan)</string>
+    <string name="weight_for_age_manual">Gewicht(manuelle)</string>
+    <string name="weight_for_age_scan">Gewicht(Scan)</string>
+    <string name="muac_for_age_manual">MUAC(manuelle)</string>
+    <string name="muac_for_age_scan">MUAC(Scan)</string>
+    <string name="percentile_error">Perzentilfehler</string>
 
 
     <!-- Diagnoses !-->

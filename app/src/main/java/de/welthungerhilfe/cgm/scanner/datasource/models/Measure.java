@@ -116,11 +116,10 @@ public class Measure extends CsvExportableModel implements Serializable {
     @Expose
     private String std_test_qr_code;
 
-    @Ignore
-    private double positive_height_error= 5.0;
 
-    @Ignore
-    private double negative_height_error = 5.0;
+    private double positive_height_error;
+
+    private double negative_height_error;
 
 
 
