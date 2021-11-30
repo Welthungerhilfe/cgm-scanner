@@ -44,47 +44,47 @@ import retrofit2.http.Query;
 public interface ApiService {
 
     @POST("persons")
-    Observable<Person> postPerson(@Header("X-API-KEY") String auth, @Body RequestBody person);
+    Observable<Person> postPerson(@Header("Authorization") String auth, @Body RequestBody person);
 
     @PUT("persons/{id}")
-    Observable<Person> putPerson(@Header("X-API-KEY") String auth, @Body RequestBody person, @Path("id") String id);
+    Observable<Person> putPerson(@Header("Authorization") String auth, @Body RequestBody person, @Path("id") String id);
 
     @GET("persons/sync_persons")
-    Observable<SyncPersonsResponse> getSyncPersons(@Header("X-API-KEY") String auth, @Query("sync_date") String sync_date);
+    Observable<SyncPersonsResponse> getSyncPersons(@Header("Authorization") String auth, @Query("sync_date") String sync_date);
 
     @POST("measurements")
-    Observable<Measure> postMeasure(@Header("X-API-KEY") String auth, @Body RequestBody measure);
+    Observable<Measure> postMeasure(@Header("Authorization") String auth, @Body RequestBody measure);
 
     @PUT("measurements/{id}")
-    Observable<Measure> putMeasure(@Header("X-API-KEY") String auth, @Body RequestBody measure, @Path("id") String id);
+    Observable<Measure> putMeasure(@Header("Authorization") String auth, @Body RequestBody measure, @Path("id") String id);
 
     @GET("persons/{person_id}/sync_measurement")
-    Observable<SyncManualMeasureResponse> getSyncManualMeasure(@Header("X-API-KEY") String auth, @Path("person_id") String person_id, @Query("sync_date") String sync_date);
+    Observable<SyncManualMeasureResponse> getSyncManualMeasure(@Header("Authorization") String auth, @Path("person_id") String person_id, @Query("sync_date") String sync_date);
 
     @POST("scans")
-    Observable<Scan> postScans(@Header("X-API-KEY") String auth, @Body RequestBody scan);
+    Observable<Scan> postScans(@Header("Authorization") String auth, @Body RequestBody scan);
 
     @Multipart
     @POST("files")
-    Observable<String> uploadFiles(@Header("X-API-KEY") String auth, @Part MultipartBody.Part file, @Part("filename") RequestBody id);
+    Observable<String> uploadFiles(@Header("Authorization") String auth, @Part MultipartBody.Part file, @Part("filename") RequestBody id);
 
     @POST("persons/{person_id}/consent")
-    Observable<Consent> postConsent(@Header("X-API-KEY") String auth, @Body RequestBody personConsent, @Path("person_id") String id);
+    Observable<Consent> postConsent(@Header("Authorization") String auth, @Body RequestBody personConsent, @Path("person_id") String id);
 
     @GET("scans/{scan_id}/estimates")
-    Observable<EstimatesResponse> getEstimates(@Header("X-API-KEY") String auth, @Path("scan_id") String scanId);
+    Observable<EstimatesResponse> getEstimates(@Header("Authorization") String auth, @Path("scan_id") String scanId);
 
     @GET("scans/estimate")
     Observable<ReceivedResult> getEstimatesAll(@Header("X-API-KEY") String auth, @Query("scan_ids") String scan_ids);
 
     @GET("workflows")
-    Observable<WorkflowsResponse> getWorkflows(@Header("X-API-KEY") String auth);
+    Observable<WorkflowsResponse> getWorkflows(@Header("Authorization") String auth);
 
     @POST("results")
-    Observable<ResultsData> postWorkFlowsResult(@Header("X-API-KEY") String auth, @Body RequestBody result);
+    Observable<ResultsData> postWorkFlowsResult(@Header("Authorization") String auth, @Body RequestBody result);
 
     @GET("test")
-    Observable<String> test(@Header("X-API-KEY") String auth);
+    Observable<String> test(@Header("Authorization") String auth);
 }
 
 
