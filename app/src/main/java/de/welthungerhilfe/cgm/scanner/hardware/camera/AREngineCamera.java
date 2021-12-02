@@ -207,18 +207,35 @@ public class AREngineCamera extends AbstractARCamera {
       }
       preview = preview.copy(Bitmap.Config.ARGB_8888, true);
       Canvas c = new Canvas(preview);
-      Paint p = new Paint();
-      p.setColor(Color.RED);
-      p.setStrokeWidth(1);
-      for (int i = 0; i < mSkeleton.size(); i += 4) {
-        int x1 = (int) (mSkeleton.get(i) * (float)preview.getWidth());
-        int y1 = (int) (mSkeleton.get(i + 1) * (float)preview.getHeight());
-        int x2 = (int) (mSkeleton.get(i + 2) * (float)preview.getWidth());
-        int y2 = (int) (mSkeleton.get(i + 3) * (float)preview.getHeight());
-        if ((x1 != 0) && (y1 != 0) && (x2 != 0) && (y2 != 0)) {
-          c.drawLine(x1, y1, x2, y2, p);
+
+      for (int pass = 0; pass < 2; pass++) {
+        int r = pass == 0 ? 20 : 15;
+        Paint p = new Paint();
+        p.setColor(pass == 0 ? Color.GREEN : Color.BLACK);
+        p.setStrokeWidth(r * 2);
+        for (int i = 0; i < mSkeleton.size(); i += 4) {
+          int x1 = (int) (mSkeleton.get(i) * (float)preview.getWidth());
+          int y1 = (int) (mSkeleton.get(i + 1) * (float)preview.getHeight());
+          int x2 = (int) (mSkeleton.get(i + 2) * (float)preview.getWidth());
+          int y2 = (int) (mSkeleton.get(i + 3) * (float)preview.getHeight());
+          if ((x1 != 0) && (y1 != 0) && (x2 != 0) && (y2 != 0)) {
+            c.drawCircle(x1, y1, r, p);
+            c.drawCircle(x2, y2, r, p);
+            c.drawLine(x1, y1, x2, y2, p);
+          }
         }
       }
+
+      int w = preview.getWidth();
+      int h = preview.getHeight();
+      int[] pixels = new int[w * h];
+      preview.getPixels(pixels, 0, w, 0, 0, w, h);
+      for (int i = 0; i < pixels.length; i++) {
+        if (pixels[i] == Color.BLACK) {
+          pixels[i] = Color.TRANSPARENT;
+        }
+      }
+      preview.setPixels(pixels, 0, w, 0, 0, w, h);
     }
 
     Bitmap finalPreview = preview;
@@ -443,7 +460,15 @@ public class AREngineCamera extends AbstractARCamera {
           float yOffset = 0.16f;
           float yScale = 0.75f;
           float[] points = body.getSkeletonPoint2D();
+          ArrayList<Integer> indices = new ArrayList<>();
           for (int i : body.getBodySkeletonConnection()) {
+            indices.add(i);
+          }
+          indices.add(ARBody.ARBodySkeletonType.BodySkeleton_l_Sho.ordinal() - 1);
+          indices.add(ARBody.ARBodySkeletonType.BodySkeleton_l_Hip.ordinal() - 1);
+          indices.add(ARBody.ARBodySkeletonType.BodySkeleton_r_Sho.ordinal() - 1);
+          indices.add(ARBody.ARBodySkeletonType.BodySkeleton_r_Hip.ordinal() - 1);
+          for (int i : indices) {
             mSkeleton.add(points[i * 3 + 1] * -0.5f + 0.5f);
             mSkeleton.add((points[i * 3] * -0.5f + 0.5f + yOffset) * yScale);
           }
