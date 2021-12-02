@@ -32,6 +32,7 @@ import com.google.gson.GsonBuilder;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -992,7 +993,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
         for (String workflow : AppConstants.workflowsList) {
             String[] data = workflow.split("-");
-            if (workflowRepository.getWorkFlowId(data[0], data[1]) == null) {
+            if (workflowRepository.getWorkFlowId(data[0], data[1], session.getEnvironment()) == null) {
                 getWorkFlowsFromServer();
                 break;
             }
@@ -1012,10 +1013,16 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     @Override
                     public void onNext(@NonNull WorkflowsResponse workflowsResponse) {
                         LogFileUtils.logInfo(TAG, "Workflow list successfully fetched... ");
+                        ArrayList<String> appWorkflowList = new ArrayList<String>(Arrays.asList(AppConstants.workflowsList));
 
                         if (workflowsResponse != null && workflowsResponse.getWorkflows() != null && workflowsResponse.getWorkflows().size() > 0) {
+                            String receivedWorkflow;
                             for (Workflow workflow : workflowsResponse.getWorkflows()) {
-                                workflowRepository.insertWorkflow(workflow);
+                                receivedWorkflow = workflow.getName() + "-" + workflow.getVersion();
+                                if (appWorkflowList.contains(receivedWorkflow)) {
+                                    workflow.setEnvironment(session.getEnvironment());
+                                    workflowRepository.insertWorkflow(workflow);
+                                }
                             }
                         }
                     }
@@ -1053,8 +1060,10 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             LogFileUtils.logInfo(TAG, "Autodetect results posting... ");
 
             String workflow[] = AppConstants.APP_AUTO_DETECT_1_0.split("-");
-            String appAutoDetectWorkflowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1]);
-
+            String appAutoDetectWorkflowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
+            if (appAutoDetectWorkflowId == null) {
+                return;
+            }
             ArrayList<Results> resultList = new ArrayList();
             for (FileLog fileLog : fileLogsList) {
                 ResultAutoDetect resultAutoDetect = new ResultAutoDetect();
@@ -1128,7 +1137,10 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 return;
             }
             String workflow[] = AppConstants.APP_HEIGHT_1_0.split("-");
-            String appHeightWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1]);
+            String appHeightWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
+            if (appHeightWorkFlowId == null) {
+                return;
+            }
             ArrayList<Results> resultList = new ArrayList();
             for (FileLog fileLog : fileLogsList) {
                 ResultAppHeight resultAppHeight = new ResultAppHeight();

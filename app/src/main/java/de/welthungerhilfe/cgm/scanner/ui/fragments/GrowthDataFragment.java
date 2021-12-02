@@ -201,7 +201,9 @@ public class GrowthDataFragment extends Fragment {
         } else {
             measures = MeasureRepository.getInstance(getContext()).getManualMeasures(person.getId());
         }
+
         if (measures == null || measures.isEmpty()) {
+            mChart.clear();
             return;
         }
         Measure lastMeasure = measures.get(0);
@@ -389,16 +391,18 @@ public class GrowthDataFragment extends Fragment {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
                 } else if (chartType == CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE && !measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
                     dataSets.add(createDataSet(entry, "", BLUE_COLOR_DOT, 5f, true));
-                    ArrayList<Entry> errorEntry = new ArrayList<>();
-                    ArrayList<Entry> posErrorEntry = new ArrayList<>();
-                    ArrayList<Entry> negativeErrorEntry = new ArrayList<>();
-                    posErrorEntry.add(new Entry(x, (float) (y + measure.getPositive_height_error())));
-                    negativeErrorEntry.add(new Entry(x, (float) (y + measure.getNegative_height_error())));
-                    errorEntry.addAll(posErrorEntry);
-                    errorEntry.addAll(negativeErrorEntry);
-                    dataSets.add(createBubbleCircle(posErrorEntry, "", BLUE_COLOR_DOT, 5f));
-                    dataSets.add(createBubbleCircle(negativeErrorEntry, "", BLUE_COLOR_DOT, 5f));
-                    dataSets.add(createDataSet(errorEntry, "scan height", BLUE_COLOR_DOT, 1.5f, false));
+                    if(measure.getReceived_at() > 0) {
+                        ArrayList<Entry> errorEntry = new ArrayList<>();
+                        ArrayList<Entry> posErrorEntry = new ArrayList<>();
+                        ArrayList<Entry> negativeErrorEntry = new ArrayList<>();
+                        posErrorEntry.add(new Entry(x, (float) (y + measure.getPositive_height_error())));
+                        negativeErrorEntry.add(new Entry(x, (float) (y + measure.getNegative_height_error())));
+                        errorEntry.addAll(posErrorEntry);
+                        errorEntry.addAll(negativeErrorEntry);
+                        dataSets.add(createBubbleCircle(posErrorEntry, "", BLUE_COLOR_DOT, 5f));
+                        dataSets.add(createBubbleCircle(negativeErrorEntry, "", BLUE_COLOR_DOT, 5f));
+                        dataSets.add(createDataSet(errorEntry, "scan height", BLUE_COLOR_DOT, 1.5f, false));
+                    }
                 }
             } catch (Exception e) {
                 LogFileUtils.logException(e);
