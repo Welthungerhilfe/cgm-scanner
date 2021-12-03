@@ -18,6 +18,7 @@
  */
 package de.welthungerhilfe.cgm.scanner;
 
+
 public class AppConstants {
 
     public static final String AUTH_SANDBOX = "{OAUTH_SCOPE_SANDBOX}";
