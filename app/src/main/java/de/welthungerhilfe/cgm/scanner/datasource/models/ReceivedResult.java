@@ -7,10 +7,10 @@ import java.io.Serializable;
 public class ReceivedResult implements Serializable {
 
     @Expose
-    double artifact_max_99_percentile_neg_error;
+    String artifact_max_99_percentile_neg_error;
 
     @Expose
-    double artifact_max_99_percentile_pos_error;
+    String artifact_max_99_percentile_pos_error;
 
     @Expose
     String height_diagnosis;
@@ -21,19 +21,19 @@ public class ReceivedResult implements Serializable {
     @Expose
     double mean_height;
 
-    public double getArtifact_max_99_percentile_neg_error() {
+    public String getArtifact_max_99_percentile_neg_error() {
         return artifact_max_99_percentile_neg_error;
     }
 
-    public void setArtifact_max_99_percentile_neg_error(double artifact_max_99_percentile_neg_error) {
+    public void setArtifact_max_99_percentile_neg_error(String artifact_max_99_percentile_neg_error) {
         this.artifact_max_99_percentile_neg_error = artifact_max_99_percentile_neg_error;
     }
 
-    public double getArtifact_max_99_percentile_pos_error() {
+    public String getArtifact_max_99_percentile_pos_error() {
         return artifact_max_99_percentile_pos_error;
     }
 
-    public void setArtifact_max_99_percentile_pos_error(double artifact_max_99_percentile_pos_error) {
+    public void setArtifact_max_99_percentile_pos_error(String artifact_max_99_percentile_pos_error) {
         this.artifact_max_99_percentile_pos_error = artifact_max_99_percentile_pos_error;
     }
 
