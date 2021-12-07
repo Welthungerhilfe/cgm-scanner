@@ -40,7 +40,6 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.appcompat.widget.SearchView;
 
-import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -201,16 +200,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                     break;
                 case R.id.menuLogout:
-                    session.setSigned(false);
-                    session.setCurrentLogFilePath(null);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        if (WifiStateChangereceiverHelperService.isServiceRunning) {
-                            startForegroundService(new Intent(this, WifiStateChangereceiverHelperService.class)
-                                    .putExtra(AppConstants.STOP_SERVICE, true));
-                        }
-                    }
-                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                    finish();
+                    logout();
                     break;
                 case R.id.menuQuitStdTest:
                     showConfirmDialog(R.string.std_test_deactivate, STD_TEST_DEACTIVE);
@@ -222,6 +212,19 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         View headerView = activityMainBinding.navMenu.getHeaderView(0);
         TextView txtUsername = headerView.findViewById(R.id.txtUsername);
         txtUsername.setText(session.getUserEmail());
+    }
+
+    public void logout() {
+        session.setSigned(false);
+        session.setCurrentLogFilePath(null);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (WifiStateChangereceiverHelperService.isServiceRunning) {
+                startForegroundService(new Intent(this, WifiStateChangereceiverHelperService.class)
+                        .putExtra(AppConstants.STOP_SERVICE, true));
+            }
+        }
+        startActivity(new Intent(MainActivity.this, LoginActivity.class));
+        finish();
     }
 
     private void setupActionBar() {
@@ -438,7 +441,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     runnable = () -> startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
                     addResultListener(PERMISSION_CAMERA, listener);
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSION_CAMERA);
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSION_CAMERA);
                 } else {
                     startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
                 }

@@ -32,6 +32,7 @@ import com.google.gson.GsonBuilder;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +50,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ReceivedResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAppHeight;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAutoDetect;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Results;
@@ -230,11 +232,11 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         private void processMeasureResults() {
 
             try {
-                List<PostScanResult> syncablePostScanResult = postScanResultrepository.getSyncablePostScanResult(session.getEnvironment());
-                LogFileUtils.logInfo(TAG, syncablePostScanResult.size() + " scan results to update");
+                List<Measure> measures = measureRepository.getMeasureWithoutScanResult();
+                LogFileUtils.logInfo(TAG, measures.size() + " scan results to update");
 
-                for (PostScanResult scanResult : syncablePostScanResult) {
-                    getEstimates(scanResult);
+                for (Measure measure : measures) {
+                    getEstimates(measure);
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
@@ -790,50 +792,62 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         }
     }
 
-    public void getEstimates(PostScanResult postScanResult) {
+    public void getEstimates(Measure measure) {
         try {
 
             onThreadChange(1);
-            LogFileUtils.logInfo(TAG, "getting estimate for scan result " + postScanResult.getId());
-            retrofit.create(ApiService.class).getEstimates(session.getAuthTokenWithBearer(), postScanResult.getId()).subscribeOn(Schedulers.io())
+            LogFileUtils.logInfo(TAG, "getting estimate for scan result " + measure);
+            List<String> postScanResultList = postScanResultrepository.getScanIdsFromMeasureId(measure.getId());
+
+            String ids = postScanResultList.get(0) + "," + postScanResultList.get(1) + "," + postScanResultList.get(2);
+
+            retrofit.create(ApiService.class).getEstimatesAll(session.getAuthTokenWithBearer(), ids).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<EstimatesResponse>() {
+                    .subscribe(new Observer<ReceivedResult>() {
                         @Override
                         public void onSubscribe(@NonNull Disposable d) {
 
                         }
 
                         @Override
-                        public void onNext(@NonNull EstimatesResponse estimatesResponse) {
-                            LogFileUtils.logInfo(TAG, "scan result " + postScanResult.getId() + " estimate successfully received");
+                        public void onNext(@NonNull ReceivedResult receivedResult) {
+                            LogFileUtils.logInfo(TAG, "scan result " + measure.getId() + " estimate successfully received");
                             //TODO : generate notification and store result based on confidence value
-                            if (estimatesResponse != null) {
+                            if (receivedResult != null) {
 
-                                Measure measure = measureRepository.getMeasureById(postScanResult.getMeasure_id());
-                                if (estimatesResponse.height != null && estimatesResponse.height.size() > 0) {
-                                    Collections.sort(estimatesResponse.height);
-                                    float height = estimatesResponse.height.get((estimatesResponse.height.size() / 2)).getValue();
+                                if (receivedResult.getMean_height() > 0) {
 
-                                    String qrCode = getQrCode(postScanResult.getMeasure_id());
+                                    String qrCode = getQrCode(measure.getId());
                                     MeasureNotification notification = MeasureNotification.get(qrCode);
 
                                     if (measure != null) {
                                         boolean hadHeight = measure.getHeightConfidence() > 0;
-                                        measure.setHeight(height);
+                                        measure.setHeight(receivedResult.getMean_height());
                                         measure.setHeightConfidence(0.1);
-                                        measure.setResulted_at(postScanResult.getTimestamp());
+                                        measure.setResulted_at(System.currentTimeMillis());
                                         measure.setReceived_at(System.currentTimeMillis());
+                                        if(receivedResult.getArtifact_max_99_percentile_pos_error()!=null) {
+                                            measure.setPositive_height_error(Double.parseDouble(receivedResult.getArtifact_max_99_percentile_pos_error()));
+                                        } else {
+                                            measure.setPositive_height_error(0.0);
+                                        }
+                                        if(receivedResult.getArtifact_max_99_percentile_neg_error()!=null) {
+                                            measure.setNegative_height_error(Double.parseDouble(receivedResult.getArtifact_max_99_percentile_neg_error()));
+                                        } else {
+                                            measure.setNegative_height_error(0.0);
+                                        }
                                         measureRepository.updateMeasure(measure);
 
 
                                         if ((notification != null) && !hadHeight) {
-                                            notification.setHeight(height);
+                                            notification.setHeight((float) receivedResult.getMean_height());
                                             MeasureNotification.showNotification(context);
                                         }
                                     }
                                 }
 
-                                if (estimatesResponse.weight != null && estimatesResponse.weight.size() > 0) {
+                                //Do not remove this code as we can use this chunk of code while app start receving weight result.
+                               /* if (estimatesResponse.weight != null && estimatesResponse.weight.size() > 0) {
                                     Collections.sort(estimatesResponse.weight);
                                     float weight = estimatesResponse.weight.get((estimatesResponse.weight.size() / 2)).getValue();
 
@@ -853,17 +867,16 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                             MeasureNotification.showNotification(context);
                                         }
                                     }
-                                }
+                                }*/
 
                                 if (measure != null) {
-                                    if ((measure.getHeight() > 0) && (measure.getWeight() > 0)) {
-                                        postScanResult.setSynced(true);
+                                    if ((measure.getHeight() > 0)) {
+
                                         firebaseAnalytics.logEvent(FirebaseService.RESULT_RECEIVED, null);
-                                        onResultReceived(postScanResult.getMeasure_id());
+                                        onResultReceived(measure.getId());
                                     }
                                 }
                             }
-                            postScanResultrepository.updatePostScanResult(postScanResult);
                             updated = true;
                             updateDelay = Math.min(60 * 1000, updateDelay);
                             onThreadChange(-1);
@@ -871,7 +884,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            LogFileUtils.logError(TAG, "scan result " + postScanResult.getId() + " estimate receiving failed " + e.getMessage());
+                            LogFileUtils.logError(TAG, "scan result " + measure.getId() + " estimate receiving failed " + e.getMessage());
                             if (Utils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
@@ -887,6 +900,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             LogFileUtils.logException(e);
         }
     }
+
 
     private String getQrCode(String measureId) {
         try {
@@ -987,7 +1001,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
         for (String workflow : AppConstants.workflowsList) {
             String[] data = workflow.split("-");
-            if (workflowRepository.getWorkFlowId(data[0], data[1]) == null) {
+            if (workflowRepository.getWorkFlowId(data[0], data[1], session.getEnvironment()) == null) {
                 getWorkFlowsFromServer();
                 break;
             }
@@ -1007,10 +1021,16 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     @Override
                     public void onNext(@NonNull WorkflowsResponse workflowsResponse) {
                         LogFileUtils.logInfo(TAG, "Workflow list successfully fetched... ");
+                        ArrayList<String> appWorkflowList = new ArrayList<String>(Arrays.asList(AppConstants.workflowsList));
 
                         if (workflowsResponse != null && workflowsResponse.getWorkflows() != null && workflowsResponse.getWorkflows().size() > 0) {
+                            String receivedWorkflow;
                             for (Workflow workflow : workflowsResponse.getWorkflows()) {
-                                workflowRepository.insertWorkflow(workflow);
+                                receivedWorkflow = workflow.getName() + "-" + workflow.getVersion();
+                                if (appWorkflowList.contains(receivedWorkflow)) {
+                                    workflow.setEnvironment(session.getEnvironment());
+                                    workflowRepository.insertWorkflow(workflow);
+                                }
                             }
                         }
                     }
@@ -1048,8 +1068,10 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             LogFileUtils.logInfo(TAG, "Autodetect results posting... ");
 
             String workflow[] = AppConstants.APP_AUTO_DETECT_1_0.split("-");
-            String appAutoDetectWorkflowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1]);
-
+            String appAutoDetectWorkflowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
+            if (appAutoDetectWorkflowId == null) {
+                return;
+            }
             ArrayList<Results> resultList = new ArrayList();
             for (FileLog fileLog : fileLogsList) {
                 ResultAutoDetect resultAutoDetect = new ResultAutoDetect();
@@ -1123,7 +1145,10 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 return;
             }
             String workflow[] = AppConstants.APP_HEIGHT_1_0.split("-");
-            String appHeightWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1]);
+            String appHeightWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
+            if (appHeightWorkFlowId == null) {
+                return;
+            }
             ArrayList<Results> resultList = new ArrayList();
             for (FileLog fileLog : fileLogsList) {
                 ResultAppHeight resultAppHeight = new ResultAppHeight();

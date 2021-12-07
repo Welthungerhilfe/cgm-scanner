@@ -37,4 +37,9 @@ public class PostScanResultrepository {
     public List<PostScanResult> getSyncablePostScanResult(int environment) {
         return database.postScanResultDao().getSyncablePostScanResult(environment);
     }
+
+    public List<String> getScanIdsFromMeasureId(String measureId){
+        return database.postScanResultDao().getScanIdsFromMeasureId(measureId);
+
+    }
 }

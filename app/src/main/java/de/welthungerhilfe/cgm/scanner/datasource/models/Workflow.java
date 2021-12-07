@@ -39,6 +39,8 @@ public class Workflow extends CsvExportableModel implements Serializable {
     @Expose
     private String version;
 
+    int environment;
+
     @Expose
     @Embedded
     private Data data;
@@ -97,6 +99,14 @@ public class Workflow extends CsvExportableModel implements Serializable {
 
     public void setData(Data data) {
         this.data = data;
+    }
+
+    public int getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(int environment) {
+        this.environment = environment;
     }
 
     @Override

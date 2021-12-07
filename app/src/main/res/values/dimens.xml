@@ -8,4 +8,7 @@
 
     <dimen name="design_fab_size_mini" tools:override="true">60dp</dimen>
     <dimen name="design_fab_image_size" tools:override="true">50dp</dimen>
+
+    <!-- GrowthDataFragment. -->
+    <dimen name="legend_dot_size">4dp</dimen>
 </resources>
