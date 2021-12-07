@@ -826,8 +826,16 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                         measure.setHeightConfidence(0.1);
                                         measure.setResulted_at(System.currentTimeMillis());
                                         measure.setReceived_at(System.currentTimeMillis());
-                                        measure.setPositive_height_error(receivedResult.getArtifact_max_99_percentile_pos_error());
-                                        measure.setNegative_height_error(receivedResult.getArtifact_max_99_percentile_neg_error());
+                                        if(receivedResult.getArtifact_max_99_percentile_pos_error()!=null) {
+                                            measure.setPositive_height_error(Double.parseDouble(receivedResult.getArtifact_max_99_percentile_pos_error()));
+                                        } else {
+                                            measure.setPositive_height_error(0.0);
+                                        }
+                                        if(receivedResult.getArtifact_max_99_percentile_neg_error()!=null) {
+                                            measure.setNegative_height_error(Double.parseDouble(receivedResult.getArtifact_max_99_percentile_neg_error()));
+                                        } else {
+                                            measure.setNegative_height_error(0.0);
+                                        }
                                         measureRepository.updateMeasure(measure);
 
 

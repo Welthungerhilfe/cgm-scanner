@@ -391,7 +391,7 @@ public class GrowthDataFragment extends Fragment {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
                 } else if (chartType == CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE && !measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
                     dataSets.add(createDataSet(entry, "", BLUE_COLOR_DOT, 5f, true));
-                    if(measure.getReceived_at() > 0) {
+                    if(measure.getReceived_at() > 0 && measure.getNegative_height_error() < 0 && measure.getPositive_height_error() > 0) {
                         ArrayList<Entry> errorEntry = new ArrayList<>();
                         ArrayList<Entry> posErrorEntry = new ArrayList<>();
                         ArrayList<Entry> negativeErrorEntry = new ArrayList<>();
