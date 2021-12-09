@@ -1,63 +1,33 @@
 package de.welthungerhilfe.cgm.scanner.datasource.models;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
 public class ReceivedResult implements Serializable {
 
+    @SerializedName("status")
     @Expose
-    String artifact_max_99_percentile_neg_error;
+    String status;
 
+    @SerializedName("estimate")
     @Expose
-    String artifact_max_99_percentile_pos_error;
+    Estimate estimate;
 
-    @Expose
-    String height_diagnosis;
-
-    @Expose
-    double mae;
-
-    @Expose
-    double mean_height;
-
-    public String getArtifact_max_99_percentile_neg_error() {
-        return artifact_max_99_percentile_neg_error;
+    public String getStatus() {
+        return status;
     }
 
-    public void setArtifact_max_99_percentile_neg_error(String artifact_max_99_percentile_neg_error) {
-        this.artifact_max_99_percentile_neg_error = artifact_max_99_percentile_neg_error;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-    public String getArtifact_max_99_percentile_pos_error() {
-        return artifact_max_99_percentile_pos_error;
+    public Estimate getEstimate() {
+        return estimate;
     }
 
-    public void setArtifact_max_99_percentile_pos_error(String artifact_max_99_percentile_pos_error) {
-        this.artifact_max_99_percentile_pos_error = artifact_max_99_percentile_pos_error;
-    }
-
-    public String getHeight_diagnosis() {
-        return height_diagnosis;
-    }
-
-    public void setHeight_diagnosis(String height_diagnosis) {
-        this.height_diagnosis = height_diagnosis;
-    }
-
-    public double getMae() {
-        return mae;
-    }
-
-    public void setMae(double mae) {
-        this.mae = mae;
-    }
-
-    public double getMean_height() {
-        return mean_height;
-    }
-
-    public void setMean_height(double mean_height) {
-        this.mean_height = mean_height;
+    public void setEstimate(Estimate estimate) {
+        this.estimate = estimate;
     }
 }
