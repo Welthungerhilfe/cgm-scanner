@@ -811,28 +811,28 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onNext(@NonNull ReceivedResult receivedResult) {
-                            LogFileUtils.logInfo(TAG, "scan result " + measure.getId() + " estimate successfully received");
                             //TODO : generate notification and store result based on confidence value
-                            if (receivedResult != null) {
+                            if (receivedResult != null && receivedResult.getEstimate()!=null && !receivedResult.getStatus().equalsIgnoreCase("result not generated") ) {
+                                LogFileUtils.logInfo(TAG, "scan result " + measure.getId() + " estimate successfully received");
 
-                                if (receivedResult.getMean_height() > 0) {
+                                if (receivedResult.getEstimate().getMean_height() > 0) {
 
                                     String qrCode = getQrCode(measure.getId());
                                     MeasureNotification notification = MeasureNotification.get(qrCode);
 
                                     if (measure != null) {
                                         boolean hadHeight = measure.getHeightConfidence() > 0;
-                                        measure.setHeight(receivedResult.getMean_height());
+                                        measure.setHeight(receivedResult.getEstimate().getMean_height());
                                         measure.setHeightConfidence(0.1);
                                         measure.setResulted_at(System.currentTimeMillis());
                                         measure.setReceived_at(System.currentTimeMillis());
-                                        if(receivedResult.getArtifact_max_99_percentile_pos_error()!=null) {
-                                            measure.setPositive_height_error(Double.parseDouble(receivedResult.getArtifact_max_99_percentile_pos_error()));
+                                        if(receivedResult.getEstimate().getArtifact_max_99_percentile_pos_error()!=null) {
+                                            measure.setPositive_height_error(Double.parseDouble(receivedResult.getEstimate().getArtifact_max_99_percentile_pos_error()));
                                         } else {
                                             measure.setPositive_height_error(0.0);
                                         }
-                                        if(receivedResult.getArtifact_max_99_percentile_neg_error()!=null) {
-                                            measure.setNegative_height_error(Double.parseDouble(receivedResult.getArtifact_max_99_percentile_neg_error()));
+                                        if(receivedResult.getEstimate().getArtifact_max_99_percentile_neg_error()!=null) {
+                                            measure.setNegative_height_error(Double.parseDouble(receivedResult.getEstimate().getArtifact_max_99_percentile_neg_error()));
                                         } else {
                                             measure.setNegative_height_error(0.0);
                                         }
@@ -840,7 +840,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
 
                                         if ((notification != null) && !hadHeight) {
-                                            notification.setHeight((float) receivedResult.getMean_height());
+                                            notification.setHeight((float) receivedResult.getEstimate().getMean_height());
                                             MeasureNotification.showNotification(context);
                                         }
                                     }
@@ -876,6 +876,9 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                         onResultReceived(measure.getId());
                                     }
                                 }
+                            } else if(receivedResult.getStatus().equalsIgnoreCase("result not generated")){
+                                LogFileUtils.logInfo(TAG, "scan result " + measure.getId() + " estimate not generated yet");
+
                             }
                             updated = true;
                             updateDelay = Math.min(60 * 1000, updateDelay);
