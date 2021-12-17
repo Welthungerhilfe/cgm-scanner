@@ -175,11 +175,13 @@
     <!-- Measure detail !-->
     <string name="manual_measure">Manual measure</string>
     <string name="machine_measure">Machine measure</string>
-    <string name="measure_date">01 Date</string>
-    <string name="measure_location">02 Location</string>
-    <string name="measure_height">03 Height</string>
-    <string name="measure_weight">04 Weight</string>
-    <string name="measure_muac">05 MUAC</string>
+    <string name="measure_date">Date</string>
+    <string name="measure_location">Location</string>
+    <string name="measure_height">Height</string>
+    <string name="measure_weight">Weight</string>
+    <string name="measure_muac">MUAC</string>
+    <string name="min_error">Min Fehler</string>
+    <string name="max_error">Max Fehler</string>
     <string name="measure_oedema">No edema</string>
     <string name="edema_check">Are you sure the child suffers from Edema?</string>
     <string name="invalid_zscore">Are you sure about entered values?</string>

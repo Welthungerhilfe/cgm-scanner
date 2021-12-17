@@ -171,11 +171,13 @@
     <!-- Measure detail !-->
     <string name="manual_measure">मैनुअल नाप</string>
     <string name="machine_measure">मशीन नाप</string>
-    <string name="measure_date">01 तिथि</string>
-    <string name="measure_location">02 स्थान</string>
-    <string name="measure_height">03 ऊंचाई</string>
-    <string name="measure_weight">04 वज़न</string>
-    <string name="measure_muac">05 एमयूएसी (मुआक)</string>
+    <string name="measure_date">तिथि</string>
+    <string name="measure_location">स्थान</string>
+    <string name="measure_height">ऊंचाई</string>
+    <string name="measure_weight">वज़न</string>
+    <string name="measure_muac">एमयूएसी (मुआक)</string>
+    <string name="min_error">न्यूनतम त्रुटि</string>
+    <string name="max_error">अधिकतम त्रुटि</string>
     <string name="measure_oedema">कोई एडिमा नहीं</string>
     <string name="edema_check">क्या आप सुनिश्चित हैं कि बच्चा एडेमा से पीड़ित है?</string>
     <string name="invalid_zscore"> क्या आप दर्ज मूल्य के बारे में सुनिश्चित हैं?</string>
