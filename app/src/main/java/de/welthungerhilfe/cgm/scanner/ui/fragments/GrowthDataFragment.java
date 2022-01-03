@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -67,6 +68,8 @@ public class GrowthDataFragment extends Fragment {
     private final int ZSCORE_COLOR_0 = Color.rgb(55, 129, 69);
     private final int ZSCORE_COLOR_2 = Color.rgb(230, 122, 58);
     private final int ZSCORE_COLOR_3 = Color.rgb(212, 53, 62);
+    private final int BLUE_COLOR_DOT = Color.rgb(15, 24, 241);
+
 
     private LineChart mChart;
     private VerticalTextView txtYAxis;
@@ -76,8 +79,11 @@ public class GrowthDataFragment extends Fragment {
     private LinearLayout lytNotif;
     private TextView txtNotifTitle;
     private TextView txtNotifMessage;
+    View first_dot, second_dot, third_dot;
+    TextView first_dot_text, second_dot_text, third_dot_text;
+    LinearLayout ll_dot_legend;
 
-    private CalculateZscoreUtils.ChartType chartType = CalculateZscoreUtils.ChartType.WEIGHT_FOR_AGE;
+    private CalculateZscoreUtils.ChartType chartType = CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE;
 
     private String qrCode;
 
@@ -118,6 +124,13 @@ public class GrowthDataFragment extends Fragment {
         lytNotif = view.findViewById(R.id.lytNotif);
         txtNotifTitle = view.findViewById(R.id.txtNotifTitle);
         txtNotifMessage = view.findViewById(R.id.txtNotifMessage);
+        ll_dot_legend = view.findViewById(R.id.ll_dot_legend);
+        first_dot = view.findViewById(R.id.first_dot);
+        second_dot = view.findViewById(R.id.second_dot);
+        third_dot = view.findViewById(R.id.third_dot);
+        first_dot_text = view.findViewById(R.id.first_dot_text);
+        second_dot_text = view.findViewById(R.id.second_dot_text);
+        third_dot_text = view.findViewById(R.id.third_dot_text);
 
         mChart = view.findViewById(R.id.chart1);
         MaterialSpinner dropChart = view.findViewById(R.id.dropChart);
@@ -167,7 +180,7 @@ public class GrowthDataFragment extends Fragment {
         mChart.setBackgroundColor(Color.WHITE);
 
         // get the legend (only possible after setting data)
-        mChart.getLegend().setEnabled(true);
+        mChart.getLegend().setEnabled(false);
 
         mChart.getAxisLeft().setEnabled(true);
         mChart.getAxisLeft().setDrawGridLines(true);
@@ -182,8 +195,15 @@ public class GrowthDataFragment extends Fragment {
         if (person == null) {
             return;
         }
-        List<Measure> measures = MeasureRepository.getInstance(getContext()).getManualMeasures(person.getId());
+        List<Measure> measures = null;
+        if (chartType == CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE) {
+            measures = MeasureRepository.getInstance(getContext()).getAllMeasuresByPersonId(person.getId());
+        } else {
+            measures = MeasureRepository.getInstance(getContext()).getManualMeasures(person.getId());
+        }
+
         if (measures == null || measures.isEmpty()) {
+            mChart.clear();
             return;
         }
         Measure lastMeasure = measures.get(0);
@@ -239,24 +259,37 @@ public class GrowthDataFragment extends Fragment {
 
     private void showAxisLegend() {
         switch (chartType) {
-            case WEIGHT_FOR_AGE:
-                txtXAxis.setText(R.string.axis_age);
-                txtYAxis.setText(R.string.axis_weight);
-                break;
-
             case HEIGHT_FOR_AGE:
                 txtXAxis.setText(R.string.axis_age);
                 txtYAxis.setText(R.string.axis_height);
+                first_dot_text.setText(R.string.height_for_age_manual);
+                second_dot_text.setText(R.string.height_for_age_scan);
+                third_dot_text.setText(R.string.percentile_error);
+                ll_dot_legend.setVisibility(View.VISIBLE);
+                break;
+
+            case WEIGHT_FOR_AGE:
+                txtXAxis.setText(R.string.axis_age);
+                txtYAxis.setText(R.string.axis_weight);
+                first_dot_text.setText(R.string.weight_for_age_manual);
+                second_dot_text.setText(R.string.weight_for_age_scan);
+                third_dot_text.setText(R.string.percentile_error);
+                ll_dot_legend.setVisibility(View.VISIBLE);
                 break;
 
             case WEIGHT_FOR_HEIGHT:
                 txtXAxis.setText(R.string.axis_height);
                 txtYAxis.setText(R.string.axis_weight);
+                ll_dot_legend.setVisibility(View.GONE);
                 break;
 
             case MUAC_FOR_AGE:
                 txtXAxis.setText(R.string.axis_age);
                 txtYAxis.setText(R.string.axis_muac);
+                first_dot_text.setText(R.string.muac_for_age_manual);
+                second_dot_text.setText(R.string.muac_for_age_scan);
+                third_dot_text.setText(R.string.percentile_error);
+                ll_dot_legend.setVisibility(View.VISIBLE);
                 break;
         }
     }
@@ -273,13 +306,13 @@ public class GrowthDataFragment extends Fragment {
 
         if (zScore < -3) { // SAM
             switch (chartType) {
-                case WEIGHT_FOR_AGE:
-                    txtNotifTitle.setText(R.string.sam_wfa_title);
-                    txtNotifMessage.setText(R.string.sam_wfa_message);
-                    break;
                 case HEIGHT_FOR_AGE:
                     txtNotifTitle.setText(R.string.sam_hfa_title);
                     txtNotifMessage.setText(R.string.sam_hfa_message);
+                    break;
+                case WEIGHT_FOR_AGE:
+                    txtNotifTitle.setText(R.string.sam_wfa_title);
+                    txtNotifMessage.setText(R.string.sam_wfa_message);
                     break;
                 case WEIGHT_FOR_HEIGHT:
                     txtNotifTitle.setText(R.string.sam_wfh_title);
@@ -295,13 +328,13 @@ public class GrowthDataFragment extends Fragment {
             lytNotif.setVisibility(View.VISIBLE);
         } else if (zScore < -2 && zScore >= -3) { // MAM
             switch (chartType) {
-                case WEIGHT_FOR_AGE:
-                    txtNotifTitle.setText(R.string.mam_wfa_title);
-                    txtNotifMessage.setText(R.string.mam_wfa_message);
-                    break;
                 case HEIGHT_FOR_AGE:
                     txtNotifTitle.setText(R.string.mam_hfa_title);
                     txtNotifMessage.setText(R.string.mam_hfa_message);
+                    break;
+                case WEIGHT_FOR_AGE:
+                    txtNotifTitle.setText(R.string.mam_wfa_title);
+                    txtNotifMessage.setText(R.string.mam_wfa_message);
                     break;
                 case WEIGHT_FOR_HEIGHT:
                     txtNotifTitle.setText(R.string.mam_wfh_title);
@@ -327,13 +360,13 @@ public class GrowthDataFragment extends Fragment {
         for (Measure measure : measures) {
             float x = 0, y = 0;
             switch (chartType) {
-                case WEIGHT_FOR_AGE:
-                    x = measure.getAge() * 12 / 365.0f;
-                    y = (float) measure.getWeight();
-                    break;
                 case HEIGHT_FOR_AGE:
                     x = measure.getAge() * 12 / 365.0f;
                     y = (float) measure.getHeight();
+                    break;
+                case WEIGHT_FOR_AGE:
+                    x = measure.getAge() * 12 / 365.0f;
+                    y = (float) measure.getWeight();
                     break;
                 case WEIGHT_FOR_HEIGHT:
                     DecimalFormat decimalFormat = new DecimalFormat("#.#");
@@ -352,31 +385,35 @@ public class GrowthDataFragment extends Fragment {
             final int fX = (int) x;
             try {
                 ArrayList<Entry> entry = new ArrayList<>();
-                entry.add(new Entry(x, y));
 
-                if (y <= Iterables.find(SD3neg, input -> (int) input.getX() == fX).getY()) {
-                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));
-                } else if (y <= Iterables.find(SD2neg, input -> (int) input.getX() == fX).getY()) {
-                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
-                } else if (y <= Iterables.find(SD0, input -> (int) input.getX() == fX).getY()) {
+                entry.add(new Entry(x, y));
+                if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
                     dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
-                } else if (y <= Iterables.find(SD2, input -> (int) input.getX() == fX).getY()) {
-                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
-                } else if (y <= Iterables.find(SD3, input -> (int) input.getX() == fX).getY()) {
-                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_2, 5f, true));
-                } else {
-                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_3, 5f, true));
+                } else if (chartType == CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE && !measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
+                    dataSets.add(createDataSet(entry, "", BLUE_COLOR_DOT, 5f, true));
+                    if(measure.getReceived_at() > 0 && measure.getNegative_height_error() < 0 && measure.getPositive_height_error() > 0) {
+                        ArrayList<Entry> errorEntry = new ArrayList<>();
+                        ArrayList<Entry> posErrorEntry = new ArrayList<>();
+                        ArrayList<Entry> negativeErrorEntry = new ArrayList<>();
+                        posErrorEntry.add(new Entry(x, (float) (y + measure.getPositive_height_error())));
+                        negativeErrorEntry.add(new Entry(x, (float) (y + measure.getNegative_height_error())));
+                        errorEntry.addAll(posErrorEntry);
+                        errorEntry.addAll(negativeErrorEntry);
+                        dataSets.add(createBubbleCircle(posErrorEntry, "", BLUE_COLOR_DOT, 5f));
+                        dataSets.add(createBubbleCircle(negativeErrorEntry, "", BLUE_COLOR_DOT, 5f));
+                        dataSets.add(createDataSet(errorEntry, "scan height", BLUE_COLOR_DOT, 1.5f, false));
+                    }
                 }
-                entries.add(new Entry(x, y));
             } catch (Exception e) {
                 LogFileUtils.logException(e);
             }
         }
-
-        if (entries.size() > 1) {
-            entries.sort((o1, o2) -> Float.compare(o1.getX(), o2.getX()));
+        if (chartType != CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE) {
+            if (entries.size() > 1) {
+                entries.sort((o1, o2) -> Float.compare(o1.getX(), o2.getX()));
+            }
+            dataSets.add(0, createDataSet(entries, getString(R.string.tab_growth).toLowerCase(), MEASURE_COLOR, 1.5f, false));
         }
-        dataSets.add(0, createDataSet(entries, getString(R.string.tab_growth).toLowerCase(), MEASURE_COLOR, 1.5f, false));
     }
 
     private void showZScore(CalculateZscoreUtils.ZScoreData zscoreData, Measure lastMeasure) {
@@ -395,12 +432,27 @@ public class GrowthDataFragment extends Fragment {
         LineDataSet dataSet = new LineDataSet(values, label);
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
         dataSet.setColor(circle ? Color.TRANSPARENT : color);
-        dataSet.setLineWidth(width);
+        if (!circle) {
+            dataSet.setLineWidth(width);
+        }
         dataSet.setDrawCircles(circle);
         dataSet.setCircleColor(color);
         dataSet.setCircleRadius(3f);
         dataSet.setDrawValues(false);
         dataSet.setDrawCircleHole(false);
+        dataSet.setHighLightColor(color);
+        return dataSet;
+    }
+
+    protected LineDataSet createBubbleCircle(ArrayList<Entry> values, String label, int color, float width) {
+        LineDataSet dataSet = new LineDataSet(values, "percentile error");
+        dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+        dataSet.setColor(true ? Color.TRANSPARENT : color);
+        dataSet.setDrawCircles(true);
+        dataSet.setCircleColor(color);
+        dataSet.setCircleRadius(3f);
+        dataSet.setDrawValues(false);
+        dataSet.setDrawCircleHole(true);
         dataSet.setHighLightColor(color);
         return dataSet;
     }

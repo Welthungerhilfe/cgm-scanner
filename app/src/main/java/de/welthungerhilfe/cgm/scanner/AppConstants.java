@@ -18,6 +18,7 @@
  */
 package de.welthungerhilfe.cgm.scanner;
 
+
 public class AppConstants {
 
     public static final String AUTH_SANDBOX = "{OAUTH_SCOPE_SANDBOX}";
@@ -29,6 +30,7 @@ public class AppConstants {
     public static final String API_URL_IN_BMZ = "{API_URL_PRODUCTION}/";
     public static final String API_URL_NAMIBIA = "{API_URL_NAMIBIA}/";
     public static final String API_TESTING_URL = "http://192.168.43.252:5001/api/";
+
 
 
     //Environments Type

@@ -117,6 +117,12 @@ public class Measure extends CsvExportableModel implements Serializable {
     private String std_test_qr_code;
 
 
+    private double positive_height_error;
+
+    private double negative_height_error;
+
+
+
     @Embedded
     @SerializedName("location")
     @Expose
@@ -386,6 +392,22 @@ public class Measure extends CsvExportableModel implements Serializable {
 
     public void setStd_test_qr_code(String std_test_qr_code) {
         this.std_test_qr_code = std_test_qr_code;
+    }
+
+    public double getPositive_height_error() {
+        return positive_height_error;
+    }
+
+    public void setPositive_height_error(double positive_height_error) {
+        this.positive_height_error = positive_height_error;
+    }
+
+    public double getNegative_height_error() {
+        return negative_height_error;
+    }
+
+    public void setNegative_height_error(double negative_height_error) {
+        this.negative_height_error = negative_height_error;
     }
 
     @Override

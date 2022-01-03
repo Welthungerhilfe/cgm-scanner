@@ -22,4 +22,7 @@
     <color name="colorRed">#DA5734</color>
     <color name="colorYellow">#E6C743</color>
     <color name="transparent_white">#BBFFFFFF</color>
+    <color name="growth_data_green">#378145</color>
+    <color name="growth_data_blue">#0F18F2</color>
+
 </resources>

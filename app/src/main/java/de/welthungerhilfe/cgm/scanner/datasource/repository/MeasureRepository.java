@@ -76,7 +76,9 @@ public class MeasureRepository {
     public List<Measure> getManualMeasures(String personId) {
         return database.measureDao().getManualMeasures(personId);
     }
-
+    public List<Measure> getAllMeasuresByPersonId(String personId) {
+        return database.measureDao().getAllMeasuresByPersonId(personId);
+    }
     public long getTotalMeasureCount() {
         return database.measureDao().getTotalMeasureCount();
     }
@@ -91,5 +93,9 @@ public class MeasureRepository {
 
     public Measure getMeasureByMeasureServerKey(String measureServerKey){
         return database.measureDao().getMeasureByMeasureServerKey(measureServerKey);
+    }
+
+    public List<Measure> getMeasureWithoutScanResult(){
+        return database.measureDao().getMeasureWithoutScanResult();
     }
 }

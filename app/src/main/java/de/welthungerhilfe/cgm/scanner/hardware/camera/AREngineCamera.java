@@ -29,14 +29,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.Image;
-import android.opengl.GLES11Ext;
-import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.util.Log;
-import android.util.Size;
 import android.view.OrientationEventListener;
-import android.widget.ImageView;
 
 import com.huawei.hiar.ARAugmentedImage;
 import com.huawei.hiar.ARAugmentedImageDatabase;
@@ -52,13 +47,10 @@ import com.huawei.hiar.ARSession;
 import com.huawei.hiar.ARTrackable;
 import com.huawei.hiar.ARWorldBodyTrackingConfig;
 
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
-import de.welthungerhilfe.cgm.scanner.hardware.gpu.RenderToTexture;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -78,8 +70,6 @@ public class AREngineCamera extends AbstractARCamera {
   //AREngine API
   private ARSession mSession;
   private ArrayList<Float> mPlanes;
-  private RenderToTexture mRTT;
-  private Size mTextureRes;
   private boolean mFirstRequest;
 
   //App integration objects
@@ -92,7 +82,6 @@ public class AREngineCamera extends AbstractARCamera {
   public AREngineCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
     super(activity, depthMode, previewSize);
     mPlanes = new ArrayList<>();
-    mRTT = new RenderToTexture();
     mSkeleton = new ArrayList<>();
 
     OrientationEventListener orientationEventListener = new OrientationEventListener(mActivity)
@@ -107,62 +96,6 @@ public class AREngineCamera extends AbstractARCamera {
     if (orientationEventListener.canDetectOrientation()) {
       orientationEventListener.enable();
     }
-  }
-
-  @Override
-  public void onCreate(ImageView colorPreview, ImageView depthPreview, GLSurfaceView surfaceview) {
-    super.onCreate(colorPreview, depthPreview, surfaceview);
-
-    //setup AREngine cycle
-    mGLSurfaceView.setEGLContextClientVersion(3);
-    mGLSurfaceView.setRenderer(new GLSurfaceView.Renderer() {
-      private final int[] textures = new int[1];
-      private int width, height;
-
-      @Override
-      public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        GLES20.glGenTextures(1, textures, 0);
-        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0]);
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
-        GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
-        GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_NEAREST);
-      }
-
-      @Override
-      public void onSurfaceChanged(GL10 gl10, int width, int height) {
-        this.width = width;
-        this.height = height;
-      }
-
-      @Override
-      public void onDrawFrame(GL10 gl10) {
-        synchronized (AREngineCamera.this) {
-          updateFrame(textures[0], width, height);
-        }
-      }
-    });
-  }
-
-  @Override
-  public synchronized void onResume() {
-    mGLSurfaceView.onResume();
-    mRTT.reset();
-
-    if (mActivity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-      if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-        if (mActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-          openCamera();
-        }
-      }
-    }
-  }
-
-  @Override
-  public synchronized void onPause() {
-    mGLSurfaceView.onPause();
-
-    closeCamera();
   }
 
   private void onProcessColorData(Bitmap bitmap) {
@@ -208,8 +141,9 @@ public class AREngineCamera extends AbstractARCamera {
       preview = preview.copy(Bitmap.Config.ARGB_8888, true);
       Canvas c = new Canvas(preview);
 
-      for (int pass = 0; pass < 2; pass++) {
-        int r = pass == 0 ? 20 : 15;
+      boolean outline = true;
+      for (int pass = 0; pass < (outline ? 2 : 1); pass++) {
+        int r = outline ? (pass == 0 ? 20 : 15) : 1;
         Paint p = new Paint();
         p.setColor(pass == 0 ? Color.GREEN : Color.BLACK);
         p.setStrokeWidth(r * 2);
@@ -219,23 +153,27 @@ public class AREngineCamera extends AbstractARCamera {
           int x2 = (int) (mSkeleton.get(i + 2) * (float)preview.getWidth());
           int y2 = (int) (mSkeleton.get(i + 3) * (float)preview.getHeight());
           if ((x1 != 0) && (y1 != 0) && (x2 != 0) && (y2 != 0)) {
-            c.drawCircle(x1, y1, r, p);
-            c.drawCircle(x2, y2, r, p);
+            if (outline) {
+              c.drawCircle(x1, y1, r, p);
+              c.drawCircle(x2, y2, r, p);
+            }
             c.drawLine(x1, y1, x2, y2, p);
           }
         }
       }
 
-      int w = preview.getWidth();
-      int h = preview.getHeight();
-      int[] pixels = new int[w * h];
-      preview.getPixels(pixels, 0, w, 0, 0, w, h);
-      for (int i = 0; i < pixels.length; i++) {
-        if (pixels[i] == Color.BLACK) {
-          pixels[i] = Color.TRANSPARENT;
+      if (outline) {
+        int w = preview.getWidth();
+        int h = preview.getHeight();
+        int[] pixels = new int[w * h];
+        preview.getPixels(pixels, 0, w, 0, 0, w, h);
+        for (int i = 0; i < pixels.length; i++) {
+          if (pixels[i] == Color.BLACK) {
+            pixels[i] = Color.TRANSPARENT;
+          }
         }
+        preview.setPixels(pixels, 0, w, 0, 0, w, h);
       }
-      preview.setPixels(pixels, 0, w, 0, 0, w, h);
     }
 
     Bitmap finalPreview = preview;
@@ -255,7 +193,13 @@ public class AREngineCamera extends AbstractARCamera {
     image.close();
   }
 
-  private void closeCamera() {
+  @Override
+  protected ByteOrder getDepthByteOrder() {
+    return ByteOrder.LITTLE_ENDIAN;
+  }
+
+  @Override
+  protected void closeCamera() {
     if (mSession != null) {
       mSession.pause();
       mSession.stop();
@@ -263,7 +207,8 @@ public class AREngineCamera extends AbstractARCamera {
     }
   }
 
-  private void openCamera() {
+  @Override
+  protected void openCamera() {
 
     //check permissions
     if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -311,45 +256,20 @@ public class AREngineCamera extends AbstractARCamera {
     }
   }
 
-  private void installAREngine() {
-    if (!mFirstRequest) {
-      return;
-    }
-    mFirstRequest = false;
-
-    new Thread(() -> {
-      mActivity.runOnUiThread(() -> {
-        try {
-          Intent intent = new Intent(ACTION_HUAWEI_DOWNLOAD_QUIK);
-          intent.putExtra(PACKAGE_NAME_KEY, PACKAGENAME_ARSERVICE);
-          intent.setPackage(HUAWEI_MARTKET_NAME);
-          intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-          mActivity.startActivity(intent);
-        } catch (SecurityException e) {
-          Log.w(TAG, "the target app has no permission of media");
-        } catch (ActivityNotFoundException e) {
-          Log.w(TAG, "the target activity is not found: " + e.getMessage());
-        }
-      });
-      Utils.sleep(100);
-      mActivity.finish();
-    }).start();
-  }
-
-  public static boolean shouldUseAREngine() {
-    String manufacturer = Build.MANUFACTURER.toUpperCase();
-    return manufacturer.startsWith("HONOR") || manufacturer.startsWith("HUAWEI");
-  }
-
-  private void updateFrame(int texture, int width, int height) {
+  @Override
+  protected void updateFrame() {
     try {
       if (mSession == null) {
         return;
       }
 
+      if (mViewportChanged) {
+        mSession.setCameraTextureName(mCameraTextureId);
+        mSession.setDisplayGeometry(0, mViewportWidth, mViewportHeight);
+        mViewportChanged = false;
+      }
+
       //get calibration from AREngine
-      mSession.setCameraTextureName(texture);
-      mSession.setDisplayGeometry(0, width, height);
       ARFrame frame = mSession.update();
       ARCameraIntrinsics intrinsics = frame.getCamera().getCameraImageIntrinsics();
       mColorCameraIntrinsic[0] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
@@ -424,7 +344,7 @@ public class AREngineCamera extends AbstractARCamera {
       Bitmap color = null;
       Image depth = null;
       try {
-        color = mRTT.renderData(texture, mTextureRes);
+        color = mRTT.renderData(mCameraTextureId, mTextureRes);
         depth = frame.acquireDepthImage();
       } catch (Exception e) {
         e.printStackTrace();
@@ -481,5 +401,35 @@ public class AREngineCamera extends AbstractARCamera {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  private void installAREngine() {
+    if (!mFirstRequest) {
+      return;
+    }
+    mFirstRequest = false;
+
+    new Thread(() -> {
+      mActivity.runOnUiThread(() -> {
+        try {
+          Intent intent = new Intent(ACTION_HUAWEI_DOWNLOAD_QUIK);
+          intent.putExtra(PACKAGE_NAME_KEY, PACKAGENAME_ARSERVICE);
+          intent.setPackage(HUAWEI_MARTKET_NAME);
+          intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          mActivity.startActivity(intent);
+        } catch (SecurityException e) {
+          Log.w(TAG, "the target app has no permission of media");
+        } catch (ActivityNotFoundException e) {
+          Log.w(TAG, "the target activity is not found: " + e.getMessage());
+        }
+      });
+      Utils.sleep(100);
+      mActivity.finish();
+    }).start();
+  }
+
+  public static boolean shouldUseAREngine() {
+    String manufacturer = Build.MANUFACTURER.toUpperCase();
+    return manufacturer.startsWith("HONOR") || manufacturer.startsWith("HUAWEI");
   }
 }
