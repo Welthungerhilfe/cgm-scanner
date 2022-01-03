@@ -77,7 +77,6 @@ public class AREngineCamera extends AbstractARCamera {
   private int mOrientation;
   private int mPersonCount = 0;
   private ArrayList<Float> mSkeleton;
-  private boolean mSkeletonValid = true;
 
   public AREngineCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
     super(activity, depthMode, previewSize);
@@ -134,7 +133,7 @@ public class AREngineCamera extends AbstractARCamera {
     Bitmap preview = getDepthPreview(image, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
 
     //skeleton visualisation
-    if (mSkeletonValid && (mPersonCount == 1)) {
+    if (mPersonCount == 1) {
       if (preview.getWidth() == 1) {
         preview = Bitmap.createBitmap(240, 180, Bitmap.Config.ARGB_8888);
       }
@@ -353,7 +352,6 @@ public class AREngineCamera extends AbstractARCamera {
 
       //get body skeleton
       mPersonCount = 0;
-      mSkeletonValid = true;
       mSkeleton.clear();
       if ((mOrientation < 45) || (mOrientation > 315)) {
         Collection<ARBody> bodies = mSession.getAllTrackables(ARBody.class);
@@ -365,16 +363,6 @@ public class AREngineCamera extends AbstractARCamera {
             continue;
           }
           mPersonCount++;
-
-          float avg = 0;
-          float[] confidence = body.getSkeletonConfidence();
-          for (float c : confidence) {
-            avg += c / (float) confidence.length;
-          }
-          if (avg < 0.5f) {
-            mSkeletonValid = false;
-            continue;
-          }
 
           //TODO:apply frame.transformDisplayUvCoords instead of yOffset and yScale
           float yOffset = 0.16f;
@@ -389,8 +377,15 @@ public class AREngineCamera extends AbstractARCamera {
           indices.add(ARBody.ARBodySkeletonType.BodySkeleton_r_Sho.ordinal() - 1);
           indices.add(ARBody.ARBodySkeletonType.BodySkeleton_r_Hip.ordinal() - 1);
           for (int i : indices) {
-            mSkeleton.add(points[i * 3 + 1] * -0.5f + 0.5f);
-            mSkeleton.add((points[i * 3] * -0.5f + 0.5f + yOffset) * yScale);
+            float x = points[i * 3 + 1] * -0.5f + 0.5f;
+            float y = points[i * 3] * -0.5f + 0.5f;
+            if ((x > 0) && (y > 0)) {
+              mSkeleton.add(x);
+              mSkeleton.add((y + yOffset) * yScale);
+            } else {
+              mSkeleton.add(0.0f);
+              mSkeleton.add(0.0f);
+            }
           }
         }
       }
