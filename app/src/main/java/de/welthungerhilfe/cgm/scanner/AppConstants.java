@@ -52,7 +52,7 @@ public class AppConstants {
     public static final String VAL_SEX_MALE = "male";
 
     public static final String VAL_MEASURE_MANUAL = "manual";
-    public static final String VAL_MEASURE_AUTO = "v1.1.0";
+    public static final String VAL_MEASURE_AUTO = "v1.1.1";
 
     public static final String LANG_ENGLISH = "en";
     public static final String LANG_GERMAN = "de";
@@ -104,7 +104,10 @@ public class AppConstants {
 
     public static final int MIN_CONFIDENCE = 100;
 
+    //scan feedback and capture parameters
     public static final int SCAN_FRAMESKIP = 6;
+    public static final float TOO_NEAR = 0.7f;
+    public static final float TOO_FAR = 1.5f;
 
     public static final String IS_FOREGROUND = "isForeGround";
 

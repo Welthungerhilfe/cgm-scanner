@@ -258,6 +258,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private int threadsCount = 0;
     private final Object threadsLock = new Object();
 
+    private ImageView colorCameraPreview;
+    private ImageView depthCameraPreview;
+    private ImageView scanOutline;
+    private GLSurfaceView glSurfaceView;
+
     private AbstractARCamera mCameraInstance;
 
     public void onStart() {
@@ -327,9 +332,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         findViewById(R.id.imgClose).setOnClickListener(this);
 
-        ImageView colorCameraPreview = findViewById(R.id.colorCameraPreview);
-        ImageView depthCameraPreview = findViewById(R.id.depthCameraPreview);
-        GLSurfaceView glSurfaceView = findViewById(R.id.surfaceview);
+        colorCameraPreview = findViewById(R.id.colorCameraPreview);
+        depthCameraPreview = findViewById(R.id.depthCameraPreview);
+        glSurfaceView = findViewById(R.id.surfaceview);
+        scanOutline = findViewById(R.id.scanOutline);
         getCamera().onCreate(colorCameraPreview, depthCameraPreview, glSurfaceView);
 
         measureRepository = MeasureRepository.getInstance(this);
@@ -500,7 +506,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void openScan() {
-        getCamera().resetTrackingState();
         fab.setImageResource(R.drawable.recorder);
         activityScanModeBinding.lytScanner.setVisibility(View.VISIBLE);
         mTxtFeedback.setVisibility(View.GONE);
@@ -689,12 +694,12 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             }
 
             //realtime value
-            /*runOnUiThread(() -> {
-                String text = getString(R.string.label_height) + " : " + String.format("~%dcm", (int)(height * 100));
+            /*String text = getString(R.string.label_height) + " : " + String.format("~%dcm", (int)(height * 100));
+            runOnUiThread(() -> {
                 mTitleView.setText(text);
             });*/
         }
-        //onFeedbackUpdate();
+        onFeedbackUpdate();
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
             long profile = System.currentTimeMillis();
@@ -745,22 +750,19 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private void onFeedbackUpdate() {
         AbstractARCamera.LightConditions light = getCamera().getLightConditionState();
-        AbstractARCamera.TrackingState tracking = getCamera().getTrackingState();
-        float distance = getCamera().getTargetDistance();
+        boolean childDetected = getCamera().getPersonCount() == 1;
         runOnUiThread(() -> {
 
-            if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-                switch (tracking) {
-                    case INIT:
-                    case TRACKED:
-                        setFeedback(null);
-                        break;
-                    case LOST:
-                        setFeedback(getString(R.string.score_not_detected));
-                        break;
-                }
-            } else {
+            if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
+                depthCameraPreview.setVisibility(View.GONE);
+                scanOutline.setVisibility(View.GONE);
+            } else if (childDetected) {
+                depthCameraPreview.setVisibility(View.VISIBLE);
+                scanOutline.setVisibility(View.GONE);
                 setFeedback(null);
+            } else {
+                scanOutline.setVisibility(View.VISIBLE);
+                depthCameraPreview.setVisibility(View.GONE);
             }
 
             if (mTxtFeedback.getVisibility() == View.GONE) {
@@ -774,16 +776,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     case DARK:
                         setFeedback(getString(R.string.score_light_dark));
                         break;
-                }
-            }
-
-            if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
-                if (distance < 0.7) {
-                    setFeedback(getString(R.string.score_distance_close));
-                } else if (distance > 1.5f) {
-                    setFeedback(getString(R.string.score_distance_far));
-                } else {
-                    setFeedback(null);
                 }
             }
         });
@@ -839,12 +831,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     break;
             }
 
-            //set information if child is detected (note: this is unsupported on ARCore devices and for lying children)
-            boolean childDetected = false;
-            if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-                AbstractARCamera.TrackingState tracking = getCamera().getTrackingState();
-                childDetected = tracking == AbstractARCamera.TrackingState.TRACKED;
-            }
+            //set information if child is detected (note: this is unsupported on ARCore devices and for lying children wrongly oriented)
+            boolean childDetected = getCamera().getPersonCount() == 1;
             log.setChildDetected(childDetected);
             log.setChildHeight(childHeight);
 

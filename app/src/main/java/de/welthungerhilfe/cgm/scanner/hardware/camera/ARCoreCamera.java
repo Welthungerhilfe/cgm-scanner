@@ -308,14 +308,14 @@ public class ARCoreCamera extends AbstractARCamera {
   }
 
   @Override
-  public float getTargetDistance() {
+  public int getPersonCount() {
     //unsupported on ARCore
-    return 0;
+    return 1;
   }
 
   @Override
-  public TrackingState getTrackingState() {
+  public float getTargetDistance() {
     //unsupported on ARCore
-    return TrackingState.INIT;
+    return 1;
   }
 }

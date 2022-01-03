@@ -60,8 +60,6 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
     public enum PreviewSize { CLIPPED, FULL, SMALL };
 
-    public enum TrackingState { INIT, TRACKED, LOST };
-
     protected final String CALIBRATION_IMAGE_FILE = "plant.jpg";
 
     //app connection
@@ -104,7 +102,6 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     protected LightConditions mLight;
     protected PlaneMode mPlaneMode;
     protected PreviewSize mPreviewSize;
-    protected TrackingState mTrackingState;
     protected long mLastBright;
     protected long mLastDark;
     protected long mSessionStart;
@@ -113,6 +110,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     protected abstract void closeCamera();
     protected abstract void openCamera();
     protected abstract void updateFrame();
+    public abstract int getPersonCount();
 
     public AbstractARCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
         mActivity = activity;
@@ -372,7 +370,6 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
                 if (!otherColors && !valid) {
                     mask = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
                 }
-                updateTrackingState(valid);
                 return mask;
             case PLANE:
                 matrix = mComputerVision.matrixCalculate(position, rotation);
@@ -410,14 +407,6 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         return mTargetHeight;
     }
 
-    public TrackingState getTrackingState() {
-        return mTrackingState;
-    }
-
-    public void resetTrackingState() {
-        mTrackingState = TrackingState.INIT;
-    }
-
     public void setPlaneMode(PlaneMode mode) {
         mPlaneMode = mode;
     }
@@ -453,21 +442,5 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
                 return mComputerVision.getPlaneVisible(depth, planes, calibration, matrix, position);
         }
         return Integer.MAX_VALUE;
-    }
-
-    private void updateTrackingState(boolean valid) {
-        switch (mTrackingState) {
-            case INIT:
-            case LOST:
-                if (valid) {
-                    mTrackingState = TrackingState.TRACKED;
-                }
-                break;
-            case TRACKED:
-                if (!valid) {
-                    mTrackingState = TrackingState.LOST;
-                }
-                break;
-        }
     }
 }
