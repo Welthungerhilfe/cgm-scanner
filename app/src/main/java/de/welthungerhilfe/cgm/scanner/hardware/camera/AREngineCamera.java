@@ -71,14 +71,12 @@ public class AREngineCamera extends AbstractARCamera {
   private static final String PACKAGENAME_ARSERVICE = "com.huawei.arengine.service";
 
   //AREngine API
-  private ARSession mSession;
-  private ArrayList<Float> mPlanes;
-  private boolean mFirstRequest;
-
-  //App integration objects
   private Bitmap mCache;
+  private boolean mFirstRequest;
   private int mOrientation;
   private int mPersonCount = 0;
+  private ARSession mSession;
+  private ArrayList<Float> mPlanes;
   private ArrayList<PointF> mSkeleton;
   private boolean mSkeletonValid;
 
@@ -319,7 +317,7 @@ public class AREngineCamera extends AbstractARCamera {
       }
 
       //process camera data
-      getBodySkeleton(frame);
+      getBodySkeleton();
       onProcessColorData(color);
       onProcessDepthData(depth);
     } catch (Exception e) {
@@ -357,7 +355,7 @@ public class AREngineCamera extends AbstractARCamera {
     }).start();
   }
 
-  private void getBodySkeleton(ARFrame frame) {
+  private void getBodySkeleton() {
     mPersonCount = 0;
     mSkeleton.clear();
     mSkeletonValid = true;
