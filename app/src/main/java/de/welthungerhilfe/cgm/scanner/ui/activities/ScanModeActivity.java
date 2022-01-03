@@ -100,13 +100,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     public void scanStanding(View view) {
         SCAN_MODE = AppConstants.SCAN_STANDING;
 
-        activityScanModeBinding.imgScanStanding.setImageResource(R.drawable.standing_active);
-        activityScanModeBinding.imgScanStandingCheck.setImageResource(R.drawable.radio_active);
-        activityScanModeBinding.txtScanStanding.setTextColor(getResources().getColor(R.color.colorBlack, getTheme()));
-
-        activityScanModeBinding.imgScanLying.setImageResource(R.drawable.lying_inactive);
-        activityScanModeBinding.imgScanLyingCheck.setImageResource(R.drawable.radio_inactive);
-        activityScanModeBinding.txtScanLying.setTextColor(getResources().getColor(R.color.colorGreyDark, getTheme()));
+        activityScanModeBinding.lytScanLying.setActive(false);
+        activityScanModeBinding.lytScanStanding.setActive(true);
 
         changeMode();
     }
@@ -114,13 +109,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     public void scanLying(View view) {
         SCAN_MODE = AppConstants.SCAN_LYING;
 
-        activityScanModeBinding.imgScanLying.setImageResource(R.drawable.lying_active);
-        activityScanModeBinding.imgScanLyingCheck.setImageResource(R.drawable.radio_active);
-        activityScanModeBinding.txtScanLying.setTextColor(getResources().getColor(R.color.colorBlack, getTheme()));
-
-        activityScanModeBinding.imgScanStanding.setImageResource(R.drawable.standing_inactive);
-        activityScanModeBinding.imgScanStandingCheck.setImageResource(R.drawable.radio_inactive);
-        activityScanModeBinding.txtScanStanding.setTextColor(getResources().getColor(R.color.colorGreyDark, getTheme()));
+        activityScanModeBinding.lytScanLying.setActive(true);
+        activityScanModeBinding.lytScanStanding.setActive(false);
 
         changeMode();
     }

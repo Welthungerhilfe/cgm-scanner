@@ -16,6 +16,12 @@
         <attr name="scantypetitle" format="string|reference" />
     </declare-styleable>
 
+    <declare-styleable name="ScanMode">
+        <attr name="scanmodeactive" format="boolean" />
+        <attr name="scanmodeicon" format="integer" />
+        <attr name="scanmodetext" format="string|reference" />
+    </declare-styleable>
+
     <declare-styleable name="SubmenuButton">
         <attr name="submenuText" format="string|reference" />
     </declare-styleable>
