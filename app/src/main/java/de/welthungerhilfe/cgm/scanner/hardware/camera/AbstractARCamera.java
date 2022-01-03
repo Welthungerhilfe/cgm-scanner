@@ -18,13 +18,17 @@
  */
 package de.welthungerhilfe.cgm.scanner.hardware.camera;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.ImageFormat;
 import android.media.Image;
+import android.opengl.GLES11Ext;
+import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.util.Size;
 import android.util.SizeF;
 import android.widget.ImageView;
 
@@ -33,9 +37,13 @@ import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
 
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+import de.welthungerhilfe.cgm.scanner.hardware.gpu.RenderToTexture;
 import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
 
-public abstract class AbstractARCamera {
+public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
     public interface Camera2DataListener
     {
@@ -73,6 +81,14 @@ public abstract class AbstractARCamera {
     protected float[] mPosition;
     protected float[] mRotation;
 
+    //camera rendering
+    protected int mCameraTextureId;
+    protected RenderToTexture mRTT;
+    protected Size mTextureRes;
+    protected boolean mViewportChanged;
+    protected int mViewportWidth;
+    protected int mViewportHeight;
+
     //AR status
     protected int mFrameIndex;
     protected float mPixelIntensity;
@@ -93,14 +109,17 @@ public abstract class AbstractARCamera {
     protected long mLastDark;
     protected long mSessionStart;
 
-    public abstract void onResume();
-    public abstract void onPause();
+    protected abstract ByteOrder getDepthByteOrder();
+    protected abstract void closeCamera();
+    protected abstract void openCamera();
+    protected abstract void updateFrame();
 
     public AbstractARCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
         mActivity = activity;
         mComputerVision = new ComputerVisionUtils();
         mListeners = new ArrayList<>();
         mLock = new Object();
+        mRTT = new RenderToTexture();
 
         mPosition = new float[3];
         mRotation = new float[4];
@@ -129,7 +148,65 @@ public abstract class AbstractARCamera {
         mColorCameraPreview.setImageBitmap(bitmap);
         mDepthCameraPreview = depthPreview;
         mDepthCameraPreview.setImageBitmap(bitmap);
+
         mGLSurfaceView = surfaceview;
+        mGLSurfaceView.setPreserveEGLContextOnPause(true);
+        mGLSurfaceView.setEGLContextClientVersion(2);
+        mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Alpha used for plane blending.
+        mGLSurfaceView.setRenderer(this);
+        mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        mGLSurfaceView.setWillNotDraw(false);
+    }
+
+    public void onPause() {
+        mGLSurfaceView.onPause();
+
+        closeCamera();
+    }
+
+    public void onResume() {
+        mGLSurfaceView.onResume();
+        mRTT.reset();
+
+        if (mActivity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                if (mActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                    openCamera();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+        GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+        // Create the texture and pass it to ARCore session to be filled during update().
+        // Generate the background texture.
+        int[] textures = new int[1];
+        GLES20.glGenTextures(1, textures, 0);
+        mCameraTextureId = textures[0];
+        int textureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
+        GLES20.glBindTexture(textureTarget, mCameraTextureId);
+        GLES20.glTexParameteri(textureTarget, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(textureTarget, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(textureTarget, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(textureTarget, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+    }
+
+    @Override
+    public void onSurfaceChanged(GL10 gl10, int width, int height) {
+        GLES20.glViewport(0, 0, width, height);
+        mViewportWidth = width;
+        mViewportHeight = height;
+        mViewportChanged = true;
+    }
+
+    @Override
+    public void onDrawFrame(GL10 gl10) {
+        synchronized (AbstractARCamera.this) {
+            updateFrame();
+        }
     }
 
     public void addListener(Object listener) {
@@ -152,7 +229,7 @@ public abstract class AbstractARCamera {
         }
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
-        buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
+        buffer = buffer.order(getDepthByteOrder());
         ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
 
         ArrayList<Short> pixel = new ArrayList<>();
@@ -366,66 +443,6 @@ public abstract class AbstractARCamera {
         }
 
         return light;
-    }
-
-    protected ByteBuffer imageToByteBuffer(Image image) {
-        final int  width  = image.getWidth();
-        final int  height = image.getHeight();
-
-        final Image.Plane[] planes     = image.getPlanes();
-        final byte[]        rowData    = new byte[planes[0].getRowStride()];
-        final int           bufferSize = width * height * ImageFormat.getBitsPerPixel(ImageFormat.YUV_420_888) / 8;
-        final ByteBuffer    output     = ByteBuffer.allocateDirect(bufferSize);
-
-        int channelOffset;
-        int outputStride;
-
-        for (int planeIndex = 0; planeIndex < 3; planeIndex++) {
-            if (planeIndex == 0) {
-                channelOffset = 0;
-                outputStride = 1;
-            } else if (planeIndex == 1) {
-                channelOffset = width * height + 1;
-                outputStride = 2;
-            } else {
-                channelOffset = width * height;
-                outputStride = 2;
-            }
-
-            final ByteBuffer buffer      = planes[planeIndex].getBuffer();
-            final int        rowStride   = planes[planeIndex].getRowStride();
-            final int        pixelStride = planes[planeIndex].getPixelStride();
-
-            final int shift         = (planeIndex == 0) ? 0 : 1;
-            final int widthShifted  = width >> shift;
-            final int heightShifted = height >> shift;
-
-            buffer.position(0);
-
-            for (int row = 0; row < heightShifted; row++) {
-                int length;
-
-                if (pixelStride == 1 && outputStride == 1) {
-                    length = widthShifted;
-                    buffer.get(output.array(), channelOffset, length);
-                    channelOffset += length;
-                } else {
-                    length = (widthShifted - 1) * pixelStride + 1;
-                    buffer.get(rowData, 0, length);
-
-                    for (int col = 0; col < widthShifted; col++) {
-                        output.array()[channelOffset] = rowData[col * pixelStride];
-                        channelOffset += outputStride;
-                    }
-                }
-
-                if (row < heightShifted - 1) {
-                    buffer.position(buffer.position() + rowStride - length);
-                }
-            }
-        }
-
-        return output;
     }
 
     private float getPlane(float[][] depth, ArrayList<Float> planes, float[] calibration, float[] matrix, float[] position) {
