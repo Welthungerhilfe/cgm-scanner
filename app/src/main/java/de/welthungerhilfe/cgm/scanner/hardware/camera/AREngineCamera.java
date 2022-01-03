@@ -46,6 +46,7 @@ import com.huawei.hiar.ARPose;
 import com.huawei.hiar.ARSession;
 import com.huawei.hiar.ARTrackable;
 import com.huawei.hiar.ARWorldBodyTrackingConfig;
+import com.huawei.hiar.ARWorldTrackingConfig;
 
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -232,13 +233,21 @@ public class AREngineCamera extends AbstractARCamera {
         LogFileUtils.logException(e);
       }
 
-      // Enable auto focus mode while AREngine is running.
-      ARWorldBodyTrackingConfig config = new ARWorldBodyTrackingConfig(mSession);
-      //TODO:config.setAugmentedImageDatabase(db);
+      // Set AR configuration
+      ARConfigBase config;
+      if (mDepthMode == DepthPreviewMode.CALIBRATION) {
+        ARWorldTrackingConfig worldTrackingConfig = new ARWorldTrackingConfig(mSession);
+        worldTrackingConfig.setAugmentedImageDatabase(db);
+        worldTrackingConfig.setPlaneFindingMode(ARConfigBase.PlaneFindingMode.HORIZONTAL_ONLY);
+        config = worldTrackingConfig;
+      } else {
+        ARWorldBodyTrackingConfig bodyTrackingConfig = new ARWorldBodyTrackingConfig(mSession);
+        bodyTrackingConfig.setPlaneFindingMode(ARConfigBase.PlaneFindingMode.HORIZONTAL_ONLY);
+        config = bodyTrackingConfig;
+      }
       config.setEnableItem(ARConfigBase.ENABLE_DEPTH);
       config.setFocusMode(ARConfigBase.FocusMode.AUTO_FOCUS);
       config.setLightingMode(ARConfigBase.LightingMode.AMBIENT_INTENSITY);
-      config.setPlaneFindingMode(ARConfigBase.PlaneFindingMode.HORIZONTAL_ONLY);
       config.setPowerMode(ARConfigBase.PowerMode.PERFORMANCE_FIRST);
       config.setUpdateMode(ARConfigBase.UpdateMode.BLOCKING);
       mSession.configure(config);
