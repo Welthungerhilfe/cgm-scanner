@@ -28,194 +28,48 @@
             android:layout_marginTop="@dimen/activity_vertical_margin"
             android:orientation="vertical">
 
-            <com.balysv.materialripple.MaterialRippleLayout
+            <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                android:id="@+id/settingDebug"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:layout_marginTop="@dimen/activity_group_margin"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                app:mrl_rippleOverlay="true">
+                android:layout_height="wrap_content"
+                app:titleText="@string/remote_debug"
+                app:titleTextSize="20sp" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/remote_debug"
-                        android:textColor="@color/colorBlack"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/txtSettingDebug"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_section_margin"
-                        android:textSize="18sp" />
-                </LinearLayout>
-
-            </com.balysv.materialripple.MaterialRippleLayout>
-
-            <com.balysv.materialripple.MaterialRippleLayout
+            <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                android:id="@+id/settingSyncPeriod"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:layout_marginTop="@dimen/activity_group_margin"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                app:mrl_rippleOverlay="true">
+                android:layout_height="wrap_content"
+                app:titleText="@string/remote_sync_period"
+                app:titleTextSize="20sp" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/remote_sync_period"
-                        android:textColor="@color/colorBlack"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/txtSettingSyncPeriod"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_section_margin"
-                        android:textSize="18sp" />
-                </LinearLayout>
-
-            </com.balysv.materialripple.MaterialRippleLayout>
-
-            <com.balysv.materialripple.MaterialRippleLayout
+            <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                android:id="@+id/settingAllowDelete"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:layout_marginTop="@dimen/activity_group_margin"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                app:mrl_rippleOverlay="true">
+                android:layout_height="wrap_content"
+                app:titleText="@string/remote_allow_delete"
+                app:titleTextSize="20sp" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/remote_allow_delete"
-                        android:textColor="@color/colorBlack"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/txtSettingAllowDelete"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_section_margin"
-                        android:textSize="18sp" />
-                </LinearLayout>
-
-            </com.balysv.materialripple.MaterialRippleLayout>
-
-            <com.balysv.materialripple.MaterialRippleLayout
+            <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                android:id="@+id/settingAllowEdit"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:layout_marginTop="@dimen/activity_group_margin"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                app:mrl_rippleOverlay="true">
+                android:layout_height="wrap_content"
+                app:titleText="@string/remote_allow_edit"
+                app:titleTextSize="20sp" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/remote_allow_edit"
-                        android:textColor="@color/colorBlack"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/txtSettingAllowEdit"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_section_margin"
-                        android:textSize="18sp" />
-                </LinearLayout>
-
-            </com.balysv.materialripple.MaterialRippleLayout>
-
-            <com.balysv.materialripple.MaterialRippleLayout
+            <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                android:id="@+id/settingEditTime"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:layout_marginTop="@dimen/activity_group_margin"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                app:mrl_rippleOverlay="true">
+                android:layout_height="wrap_content"
+                app:titleText="@string/remote_edit_time"
+                app:titleTextSize="20sp" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/remote_edit_time"
-                        android:textColor="@color/colorBlack"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/txtSettingEditTime"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_section_margin"
-                        android:textSize="18sp" />
-                </LinearLayout>
-
-            </com.balysv.materialripple.MaterialRippleLayout>
-
-            <com.balysv.materialripple.MaterialRippleLayout
+            <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                android:id="@+id/settingMeasureVisibility"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:layout_marginTop="@dimen/activity_group_margin"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                app:mrl_rippleOverlay="true">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/remote_measure_visibility"
-                        android:textColor="@color/colorBlack"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/txtSettingMeasureVisibility"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_section_margin"
-                        android:textSize="18sp" />
-                </LinearLayout>
-
-            </com.balysv.materialripple.MaterialRippleLayout>
+                android:layout_height="wrap_content"
+                app:titleText="@string/remote_measure_visibility"
+                app:titleTextSize="20sp" />
 
         </LinearLayout>
-
-
     </LinearLayout>
 </layout>
