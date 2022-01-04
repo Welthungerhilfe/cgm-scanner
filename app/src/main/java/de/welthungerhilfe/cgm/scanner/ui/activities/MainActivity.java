@@ -76,6 +76,7 @@ import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.DeviceCheckFragment;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
@@ -290,80 +291,83 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 .setCancelable(true)
                 .setInAnimation(R.anim.abc_fade_in)
                 .setOutAnimation(R.anim.abc_fade_out)
-                .setOnClickListener((dialog, view) -> {
-
-                    switch (view.getId()) {
-                        case R.id.rytFilterData:
-                            viewModel.setFilterOwn();
-                            break;
-                        case R.id.rytFilterDate:
-                            doFilterByDate();
-                            break;
-                        case R.id.rytFilterLocation:
-                            doFilterByLocation();
-                            break;
-                        case R.id.rytFilterClear:
-                            viewModel.setFilterNo();
-                            break;
-                        case R.id.rytSortDate:
-                            viewModel.setSortType(AppConstants.SORT_DATE);
-                            break;
-                        case R.id.rytSortLocation:
-                            adapterData.clear();
-                            Loc loc = Utils.getLastKnownLocation(this);
-                            if (loc != null) {
-                                viewModel.setLocation(loc);
-                                viewModel.setSortType(AppConstants.SORT_LOCATION);
-                            }
-                            break;
-                        case R.id.rytSortWasting:
-
-                            viewModel.setSortType(AppConstants.SORT_WASTING);
-                            break;
-                        case R.id.rytSortStunting:
-
-                            viewModel.setSortType(AppConstants.SORT_STUNTING);
-                            break;
-                    }
-
-                    dialog.dismiss();
-                })
                 .create();
+
+        //set filter action
+        sortDialog.findViewById(R.id.filterData).setOnClickListener(v -> {
+            viewModel.setFilterOwn();
+            sortDialog.dismiss();
+        });
+        sortDialog.findViewById(R.id.filterDate).setOnClickListener(v -> {
+            doFilterByDate();
+            sortDialog.dismiss();
+        });
+        sortDialog.findViewById(R.id.filterLocation).setOnClickListener(v -> {
+            doFilterByLocation();
+            sortDialog.dismiss();
+        });
+        sortDialog.findViewById(R.id.filterClear).setOnClickListener(v -> {
+            viewModel.setFilterNo();
+            sortDialog.dismiss();
+        });
+
+        //set sort action
+        sortDialog.findViewById(R.id.sortDate).setOnClickListener(v -> {
+            viewModel.setSortType(AppConstants.SORT_DATE);
+            sortDialog.dismiss();
+        });
+        sortDialog.findViewById(R.id.sortLocation).setOnClickListener(v -> {
+            adapterData.clear();
+            Loc loc = Utils.getLastKnownLocation(getBaseContext());
+            if (loc != null) {
+                viewModel.setLocation(loc);
+                viewModel.setSortType(AppConstants.SORT_LOCATION);
+            }
+            sortDialog.dismiss();
+        });
+        sortDialog.findViewById(R.id.sortWasting).setOnClickListener(v -> {
+            viewModel.setSortType(AppConstants.SORT_WASTING);
+            sortDialog.dismiss();
+        });
+        sortDialog.findViewById(R.id.sortStunting).setOnClickListener(v -> {
+            viewModel.setSortType(AppConstants.SORT_STUNTING);
+            sortDialog.dismiss();
+        });
 
         viewModel.getPersonFilterLiveData().observe(this, filter -> {
             View view = sortDialog.getHolderView();
 
             //filter check icon
             boolean anyFilter = filter.isOwn() || filter.isDate() || filter.isLocation();
-            view.findViewById(R.id.imgFilterData).setVisibility(filter.isOwn() ? View.VISIBLE : View.INVISIBLE);
-            view.findViewById(R.id.imgFilterDate).setVisibility(filter.isDate() ? View.VISIBLE : View.INVISIBLE);
-            view.findViewById(R.id.imgFilterLocation).setVisibility(filter.isLocation() ? View.VISIBLE : View.INVISIBLE);
-            view.findViewById(R.id.imgFilterClear).setVisibility(anyFilter ? View.INVISIBLE : View.VISIBLE);
+            view.findViewById(R.id.filterData).setSelected(filter.isOwn());
+            view.findViewById(R.id.filterDate).setSelected(filter.isDate());
+            view.findViewById(R.id.filterLocation).setSelected(filter.isLocation());
+            view.findViewById(R.id.filterClear).setSelected(!anyFilter);
 
             //sort check icon
             int sort = filter.getSortType();
-            view.findViewById(R.id.imgSortDate).setVisibility(sort == AppConstants.SORT_DATE ? View.VISIBLE : View.INVISIBLE);
-            view.findViewById(R.id.imgSortLocation).setVisibility(sort == AppConstants.SORT_LOCATION ? View.VISIBLE : View.INVISIBLE);
-            view.findViewById(R.id.imgSortWasting).setVisibility(sort == AppConstants.SORT_WASTING ? View.VISIBLE : View.INVISIBLE);
-            view.findViewById(R.id.imgSortStunting).setVisibility(sort == AppConstants.SORT_STUNTING ? View.VISIBLE : View.INVISIBLE);
+            view.findViewById(R.id.sortDate).setSelected(sort == AppConstants.SORT_DATE);
+            view.findViewById(R.id.sortLocation).setSelected(sort == AppConstants.SORT_LOCATION);
+            view.findViewById(R.id.sortWasting).setSelected(sort == AppConstants.SORT_WASTING);
+            view.findViewById(R.id.sortStunting).setSelected(sort == AppConstants.SORT_STUNTING);
 
             //set date info
             if (filter.isDate()) {
                 int diff = (int) Math.ceil((double) (filter.getToDate() - filter.getFromDate()) / 1000 / 3600 / 24);
-                TextView txtView = view.findViewById(R.id.txtFilterDate);
-                txtView.setText(getResources().getString(R.string.last_days, diff));
+                TwoLineTextView txtView = view.findViewById(R.id.filterDate);
+                txtView.setText(2, getResources().getString(R.string.last_days, diff));
             } else {
-                TextView txtView = view.findViewById(R.id.txtFilterDate);
-                txtView.setText(getResources().getString(R.string.last_days).replace("%1$d", "x"));
+                TwoLineTextView txtView = view.findViewById(R.id.filterDate);
+                txtView.setText(2, getResources().getString(R.string.last_days).replace("%1$d", "x"));
             }
 
             //set location info
             if (filter.isLocation()) {
-                TextView txtView = sortDialog.getHolderView().findViewById(R.id.txtFilterLocation);
+                TwoLineTextView txtView = sortDialog.getHolderView().findViewById(R.id.filterLocation);
                 if (filter.getFromLOC() != null) {
-                    txtView.setText(filter.getFromLOC().getAddress());
+                    txtView.setText(2, filter.getFromLOC().getAddress());
                 } else {
-                    txtView.setText(R.string.last_location_error);
+                    txtView.setText(2, getString(R.string.last_location_error));
                 }
             }
         });

@@ -23,8 +23,11 @@
     </declare-styleable>
 
     <declare-styleable name="TwoLineTextView">
-        <attr name="firstText" format="string|reference" />
-        <attr name="secondText" format="string|reference" />
+        <attr name="titleText" format="string|reference" />
+        <attr name="titleTextSize" format="dimension" />
+        <attr name="descriptionText" format="string|reference" />
+        <attr name="checkVisible" format="boolean" />
+        <attr name="separatorVisible" format="boolean" />
         <attr name="submenuVisible" format="boolean" />
         <attr name="toggleVisible" format="boolean" />
     </declare-styleable>
