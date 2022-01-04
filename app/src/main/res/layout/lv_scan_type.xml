@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <LinearLayout
-        android:id="@+id/backScanStep"
+        android:id="@+id/lytScanStepBack"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="30dp"
@@ -56,7 +56,7 @@
                     android:layout_width="60dp"
                     android:layout_height="60dp"
                     android:layout_gravity="right"
-                    android:src="@drawable/stand_front_active" />
+                    android:src="@drawable/stand_front" />
 
                 <LinearLayout
                     android:id="@+id/lytScanAgain"
