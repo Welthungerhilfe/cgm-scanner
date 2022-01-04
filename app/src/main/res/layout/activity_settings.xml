@@ -206,18 +206,20 @@
                         android:textColor="@color/colorPrimary"
                         android:textSize="20sp" />
 
-                    <de.welthungerhilfe.cgm.scanner.ui.views.SubmenuButton
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
                         android:id="@+id/submenu_performance_measurement"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:submenuText="@string/performance_measurement"
+                        app:firstText="@string/performance_measurement"
+                        app:submenuVisible="true"
                         android:onClick="openPerformanceMeasurement"/>
 
-                    <de.welthungerhilfe.cgm.scanner.ui.views.SubmenuButton
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
                         android:id="@+id/submenu_remote_config"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:submenuText="@string/remote_config"
+                        app:firstText="@string/remote_config"
+                        app:submenuVisible="true"
                         android:onClick="openRemoteConfig"/>
 
                     <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView

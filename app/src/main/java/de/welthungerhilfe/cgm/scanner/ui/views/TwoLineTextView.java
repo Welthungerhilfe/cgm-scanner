@@ -23,15 +23,22 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.SwitchCompat;
 
+import com.balysv.materialripple.MaterialRippleLayout;
+
 import de.welthungerhilfe.cgm.scanner.R;
 
 public class TwoLineTextView extends LinearLayout {
 
+    private OnClickListener mListener;
+
+    private MaterialRippleLayout mLayout;
+    private ImageView mSubmenu;
     private TextView mFirstLine;
     private TextView mSecondLine;
     private SwitchCompat mSwitch;
@@ -57,15 +64,26 @@ public class TwoLineTextView extends LinearLayout {
         View root = inflate(getContext(), R.layout.lv_two_line_view, this);
         mFirstLine = root.findViewById(R.id.twoLineFirst);
         mSecondLine = root.findViewById(R.id.twoLineSecond);
+        mSubmenu = root.findViewById(R.id.submenu_button);
         mSwitch = root.findViewById(R.id.toggle_switch);
+
+        mLayout = root.findViewById(R.id.item_layout);
+        mLayout.setOnClickListener(mListener);
     }
 
     private void getAttributes(Context context, AttributeSet attrs, int defStyleAttr) {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TwoLineTextView, defStyleAttr, 0);
+
+        //set texts
         setText(1, a.getString(R.styleable.TwoLineTextView_firstText));
         setText(2, a.getString(R.styleable.TwoLineTextView_secondText));
+
+        //set objects visibility
+        boolean submenu = a.getBoolean(R.styleable.TwoLineTextView_submenuVisible, false);
+        mSubmenu.setVisibility(submenu ? View.VISIBLE : View.GONE);
         boolean toggle = a.getBoolean(R.styleable.TwoLineTextView_toggleVisible, false);
         mSwitch.setVisibility(toggle ? View.VISIBLE : View.GONE);
+
         a.recycle();
     }
 
@@ -75,6 +93,14 @@ public class TwoLineTextView extends LinearLayout {
 
     public void setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener listener) {
         mSwitch.setOnCheckedChangeListener(listener);
+    }
+
+    @Override
+    public void setOnClickListener(OnClickListener listener) {
+        mListener = listener;
+        if (mLayout != null) {
+            mLayout.setOnClickListener(mListener);
+        }
     }
 
     public void setText(int line, String text) {

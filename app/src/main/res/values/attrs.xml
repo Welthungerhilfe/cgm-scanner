@@ -22,13 +22,10 @@
         <attr name="scanmodetext" format="string|reference" />
     </declare-styleable>
 
-    <declare-styleable name="SubmenuButton">
-        <attr name="submenuText" format="string|reference" />
-    </declare-styleable>
-
     <declare-styleable name="TwoLineTextView">
         <attr name="firstText" format="string|reference" />
         <attr name="secondText" format="string|reference" />
+        <attr name="submenuVisible" format="boolean" />
         <attr name="toggleVisible" format="boolean" />
     </declare-styleable>
 
