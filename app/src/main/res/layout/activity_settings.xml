@@ -184,11 +184,12 @@
                         android:textColor="@color/colorPrimary"
                         android:textSize="20sp" />
 
-                    <de.welthungerhilfe.cgm.scanner.ui.views.ToggleView
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
                         android:id="@+id/upload_over_wifi"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:toggleText="@string/upload_over_wifi" />
+                        app:firstText="@string/upload_over_wifi"
+                        app:toggleVisible="true" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -219,11 +220,12 @@
                         app:submenuText="@string/remote_config"
                         android:onClick="openRemoteConfig"/>
 
-                    <de.welthungerhilfe.cgm.scanner.ui.views.ToggleView
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
                         android:id="@+id/show_depth_data"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:toggleText="@string/show_depth_data"
+                        app:firstText="@string/show_depth_data"
+                        app:toggleVisible="true"
                         android:onClick="openRemoteConfig"/>
                 </LinearLayout>
 

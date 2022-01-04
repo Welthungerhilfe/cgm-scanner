@@ -26,13 +26,10 @@
         <attr name="submenuText" format="string|reference" />
     </declare-styleable>
 
-    <declare-styleable name="ToggleView">
-        <attr name="toggleText" format="string|reference" />
-    </declare-styleable>
-
     <declare-styleable name="TwoLineTextView">
         <attr name="firstText" format="string|reference" />
         <attr name="secondText" format="string|reference" />
+        <attr name="toggleVisible" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="UnitEditText">

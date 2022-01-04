@@ -22,8 +22,11 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.appcompat.widget.SwitchCompat;
 
 import de.welthungerhilfe.cgm.scanner.R;
 
@@ -31,6 +34,7 @@ public class TwoLineTextView extends LinearLayout {
 
     private TextView mFirstLine;
     private TextView mSecondLine;
+    private SwitchCompat mSwitch;
 
     public TwoLineTextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -53,23 +57,44 @@ public class TwoLineTextView extends LinearLayout {
         View root = inflate(getContext(), R.layout.lv_two_line_view, this);
         mFirstLine = root.findViewById(R.id.twoLineFirst);
         mSecondLine = root.findViewById(R.id.twoLineSecond);
+        mSwitch = root.findViewById(R.id.toggle_switch);
     }
 
     private void getAttributes(Context context, AttributeSet attrs, int defStyleAttr) {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TwoLineTextView, defStyleAttr, 0);
-        mFirstLine.setText(a.getString(R.styleable.TwoLineTextView_firstText));
-        mSecondLine.setText(a.getString(R.styleable.TwoLineTextView_secondText));
+        setText(1, a.getString(R.styleable.TwoLineTextView_firstText));
+        setText(2, a.getString(R.styleable.TwoLineTextView_secondText));
+        boolean toggle = a.getBoolean(R.styleable.TwoLineTextView_toggleVisible, false);
+        mSwitch.setVisibility(toggle ? View.VISIBLE : View.GONE);
         a.recycle();
     }
 
+    public void setChecked(boolean checked) {
+        mSwitch.setChecked(checked);
+    }
+
+    public void setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener listener) {
+        mSwitch.setOnCheckedChangeListener(listener);
+    }
+
     public void setText(int line, String text) {
+        TextView view;
         switch (line) {
             case 1:
-                mFirstLine.setText(text);
+                view = mFirstLine;
                 break;
             case 2:
-                mSecondLine.setText(text);
+                view = mSecondLine;
                 break;
+            default:
+                return;
+        }
+
+        if (text != null) {
+            view.setText(text);
+            view.setVisibility(View.VISIBLE);
+        } else {
+            view.setVisibility(View.GONE);
         }
     }
 }
