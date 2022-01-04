@@ -91,7 +91,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:scantypecolor="@color/colorGreenLight"
-                        app:scantypeicon="@drawable/stand_front_active"
+                        app:scantypeicon="@drawable/stand_front"
                         app:scantypetitle="@string/front_scan"
                         app:scantypetext="@string/help_front_view_2" />
 
@@ -100,7 +100,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:scantypecolor="@color/colorGreenMedium"
-                        app:scantypeicon="@drawable/stand_side_active"
+                        app:scantypeicon="@drawable/stand_side"
                         app:scantypetitle="@string/side_scan"
                         app:scantypetext="@string/help_lateral_view" />
 
@@ -109,7 +109,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:scantypecolor="@color/colorGreenDark"
-                        app:scantypeicon="@drawable/stand_back_active"
+                        app:scantypeicon="@drawable/stand_back"
                         app:scantypetitle="@string/back_scan"
                         app:scantypetext="@string/help_back_view" />
 
@@ -154,7 +154,7 @@
                     android:id="@+id/imgClose"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/close"
+                    android:src="@drawable/ic_close"
                     android:tint="@color/colorWhite"
                     tools:ignore="ContentDescription" />
 
