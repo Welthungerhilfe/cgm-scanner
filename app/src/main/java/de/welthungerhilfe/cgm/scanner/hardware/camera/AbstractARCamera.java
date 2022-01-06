@@ -320,7 +320,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
                 }
             }
         }
-        mNoiseAmount = diffDepth;
+        mNoiseAmount = diffDepth > 0.0005f ? diffDepth : 1000;
         return mDepthmap;
     }
 
