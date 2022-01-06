@@ -181,8 +181,8 @@ public class ComputerVisionUtils {
         return bitmap;
     }
 
-    public Bitmap getDepthPreviewCenter(float[][] depth, float plane, float[] calibration, float[] matrix, boolean otherColors) {
-        Bitmap bitmap = getDepthPreviewPlane(depth, plane, calibration, matrix);
+    public Bitmap getDepthPreviewCenter(float[][] depth, float plane, boolean otherColors) {
+        Bitmap bitmap = getDepthPreviewSobel(depth);
         int w = bitmap.getWidth();
         int h = bitmap.getHeight();
         int[] pixels = new int[w * h];
@@ -287,10 +287,10 @@ public class ComputerVisionUtils {
                 float px = depth[x][y] - depth[x + 1][y];
                 float my = depth[x][y] - depth[x][y - 1];
                 float py = depth[x][y] - depth[x][y + 1];
-                float value = (Math.abs(mx) + Math.abs(px) + Math.abs(my) + Math.abs(py)) * 1000.0f;
-                int r = (int) Math.max(0, Math.min(1.0f * value, 255));
-                int g = (int) Math.max(0, Math.min(2.0f * value, 255));
-                int b = (int) Math.max(0, Math.min(3.0f * value, 255));
+                float value = (Math.abs(mx) + Math.abs(px) + Math.abs(my) + Math.abs(py));
+                int r = (int) Math.max(0, Math.min(1000.0f * value, 255));
+                int g = (int) Math.max(0, Math.min(2000.0f * value, 255));
+                int b = (int) Math.max(0, Math.min(3000.0f * value, 255));
                 bitmap.setPixel(x, y, Color.argb(ALPHA_DEFAULT, r, g, b));
             }
         }

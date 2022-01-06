@@ -593,16 +593,26 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private AbstractARCamera getCamera() {
         if (mCameraInstance == null) {
-            AbstractARCamera.DepthPreviewMode depthMode = AbstractARCamera.DepthPreviewMode.FOCUS;
+            AbstractARCamera.DepthPreviewMode depthMode;
             AbstractARCamera.PreviewSize previewSize = AbstractARCamera.PreviewSize.CLIPPED;
             if (LocalPersistency.getBoolean(this, SettingsActivity.KEY_SHOW_DEPTH)) {
-                depthMode = AbstractARCamera.DepthPreviewMode.CENTER;
+                if (AREngineCamera.shouldUseAREngine()) {
+                    depthMode = AbstractARCamera.DepthPreviewMode.CENTER;
+                } else {
+                    depthMode = AbstractARCamera.DepthPreviewMode.CENTER_LOW_POWER;
+                }
+            } else {
+                if (AREngineCamera.shouldUseAREngine()) {
+                    depthMode = AbstractARCamera.DepthPreviewMode.FOCUS;
+                } else {
+                    depthMode = AbstractARCamera.DepthPreviewMode.FOCUS_LOW_POWER;
+                }
             }
 
             if (AREngineCamera.shouldUseAREngine()) {
                 mCameraInstance = new AREngineCamera(this, depthMode, previewSize);
             } else {
-                mCameraInstance = new ARCoreCamera(this, AbstractARCamera.DepthPreviewMode.OFF, previewSize);
+                mCameraInstance = new ARCoreCamera(this, depthMode, previewSize);
             }
         }
         return mCameraInstance;
@@ -676,9 +686,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             }
 
             //realtime value
-            //String text = getString(R.string.label_height) + " : " + String.format(Locale.US,"~%dcm", (int)(height * 100));
-            //String text = "Noise amount: " + String.format(Locale.US, "%.3f", getCamera().getDepthNoiseAmount());
-            //runOnUiThread(() -> mTitleView.setText(text));
+            /*String text = getString(R.string.label_height) + " : " + String.format(Locale.US,"~%.1fcm", height * 100.0f) +
+            "\nNoise amount: " + String.format(Locale.US, "%.3f", getCamera().getDepthNoiseAmount());
+            runOnUiThread(() -> mTitleView.setText(text));*/
         }
         onFeedbackUpdate();
 

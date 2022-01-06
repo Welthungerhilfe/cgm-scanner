@@ -59,7 +59,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         void onDepthDataReceived(Depthmap depthmap, int frameIndex);
     }
 
-    public enum DepthPreviewMode { OFF, SOBEL, PLANE, CENTER, FOCUS, CALIBRATION };
+    public enum DepthPreviewMode { OFF, SOBEL, PLANE, CENTER, CENTER_LOW_POWER, FOCUS, FOCUS_LOW_POWER, CALIBRATION };
 
     public enum LightConditions { NORMAL, BRIGHT, DARK };
 
@@ -112,11 +112,11 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     protected PlaneMode mPlaneMode;
     protected PreviewSize mPreviewSize;
     protected TrackingState mTrackingState;
+    protected ArrayList<Float> mPlanes;
     protected long mLastBright;
     protected long mLastDark;
     protected long mSessionStart;
 
-    protected abstract ByteOrder getDepthByteOrder();
     protected abstract void closeCamera();
     protected abstract void openCamera();
     protected abstract void updateFrame();
@@ -133,6 +133,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
         mFrameIndex = 1;
         mPixelIntensity = 0;
+        mPlanes = new ArrayList<>();
         mDepthMode = depthMode;
         mPreviewSize = previewSize;
         mLight = LightConditions.NORMAL;
@@ -212,6 +213,39 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         }
     }
 
+    protected void onProcessColorData(Bitmap bitmap) {
+        for (Object listener : mListeners) {
+            ((Camera2DataListener)listener).onColorDataReceived(bitmap, mFrameIndex);
+        }
+
+        //update preview window
+        mActivity.runOnUiThread(() -> {
+            float scale = getPreviewScale(bitmap);
+            mColorCameraPreview.setImageBitmap(bitmap);
+            mColorCameraPreview.setRotation(90);
+            mColorCameraPreview.setScaleX(scale);
+            mColorCameraPreview.setScaleY(scale);
+            mDepthCameraPreview.setRotation(90);
+            mDepthCameraPreview.setScaleX(scale);
+            mDepthCameraPreview.setScaleY(scale);
+        });
+    }
+
+    protected void onProcessDepthData(Depthmap depthmap) {
+        if (depthmap == null) {
+            return;
+        }
+
+        for (Object listener : mListeners) {
+            ((Camera2DataListener)listener).onDepthDataReceived(depthmap, mFrameIndex);
+        }
+
+        Bitmap preview = getDepthPreview(depthmap, mPlanes, mColorCameraIntrinsic);
+        if (preview != null) {
+            mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
+        }
+    }
+
     public void addListener(Object listener) {
         mListeners.add(listener);
     }
@@ -240,7 +274,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         //extract data
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
-        buffer = buffer.order(getDepthByteOrder());
+        buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
         ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
         ArrayList<Short> pixel = new ArrayList<>();
         while (shortDepthBuffer.hasRemaining()) {
@@ -356,11 +390,28 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
     public Bitmap getDepthPreview(Depthmap depthmap, ArrayList<Float> planes, float[] calibration) {
 
+        DepthPreviewMode mode = mDepthMode;
+        switch (mDepthMode) {
+            case CENTER_LOW_POWER:
+                if (mFrameIndex % 60 == 0) {
+                    mode = DepthPreviewMode.CENTER;
+                } else {
+                    mode = DepthPreviewMode.SOBEL;
+                }
+                break;
+            case FOCUS_LOW_POWER:
+                if (mFrameIndex % 60 == 0) {
+                    mode = DepthPreviewMode.FOCUS;
+                    break;
+                } else {
+                    return null;
+                }
+        }
         mTargetDistance = mTargetDistance * 0.9f + depthmap.distance * 0.1f;
 
         float bestPlane;
         float[] matrix = depthmap.getMatrix();
-        switch (mDepthMode) {
+        switch (mode) {
             case CALIBRATION:
                 Matrix.invertM(matrix, 0, matrix, 0);
                 ArrayList<ComputerVisionUtils.Point3F> edges;
@@ -390,7 +441,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
             case FOCUS:
                 boolean otherColors = mDepthMode == DepthPreviewMode.CENTER;
                 bestPlane = getPlane(depthmap.depth, planes, calibration, matrix, depthmap.position);
-                Bitmap mask = mComputerVision.getDepthPreviewCenter(depthmap.depth, bestPlane, calibration, matrix, otherColors);
+                Bitmap mask = mComputerVision.getDepthPreviewCenter(depthmap.depth, bestPlane, otherColors);
                 mTargetHeight = mComputerVision.getCenterFocusHeight(mask, depthmap.depth, bestPlane, calibration, matrix);
 
                 boolean valid = mComputerVision.isFocusValid(mask) && (mTargetHeight >= 0.45) && (mTargetHeight <= 1.3);
@@ -398,7 +449,11 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
                     mask = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
                 }
                 updateTrackingState(valid);
-                return mask;
+                if (mDepthMode == DepthPreviewMode.CENTER_LOW_POWER) {
+                    return null;
+                } else {
+                    return mask;
+                }
             case PLANE:
                 bestPlane = getPlane(depthmap.depth, planes, calibration, matrix, depthmap.position);
                 return mComputerVision.getDepthPreviewPlane(depthmap.depth, bestPlane, calibration, matrix);

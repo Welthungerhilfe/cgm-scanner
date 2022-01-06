@@ -37,9 +37,6 @@ import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
@@ -50,56 +47,10 @@ public class ARCoreCamera extends AbstractARCamera {
 
   //ARCore API
   private boolean mInstallRequested;
-  private ArrayList<Float> mPlanes;
   private Session mSession;
 
   public ARCoreCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
     super(activity, depthMode, previewSize);
-    mPlanes = new ArrayList<>();
-  }
-
-  private void onProcessColorData(Bitmap bitmap) {
-    for (Object listener : mListeners) {
-      ((Camera2DataListener)listener).onColorDataReceived(bitmap, mFrameIndex);
-    }
-
-    //update preview window
-    mActivity.runOnUiThread(() -> {
-      float scale = getPreviewScale(bitmap);
-      mColorCameraPreview.setImageBitmap(bitmap);
-      mColorCameraPreview.setRotation(90);
-      mColorCameraPreview.setScaleX(scale);
-      mColorCameraPreview.setScaleY(scale);
-      mDepthCameraPreview.setRotation(90);
-      mDepthCameraPreview.setScaleX(scale);
-      mDepthCameraPreview.setScaleY(scale);
-    });
-  }
-
-  private void onProcessDepthData(Depthmap depthmap) {
-    if (depthmap == null) {
-      return;
-    }
-
-    //get one frame per two seconds to calculate height
-    if (mFrameIndex % 60 == 0) {
-      DepthPreviewMode mode = mDepthMode;
-      mDepthMode = DepthPreviewMode.FOCUS;
-      getDepthPreview(depthmap, mPlanes, mColorCameraIntrinsic);
-      mDepthMode = mode;
-    } else {
-      Bitmap preview = getDepthPreview(depthmap, mPlanes, mColorCameraIntrinsic);
-      mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
-    }
-
-    for (Object listener : mListeners) {
-      ((Camera2DataListener)listener).onDepthDataReceived(depthmap, mFrameIndex);
-    }
-  }
-
-  @Override
-  protected ByteOrder getDepthByteOrder() {
-    return ByteOrder.BIG_ENDIAN;
   }
 
   @Override

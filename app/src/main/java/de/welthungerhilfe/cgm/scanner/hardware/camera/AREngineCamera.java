@@ -40,9 +40,6 @@ import com.huawei.hiar.ARPose;
 import com.huawei.hiar.ARSession;
 import com.huawei.hiar.ARWorldTrackingConfig;
 
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -61,61 +58,10 @@ public class AREngineCamera extends AbstractARCamera {
 
   //AREngine API
   private ARSession mSession;
-  private ArrayList<Float> mPlanes;
   private boolean mFirstRequest;
-
-  //App integration objects
-  private Bitmap mCache;
 
   public AREngineCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
     super(activity, depthMode, previewSize);
-    mPlanes = new ArrayList<>();
-  }
-
-  private void onProcessColorData(Bitmap bitmap) {
-    if (bitmap == null) {
-      return;
-    }
-
-    mCache = bitmap;
-
-    //update preview window
-    mActivity.runOnUiThread(() -> {
-      float scale = getPreviewScale(bitmap);
-      mColorCameraPreview.setImageBitmap(bitmap);
-      mColorCameraPreview.setRotation(90);
-      mColorCameraPreview.setScaleX(scale);
-      mColorCameraPreview.setScaleY(scale);
-      mDepthCameraPreview.setRotation(90);
-      mDepthCameraPreview.setScaleX(scale);
-      mDepthCameraPreview.setScaleY(scale);
-    });
-  }
-
-  private void onProcessDepthData(Depthmap depthmap) {
-    if (depthmap == null) {
-      return;
-    }
-
-    Bitmap preview = getDepthPreview(depthmap, mPlanes, mColorCameraIntrinsic);
-    mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
-
-    if (mCache != null) {
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onDepthDataReceived(depthmap, mFrameIndex);
-      }
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onColorDataReceived(mCache, mFrameIndex);
-      }
-
-      mCache = null;
-      mFrameIndex++;
-    }
-  }
-
-  @Override
-  protected ByteOrder getDepthByteOrder() {
-    return ByteOrder.LITTLE_ENDIAN;
   }
 
   @Override
@@ -277,6 +223,7 @@ public class AREngineCamera extends AbstractARCamera {
       //process camera data
       onProcessColorData(color);
       onProcessDepthData(depth);
+      mFrameIndex++;
     } catch (Exception e) {
       e.printStackTrace();
     }
