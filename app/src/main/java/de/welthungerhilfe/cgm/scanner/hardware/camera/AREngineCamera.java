@@ -40,9 +40,6 @@ import com.huawei.hiar.ARPose;
 import com.huawei.hiar.ARSession;
 import com.huawei.hiar.ARWorldTrackingConfig;
 
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -61,70 +58,10 @@ public class AREngineCamera extends AbstractARCamera {
 
   //AREngine API
   private ARSession mSession;
-  private ArrayList<Float> mPlanes;
   private boolean mFirstRequest;
-
-  //App integration objects
-  private Bitmap mCache;
 
   public AREngineCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
     super(activity, depthMode, previewSize);
-    mPlanes = new ArrayList<>();
-  }
-
-  private void onProcessColorData(Bitmap bitmap) {
-    if (bitmap == null) {
-      return;
-    }
-
-    mCache = bitmap;
-
-    //update preview window
-    mActivity.runOnUiThread(() -> {
-      float scale = getPreviewScale(bitmap);
-      mColorCameraPreview.setImageBitmap(bitmap);
-      mColorCameraPreview.setRotation(90);
-      mColorCameraPreview.setScaleX(scale);
-      mColorCameraPreview.setScaleY(scale);
-      mDepthCameraPreview.setRotation(90);
-      mDepthCameraPreview.setScaleX(scale);
-      mDepthCameraPreview.setScaleY(scale);
-    });
-  }
-
-  private void onProcessDepthData(Image image) {
-    float[] position;
-    float[] rotation;
-    synchronized (mLock) {
-      position = mPosition;
-      rotation = mRotation;
-    }
-
-    if (!hasCameraCalibration()) {
-      image.close();
-      return;
-    }
-
-    Bitmap preview = getDepthPreview(image, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
-    mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
-
-    if (mCache != null) {
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, mFrameIndex);
-      }
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onColorDataReceived(mCache, mFrameIndex);
-      }
-
-      mCache = null;
-      mFrameIndex++;
-    }
-    image.close();
-  }
-
-  @Override
-  protected ByteOrder getDepthByteOrder() {
-    return ByteOrder.LITTLE_ENDIAN;
   }
 
   @Override
@@ -248,12 +185,8 @@ public class AREngineCamera extends AbstractARCamera {
       }
 
       //get pose from AREngine
-      synchronized (mLock) {
-        ARCamera camera = frame.getCamera();
-        ARPose pose = camera.getPose();
-        pose.getTranslation(mPosition, 0);
-        pose.getRotationQuaternion(mRotation, 0);
-      }
+      ARCamera camera = frame.getCamera();
+      ARPose pose = camera.getPose();
 
       //get light estimation from AREngine
       mPixelIntensity = frame.getLightEstimate().getPixelIntensity() * 2.0f;
@@ -271,10 +204,17 @@ public class AREngineCamera extends AbstractARCamera {
 
       //get camera data
       Bitmap color = null;
-      Image depth = null;
+      Depthmap depth = null;
       try {
         color = mRTT.renderData(mCameraTextureId, mTextureRes);
-        depth = frame.acquireDepthImage();
+        if (hasCameraCalibration()) {
+          Image image = frame.acquireDepthImage();
+          float[] position = new float[3];
+          float[] rotation = new float[4];
+          pose.getTranslation(position, 0);
+          pose.getRotationQuaternion(rotation, 0);
+          depth = updateDepthmap(image, position, rotation);
+        }
       } catch (Exception e) {
         e.printStackTrace();
         installAREngine();
@@ -283,6 +223,7 @@ public class AREngineCamera extends AbstractARCamera {
       //process camera data
       onProcessColorData(color);
       onProcessDepthData(depth);
+      mFrameIndex++;
     } catch (Exception e) {
       e.printStackTrace();
     }

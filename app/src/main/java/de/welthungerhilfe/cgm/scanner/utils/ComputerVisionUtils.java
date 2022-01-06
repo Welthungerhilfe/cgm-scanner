@@ -105,7 +105,7 @@ public class ComputerVisionUtils {
                 int tx = (int) (-point[0] * fx / point[2] + cx);
                 int ty = (int) (point[1] * fy / point[2] + cy);
                 if ((tx >= 0) && (ty >= 0) && (tx < w) && (ty < h)) {
-                    float z = depth[tx][ty] * 0.001f;
+                    float z = depth[tx][ty];
                     if (z > 0) {
                         float vx = (tx - cx) * z / fx;
                         float vy = (ty - cy) * z / fy;
@@ -133,7 +133,7 @@ public class ComputerVisionUtils {
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
                     if (Color.alpha(pixels[y * w + x]) == ALPHA_FOCUS) {
-                        float z = depth[x][y] * 0.001f;
+                        float z = depth[x][y];
                         if (z > 0) {
                             float tx = (x - cx) * z / fx;
                             float ty = (y - cy) * z / fy;
@@ -181,8 +181,8 @@ public class ComputerVisionUtils {
         return bitmap;
     }
 
-    public Bitmap getDepthPreviewCenter(float[][] depth, float plane, float[] calibration, float[] matrix, boolean otherColors) {
-        Bitmap bitmap = getDepthPreviewPlane(depth, plane, calibration, matrix);
+    public Bitmap getDepthPreviewCenter(float[][] depth, float plane, boolean otherColors) {
+        Bitmap bitmap = getDepthPreviewSobel(depth);
         int w = bitmap.getWidth();
         int h = bitmap.getHeight();
         int[] pixels = new int[w * h];
@@ -254,7 +254,7 @@ public class ComputerVisionUtils {
         float cy = calibration[3] * (float)h;
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                float z = depth[x][y] * 0.001f;
+                float z = depth[x][y];
                 if (z > 0) {
                     float tx = (x - cx) * z / fx;
                     float ty = (y - cy) * z / fy;
@@ -287,10 +287,10 @@ public class ComputerVisionUtils {
                 float px = depth[x][y] - depth[x + 1][y];
                 float my = depth[x][y] - depth[x][y - 1];
                 float py = depth[x][y] - depth[x][y + 1];
-                float value = Math.abs(mx) + Math.abs(px) + Math.abs(my) + Math.abs(py);
-                int r = (int) Math.max(0, Math.min(1.0f * value, 255));
-                int g = (int) Math.max(0, Math.min(2.0f * value, 255));
-                int b = (int) Math.max(0, Math.min(3.0f * value, 255));
+                float value = (Math.abs(mx) + Math.abs(px) + Math.abs(my) + Math.abs(py));
+                int r = (int) Math.max(0, Math.min(1000.0f * value, 255));
+                int g = (int) Math.max(0, Math.min(2000.0f * value, 255));
+                int b = (int) Math.max(0, Math.min(3000.0f * value, 255));
                 bitmap.setPixel(x, y, Color.argb(ALPHA_DEFAULT, r, g, b));
             }
         }
@@ -322,7 +322,7 @@ public class ComputerVisionUtils {
             float value = f - 2.0f * position[1];
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
-                    float z = depth[x][y] * 0.001f;
+                    float z = depth[x][y];
                     if (z > 0) {
                         float tx = (x - cx) * z / fx;
                         float ty = (y - cy) * z / fy;
@@ -364,43 +364,6 @@ public class ComputerVisionUtils {
         valid.addPoint(m, m);
         valid.addPoint(w - m, h - m);
         return focus.isInside(valid);
-    }
-
-    public float[] matrixCalculate(float[] position, float[] rotation) {
-        float[] matrix = {1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1};
-
-        double sqw = rotation[3] * rotation[3];
-        double sqx = rotation[0] * rotation[0];
-        double sqy = rotation[1] * rotation[1];
-        double sqz = rotation[2] * rotation[2];
-
-        double invs = 1 / (sqx + sqy + sqz + sqw);
-        matrix[0] = (float) ((sqx - sqy - sqz + sqw) * invs);
-        matrix[5] = (float) ((-sqx + sqy - sqz + sqw) * invs);
-        matrix[10] = (float) ((-sqx - sqy + sqz + sqw) * invs);
-
-        double tmp1 = rotation[0] * rotation[1];
-        double tmp2 = rotation[2] * rotation[3];
-        matrix[1] = (float) (2.0 * (tmp1 + tmp2) * invs);
-        matrix[4] = (float) (2.0 * (tmp1 - tmp2) * invs);
-
-        tmp1 = rotation[0] * rotation[2];
-        tmp2 = rotation[1] * rotation[3];
-        matrix[2] = (float) (2.0 * (tmp1 - tmp2) * invs);
-        matrix[8] = (float) (2.0 * (tmp1 + tmp2) * invs);
-
-        tmp1 = rotation[1] * rotation[2];
-        tmp2 = rotation[0] * rotation[3];
-        matrix[6] = (float) (2.0 * (tmp1 + tmp2) * invs);
-        matrix[9] = (float) (2.0 * (tmp1 - tmp2) * invs);
-
-        matrix[12] = position[0];
-        matrix[13] = position[1];
-        matrix[14] = position[2];
-        return matrix;
     }
 
     private float[] matrixTransformPoint(float[] matrix, float x, float y, float z) {

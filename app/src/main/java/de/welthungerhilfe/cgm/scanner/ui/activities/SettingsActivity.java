@@ -112,12 +112,8 @@ public class SettingsActivity extends BaseActivity {
         activitySettingsBinding.testQAlayout.setVisibility(showQA ? View.VISIBLE : View.GONE);
 
         activitySettingsBinding.txtSettingUuid.setText(2, Utils.getAndroidID(getContentResolver()));
-        if (!AREngineCamera.shouldUseAREngine()) {
-            activitySettingsBinding.showDepthData.setVisibility(View.GONE);
-        } else {
-            activitySettingsBinding.showDepthData.setChecked(LocalPersistency.getBoolean(this, KEY_SHOW_DEPTH));
-            activitySettingsBinding.showDepthData.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_SHOW_DEPTH, value));
-        }
+        activitySettingsBinding.showDepthData.setChecked(LocalPersistency.getBoolean(this, KEY_SHOW_DEPTH));
+        activitySettingsBinding.showDepthData.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_SHOW_DEPTH, value));
 
         activitySettingsBinding.uploadOverWifi.setChecked(LocalPersistency.getBoolean(this, KEY_UPLOAD_WIFI));
         activitySettingsBinding.uploadOverWifi.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_UPLOAD_WIFI, value));

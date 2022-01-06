@@ -37,9 +37,6 @@ import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
@@ -50,72 +47,10 @@ public class ARCoreCamera extends AbstractARCamera {
 
   //ARCore API
   private boolean mInstallRequested;
-  private ArrayList<Float> mPlanes;
   private Session mSession;
-  private final Object mLock;
 
   public ARCoreCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
     super(activity, depthMode, previewSize);
-    mLock = new Object();
-    mPlanes = new ArrayList<>();
-  }
-
-  private void onProcessColorData(Bitmap bitmap) {
-    for (Object listener : mListeners) {
-      ((Camera2DataListener)listener).onColorDataReceived(bitmap, mFrameIndex);
-    }
-
-    //update preview window
-    mActivity.runOnUiThread(() -> {
-      float scale = getPreviewScale(bitmap);
-      mColorCameraPreview.setImageBitmap(bitmap);
-      mColorCameraPreview.setRotation(90);
-      mColorCameraPreview.setScaleX(scale);
-      mColorCameraPreview.setScaleY(scale);
-      mDepthCameraPreview.setRotation(90);
-      mDepthCameraPreview.setScaleX(scale);
-      mDepthCameraPreview.setScaleY(scale);
-    });
-  }
-
-  private void onProcessDepthData(Image image) {
-    if (image == null) {
-      Log.w(TAG, "onImageAvailable: Skipping null image.");
-      return;
-    }
-
-    if (!hasCameraCalibration()) {
-      image.close();
-      return;
-    }
-
-    float[] position;
-    float[] rotation;
-    synchronized (mLock) {
-      position = mPosition;
-      rotation = mRotation;
-    }
-
-    //get one frame per two seconds to calculate height
-    if (mFrameIndex % 60 == 0) {
-      DepthPreviewMode mode = mDepthMode;
-      mDepthMode = DepthPreviewMode.FOCUS;
-      getDepthPreview(image, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
-      mDepthMode = mode;
-    } else {
-      Bitmap preview = getDepthPreview(image, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
-      mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
-    }
-
-    for (Object listener : mListeners) {
-      ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, mFrameIndex);
-    }
-    image.close();
-  }
-
-  @Override
-  protected ByteOrder getDepthByteOrder() {
-    return ByteOrder.BIG_ENDIAN;
   }
 
   @Override
@@ -256,12 +191,8 @@ public class ARCoreCamera extends AbstractARCamera {
       }
 
       //get pose from ARCore
-      synchronized (mLock) {
-        Camera camera = frame.getCamera();
-        Pose pose = camera.getPose();
-        mPosition = pose.getTranslation();
-        mRotation = pose.getRotationQuaternion();
-      }
+      Camera camera = frame.getCamera();
+      Pose pose = camera.getPose();
 
       //get planes
       mPlanes.clear();
@@ -285,21 +216,22 @@ public class ARCoreCamera extends AbstractARCamera {
 
       //get camera data
       Bitmap color = null;
-      Image depth = null;
+      Depthmap depth = null;
       try {
         color = mRTT.renderData(mCameraTextureId, mTextureRes);
-        depth = frame.acquireDepthImage();
+        if (hasCameraCalibration() && mSession.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+          if (mFrameIndex % AppConstants.SCAN_FRAMESKIP == 0) {
+            Image image = frame.acquireRawDepthImage();
+            depth = updateDepthmap(image, pose.getTranslation(), pose.getRotationQuaternion());
+          }
+        }
       } catch (Exception e) {
         e.printStackTrace();
       }
 
       //process camera data
       onProcessColorData(color);
-      if (mSession.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
-        if ((mFrameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
-          onProcessDepthData(depth);
-        }
-      }
+      onProcessDepthData(depth);
       mFrameIndex++;
 
     } catch (Exception e) {
