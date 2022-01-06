@@ -25,8 +25,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class Depthmap {
-    byte[] confidence;
-    short[] depth;
+    byte[][] confidence;
+    float[][] depth;
+    float distance;
     int count;
     int width;
     int height;
@@ -39,8 +40,9 @@ public class Depthmap {
         this.height = height;
 
         count = 0;
-        confidence = new byte[width * height];
-        depth = new short[width * height];
+        distance = 0;
+        confidence = new byte[width][height];
+        depth = new float[width][height];
         position = new float[] {0, 0, 0};
         rotation = new float[] {0, 0, 0, 1};
     }
@@ -54,13 +56,50 @@ public class Depthmap {
         byte[] output = new byte[width * height * 3];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                short depthRange = depth[y * width + x];
+                short depthRange = (short) (depth[x][y] * 1000);
                 output[index++] = (byte) (depthRange / 256);
                 output[index++] = (byte) (depthRange % 256);
-                output[index++] = confidence[y * width + x];
+                output[index++] = confidence[x][y];
             }
         }
         return output;
+    }
+
+    public float[] getMatrix() {
+        float[] matrix = {1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1};
+
+        double sqw = rotation[3] * rotation[3];
+        double sqx = rotation[0] * rotation[0];
+        double sqy = rotation[1] * rotation[1];
+        double sqz = rotation[2] * rotation[2];
+
+        double invs = 1 / (sqx + sqy + sqz + sqw);
+        matrix[0] = (float) ((sqx - sqy - sqz + sqw) * invs);
+        matrix[5] = (float) ((-sqx + sqy - sqz + sqw) * invs);
+        matrix[10] = (float) ((-sqx - sqy + sqz + sqw) * invs);
+
+        double tmp1 = rotation[0] * rotation[1];
+        double tmp2 = rotation[2] * rotation[3];
+        matrix[1] = (float) (2.0 * (tmp1 + tmp2) * invs);
+        matrix[4] = (float) (2.0 * (tmp1 - tmp2) * invs);
+
+        tmp1 = rotation[0] * rotation[2];
+        tmp2 = rotation[1] * rotation[3];
+        matrix[2] = (float) (2.0 * (tmp1 - tmp2) * invs);
+        matrix[8] = (float) (2.0 * (tmp1 + tmp2) * invs);
+
+        tmp1 = rotation[1] * rotation[2];
+        tmp2 = rotation[0] * rotation[3];
+        matrix[6] = (float) (2.0 * (tmp1 + tmp2) * invs);
+        matrix[9] = (float) (2.0 * (tmp1 - tmp2) * invs);
+
+        matrix[12] = position[0];
+        matrix[13] = position[1];
+        matrix[14] = position[2];
+        return matrix;
     }
 
     public String getPose(String separator) {

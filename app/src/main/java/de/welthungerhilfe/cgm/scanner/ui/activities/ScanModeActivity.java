@@ -27,19 +27,9 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationManager;
-import android.media.Image;
 import android.media.MediaActionSound;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import androidx.core.app.ActivityCompat;
-import androidx.appcompat.app.ActionBar;
-import androidx.databinding.DataBindingUtil;
-
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -49,6 +39,13 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.core.app.ActivityCompat;
+import androidx.databinding.DataBindingUtil;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.microsoft.appcenter.crashes.Crashes;
 
@@ -58,33 +55,33 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityScanModeBinding;
-import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
-import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
-import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
-import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
-import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
 import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
+import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, ScanTypeView.ScanTypeListener {
@@ -248,11 +245,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private int threadsCount = 0;
     private final Object threadsLock = new Object();
 
-    private ImageView colorCameraPreview;
-    private ImageView depthCameraPreview;
-    private ImageView scanOutline;
-    private GLSurfaceView glSurfaceView;
-
     private AbstractARCamera mCameraInstance;
 
     public void onStart() {
@@ -322,10 +314,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         findViewById(R.id.imgClose).setOnClickListener(this);
 
-        colorCameraPreview = findViewById(R.id.colorCameraPreview);
-        depthCameraPreview = findViewById(R.id.depthCameraPreview);
-        glSurfaceView = findViewById(R.id.surfaceview);
-        scanOutline = findViewById(R.id.scanOutline);
+        ImageView colorCameraPreview = findViewById(R.id.colorCameraPreview);
+        ImageView depthCameraPreview = findViewById(R.id.depthCameraPreview);
+        GLSurfaceView glSurfaceView = findViewById(R.id.surfaceview);
         getCamera().onCreate(colorCameraPreview, depthCameraPreview, glSurfaceView);
 
         measureRepository = MeasureRepository.getInstance(this);
@@ -601,16 +592,26 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private AbstractARCamera getCamera() {
         if (mCameraInstance == null) {
-            AbstractARCamera.DepthPreviewMode depthMode = AbstractARCamera.DepthPreviewMode.FOCUS;
+            AbstractARCamera.DepthPreviewMode depthMode;
             AbstractARCamera.PreviewSize previewSize = AbstractARCamera.PreviewSize.CLIPPED;
             if (LocalPersistency.getBoolean(this, SettingsActivity.KEY_SHOW_DEPTH)) {
-                depthMode = AbstractARCamera.DepthPreviewMode.CENTER;
+                if (AREngineCamera.shouldUseAREngine()) {
+                    depthMode = AbstractARCamera.DepthPreviewMode.CENTER;
+                } else {
+                    depthMode = AbstractARCamera.DepthPreviewMode.CENTER_LOW_POWER;
+                }
+            } else {
+                if (AREngineCamera.shouldUseAREngine()) {
+                    depthMode = AbstractARCamera.DepthPreviewMode.FOCUS;
+                } else {
+                    depthMode = AbstractARCamera.DepthPreviewMode.FOCUS_LOW_POWER;
+                }
             }
 
             if (AREngineCamera.shouldUseAREngine()) {
                 mCameraInstance = new AREngineCamera(this, depthMode, previewSize);
             } else {
-                mCameraInstance = new ARCoreCamera(this, AbstractARCamera.DepthPreviewMode.OFF, previewSize);
+                mCameraInstance = new ARCoreCamera(this, depthMode, previewSize);
             }
         }
         return mCameraInstance;
@@ -672,7 +673,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     @Override
-    public void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex) {
+    public void onDepthDataReceived(Depthmap depthmap, int frameIndex) {
 
         float height = 0;
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
@@ -684,16 +685,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             }
 
             //realtime value
-            /*String text = getString(R.string.label_height) + " : " + String.format("~%dcm", (int)(height * 100));
-            runOnUiThread(() -> {
-                mTitleView.setText(text);
-            });*/
+            /*String text = getString(R.string.label_height) + " : " + String.format(Locale.US,"~%.1fcm", height * 100.0f) +
+            "\nNoise amount: " + String.format(Locale.US, "%.3f", getCamera().getDepthNoiseAmount());
+            runOnUiThread(() -> mTitleView.setText(text));*/
         }
         onFeedbackUpdate();
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
             long profile = System.currentTimeMillis();
-            Depthmap depthmap = getCamera().extractDepthmap(image, position, rotation);
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
             mNumberOfFilesWritten++;
 
@@ -744,15 +743,12 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         runOnUiThread(() -> {
 
             if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
-                depthCameraPreview.setVisibility(View.GONE);
-                scanOutline.setVisibility(View.GONE);
+                getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OFF);
             } else if (childDetected) {
-                depthCameraPreview.setVisibility(View.VISIBLE);
-                scanOutline.setVisibility(View.GONE);
+                getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OUTLINE);
                 setFeedback(null);
             } else {
-                scanOutline.setVisibility(View.VISIBLE);
-                depthCameraPreview.setVisibility(View.GONE);
+                getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OUTLINE);
             }
 
             if (mTxtFeedback.getVisibility() == View.GONE) {

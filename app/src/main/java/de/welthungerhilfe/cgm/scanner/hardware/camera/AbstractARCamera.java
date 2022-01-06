@@ -22,7 +22,10 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PointF;
 import android.media.Image;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
@@ -40,25 +43,35 @@ import java.util.ArrayList;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.RenderToTexture;
 import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
 
 public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
+    private final float DEPTH_FUSION_LERP_MAX = 1.0f;
+    private final float DEPTH_FUSION_LERP_MIN = 0.25f;
+    private final float DEPTH_FUSION_MAX_DEPTH = 3;
+    private final float DEPTH_FUSION_MAX_DIFF = 0.03f;
+    private final float DEPTH_FUSION_MIN_DISTANCE = 0.25f;
+    private final float DEPTH_FUSION_NOISE_FACTOR = 100;
+
     public interface Camera2DataListener
     {
         void onColorDataReceived(Bitmap bitmap, int frameIndex);
 
-        void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex);
+        void onDepthDataReceived(Depthmap depthmap, int frameIndex);
     }
 
-    public enum DepthPreviewMode { OFF, SOBEL, PLANE, CENTER, FOCUS, CALIBRATION };
+    public enum DepthPreviewMode { OFF, SOBEL, PLANE, CENTER, CENTER_LOW_POWER, FOCUS, FOCUS_LOW_POWER, CALIBRATION };
 
     public enum LightConditions { NORMAL, BRIGHT, DARK };
 
     public enum PlaneMode { LOWEST, VISIBLE };
 
     public enum PreviewSize { CLIPPED, FULL, SMALL };
+
+    public enum SkeletonMode { OFF, LINES, OUTLINE };
 
     protected final String CALIBRATION_IMAGE_FILE = "plant.jpg";
 
@@ -68,16 +81,11 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     protected ImageView mDepthCameraPreview;
     protected GLSurfaceView mGLSurfaceView;
     protected ArrayList<Object> mListeners;
-    protected final Object mLock;
 
     //camera calibration
     protected float[] mColorCameraIntrinsic;
     protected float[] mDepthCameraIntrinsic;
     protected boolean mHasCameraCalibration;
-
-    //camera pose
-    protected float[] mPosition;
-    protected float[] mRotation;
 
     //camera rendering
     protected int mCameraTextureId;
@@ -86,6 +94,11 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     protected boolean mViewportChanged;
     protected int mViewportWidth;
     protected int mViewportHeight;
+
+    //depthmap fusion
+    private Depthmap mDepthmap;
+    private Depthmap mLastDepthmap;
+    private float mNoiseAmount;
 
     //AR status
     protected int mFrameIndex;
@@ -102,11 +115,15 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     protected LightConditions mLight;
     protected PlaneMode mPlaneMode;
     protected PreviewSize mPreviewSize;
+    protected SkeletonMode mSkeletonMode;
+    protected ArrayList<Float> mPlanes;
+    protected ArrayList<PointF> mSkeleton;
+    protected boolean mSkeletonValid;
     protected long mLastBright;
     protected long mLastDark;
     protected long mSessionStart;
+    protected int mPersonCount = 0;
 
-    protected abstract ByteOrder getDepthByteOrder();
     protected abstract void closeCamera();
     protected abstract void openCamera();
     protected abstract void updateFrame();
@@ -116,11 +133,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         mActivity = activity;
         mComputerVision = new ComputerVisionUtils();
         mListeners = new ArrayList<>();
-        mLock = new Object();
         mRTT = new RenderToTexture();
-
-        mPosition = new float[3];
-        mRotation = new float[4];
 
         mColorCameraIntrinsic = new float[4];
         mDepthCameraIntrinsic = new float[4];
@@ -128,6 +141,8 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
         mFrameIndex = 1;
         mPixelIntensity = 0;
+        mPlanes = new ArrayList<>();
+        mSkeleton = new ArrayList<>();
         mDepthMode = depthMode;
         mPreviewSize = previewSize;
         mLight = LightConditions.NORMAL;
@@ -207,6 +222,38 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         }
     }
 
+    protected void onProcessColorData(Bitmap bitmap) {
+        for (Object listener : mListeners) {
+            ((Camera2DataListener)listener).onColorDataReceived(bitmap, mFrameIndex);
+        }
+
+        //update preview window
+        mActivity.runOnUiThread(() -> {
+            float scale = getPreviewScale(bitmap);
+            mColorCameraPreview.setImageBitmap(bitmap);
+            mColorCameraPreview.setRotation(90);
+            mColorCameraPreview.setScaleX(scale);
+            mColorCameraPreview.setScaleY(scale);
+            mDepthCameraPreview.setRotation(90);
+            mDepthCameraPreview.setScaleX(scale);
+            mDepthCameraPreview.setScaleY(scale);
+        });
+    }
+
+    protected void onProcessDepthData(Depthmap depthmap) {
+        if (depthmap == null) {
+            return;
+        }
+
+        for (Object listener : mListeners) {
+            ((Camera2DataListener)listener).onDepthDataReceived(depthmap, mFrameIndex);
+        }
+
+        Bitmap preview = getDepthPreview(depthmap, mPlanes, mColorCameraIntrinsic);
+        Bitmap finalPreview = skeletonVisualisation(preview);
+        mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(finalPreview));
+    }
+
     public void addListener(Object listener) {
         mListeners.add(listener);
     }
@@ -217,31 +264,58 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         }
     }
 
-    public Depthmap extractDepthmap(Image image, float[] position, float[] rotation) {
+    public Depthmap updateDepthmap(Image image, float[] position, float[] rotation) {
         if (image == null) {
-            Depthmap depthmap = new Depthmap(0, 0);
-            depthmap.position = position;
-            depthmap.rotation = rotation;
-            depthmap.timestamp = 0;
-            return depthmap;
+            if (mDepthmap != null) {
+                mDepthmap.position = position;
+                mDepthmap.rotation = rotation;
+                return mDepthmap;
+            } else {
+                Depthmap depthmap = new Depthmap(0, 0);
+                depthmap.position = position;
+                depthmap.rotation = rotation;
+                depthmap.timestamp = 0;
+                return depthmap;
+            }
         }
+
+        //extract data
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
-        buffer = buffer.order(getDepthByteOrder());
+        buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
         ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
-
         ArrayList<Short> pixel = new ArrayList<>();
         while (shortDepthBuffer.hasRemaining()) {
             pixel.add(shortDepthBuffer.get());
         }
+
+        //extract metadata
         int stride = plane.getRowStride();
         int width = image.getWidth();
         int height = image.getHeight();
+        if (mDepthmap == null) {
+            mDepthmap = new Depthmap(width, height);
+            mLastDepthmap = new Depthmap(width, height);
+        }
+        mDepthmap.distance = 0;
+        mDepthmap.position = position;
+        mDepthmap.rotation = rotation;
+        mDepthmap.timestamp = image.getTimestamp();
+        image.close();
 
-        Depthmap depthmap = new Depthmap(width, height);
-        depthmap.position = position;
-        depthmap.rotation = rotation;
-        depthmap.timestamp = image.getTimestamp();
+        //swap depthmaps
+        Depthmap temp = mLastDepthmap;
+        mLastDepthmap = mDepthmap;
+        mDepthmap = temp;
+
+        //update depthmap
+        int avgCount = 0;
+        float avgDepth = 0;
+        int diffCount = 0;
+        float diffDepth = 0;
+        int cx = width / 2;
+        int cy = height / 2;
+        int center = Integer.MAX_VALUE;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int depthSample = pixel.get((y / 2) * stride + x);
@@ -252,13 +326,44 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
                     depthRange = 0;
                 }
                 if (depthRange > 0) {
-                    depthmap.count++;
+                    int value = Math.abs(x - cx) + Math.abs(y - cy);
+                    if (center > value) {
+                        center = value;
+                        mDepthmap.distance = depthRange * 0.001f;
+                    }
+                    avgCount++;
+                    avgDepth += depthRange * 0.001f;
+                    mDepthmap.count++;
                 }
-                depthmap.confidence[y * width + x] = (byte) depthConfidence;
-                depthmap.depth[y * width + x] = (short) depthRange;
+                mDepthmap.confidence[x][y] = (byte) depthConfidence;
+                mDepthmap.depth[x][y] = depthRange * 0.001f;
+                if (mDepthmap.depth[x][y] < DEPTH_FUSION_MAX_DEPTH) {
+                    diffDepth += Math.abs(mLastDepthmap.depth[x][y] - mDepthmap.depth[x][y]) > DEPTH_FUSION_MAX_DIFF ? 1 : 0;
+                    diffCount++;
+                }
             }
         }
-        return depthmap;
+
+        //depth fusion
+        if (avgCount > 0) {
+            avgDepth /= avgCount;
+            if (avgDepth > DEPTH_FUSION_MIN_DISTANCE) {
+                if (diffCount > 0) {
+                    diffDepth /= diffCount;
+                    diffDepth = diffDepth * diffDepth * DEPTH_FUSION_NOISE_FACTOR;
+                    float lerp = Math.max(Math.min(diffDepth, DEPTH_FUSION_LERP_MAX), DEPTH_FUSION_LERP_MIN);
+                    for (int y = 0; y < height; y++) {
+                        for (int x = 0; x < width; x++) {
+                            if ((mDepthmap.depth[x][y] > 0) && (mLastDepthmap.depth[x][y] > 0)) {
+                                mDepthmap.depth[x][y] = mLastDepthmap.depth[x][y] * (1 - lerp) + mDepthmap.depth[x][y] * lerp;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        mNoiseAmount = diffDepth > 0.0005f ? diffDepth : 1000;
+        return mDepthmap;
     }
 
     public String getCameraCalibration() {
@@ -267,8 +372,6 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         output += mColorCameraIntrinsic[0] + " " + mColorCameraIntrinsic[1] + " " + mColorCameraIntrinsic[2] + " " + mColorCameraIntrinsic[3] + "\n";
         output += "Depth camera intrinsic:\n";
         output += mDepthCameraIntrinsic[0] + " " + mDepthCameraIntrinsic[1] + " " + mDepthCameraIntrinsic[2] + " " + mDepthCameraIntrinsic[3] + "\n";
-        output += "Depth camera position:\n";
-        output += "0 0 0\n";
         return output;
     }
 
@@ -289,54 +392,38 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         return mLight;
     }
 
-    public Bitmap getDepthPreview(Image image, ArrayList<Float> planes, float[] calibration, float[] position, float[] rotation) {
+    public float getDepthNoiseAmount() {
+        return mNoiseAmount;
+    }
 
-        //get short buffer
-        Image.Plane plane = image.getPlanes()[0];
-        ByteBuffer buffer = plane.getBuffer();
-        buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
-        ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
+    public Bitmap getDepthPreview(Depthmap depthmap, ArrayList<Float> planes, float[] calibration) {
 
-        //get buffer as array
-        ArrayList<Integer> pixel = new ArrayList<>();
-        while (shortDepthBuffer.hasRemaining()) {
-            pixel.add((int) shortDepthBuffer.get());
-        }
-
-        //get depthmap
-        float distance = 0;
-        int center = Integer.MAX_VALUE;
-        int stride = plane.getRowStride();
-        int width = image.getWidth();
-        int height = image.getHeight();
-        float[][] depth = new float[width][height];
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int depthSample = pixel.get((y / 2) * stride + x);
-                int depthRange = depthSample & 0x1FFF;
-                if ((x < 1) || (y < 1) || (x >= width - 1) || (y >= height - 1)) {
-                    depthRange = 0;
+        DepthPreviewMode mode = mDepthMode;
+        switch (mDepthMode) {
+            case CENTER_LOW_POWER:
+                if (mFrameIndex % 60 == 0) {
+                    mode = DepthPreviewMode.CENTER;
+                } else {
+                    mode = DepthPreviewMode.SOBEL;
                 }
-                if (depthRange > 0) {
-                    int value = Math.abs(x - width / 2) + Math.abs(y - height / 2);
-                    if (center > value) {
-                        center = value;
-                        distance = depthRange * 0.001f;
-                    }
+                break;
+            case FOCUS_LOW_POWER:
+                if (mFrameIndex % 60 == 0) {
+                    mode = DepthPreviewMode.FOCUS;
+                    break;
+                } else {
+                    return null;
                 }
-                depth[x][y] = depthRange;
-            }
         }
-        mTargetDistance = mTargetDistance * 0.9f + distance * 0.1f;
+        mTargetDistance = mTargetDistance * 0.9f + depthmap.distance * 0.1f;
 
         float bestPlane;
-        float[] matrix;
-        switch (mDepthMode) {
+        float[] matrix = depthmap.getMatrix();
+        switch (mode) {
             case CALIBRATION:
-                matrix = mComputerVision.matrixCalculate(position, rotation);
                 Matrix.invertM(matrix, 0, matrix, 0);
                 ArrayList<ComputerVisionUtils.Point3F> edges;
-                edges = mComputerVision.getCalibrationToFEdges(depth, calibration, matrix, mCalibrationImageEdges);
+                edges = mComputerVision.getCalibrationToFEdges(depthmap.depth, calibration, matrix, mCalibrationImageEdges);
 
                 mCalibrationImageSizeCV = null;
                 if (mCalibrationImageEdges.length >= 4) {
@@ -357,26 +444,28 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
                     }
                 }
 
-                return mComputerVision.getDepthPreviewCalibration(depth, calibration, matrix, mCalibrationImageEdges);
+                return mComputerVision.getDepthPreviewCalibration(depthmap.depth, calibration, matrix, mCalibrationImageEdges);
             case CENTER:
             case FOCUS:
                 boolean otherColors = mDepthMode == DepthPreviewMode.CENTER;
-                matrix = mComputerVision.matrixCalculate(position, rotation);
-                bestPlane = getPlane(depth, planes, calibration, matrix, position);
-                Bitmap mask = mComputerVision.getDepthPreviewCenter(depth, bestPlane, calibration, matrix, otherColors);
-                mTargetHeight = mComputerVision.getCenterFocusHeight(mask, depth, bestPlane, calibration, matrix);
+                bestPlane = getPlane(depthmap.depth, planes, calibration, matrix, depthmap.position);
+                Bitmap mask = mComputerVision.getDepthPreviewCenter(depthmap.depth, bestPlane, otherColors);
+                mTargetHeight = mComputerVision.getCenterFocusHeight(mask, depthmap.depth, bestPlane, calibration, matrix);
 
                 boolean valid = mComputerVision.isFocusValid(mask) && (mTargetHeight >= 0.45) && (mTargetHeight <= 1.3);
                 if (!otherColors && !valid) {
                     mask = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
                 }
-                return mask;
+                if (mDepthMode == DepthPreviewMode.CENTER_LOW_POWER) {
+                    return null;
+                } else {
+                    return mask;
+                }
             case PLANE:
-                matrix = mComputerVision.matrixCalculate(position, rotation);
-                bestPlane = getPlane(depth, planes, calibration, matrix, position);
-                return mComputerVision.getDepthPreviewPlane(depth, bestPlane, calibration, matrix);
+                bestPlane = getPlane(depthmap.depth, planes, calibration, matrix, depthmap.position);
+                return mComputerVision.getDepthPreviewPlane(depthmap.depth, bestPlane, calibration, matrix);
             case SOBEL:
-                return mComputerVision.getDepthPreviewSobel(depth);
+                return mComputerVision.getDepthPreviewSobel(depthmap.depth);
             default:
                 return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
         }
@@ -411,6 +500,10 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         mPlaneMode = mode;
     }
 
+    public void setSkeletonMode(SkeletonMode mode) {
+        mSkeletonMode = mode;
+    }
+
     public LightConditions updateLight(LightConditions light, long lastBright, long lastDark, long sessionStart) {
         //prevent showing "too bright" directly after changing light conditions
         double diff = Math.abs(lastBright - System.currentTimeMillis());
@@ -442,5 +535,66 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
                 return mComputerVision.getPlaneVisible(depth, planes, calibration, matrix, position);
         }
         return Integer.MAX_VALUE;
+    }
+
+
+    private Bitmap skeletonVisualisation(Bitmap preview) {
+
+        if (mSkeletonMode == SkeletonMode.OFF) {
+            return preview;
+        }
+
+        //skeleton visualisation
+        if (mPersonCount == 1) {
+            if (preview == null || (preview.getWidth() == 1)) {
+                preview = Bitmap.createBitmap(240, 180, Bitmap.Config.ARGB_8888);
+            }
+            preview = preview.copy(Bitmap.Config.ARGB_8888, true);
+            Canvas c = new Canvas(preview);
+
+            //define look of the visualisation
+            int color = Color.argb(128, 0, 255, 0);
+            if ((mTargetDistance < AppConstants.TOO_NEAR) || (mTargetDistance > AppConstants.TOO_FAR)) {
+                color = Color.argb(128, 255, 255, 0);
+            } else if (!mSkeletonValid) {
+                color = Color.argb(128, 255, 255, 0);
+            }
+
+            //draw bones
+            for (int pass = 0; pass < ((mSkeletonMode == SkeletonMode.OUTLINE) ? 2 : 1); pass++) {
+                int r = (mSkeletonMode == SkeletonMode.OUTLINE) ? (pass == 0 ? 20 : 15) : 1;
+                Paint p = new Paint();
+                p.setColor(pass == 0 ? color : Color.BLACK);
+                p.setStrokeWidth(r * 2);
+                for (int i = 0; i < mSkeleton.size(); i += 2) {
+                    int x1 = (int) (mSkeleton.get(i).x * (float)preview.getWidth());
+                    int y1 = (int) (mSkeleton.get(i).y * (float)preview.getHeight());
+                    int x2 = (int) (mSkeleton.get(i + 1).x * (float)preview.getWidth());
+                    int y2 = (int) (mSkeleton.get(i + 1).y * (float)preview.getHeight());
+                    if ((x1 != 0) && (y1 != 0) && (x2 != 0) && (y2 != 0)) {
+                        if (mSkeletonMode == SkeletonMode.OUTLINE) {
+                            c.drawCircle(x1, y1, r, p);
+                            c.drawCircle(x2, y2, r, p);
+                        }
+                        c.drawLine(x1, y1, x2, y2, p);
+                    }
+                }
+            }
+
+            //masking which creates outline
+            if (mSkeletonMode == SkeletonMode.OUTLINE) {
+                int w = preview.getWidth();
+                int h = preview.getHeight();
+                int[] pixels = new int[w * h];
+                preview.getPixels(pixels, 0, w, 0, 0, w, h);
+                for (int i = 0; i < pixels.length; i++) {
+                    if (pixels[i] == Color.BLACK) {
+                        pixels[i] = Color.TRANSPARENT;
+                    }
+                }
+                preview.setPixels(pixels, 0, w, 0, 0, w, h);
+            }
+        }
+        return preview;
     }
 }

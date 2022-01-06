@@ -25,9 +25,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.PointF;
 import android.media.Image;
 import android.os.Build;
@@ -49,11 +46,9 @@ import com.huawei.hiar.ARTrackable;
 import com.huawei.hiar.ARWorldBodyTrackingConfig;
 import com.huawei.hiar.ARWorldTrackingConfig;
 
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -71,19 +66,12 @@ public class AREngineCamera extends AbstractARCamera {
   private static final String PACKAGENAME_ARSERVICE = "com.huawei.arengine.service";
 
   //AREngine API
-  private Bitmap mCache;
   private boolean mFirstRequest;
   private int mOrientation;
-  private int mPersonCount = 0;
   private ARSession mSession;
-  private ArrayList<Float> mPlanes;
-  private ArrayList<PointF> mSkeleton;
-  private boolean mSkeletonValid;
 
   public AREngineCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
     super(activity, depthMode, previewSize);
-    mPlanes = new ArrayList<>();
-    mSkeleton = new ArrayList<>();
 
     OrientationEventListener orientationEventListener = new OrientationEventListener(mActivity)
     {
@@ -99,61 +87,6 @@ public class AREngineCamera extends AbstractARCamera {
     }
   }
 
-  private void onProcessColorData(Bitmap bitmap) {
-    if (bitmap == null) {
-      return;
-    }
-
-    mCache = bitmap;
-
-    //update preview window
-    mActivity.runOnUiThread(() -> {
-      float scale = getPreviewScale(bitmap);
-      mColorCameraPreview.setImageBitmap(bitmap);
-      mColorCameraPreview.setRotation(90);
-      mColorCameraPreview.setScaleX(scale);
-      mColorCameraPreview.setScaleY(scale);
-      mDepthCameraPreview.setRotation(90);
-      mDepthCameraPreview.setScaleX(scale);
-      mDepthCameraPreview.setScaleY(scale);
-    });
-  }
-
-  private void onProcessDepthData(Image image) {
-    float[] position;
-    float[] rotation;
-    synchronized (mLock) {
-      position = mPosition;
-      rotation = mRotation;
-    }
-
-    if (!hasCameraCalibration()) {
-      image.close();
-      return;
-    }
-
-    Bitmap preview = getDepthPreview(image, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
-    Bitmap finalPreview = skeletonVisualisation(preview, true);
-    mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(finalPreview));
-
-    if (mCache != null) {
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, mFrameIndex);
-      }
-      for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onColorDataReceived(mCache, mFrameIndex);
-      }
-
-      mCache = null;
-      mFrameIndex++;
-    }
-    image.close();
-  }
-
-  @Override
-  protected ByteOrder getDepthByteOrder() {
-    return ByteOrder.LITTLE_ENDIAN;
-  }
 
   @Override
   protected void closeCamera() {
@@ -284,12 +217,8 @@ public class AREngineCamera extends AbstractARCamera {
       }
 
       //get pose from AREngine
-      synchronized (mLock) {
-        ARCamera camera = frame.getCamera();
-        ARPose pose = camera.getPose();
-        pose.getTranslation(mPosition, 0);
-        pose.getRotationQuaternion(mRotation, 0);
-      }
+      ARCamera camera = frame.getCamera();
+      ARPose pose = camera.getPose();
 
       //get light estimation from AREngine
       mPixelIntensity = frame.getLightEstimate().getPixelIntensity() * 2.0f;
@@ -307,10 +236,17 @@ public class AREngineCamera extends AbstractARCamera {
 
       //get camera data
       Bitmap color = null;
-      Image depth = null;
+      Depthmap depth = null;
       try {
         color = mRTT.renderData(mCameraTextureId, mTextureRes);
-        depth = frame.acquireDepthImage();
+        if (hasCameraCalibration()) {
+          Image image = frame.acquireDepthImage();
+          float[] position = new float[3];
+          float[] rotation = new float[4];
+          pose.getTranslation(position, 0);
+          pose.getRotationQuaternion(rotation, 0);
+          depth = updateDepthmap(image, position, rotation);
+        }
       } catch (Exception e) {
         e.printStackTrace();
         installAREngine();
@@ -320,6 +256,7 @@ public class AREngineCamera extends AbstractARCamera {
       getBodySkeleton();
       onProcessColorData(color);
       onProcessDepthData(depth);
+      mFrameIndex++;
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -394,62 +331,6 @@ public class AREngineCamera extends AbstractARCamera {
         }
       }
     }
-  }
-
-  private Bitmap skeletonVisualisation(Bitmap preview, boolean outline) {
-
-    //skeleton visualisation
-    if (mPersonCount == 1) {
-      if (preview.getWidth() == 1) {
-        preview = Bitmap.createBitmap(240, 180, Bitmap.Config.ARGB_8888);
-      }
-      preview = preview.copy(Bitmap.Config.ARGB_8888, true);
-      Canvas c = new Canvas(preview);
-
-      //define look of the visualisation
-      int color = Color.argb(128, 0, 255, 0);
-      if ((mTargetDistance < AppConstants.TOO_NEAR) || (mTargetDistance > AppConstants.TOO_FAR)) {
-        color = Color.argb(128, 255, 255, 0);
-      } else if (!mSkeletonValid) {
-        color = Color.argb(128, 255, 255, 0);
-      }
-
-      //draw bones
-      for (int pass = 0; pass < (outline ? 2 : 1); pass++) {
-        int r = outline ? (pass == 0 ? 20 : 15) : 1;
-        Paint p = new Paint();
-        p.setColor(pass == 0 ? color : Color.BLACK);
-        p.setStrokeWidth(r * 2);
-        for (int i = 0; i < mSkeleton.size(); i += 2) {
-          int x1 = (int) (mSkeleton.get(i).x * (float)preview.getWidth());
-          int y1 = (int) (mSkeleton.get(i).y * (float)preview.getHeight());
-          int x2 = (int) (mSkeleton.get(i + 1).x * (float)preview.getWidth());
-          int y2 = (int) (mSkeleton.get(i + 1).y * (float)preview.getHeight());
-          if ((x1 != 0) && (y1 != 0) && (x2 != 0) && (y2 != 0)) {
-            if (outline) {
-              c.drawCircle(x1, y1, r, p);
-              c.drawCircle(x2, y2, r, p);
-            }
-            c.drawLine(x1, y1, x2, y2, p);
-          }
-        }
-      }
-
-      //masking which creates outline
-      if (outline) {
-        int w = preview.getWidth();
-        int h = preview.getHeight();
-        int[] pixels = new int[w * h];
-        preview.getPixels(pixels, 0, w, 0, 0, w, h);
-        for (int i = 0; i < pixels.length; i++) {
-          if (pixels[i] == Color.BLACK) {
-            pixels[i] = Color.TRANSPARENT;
-          }
-        }
-        preview.setPixels(pixels, 0, w, 0, 0, w, h);
-      }
-    }
-    return preview;
   }
 
   public static boolean shouldUseAREngine() {
