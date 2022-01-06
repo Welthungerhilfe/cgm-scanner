@@ -45,6 +45,13 @@ import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
 
 public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
+    private final float DEPTH_FUSION_LERP_MAX = 1.0f;
+    private final float DEPTH_FUSION_LERP_MIN = 0.25f;
+    private final float DEPTH_FUSION_MAX_DEPTH = 3;
+    private final float DEPTH_FUSION_MAX_DIFF = 0.03f;
+    private final float DEPTH_FUSION_MIN_DISTANCE = 0.25f;
+    private final float DEPTH_FUSION_NOISE_FACTOR = 100;
+
     public interface Camera2DataListener
     {
         void onColorDataReceived(Bitmap bitmap, int frameIndex);
@@ -83,6 +90,11 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     protected boolean mViewportChanged;
     protected int mViewportWidth;
     protected int mViewportHeight;
+
+    //depthmap fusion
+    private Depthmap mDepthmap;
+    private Depthmap mLastDepthmap;
+    private float mNoiseAmount;
 
     //AR status
     protected int mFrameIndex;
@@ -210,34 +222,58 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         }
     }
 
-    public Depthmap extractDepthmap(Image image, float[] position, float[] rotation) {
+    public Depthmap updateDepthmap(Image image, float[] position, float[] rotation) {
         if (image == null) {
-            Depthmap depthmap = new Depthmap(0, 0);
-            depthmap.position = position;
-            depthmap.rotation = rotation;
-            depthmap.timestamp = 0;
-            return depthmap;
+            if (mDepthmap != null) {
+                mDepthmap.position = position;
+                mDepthmap.rotation = rotation;
+                return mDepthmap;
+            } else {
+                Depthmap depthmap = new Depthmap(0, 0);
+                depthmap.position = position;
+                depthmap.rotation = rotation;
+                depthmap.timestamp = 0;
+                return depthmap;
+            }
         }
+
+        //extract data
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
         buffer = buffer.order(getDepthByteOrder());
         ShortBuffer shortDepthBuffer = buffer.asShortBuffer();
-
         ArrayList<Short> pixel = new ArrayList<>();
         while (shortDepthBuffer.hasRemaining()) {
             pixel.add(shortDepthBuffer.get());
         }
+
+        //extract metadata
         int stride = plane.getRowStride();
         int width = image.getWidth();
         int height = image.getHeight();
+        if (mDepthmap == null) {
+            mDepthmap = new Depthmap(width, height);
+            mLastDepthmap = new Depthmap(width, height);
+        }
+        mDepthmap.distance = 0;
+        mDepthmap.position = position;
+        mDepthmap.rotation = rotation;
+        mDepthmap.timestamp = image.getTimestamp();
+        image.close();
 
-        int center = Integer.MAX_VALUE;
+        //swap depthmaps
+        Depthmap temp = mLastDepthmap;
+        mLastDepthmap = mDepthmap;
+        mDepthmap = temp;
+
+        //update depthmap
+        int avgCount = 0;
+        float avgDepth = 0;
+        int diffCount = 0;
+        float diffDepth = 0;
         int cx = width / 2;
         int cy = height / 2;
-        Depthmap depthmap = new Depthmap(width, height);
-        depthmap.position = position;
-        depthmap.rotation = rotation;
-        depthmap.timestamp = image.getTimestamp();
+        int center = Integer.MAX_VALUE;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int depthSample = pixel.get((y / 2) * stride + x);
@@ -251,15 +287,41 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
                     int value = Math.abs(x - cx) + Math.abs(y - cy);
                     if (center > value) {
                         center = value;
-                        depthmap.distance = depthRange * 0.001f;
+                        mDepthmap.distance = depthRange * 0.001f;
                     }
-                    depthmap.count++;
+                    avgCount++;
+                    avgDepth += depthRange * 0.001f;
+                    mDepthmap.count++;
                 }
-                depthmap.confidence[x][y] = (byte) depthConfidence;
-                depthmap.depth[x][y] = depthRange * 0.001f;
+                mDepthmap.confidence[x][y] = (byte) depthConfidence;
+                mDepthmap.depth[x][y] = depthRange * 0.001f;
+                if (mDepthmap.depth[x][y] < DEPTH_FUSION_MAX_DEPTH) {
+                    diffDepth += Math.abs(mLastDepthmap.depth[x][y] - mDepthmap.depth[x][y]) > DEPTH_FUSION_MAX_DIFF ? 1 : 0;
+                    diffCount++;
+                }
             }
         }
-        return depthmap;
+
+        //depth fusion
+        if (avgCount > 0) {
+            avgDepth /= avgCount;
+            if (avgDepth > DEPTH_FUSION_MIN_DISTANCE) {
+                if (diffCount > 0) {
+                    diffDepth /= diffCount;
+                    diffDepth = diffDepth * diffDepth * DEPTH_FUSION_NOISE_FACTOR;
+                    float lerp = Math.max(Math.min(diffDepth, DEPTH_FUSION_LERP_MAX), DEPTH_FUSION_LERP_MIN);
+                    for (int y = 0; y < height; y++) {
+                        for (int x = 0; x < width; x++) {
+                            if ((mDepthmap.depth[x][y] > 0) && (mLastDepthmap.depth[x][y] > 0)) {
+                                mDepthmap.depth[x][y] = mLastDepthmap.depth[x][y] * (1 - lerp) + mDepthmap.depth[x][y] * lerp;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        mNoiseAmount = diffDepth;
+        return mDepthmap;
     }
 
     public String getCameraCalibration() {
@@ -268,8 +330,6 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         output += mColorCameraIntrinsic[0] + " " + mColorCameraIntrinsic[1] + " " + mColorCameraIntrinsic[2] + " " + mColorCameraIntrinsic[3] + "\n";
         output += "Depth camera intrinsic:\n";
         output += mDepthCameraIntrinsic[0] + " " + mDepthCameraIntrinsic[1] + " " + mDepthCameraIntrinsic[2] + " " + mDepthCameraIntrinsic[3] + "\n";
-        output += "Depth camera position:\n";
-        output += "0 0 0\n";
         return output;
     }
 
@@ -288,6 +348,10 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     public LightConditions getLightConditionState() {
         mLight = updateLight(mLight, mLastBright, mLastDark, mSessionStart);
         return mLight;
+    }
+
+    public float getDepthNoiseAmount() {
+        return mNoiseAmount;
     }
 
     public Bitmap getDepthPreview(Depthmap depthmap, ArrayList<Float> planes, float[] calibration) {

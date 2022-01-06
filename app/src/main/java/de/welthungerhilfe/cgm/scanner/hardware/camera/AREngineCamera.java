@@ -267,10 +267,7 @@ public class AREngineCamera extends AbstractARCamera {
           float[] rotation = new float[4];
           pose.getTranslation(position, 0);
           pose.getRotationQuaternion(rotation, 0);
-          depth = extractDepthmap(image, position, rotation);
-          if (image != null) {
-            image.close();
-          }
+          depth = updateDepthmap(image, position, rotation);
         }
       } catch (Exception e) {
         e.printStackTrace();

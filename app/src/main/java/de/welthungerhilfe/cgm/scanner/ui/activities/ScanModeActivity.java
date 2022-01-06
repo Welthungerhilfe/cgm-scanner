@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -675,10 +676,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             }
 
             //realtime value
-            /*runOnUiThread(() -> {
-                String text = getString(R.string.label_height) + " : " + String.format("~%dcm", (int)(height * 100));
-                mTitleView.setText(text);
-            });*/
+            //String text = getString(R.string.label_height) + " : " + String.format(Locale.US,"~%dcm", (int)(height * 100));
+            //String text = "Noise amount: " + String.format(Locale.US, "%.3f", getCamera().getDepthNoiseAmount());
+            //runOnUiThread(() -> mTitleView.setText(text));
         }
         onFeedbackUpdate();
 

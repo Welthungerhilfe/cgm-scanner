@@ -271,10 +271,7 @@ public class ARCoreCamera extends AbstractARCamera {
         if (hasCameraCalibration() && mSession.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
           if (mFrameIndex % AppConstants.SCAN_FRAMESKIP == 0) {
             Image image = frame.acquireRawDepthImage();
-            depth = extractDepthmap(image, pose.getTranslation(), pose.getRotationQuaternion());
-            if (image != null) {
-              image.close();
-            }
+            depth = updateDepthmap(image, pose.getTranslation(), pose.getRotationQuaternion());
           }
         }
       } catch (Exception e) {
