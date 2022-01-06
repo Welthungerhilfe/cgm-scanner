@@ -92,25 +92,17 @@ public class AREngineCamera extends AbstractARCamera {
     });
   }
 
-  private void onProcessDepthData(Image image) {
-    float[] position;
-    float[] rotation;
-    synchronized (mLock) {
-      position = mPosition;
-      rotation = mRotation;
-    }
-
-    if (!hasCameraCalibration()) {
-      image.close();
+  private void onProcessDepthData(Depthmap depthmap) {
+    if (depthmap == null) {
       return;
     }
 
-    Bitmap preview = getDepthPreview(image, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
+    Bitmap preview = getDepthPreview(depthmap, mPlanes, mColorCameraIntrinsic);
     mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
 
     if (mCache != null) {
       for (Object listener : mListeners) {
-        ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, mFrameIndex);
+        ((Camera2DataListener)listener).onDepthDataReceived(depthmap, mFrameIndex);
       }
       for (Object listener : mListeners) {
         ((Camera2DataListener)listener).onColorDataReceived(mCache, mFrameIndex);
@@ -119,7 +111,6 @@ public class AREngineCamera extends AbstractARCamera {
       mCache = null;
       mFrameIndex++;
     }
-    image.close();
   }
 
   @Override
@@ -248,12 +239,8 @@ public class AREngineCamera extends AbstractARCamera {
       }
 
       //get pose from AREngine
-      synchronized (mLock) {
-        ARCamera camera = frame.getCamera();
-        ARPose pose = camera.getPose();
-        pose.getTranslation(mPosition, 0);
-        pose.getRotationQuaternion(mRotation, 0);
-      }
+      ARCamera camera = frame.getCamera();
+      ARPose pose = camera.getPose();
 
       //get light estimation from AREngine
       mPixelIntensity = frame.getLightEstimate().getPixelIntensity() * 2.0f;
@@ -271,10 +258,20 @@ public class AREngineCamera extends AbstractARCamera {
 
       //get camera data
       Bitmap color = null;
-      Image depth = null;
+      Depthmap depth = null;
       try {
         color = mRTT.renderData(mCameraTextureId, mTextureRes);
-        depth = frame.acquireDepthImage();
+        if (hasCameraCalibration()) {
+          Image image = frame.acquireDepthImage();
+          float[] position = new float[3];
+          float[] rotation = new float[4];
+          pose.getTranslation(position, 0);
+          pose.getRotationQuaternion(rotation, 0);
+          depth = extractDepthmap(image, position, rotation);
+          if (image != null) {
+            image.close();
+          }
+        }
       } catch (Exception e) {
         e.printStackTrace();
         installAREngine();

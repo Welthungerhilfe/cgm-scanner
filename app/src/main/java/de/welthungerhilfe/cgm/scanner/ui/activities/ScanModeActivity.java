@@ -27,19 +27,9 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationManager;
-import android.media.Image;
 import android.media.MediaActionSound;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import androidx.core.app.ActivityCompat;
-import androidx.appcompat.app.ActionBar;
-import androidx.databinding.DataBindingUtil;
-
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -49,6 +39,13 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.core.app.ActivityCompat;
+import androidx.databinding.DataBindingUtil;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.microsoft.appcenter.crashes.Crashes;
 
@@ -61,30 +58,29 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityScanModeBinding;
-import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
-import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
-import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
-import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
-import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
 import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
+import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, ScanTypeView.ScanTypeListener {
@@ -667,7 +663,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     @Override
-    public void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex) {
+    public void onDepthDataReceived(Depthmap depthmap, int frameIndex) {
 
         float height = 0;
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
@@ -688,7 +684,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
             long profile = System.currentTimeMillis();
-            Depthmap depthmap = getCamera().extractDepthmap(image, position, rotation);
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
             mNumberOfFilesWritten++;
 

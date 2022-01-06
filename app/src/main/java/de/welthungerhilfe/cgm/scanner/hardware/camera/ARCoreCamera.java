@@ -52,11 +52,9 @@ public class ARCoreCamera extends AbstractARCamera {
   private boolean mInstallRequested;
   private ArrayList<Float> mPlanes;
   private Session mSession;
-  private final Object mLock;
 
   public ARCoreCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
     super(activity, depthMode, previewSize);
-    mLock = new Object();
     mPlanes = new ArrayList<>();
   }
 
@@ -78,39 +76,25 @@ public class ARCoreCamera extends AbstractARCamera {
     });
   }
 
-  private void onProcessDepthData(Image image) {
-    if (image == null) {
-      Log.w(TAG, "onImageAvailable: Skipping null image.");
+  private void onProcessDepthData(Depthmap depthmap) {
+    if (depthmap == null) {
       return;
-    }
-
-    if (!hasCameraCalibration()) {
-      image.close();
-      return;
-    }
-
-    float[] position;
-    float[] rotation;
-    synchronized (mLock) {
-      position = mPosition;
-      rotation = mRotation;
     }
 
     //get one frame per two seconds to calculate height
     if (mFrameIndex % 60 == 0) {
       DepthPreviewMode mode = mDepthMode;
       mDepthMode = DepthPreviewMode.FOCUS;
-      getDepthPreview(image, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
+      getDepthPreview(depthmap, mPlanes, mColorCameraIntrinsic);
       mDepthMode = mode;
     } else {
-      Bitmap preview = getDepthPreview(image, mPlanes, mColorCameraIntrinsic, mPosition, mRotation);
+      Bitmap preview = getDepthPreview(depthmap, mPlanes, mColorCameraIntrinsic);
       mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
     }
 
     for (Object listener : mListeners) {
-      ((Camera2DataListener)listener).onDepthDataReceived(image, position, rotation, mFrameIndex);
+      ((Camera2DataListener)listener).onDepthDataReceived(depthmap, mFrameIndex);
     }
-    image.close();
   }
 
   @Override
@@ -256,12 +240,8 @@ public class ARCoreCamera extends AbstractARCamera {
       }
 
       //get pose from ARCore
-      synchronized (mLock) {
-        Camera camera = frame.getCamera();
-        Pose pose = camera.getPose();
-        mPosition = pose.getTranslation();
-        mRotation = pose.getRotationQuaternion();
-      }
+      Camera camera = frame.getCamera();
+      Pose pose = camera.getPose();
 
       //get planes
       mPlanes.clear();
@@ -285,21 +265,25 @@ public class ARCoreCamera extends AbstractARCamera {
 
       //get camera data
       Bitmap color = null;
-      Image depth = null;
+      Depthmap depth = null;
       try {
         color = mRTT.renderData(mCameraTextureId, mTextureRes);
-        depth = frame.acquireDepthImage();
+        if (hasCameraCalibration() && mSession.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+          if (mFrameIndex % AppConstants.SCAN_FRAMESKIP == 0) {
+            Image image = frame.acquireRawDepthImage();
+            depth = extractDepthmap(image, pose.getTranslation(), pose.getRotationQuaternion());
+            if (image != null) {
+              image.close();
+            }
+          }
+        }
       } catch (Exception e) {
         e.printStackTrace();
       }
 
       //process camera data
       onProcessColorData(color);
-      if (mSession.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
-        if ((mFrameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
-          onProcessDepthData(depth);
-        }
-      }
+      onProcessDepthData(depth);
       mFrameIndex++;
 
     } catch (Exception e) {
