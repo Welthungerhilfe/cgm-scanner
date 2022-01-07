@@ -69,7 +69,7 @@ public class ScanTypeView extends LinearLayout {
 
     private void initView() {
         View root = inflate(getContext(), R.layout.lv_scan_type, this);
-        mBack = root.findViewById(R.id.backScanStep);
+        mBack = root.findViewById(R.id.lytScanStepBack);
         mButtons = root.findViewById(R.id.lytScanAgain);
         mChildIcon = root.findViewById(R.id.imgScanStep);
         mRetakeButton = root.findViewById(R.id.btnRetake);

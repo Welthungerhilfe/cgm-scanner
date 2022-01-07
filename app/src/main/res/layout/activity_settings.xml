@@ -47,13 +47,13 @@
                         android:id="@+id/txtSettingVersion"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:firstText="@string/version" />
+                        app:titleText="@string/version" />
 
                     <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
                         android:id="@+id/txtSettingUuid"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:firstText="@string/uuid" />
+                        app:titleText="@string/uuid" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -73,7 +73,7 @@
                         android:id="@+id/txtSettingBackupDate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:firstText="@string/last_backup_date" />
+                        app:titleText="@string/last_backup_date" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -121,13 +121,13 @@
                         android:id="@+id/txtSettingAccount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:secondText="@string/app_name_long" />
+                        app:descriptionText="@string/app_name_long" />
 
                     <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
                         android:id="@+id/txtSettingAzureAccount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:secondText="@string/azure_account" />
+                        app:descriptionText="@string/azure_account" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -184,11 +184,12 @@
                         android:textColor="@color/colorPrimary"
                         android:textSize="20sp" />
 
-                    <de.welthungerhilfe.cgm.scanner.ui.views.ToggleView
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
                         android:id="@+id/upload_over_wifi"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:toggleText="@string/upload_over_wifi" />
+                        app:titleText="@string/upload_over_wifi"
+                        app:toggleVisible="true" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -205,25 +206,28 @@
                         android:textColor="@color/colorPrimary"
                         android:textSize="20sp" />
 
-                    <de.welthungerhilfe.cgm.scanner.ui.views.SubmenuButton
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
                         android:id="@+id/submenu_performance_measurement"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:submenuText="@string/performance_measurement"
+                        app:titleText="@string/performance_measurement"
+                        app:submenuVisible="true"
                         android:onClick="openPerformanceMeasurement"/>
 
-                    <de.welthungerhilfe.cgm.scanner.ui.views.SubmenuButton
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
                         android:id="@+id/submenu_remote_config"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:submenuText="@string/remote_config"
+                        app:titleText="@string/remote_config"
+                        app:submenuVisible="true"
                         android:onClick="openRemoteConfig"/>
 
-                    <de.welthungerhilfe.cgm.scanner.ui.views.ToggleView
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
                         android:id="@+id/show_depth_data"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:toggleText="@string/show_depth_data"
+                        app:titleText="@string/show_depth_data"
+                        app:toggleVisible="true"
                         android:onClick="openRemoteConfig"/>
                 </LinearLayout>
 

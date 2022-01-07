@@ -55,100 +55,24 @@
                 android:orientation="horizontal"
                 android:baselineAligned="false">
 
-                <com.balysv.materialripple.MaterialRippleLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
+                <de.welthungerhilfe.cgm.scanner.ui.views.ScanModeView
+                    android:id="@+id/lytScanStanding"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    app:mrl_rippleOverlay="true">
+                    app:scanmodeactive="true"
+                    app:scanmodeicon="@drawable/standing"
+                    app:scanmodetext="@string/mode_standing"
+                    android:onClick="scanStanding"/>
 
-                    <LinearLayout
-                        android:id="@+id/lytScanStanding"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:onClick="scanStanding">
-
-                        <ImageView
-                            android:id="@+id/imgScanStanding"
-                            android:layout_width="wrap_content"
-                            android:layout_height="35dp"
-                            android:src="@drawable/standing_active"
-                            tools:ignore="ContentDescription" />
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/activity_section_margin"
-                            android:gravity="center">
-
-                            <ImageView
-                                android:id="@+id/imgScanStandingCheck"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/radio_active"
-                                tools:ignore="ContentDescription" />
-
-                            <TextView
-                                android:id="@+id/txtScanStanding"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="@dimen/activity_group_margin"
-                                android:text="@string/mode_standing"
-                                android:textColor="@color/colorBlack" />
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                </com.balysv.materialripple.MaterialRippleLayout>
-
-                <com.balysv.materialripple.MaterialRippleLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
+                <de.welthungerhilfe.cgm.scanner.ui.views.ScanModeView
+                    android:id="@+id/lytScanLying"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    app:mrl_rippleOverlay="true">
-
-                    <LinearLayout
-                        android:id="@+id/lytScanLying"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:onClick="scanLying">
-
-                        <ImageView
-                            android:id="@+id/imgScanLying"
-                            android:layout_width="wrap_content"
-                            android:layout_height="35dp"
-                            android:src="@drawable/lying_inactive"
-                            tools:ignore="ContentDescription" />
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/activity_section_margin"
-                            android:gravity="center">
-
-                            <ImageView
-                                android:id="@+id/imgScanLyingCheck"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/radio_inactive"
-                                tools:ignore="ContentDescription" />
-
-                            <TextView
-                                android:id="@+id/txtScanLying"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="@dimen/activity_group_margin"
-                                android:text="@string/mode_lying"
-                                android:textColor="@color/colorGreyDark" />
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                </com.balysv.materialripple.MaterialRippleLayout>
-
+                    app:scanmodeicon="@drawable/lying"
+                    app:scanmodetext="@string/mode_lying"
+                    android:onClick="scanLying"/>
             </LinearLayout>
 
             <androidx.core.widget.NestedScrollView
@@ -167,7 +91,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:scantypecolor="@color/colorGreenLight"
-                        app:scantypeicon="@drawable/stand_front_active"
+                        app:scantypeicon="@drawable/stand_front"
                         app:scantypetitle="@string/front_scan"
                         app:scantypetext="@string/help_front_view_2" />
 
@@ -176,7 +100,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:scantypecolor="@color/colorGreenMedium"
-                        app:scantypeicon="@drawable/stand_side_active"
+                        app:scantypeicon="@drawable/stand_side"
                         app:scantypetitle="@string/side_scan"
                         app:scantypetext="@string/help_lateral_view" />
 
@@ -185,7 +109,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:scantypecolor="@color/colorGreenDark"
-                        app:scantypeicon="@drawable/stand_back_active"
+                        app:scantypeicon="@drawable/stand_back"
                         app:scantypetitle="@string/back_scan"
                         app:scantypetext="@string/help_back_view" />
 
@@ -230,7 +154,7 @@
                     android:id="@+id/imgClose"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/close"
+                    android:src="@drawable/ic_close"
                     android:tint="@color/colorWhite"
                     tools:ignore="ContentDescription" />
 

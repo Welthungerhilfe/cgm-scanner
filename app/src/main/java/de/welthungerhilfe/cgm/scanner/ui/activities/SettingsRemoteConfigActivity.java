@@ -18,12 +18,11 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.view.MenuItem;
+
 import androidx.appcompat.app.ActionBar;
 import androidx.databinding.DataBindingUtil;
-
-import android.view.MenuItem;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityTestRemoteconfigBinding;
@@ -31,7 +30,6 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class SettingsRemoteConfigActivity extends BaseActivity {
-
 
     private RemoteConfig config;
 
@@ -58,15 +56,13 @@ public class SettingsRemoteConfigActivity extends BaseActivity {
         }
     }
 
-    @SuppressLint("StaticFieldLeak")
     private void initUI() {
-
-        activityTestRemoteconfigBinding.txtSettingDebug.setText(String.valueOf(config.isDebug()));
-        activityTestRemoteconfigBinding.txtSettingSyncPeriod.setText(String.valueOf(config.getSync_period()));
-        activityTestRemoteconfigBinding.txtSettingAllowDelete.setText(String.valueOf(config.isAllow_delete()));
-        activityTestRemoteconfigBinding.txtSettingAllowEdit.setText(String.valueOf(config.isAllow_edit()));
-        activityTestRemoteconfigBinding.txtSettingEditTime.setText(String.valueOf(config.getTime_to_allow_editing()));
-        activityTestRemoteconfigBinding.txtSettingMeasureVisibility.setText(String.valueOf(config.isMeasure_visibility()));
+        activityTestRemoteconfigBinding.settingDebug.setText(2, String.valueOf(config.isDebug()));
+        activityTestRemoteconfigBinding.settingSyncPeriod.setText(2, String.valueOf(config.getSync_period()));
+        activityTestRemoteconfigBinding.settingAllowDelete.setText(2, String.valueOf(config.isAllow_delete()));
+        activityTestRemoteconfigBinding.settingAllowEdit.setText(2, String.valueOf(config.isAllow_edit()));
+        activityTestRemoteconfigBinding.settingEditTime.setText(2, String.valueOf(config.getTime_to_allow_editing()));
+        activityTestRemoteconfigBinding.settingMeasureVisibility.setText(2, String.valueOf(config.isMeasure_visibility()));
     }
 
     @Override

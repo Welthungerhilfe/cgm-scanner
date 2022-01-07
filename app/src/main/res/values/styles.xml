@@ -52,12 +52,6 @@
         <item name="textAllCaps">true</item>
     </style>
 
-    <style name="CustomRatingBar" parent="@android:style/Widget.RatingBar">
-        <item name="android:progressDrawable">@drawable/view_rating_bar</item>
-        <item name="android:minHeight">24dip</item>
-        <item name="android:maxHeight">24dip</item>
-    </style>
-
     <style name="noAnimTheme" parent="@style/AppTheme.NoActionBar">
         <item name="android:windowAnimationStyle">@null</item>
     </style>
