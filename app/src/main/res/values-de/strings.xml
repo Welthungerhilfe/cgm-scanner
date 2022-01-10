@@ -116,6 +116,9 @@
     <string name="std_test_will_start">Diese Aktion startet den Standardisierungstest. Möchtest du fortfahren?</string>
     <string name="std_test_started">Standardisierungstest auf diesem Gerät ist aktiviert</string>
     <string name="std_test_deactivate">Möchten Sie den Standardisierungstest wirklich deaktivieren?</string>
+    <string name="std_test_invalid_qrcode">Der gescannte QR-Code des Normungstests ist ungültig.</string>
+    <string name="std_test_old_qrcode">Das gescannte Standardisierungstest-QR-Code-Ereignis ist in der Vergangenheit abgeschlossen.</string>
+    <string name="std_test_future_qrcode">Gescannte Standardisierungstest-QR-Code-Veranstaltung ist für die Zukunft geplant.</string>
 
     <string name="retake">Retake</string>
     <string name="label_continue">Fortsetzen</string>
