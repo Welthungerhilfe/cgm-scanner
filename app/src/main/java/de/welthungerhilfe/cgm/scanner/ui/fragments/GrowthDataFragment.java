@@ -20,6 +20,7 @@ package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Path;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -63,14 +64,13 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class GrowthDataFragment extends Fragment {
 
-    private enum ValueType {LINE, CIRCLE, BUBBLE}
+    private enum ValueType {LINE, CIRCLE, BUBBLE, TRIANGLE}
 
     private final int MEASURE_COLOR = Color.rgb(158, 232, 252);
     private final int ZSCORE_COLOR_0 = Color.rgb(55, 129, 69);
     private final int ZSCORE_COLOR_2 = Color.rgb(230, 122, 58);
     private final int ZSCORE_COLOR_3 = Color.rgb(212, 53, 62);
     private final int BLUE_COLOR_DOT = Color.rgb(15, 24, 241);
-
 
     private LineChart mChart;
     private VerticalTextView txtYAxis;
@@ -389,7 +389,7 @@ public class GrowthDataFragment extends Fragment {
 
                 entry.add(new Entry(x, y));
                 if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
-                    dataSets.add(createDataSet(ValueType.CIRCLE, entry, ZSCORE_COLOR_0));
+                    dataSets.add(createDataSet(ValueType.TRIANGLE, entry, ZSCORE_COLOR_0));
                 } else if (chartType == CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE && !measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
                     dataSets.add(createDataSet(ValueType.CIRCLE, entry, BLUE_COLOR_DOT));
                     if(measure.getReceived_at() > 0 && measure.getNegative_height_error() < 0 && measure.getPositive_height_error() > 0) {
@@ -431,28 +431,32 @@ public class GrowthDataFragment extends Fragment {
 
     protected LineDataSet createDataSet(ValueType type, ArrayList<Entry> values, int color) {
         LineDataSet dataSet = new LineDataSet(values, "");
-        dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+        Path path = new Path();
+        float shapeSize = 10;
         switch (type) {
             case LINE:
-                dataSet.setDrawCircles(false);
                 dataSet.setColor(color);
                 dataSet.setLineWidth(1.5f);
                 break;
             case CIRCLE:
-                dataSet.setDrawCircles(true);
-                dataSet.setDrawCircleHole(true);
-                dataSet.setColor(Color.TRANSPARENT);
+                path.addCircle(shapeSize, shapeSize, shapeSize, Path.Direction.CW);
                 break;
             case BUBBLE:
-                dataSet.setDrawCircles(true);
-                dataSet.setDrawCircleHole(false);
-                dataSet.setColor(Color.TRANSPARENT);
+                path.addCircle(shapeSize, shapeSize, shapeSize, Path.Direction.CW); //fill
+                path.addCircle(shapeSize, shapeSize, shapeSize / 2, Path.Direction.CCW); //hole
+                break;
+            case TRIANGLE:
+                path.moveTo(0, -shapeSize);
+                path.lineTo(-shapeSize, shapeSize);
+                path.lineTo(shapeSize, shapeSize);
+                path.close();
                 break;
         }
-        dataSet.setCircleColor(color);
-        dataSet.setCircleRadius(3f);
+        dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+        dataSet.setDrawShapes(type != ValueType.LINE);
+        dataSet.setShapeColor(color);
+        dataSet.setShapePath(path);
         dataSet.setDrawValues(false);
-        dataSet.setDrawCircleHole(false);
         dataSet.setHighLightColor(color);
         return dataSet;
     }

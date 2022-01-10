@@ -1,6 +1,7 @@
 package com.github.mikephil.charting.interfaces.datasets;
 
 import android.graphics.DashPathEffect;
+import android.graphics.Path;
 
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -33,51 +34,25 @@ public interface ILineDataSet extends ILineRadarDataSet<Entry> {
     boolean isDrawSteppedEnabled();
 
     /**
-     * Returns the size of the drawn circles.
+     * Returns the geometry of the drawn shapes.
      */
-    float getCircleRadius();
+    Path getShapePath();
 
     /**
-     * Returns the hole radius of the drawn circles.
-     */
-    float getCircleHoleRadius();
-
-    /**
-     * Returns the color at the given index of the DataSet's circle-color array.
+     * Returns the color at the given index of the DataSet's shape-color array.
      * Performs a IndexOutOfBounds check by modulus.
      *
      * @param index
      * @return
      */
-    int getCircleColor(int index);
+    int getShapeColor(int index);
 
     /**
-     * Returns the number of colors in this DataSet's circle-color array.
+     * Returns true if drawing shapes for this DataSet is enabled, false if not
      *
      * @return
      */
-    int getCircleColorCount();
-
-    /**
-     * Returns true if drawing circles for this DataSet is enabled, false if not
-     *
-     * @return
-     */
-    boolean isDrawCirclesEnabled();
-
-    /**
-     * Returns the color of the inner circle (the circle-hole).
-     *
-     * @return
-     */
-    int getCircleHoleColor();
-
-    /**
-     * Returns true if drawing the circle-holes is enabled, false if not.
-     *
-     * @return
-     */
-    boolean isDrawCircleHoleEnabled();
+    boolean isDrawShapesEnabled();
 
     /**
      * Returns the DashPathEffect that is used for drawing the lines.
