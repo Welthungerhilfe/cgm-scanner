@@ -38,7 +38,6 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
-import com.google.common.collect.Iterables;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
 import java.text.DecimalFormat;
@@ -63,6 +62,8 @@ import de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class GrowthDataFragment extends Fragment {
+
+    private enum ValueType {LINE, CIRCLE, BUBBLE}
 
     private final int MEASURE_COLOR = Color.rgb(158, 232, 252);
     private final int ZSCORE_COLOR_0 = Color.rgb(55, 129, 69);
@@ -295,11 +296,11 @@ public class GrowthDataFragment extends Fragment {
     }
 
     private void showData(ArrayList<ILineDataSet> dataSets) {
-        dataSets.add(createDataSet(SD3neg, "-3", ZSCORE_COLOR_3, 1.5f, false));
-        dataSets.add(createDataSet(SD2neg, "-2", ZSCORE_COLOR_2, 1.5f, false));
-        dataSets.add(createDataSet(SD0, "0", ZSCORE_COLOR_0, 1.5f, false));
-        dataSets.add(createDataSet(SD2, "+2", ZSCORE_COLOR_2, 1.5f, false));
-        dataSets.add(createDataSet(SD3, "+3", ZSCORE_COLOR_3, 1.5f, false));
+        dataSets.add(createDataSet(ValueType.LINE, SD3neg, ZSCORE_COLOR_3));
+        dataSets.add(createDataSet(ValueType.LINE, SD2neg, ZSCORE_COLOR_2));
+        dataSets.add(createDataSet(ValueType.LINE, SD0, ZSCORE_COLOR_0));
+        dataSets.add(createDataSet(ValueType.LINE, SD2, ZSCORE_COLOR_2));
+        dataSets.add(createDataSet(ValueType.LINE, SD3, ZSCORE_COLOR_3));
     }
 
     private void showDiagnose(double zScore) {
@@ -388,9 +389,9 @@ public class GrowthDataFragment extends Fragment {
 
                 entry.add(new Entry(x, y));
                 if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
-                    dataSets.add(createDataSet(entry, "", ZSCORE_COLOR_0, 5f, true));
+                    dataSets.add(createDataSet(ValueType.CIRCLE, entry, ZSCORE_COLOR_0));
                 } else if (chartType == CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE && !measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
-                    dataSets.add(createDataSet(entry, "", BLUE_COLOR_DOT, 5f, true));
+                    dataSets.add(createDataSet(ValueType.CIRCLE, entry, BLUE_COLOR_DOT));
                     if(measure.getReceived_at() > 0 && measure.getNegative_height_error() < 0 && measure.getPositive_height_error() > 0) {
                         ArrayList<Entry> errorEntry = new ArrayList<>();
                         ArrayList<Entry> posErrorEntry = new ArrayList<>();
@@ -399,9 +400,9 @@ public class GrowthDataFragment extends Fragment {
                         negativeErrorEntry.add(new Entry(x, (float) (y + measure.getNegative_height_error())));
                         errorEntry.addAll(posErrorEntry);
                         errorEntry.addAll(negativeErrorEntry);
-                        dataSets.add(createBubbleCircle(posErrorEntry, "", BLUE_COLOR_DOT, 5f));
-                        dataSets.add(createBubbleCircle(negativeErrorEntry, "", BLUE_COLOR_DOT, 5f));
-                        dataSets.add(createDataSet(errorEntry, "scan height", BLUE_COLOR_DOT, 1.5f, false));
+                        dataSets.add(createDataSet(ValueType.BUBBLE, posErrorEntry, BLUE_COLOR_DOT));
+                        dataSets.add(createDataSet(ValueType.BUBBLE, negativeErrorEntry, BLUE_COLOR_DOT));
+                        dataSets.add(createDataSet(ValueType.LINE, errorEntry, BLUE_COLOR_DOT));
                     }
                 }
             } catch (Exception e) {
@@ -412,7 +413,7 @@ public class GrowthDataFragment extends Fragment {
             if (entries.size() > 1) {
                 entries.sort((o1, o2) -> Float.compare(o1.getX(), o2.getX()));
             }
-            dataSets.add(0, createDataSet(entries, getString(R.string.tab_growth).toLowerCase(), MEASURE_COLOR, 1.5f, false));
+            dataSets.add(0, createDataSet(ValueType.LINE, entries, MEASURE_COLOR));
         }
     }
 
@@ -428,31 +429,30 @@ public class GrowthDataFragment extends Fragment {
         }
     }
 
-    protected LineDataSet createDataSet(ArrayList<Entry> values, String label, int color, float width, boolean circle) {
-        LineDataSet dataSet = new LineDataSet(values, label);
+    protected LineDataSet createDataSet(ValueType type, ArrayList<Entry> values, int color) {
+        LineDataSet dataSet = new LineDataSet(values, "");
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
-        dataSet.setColor(circle ? Color.TRANSPARENT : color);
-        if (!circle) {
-            dataSet.setLineWidth(width);
+        switch (type) {
+            case LINE:
+                dataSet.setDrawCircles(false);
+                dataSet.setColor(color);
+                dataSet.setLineWidth(1.5f);
+                break;
+            case CIRCLE:
+                dataSet.setDrawCircles(true);
+                dataSet.setDrawCircleHole(true);
+                dataSet.setColor(Color.TRANSPARENT);
+                break;
+            case BUBBLE:
+                dataSet.setDrawCircles(true);
+                dataSet.setDrawCircleHole(false);
+                dataSet.setColor(Color.TRANSPARENT);
+                break;
         }
-        dataSet.setDrawCircles(circle);
         dataSet.setCircleColor(color);
         dataSet.setCircleRadius(3f);
         dataSet.setDrawValues(false);
         dataSet.setDrawCircleHole(false);
-        dataSet.setHighLightColor(color);
-        return dataSet;
-    }
-
-    protected LineDataSet createBubbleCircle(ArrayList<Entry> values, String label, int color, float width) {
-        LineDataSet dataSet = new LineDataSet(values, "percentile error");
-        dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
-        dataSet.setColor(true ? Color.TRANSPARENT : color);
-        dataSet.setDrawCircles(true);
-        dataSet.setCircleColor(color);
-        dataSet.setCircleRadius(3f);
-        dataSet.setDrawValues(false);
-        dataSet.setDrawCircleHole(true);
         dataSet.setHighLightColor(color);
         return dataSet;
     }
