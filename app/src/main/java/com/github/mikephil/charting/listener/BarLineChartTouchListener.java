@@ -2,7 +2,6 @@ package com.github.mikephil.charting.listener;
 
 import android.annotation.SuppressLint;
 import android.graphics.Matrix;
-import android.graphics.PointF;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -10,7 +9,6 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 
 import com.github.mikephil.charting.charts.BarLineChartBase;
-import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.data.BarLineScatterCandleBubbleData;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
@@ -322,13 +320,7 @@ public class BarLineChartTouchListener extends ChartTouchListener<BarLineChartBa
 
         // check if axis is inverted
         if (inverted()) {
-
-            // if there is an inverted horizontalbarchart
-            if (mChart instanceof HorizontalBarChart) {
-                distanceX = -distanceX;
-            } else {
-                distanceY = -distanceY;
-            }
+            distanceY = -distanceY;
         }
 
         mMatrix.postTranslate(distanceX, distanceY);

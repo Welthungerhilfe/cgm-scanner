@@ -12,9 +12,7 @@ import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.LegendEntry;
 import com.github.mikephil.charting.data.ChartData;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
-import com.github.mikephil.charting.interfaces.datasets.ICandleDataSet;
 import com.github.mikephil.charting.interfaces.datasets.IDataSet;
-import com.github.mikephil.charting.interfaces.datasets.IPieDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.github.mikephil.charting.utils.FSize;
 import com.github.mikephil.charting.utils.Utils;
@@ -133,58 +131,6 @@ public class LegendRenderer extends Renderer {
                                 ColorTemplate.COLOR_NONE
                         ));
                     }
-
-                } else if (dataSet instanceof IPieDataSet) {
-
-                    IPieDataSet pds = (IPieDataSet) dataSet;
-
-                    for (int j = 0; j < clrs.size() && j < entryCount; j++) {
-
-                        computedEntries.add(new LegendEntry(
-                                pds.getEntryForIndex(j).getLabel(),
-                                dataSet.getForm(),
-                                dataSet.getFormSize(),
-                                dataSet.getFormLineWidth(),
-                                dataSet.getFormLineDashEffect(),
-                                clrs.get(j)
-                        ));
-                    }
-
-                    if (pds.getLabel() != null) {
-                        // add the legend description label
-                        computedEntries.add(new LegendEntry(
-                                dataSet.getLabel(),
-                                Legend.LegendForm.NONE,
-                                Float.NaN,
-                                Float.NaN,
-                                null,
-                                ColorTemplate.COLOR_NONE
-                        ));
-                    }
-
-                } else if (dataSet instanceof ICandleDataSet && ((ICandleDataSet) dataSet).getDecreasingColor() !=
-                        ColorTemplate.COLOR_NONE) {
-
-                    int decreasingColor = ((ICandleDataSet) dataSet).getDecreasingColor();
-                    int increasingColor = ((ICandleDataSet) dataSet).getIncreasingColor();
-
-                    computedEntries.add(new LegendEntry(
-                            null,
-                            dataSet.getForm(),
-                            dataSet.getFormSize(),
-                            dataSet.getFormLineWidth(),
-                            dataSet.getFormLineDashEffect(),
-                            decreasingColor
-                    ));
-
-                    computedEntries.add(new LegendEntry(
-                            dataSet.getLabel(),
-                            dataSet.getForm(),
-                            dataSet.getFormSize(),
-                            dataSet.getFormLineWidth(),
-                            dataSet.getFormLineDashEffect(),
-                            increasingColor
-                    ));
 
                 } else { // all others
 
