@@ -6,8 +6,8 @@ android {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 24
         targetSdkVersion 30
-        versionCode 700
-        versionName "7.0.0"
+        versionCode 710
+        versionName "7.1.0"
         manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", arengineValue:"optional"]
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         javaCompileOptions {
@@ -86,7 +86,7 @@ dependencies {
     implementation 'androidx.work:work-runtime:2.3.3' //workmanager for background task
 
     // Camera
-    implementation 'com.google.ar:core:1.26.0' //Google ARCore
+    implementation 'com.google.ar:core:1.29.0' //Google ARCore
     implementation 'com.huawei.hms:arenginesdk:2.15.0.4' //Huawei AREngine
     implementation 'me.dm7.barcodescanner:zxing:1.9.8' //QR Code scanner
 

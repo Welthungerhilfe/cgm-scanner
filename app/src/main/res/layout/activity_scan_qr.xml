@@ -24,7 +24,7 @@
                 android:layout_width="34dp"
                 android:layout_height="34dp"
                 android:padding="4dp"
-                android:src="@drawable/close"
+                android:src="@drawable/ic_close"
                 android:tint="@color/colorWhite"
                 tools:ignore="ContentDescription"
                 android:onClick="close"/>

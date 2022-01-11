@@ -120,6 +120,9 @@
     <string name="std_test_will_start">This action will start standardisation test. Do you want to continue?</string>
     <string name="std_test_started">Standardisation test on this device is activated.</string>
     <string name="std_test_deactivate">Are you sure you want to deactivate the standardization test?</string>
+    <string name="std_test_invalid_qrcode">Scanned standardisation test QR code is invalid.</string>
+    <string name="std_test_old_qrcode">Scanned standardisation test QR code event is finished in past.</string>
+    <string name="std_test_future_qrcode">Scanned standardisation test QR code event is planned in future.</string>
     <string name="retake">Retake</string>
     <string name="label_continue">Continue</string>
     <string name="error">Something went wrong</string>
@@ -175,11 +178,13 @@
     <!-- Measure detail !-->
     <string name="manual_measure">Manual measure</string>
     <string name="machine_measure">Machine measure</string>
-    <string name="measure_date">01 Date</string>
-    <string name="measure_location">02 Location</string>
-    <string name="measure_height">03 Height</string>
-    <string name="measure_weight">04 Weight</string>
-    <string name="measure_muac">05 MUAC</string>
+    <string name="measure_date">Date</string>
+    <string name="measure_location">Location</string>
+    <string name="measure_height">Height</string>
+    <string name="measure_weight">Weight</string>
+    <string name="measure_muac">MUAC</string>
+    <string name="min_error">Min Fehler</string>
+    <string name="max_error">Max Fehler</string>
     <string name="measure_oedema">No edema</string>
     <string name="edema_check">Are you sure the child suffers from Edema?</string>
     <string name="invalid_zscore">Are you sure about entered values?</string>
@@ -223,9 +228,6 @@
     <string name="score_light">Light Score : </string>
     <string name="score_light_bright">Too bright</string>
     <string name="score_light_dark">Too dark</string>
-    <string name="score_distance_close">Too close</string>
-    <string name="score_distance_far">Too far</string>
-    <string name="score_not_detected">Child not fully detected</string>
     <string name="capture_inside">Capture the child inside of outline</string>
     <string name="standup">Try to keep the child against a clear background and keep the whole child within the camera view</string>
     <string name="lyedown">Try to keep the child against a clear background and keep the whole child within the camera view</string>

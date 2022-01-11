@@ -53,7 +53,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginStart="5dp"
-                android:src="@drawable/close"
+                android:src="@drawable/ic_close"
                 android:layout_gravity="center_vertical"
                 android:contentDescription="@string/content_image"
                 android:onClick="onClose"/>

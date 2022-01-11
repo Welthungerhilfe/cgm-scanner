@@ -89,6 +89,12 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
 
     private static final int STD_TEST_START_CONFIRM = 5;
 
+    private static final int STD_TEST_QRCODE_OLDER = 6;
+
+    private static final int STD_TEST_QRCODE_INFUTURE = 7;
+
+    private static final int STD_TEST_QRCODE_INVALID = 8;
+
 
     int CONFIRM_DIALOG_STEP = 0;
 
@@ -101,6 +107,8 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
     SessionManager sessionManager;
 
     FirebaseAnalytics firebaseAnalytics;
+
+    public enum STDTEST {VALID, INVALID, OLDER, INFUTURE}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,11 +146,12 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
             if (CONFIRM_DIALOG_STEP == STD_TEST_WILL_STARTED) {
                 sessionManager.setStdTestQrCode(qrCode);
                 showConfirmDialog(R.string.std_test_started, STD_TEST_START_CONFIRM);
-                firebaseAnalytics.logEvent(FirebaseService.STD_TEST_START,null);
-            } else if (CONFIRM_DIALOG_STEP == NO_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == EMPTY_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == STD_TEST_START_CONFIRM) {
+                firebaseAnalytics.logEvent(FirebaseService.STD_TEST_START, null);
+            } else if (CONFIRM_DIALOG_STEP == NO_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == EMPTY_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == STD_TEST_START_CONFIRM
+                    || CONFIRM_DIALOG_STEP == STD_TEST_QRCODE_INFUTURE || CONFIRM_DIALOG_STEP == STD_TEST_QRCODE_OLDER || CONFIRM_DIALOG_STEP == STD_TEST_QRCODE_INVALID) {
                 finish();
             } else {
-                firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_START,null);
+                firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_START, null);
                 startCaptureImage();
             }
         } else {
@@ -192,9 +201,20 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         this.qrCode = qrCode;
 
         if (Utils.isStdTestQRCode(qrCode)) {
-            if (Utils.isValidateStdTestQrCode(qrCode)) {
-                showConfirmDialog(R.string.std_test_will_start, STD_TEST_WILL_STARTED);
-                return;
+            switch (Utils.isValidateStdTestQrCode(qrCode)) {
+                case VALID:
+                    showConfirmDialog(R.string.std_test_will_start, STD_TEST_WILL_STARTED);
+                    return;
+                case INVALID:
+                    showConfirmDialog(R.string.std_test_invalid_qrcode, STD_TEST_QRCODE_INVALID);
+                    return;
+                case OLDER:
+                    showConfirmDialog(R.string.std_test_old_qrcode, STD_TEST_QRCODE_OLDER);
+                    return;
+                case INFUTURE:
+                    showConfirmDialog(R.string.std_test_future_qrcode, STD_TEST_QRCODE_INFUTURE);
+                    return;
+
             }
         }
 
@@ -310,7 +330,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                     Intent intent = new Intent(QRScanActivity.this, CreateDataActivity.class);
                     intent.putExtra(AppConstants.EXTRA_QR, qrCode);
                     startActivity(intent);
-                    firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_STOP,null);
+                    firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_STOP, null);
                     finish();
                 } else {
                     Toast.makeText(context, R.string.error, Toast.LENGTH_LONG).show();

@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.media.Image;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Environment;
@@ -48,19 +47,19 @@ import java.util.Objects;
 
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.databinding.FragmentDeviceCheckBinding;
+import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
-import de.welthungerhilfe.cgm.scanner.databinding.FragmentDeviceCheckBinding;
-import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.TestView;
-import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -211,7 +210,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     }
 
     @Override
-    public void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex) {
+    public void onDepthDataReceived(Depthmap depthmap, int frameIndex) {
 
         if (frameIndex % 10 == 0) {
             SizeF calibrationRGB = camera.getCalibrationImageSize(false);

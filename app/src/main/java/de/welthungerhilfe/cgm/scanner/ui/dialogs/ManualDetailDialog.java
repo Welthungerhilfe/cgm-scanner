@@ -28,6 +28,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
+import java.util.Locale;
+
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.databinding.DialogManualDetailBinding;
@@ -71,9 +73,21 @@ public class ManualDetailDialog extends Dialog {
         if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
             dialogManualDetailBinding.imgType.setImageResource(R.drawable.manual);
             dialogManualDetailBinding.txtTitle.setText(R.string.manual_measure);
+            dialogManualDetailBinding.rltNegError.setVisibility(View.GONE);
+            dialogManualDetailBinding.rltPosError.setVisibility(View.GONE);
         } else {
             dialogManualDetailBinding.imgType.setImageResource(R.drawable.machine);
             dialogManualDetailBinding.txtTitle.setText(R.string.machine_measure);
+            if(measure.getPositive_height_error()==0) {
+                dialogManualDetailBinding.txtPositivePe.setText("--");
+            } else {
+                dialogManualDetailBinding.txtPositivePe.setText(String.format(Locale.getDefault(), "%.1f", measure.getPositive_height_error()));
+            }
+            if(measure.getNegative_height_error()==0){
+                dialogManualDetailBinding.txtNegativePe.setText("--");
+            } else {
+                dialogManualDetailBinding.txtNegativePe.setText(String.format(Locale.getDefault(), "%.1f", measure.getNegative_height_error()));
+            }
         }
 
         dialogManualDetailBinding.txtManualDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, measure.getDate()));
@@ -85,9 +99,9 @@ public class ManualDetailDialog extends Dialog {
         SessionManager sessionManager = new SessionManager(getContext());
         boolean stdtest = sessionManager.getStdTestQrCode() != null;
         if (!stdtest) {
-            dialogManualDetailBinding.txtManualHeight.setText(String.valueOf(measure.getHeight()));
-            dialogManualDetailBinding.txtManualWeight.setText(String.valueOf(measure.getWeight()));
-            dialogManualDetailBinding.txtManualMuac.setText(String.valueOf(measure.getMuac()));
+            dialogManualDetailBinding.txtManualHeight.setText(String.format(Locale.getDefault(), "%.1f", measure.getHeight()));
+            dialogManualDetailBinding.txtManualWeight.setText(String.format(Locale.getDefault(), "%.3f", measure.getWeight()));
+            dialogManualDetailBinding.txtManualMuac.setText(String.format(Locale.getDefault(), "%.1f", measure.getMuac()));
         } else {
             dialogManualDetailBinding.txtManualHeight.setText(R.string.field_concealed);
             dialogManualDetailBinding.txtManualWeight.setText(R.string.field_concealed);
