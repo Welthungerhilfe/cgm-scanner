@@ -246,6 +246,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private final Object threadsLock = new Object();
 
     private AbstractARCamera mCameraInstance;
+    private ImageView mOutline;
 
     public void onStart() {
         super.onStart();
@@ -314,6 +315,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         findViewById(R.id.imgClose).setOnClickListener(this);
 
+        mOutline = findViewById(R.id.scanOutline);
         ImageView colorCameraPreview = findViewById(R.id.colorCameraPreview);
         ImageView depthCameraPreview = findViewById(R.id.depthCameraPreview);
         GLSurfaceView glSurfaceView = findViewById(R.id.surfaceview);
@@ -743,12 +745,15 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         runOnUiThread(() -> {
 
             if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
+                mOutline.setVisibility(View.GONE);
                 getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OFF);
             } else if (childDetected) {
+                mOutline.setVisibility(View.GONE);
                 getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OUTLINE);
                 setFeedback(null);
             } else {
-                getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OUTLINE);
+                mOutline.setVisibility(View.VISIBLE);
+                getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OFF);
             }
 
             if (mTxtFeedback.getVisibility() == View.GONE) {
