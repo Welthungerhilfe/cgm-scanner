@@ -224,9 +224,6 @@
     <string name="score_light">लाइट स्कोर : </string>
     <string name="score_light_bright">बहुत चमकीला</string>
     <string name="score_light_dark">बहुत अँधेरा</string>
-    <string name="score_distance_close">बहुत समीप</string>
-    <string name="score_distance_far">बहुत दूर</string>
-    <string name="score_not_detected">बच्चा पूरी तरह से दिखाई नहीं दे रहा है</string>
     <string name="capture_inside">बच्चे को रूपरेखा के अंदर कैप्चर करें</string>
     <string name="standup">बच्चे को एक स्पष्ट पृष्ठभूमि के खिलाफ रखने की कोशिश करें और पूरे बच्चे को कैमरे के दृश्य में रखें</string>
     <string name="lyedown">बच्चे को एक स्पष्ट पृष्ठभूमि के खिलाफ रखने की कोशिश करें और पूरे बच्चे को कैमरे के दृश्य में रखें</string>

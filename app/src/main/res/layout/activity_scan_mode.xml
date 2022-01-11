@@ -187,6 +187,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
+
+                <ImageView
+                    android:id="@+id/scanOutline"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="50dp"
+                    android:src="@drawable/scan_outline_dots"
+                    android:visibility="gone" />
+
                 <TextView
                     android:id="@+id/txtFeedback"
                     android:background="#80000000"
