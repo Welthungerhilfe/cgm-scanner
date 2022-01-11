@@ -115,6 +115,9 @@
     <string name="std_test_will_start">यह क्रिया मानकीकरण परीक्षण शुरू करेगी। क्या आप जारी रखना चाहते हैं?</string>
     <string name="std_test_started">इस उपकरण पर मानकीकरण परीक्षण सक्रिय है।</string>
     <string name="std_test_deactivate">क्या आप वाकई मानकीकरण परीक्षण को निष्क्रिय करना चाहते हैं?</string>
+    <string name="std_test_invalid_qrcode">स्कैन किया गया मानकीकरण परीक्षण क्यूआर कोड अमान्य है।</string>
+    <string name="std_test_old_qrcode">स्कैन मानकीकरण परीक्षण क्यूआर कोड कार्यक्रम अतीत में समाप्त हो गई है।</string>
+    <string name="std_test_future_qrcode">भविष्य में स्कैन किए गए मानकीकरण परीक्षण क्यूआर कोड कार्यक्रम की योजना बनाई गई है।</string>
     <string name="retake">फिर से लेना</string>
     <string name="label_continue">Continue</string>
     <string name="error">कुछ गलत हो गया</string>
@@ -171,11 +174,13 @@
     <!-- Measure detail !-->
     <string name="manual_measure">मैनुअल नाप</string>
     <string name="machine_measure">मशीन नाप</string>
-    <string name="measure_date">01 तिथि</string>
-    <string name="measure_location">02 स्थान</string>
-    <string name="measure_height">03 ऊंचाई</string>
-    <string name="measure_weight">04 वज़न</string>
-    <string name="measure_muac">05 एमयूएसी (मुआक)</string>
+    <string name="measure_date">तिथि</string>
+    <string name="measure_location">स्थान</string>
+    <string name="measure_height">ऊंचाई</string>
+    <string name="measure_weight">वज़न</string>
+    <string name="measure_muac">एमयूएसी (मुआक)</string>
+    <string name="min_error">न्यूनतम त्रुटि</string>
+    <string name="max_error">अधिकतम त्रुटि</string>
     <string name="measure_oedema">कोई एडिमा नहीं</string>
     <string name="edema_check">क्या आप सुनिश्चित हैं कि बच्चा एडेमा से पीड़ित है?</string>
     <string name="invalid_zscore"> क्या आप दर्ज मूल्य के बारे में सुनिश्चित हैं?</string>

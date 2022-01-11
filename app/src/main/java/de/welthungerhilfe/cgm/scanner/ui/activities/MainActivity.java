@@ -132,7 +132,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         if (session.getStdTestQrCode() != null) {
-            if (!Utils.isValidateStdTestQrCode(session.getStdTestQrCode())) {
+            if (Utils.isValidateStdTestQrCode(session.getStdTestQrCode()) == QRScanActivity.STDTEST.VALID) {
                 session.setStdTestQrCode(null);
                 showStdTestButtonInMenu(false);
             }
@@ -553,7 +553,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     session.setStdTestQrCode(null);
                     adapterData.notifyDataSetChanged();
                     checkIfStdTestActive();
-                    firebaseAnalytics.logEvent(FirebaseService.STD_TEST_STOP,null);
+                    firebaseAnalytics.logEvent(FirebaseService.STD_TEST_STOP, null);
                 }
             });
             confirmDialog.show();
