@@ -38,6 +38,8 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IFillFormatter;
+import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
@@ -62,14 +64,14 @@ import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
 import de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
-public class GrowthDataFragment extends Fragment {
+public class GrowthDataFragment extends Fragment implements IFillFormatter {
 
-    private enum ValueType {LINE, CIRCLE, BUBBLE, TRIANGLE}
+    private enum ValueType {LINE, LINE_FILL_UP, LINE_FILL_DOWN, CIRCLE, BUBBLE, TRIANGLE}
 
     private final int MEASURE_COLOR = Color.rgb(158, 232, 252);
-    private final int ZSCORE_COLOR_0 = Color.rgb(55, 129, 69);
-    private final int ZSCORE_COLOR_2 = Color.rgb(230, 122, 58);
-    private final int ZSCORE_COLOR_3 = Color.rgb(212, 53, 62);
+    private final int ZSCORE_COLOR_0 = Color.argb(64, 55, 129, 69);
+    private final int ZSCORE_COLOR_2 = Color.argb(0, 230, 122, 58);
+    private final int ZSCORE_COLOR_3 = Color.argb(0, 212, 53, 62);
     private final int BLUE_COLOR_DOT = Color.rgb(15, 24, 241);
 
     private LineChart mChart;
@@ -223,7 +225,7 @@ public class GrowthDataFragment extends Fragment {
 
         //show data
         showAxisLegend();
-        showData(dataSets);
+        showData(dataSets, false);
         showManualMeasures(measures, dataSets);
         showZScore(zscoreData, lastMeasure);
         mChart.setData(new LineData(dataSets));
@@ -295,12 +297,22 @@ public class GrowthDataFragment extends Fragment {
         }
     }
 
-    private void showData(ArrayList<ILineDataSet> dataSets) {
-        dataSets.add(createDataSet(ValueType.LINE, SD3neg, ZSCORE_COLOR_3));
-        dataSets.add(createDataSet(ValueType.LINE, SD2neg, ZSCORE_COLOR_2));
-        dataSets.add(createDataSet(ValueType.LINE, SD0, ZSCORE_COLOR_0));
-        dataSets.add(createDataSet(ValueType.LINE, SD2, ZSCORE_COLOR_2));
-        dataSets.add(createDataSet(ValueType.LINE, SD3, ZSCORE_COLOR_3));
+    private void showData(ArrayList<ILineDataSet> dataSets, boolean filled) {
+        if (filled) {
+            dataSets.add(createDataSet(ValueType.LINE_FILL_UP, SD0, ZSCORE_COLOR_0));
+            dataSets.add(createDataSet(ValueType.LINE_FILL_UP, SD2, ZSCORE_COLOR_2));
+            dataSets.add(createDataSet(ValueType.LINE_FILL_UP, SD3, ZSCORE_COLOR_3));
+            dataSets.add(createDataSet(ValueType.LINE_FILL_DOWN, SD0, ZSCORE_COLOR_0));
+            dataSets.add(createDataSet(ValueType.LINE_FILL_DOWN, SD2neg, ZSCORE_COLOR_2));
+            dataSets.add(createDataSet(ValueType.LINE_FILL_DOWN, SD3neg, ZSCORE_COLOR_3));
+        } else {
+            dataSets.add(createDataSet(ValueType.LINE, SD0, ZSCORE_COLOR_0));
+            dataSets.add(createDataSet(ValueType.LINE, SD2, ZSCORE_COLOR_2));
+            dataSets.add(createDataSet(ValueType.LINE, SD3, ZSCORE_COLOR_3));
+            dataSets.add(createDataSet(ValueType.LINE, SD0, ZSCORE_COLOR_0));
+            dataSets.add(createDataSet(ValueType.LINE, SD2neg, ZSCORE_COLOR_2));
+            dataSets.add(createDataSet(ValueType.LINE, SD3neg, ZSCORE_COLOR_3));
+        }
     }
 
     private void showDiagnose(double zScore) {
@@ -430,22 +442,44 @@ public class GrowthDataFragment extends Fragment {
     }
 
     protected LineDataSet createDataSet(ValueType type, ArrayList<Entry> values, int color) {
-        LineDataSet dataSet = new LineDataSet(values, "");
+        String label = "";
+        if (type == ValueType.LINE_FILL_UP) {
+            label = "pos";
+        } else if (type == ValueType.LINE_FILL_DOWN) {
+            label = "neg";
+        }
+
+        int rgb = Color.rgb(Color.red(color), Color.green(color), Color.blue(color));
+        LineDataSet dataSet = new LineDataSet(values, label);
         Path path = new Path();
         float shapeSize = 10;
         switch (type) {
             case LINE:
-                dataSet.setColor(color);
+                dataSet.setDrawShapes(false);
+                dataSet.setColor(rgb);
+                dataSet.setLineWidth(1.5f);
+                break;
+            case LINE_FILL_UP:
+            case LINE_FILL_DOWN:
+                dataSet.setDrawShapes(false);
+                dataSet.setDrawFilled(true);
+                dataSet.setFillAlpha(Color.alpha(color));
+                dataSet.setFillFormatter(this);
+                dataSet.setFillColor(rgb);
+                dataSet.setColor(Color.TRANSPARENT);
                 dataSet.setLineWidth(1.5f);
                 break;
             case CIRCLE:
+                dataSet.setDrawShapes(true);
                 path.addCircle(shapeSize, shapeSize, shapeSize, Path.Direction.CW);
                 break;
             case BUBBLE:
+                dataSet.setDrawShapes(true);
                 path.addCircle(shapeSize, shapeSize, shapeSize, Path.Direction.CW); //fill
                 path.addCircle(shapeSize, shapeSize, shapeSize / 2, Path.Direction.CCW); //hole
                 break;
             case TRIANGLE:
+                dataSet.setDrawShapes(true);
                 path.moveTo(0, -shapeSize);
                 path.lineTo(-shapeSize, shapeSize);
                 path.lineTo(shapeSize, shapeSize);
@@ -453,11 +487,15 @@ public class GrowthDataFragment extends Fragment {
                 break;
         }
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
-        dataSet.setDrawShapes(type != ValueType.LINE);
-        dataSet.setShapeColor(color);
+        dataSet.setShapeColor(rgb);
         dataSet.setShapePath(path);
         dataSet.setDrawValues(false);
-        dataSet.setHighLightColor(color);
+        dataSet.setHighLightColor(rgb);
         return dataSet;
+    }
+
+    @Override
+    public float getFillLinePosition(ILineDataSet dataSet, LineDataProvider dataProvider) {
+        return dataSet.getLabel().compareTo("pos") == 0 ? mChart.getYChartMax() : mChart.getYChartMin();
     }
 }

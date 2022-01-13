@@ -1,6 +1,8 @@
 package com.github.mikephil.charting.renderer;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
@@ -13,6 +15,8 @@ import com.github.mikephil.charting.utils.ViewPortHandler;
  * Created by Philipp Jahoda on 25/01/16.
  */
 public abstract class LineRadarRenderer extends LineScatterCandleRadarRenderer {
+
+    private Bitmap mBitmap;
 
     public LineRadarRenderer(ChartAnimator animator, ViewPortHandler viewPortHandler) {
         super(animator, viewPortHandler);
@@ -56,31 +60,34 @@ public abstract class LineRadarRenderer extends LineScatterCandleRadarRenderer {
      */
     protected void drawFilledPath(Canvas c, Path filledPath, int fillColor, int fillAlpha) {
 
-        int color = (fillAlpha << 24) | (fillColor & 0xffffff);
+        // create drawing bitmap
+        if ((mBitmap == null) || (mBitmap.getWidth() != c.getWidth()) || (mBitmap.getHeight() != c.getHeight())) {
+            mBitmap = Bitmap.createBitmap(c.getWidth(), c.getHeight(), Bitmap.Config.ARGB_8888);
+        }
+        Canvas b = new Canvas(mBitmap);
 
+        // draw into bitmap
+        Paint.Style previous = mRenderPaint.getStyle();
+        int previousColor = mRenderPaint.getColor();
+        mRenderPaint.setStyle(Paint.Style.FILL);
+        mRenderPaint.setColor(fillColor);
+        b.drawPath(filledPath, mRenderPaint);
+        mRenderPaint.setColor(previousColor);
+        mRenderPaint.setStyle(previous);
+
+        // draw bitmap on screen
         if (clipPathSupported()) {
+            Paint paint = new Paint();
+            paint.setAlpha(fillAlpha);
 
             int save = c.save();
-
             c.clipPath(filledPath);
-
-            c.drawColor(color);
+            c.drawColor(Color.TRANSPARENT);
+            c.drawBitmap(mBitmap, 0, 0, paint);
             c.restoreToCount(save);
         } else {
-
-            // save
-            Paint.Style previous = mRenderPaint.getStyle();
-            int previousColor = mRenderPaint.getColor();
-
-            // set
-            mRenderPaint.setStyle(Paint.Style.FILL);
-            mRenderPaint.setColor(color);
-
-            c.drawPath(filledPath, mRenderPaint);
-
-            // restore
-            mRenderPaint.setColor(previousColor);
-            mRenderPaint.setStyle(previous);
+            throw new RuntimeException("Fill-path not (yet) supported below API level 18, " +
+                    "this code was run on API level " + Utils.getSDKInt() + ".");
         }
     }
 
