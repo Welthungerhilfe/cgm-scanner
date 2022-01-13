@@ -116,6 +116,9 @@
     <string name="std_test_will_start">Diese Aktion startet den Standardisierungstest. Möchtest du fortfahren?</string>
     <string name="std_test_started">Standardisierungstest auf diesem Gerät ist aktiviert</string>
     <string name="std_test_deactivate">Möchten Sie den Standardisierungstest wirklich deaktivieren?</string>
+    <string name="std_test_invalid_qrcode">Der gescannte QR-Code des Normungstests ist ungültig.</string>
+    <string name="std_test_old_qrcode">Das gescannte Standardisierungstest-QR-Code-Ereignis ist in der Vergangenheit abgeschlossen.</string>
+    <string name="std_test_future_qrcode">Gescannte Standardisierungstest-QR-Code-Veranstaltung ist für die Zukunft geplant.</string>
 
     <string name="retake">Retake</string>
     <string name="label_continue">Fortsetzen</string>
@@ -172,11 +175,13 @@
     <!-- Measure detail !-->
     <string name="manual_measure">manuelle Messung</string>
     <string name="machine_measure">Scan</string>
-    <string name="measure_date">01 Datum</string>
-    <string name="measure_location">02 Ort</string>
-    <string name="measure_height">03 Größe</string>
-    <string name="measure_weight">04 Gewicht</string>
-    <string name="measure_muac">05 MUAC</string>
+    <string name="measure_date">Datum</string>
+    <string name="measure_location">Ort</string>
+    <string name="measure_height">Größe</string>
+    <string name="measure_weight">Gewicht</string>
+    <string name="measure_muac">MUAC</string>
+    <string name="min_error">Min Error</string>
+    <string name="max_error">Max Error</string>
     <string name="measure_oedema">Kein Ödem</string>
     <string name="edema_check">Sind Sie sicher, dass das Kind an Ödem leidet?</string>
     <string name="invalid_zscore">Sind Sie sicher über eingegebene Werte?</string>
@@ -220,9 +225,6 @@
     <string name="score_light">Belichtung : </string>
     <string name="score_light_bright">Zu hell</string>
     <string name="score_light_dark">Zu dunkel</string>
-    <string name="score_distance_close">Zu nah</string>
-    <string name="score_distance_far">Zu weit</string>
-    <string name="score_not_detected">Kind nicht vollständig erkannt</string>
     <string name="capture_inside">Erfassen Sie das Kind innerhalb der Kontur</string>
     <string name="standup">Stellen Sie sicher, dass der gesamte Körper des Kindes in der Kameransicht zu sehen ist und dass die Aufnahme vor einem klaren Hintergrund durchgeführt</string>
     <string name="lyedown">Stellen Sie sicher, dass der gesamte Körper des Kindes in der Kameransicht zu sehen ist und dass die Aufnahme vor einem klaren Hintergrund durchgeführt</string>

@@ -25,20 +25,29 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PointF;
 import android.media.Image;
 import android.os.Build;
 import android.util.Log;
+import android.view.OrientationEventListener;
 
 import com.huawei.hiar.ARAugmentedImage;
 import com.huawei.hiar.ARAugmentedImageDatabase;
+import com.huawei.hiar.ARBody;
 import com.huawei.hiar.ARCamera;
 import com.huawei.hiar.ARCameraIntrinsics;
 import com.huawei.hiar.ARConfigBase;
+import com.huawei.hiar.ARCoordinateSystemType;
 import com.huawei.hiar.ARFrame;
 import com.huawei.hiar.ARPlane;
 import com.huawei.hiar.ARPose;
 import com.huawei.hiar.ARSession;
+import com.huawei.hiar.ARTrackable;
+import com.huawei.hiar.ARWorldBodyTrackingConfig;
 import com.huawei.hiar.ARWorldTrackingConfig;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
@@ -57,12 +66,27 @@ public class AREngineCamera extends AbstractARCamera {
   private static final String PACKAGENAME_ARSERVICE = "com.huawei.arengine.service";
 
   //AREngine API
-  private ARSession mSession;
   private boolean mFirstRequest;
+  private int mOrientation;
+  private ARSession mSession;
 
   public AREngineCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
     super(activity, depthMode, previewSize);
+
+    OrientationEventListener orientationEventListener = new OrientationEventListener(mActivity)
+    {
+      @Override
+      public void onOrientationChanged(int orientation)
+      {
+        mOrientation = orientation;
+      }
+    };
+
+    if (orientationEventListener.canDetectOrientation()) {
+      orientationEventListener.enable();
+    }
   }
+
 
   @Override
   protected void closeCamera() {
@@ -99,13 +123,21 @@ public class AREngineCamera extends AbstractARCamera {
         LogFileUtils.logException(e);
       }
 
-      // Enable auto focus mode while AREngine is running.
-      ARWorldTrackingConfig config = new ARWorldTrackingConfig(mSession);
-      config.setAugmentedImageDatabase(db);
+      // Set AR configuration
+      ARConfigBase config;
+      if (mDepthMode == DepthPreviewMode.CALIBRATION) {
+        ARWorldTrackingConfig worldTrackingConfig = new ARWorldTrackingConfig(mSession);
+        worldTrackingConfig.setAugmentedImageDatabase(db);
+        worldTrackingConfig.setPlaneFindingMode(ARConfigBase.PlaneFindingMode.HORIZONTAL_ONLY);
+        config = worldTrackingConfig;
+      } else {
+        ARWorldBodyTrackingConfig bodyTrackingConfig = new ARWorldBodyTrackingConfig(mSession);
+        bodyTrackingConfig.setPlaneFindingMode(ARConfigBase.PlaneFindingMode.HORIZONTAL_ONLY);
+        config = bodyTrackingConfig;
+      }
       config.setEnableItem(ARConfigBase.ENABLE_DEPTH);
       config.setFocusMode(ARConfigBase.FocusMode.AUTO_FOCUS);
       config.setLightingMode(ARConfigBase.LightingMode.AMBIENT_INTENSITY);
-      config.setPlaneFindingMode(ARConfigBase.PlaneFindingMode.HORIZONTAL_ONLY);
       config.setPowerMode(ARConfigBase.PowerMode.PERFORMANCE_FIRST);
       config.setUpdateMode(ARConfigBase.UpdateMode.BLOCKING);
       mSession.configure(config);
@@ -221,12 +253,18 @@ public class AREngineCamera extends AbstractARCamera {
       }
 
       //process camera data
+      getBodySkeleton();
       onProcessColorData(color);
       onProcessDepthData(depth);
       mFrameIndex++;
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  @Override
+  public int getPersonCount() {
+    return mPersonCount;
   }
 
   private void installAREngine() {
@@ -252,6 +290,47 @@ public class AREngineCamera extends AbstractARCamera {
       Utils.sleep(100);
       mActivity.finish();
     }).start();
+  }
+
+  private void getBodySkeleton() {
+    mPersonCount = 0;
+    mSkeleton.clear();
+    mSkeletonValid = true;
+    if ((mOrientation < 45) || (mOrientation > 315)) {
+      Collection<ARBody> bodies = mSession.getAllTrackables(ARBody.class);
+      for (ARBody body : bodies) {
+        if (body.getTrackingState() != ARTrackable.TrackingState.TRACKING) {
+          continue;
+        }
+        if (body.getCoordinateSystemType() != ARCoordinateSystemType.COORDINATE_SYSTEM_TYPE_3D_CAMERA) {
+          continue;
+        }
+        mPersonCount++;
+
+        //TODO:apply frame.transformDisplayUvCoords instead of yOffset and yScale
+        float yOffset = 0.16f;
+        float yScale = 0.75f;
+        float[] points = body.getSkeletonPoint2D();
+        ArrayList<Integer> indices = new ArrayList<>();
+        for (int i : body.getBodySkeletonConnection()) {
+          indices.add(i);
+        }
+        indices.add(ARBody.ARBodySkeletonType.BodySkeleton_l_Sho.ordinal() - 1);
+        indices.add(ARBody.ARBodySkeletonType.BodySkeleton_l_Hip.ordinal() - 1);
+        indices.add(ARBody.ARBodySkeletonType.BodySkeleton_r_Sho.ordinal() - 1);
+        indices.add(ARBody.ARBodySkeletonType.BodySkeleton_r_Hip.ordinal() - 1);
+        for (int i : indices) {
+          float x = points[i * 3 + 1] * -0.5f + 0.5f;
+          float y = points[i * 3] * -0.5f + 0.5f;
+          if ((x > 0) && (y > 0)) {
+            mSkeleton.add(new PointF(x, (y + yOffset) * yScale));
+          } else {
+            mSkeleton.add(new PointF(0, 0));
+            mSkeletonValid = false;
+          }
+        }
+      }
+    }
   }
 
   public static boolean shouldUseAREngine() {

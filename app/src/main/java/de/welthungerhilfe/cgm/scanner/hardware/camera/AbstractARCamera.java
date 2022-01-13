@@ -22,7 +22,10 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PointF;
 import android.media.Image;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
@@ -40,6 +43,7 @@ import java.util.ArrayList;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.RenderToTexture;
 import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
 
@@ -67,7 +71,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
     public enum PreviewSize { CLIPPED, FULL, SMALL };
 
-    public enum TrackingState { INIT, TRACKED, LOST };
+    public enum SkeletonMode { OFF, LINES, OUTLINE };
 
     protected final String CALIBRATION_IMAGE_FILE = "plant.jpg";
 
@@ -111,15 +115,19 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     protected LightConditions mLight;
     protected PlaneMode mPlaneMode;
     protected PreviewSize mPreviewSize;
-    protected TrackingState mTrackingState;
+    protected SkeletonMode mSkeletonMode;
     protected ArrayList<Float> mPlanes;
+    protected ArrayList<PointF> mSkeleton;
+    protected boolean mSkeletonValid;
     protected long mLastBright;
     protected long mLastDark;
     protected long mSessionStart;
+    protected int mPersonCount = 0;
 
     protected abstract void closeCamera();
     protected abstract void openCamera();
     protected abstract void updateFrame();
+    public abstract int getPersonCount();
 
     public AbstractARCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
         mActivity = activity;
@@ -134,6 +142,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         mFrameIndex = 1;
         mPixelIntensity = 0;
         mPlanes = new ArrayList<>();
+        mSkeleton = new ArrayList<>();
         mDepthMode = depthMode;
         mPreviewSize = previewSize;
         mLight = LightConditions.NORMAL;
@@ -241,9 +250,8 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         }
 
         Bitmap preview = getDepthPreview(depthmap, mPlanes, mColorCameraIntrinsic);
-        if (preview != null) {
-            mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(preview));
-        }
+        Bitmap finalPreview = skeletonVisualisation(preview);
+        mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(finalPreview));
     }
 
     public void addListener(Object listener) {
@@ -448,7 +456,6 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
                 if (!otherColors && !valid) {
                     mask = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
                 }
-                updateTrackingState(valid);
                 if (mDepthMode == DepthPreviewMode.CENTER_LOW_POWER) {
                     return null;
                 } else {
@@ -489,16 +496,12 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         return mTargetHeight;
     }
 
-    public TrackingState getTrackingState() {
-        return mTrackingState;
-    }
-
-    public void resetTrackingState() {
-        mTrackingState = TrackingState.INIT;
-    }
-
     public void setPlaneMode(PlaneMode mode) {
         mPlaneMode = mode;
+    }
+
+    public void setSkeletonMode(SkeletonMode mode) {
+        mSkeletonMode = mode;
     }
 
     public LightConditions updateLight(LightConditions light, long lastBright, long lastDark, long sessionStart) {
@@ -534,19 +537,64 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         return Integer.MAX_VALUE;
     }
 
-    private void updateTrackingState(boolean valid) {
-        switch (mTrackingState) {
-            case INIT:
-            case LOST:
-                if (valid) {
-                    mTrackingState = TrackingState.TRACKED;
-                }
-                break;
-            case TRACKED:
-                if (!valid) {
-                    mTrackingState = TrackingState.LOST;
-                }
-                break;
+
+    private Bitmap skeletonVisualisation(Bitmap preview) {
+
+        if (mSkeletonMode == SkeletonMode.OFF) {
+            return preview;
         }
+
+        //skeleton visualisation
+        if (mPersonCount == 1) {
+            if (preview == null || (preview.getWidth() == 1)) {
+                preview = Bitmap.createBitmap(240, 180, Bitmap.Config.ARGB_8888);
+            }
+            preview = preview.copy(Bitmap.Config.ARGB_8888, true);
+            Canvas c = new Canvas(preview);
+
+            //define look of the visualisation
+            int color = Color.argb(128, 0, 255, 0);
+            if ((mTargetDistance < AppConstants.TOO_NEAR) || (mTargetDistance > AppConstants.TOO_FAR)) {
+                color = Color.argb(128, 255, 255, 0);
+            } else if (!mSkeletonValid) {
+                color = Color.argb(128, 255, 255, 0);
+            }
+
+            //draw bones
+            for (int pass = 0; pass < ((mSkeletonMode == SkeletonMode.OUTLINE) ? 2 : 1); pass++) {
+                int r = (mSkeletonMode == SkeletonMode.OUTLINE) ? (pass == 0 ? 20 : 15) : 1;
+                Paint p = new Paint();
+                p.setColor(pass == 0 ? color : Color.BLACK);
+                p.setStrokeWidth(r * 2);
+                for (int i = 0; i < mSkeleton.size(); i += 2) {
+                    int x1 = (int) (mSkeleton.get(i).x * (float)preview.getWidth());
+                    int y1 = (int) (mSkeleton.get(i).y * (float)preview.getHeight());
+                    int x2 = (int) (mSkeleton.get(i + 1).x * (float)preview.getWidth());
+                    int y2 = (int) (mSkeleton.get(i + 1).y * (float)preview.getHeight());
+                    if ((x1 != 0) && (y1 != 0) && (x2 != 0) && (y2 != 0)) {
+                        if (mSkeletonMode == SkeletonMode.OUTLINE) {
+                            c.drawCircle(x1, y1, r, p);
+                            c.drawCircle(x2, y2, r, p);
+                        }
+                        c.drawLine(x1, y1, x2, y2, p);
+                    }
+                }
+            }
+
+            //masking which creates outline
+            if (mSkeletonMode == SkeletonMode.OUTLINE) {
+                int w = preview.getWidth();
+                int h = preview.getHeight();
+                int[] pixels = new int[w * h];
+                preview.getPixels(pixels, 0, w, 0, 0, w, h);
+                for (int i = 0; i < pixels.length; i++) {
+                    if (pixels[i] == Color.BLACK) {
+                        pixels[i] = Color.TRANSPARENT;
+                    }
+                }
+                preview.setPixels(pixels, 0, w, 0, 0, w, h);
+            }
+        }
+        return preview;
     }
 }

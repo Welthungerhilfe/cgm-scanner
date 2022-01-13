@@ -153,7 +153,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         boolean stdtest = sessionManager.getStdTestQrCode() != null;
         if (config.isMeasure_visibility() && !stdtest) {
 
-            holder.txtHeight.setText(String.format(Locale.getDefault(), "%.1f", measure.getHeight()) + context.getString(R.string.unit_cm));
+            holder.txtHeight.setText(String.format(Locale.getDefault(), "%.1f", measure.getHeight() ) + context.getString(R.string.unit_cm));
             holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f", measure.getWeight()) + context.getString(R.string.unit_kg));
 
             if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {

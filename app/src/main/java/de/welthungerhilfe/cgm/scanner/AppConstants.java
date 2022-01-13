@@ -104,7 +104,10 @@ public class AppConstants {
 
     public static final int MIN_CONFIDENCE = 100;
 
+    //scan feedback and capture parameters
     public static final int SCAN_FRAMESKIP = 6;
+    public static final float TOO_NEAR = 0.7f;
+    public static final float TOO_FAR = 1.5f;
 
     public static final String IS_FOREGROUND = "isForeGround";
 

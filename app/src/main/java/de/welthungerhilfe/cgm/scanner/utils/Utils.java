@@ -57,6 +57,7 @@ import java.util.TimeZone;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.ui.activities.QRScanActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
 
 public class Utils {
@@ -288,7 +289,7 @@ public class Utils {
         return qrcode.toUpperCase().contains("STD_TEST_");
     }
 
-    public static boolean isValidateStdTestQrCode(String qrcode) {
+    public static QRScanActivity.STDTEST isValidateStdTestQrCode(String qrcode) {
         try {
             String[] arrOfStr = qrcode.split("_", 5);
             String date = arrOfStr[2];
@@ -298,13 +299,22 @@ public class Utils {
             String formattedDate = df.format(c);
 
             if (date.equals(formattedDate)) {
-                return true;
+                return QRScanActivity.STDTEST.VALID;
             } else {
-                return false;
+
+                if(Double.parseDouble(date) > Double.parseDouble(formattedDate)){
+                    return QRScanActivity.STDTEST.INFUTURE;
+                }
+                else if(Double.parseDouble(date) < Double.parseDouble(formattedDate)) {
+                    return QRScanActivity.STDTEST.OLDER;
+                }
+                else {
+                    return QRScanActivity.STDTEST.INVALID;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return QRScanActivity.STDTEST.INVALID;
         }
     }
 
