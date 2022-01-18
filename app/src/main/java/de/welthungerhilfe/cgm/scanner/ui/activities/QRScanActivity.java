@@ -19,24 +19,20 @@
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.Manifest;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
-
-import android.provider.MediaStore;
-import android.util.Log;
-import android.view.View;
-
-import android.widget.Toast;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -44,7 +40,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityScanQrBinding;
@@ -52,12 +48,11 @@ import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
-import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.ui.views.QRScanView;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
 import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
+import de.welthungerhilfe.cgm.scanner.ui.views.QRScanView;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -75,9 +70,6 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
     FileLogRepository fileLogRepository;
 
     PersonRepository personRepository;
-
-    Uri imageUri;
-
 
     private static final int CAPTURED_CONSENT_SHEET_STEP = 1;
 
@@ -152,7 +144,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                 finish();
             } else {
                 firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_START, null);
-                startCaptureImage();
+                startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), IMAGE_CAPTURED_REQUEST);
             }
         } else {
             finish();
@@ -166,12 +158,8 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
             try {
                 activityScanQrBinding.llQrDetails.setVisibility(View.GONE);
                 activityScanQrBinding.qrScanView.setVisibility(View.GONE);
-                Bitmap capturedImageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+                Bitmap capturedImageBitmap = (Bitmap) data.getExtras().get("data");
                 capturedImageBitmap = BitmapHelper.getAcceptableBitmap(capturedImageBitmap);
-                File file = new File(imageUri.getPath());
-                if (file.exists()) {
-                    file.delete();
-                }
                 ImageSaver(capturedImageBitmap, QRScanActivity.this);
                 return;
             } catch (Exception e) {
@@ -248,20 +236,6 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         } catch (Exception e) {
 
         }
-    }
-
-    void startCaptureImage() {
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.TITLE, "Picture");
-        File root = AppController.getInstance().getPublicAppDirectory(this);
-        File file = new File(root, "consent.jpg");
-        if (file.exists()) {
-            file.delete();
-        }
-        imageUri = Uri.fromFile(file);
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-        startActivityForResult(intent, IMAGE_CAPTURED_REQUEST);
     }
 
     void ImageSaver(Bitmap data1, Context context) {
