@@ -66,7 +66,7 @@ import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class GrowthDataFragment extends Fragment implements IFillFormatter {
 
-    private enum ValueType {LINE, LINE_FILL_UP, LINE_FILL_DOWN, CIRCLE, BUBBLE, TRIANGLE}
+    private enum ValueType {LINE, LINE_THIN, LINE_FILL_UP, LINE_FILL_DOWN, CIRCLE, BUBBLE, TRIANGLE}
 
     private final int MEASURE_COLOR = Color.rgb(158, 232, 252);
     private final int ZSCORE_COLOR_0 = Color.argb(64, 55, 129, 69);
@@ -395,13 +395,13 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
             if (x == 0 || y == 0)
                 continue;
 
-            final int fX = (int) x;
             try {
                 ArrayList<Entry> entry = new ArrayList<>();
 
                 entry.add(new Entry(x, y));
                 if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
                     dataSets.add(createDataSet(ValueType.TRIANGLE, entry, ZSCORE_COLOR_0));
+                    entries.add(new Entry(x, y));
                 } else if (chartType == CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE && !measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
                     dataSets.add(createDataSet(ValueType.CIRCLE, entry, BLUE_COLOR_DOT));
                     if(measure.getReceived_at() > 0 && measure.getNegative_height_error() < 0 && measure.getPositive_height_error() > 0) {
@@ -425,7 +425,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
             if (entries.size() > 1) {
                 entries.sort((o1, o2) -> Float.compare(o1.getX(), o2.getX()));
             }
-            dataSets.add(0, createDataSet(ValueType.LINE, entries, MEASURE_COLOR));
+            dataSets.add(0, createDataSet(ValueType.LINE_THIN, entries, MEASURE_COLOR));
         }
     }
 
@@ -455,9 +455,9 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
         float shapeSize = 10;
         switch (type) {
             case LINE:
+            case LINE_THIN:
                 dataSet.setDrawShapes(false);
                 dataSet.setColor(rgb);
-                dataSet.setLineWidth(1.5f);
                 break;
             case LINE_FILL_UP:
             case LINE_FILL_DOWN:
@@ -467,19 +467,21 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
                 dataSet.setFillFormatter(this);
                 dataSet.setFillColor(rgb);
                 dataSet.setColor(Color.TRANSPARENT);
-                dataSet.setLineWidth(1.5f);
                 break;
             case CIRCLE:
                 dataSet.setDrawShapes(true);
-                path.addCircle(shapeSize, shapeSize, shapeSize, Path.Direction.CW);
+                dataSet.setDrawShapesShadow(true);
+                path.addCircle(0, 0, shapeSize, Path.Direction.CW);
                 break;
             case BUBBLE:
                 dataSet.setDrawShapes(true);
-                path.addCircle(shapeSize, shapeSize, shapeSize, Path.Direction.CW); //fill
-                path.addCircle(shapeSize, shapeSize, shapeSize / 2, Path.Direction.CCW); //hole
+                dataSet.setDrawShapesShadow(true);
+                path.addCircle(0, 0, shapeSize, Path.Direction.CW); //fill
+                path.addCircle(0, 0, shapeSize / 2, Path.Direction.CCW); //hole
                 break;
             case TRIANGLE:
                 dataSet.setDrawShapes(true);
+                dataSet.setDrawShapesShadow(true);
                 path.moveTo(0, -shapeSize);
                 path.lineTo(-shapeSize, shapeSize);
                 path.lineTo(shapeSize, shapeSize);
@@ -487,6 +489,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
                 break;
         }
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+        dataSet.setLineWidth(type == ValueType.LINE_THIN ? 1.0f : 1.5f);
         dataSet.setShapeColor(rgb);
         dataSet.setShapePath(path);
         dataSet.setDrawValues(false);

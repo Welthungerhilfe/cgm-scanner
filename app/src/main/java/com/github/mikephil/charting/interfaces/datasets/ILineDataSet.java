@@ -55,6 +55,13 @@ public interface ILineDataSet extends ILineRadarDataSet<Entry> {
     boolean isDrawShapesEnabled();
 
     /**
+     * Returns true if drawing shapes shadow for this DataSet is enabled, false if not
+     *
+     * @return
+     */
+    boolean isDrawShapesShadowEnabled();
+
+    /**
      * Returns the DashPathEffect that is used for drawing the lines.
      *
      * @return

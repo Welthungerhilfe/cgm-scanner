@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 
 import com.github.mikephil.charting.animation.ChartAnimator;
 import com.github.mikephil.charting.charts.LineChart;
@@ -627,6 +626,8 @@ public class LineChartRenderer extends LineRadarRenderer {
             Path path = dataSet.getShapePath();
             Paint paint = new Paint();
             paint.setColor(dataSet.getShapeColor(i));
+            Paint shadow = new Paint();
+            shadow.setColor(Color.argb(8, 0, 0, 0));
             int boundsRangeCount = mXBounds.range + mXBounds.min;
             for (int j = mXBounds.min; j <= boundsRangeCount; j++) {
 
@@ -647,6 +648,14 @@ public class LineChartRenderer extends LineRadarRenderer {
                     continue;
 
                 c.translate(mShapeBuffer[0], mShapeBuffer[1]);
+                if (dataSet.isDrawShapesShadowEnabled()) {
+                    for (float scale = 1.5f; scale > 1.0f; scale -= 0.1f) {
+                        c.save();
+                        c.scale(scale, scale);
+                        c.drawPath(path, shadow);
+                        c.restore();
+                    }
+                }
                 c.drawPath(path, paint);
                 c.translate(-mShapeBuffer[0], -mShapeBuffer[1]);
             }

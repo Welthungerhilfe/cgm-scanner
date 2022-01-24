@@ -49,6 +49,11 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
      */
     private boolean mDrawShapes = true;
 
+    /**
+     * if true, drawing shapes shadow is enabled
+     */
+    private boolean mDrawShapesShadow = false;
+
 
     public LineDataSet(List<Entry> yVals, String label) {
         super(yVals, label);
@@ -73,6 +78,7 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
         lineDataSet.mCubicIntensity = mCubicIntensity;
         lineDataSet.mDashPathEffect = mDashPathEffect;
         lineDataSet.mDrawShapes = mDrawShapes;
+        lineDataSet.mDrawShapesShadow = mDrawShapesShadow;
         lineDataSet.mFillFormatter = mFillFormatter;
         lineDataSet.mMode = mMode;
     }
@@ -178,6 +184,21 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
     @Override
     public boolean isDrawShapesEnabled() {
         return mDrawShapes;
+    }
+
+    /**
+     * set this to true to enable the drawing of shape shadows for this
+     * DataSet, default false
+     *
+     * @param enabled
+     */
+    public void setDrawShapesShadow(boolean enabled) {
+        this.mDrawShapesShadow = enabled;
+    }
+
+    @Override
+    public boolean isDrawShapesShadowEnabled() {
+        return mDrawShapesShadow;
     }
 
     @Deprecated
