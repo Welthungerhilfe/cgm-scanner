@@ -124,10 +124,10 @@ public class ARCoreCamera extends AbstractARCamera {
           if ((w > 1024) && (h > 1024)) {
             rank += 1;
           }
-          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.REQUIRE_AND_USE) {
+          if (cameraConfig.getStereoCameraUsage() == CameraConfig.StereoCameraUsage.REQUIRE_AND_USE) {
             rank += 2;
           }
-          if (cameraConfig.getStereoCameraUsage() == CameraConfig.StereoCameraUsage.REQUIRE_AND_USE) {
+          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.REQUIRE_AND_USE) {
             rank += 4;
           }
 
