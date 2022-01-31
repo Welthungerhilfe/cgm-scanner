@@ -225,7 +225,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
 
         //show data
         showAxisLegend();
-        showData(dataSets, false);
+        showData(dataSets, true);
         showManualMeasures(measures, dataSets);
         showZScore(zscoreData, lastMeasure);
         mChart.setData(new LineData(dataSets));
