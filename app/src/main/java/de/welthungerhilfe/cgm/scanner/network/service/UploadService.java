@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -363,6 +364,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                     public void onError(@NonNull Throwable e) {
                         LogFileUtils.logError(TAG, "File " + file.getPath() + " upload fail - " + e.getMessage());
                         if (Utils.isExpiredToken(e.getMessage())) {
+                            Log.i(TAG,"Token auth fail "+e.getMessage());
                             AuthenticationHandler.restoreToken(getApplicationContext());
                             stopSelf();
                         } else {

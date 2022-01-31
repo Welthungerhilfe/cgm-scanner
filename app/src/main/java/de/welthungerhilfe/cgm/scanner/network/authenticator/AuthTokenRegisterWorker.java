@@ -34,18 +34,22 @@ public class AuthTokenRegisterWorker extends Worker {
 
         context = getApplicationContext();
         int environment = AuthenticationHandler.getEnvironment(context);
-        Log.d(TAG, "Renewing token for " + SyncingWorkManager.getAPI());
+        Log.i(TAG, "Token renewing for " + SyncingWorkManager.getAPI());
         PublicClientApplication.createSingleAccountPublicClientApplication(context,
                 AuthenticationHandler.getConfig(environment),
                 new IPublicClientApplication.ISingleAccountApplicationCreatedListener() {
                     @Override
                     public void onCreated(ISingleAccountPublicClientApplication application) {
+                        Log.i(TAG,"Token regristration sucess ");
+
                         singleAccountApp = application;
                         updateToken();
                     }
 
                     @Override
                     public void onError(MsalException exception) {
+                        Log.i(TAG,"Token regristration error "+exception.getMessage());
+
                         exception.printStackTrace();
                     }
                 });
@@ -61,12 +65,15 @@ public class AuthTokenRegisterWorker extends Worker {
             @Override
             public void onSuccess(IAuthenticationResult authenticationResult) {
                 session.setAuthToken(authenticationResult.getAccessToken());
+                Log.i(TAG,"Token sucess "+authenticationResult.getAccessToken());
+
                 Log.d(TAG, "Token for " + SyncingWorkManager.getAPI() + " set");
                 SyncingWorkManager.startSyncingWithWorkManager(getApplicationContext());
             }
 
             @Override
             public void onError(MsalException exception) {
+                Log.i(TAG,"Token error "+exception.getMessage());
                 exception.printStackTrace();
             }
         });
