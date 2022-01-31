@@ -229,7 +229,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
         showManualMeasures(measures, dataSets);
         showZScore(zscoreData, lastMeasure);
         mChart.setData(new LineData(dataSets));
-        mChart.animateX(3000);
+        mChart.animateX(0);
     }
 
     private void convertData(HashMap<Integer, CalculateZscoreUtils.ZScoreData> data) {
