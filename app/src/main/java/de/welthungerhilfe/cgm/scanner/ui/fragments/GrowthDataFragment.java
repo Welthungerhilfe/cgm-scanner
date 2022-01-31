@@ -283,7 +283,10 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
             case WEIGHT_FOR_HEIGHT:
                 txtXAxis.setText(R.string.axis_height);
                 txtYAxis.setText(R.string.axis_weight);
-                ll_dot_legend.setVisibility(View.GONE);
+                ll_dot_legend.setVisibility(View.VISIBLE);
+                first_dot_text.setText(R.string.manual_measure);
+                second_dot_text.setText(R.string.scan_measure);
+                third_dot_text.setText(R.string.percentile_error);
                 break;
 
             case MUAC_FOR_AGE:

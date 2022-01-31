@@ -173,6 +173,7 @@
 
     <!-- Measure detail !-->
     <string name="manual_measure">मैनुअल नाप</string>
+    <string name="scan_measure">स्कैन उपाय</string>
     <string name="machine_measure">मशीन नाप</string>
     <string name="measure_date">तिथि</string>
     <string name="measure_location">स्थान</string>

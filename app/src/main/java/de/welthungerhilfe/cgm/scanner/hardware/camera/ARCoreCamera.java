@@ -30,12 +30,16 @@ import com.google.ar.core.AugmentedImage;
 import com.google.ar.core.AugmentedImageDatabase;
 import com.google.ar.core.Camera;
 import com.google.ar.core.CameraConfig;
+import com.google.ar.core.CameraConfigFilter;
 import com.google.ar.core.CameraIntrinsics;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
+
+import java.util.EnumSet;
+import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
@@ -73,6 +77,11 @@ public class ARCoreCamera extends AbstractARCamera {
         }
 
         mSession = new Session(/* context = */ mActivity);
+        CameraConfigFilter filter = new CameraConfigFilter(mSession);
+        filter.setFacingDirection(CameraConfig.FacingDirection.BACK);
+        filter.setStereoCameraUsage(EnumSet.of(CameraConfig.StereoCameraUsage.REQUIRE_AND_USE));
+        List<CameraConfig> configs = mSession.getSupportedCameraConfigs(filter);
+        Log.d(TAG, "Found " + configs.size() + " configs supporting stereo camera");
       } catch (Exception e) {
         e.printStackTrace();
         return;
@@ -115,8 +124,11 @@ public class ARCoreCamera extends AbstractARCamera {
           if ((w > 1024) && (h > 1024)) {
             rank += 1;
           }
-          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.REQUIRE_AND_USE) {
+          if (cameraConfig.getStereoCameraUsage() == CameraConfig.StereoCameraUsage.REQUIRE_AND_USE) {
             rank += 2;
+          }
+          if (cameraConfig.getDepthSensorUsage() == CameraConfig.DepthSensorUsage.REQUIRE_AND_USE) {
+            rank += 4;
           }
 
           if (selectedRank < rank) {
