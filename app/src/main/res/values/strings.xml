@@ -177,6 +177,7 @@
 
     <!-- Measure detail !-->
     <string name="manual_measure">Manual measure</string>
+    <string name="scan_measure">Scan measure</string>
     <string name="machine_measure">Machine measure</string>
     <string name="measure_date">Date</string>
     <string name="measure_location">Location</string>

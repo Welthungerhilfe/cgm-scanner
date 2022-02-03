@@ -191,7 +191,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="12dp"
                     android:layout_marginRight="5dp"
-                    android:background="@drawable/growth_chart_green_color_dot"></View>
+                    android:background="@drawable/growth_chart_green_triangle"></View>
 
                 <TextView
                     android:id="@+id/first_dot_text"
