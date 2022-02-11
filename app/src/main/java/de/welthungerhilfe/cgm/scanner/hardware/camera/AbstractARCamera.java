@@ -122,6 +122,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     protected long mLastBright;
     protected long mLastDark;
     protected long mSessionStart;
+    protected float mOutlineAlpha = 0;
     protected int mPersonCount = 0;
 
     protected abstract void closeCamera();
@@ -541,6 +542,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     private Bitmap skeletonVisualisation(Bitmap preview) {
 
         if (mSkeletonMode == SkeletonMode.OFF) {
+            mOutlineAlpha = -2;
             return preview;
         }
 
@@ -553,12 +555,15 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
             Canvas c = new Canvas(preview);
 
             //define look of the visualisation
-            int color = Color.argb(128, 0, 255, 0);
+            mOutlineAlpha = mOutlineAlpha * 0.9f + 0.1f;
+            int alpha = Math.max(0, (int)(mOutlineAlpha * 128));
+            int color = Color.GREEN;
             if ((mTargetDistance < AppConstants.TOO_NEAR) || (mTargetDistance > AppConstants.TOO_FAR)) {
-                color = Color.argb(128, 255, 255, 0);
+                color = Color.YELLOW;
             } else if (!mSkeletonValid) {
-                color = Color.argb(128, 255, 255, 0);
+                color = Color.YELLOW;
             }
+            color = Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
 
             //draw bones
             for (int pass = 0; pass < ((mSkeletonMode == SkeletonMode.OUTLINE) ? 2 : 1); pass++) {
