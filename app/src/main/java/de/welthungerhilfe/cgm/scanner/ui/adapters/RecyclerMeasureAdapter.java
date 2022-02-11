@@ -160,7 +160,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                 holder.txtHeightAccuracy.setVisibility(View.GONE);
                 holder.txtWeightAccuracy.setVisibility(View.GONE);
             } else {
-                double heightError = Math.max(measure.getPositive_height_error(), measure.getNegative_height_error());
+                double heightError = Math.max(measure.getPositive_height_error(), -measure.getNegative_height_error());
                 if ((measure.getHeight() > 0) && (heightError > 0)) {
                     boolean heightValid = heightError < AppConstants.MAX_HEIGHT_ERROR;
                     String heightValue = DataFormat.formatValue(context, heightError, R.string.unit_cm);
