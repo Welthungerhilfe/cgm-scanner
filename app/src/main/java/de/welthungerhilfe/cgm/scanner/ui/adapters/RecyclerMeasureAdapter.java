@@ -153,24 +153,23 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         boolean stdtest = sessionManager.getStdTestQrCode() != null;
         if (config.isMeasure_visibility() && !stdtest) {
 
-            holder.txtHeight.setText(String.format(Locale.getDefault(), "%.2f", measure.getHeight()) + context.getString(R.string.unit_cm));
+            holder.txtHeight.setText(String.format(Locale.getDefault(), "%.1f", measure.getHeight() ) + context.getString(R.string.unit_cm));
             holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f", measure.getWeight()) + context.getString(R.string.unit_kg));
 
             if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
                 holder.txtHeightAccuracy.setVisibility(View.GONE);
                 holder.txtWeightAccuracy.setVisibility(View.GONE);
             } else {
-                Measure closest = getClosestManualMeasure(measure);
-                if ((closest != null) && (measure.getHeight() > 0)) {
-                    double heightError = Math.abs(closest.getHeight() - measure.getHeight());
+                double heightError = Math.max(measure.getPositive_height_error(), measure.getNegative_height_error());
+                if ((measure.getHeight() > 0) && (heightError > 0)) {
                     boolean heightValid = heightError < AppConstants.MAX_HEIGHT_ERROR;
                     String heightValue = DataFormat.formatValue(context, heightError, R.string.unit_cm);
                     setAccuracy(holder.txtHeight, holder.txtHeightAccuracy, heightValue, heightValid);
                 } else {
                     holder.txtHeightAccuracy.setVisibility(View.GONE);
                 }
-                if ((closest != null) && (measure.getWeight() > 0)) {
-                    double weightError = Math.abs(closest.getWeight() - measure.getWeight());
+                double weightError = 0; //TODO:implement
+                if ((measure.getWeight() > 0) && (weightError > 0)) {
                     boolean weightValid = weightError < AppConstants.MAX_WEIGHT_ERROR;
                     String weightValue = DataFormat.formatValue(context, weightError, R.string.unit_kg);
                     setAccuracy(holder.txtWeight, holder.txtWeightAccuracy, weightValue, weightValid);
@@ -201,21 +200,6 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         int index = measureList.indexOf(measure);
         measureList.remove(measure);
         notifyItemRemoved(index);
-    }
-
-    private Measure getClosestManualMeasure(Measure measure) {
-        Measure output = null;
-        long best = Integer.MAX_VALUE;
-        for (Measure m : measureList) {
-            if (m.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
-                long diff = Math.abs(m.getAge() - measure.getAge());
-                if (best > diff) {
-                    best = diff;
-                    output = m;
-                }
-            }
-        }
-        return output;
     }
 
     private void setAccuracy(TextView text, TextView percentage, String value, boolean valid) {

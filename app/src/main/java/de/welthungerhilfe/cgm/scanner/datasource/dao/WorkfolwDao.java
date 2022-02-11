@@ -20,6 +20,6 @@ public interface WorkfolwDao {
     @Insert(onConflict = REPLACE)
     void insertPerson(Workflow workflow);
 
-    @Query("SELECT id FROM " + TABLE_WORKFLOWS + " WHERE name=:name AND version=:version LIMIT 1")
-    String getWorkFlowId(String name, String version);
+    @Query("SELECT id FROM " + TABLE_WORKFLOWS + " WHERE name=:name AND version=:version AND environment=:environment LIMIT 1")
+    String getWorkFlowId(String name, String version, int environment);
 }

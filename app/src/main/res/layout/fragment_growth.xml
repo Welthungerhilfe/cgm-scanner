@@ -17,7 +17,7 @@
   ~     along with this program.  If not, see <http://www.gnu.org/licenses/>.
   ~
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -70,10 +70,13 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/lyt_graph"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="@dimen/activity_horizontal_margin"
-        android:orientation="vertical">
+        android:layout_below="@+id/lytNotif"
+        android:orientation="vertical"
+        android:layout_marginBottom="50dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -126,25 +129,26 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:visibility="visible"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="10dp"
+            >
 
             <de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView
                 android:id="@+id/txtYAxis"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:rotation="180"
                 android:text="@string/axis_y"
-                android:textColor="@color/colorGreyDark"
-                android:rotation="180"/>
+                android:textColor="@color/colorGreyDark" />
 
             <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/chart1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_toRightOf="@+id/txtYAxis"
-                android:layout_above="@+id/txtXAxis" />
+                android:layout_above="@+id/txtXAxis"
+                android:layout_toRightOf="@+id/txtYAxis" />
 
             <TextView
                 android:id="@+id/txtXAxis"
@@ -159,4 +163,182 @@
 
     </LinearLayout>
 
-</LinearLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:background="#e5e5e5"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:id="@+id/ll_dot_legend"
+            android:visibility="visible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="3">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <View
+                    android:id="@+id/first_dot"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="12dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/growth_chart_green_triangle"></View>
+
+                <TextView
+                    android:id="@+id/first_dot_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Height(Manual)"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="10sp"></TextView>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <View
+                    android:id="@+id/second_dot"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="12dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/growth_chart_blue_color_dot"></View>
+
+                <TextView
+                    android:id="@+id/second_dot_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Height(Scan)"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="10sp"></TextView>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <View
+                    android:id="@+id/third_dot"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="12dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/growth_chart_percentile_error_dot"></View>
+
+                <TextView
+                    android:id="@+id/third_dot_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PercentileError"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="10sp"></TextView>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_line_legend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ll_dot_legend"
+            android:layout_marginTop="7dp"
+            android:weightSum="3">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="4dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="13dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@color/growth_data_green"></View>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="10sp"></TextView>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="4dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="13dp"
+                    android:layout_marginRight="5dp"
+                    android:background="#E67A3A"></View>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+/-2"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="10sp"></TextView>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="4dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="13dp"
+                    android:layout_marginRight="5dp"
+                    android:background="#D4353E"></View>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+/-3"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="10sp"></TextView>
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+</RelativeLayout>

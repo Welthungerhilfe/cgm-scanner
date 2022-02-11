@@ -120,6 +120,9 @@
     <string name="std_test_will_start">This action will start standardisation test. Do you want to continue?</string>
     <string name="std_test_started">Standardisation test on this device is activated.</string>
     <string name="std_test_deactivate">Are you sure you want to deactivate the standardization test?</string>
+    <string name="std_test_invalid_qrcode">Scanned standardisation test QR code is invalid.</string>
+    <string name="std_test_old_qrcode">Scanned standardisation test QR code event is finished in past.</string>
+    <string name="std_test_future_qrcode">Scanned standardisation test QR code event is planned in future.</string>
     <string name="retake">Retake</string>
     <string name="label_continue">Continue</string>
     <string name="error">Something went wrong</string>
@@ -174,12 +177,15 @@
 
     <!-- Measure detail !-->
     <string name="manual_measure">Manual measure</string>
+    <string name="scan_measure">Scan measure</string>
     <string name="machine_measure">Machine measure</string>
-    <string name="measure_date">01 Date</string>
-    <string name="measure_location">02 Location</string>
-    <string name="measure_height">03 Height</string>
-    <string name="measure_weight">04 Weight</string>
-    <string name="measure_muac">05 MUAC</string>
+    <string name="measure_date">Date</string>
+    <string name="measure_location">Location</string>
+    <string name="measure_height">Height</string>
+    <string name="measure_weight">Weight</string>
+    <string name="measure_muac">MUAC</string>
+    <string name="min_error">Min Fehler</string>
+    <string name="max_error">Max Fehler</string>
     <string name="measure_oedema">No edema</string>
     <string name="edema_check">Are you sure the child suffers from Edema?</string>
     <string name="invalid_zscore">Are you sure about entered values?</string>
@@ -223,9 +229,6 @@
     <string name="score_light">Light Score : </string>
     <string name="score_light_bright">Too bright</string>
     <string name="score_light_dark">Too dark</string>
-    <string name="score_distance_close">Too close</string>
-    <string name="score_distance_far">Too far</string>
-    <string name="score_not_detected">Child not fully detected</string>
     <string name="capture_inside">Capture the child inside of outline</string>
     <string name="standup">Try to keep the child against a clear background and keep the whole child within the camera view</string>
     <string name="lyedown">Try to keep the child against a clear background and keep the whole child within the camera view</string>
@@ -238,13 +241,20 @@
     <string name="axis_height">height in cm</string>
     <string name="axis_weight">weight in kg</string>
     <string name="axis_muac">MUAC in cm</string>
-    <string name="filter_age_weight">1. Weight-for-age</string>
-    <string name="filter_age_height">2. Height-for-age</string>
-    <string name="filter_height_weight">3. Weight-for-height</string>
-    <string name="filter_muac_age">4. MUAC-for-age</string>
+    <string name="filter_age_weight">Weight-for-age</string>
+    <string name="filter_age_height">Height-for-age</string>
+    <string name="filter_height_weight">Weight-for-height</string>
+    <string name="filter_muac_age">MUAC-for-age</string>
+    <string name="height_for_age_manual">Height(Manual)</string>
+    <string name="height_for_age_scan">Height(Scan)</string>
+    <string name="weight_for_age_manual">Weight(Manual)</string>
+    <string name="weight_for_age_scan">Weight(Scan)</string>
+    <string name="muac_for_age_manual">MUAC(Manual)</string>
+    <string name="muac_for_age_scan">MUAC(Scan)</string>
+    <string name="percentile_error">Percentile Error</string>
     <string-array name="filters" translatable="false">
-        <item>@string/filter_age_weight</item>
         <item>@string/filter_age_height</item>
+        <item>@string/filter_age_weight</item>
         <item>@string/filter_height_weight</item>
         <item>@string/filter_muac_age</item>
     </string-array>

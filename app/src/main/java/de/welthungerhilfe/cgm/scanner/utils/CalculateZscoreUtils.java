@@ -25,10 +25,10 @@ public class CalculateZscoreUtils {
         public float SD3;
     }
 
-    private static final String[] BOYS = {"wfa_boys_0_5_zscores.json", "lhfa_boys_0_5_zscores.json", "wfh_boys_0_5_zscores.json", "acfa_boys_p_exp.txt"};
-    private static final String[] GIRLS = {"wfa_girls_0_5_zscores.json", "lhfa_girls_0_5_zscores.json", "wfh_girls_0_5_zscores.json", "acfa_girls_p_exp.txt"};
+    private static final String[] BOYS = {"lhfa_boys_0_5_zscores.json", "wfa_boys_0_5_zscores.json", "wfh_boys_0_5_zscores.json", "acfa_boys_p_exp.txt"};
+    private static final String[] GIRLS = {"lhfa_girls_0_5_zscores.json", "wfa_girls_0_5_zscores.json", "wfh_girls_0_5_zscores.json", "acfa_girls_p_exp.txt"};
 
-    public enum ChartType { WEIGHT_FOR_AGE, HEIGHT_FOR_AGE, WEIGHT_FOR_HEIGHT, MUAC_FOR_AGE }
+    public enum ChartType {HEIGHT_FOR_AGE, WEIGHT_FOR_AGE, WEIGHT_FOR_HEIGHT, MUAC_FOR_AGE }
 
     public static double getZScore(double y, double Mt, double Lt, double St) {
         double Zind = (Math.pow(y / Mt, Lt) - 1) / (St * Lt);

@@ -19,24 +19,20 @@
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.Manifest;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
-
-import android.provider.MediaStore;
-import android.util.Log;
-import android.view.View;
-
-import android.widget.Toast;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -44,7 +40,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityScanQrBinding;
@@ -52,12 +48,11 @@ import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
-import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.ui.views.QRScanView;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
 import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
+import de.welthungerhilfe.cgm.scanner.ui.views.QRScanView;
 import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -76,9 +71,6 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
 
     PersonRepository personRepository;
 
-    Uri imageUri;
-
-
     private static final int CAPTURED_CONSENT_SHEET_STEP = 1;
 
     private static final int NO_QR_CODE_FOUND = 2;
@@ -88,6 +80,12 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
     private static final int STD_TEST_WILL_STARTED = 4;
 
     private static final int STD_TEST_START_CONFIRM = 5;
+
+    private static final int STD_TEST_QRCODE_OLDER = 6;
+
+    private static final int STD_TEST_QRCODE_INFUTURE = 7;
+
+    private static final int STD_TEST_QRCODE_INVALID = 8;
 
 
     int CONFIRM_DIALOG_STEP = 0;
@@ -101,6 +99,8 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
     SessionManager sessionManager;
 
     FirebaseAnalytics firebaseAnalytics;
+
+    public enum STDTEST {VALID, INVALID, OLDER, INFUTURE}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,12 +138,13 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
             if (CONFIRM_DIALOG_STEP == STD_TEST_WILL_STARTED) {
                 sessionManager.setStdTestQrCode(qrCode);
                 showConfirmDialog(R.string.std_test_started, STD_TEST_START_CONFIRM);
-                firebaseAnalytics.logEvent(FirebaseService.STD_TEST_START,null);
-            } else if (CONFIRM_DIALOG_STEP == NO_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == EMPTY_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == STD_TEST_START_CONFIRM) {
+                firebaseAnalytics.logEvent(FirebaseService.STD_TEST_START, null);
+            } else if (CONFIRM_DIALOG_STEP == NO_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == EMPTY_QR_CODE_FOUND || CONFIRM_DIALOG_STEP == STD_TEST_START_CONFIRM
+                    || CONFIRM_DIALOG_STEP == STD_TEST_QRCODE_INFUTURE || CONFIRM_DIALOG_STEP == STD_TEST_QRCODE_OLDER || CONFIRM_DIALOG_STEP == STD_TEST_QRCODE_INVALID) {
                 finish();
             } else {
-                firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_START,null);
-                startCaptureImage();
+                firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_START, null);
+                startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), IMAGE_CAPTURED_REQUEST);
             }
         } else {
             finish();
@@ -157,12 +158,8 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
             try {
                 activityScanQrBinding.llQrDetails.setVisibility(View.GONE);
                 activityScanQrBinding.qrScanView.setVisibility(View.GONE);
-                Bitmap capturedImageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+                Bitmap capturedImageBitmap = (Bitmap) data.getExtras().get("data");
                 capturedImageBitmap = BitmapHelper.getAcceptableBitmap(capturedImageBitmap);
-                File file = new File(imageUri.getPath());
-                if (file.exists()) {
-                    file.delete();
-                }
                 ImageSaver(capturedImageBitmap, QRScanActivity.this);
                 return;
             } catch (Exception e) {
@@ -192,9 +189,20 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         this.qrCode = qrCode;
 
         if (Utils.isStdTestQRCode(qrCode)) {
-            if (Utils.isValidateStdTestQrCode(qrCode)) {
-                showConfirmDialog(R.string.std_test_will_start, STD_TEST_WILL_STARTED);
-                return;
+            switch (Utils.isValidateStdTestQrCode(qrCode)) {
+                case VALID:
+                    showConfirmDialog(R.string.std_test_will_start, STD_TEST_WILL_STARTED);
+                    return;
+                case INVALID:
+                    showConfirmDialog(R.string.std_test_invalid_qrcode, STD_TEST_QRCODE_INVALID);
+                    return;
+                case OLDER:
+                    showConfirmDialog(R.string.std_test_old_qrcode, STD_TEST_QRCODE_OLDER);
+                    return;
+                case INFUTURE:
+                    showConfirmDialog(R.string.std_test_future_qrcode, STD_TEST_QRCODE_INFUTURE);
+                    return;
+
             }
         }
 
@@ -228,20 +236,6 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         } catch (Exception e) {
 
         }
-    }
-
-    void startCaptureImage() {
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.TITLE, "Picture");
-        File root = AppController.getInstance().getPublicAppDirectory(this);
-        File file = new File(root, "consent.jpg");
-        if (file.exists()) {
-            file.delete();
-        }
-        imageUri = Uri.fromFile(file);
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-        startActivityForResult(intent, IMAGE_CAPTURED_REQUEST);
     }
 
     void ImageSaver(Bitmap data1, Context context) {
@@ -310,7 +304,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                     Intent intent = new Intent(QRScanActivity.this, CreateDataActivity.class);
                     intent.putExtra(AppConstants.EXTRA_QR, qrCode);
                     startActivity(intent);
-                    firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_STOP,null);
+                    firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_STOP, null);
                     finish();
                 } else {
                     Toast.makeText(context, R.string.error, Toast.LENGTH_LONG).show();

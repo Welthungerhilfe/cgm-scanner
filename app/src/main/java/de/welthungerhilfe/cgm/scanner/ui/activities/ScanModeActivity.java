@@ -27,19 +27,9 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationManager;
-import android.media.Image;
 import android.media.MediaActionSound;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import androidx.core.app.ActivityCompat;
-import androidx.appcompat.app.ActionBar;
-import androidx.databinding.DataBindingUtil;
-
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -49,6 +39,13 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.core.app.ActivityCompat;
+import androidx.databinding.DataBindingUtil;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.microsoft.appcenter.crashes.Crashes;
 
@@ -58,33 +55,33 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityScanModeBinding;
-import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
-import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
-import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
-import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
-import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
-import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
 import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
+import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
+import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, ScanTypeView.ScanTypeListener {
@@ -100,13 +97,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     public void scanStanding(View view) {
         SCAN_MODE = AppConstants.SCAN_STANDING;
 
-        activityScanModeBinding.imgScanStanding.setImageResource(R.drawable.standing_active);
-        activityScanModeBinding.imgScanStandingCheck.setImageResource(R.drawable.radio_active);
-        activityScanModeBinding.txtScanStanding.setTextColor(getResources().getColor(R.color.colorBlack, getTheme()));
-
-        activityScanModeBinding.imgScanLying.setImageResource(R.drawable.lying_inactive);
-        activityScanModeBinding.imgScanLyingCheck.setImageResource(R.drawable.radio_inactive);
-        activityScanModeBinding.txtScanLying.setTextColor(getResources().getColor(R.color.colorGreyDark, getTheme()));
+        activityScanModeBinding.lytScanLying.setActive(false);
+        activityScanModeBinding.lytScanStanding.setActive(true);
 
         changeMode();
     }
@@ -114,13 +106,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     public void scanLying(View view) {
         SCAN_MODE = AppConstants.SCAN_LYING;
 
-        activityScanModeBinding.imgScanLying.setImageResource(R.drawable.lying_active);
-        activityScanModeBinding.imgScanLyingCheck.setImageResource(R.drawable.radio_active);
-        activityScanModeBinding.txtScanLying.setTextColor(getResources().getColor(R.color.colorBlack, getTheme()));
-
-        activityScanModeBinding.imgScanStanding.setImageResource(R.drawable.standing_inactive);
-        activityScanModeBinding.imgScanStandingCheck.setImageResource(R.drawable.radio_inactive);
-        activityScanModeBinding.txtScanStanding.setTextColor(getResources().getColor(R.color.colorGreyDark, getTheme()));
+        activityScanModeBinding.lytScanLying.setActive(true);
+        activityScanModeBinding.lytScanStanding.setActive(false);
 
         changeMode();
     }
@@ -259,6 +246,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private final Object threadsLock = new Object();
 
     private AbstractARCamera mCameraInstance;
+    private ImageView mOutline;
 
     public void onStart() {
         super.onStart();
@@ -327,6 +315,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         findViewById(R.id.imgClose).setOnClickListener(this);
 
+        mOutline = findViewById(R.id.scanOutline);
         ImageView colorCameraPreview = findViewById(R.id.colorCameraPreview);
         ImageView depthCameraPreview = findViewById(R.id.depthCameraPreview);
         GLSurfaceView glSurfaceView = findViewById(R.id.surfaceview);
@@ -442,14 +431,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private void changeMode() {
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-            activityScanModeBinding.scanType1.setChildIcon(R.drawable.stand_front_active);
-            activityScanModeBinding.scanType2.setChildIcon(R.drawable.stand_side_active);
-            activityScanModeBinding.scanType3.setChildIcon(R.drawable.stand_back_active);
+            activityScanModeBinding.scanType1.setChildIcon(R.drawable.stand_front);
+            activityScanModeBinding.scanType2.setChildIcon(R.drawable.stand_side);
+            activityScanModeBinding.scanType3.setChildIcon(R.drawable.stand_back);
             getCamera().setPlaneMode(AbstractARCamera.PlaneMode.LOWEST);
         } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
-            activityScanModeBinding.scanType1.setChildIcon(R.drawable.lying_front_active);
-            activityScanModeBinding.scanType2.setChildIcon(R.drawable.lying_side_active);
-            activityScanModeBinding.scanType3.setChildIcon(R.drawable.lying_back_active);
+            activityScanModeBinding.scanType1.setChildIcon(R.drawable.lying_front);
+            activityScanModeBinding.scanType2.setChildIcon(R.drawable.lying_side);
+            activityScanModeBinding.scanType3.setChildIcon(R.drawable.lying_back);
             getCamera().setPlaneMode(AbstractARCamera.PlaneMode.VISIBLE);
         }
     }
@@ -500,7 +489,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void openScan() {
-        getCamera().resetTrackingState();
         fab.setImageResource(R.drawable.recorder);
         activityScanModeBinding.lytScanner.setVisibility(View.VISIBLE);
         mTxtFeedback.setVisibility(View.GONE);
@@ -606,16 +594,26 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private AbstractARCamera getCamera() {
         if (mCameraInstance == null) {
-            AbstractARCamera.DepthPreviewMode depthMode = AbstractARCamera.DepthPreviewMode.FOCUS;
+            AbstractARCamera.DepthPreviewMode depthMode;
             AbstractARCamera.PreviewSize previewSize = AbstractARCamera.PreviewSize.CLIPPED;
             if (LocalPersistency.getBoolean(this, SettingsActivity.KEY_SHOW_DEPTH)) {
-                depthMode = AbstractARCamera.DepthPreviewMode.CENTER;
+                if (AREngineCamera.shouldUseAREngine()) {
+                    depthMode = AbstractARCamera.DepthPreviewMode.CENTER;
+                } else {
+                    depthMode = AbstractARCamera.DepthPreviewMode.CENTER_LOW_POWER;
+                }
+            } else {
+                if (AREngineCamera.shouldUseAREngine()) {
+                    depthMode = AbstractARCamera.DepthPreviewMode.FOCUS;
+                } else {
+                    depthMode = AbstractARCamera.DepthPreviewMode.FOCUS_LOW_POWER;
+                }
             }
 
             if (AREngineCamera.shouldUseAREngine()) {
                 mCameraInstance = new AREngineCamera(this, depthMode, previewSize);
             } else {
-                mCameraInstance = new ARCoreCamera(this, AbstractARCamera.DepthPreviewMode.OFF, previewSize);
+                mCameraInstance = new ARCoreCamera(this, depthMode, previewSize);
             }
         }
         return mCameraInstance;
@@ -677,7 +675,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     @Override
-    public void onDepthDataReceived(Image image, float[] position, float[] rotation, int frameIndex) {
+    public void onDepthDataReceived(Depthmap depthmap, int frameIndex) {
 
         float height = 0;
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
@@ -689,16 +687,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             }
 
             //realtime value
-            /*runOnUiThread(() -> {
-                String text = getString(R.string.label_height) + " : " + String.format("~%dcm", (int)(height * 100));
-                mTitleView.setText(text);
-            });*/
+            /*String text = getString(R.string.label_height) + " : " + String.format(Locale.US,"~%.1fcm", height * 100.0f) +
+            "\nNoise amount: " + String.format(Locale.US, "%.3f", getCamera().getDepthNoiseAmount());
+            runOnUiThread(() -> mTitleView.setText(text));*/
         }
         onFeedbackUpdate();
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
             long profile = System.currentTimeMillis();
-            Depthmap depthmap = getCamera().extractDepthmap(image, position, rotation);
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
             mNumberOfFilesWritten++;
 
@@ -745,22 +741,19 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private void onFeedbackUpdate() {
         AbstractARCamera.LightConditions light = getCamera().getLightConditionState();
-        AbstractARCamera.TrackingState tracking = getCamera().getTrackingState();
-        float distance = getCamera().getTargetDistance();
+        boolean childDetected = getCamera().getPersonCount() == 1;
         runOnUiThread(() -> {
 
-            if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-                switch (tracking) {
-                    case INIT:
-                    case TRACKED:
-                        setFeedback(null);
-                        break;
-                    case LOST:
-                        setFeedback(getString(R.string.score_not_detected));
-                        break;
-                }
-            } else {
+            if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
+                mOutline.setVisibility(View.GONE);
+                getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OFF);
+            } else if (childDetected) {
+                mOutline.setVisibility(View.GONE);
+                getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OUTLINE);
                 setFeedback(null);
+            } else {
+                mOutline.setVisibility(View.VISIBLE);
+                getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OFF);
             }
 
             if (mTxtFeedback.getVisibility() == View.GONE) {
@@ -774,16 +767,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     case DARK:
                         setFeedback(getString(R.string.score_light_dark));
                         break;
-                }
-            }
-
-            if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
-                if (distance < 0.7) {
-                    setFeedback(getString(R.string.score_distance_close));
-                } else if (distance > 1.5f) {
-                    setFeedback(getString(R.string.score_distance_far));
-                } else {
-                    setFeedback(null);
                 }
             }
         });
@@ -839,12 +822,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     break;
             }
 
-            //set information if child is detected (note: this is unsupported on ARCore devices and for lying children)
-            boolean childDetected = false;
-            if (SCAN_MODE == AppConstants.SCAN_STANDING) {
-                AbstractARCamera.TrackingState tracking = getCamera().getTrackingState();
-                childDetected = tracking == AbstractARCamera.TrackingState.TRACKED;
-            }
+            //set information if child is detected (note: this is unsupported on ARCore devices and for lying children wrongly oriented)
+            boolean childDetected = getCamera().getPersonCount() == 1;
             log.setChildDetected(childDetected);
             log.setChildHeight(childHeight);
 

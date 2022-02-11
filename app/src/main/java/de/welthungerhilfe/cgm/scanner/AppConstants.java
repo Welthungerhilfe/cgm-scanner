@@ -18,6 +18,7 @@
  */
 package de.welthungerhilfe.cgm.scanner;
 
+
 public class AppConstants {
 
     public static final String AUTH_SANDBOX = "{OAUTH_SCOPE_SANDBOX}";
@@ -29,6 +30,7 @@ public class AppConstants {
     public static final String API_URL_IN_BMZ = "{API_URL_PRODUCTION}/";
     public static final String API_URL_NAMIBIA = "{API_URL_NAMIBIA}/";
     public static final String API_TESTING_URL = "http://192.168.43.252:5001/api/";
+
 
 
     //Environments Type
@@ -50,7 +52,7 @@ public class AppConstants {
     public static final String VAL_SEX_MALE = "male";
 
     public static final String VAL_MEASURE_MANUAL = "manual";
-    public static final String VAL_MEASURE_AUTO = "v1.1.0";
+    public static final String VAL_MEASURE_AUTO = "v1.2.0";
 
     public static final String LANG_ENGLISH = "en";
     public static final String LANG_GERMAN = "de";
@@ -103,7 +105,10 @@ public class AppConstants {
     public static final double MAX_HEIGHT_ERROR = 1.2;
     public static final double MAX_WEIGHT_ERROR = 0.21;
 
+    //scan feedback and capture parameters
     public static final int SCAN_FRAMESKIP = 6;
+    public static final float TOO_NEAR = 0.7f;
+    public static final float TOO_FAR = 1.5f;
 
     public static final String IS_FOREGROUND = "isForeGround";
 

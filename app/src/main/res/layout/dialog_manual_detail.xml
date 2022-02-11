@@ -25,7 +25,10 @@
         android:layout_margin="20dp"
         android:background="@color/colorWhite"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingBottom="25dp"
+        android:paddingTop="25dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp">
 
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
@@ -44,6 +47,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:contentDescription="@string/content_image"
+                    android:layout_marginBottom="3dp"
                     android:src="@drawable/manual" />
 
                 <TextView
@@ -57,6 +61,11 @@
                     android:textStyle="bold" />
 
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D3D7D3"></View>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -98,6 +107,11 @@
                 </LinearLayout>
             </RelativeLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D3D7D3"></View>
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -136,44 +150,150 @@
                 </LinearLayout>
             </RelativeLayout>
 
-            <RelativeLayout
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D3D7D3"></View>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp">
+                android:orientation="horizontal"
+                android:weightSum="3">
 
-                <ImageView
-                    android:id="@+id/iv_scan_height"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_centerVertical="true"
-                    android:layout_marginRight="10dp"
-                    android:src="@drawable/ic_height" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_toRightOf="@id/iv_scan_height"
-                    android:orientation="vertical">
+                    android:layout_marginTop="15dp"
+                    android:layout_weight="1">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:text="@string/measure_height"
-                        android:textColor="@color/colorPrimary"
-                        android:textSize="12sp" />
+                    <ImageView
+                        android:id="@+id/iv_scan_height"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="10dp"
+                        android:src="@drawable/ic_height" />
 
-                    <TextView
-                        android:id="@+id/txtManualHeight"
-                        android:layout_width="match_parent"
+                    <LinearLayout
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:hint="@string/measure_height"
-                        android:singleLine="true"
-                        android:textColor="@color/colorBlack"
-                        android:textSize="18sp" />
-                </LinearLayout>
-            </RelativeLayout>
+                        android:layout_centerVertical="true"
+                        android:layout_toRightOf="@id/iv_scan_height"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:text="@string/measure_height"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/txtManualHeight"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/measure_height"
+                            android:singleLine="true"
+                            android:textColor="@color/colorBlack"
+                            android:textSize="18sp" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/rlt_pos_error"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:layout_weight="1">
+
+                    <ImageView
+                        android:id="@+id/iv_positive_pe"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="10dp"
+                        android:src="@drawable/ic_percentile_error" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toRightOf="@id/iv_positive_pe"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:text="Pos Error"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/txtPositivePe"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="6.6"
+                            android:singleLine="true"
+                            android:layout_marginLeft="3dp"
+                            android:textColor="@color/colorBlack"
+                            android:textSize="18sp" />
+
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/rlt_neg_error"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:layout_weight="1">
+
+                    <ImageView
+                        android:id="@+id/iv_negative_pe"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="10dp"
+                        android:src="@drawable/ic_percentile_error" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toRightOf="@id/iv_negative_pe"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:text="Neg Error"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/txtNegativePe"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/percentile_error"
+                            android:singleLine="true"
+                            android:layout_marginLeft="3dp"
+                            android:textColor="@color/colorBlack"
+                            android:textSize="18sp" />
+
+                    </LinearLayout>
+                </RelativeLayout>
+
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D3D7D3"></View>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -215,6 +335,11 @@
                 </LinearLayout>
             </RelativeLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D3D7D3"></View>
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -253,6 +378,11 @@
                         android:textSize="18sp" />
                 </LinearLayout>
             </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D3D7D3"></View>
 
             <androidx.appcompat.widget.AppCompatCheckBox
                 android:id="@+id/checkManualOedema"

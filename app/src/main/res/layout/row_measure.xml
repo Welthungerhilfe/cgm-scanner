@@ -52,7 +52,7 @@
                         android:id="@+id/iv_is_synced_corner"
                         android:layout_width="12dp"
                         android:layout_height="12dp"
-                        android:src="@drawable/checkmark"
+                        android:src="@drawable/ic_check"
                         android:visibility="gone"
                         tools:ignore="ContentDescription" />
 
@@ -61,7 +61,7 @@
                         android:layout_width="12dp"
                         android:layout_height="12dp"
                         android:layout_centerInParent="true"
-                        android:src="@drawable/checkmark"
+                        android:src="@drawable/ic_check"
                         android:visibility="gone"
                         tools:ignore="ContentDescription" />
                 </RelativeLayout>
