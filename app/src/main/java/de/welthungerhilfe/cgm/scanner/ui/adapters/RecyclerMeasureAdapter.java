@@ -166,6 +166,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                     String heightValue = DataFormat.formatValue(context, heightError, R.string.unit_cm);
                     setAccuracy(holder.txtHeight, holder.txtHeightAccuracy, heightValue, heightValid);
                 } else {
+                    holder.txtHeight.setPaintFlags(Paint.ANTI_ALIAS_FLAG | Paint.STRIKE_THRU_TEXT_FLAG);
                     holder.txtHeightAccuracy.setVisibility(View.GONE);
                 }
                 double weightError = 0; //TODO:implement
@@ -174,6 +175,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                     String weightValue = DataFormat.formatValue(context, weightError, R.string.unit_kg);
                     setAccuracy(holder.txtWeight, holder.txtWeightAccuracy, weightValue, weightValid);
                 } else {
+                    holder.txtWeight.setPaintFlags(Paint.ANTI_ALIAS_FLAG | Paint.STRIKE_THRU_TEXT_FLAG);
                     holder.txtWeightAccuracy.setVisibility(View.GONE);
                 }
             }
