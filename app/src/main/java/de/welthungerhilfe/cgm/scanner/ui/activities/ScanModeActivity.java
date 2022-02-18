@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -247,6 +246,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private AbstractARCamera mCameraInstance;
     private ImageView mOutline;
+    private float mOutlineAlpha = 1;
 
     public void onStart() {
         super.onStart();
@@ -745,15 +745,15 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         runOnUiThread(() -> {
 
             if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
-                mOutline.setVisibility(View.GONE);
                 getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OFF);
+                setOutline(false);
             } else if (childDetected) {
-                mOutline.setVisibility(View.GONE);
                 getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OUTLINE);
                 setFeedback(null);
+                setOutline(false);
             } else {
-                mOutline.setVisibility(View.VISIBLE);
                 getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OFF);
+                setOutline(true);
             }
 
             if (mTxtFeedback.getVisibility() == View.GONE) {
@@ -770,6 +770,17 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 }
             }
         });
+    }
+
+    private void setOutline(boolean visible) {
+        float alpha = mOutlineAlpha * 0.9f + 0.1f;
+        if (visible && (alpha > 0)) {
+            mOutline.setAlpha(alpha);
+            mOutline.setVisibility(View.VISIBLE);
+        } else {
+            mOutline.setVisibility(View.GONE);
+        }
+        mOutlineAlpha = visible ? alpha : -2;
     }
 
     private void setFeedback(String feedback) {

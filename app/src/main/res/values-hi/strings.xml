@@ -80,7 +80,7 @@
     <string name="date">तारीख</string>
     <string name="last_days">अंतिम %1$d दिन</string>
     <string name="last_location_error">अंतिम स्थान उपलब्ध नहीं है</string>
-    <string name="sort_date">सबसे अधिक उम्र का व्यक्ति शीर्ष पर</string>
+    <string name="sort_date">शीर्ष पर नया व्यक्ति</string>
     <string name="sort_location">सबसे निकटतम व्यक्ति शीर्ष पर</string>
     <string name="wasting">वेस्टिंग</string>
     <string name="wasting_weight_height">सबसे कम वजन/ऊंचाई शीर्ष पर</string>

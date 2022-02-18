@@ -80,7 +80,7 @@
     <string name="date">Datum</string>
     <string name="last_days">letzte %1$d Tage</string>
     <string name="last_location_error">letzter Ort nicht verfügar</string>
-    <string name="sort_date">älteste Person oben</string>
+    <string name="sort_date">Neu Person oben</string>
     <string name="sort_location">nächste Person oben</string>
     <string name="wasting">Vergeudung</string>
     <string name="wasting_weight_height">niedrigstes Gewicht/Größen-Verhältnis oben</string>

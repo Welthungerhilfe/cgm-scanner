@@ -156,7 +156,8 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.txtHeight.setText(String.format(Locale.getDefault(), "%.1f", measure.getHeight() ) + context.getString(R.string.unit_cm));
             holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f", measure.getWeight()) + context.getString(R.string.unit_kg));
 
-            if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
+            //do not show confidence as it is dummy now
+            /*if (measure.getType().compareTo(AppConstants.VAL_MEASURE_MANUAL) == 0) {
                 holder.txtHeightConfidence.setVisibility(View.GONE);
                 holder.txtWeightConfidence.setVisibility(View.GONE);
             } else {
@@ -164,7 +165,9 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                 int weightConfidence = (int) (measure.getWeightConfidence() * 100);
                 setConfidence(holder.txtHeight, holder.txtHeightConfidence, heightConfidence);
                 setConfidence(holder.txtWeight, holder.txtWeightConfidence, weightConfidence);
-            }
+            }*/
+            holder.txtHeightConfidence.setVisibility(View.GONE);
+            holder.txtWeightConfidence.setVisibility(View.GONE);
         } else {
             holder.txtHeight.setText(R.string.field_concealed);
             holder.txtWeight.setText(R.string.field_concealed);
