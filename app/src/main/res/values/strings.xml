@@ -85,7 +85,7 @@
     <string name="date">Date</string>
     <string name="last_days">last %1$d days</string>
     <string name="last_location_error">last location not available</string>
-    <string name="sort_date">old person on top</string>
+    <string name="sort_date">new person on top</string>
     <string name="sort_location">nearest person on top</string>
     <string name="wasting">Wasting</string>
     <string name="wasting_weight_height">lowest weight/height on top</string>
