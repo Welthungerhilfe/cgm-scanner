@@ -130,7 +130,7 @@ public class PersonRepository {
 
         switch (filter.getSortType()) {
             case AppConstants.SORT_DATE:
-                orderByClause = "p.created ASC";
+                orderByClause = "p.created DESC";
                 break;
             case AppConstants.SORT_LOCATION:
                 Loc loc = filter.getFromLOC();
