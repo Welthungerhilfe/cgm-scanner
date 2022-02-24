@@ -156,15 +156,15 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
             //update UI
             runOnUiThread(() -> {
                 if (running) {
-                    activityTestPerformanceBinding.profilePerformanceColorSize.setText(DataFormat.filesize(this, profileColorSize));
-                    activityTestPerformanceBinding.profilePerformanceDepthTime.setText(DataFormat.filesize(this, profileDepthSize));
-                    activityTestPerformanceBinding.profilePerformanceColorTime.setText(DataFormat.time(this, profileColorTime));
-                    activityTestPerformanceBinding.profilePerformanceDepthTime.setText(DataFormat.time(this, profileDepthTime));
-                    activityTestPerformanceBinding.profileResultTimestampScan.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultScan));
-                    activityTestPerformanceBinding.profileResultTimestampStart.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultStart));
-                    activityTestPerformanceBinding.profileResultTimestampEnd.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultEnd));
-                    activityTestPerformanceBinding.profileResultTimestampReceive.setText(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultReceive));
-                    activityTestPerformanceBinding.profileResultTimestampAverage.setText(DataFormat.time(this, resultAverage));
+                    activityTestPerformanceBinding.profilePerformanceColorSize.setValue(DataFormat.filesize(this, profileColorSize));
+                    activityTestPerformanceBinding.profilePerformanceDepthSize.setValue(DataFormat.filesize(this, profileDepthSize));
+                    activityTestPerformanceBinding.profilePerformanceColorTime.setValue(DataFormat.time(this, profileColorTime));
+                    activityTestPerformanceBinding.profilePerformanceDepthTime.setValue(DataFormat.time(this, profileDepthTime));
+                    activityTestPerformanceBinding.profileResultTimestampScan.setValue(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultScan));
+                    activityTestPerformanceBinding.profileResultTimestampStart.setValue(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultStart));
+                    activityTestPerformanceBinding.profileResultTimestampEnd.setValue(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultEnd));
+                    activityTestPerformanceBinding.profileResultTimestampReceive.setValue(DataFormat.timestamp(this, DataFormat.TimestampFormat.TIME, resultReceive));
+                    activityTestPerformanceBinding.profileResultTimestampAverage.setValue(DataFormat.time(this, resultAverage));
                 }
             });
 
