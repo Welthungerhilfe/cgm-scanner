@@ -24,12 +24,14 @@
 
     <declare-styleable name="TwoLineTextView">
         <attr name="titleText" format="string|reference" />
+        <attr name="titleTextColor" format="color|reference" />
         <attr name="titleTextSize" format="dimension" />
         <attr name="descriptionText" format="string|reference" />
         <attr name="checkVisible" format="boolean" />
         <attr name="separatorVisible" format="boolean" />
         <attr name="submenuVisible" format="boolean" />
         <attr name="toggleVisible" format="boolean" />
+        <attr name="valueVisible" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="UnitEditText">
