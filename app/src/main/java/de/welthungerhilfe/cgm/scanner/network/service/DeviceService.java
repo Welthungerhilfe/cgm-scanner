@@ -41,7 +41,6 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 import static de.welthungerhilfe.cgm.scanner.AppConstants.HEALTH_INTERVAL;
 
@@ -73,9 +72,9 @@ public class DeviceService extends Service {
 
                 Device device = new Device();
                 device.setId(AppController.getInstance().getDeviceId());
-                device.setUuid(Utils.getAndroidID(getContentResolver()));
-                device.setCreate_timestamp(Utils.getUniversalTimestamp());
-                device.setSync_timestamp(Utils.getUniversalTimestamp());
+                device.setUuid(AppController.getInstance().getAndroidID());
+                device.setCreate_timestamp(AppController.getInstance().getUniversalTimestamp());
+                device.setSync_timestamp(AppController.getInstance().getUniversalTimestamp());
                 device.setCreated_by(session.getUserEmail());
                 device.setSchema_version(CgmDatabase.version);
                 device.setIssues(LocalPersistency.getString(getApplicationContext(), DeviceCheckActivity.KEY_LAST_DEVICE_CHECK_ISSUES));

@@ -80,7 +80,6 @@ import de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 
 import static de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity.KEY_LAST_DEVICE_CHECK_ISSUES;
@@ -126,11 +125,11 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         session = new SessionManager(MainActivity.this);
         LogFileUtils.startSession(MainActivity.this, session);
-        LogFileUtils.logInfo(TAG, "CGM-Scanner " + Utils.getAppVersion(this) + " started");
+        LogFileUtils.logInfo(TAG, "CGM-Scanner " + AppController.getInstance().getAppVersion() + " started");
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         if (session.getStdTestQrCode() != null) {
-            if (Utils.isValidateStdTestQrCode(session.getStdTestQrCode()) == QRScanActivity.STDTEST.VALID) {
+            if (QRScanActivity.isValidStdTestQrCode(session.getStdTestQrCode()) == QRScanActivity.STDTEST.VALID) {
                 session.setStdTestQrCode(null);
                 showStdTestButtonInMenu(false);
             }
@@ -559,5 +558,4 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             e.printStackTrace();
         }
     }
-
 }

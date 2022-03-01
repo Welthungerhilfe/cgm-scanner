@@ -1,4 +1,4 @@
-package de.welthungerhilfe.cgm.scanner.utils;
+package de.welthungerhilfe.cgm.scanner.unittests;
 
 import android.content.Context;
 
@@ -18,7 +18,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.io.ZscoreUtils;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
-public class CalculateZscoreUtilsTest {
+public class ZscoreUtilsTest {
 
     double[] zScore = new double[3];
     private Context context;

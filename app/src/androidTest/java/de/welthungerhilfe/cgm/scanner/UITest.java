@@ -22,7 +22,6 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LoginActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
@@ -55,31 +54,31 @@ public class UITest extends UITestUtils {
     public void test02_tutorial() {
         onView(withId(R.id.drawer)).perform(open());
         onView(withId(R.id.navMenu)).perform(NavigationViewActions.navigateTo(R.id.menuTutorial));
-        Utils.sleep(TRANSITION_DELAY);
+        AppController.sleep(TRANSITION_DELAY);
 
         //screen 1
         onView(withText(R.string.tutorial11)).perform(click());
         onView(withText(R.string.tutorial12)).perform(click());
         onView(withIdAndIndex(R.id.btnNext, 0)).perform(click());
-        Utils.sleep(TRANSITION_DELAY);
+        AppController.sleep(TRANSITION_DELAY);
 
         //screen 2
         onView(withText(R.string.tutorial21)).perform(click());
         onView(withText(R.string.tutorial22)).perform(click());
         onView(withIdAndIndex(R.id.btnNext, 1)).perform(click());
-        Utils.sleep(TRANSITION_DELAY);
+        AppController.sleep(TRANSITION_DELAY);
 
         //screen 3
         onView(withText(R.string.tutorial31)).perform(click());
         onView(withText(R.string.tutorial32)).perform(click());
         onView(withIdAndIndex(R.id.btnNext, 2)).perform(click());
-        Utils.sleep(TRANSITION_DELAY);
+        AppController.sleep(TRANSITION_DELAY);
 
         //screen 4
         onView(withText(R.string.tutorial41)).perform(click());
         onView(withText(R.string.tutorial42)).perform(click());
         onView(withIdAndIndex(R.id.btnNext, 3)).perform(click());
-        Utils.sleep(TRANSITION_DELAY);
+        AppController.sleep(TRANSITION_DELAY);
 
         //final screen
         onView(withId(R.id.btnStart)).perform(click());

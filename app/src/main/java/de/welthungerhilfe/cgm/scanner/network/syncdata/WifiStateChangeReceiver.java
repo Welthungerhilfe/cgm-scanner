@@ -12,7 +12,6 @@ import java.net.URL;
 import java.net.UnknownHostException;
 
 import de.welthungerhilfe.cgm.scanner.network.NetworkUtils;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class WifiStateChangeReceiver extends BroadcastReceiver {
 

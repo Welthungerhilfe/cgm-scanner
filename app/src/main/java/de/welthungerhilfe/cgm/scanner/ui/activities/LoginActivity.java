@@ -22,7 +22,6 @@ import android.Manifest;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.content.Intent;
-
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -37,20 +36,19 @@ import androidx.databinding.DataBindingUtil;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityLoginBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
-import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
+import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
-import de.welthungerhilfe.cgm.scanner.utils.LanguageHelper;
-import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
-import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
-import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 
 public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback, CompoundButton.OnCheckedChangeListener {
 
@@ -104,7 +102,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        LanguageHelper.onAttach(this);
+        BaseActivity.forceSelectedLanguage(this);
 
        activityLoginBinding = DataBindingUtil.setContentView(this,R.layout.activity_login);
        firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);

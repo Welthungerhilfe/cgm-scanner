@@ -50,7 +50,6 @@ import de.welthungerhilfe.cgm.scanner.ui.fragments.GrowthDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasuresDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class CreateDataActivity extends BaseActivity {
 

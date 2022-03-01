@@ -124,6 +124,15 @@ public class DataFormat {
         return 0;
     }
 
+    public static String getNameFromEmail(String email) {
+        if (email == null || email.isEmpty())
+            return "unknown";
+        else {
+            String[] arr = email.split("@");
+            return arr[0];
+        }
+    }
+
     public static String filesize(Context context, long bytes) {
         int kB = 1024;
         int MB = 1024 * 1024;

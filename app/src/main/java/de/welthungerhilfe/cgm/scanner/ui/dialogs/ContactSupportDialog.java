@@ -30,7 +30,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -39,15 +38,13 @@ import androidx.databinding.DataBindingUtil;
 import java.io.File;
 import java.util.ArrayList;
 
-
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.DialogContactSupportBinding;
 import de.welthungerhilfe.cgm.scanner.hardware.Audio;
-import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 
 public class ContactSupportDialog extends Dialog implements View.OnClickListener {
 
@@ -108,7 +105,7 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         } else {
             type = " - " + type;
         }
-        String subject = "CGM-Scanner version " + Utils.getAppVersion(context) + type;
+        String subject = "CGM-Scanner version " + AppController.getInstance().getAppVersion() + type;
         String message = dialogContactSupportBinding.inputMessage.getText().toString();
         if (footer != null) {
             message += "\n\n" + footer;

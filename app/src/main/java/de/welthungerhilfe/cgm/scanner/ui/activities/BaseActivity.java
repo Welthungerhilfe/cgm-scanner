@@ -18,8 +18,14 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
+import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.LocaleList;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,8 +34,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.microsoft.appcenter.crashes.Crashes;
 
 import java.util.HashMap;
+import java.util.Locale;
 
-import de.welthungerhilfe.cgm.scanner.utils.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 public class BaseActivity extends AppCompatActivity {
@@ -54,19 +60,11 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
-    private SessionManager session;
-
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
 
-        LanguageHelper.onAttach(this);
+        forceSelectedLanguage(this);
         Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        session = new SessionManager(this);
     }
 
     @Override
@@ -98,5 +96,65 @@ public class BaseActivity extends AppCompatActivity {
             map.remove(resultCode);
         }
         map.put(resultCode, listener);
+    }
+
+
+    public static Context forceSelectedLanguage(Context context) {
+        String lang = getPersistedData(context);
+        return setLanguage(context, lang);
+    }
+
+    public static Context setLanguage(Context context, String language) {
+        persist(context, language);
+
+        Locale locale = new Locale(language);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        context.getResources().updateConfiguration(config, context.getResources().getDisplayMetrics());
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return updateResources(context, language);
+        }
+
+        return updateResourcesLegacy(context, language);
+    }
+
+    public static String getPersistedData(Context context) {
+        return new SessionManager(context).getLanguage();
+    }
+
+    private static void persist(Context context, String language) {
+        new SessionManager(context).setLanguage(language);
+    }
+
+    @TargetApi(Build.VERSION_CODES.N)
+    private static Context updateResources(Context context, String language) {
+
+        Locale locale = new Locale(language);
+
+        Configuration configuration = context.getResources().getConfiguration();
+
+        LocaleList localeList = new LocaleList(locale);
+        LocaleList.setDefault(localeList);
+        configuration.setLocales(localeList);
+
+        return context.createConfigurationContext(configuration);
+    }
+
+    @SuppressWarnings("deprecation")
+    private static Context updateResourcesLegacy(Context context, String language) {
+
+        Locale locale = new Locale(language);
+        Locale.setDefault(locale);
+
+        Resources resources = context.getResources();
+
+        Configuration configuration = resources.getConfiguration();
+        configuration.locale = locale;
+
+        resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+
+        return context;
     }
 }

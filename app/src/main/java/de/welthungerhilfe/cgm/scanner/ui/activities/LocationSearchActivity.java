@@ -56,7 +56,6 @@ import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class LocationSearchActivity extends BaseActivity implements OnMapReadyCallback, SeekBar.OnSeekBarChangeListener {
 

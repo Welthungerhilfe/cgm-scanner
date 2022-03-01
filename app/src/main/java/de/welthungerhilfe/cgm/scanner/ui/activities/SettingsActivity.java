@@ -53,7 +53,6 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class SettingsActivity extends BaseActivity {
 
@@ -110,14 +109,14 @@ public class SettingsActivity extends BaseActivity {
         boolean showQA = BuildConfig.DEBUG || devUser || devVersion;
         activitySettingsBinding.testQAlayout.setVisibility(showQA ? View.VISIBLE : View.GONE);
 
-        activitySettingsBinding.txtSettingUuid.setText(2, Utils.getAndroidID(getContentResolver()));
+        activitySettingsBinding.txtSettingUuid.setText(2, AppController.getInstance().getAndroidID());
         activitySettingsBinding.showDepthData.setChecked(LocalPersistency.getBoolean(this, KEY_SHOW_DEPTH));
         activitySettingsBinding.showDepthData.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_SHOW_DEPTH, value));
 
         activitySettingsBinding.uploadOverWifi.setChecked(LocalPersistency.getBoolean(this, KEY_UPLOAD_WIFI));
         activitySettingsBinding.uploadOverWifi.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_UPLOAD_WIFI, value));
 
-        activitySettingsBinding.txtSettingVersion.setText(2, Utils.getAppVersion(this));
+        activitySettingsBinding.txtSettingVersion.setText(2, AppController.getInstance().getAppVersion());
         activitySettingsBinding.txtSettingAccount.setText(1, session.getUserEmail());
         activitySettingsBinding.txtSettingAzureAccount.setText(1, SyncingWorkManager.getAPI());
 

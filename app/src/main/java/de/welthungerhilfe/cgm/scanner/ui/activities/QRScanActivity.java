@@ -39,6 +39,10 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
@@ -54,7 +58,6 @@ import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.QRScanView;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConfirmListener, QRScanView.QRScanHandler {
     private final String TAG = QRScanActivity.class.getSimpleName();
@@ -188,8 +191,8 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         activityScanQrBinding.qrScanView.stopCamera();
         this.qrCode = qrCode;
 
-        if (Utils.isStdTestQRCode(qrCode)) {
-            switch (Utils.isValidateStdTestQrCode(qrCode)) {
+        if (isStdTestQRCode(qrCode)) {
+            switch (isValidStdTestQrCode(qrCode)) {
                 case VALID:
                     showConfirmDialog(R.string.std_test_will_start, STD_TEST_WILL_STARTED);
                     return;
@@ -244,7 +247,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... voids) {
-                final long timestamp = Utils.getUniversalTimestamp();
+                final long timestamp = AppController.getInstance().getUniversalTimestamp();
                 final String consentFileString = timestamp + "_" + qrCode + ".jpg";
 
                 File extFileDir = AppController.getInstance().getRootDirectory(context);
@@ -274,7 +277,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                     log.setUploadDate(0);
                     log.setQrCode(qrCode);
                     log.setDeleted(false);
-                    log.setCreateDate(Utils.getUniversalTimestamp());
+                    log.setCreateDate(AppController.getInstance().getUniversalTimestamp());
                     log.setCreatedBy(new SessionManager(QRScanActivity.this).getUserEmail());
                     log.setEnvironment(new SessionManager(QRScanActivity.this).getEnvironment());
                     log.setSchema_version(CgmDatabase.version);
@@ -318,4 +321,39 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
     }
 
 
+    public static boolean isStdTestQRCode(String qrcode) {
+        if (qrcode == null) {
+            return false;
+        }
+        return qrcode.toUpperCase().contains("STD_TEST_");
+    }
+
+    public static STDTEST isValidStdTestQrCode(String qrcode) {
+        try {
+            String[] arrOfStr = qrcode.split("_", 5);
+            String date = arrOfStr[2];
+            Date c = Calendar.getInstance().getTime();
+
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
+            String formattedDate = df.format(c);
+
+            if (date.equals(formattedDate)) {
+                return STDTEST.VALID;
+            } else {
+
+                if(Double.parseDouble(date) > Double.parseDouble(formattedDate)){
+                    return STDTEST.INFUTURE;
+                }
+                else if(Double.parseDouble(date) < Double.parseDouble(formattedDate)) {
+                    return STDTEST.OLDER;
+                }
+                else {
+                    return STDTEST.INVALID;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return STDTEST.INVALID;
+        }
+    }
 }

@@ -49,8 +49,8 @@ import com.huawei.hiar.ARWorldTrackingConfig;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AREngineCamera extends AbstractARCamera {
 
@@ -286,7 +286,7 @@ public class AREngineCamera extends AbstractARCamera {
           Log.w(TAG, "the target activity is not found: " + e.getMessage());
         }
       });
-      Utils.sleep(100);
+      AppController.sleep(100);
       mActivity.finish();
     }).start();
   }

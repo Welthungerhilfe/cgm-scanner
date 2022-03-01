@@ -56,7 +56,6 @@ import de.welthungerhilfe.cgm.scanner.databinding.ActivityLocationDetectBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class LocationDetectActivity extends BaseActivity implements OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
     public static final String EXTRA_LOCATION = "extra_location";

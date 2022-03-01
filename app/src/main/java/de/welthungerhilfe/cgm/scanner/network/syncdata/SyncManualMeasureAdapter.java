@@ -19,7 +19,6 @@ import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandle
 import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observer;
@@ -106,7 +105,7 @@ public class SyncManualMeasureAdapter {
                                 }
 
                             }
-                            person.setLast_sync_measurments(Utils.getUniversalTimestamp());
+                            person.setLast_sync_measurments(AppController.getInstance().getUniversalTimestamp());
                             savePerson(person);
                         }
 

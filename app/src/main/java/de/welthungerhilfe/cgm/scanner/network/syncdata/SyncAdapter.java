@@ -72,7 +72,6 @@ import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observer;
@@ -948,7 +947,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         if (updated && (count == 0)) {
             new Thread(() -> {
                 if (updateDelay > 0) {
-                    Utils.sleep(updateDelay);
+                    AppController.sleep(updateDelay);
                 }
                 startSyncing();
             }).start();

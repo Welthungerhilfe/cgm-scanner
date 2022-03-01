@@ -49,7 +49,6 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.network.NetworkUtils;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AuthenticationHandler {
 

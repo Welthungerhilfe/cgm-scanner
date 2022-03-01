@@ -31,11 +31,11 @@ import android.widget.CompoundButton;
 import java.util.ArrayList;
 
 
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityTestPerformanceBinding;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class SettingsPerformanceActivity extends BaseActivity implements CompoundButton.OnCheckedChangeListener, Runnable {
 
@@ -169,7 +169,7 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
             });
 
             //wait a second before updating again
-            Utils.sleep(1000);
+            AppController.sleep(1000);
         }
     }
 }

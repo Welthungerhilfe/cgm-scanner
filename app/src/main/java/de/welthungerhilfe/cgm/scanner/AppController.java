@@ -19,18 +19,21 @@ package de.welthungerhilfe.cgm.scanner;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StrictMode;
+import android.provider.Settings;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-
+import java.util.Calendar;
+import java.util.Random;
+import java.util.TimeZone;
 
 import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AppController extends Application {
 
@@ -56,23 +59,37 @@ public class AppController extends Application {
     }
 
     public String getPersonId() {
-        return String.format("%s_person_%s_%s", Utils.getAndroidID(getContentResolver()), Utils.getUniversalTimestamp(), Utils.getSaltString(16));
+        return String.format("%s_person_%s_%s", getAndroidID(), getUniversalTimestamp(), getSaltString(16));
     }
 
     public String getMeasureId() {
-        return String.format("%s_measure_%s_%s", Utils.getAndroidID(getContentResolver()), Utils.getUniversalTimestamp(), Utils.getSaltString(16));
+        return String.format("%s_measure_%s_%s", getAndroidID(), getUniversalTimestamp(), getSaltString(16));
     }
 
     public String getArtifactId(String type) {
-        return String.format("%s_artifact-%s_%s_%s", Utils.getAndroidID(getContentResolver()), type, Utils.getUniversalTimestamp(), Utils.getSaltString(16));
+        return String.format("%s_artifact-%s_%s_%s", getAndroidID(), type, getUniversalTimestamp(), getSaltString(16));
     }
 
     public String getArtifactId(String type, long timestamp) {
-        return String.format("%s_artifact-%s_%s_%s", Utils.getAndroidID(getContentResolver()), type, timestamp, Utils.getSaltString(16));
+        return String.format("%s_artifact-%s_%s_%s", getAndroidID(), type, timestamp, getSaltString(16));
     }
 
     public String getDeviceId() {
-        return String.format("%s-device-%s-%s", Utils.getAndroidID(getContentResolver()), Utils.getUniversalTimestamp(), Utils.getSaltString(16));
+        return String.format("%s-device-%s-%s", getAndroidID(), getUniversalTimestamp(), getSaltString(16));
+    }
+
+
+    public String getAndroidID() {
+        return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+    }
+
+    public String getAppVersion() {
+        try {
+            return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return "unknown";
+        }
     }
 
     public File getPublicAppDirectory(Context context) {
@@ -105,8 +122,23 @@ public class AppController extends Application {
         return mExtFileDir;
     }
 
+    public static String getSaltString(int length) {
+        String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz";
+        StringBuilder salt = new StringBuilder();
+        Random rnd = new Random();
+        while (salt.length() < length) {
+            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
+            salt.append(SALTCHARS.charAt(index));
+        }
 
-    public static void overrideFont(Context context, String defaultFontNameToOverride, String customFontFileNameInAssets) {
+        return salt.toString();
+    }
+
+    public static long getUniversalTimestamp() {
+        return Calendar.getInstance(TimeZone.getTimeZone("GMT")).getTimeInMillis();
+    }
+
+    public void overrideFont(Context context, String defaultFontNameToOverride, String customFontFileNameInAssets) {
         try {
             final Typeface customFontTypeface = Typeface.createFromAsset(context.getAssets(), customFontFileNameInAssets);
 
@@ -114,6 +146,14 @@ public class AppController extends Application {
             defaultFontTypefaceField.setAccessible(true);
             defaultFontTypefaceField.set(null, customFontTypeface);
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void sleep(long miliseconds) {
+        try {
+            Thread.sleep(miliseconds);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

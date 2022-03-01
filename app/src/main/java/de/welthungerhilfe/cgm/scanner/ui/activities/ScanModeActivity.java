@@ -83,7 +83,6 @@ import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, ScanTypeView.ScanTypeListener {
 
@@ -163,7 +162,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     public void completeScan(View view) {
         measure.setCreatedBy(session.getUserEmail());
-        measure.setDate(Utils.getUniversalTimestamp());
+        measure.setDate(AppController.getInstance().getUniversalTimestamp());
         measure.setAge(age);
         measure.setType(AppConstants.VAL_MEASURE_AUTO);
         measure.setWeight(0.0f);
@@ -288,7 +287,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         executor = Executors.newFixedThreadPool(20);
 
-        mNowTime = Utils.getUniversalTimestamp();
+        mNowTime = AppController.getInstance().getUniversalTimestamp();
         mNowTimeString = String.valueOf(mNowTime);
 
         session = new SessionManager(this);
@@ -878,7 +877,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     break;
                 }
             }
-            Utils.sleep(5);
+            AppController.sleep(5);
         }
         LogFileUtils.logInfo(TAG, "Stop waiting on running threads");
     }

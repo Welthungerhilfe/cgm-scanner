@@ -21,6 +21,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.IntentSender;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -39,9 +40,10 @@ import java.util.List;
 import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class GPS {
+
+    private static final String PACKAGE_GOOGLE_PLAY = "com.android.vending";
 
     public static String getAddress(Activity context, Loc location) {
         if (location != null) {
@@ -49,7 +51,7 @@ public class GPS {
             List<Address> addresses = null;
 
             try {
-                if (Utils.isPackageInstalled(context, Utils.PACKAGE_GOOGLE_PLAY)) {
+                if (isPackageInstalled(context, PACKAGE_GOOGLE_PLAY)) {
                     addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
                 }
             } catch (Exception ioException) {
@@ -128,5 +130,23 @@ public class GPS {
                         }
                     }
                 });
+    }
+
+    private static boolean isPackageInstalled(Activity activity, String packageName) {
+        PackageManager pm = activity.getPackageManager();
+
+        for (PackageInfo info : activity.getPackageManager().getInstalledPackages(0)) {
+            if (info.packageName.compareTo(packageName) == 0) {
+                int state = pm.getApplicationEnabledSetting(packageName);
+                switch (state) {
+                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
+                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
+                        return false;
+                    default:
+                        return true;
+                }
+            }
+        }
+        return false;
     }
 }

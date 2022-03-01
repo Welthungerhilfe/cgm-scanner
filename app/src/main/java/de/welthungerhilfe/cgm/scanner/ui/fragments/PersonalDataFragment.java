@@ -68,7 +68,6 @@ import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.DateEditText;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, DateEditText.DateInputListener, TextWatcher {
 
@@ -289,7 +288,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setGuardian(editGuardian.getText().toString());
                     person.setSex(sex);
                     person.setAgeEstimated(checkAge.isChecked());
-                    person.setTimestamp(Utils.getUniversalTimestamp());
+                    person.setTimestamp(AppController.getInstance().getUniversalTimestamp());
                     person.setCreatedBy(session.getUserEmail());
                     person.setSchema_version(CgmDatabase.version);
                     person.setDevice_updated_at_timestamp(System.currentTimeMillis());

@@ -23,7 +23,6 @@ import android.net.NetworkInfo;
 
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class NetworkUtils {
     public static boolean isExpiredToken(String message) {
