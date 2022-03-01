@@ -42,8 +42,6 @@ public class Utils {
 
     public static final String PACKAGE_GOOGLE_PLAY = "com.android.vending";
 
-    private static MediaActionSound sound = null;
-
     public static long averageValue(ArrayList<Long> values) {
         long value = 0;
         if (values == null) {
@@ -190,22 +188,6 @@ public class Utils {
         Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=" + packageName);
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         activity.startActivity(intent);
-    }
-
-    public static void playShooterSound(Context context, int sample) {
-        AudioManager audio = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-        switch (audio.getRingerMode()) {
-            case AudioManager.RINGER_MODE_NORMAL:
-                if (sound == null) {
-                    sound = new MediaActionSound();
-                }
-                sound.play(sample);
-                break;
-            case AudioManager.RINGER_MODE_SILENT:
-                break;
-            case AudioManager.RINGER_MODE_VIBRATE:
-                break;
-        }
     }
 
     public static void sleep(long miliseconds) {

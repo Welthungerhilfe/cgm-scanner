@@ -44,6 +44,7 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.DialogContactSupportBinding;
+import de.welthungerhilfe.cgm.scanner.hardware.Audio;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
@@ -81,39 +82,20 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         }
 
         if (!recording) {
-            Utils.playShooterSound(context, MediaActionSound.START_VIDEO_RECORDING);
+            Audio.playShooterSound(context, MediaActionSound.START_VIDEO_RECORDING);
             dialogContactSupportBinding.recordAudio.setImageDrawable(context.getDrawable(R.drawable.stop));
             recording = true;
 
             audioFile = new File(AppController.getInstance().getPublicAppDirectory(context), "voice_record.wav");
-            audioEncoder = new MediaRecorder();
-            audioEncoder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            audioEncoder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
-            audioEncoder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-            audioEncoder.setAudioEncodingBitRate(128000);
-            audioEncoder.setAudioSamplingRate(44100);
-            audioEncoder.setOutputFile(audioFile.getAbsolutePath());
-            try {
-                audioEncoder.prepare();
-                audioEncoder.start();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            audioEncoder = Audio.startRecording(audioFile);
         } else {
-            try {
-                audioEncoder.stop();
-                audioEncoder.release();
-                audioEncoder = null;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            Utils.playShooterSound(context, MediaActionSound.STOP_VIDEO_RECORDING);
+            Audio.stopRecording(audioEncoder);
+            Audio.playShooterSound(context, MediaActionSound.STOP_VIDEO_RECORDING);
             dialogContactSupportBinding.recordAudio.setImageDrawable(context.getDrawable(R.drawable.ic_record_audio));
+            audioEncoder = null;
             recording = false;
         }
     }
-
 
     void onConfirm() {
         if (recording) {

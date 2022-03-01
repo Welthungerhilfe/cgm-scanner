@@ -69,6 +69,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.hardware.Audio;
 import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
@@ -480,13 +481,13 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         mIsRecording = true;
         fab.setImageResource(R.drawable.stop);
-        Utils.playShooterSound(this, MediaActionSound.START_VIDEO_RECORDING);
+        Audio.playShooterSound(this, MediaActionSound.START_VIDEO_RECORDING);
     }
 
     private void pauseScan() {
         mIsRecording = false;
         fab.setImageResource(R.drawable.recorder);
-        Utils.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
+        Audio.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
     }
 
     private void openScan() {
@@ -499,7 +500,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     public void closeScan() {
         if (mIsRecording) {
-            Utils.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
+            Audio.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
         }
         mIsRecording = false;
         activityScanModeBinding.lytScanner.setVisibility(View.GONE);
