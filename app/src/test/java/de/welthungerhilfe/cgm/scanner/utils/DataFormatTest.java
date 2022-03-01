@@ -15,6 +15,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
 public class DataFormatTest {

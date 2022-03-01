@@ -42,44 +42,6 @@ public class Utils {
 
     public static final String PACKAGE_GOOGLE_PLAY = "com.android.vending";
 
-    public static long averageValue(ArrayList<Long> values) {
-        long value = 0;
-        if (values == null) {
-            return value;
-        }
-        for (long l : values) {
-            value += l;
-        }
-        if (values.size() > 0) {
-            value /= values.size();
-        }
-        return value;
-    }
-
-    public static double parseDouble(String value) {
-        if (value == null) {
-            return 0;
-        }
-        value = value.replace(',', '.');
-        try {
-            return Double.parseDouble(value);
-        } catch (Exception e) {
-        }
-        return 0;
-    }
-
-    public static float parseFloat(String value) {
-        if (value == null) {
-            return 0;
-        }
-        value = value.replace(',', '.');
-        try {
-            return Float.parseFloat(value);
-        } catch (Exception e) {
-        }
-        return 0;
-    }
-
     public static String getAndroidID(ContentResolver resolver) {
         return Settings.Secure.getString(resolver, Settings.Secure.ANDROID_ID);
     }
@@ -118,16 +80,6 @@ public class Utils {
             String[] arr = email.split("@");
             return arr[0];
         }
-    }
-
-    public static int checkDoubleDecimals(String number) {
-        number = number.replace(',', '.');
-        int integerPlaces = number.indexOf('.');
-
-        if (integerPlaces < 0)
-            return 0;
-
-        return number.length() - integerPlaces - 1;
     }
 
     public static boolean isPackageInstalled(Activity activity, String packageName) {
@@ -196,17 +148,5 @@ public class Utils {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    public static boolean isNumber(String value) {
-        for (int i = 0; i < value.length(); i++) {
-            char c = value.charAt(i);
-            if ((c != '.') && (c != ',')) {
-                if ((c < '0') || (c > '9')) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 }

@@ -62,7 +62,7 @@ import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
 import de.welthungerhilfe.cgm.scanner.hardware.io.ZscoreUtils;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
 public class GrowthDataFragment extends Fragment implements IFillFormatter {
 
@@ -386,7 +386,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
                     break;
                 case WEIGHT_FOR_HEIGHT:
                     DecimalFormat decimalFormat = new DecimalFormat("#.#");
-                    x = Utils.parseFloat(decimalFormat.format(measure.getHeight()));
+                    x = DataFormat.parseFloat(decimalFormat.format(measure.getHeight()));
                     y = (float) measure.getWeight();
                     break;
                 case MUAC_FOR_AGE:

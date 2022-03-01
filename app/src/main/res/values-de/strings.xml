@@ -195,7 +195,7 @@
     <string name="tooltipe_height_max">Das Kind sollte kleiner als 130cm sein</string>
     <string name="tooltipe_weight_min">Gewicht sollte größer als 2kg sein</string>
     <string name="tooltipe_weight_max">Gewicht sollte weniger als 30kg betragen</string>
-    <string name="tooltipe_muac_min">MUAC sollte größer als 9cm sein</string>
+    <string name="tooltipe_muac_min">MUAC sollte größer als 7cm sein</string>
     <string name="tooltipe_muac_max">MUAC sollte kleiner als 22cm sein</string>
     <string name="tooltip_kg">Werte in Kilogramm</string>
     <string name="tooltip_decimal">genau eine Nachkommastelle eingeben</string>

@@ -67,7 +67,7 @@ import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.DateEditText;
-import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, DateEditText.DateInputListener, TextWatcher {

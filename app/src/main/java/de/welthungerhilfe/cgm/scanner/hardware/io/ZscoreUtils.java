@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
 public class ZscoreUtils {
 
@@ -129,16 +129,16 @@ public class ZscoreUtils {
                 String jsonKey = keys.next();
                 JSONObject jsonObject = obj.getJSONObject(jsonKey);
                 ZScoreData value = new ZScoreData();
-                value.skew = Utils.parseFloat(jsonObject.getString("L"));
-                value.median = Utils.parseFloat(jsonObject.getString("M"));
-                value.coefficient = Utils.parseFloat(jsonObject.getString("S"));
-                value.SD3neg = Utils.parseFloat(jsonObject.getString("SD3neg"));
-                value.SD2neg = Utils.parseFloat(jsonObject.getString("SD2neg"));
-                value.SD0 = Utils.parseFloat(jsonObject.getString("SD0"));
-                value.SD2 = Utils.parseFloat(jsonObject.getString("SD2"));
-                value.SD3 = Utils.parseFloat(jsonObject.getString("SD3"));
+                value.skew = DataFormat.parseFloat(jsonObject.getString("L"));
+                value.median = DataFormat.parseFloat(jsonObject.getString("M"));
+                value.coefficient = DataFormat.parseFloat(jsonObject.getString("S"));
+                value.SD3neg = DataFormat.parseFloat(jsonObject.getString("SD3neg"));
+                value.SD2neg = DataFormat.parseFloat(jsonObject.getString("SD2neg"));
+                value.SD0 = DataFormat.parseFloat(jsonObject.getString("SD0"));
+                value.SD2 = DataFormat.parseFloat(jsonObject.getString("SD2"));
+                value.SD3 = DataFormat.parseFloat(jsonObject.getString("SD3"));
 
-                float key = Utils.parseFloat(jsonKey);
+                float key = DataFormat.parseFloat(jsonKey);
                 if (chartType == ChartType.WEIGHT_FOR_HEIGHT) {
                     output.put((int) (key * 1000), value);
                 } else {
@@ -159,18 +159,18 @@ public class ZscoreUtils {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] arr = line.split("\t");
-                if (Utils.isNumber(arr[0])) {
+                if (DataFormat.isNumber(arr[0])) {
                     ZScoreData value = new ZScoreData();
-                    value.skew = Utils.parseFloat(arr[1]);
-                    value.median = Utils.parseFloat(arr[2]);
-                    value.coefficient = Utils.parseFloat(arr[3]);
-                    value.SD3neg = Utils.parseFloat(arr[4]);
-                    value.SD2neg = Utils.parseFloat(arr[5]);
-                    value.SD0 = Utils.parseFloat(arr[7]);
-                    value.SD2 = Utils.parseFloat(arr[9]);
-                    value.SD3 = Utils.parseFloat(arr[10]);
+                    value.skew = DataFormat.parseFloat(arr[1]);
+                    value.median = DataFormat.parseFloat(arr[2]);
+                    value.coefficient = DataFormat.parseFloat(arr[3]);
+                    value.SD3neg = DataFormat.parseFloat(arr[4]);
+                    value.SD2neg = DataFormat.parseFloat(arr[5]);
+                    value.SD0 = DataFormat.parseFloat(arr[7]);
+                    value.SD2 = DataFormat.parseFloat(arr[9]);
+                    value.SD3 = DataFormat.parseFloat(arr[10]);
 
-                    float key = Utils.parseFloat(arr[0]);
+                    float key = DataFormat.parseFloat(arr[0]);
                     if (chartType == ChartType.WEIGHT_FOR_HEIGHT) {
                         output.put((int) (key * 1000), value);
                     } else {

@@ -70,7 +70,7 @@ import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
-import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;

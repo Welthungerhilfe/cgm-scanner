@@ -52,7 +52,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.database.BackupManager;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
-import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class SettingsActivity extends BaseActivity {

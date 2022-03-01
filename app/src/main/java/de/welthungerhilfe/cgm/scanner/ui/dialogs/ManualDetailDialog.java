@@ -34,7 +34,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.databinding.DialogManualDetailBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 public class ManualDetailDialog extends Dialog {

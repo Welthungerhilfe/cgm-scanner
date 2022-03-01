@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityTestPerformanceBinding;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
-import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class SettingsPerformanceActivity extends BaseActivity implements CompoundButton.OnCheckedChangeListener, Runnable {
@@ -151,7 +151,7 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
             long resultStart = LocalPersistency.getLong(this, KEY_TEST_RESULT_START);
             long resultEnd = LocalPersistency.getLong(this, KEY_TEST_RESULT_END);
             long resultReceive = LocalPersistency.getLong(this, KEY_TEST_RESULT_RECEIVE);
-            long resultAverage = Utils.averageValue(LocalPersistency.getLongArray(this, KEY_TEST_RESULT_AVERAGE));
+            long resultAverage = DataFormat.averageValue(LocalPersistency.getLongArray(this, KEY_TEST_RESULT_AVERAGE));
 
             //update UI
             runOnUiThread(() -> {

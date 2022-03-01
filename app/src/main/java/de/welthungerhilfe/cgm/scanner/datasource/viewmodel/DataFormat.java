@@ -16,13 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.welthungerhilfe.cgm.scanner.utils;
+package de.welthungerhilfe.cgm.scanner.datasource.viewmodel;
 
 import android.content.Context;
 import android.os.Build;
 import android.text.format.DateFormat;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -35,6 +36,30 @@ public class DataFormat {
         DATE_AND_TIME,
         TIME
     };
+
+    public static long averageValue(ArrayList<Long> values) {
+        long value = 0;
+        if (values == null) {
+            return value;
+        }
+        for (long l : values) {
+            value += l;
+        }
+        if (values.size() > 0) {
+            value /= values.size();
+        }
+        return value;
+    }
+
+    public static int checkDoubleDecimals(String number) {
+        number = number.replace(',', '.');
+        int integerPlaces = number.indexOf('.');
+
+        if (integerPlaces < 0)
+            return 0;
+
+        return number.length() - integerPlaces - 1;
+    }
 
     public static String convertFormat(Context context, TimestampFormat format) {
         switch (format) {
@@ -172,5 +197,41 @@ public class DataFormat {
         } else {
             return "hh:mm";
         }
+    }
+
+    public static boolean isNumber(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if ((c != '.') && (c != ',')) {
+                if ((c < '0') || (c > '9')) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public static double parseDouble(String value) {
+        if (value == null) {
+            return 0;
+        }
+        value = value.replace(',', '.');
+        try {
+            return Double.parseDouble(value);
+        } catch (Exception e) {
+        }
+        return 0;
+    }
+
+    public static float parseFloat(String value) {
+        if (value == null) {
+            return 0;
+        }
+        value = value.replace(',', '.');
+        try {
+            return Float.parseFloat(value);
+        } catch (Exception e) {
+        }
+        return 0;
     }
 }
