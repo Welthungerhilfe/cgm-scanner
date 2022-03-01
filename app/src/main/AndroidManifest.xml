@@ -148,10 +148,6 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".ui.activities.ImageDetailActivity"
-            android:screenOrientation="portrait" />
-
-        <activity
             android:name=".ui.activities.SettingsActivity"
             android:screenOrientation="portrait" />
 
