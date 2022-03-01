@@ -76,7 +76,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
-import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
+import de.welthungerhilfe.cgm.scanner.hardware.io.FileSystem;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
@@ -841,7 +841,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
             //set metadata
             log.setPath(artifactFile.getPath());
-            log.setHashValue(IO.getMD5(artifactFile.getPath()));
+            log.setHashValue(FileSystem.getMD5(artifactFile.getPath()));
             log.setFileSize(artifactFile.length());
             log.setUploadDate(0);
             log.setDeleted(false);

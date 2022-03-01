@@ -53,7 +53,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
-import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
+import de.welthungerhilfe.cgm.scanner.hardware.io.FileSystem;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.QRScanView;
@@ -272,7 +272,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                     log.setId(AppController.getInstance().getArtifactId("consent"));
                     log.setType("consent");
                     log.setPath(consentFile.getPath());
-                    log.setHashValue(IO.getMD5(consentFile.getPath()));
+                    log.setHashValue(FileSystem.getMD5(consentFile.getPath()));
                     log.setFileSize(consentFile.length());
                     log.setUploadDate(0);
                     log.setQrCode(qrCode);

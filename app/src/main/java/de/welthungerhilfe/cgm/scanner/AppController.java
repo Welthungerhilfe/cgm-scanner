@@ -33,7 +33,7 @@ import java.util.Calendar;
 import java.util.Random;
 import java.util.TimeZone;
 
-import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
+import de.welthungerhilfe.cgm.scanner.hardware.io.FileSystem;
 
 public class AppController extends Application {
 
@@ -108,7 +108,7 @@ public class AppController extends Application {
 
         File mExtFileDir = new File(c.getApplicationInfo().dataDir);
         File oldDir = new File(Environment.getExternalStorageDirectory(), "Child Growth Monitor Scanner App");
-        IO.move(oldDir, mExtFileDir);
+        FileSystem.move(oldDir, mExtFileDir);
 
         File nomedia = new File(mExtFileDir, ".nomedia");
         if (!nomedia.exists()) {

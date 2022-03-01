@@ -43,7 +43,7 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.DialogContactSupportBinding;
 import de.welthungerhilfe.cgm.scanner.hardware.Audio;
-import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
+import de.welthungerhilfe.cgm.scanner.hardware.io.FileSystem;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 
 public class ContactSupportDialog extends Dialog implements View.OnClickListener {
@@ -173,7 +173,7 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
             paths[i] = files[i].getAbsolutePath();
         }
         zip = new File(AppController.getInstance().getPublicAppDirectory(context), "report.zip");
-        IO.zip(paths, zip.getAbsolutePath());
+        FileSystem.zip(paths, zip.getAbsolutePath());
         return Uri.fromFile(zip);
     }
 
@@ -194,7 +194,7 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         }
 
         File screenshot = new File(AppController.getInstance().getPublicAppDirectory(activity), "screenshot.png");
-        IO.takeScreenshot(activity, screenshot);
+        FileSystem.takeScreenshot(activity, screenshot);
         ContactSupportDialog contactSupportDialog = new ContactSupportDialog(activity);
         contactSupportDialog.attachScreenshot(screenshot);
         contactSupportDialog.setFooter(footer);
