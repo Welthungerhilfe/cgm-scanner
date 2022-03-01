@@ -64,6 +64,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.PostScanResultreposi
 import de.welthungerhilfe.cgm.scanner.datasource.repository.WorkflowRepository;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.network.NetworkUtils;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
@@ -193,7 +194,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (!Utils.isUploadAllowed(context)) {
+            if (!NetworkUtils.isUploadAllowed(context)) {
                 LogFileUtils.logInfo(TAG, "skipped due to missing connection");
                 syncTask = null;
                 return null;
@@ -382,7 +383,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             @Override
                             public void onError(@NonNull Throwable e) {
                                 LogFileUtils.logError(TAG, "scan " + scan.getId() + " posting failed " + e.getMessage());
-                                if (Utils.isExpiredToken(e.getMessage())) {
+                                if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                     AuthenticationHandler.restoreToken(context);
                                 }
 
@@ -462,11 +463,11 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             LogFileUtils.logError(TAG, "person " + person1.getQrcode() + " posting failed " + e.getMessage());
-                            if (Utils.isDenied(e.getMessage())) {
+                            if (NetworkUtils.isDenied(e.getMessage())) {
                                 person1.setDenied(true);
                                 personRepository.updatePerson(person1);
                             }
-                            if (Utils.isExpiredToken(e.getMessage())) {
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
@@ -531,7 +532,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             LogFileUtils.logError(TAG, "person " + person1.getQrcode() + " putting failed " + e.getMessage());
-                            if (Utils.isExpiredToken(e.getMessage())) {
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
@@ -605,7 +606,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             LogFileUtils.logError(TAG, "Sync person failed " + e.getMessage());
-                            if (Utils.isExpiredToken(e.getMessage())) {
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
@@ -664,7 +665,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             LogFileUtils.logError(TAG, "measure " + measure.getId() + " posting failed " + e.getMessage());
-                            if (Utils.isExpiredToken(e.getMessage())) {
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
@@ -722,7 +723,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             LogFileUtils.logError(TAG, "measure " + measure.getId() + " putting failed " + e.getMessage());
-                            if (Utils.isExpiredToken(e.getMessage())) {
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
@@ -773,7 +774,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             LogFileUtils.logError(TAG, "consent " + fileLog.getPath() + " posting failed " + e.getMessage());
-                            if (Utils.isExpiredToken(e.getMessage())) {
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
@@ -885,7 +886,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             LogFileUtils.logError(TAG, "scan result " + measure.getId() + " estimate receiving failed " + e.getMessage());
-                            if (Utils.isExpiredToken(e.getMessage())) {
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
@@ -1119,7 +1120,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         public void onError(@NonNull Throwable e) {
                             LogFileUtils.logError(TAG, "Autodetect workflow posting failed " + e.getMessage());
 
-                            if (Utils.isExpiredToken(e.getMessage())) {
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);
@@ -1198,7 +1199,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         public void onError(@NonNull Throwable e) {
                             LogFileUtils.logError(TAG, "AppHeight workflow posting failed " + e.getMessage());
 
-                            if (Utils.isExpiredToken(e.getMessage())) {
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
                             onThreadChange(-1);

@@ -52,6 +52,7 @@ import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityLocationSearchBinding;
+import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
@@ -101,7 +102,7 @@ public class LocationSearchActivity extends BaseActivity implements OnMapReadyCa
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, PERMISSION_LOCATION);
         } else {
-            Utils.openLocationSettings(this, PERMISSION_LOCATION);
+            GPS.openLocationSettings(this, PERMISSION_LOCATION);
             LocationManager lm = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
             boolean isGPSEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);

@@ -69,6 +69,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
@@ -533,7 +534,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
                     location.setLatitude(loc.getLatitude());
                     location.setLongitude(loc.getLongitude());
-                    location.setAddress(Utils.getAddress(this, location));
+                    location.setAddress(GPS.getAddress(this, location));
                     measure.setLocation(location);
                 }
             }

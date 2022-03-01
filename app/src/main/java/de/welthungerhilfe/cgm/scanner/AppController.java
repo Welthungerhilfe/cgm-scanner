@@ -19,12 +19,14 @@ package de.welthungerhilfe.cgm.scanner;
 
 import android.app.Application;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StrictMode;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 
 
 import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
@@ -39,7 +41,7 @@ public class AppController extends Application {
         super.onCreate();
 
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
-        Utils.overrideFont(getApplicationContext(), "SERIF", "roboto.ttf");
+        overrideFont(getApplicationContext(), "SERIF", "roboto.ttf");
 
         mInstance = this;
 
@@ -103,4 +105,16 @@ public class AppController extends Application {
         return mExtFileDir;
     }
 
+
+    public static void overrideFont(Context context, String defaultFontNameToOverride, String customFontFileNameInAssets) {
+        try {
+            final Typeface customFontTypeface = Typeface.createFromAsset(context.getAssets(), customFontFileNameInAssets);
+
+            final Field defaultFontTypefaceField = Typeface.class.getDeclaredField(defaultFontNameToOverride);
+            defaultFontTypefaceField.setAccessible(true);
+            defaultFontTypefaceField.set(null, customFontTypeface);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

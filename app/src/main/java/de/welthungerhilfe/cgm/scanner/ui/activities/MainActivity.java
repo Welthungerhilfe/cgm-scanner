@@ -65,6 +65,7 @@ import de.welthungerhilfe.cgm.scanner.databinding.ActivityMainBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
+import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.network.service.DeviceService;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.service.WifiStateChangereceiverHelperService;
@@ -315,7 +316,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         });
         sortDialog.findViewById(R.id.sortLocation).setOnClickListener(v -> {
             adapterData.clear();
-            Loc loc = Utils.getLastKnownLocation(getBaseContext());
+            Loc loc = GPS.getLastKnownLocation(getBaseContext());
             if (loc != null) {
                 viewModel.setLocation(loc);
                 viewModel.setSortType(AppConstants.SORT_LOCATION);

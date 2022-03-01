@@ -49,11 +49,13 @@ import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.FragmentDeviceCheckBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
+import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.network.NetworkUtils;
 import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
@@ -458,7 +460,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                 if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, BaseActivity.PERMISSION_LOCATION);
                 } else {
-                    if (Utils.getLastKnownLocation(getContext()) != null) {
+                    if (GPS.getLastKnownLocation(getContext()) != null) {
                         setTestResult(fragmentDeviceCheckBinding.test3, R.string.ok, TestView.TestState.SUCCESS);
                     } else {
                         setTestResult(fragmentDeviceCheckBinding.test3, R.string.device_check_failed, TestView.TestState.ERROR);
@@ -492,7 +494,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
 
                                 @Override
                                 public void onError(@NonNull Throwable e) {
-                                    if (Utils.isExpiredToken(e.getMessage())) {
+                                    if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                         setTestResult(fragmentDeviceCheckBinding.test4, R.string.ok, TestView.TestState.SUCCESS);
                                         updateNextButton();
                                     } else {

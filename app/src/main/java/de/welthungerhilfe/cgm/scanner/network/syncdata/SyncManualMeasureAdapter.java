@@ -14,6 +14,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.SyncManualMeasureRespons
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.network.NetworkUtils;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
@@ -113,7 +114,7 @@ public class SyncManualMeasureAdapter {
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is inside getSyncPersons error " + e.getMessage());
                             LogFileUtils.logError(TAG, "Sync person failed " + e.getMessage());
-                            if (Utils.isExpiredToken(e.getMessage())) {
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
                         }

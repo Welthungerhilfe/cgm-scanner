@@ -11,6 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
 
+import de.welthungerhilfe.cgm.scanner.network.NetworkUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class WifiStateChangeReceiver extends BroadcastReceiver {
@@ -47,7 +48,7 @@ public class WifiStateChangeReceiver extends BroadcastReceiver {
         protected void onPostExecute(Boolean res) {
             super.onPostExecute(res);
             Context context = contextRef.get();
-            if (res && Utils.isWifiConnected(context)) {
+            if (res && NetworkUtils.isWifiConnected(context)) {
                 SyncingWorkManager.startSyncingWithWorkManager(context);
             }
             isActivate = false;
@@ -70,7 +71,7 @@ public class WifiStateChangeReceiver extends BroadcastReceiver {
             Log.i("wifistatechange", "this is inside catch " + e.getMessage());
 
             if (--recheckCounter > 0) {
-                if (Utils.isWifiConnected(context))
+                if (NetworkUtils.isWifiConnected(context))
                     isInternetWorking(context);
             }
         } catch (Exception e) {

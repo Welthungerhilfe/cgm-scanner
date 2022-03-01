@@ -41,6 +41,7 @@ import java.util.concurrent.Executors;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.network.NetworkUtils;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
@@ -164,7 +165,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
     }
 
     private void loadQueueFileLogs() {
-        if (!Utils.isUploadAllowed(this)) {
+        if (!NetworkUtils.isUploadAllowed(this)) {
             LogFileUtils.logInfo(TAG, "Skipped due to not available network");
             stopSelf();
             return;
@@ -274,7 +275,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
             }
 
             Utils.sleep(1000);
-            while (!Utils.isUploadAllowed(getApplicationContext())) {
+            while (!NetworkUtils.isUploadAllowed(getApplicationContext())) {
                 Utils.sleep(3000);
             }
 
@@ -362,7 +363,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                     @Override
                     public void onError(@NonNull Throwable e) {
                         LogFileUtils.logError(TAG, "File " + file.getPath() + " upload fail - " + e.getMessage());
-                        if (Utils.isExpiredToken(e.getMessage())) {
+                        if (NetworkUtils.isExpiredToken(e.getMessage())) {
                             AuthenticationHandler.restoreToken(getApplicationContext());
                             stopSelf();
                         } else {
