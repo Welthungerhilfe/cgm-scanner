@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -52,14 +53,13 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualDetailDialog;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
-import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
 public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasureAdapter.ViewHolder> {
     private BaseActivity context;
@@ -147,7 +147,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
 
         holder.txtDate.setText(DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE_AND_TIME, measure.getDate()));
-        holder.txtAuthor.setText(Utils.getNameFromEmail(measure.getCreatedBy()));
+        holder.txtAuthor.setText(DataFormat.getNameFromEmail(measure.getCreatedBy()));
 
         SessionManager sessionManager = new SessionManager(context);
         boolean stdtest = sessionManager.getStdTestQrCode() != null;
@@ -221,7 +221,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
                 if (result) {
                     measure.setDeleted(true);
                     measure.setDeletedBy(session.getUserEmail());
-                    measure.setTimestamp(Utils.getUniversalTimestamp());
+                    measure.setTimestamp(AppController.getInstance().getUniversalTimestamp());
 
                     removeMeasure(measure);
                 } else {
@@ -236,7 +236,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
         if (!config.isAllow_edit()) {
             notifyDataSetChanged();
             Snackbar.make(recyclerMeasure, R.string.permission_edit, Snackbar.LENGTH_LONG).show();
-        } else if (measure.getDate() < Utils.getUniversalTimestamp() - config.getTime_to_allow_editing() * 3600 * 1000) {
+        } else if (measure.getDate() < AppController.getInstance().getUniversalTimestamp() - config.getTime_to_allow_editing() * 3600 * 1000) {
             notifyDataSetChanged();
             Snackbar.make(recyclerMeasure, R.string.permission_expired, Snackbar.LENGTH_LONG).show();
         } else if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {

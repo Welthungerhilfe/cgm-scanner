@@ -44,12 +44,12 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.GrowthDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasuresDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 public class CreateDataActivity extends BaseActivity {
 
@@ -125,7 +125,7 @@ public class CreateDataActivity extends BaseActivity {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, PERMISSION_LOCATION);
         } else {
-            Utils.openLocationSettings(this, PERMISSION_LOCATION);
+            GPS.openLocationSettings(this, PERMISSION_LOCATION);
             LocationManager lm = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
             boolean isGPSEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -150,7 +150,7 @@ public class CreateDataActivity extends BaseActivity {
                     location = new Loc();
                     location.setLatitude(loc.getLatitude());
                     location.setLongitude(loc.getLongitude());
-                    location.setAddress(Utils.getAddress(this, location));
+                    location.setAddress(GPS.getAddress(this, location));
 
                     if (personalFragment != null) {
                         personalFragment.setLocation(location);

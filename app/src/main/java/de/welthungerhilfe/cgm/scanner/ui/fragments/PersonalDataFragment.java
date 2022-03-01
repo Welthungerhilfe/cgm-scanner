@@ -59,7 +59,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
@@ -67,8 +67,7 @@ import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.DateEditText;
-import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
 public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, DateEditText.DateInputListener, TextWatcher {
 
@@ -289,7 +288,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setGuardian(editGuardian.getText().toString());
                     person.setSex(sex);
                     person.setAgeEstimated(checkAge.isChecked());
-                    person.setTimestamp(Utils.getUniversalTimestamp());
+                    person.setTimestamp(AppController.getInstance().getUniversalTimestamp());
                     person.setCreatedBy(session.getUserEmail());
                     person.setSchema_version(CgmDatabase.version);
                     person.setDevice_updated_at_timestamp(System.currentTimeMillis());

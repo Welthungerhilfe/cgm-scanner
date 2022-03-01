@@ -14,11 +14,11 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.SyncManualMeasureRespons
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.network.NetworkUtils;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
-import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observer;
@@ -105,7 +105,7 @@ public class SyncManualMeasureAdapter {
                                 }
 
                             }
-                            person.setLast_sync_measurments(Utils.getUniversalTimestamp());
+                            person.setLast_sync_measurments(AppController.getInstance().getUniversalTimestamp());
                             savePerson(person);
                         }
 
@@ -113,7 +113,7 @@ public class SyncManualMeasureAdapter {
                         public void onError(@NonNull Throwable e) {
                             Log.i(TAG, "this is inside getSyncPersons error " + e.getMessage());
                             LogFileUtils.logError(TAG, "Sync person failed " + e.getMessage());
-                            if (Utils.isExpiredToken(e.getMessage())) {
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
                         }

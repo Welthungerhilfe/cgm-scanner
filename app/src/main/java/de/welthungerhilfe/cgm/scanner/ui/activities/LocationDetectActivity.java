@@ -54,8 +54,8 @@ import java.util.Locale;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityLocationDetectBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class LocationDetectActivity extends BaseActivity implements OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
     public static final String EXTRA_LOCATION = "extra_location";
@@ -166,7 +166,7 @@ public class LocationDetectActivity extends BaseActivity implements OnMapReadyCa
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_LOCATION);
         } else {
-            Utils.openLocationSettings(this, PERMISSION_LOCATION);
+            GPS.openLocationSettings(this, PERMISSION_LOCATION);
             googleMap.getUiSettings().setMyLocationButtonEnabled(false);
             googleMap.setMyLocationEnabled(true);
         }

@@ -30,7 +30,7 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 public class PersonListViewModel extends AndroidViewModel {
     private PersonRepository repository;

@@ -32,7 +32,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonFilter;
 
 public class PersonRepository {

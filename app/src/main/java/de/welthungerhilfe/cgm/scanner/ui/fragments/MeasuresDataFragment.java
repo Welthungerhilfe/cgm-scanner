@@ -47,7 +47,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerMeasureAdapter;
@@ -56,7 +56,6 @@ import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.ManualMeasureListener {
     private Context context;
@@ -200,8 +199,8 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setOedema(oedema);
         measure.setType(AppConstants.VAL_MEASURE_MANUAL);
         measure.setPersonId(person.getId());
-        measure.setTimestamp(Utils.getUniversalTimestamp());
-        measure.setDate(Utils.getUniversalTimestamp());
+        measure.setTimestamp(AppController.getInstance().getUniversalTimestamp());
+        measure.setDate(AppController.getInstance().getUniversalTimestamp());
         measure.setCreatedBy(session.getUserEmail());
         measure.setQrCode(qrCode);
         measure.setSchema_version(CgmDatabase.version);

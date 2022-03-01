@@ -43,8 +43,7 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAdapter.ViewHolder> {
     private BaseActivity context;
@@ -147,7 +146,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
                         protected Void doInBackground(Void... voids) {
                             person.setDeleted(true);
                             person.setDeletedBy(session.getUserEmail());
-                            person.setTimestamp(Utils.getUniversalTimestamp());
+                            person.setTimestamp(AppController.getInstance().getUniversalTimestamp());
 
                             return null;
                         }

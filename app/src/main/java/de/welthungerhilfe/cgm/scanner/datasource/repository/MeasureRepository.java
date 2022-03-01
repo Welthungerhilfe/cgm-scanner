@@ -26,7 +26,7 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 public class MeasureRepository {
     private static MeasureRepository instance;

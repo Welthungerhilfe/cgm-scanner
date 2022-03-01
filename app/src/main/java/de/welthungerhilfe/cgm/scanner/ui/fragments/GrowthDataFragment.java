@@ -61,8 +61,8 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.VerticalTextView;
-import de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.ZscoreUtils;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
 public class GrowthDataFragment extends Fragment implements IFillFormatter {
 
@@ -86,7 +86,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
     TextView first_dot_text, second_dot_text, third_dot_text;
     LinearLayout ll_dot_legend;
 
-    private CalculateZscoreUtils.ChartType chartType = CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE;
+    private ZscoreUtils.ChartType chartType = ZscoreUtils.ChartType.HEIGHT_FOR_AGE;
 
     private String qrCode;
 
@@ -141,7 +141,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
         String[] filters = getResources().getStringArray(R.array.filters);
         dropChart.setItems(filters);
         dropChart.setOnItemSelectedListener((MaterialSpinner.OnItemSelectedListener<String>) (view1, position, id, item) -> {
-            chartType = CalculateZscoreUtils.ChartType.values()[position];
+            chartType = ZscoreUtils.ChartType.values()[position];
             setData();
         });
 
@@ -199,7 +199,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
             return;
         }
         List<Measure> measures = null;
-        if (chartType == CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE) {
+        if (chartType == ZscoreUtils.ChartType.HEIGHT_FOR_AGE) {
             measures = MeasureRepository.getInstance(getContext()).getAllMeasuresByPersonId(person.getId());
         } else {
             measures = MeasureRepository.getInstance(getContext()).getManualMeasures(person.getId());
@@ -219,8 +219,8 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
 
         //get data
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
-        HashMap<Integer, CalculateZscoreUtils.ZScoreData> data = CalculateZscoreUtils.parseData(getContext(), person.getSex(), chartType);
-        CalculateZscoreUtils.ZScoreData zscoreData = CalculateZscoreUtils.getClosestData(data, lastMeasure.getHeight(), lastMeasure.getAge(), chartType);
+        HashMap<Integer, ZscoreUtils.ZScoreData> data = ZscoreUtils.parseData(getContext(), person.getSex(), chartType);
+        ZscoreUtils.ZScoreData zscoreData = ZscoreUtils.getClosestData(data, lastMeasure.getHeight(), lastMeasure.getAge(), chartType);
         convertData(data);
 
         //show data
@@ -232,7 +232,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
         mChart.animateX(0);
     }
 
-    private void convertData(HashMap<Integer, CalculateZscoreUtils.ZScoreData> data) {
+    private void convertData(HashMap<Integer, ZscoreUtils.ZScoreData> data) {
         SD3neg = new ArrayList<>();
         SD2neg = new ArrayList<>();
         SD0 = new ArrayList<>();
@@ -243,12 +243,12 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
             Collections.sort(sortedKeys);
             for (Integer key : sortedKeys) {
                 float x = key;
-                if (chartType == CalculateZscoreUtils.ChartType.WEIGHT_FOR_HEIGHT) {
+                if (chartType == ZscoreUtils.ChartType.WEIGHT_FOR_HEIGHT) {
                     x /= 1000.0f;
                 } else {
                     x *= 12.0f / 365.0f;
                 }
-                CalculateZscoreUtils.ZScoreData item = data.get(key);
+                ZscoreUtils.ZScoreData item = data.get(key);
                 if (item != null) {
                     SD3neg.add(new Entry(x, item.SD3neg));
                     SD2neg.add(new Entry(x, item.SD2neg));
@@ -386,7 +386,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
                     break;
                 case WEIGHT_FOR_HEIGHT:
                     DecimalFormat decimalFormat = new DecimalFormat("#.#");
-                    x = Utils.parseFloat(decimalFormat.format(measure.getHeight()));
+                    x = DataFormat.parseFloat(decimalFormat.format(measure.getHeight()));
                     y = (float) measure.getWeight();
                     break;
                 case MUAC_FOR_AGE:
@@ -405,7 +405,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
                 if (measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
                     dataSets.add(createDataSet(ValueType.TRIANGLE, entry, ZSCORE_COLOR_0));
                     entries.add(new Entry(x, y));
-                } else if (chartType == CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE && !measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
+                } else if (chartType == ZscoreUtils.ChartType.HEIGHT_FOR_AGE && !measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL)) {
                     dataSets.add(createDataSet(ValueType.CIRCLE, entry, BLUE_COLOR_DOT));
                     if(measure.getReceived_at() > 0 && measure.getNegative_height_error() < 0 && measure.getPositive_height_error() > 0) {
                         ArrayList<Entry> errorEntry = new ArrayList<>();
@@ -424,7 +424,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
                 LogFileUtils.logException(e);
             }
         }
-        if (chartType != CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE) {
+        if (chartType != ZscoreUtils.ChartType.HEIGHT_FOR_AGE) {
             if (entries.size() > 1) {
                 entries.sort((o1, o2) -> Float.compare(o1.getX(), o2.getX()));
             }
@@ -432,9 +432,9 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
         }
     }
 
-    private void showZScore(CalculateZscoreUtils.ZScoreData zscoreData, Measure lastMeasure) {
+    private void showZScore(ZscoreUtils.ZScoreData zscoreData, Measure lastMeasure) {
         if (zscoreData != null) {
-            double zScore = CalculateZscoreUtils.getZScore(zscoreData, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getMuac(), chartType);
+            double zScore = ZscoreUtils.getZScore(zscoreData, lastMeasure.getHeight(), lastMeasure.getWeight(), lastMeasure.getMuac(), chartType);
             txtZScore.setText(String.format(Locale.getDefault(), "( z-score : %.2f )", zScore));
             txtZScore.setVisibility(View.VISIBLE);
             showDiagnose(zScore);

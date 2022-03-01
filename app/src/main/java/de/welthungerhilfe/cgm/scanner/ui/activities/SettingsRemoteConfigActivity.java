@@ -27,7 +27,7 @@ import androidx.databinding.DataBindingUtil;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityTestRemoteconfigBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 public class SettingsRemoteConfigActivity extends BaseActivity {
 

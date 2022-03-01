@@ -13,8 +13,7 @@ import java.util.Date;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
-import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
 public class LogFileUtils {
     static File logFile;

@@ -15,7 +15,7 @@ import com.microsoft.identity.client.SilentAuthenticationCallback;
 import com.microsoft.identity.client.exception.MsalException;
 
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 public class AuthTokenRegisterWorker extends Worker {
 
