@@ -43,7 +43,6 @@ import java.util.List;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
-import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
 
 public class ARCoreCamera extends AbstractARCamera {
 

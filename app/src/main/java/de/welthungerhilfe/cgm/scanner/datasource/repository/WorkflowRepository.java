@@ -3,9 +3,8 @@ package de.welthungerhilfe.cgm.scanner.datasource.repository;
 import android.content.Context;
 
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
-import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Workflow;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 public class WorkflowRepository {
 

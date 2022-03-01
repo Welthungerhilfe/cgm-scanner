@@ -45,7 +45,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.RenderToTexture;
-import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
 
 public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 

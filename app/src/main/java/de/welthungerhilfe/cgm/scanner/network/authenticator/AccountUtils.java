@@ -23,7 +23,7 @@ import android.app.Activity;
 import android.content.Context;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 public class AccountUtils {
 

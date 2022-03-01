@@ -21,7 +21,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LoginActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 @RunWith(AndroidJUnit4.class)

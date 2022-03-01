@@ -14,7 +14,6 @@ import java.util.Date;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class LogFileUtils {
     static File logFile;

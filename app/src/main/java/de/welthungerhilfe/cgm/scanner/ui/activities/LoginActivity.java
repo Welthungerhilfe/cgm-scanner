@@ -49,7 +49,7 @@ import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.utils.LanguageHelper;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 
 public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback, CompoundButton.OnCheckedChangeListener {

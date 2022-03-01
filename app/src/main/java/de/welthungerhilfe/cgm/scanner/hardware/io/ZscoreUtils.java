@@ -1,4 +1,4 @@
-package de.welthungerhilfe.cgm.scanner.utils;
+package de.welthungerhilfe.cgm.scanner.hardware.io;
 
 import android.content.Context;
 
@@ -11,7 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 
-public class CalculateZscoreUtils {
+import de.welthungerhilfe.cgm.scanner.utils.Utils;
+
+public class ZscoreUtils {
 
     public static class ZScoreData {
         public float median;

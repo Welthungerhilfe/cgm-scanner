@@ -50,7 +50,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
-import de.welthungerhilfe.cgm.scanner.utils.ComputerVisionUtils;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class AREngineCamera extends AbstractARCamera {

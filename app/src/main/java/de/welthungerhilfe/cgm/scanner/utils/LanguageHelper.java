@@ -27,6 +27,8 @@ import android.os.LocaleList;
 
 import java.util.Locale;
 
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
+
 public class LanguageHelper {
 
     public static Context onAttach(Context context) {

@@ -30,7 +30,6 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
 
 public class FileLogRepository {
 

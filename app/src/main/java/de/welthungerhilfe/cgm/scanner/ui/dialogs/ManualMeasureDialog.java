@@ -46,7 +46,7 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
-import de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.ZscoreUtils;
 import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
 import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
@@ -72,9 +72,9 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
             return;
         }
 
-        boolean wfa = validZscore(CalculateZscoreUtils.ChartType.WEIGHT_FOR_AGE);
-        boolean hfa = validZscore(CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE);
-        boolean mfa = validZscore(CalculateZscoreUtils.ChartType.MUAC_FOR_AGE);
+        boolean wfa = validZscore(ZscoreUtils.ChartType.WEIGHT_FOR_AGE);
+        boolean hfa = validZscore(ZscoreUtils.ChartType.HEIGHT_FOR_AGE);
+        boolean mfa = validZscore(ZscoreUtils.ChartType.MUAC_FOR_AGE);
 
         if (wfa && hfa && mfa) {
             updateManualMeasurements();
@@ -316,12 +316,12 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         return mContext.getResources().getString(string);
     }
 
-    private boolean validZscore(CalculateZscoreUtils.ChartType chartType) {
+    private boolean validZscore(ZscoreUtils.ChartType chartType) {
         String height = dialogManualMeasureBinding.editManualHeight.getText().toString();
         String weight = dialogManualMeasureBinding.editManualWeight.getText().toString();
         String muac = dialogManualMeasureBinding.editManualMuac.getText().toString();
         long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
-        double zScore = CalculateZscoreUtils.getZScoreSlow(mContext,Utils.parseDouble(height),Utils.parseDouble(weight), Utils.parseDouble(muac),age,person.getSex(), chartType);
+        double zScore = ZscoreUtils.getZScoreSlow(mContext,Utils.parseDouble(height),Utils.parseDouble(weight), Utils.parseDouble(muac),age,person.getSex(), chartType);
         return Math.abs(zScore) < 3.0;
     }
 

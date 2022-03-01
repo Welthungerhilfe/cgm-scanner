@@ -30,7 +30,7 @@ import com.microsoft.appcenter.crashes.Crashes;
 import java.util.HashMap;
 
 import de.welthungerhilfe.cgm.scanner.utils.LanguageHelper;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 public class BaseActivity extends AppCompatActivity {
 

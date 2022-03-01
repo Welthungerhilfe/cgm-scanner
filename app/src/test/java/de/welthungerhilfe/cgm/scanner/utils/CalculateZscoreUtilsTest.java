@@ -14,6 +14,8 @@ import org.robolectric.annotation.Config;
 import static org.hamcrest.Matchers.closeTo;
 import static org.junit.Assert.assertThat;
 
+import de.welthungerhilfe.cgm.scanner.hardware.io.ZscoreUtils;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
 public class CalculateZscoreUtilsTest {
@@ -183,9 +185,9 @@ public class CalculateZscoreUtilsTest {
     }
 
     public double[] calculateAllZscore(Context context, double height, double weight, long age, String sex) {
-        zScore[0] = CalculateZscoreUtils.getZScoreSlow(context, height, weight, 0.0,age, sex, CalculateZscoreUtils.ChartType.WEIGHT_FOR_AGE);
-        zScore[1] = CalculateZscoreUtils.getZScoreSlow(context, height, weight,0.0, age, sex, CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE);
-        zScore[2] = CalculateZscoreUtils.getZScoreSlow(context, height, weight,0.0, age, sex, CalculateZscoreUtils.ChartType.WEIGHT_FOR_HEIGHT);
+        zScore[0] = ZscoreUtils.getZScoreSlow(context, height, weight, 0.0,age, sex, ZscoreUtils.ChartType.WEIGHT_FOR_AGE);
+        zScore[1] = ZscoreUtils.getZScoreSlow(context, height, weight,0.0, age, sex, ZscoreUtils.ChartType.HEIGHT_FOR_AGE);
+        zScore[2] = ZscoreUtils.getZScoreSlow(context, height, weight,0.0, age, sex, ZscoreUtils.ChartType.WEIGHT_FOR_HEIGHT);
         return zScore;
     }
 
