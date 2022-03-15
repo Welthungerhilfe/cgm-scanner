@@ -29,179 +29,58 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/activity_horizontal_margin"
                 android:orientation="vertical">
 
+                <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                    android:id="@+id/profile_result_switch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:titleText="@string/profile_result_title"
+                    app:titleTextColor="@color/colorPrimary"
+                    app:titleTextSize="20sp"
+                    app:toggleVisible="true"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:layout_marginLeft="@dimen/activity_vertical_margin"
+                    android:layout_marginRight="@dimen/activity_vertical_margin"
                     android:orientation="vertical">
 
-                    <LinearLayout
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                        android:id="@+id/profile_result_timestamp_scan"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                        android:orientation="horizontal">
+                        app:titleText="@string/profile_result_timestamp_scan"
+                        app:valueVisible="true"/>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/profile_result_title"
-                            android:textSize="20sp"
-                            android:textColor="@color/colorPrimary" />
-
-                        <androidx.appcompat.widget.SwitchCompat
-                            android:id="@+id/profile_result_switch"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                        android:id="@+id/profile_result_timestamp_start"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/activity_horizontal_margin"
-                        android:orientation="horizontal">
+                        app:titleText="@string/profile_result_timestamp_start"
+                        app:valueVisible="true"/>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/profile_result_timestamp_scan"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                        <TextView
-                            android:id="@+id/profile_result_timestamp_scan"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                        android:id="@+id/profile_result_timestamp_end"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/activity_horizontal_margin"
-                        android:orientation="horizontal">
+                        app:titleText="@string/profile_result_timestamp_end"
+                        app:valueVisible="true"/>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/profile_result_timestamp_start"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                        <TextView
-                            android:id="@+id/profile_result_timestamp_start"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                    </LinearLayout>
-
-
-                    <LinearLayout
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                        android:id="@+id/profile_result_timestamp_receive"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/activity_horizontal_margin"
-                        android:orientation="horizontal">
+                        app:titleText="@string/profile_result_timestamp_receive"
+                        app:valueVisible="true"/>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/profile_result_timestamp_end"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                        <TextView
-                            android:id="@+id/profile_result_timestamp_end"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                    </LinearLayout>
-
-
-                    <LinearLayout
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                        android:id="@+id/profile_result_timestamp_average"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/activity_horizontal_margin"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/profile_result_timestamp_receive"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                        <TextView
-                            android:id="@+id/profile_result_timestamp_receive"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                    </LinearLayout>
-
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/activity_horizontal_margin"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/profile_result_timestamp_average"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                        <TextView
-                            android:id="@+id/profile_result_timestamp_average"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                    </LinearLayout>
-
+                        app:titleText="@string/profile_result_timestamp_average"
+                        app:valueVisible="true"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -210,144 +89,53 @@
                     android:layout_marginTop="@dimen/activity_vertical_margin"
                     android:orientation="vertical">
 
-                    <LinearLayout
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                        android:id="@+id/profile_performance_switch"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/profile_performance_title"
-                            android:textSize="20sp"
-                            android:textColor="@color/colorPrimary" />
-
-                        <androidx.appcompat.widget.SwitchCompat
-                            android:id="@+id/profile_performance_switch"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
+                        app:titleText="@string/profile_performance_title"
+                        app:titleTextColor="@color/colorPrimary"
+                        app:titleTextSize="20sp"
+                        app:toggleVisible="true"/>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/activity_horizontal_margin"
-                        android:orientation="horizontal">
+                        android:layout_marginLeft="@dimen/activity_vertical_margin"
+                        android:layout_marginRight="@dimen/activity_vertical_margin"
+                        android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/profile_performance_color_time"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                        <TextView
+                        <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
                             android:id="@+id/profile_performance_color_time"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
+                            app:titleText="@string/profile_performance_color_time"
+                            app:valueVisible="true"/>
 
-                    </LinearLayout>
-
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/activity_horizontal_margin"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/profile_performance_depth_time"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                        <TextView
+                        <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
                             android:id="@+id/profile_performance_depth_time"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
+                            app:titleText="@string/profile_performance_depth_time"
+                            app:valueVisible="true"/>
 
-                    </LinearLayout>
-
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/activity_horizontal_margin"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/profile_performance_color_size"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                        <TextView
+                        <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
                             android:id="@+id/profile_performance_color_size"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
+                            app:titleText="@string/profile_performance_color_size"
+                            app:valueVisible="true"/>
 
-                    </LinearLayout>
-
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/activity_horizontal_margin"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/profile_performance_depth_size"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
-
-                        <TextView
+                        <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
                             android:id="@+id/profile_performance_depth_size"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorBlack" />
+                            app:titleText="@string/profile_performance_depth_size"
+                            app:valueVisible="true"/>
 
                     </LinearLayout>
 
                 </LinearLayout>
-
             </LinearLayout>
 
         </androidx.core.widget.NestedScrollView>

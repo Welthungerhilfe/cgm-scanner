@@ -65,6 +65,14 @@
                 android:layout_marginLeft="10dp"
                 android:gravity="center_vertical"
                 android:src="@drawable/right"/>
+
+            <TextView
+                android:id="@+id/text_value"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:gravity="center_vertical"
+                android:src="@drawable/right"/>
         </LinearLayout>
 
     </com.balysv.materialripple.MaterialRippleLayout>

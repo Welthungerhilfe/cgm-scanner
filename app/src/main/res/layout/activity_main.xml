@@ -10,9 +10,118 @@
         android:fitsSystemWindows="true"
         tools:openDrawer="start">
 
-        <include
+        <RelativeLayout
             android:id="@+id/content_main"
-            layout="@layout/content_main" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="de.welthungerhilfe.cgm.scanner.ui.activities.MainActivity">
+
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/appBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/AppTheme.AppBarOverlay">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize">
+
+                    <androidx.appcompat.widget.Toolbar
+                        android:id="@+id/toolbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="?attr/actionBarSize"
+                        android:background="?attr/colorPrimary"
+                        app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+                    <androidx.appcompat.widget.Toolbar
+                        android:id="@+id/searchbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="?attr/actionBarSize"
+                        android:background="@color/colorWhite"
+                        android:visibility="gone"
+                        android:animateLayoutChanges="true"
+                        android:contentInsetStart="0dp"
+                        android:contentInsetLeft="0dp"
+                        app:contentInsetStartWithNavigation="0dp"
+                        app:contentInsetStart="0dp"
+                        app:contentInsetLeft="0dp"
+                        app:theme="@style/SearchBar">
+
+                        <androidx.appcompat.widget.SearchView
+                            android:id="@+id/searchview"
+                            android:gravity="start"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:actionBarWidgetTheme="@style/SearchBar"
+                            app:iconifiedByDefault="false" />
+
+                    </androidx.appcompat.widget.Toolbar>
+
+                </FrameLayout>
+
+            </com.google.android.material.appbar.AppBarLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/colorWhite"
+                android:layout_below="@+id/appBar">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerData"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <LinearLayout
+                    android:id="@+id/lytNoPerson"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorGreyLight"
+                    android:visibility="visible"
+                    android:layout_centerInParent="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:tint="@color/colorGreyDark"
+                        android:src="@drawable/alert"
+                        tools:ignore="ContentDescription" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:text="@string/no_scans"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorGreyDark" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:text="@string/add_scans"
+                        android:textSize="18sp"
+                        android:textColor="@color/colorGreyDark" />
+
+                </LinearLayout>
+            </RelativeLayout>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabCreate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                app:fabSize="mini"
+                app:fabCustomSize="@dimen/design_fab_size_mini"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                app:srcCompat="@drawable/plus"
+                android:onClick="createData"/>
+
+        </RelativeLayout>
 
         <com.google.android.material.navigation.NavigationView
             android:id="@+id/navMenu"

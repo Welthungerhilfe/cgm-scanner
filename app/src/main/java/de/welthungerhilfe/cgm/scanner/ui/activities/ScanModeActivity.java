@@ -69,19 +69,20 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.hardware.Audio;
+import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
-import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
+import de.welthungerhilfe.cgm.scanner.hardware.io.FileSystem;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, ScanTypeView.ScanTypeListener {
 
@@ -161,7 +162,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     public void completeScan(View view) {
         measure.setCreatedBy(session.getUserEmail());
-        measure.setDate(Utils.getUniversalTimestamp());
+        measure.setDate(AppController.getInstance().getUniversalTimestamp());
         measure.setAge(age);
         measure.setType(AppConstants.VAL_MEASURE_AUTO);
         measure.setWeight(0.0f);
@@ -286,7 +287,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         executor = Executors.newFixedThreadPool(20);
 
-        mNowTime = Utils.getUniversalTimestamp();
+        mNowTime = AppController.getInstance().getUniversalTimestamp();
         mNowTimeString = String.valueOf(mNowTime);
 
         session = new SessionManager(this);
@@ -479,13 +480,13 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         mIsRecording = true;
         fab.setImageResource(R.drawable.stop);
-        Utils.playShooterSound(this, MediaActionSound.START_VIDEO_RECORDING);
+        Audio.playShooterSound(this, MediaActionSound.START_VIDEO_RECORDING);
     }
 
     private void pauseScan() {
         mIsRecording = false;
         fab.setImageResource(R.drawable.recorder);
-        Utils.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
+        Audio.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
     }
 
     private void openScan() {
@@ -498,7 +499,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     public void closeScan() {
         if (mIsRecording) {
-            Utils.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
+            Audio.playShooterSound(this, MediaActionSound.STOP_VIDEO_RECORDING);
         }
         mIsRecording = false;
         activityScanModeBinding.lytScanner.setVisibility(View.GONE);
@@ -533,7 +534,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
                     location.setLatitude(loc.getLatitude());
                     location.setLongitude(loc.getLongitude());
-                    location.setAddress(Utils.getAddress(this, location));
+                    location.setAddress(GPS.getAddress(this, location));
                     measure.setLocation(location);
                 }
             }
@@ -840,7 +841,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
             //set metadata
             log.setPath(artifactFile.getPath());
-            log.setHashValue(IO.getMD5(artifactFile.getPath()));
+            log.setHashValue(FileSystem.getMD5(artifactFile.getPath()));
             log.setFileSize(artifactFile.length());
             log.setUploadDate(0);
             log.setDeleted(false);
@@ -876,7 +877,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     break;
                 }
             }
-            Utils.sleep(5);
+            AppController.sleep(5);
         }
         LogFileUtils.logInfo(TAG, "Stop waiting on running threads");
     }

@@ -44,17 +44,15 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivitySettingsBinding;
-import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.database.BackupManager;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
-import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
 public class SettingsActivity extends BaseActivity {
 
@@ -111,14 +109,14 @@ public class SettingsActivity extends BaseActivity {
         boolean showQA = BuildConfig.DEBUG || devUser || devVersion;
         activitySettingsBinding.testQAlayout.setVisibility(showQA ? View.VISIBLE : View.GONE);
 
-        activitySettingsBinding.txtSettingUuid.setText(2, Utils.getAndroidID(getContentResolver()));
+        activitySettingsBinding.txtSettingUuid.setText(2, AppController.getInstance().getAndroidID());
         activitySettingsBinding.showDepthData.setChecked(LocalPersistency.getBoolean(this, KEY_SHOW_DEPTH));
         activitySettingsBinding.showDepthData.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_SHOW_DEPTH, value));
 
         activitySettingsBinding.uploadOverWifi.setChecked(LocalPersistency.getBoolean(this, KEY_UPLOAD_WIFI));
         activitySettingsBinding.uploadOverWifi.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_UPLOAD_WIFI, value));
 
-        activitySettingsBinding.txtSettingVersion.setText(2, Utils.getAppVersion(this));
+        activitySettingsBinding.txtSettingVersion.setText(2, AppController.getInstance().getAppVersion());
         activitySettingsBinding.txtSettingAccount.setText(1, session.getUserEmail());
         activitySettingsBinding.txtSettingAzureAccount.setText(1, SyncingWorkManager.getAPI());
 

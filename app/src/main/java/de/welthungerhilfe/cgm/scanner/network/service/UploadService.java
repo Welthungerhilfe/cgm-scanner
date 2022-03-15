@@ -39,8 +39,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.network.NetworkUtils;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
@@ -48,9 +50,8 @@ import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.SettingsPerformanceActivity;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observer;
@@ -164,7 +165,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
     }
 
     private void loadQueueFileLogs() {
-        if (!Utils.isUploadAllowed(this)) {
+        if (!NetworkUtils.isUploadAllowed(this)) {
             LogFileUtils.logInfo(TAG, "Skipped due to not available network");
             stopSelf();
             return;
@@ -273,9 +274,9 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                     LogFileUtils.logError(TAG, "Data type not supported");
             }
 
-            Utils.sleep(1000);
-            while (!Utils.isUploadAllowed(getApplicationContext())) {
-                Utils.sleep(3000);
+            AppController.sleep(1000);
+            while (!NetworkUtils.isUploadAllowed(getApplicationContext())) {
+                AppController.sleep(3000);
             }
 
             uploadFile(log, mime);
@@ -315,7 +316,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
             body = MultipartBody.Part.createFormData("file", file.getName(), RequestBody.create(
                     MediaType.parse(mime), IOUtils.toByteArray(inputStream)));
             inputStream.close();
-            log.setCreateDate(Utils.getUniversalTimestamp());
+            log.setCreateDate(AppController.getInstance().getUniversalTimestamp());
         } catch (FileNotFoundException e) {
             LogFileUtils.logException(e);
 
@@ -345,7 +346,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                     public void onNext(@NonNull String id) {
                         LogFileUtils.logInfo(TAG, "File " + file.getPath() + " successfully uploaded");
 
-                        log.setUploadDate(Utils.getUniversalTimestamp());
+                        log.setUploadDate(AppController.getInstance().getUniversalTimestamp());
                         log.setServerId(id);
 
                         if (file.delete()) {
@@ -362,7 +363,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                     @Override
                     public void onError(@NonNull Throwable e) {
                         LogFileUtils.logError(TAG, "File " + file.getPath() + " upload fail - " + e.getMessage());
-                        if (Utils.isExpiredToken(e.getMessage())) {
+                        if (NetworkUtils.isExpiredToken(e.getMessage())) {
                             AuthenticationHandler.restoreToken(getApplicationContext());
                             stopSelf();
                         } else {

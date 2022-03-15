@@ -68,8 +68,8 @@
                         android:fontFamily="sans-serif-medium"
                         android:paddingTop="15dp"
                         android:paddingBottom="15dp"
-                        android:buttonTint="@color/radio_text_selector"
-                        android:textColor="@color/radio_text_selector"
+                        android:buttonTint="@color/colorPrimary"
+                        android:textColor="@color/colorPrimary"
                         android:textSize="18sp" />
 
                     <RadioButton
@@ -80,8 +80,8 @@
                         android:fontFamily="sans-serif-medium"
                         android:paddingTop="15dp"
                         android:paddingBottom="15dp"
-                        android:buttonTint="@color/radio_text_selector"
-                        android:textColor="@color/radio_text_selector"
+                        android:buttonTint="@color/colorPrimary"
+                        android:textColor="@color/colorPrimary"
                         android:textSize="18sp" />
 
                     <RadioButton
@@ -92,8 +92,8 @@
                         android:fontFamily="sans-serif-medium"
                         android:paddingTop="15dp"
                         android:paddingBottom="15dp"
-                        android:buttonTint="@color/radio_text_selector"
-                        android:textColor="@color/radio_text_selector"
+                        android:buttonTint="@color/colorPrimary"
+                        android:textColor="@color/colorPrimary"
                         android:textSize="18sp" />
 
                     <RadioButton
@@ -104,8 +104,8 @@
                         android:fontFamily="sans-serif-medium"
                         android:paddingTop="15dp"
                         android:paddingBottom="15dp"
-                        android:buttonTint="@color/radio_text_selector"
-                        android:textColor="@color/radio_text_selector"
+                        android:buttonTint="@color/colorPrimary"
+                        android:textColor="@color/colorPrimary"
                         android:textSize="18sp" />
 
                     <RadioButton
@@ -117,8 +117,8 @@
                         android:paddingTop="15dp"
                         android:paddingBottom="15dp"
                         android:visibility="gone"
-                        android:buttonTint="@color/radio_text_selector"
-                        android:textColor="@color/radio_text_selector"
+                        android:buttonTint="@color/colorPrimary"
+                        android:textColor="@color/colorPrimary"
                         android:textSize="18sp" />
                 </RadioGroup>
 

@@ -1,6 +1,4 @@
 <resources>
-
-    <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -15,14 +13,7 @@
         <item name="android:typeface">serif</item>
     </style>
 
-    <!-- Activity with no Title -->
-
-    <!-- Dark Buttons -->
-
-    <!-- Light EditTexts -->
-
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <style name="SearchBar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">

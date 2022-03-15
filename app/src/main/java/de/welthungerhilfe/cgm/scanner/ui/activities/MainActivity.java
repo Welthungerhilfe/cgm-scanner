@@ -27,6 +27,8 @@ import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -62,10 +64,10 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityMainBinding;
-import de.welthungerhilfe.cgm.scanner.databinding.ContentMainBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
+import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.network.service.DeviceService;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.service.WifiStateChangereceiverHelperService;
@@ -77,10 +79,9 @@ import de.welthungerhilfe.cgm.scanner.ui.fragments.DeviceCheckFragment;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 
 import static de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity.KEY_LAST_DEVICE_CHECK_ISSUES;
@@ -117,8 +118,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     private ActivityMainBinding activityMainBinding;
 
-    private ContentMainBinding contentMainBinding;
-
     FirebaseAnalytics firebaseAnalytics;
 
     @Override
@@ -128,11 +127,11 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         session = new SessionManager(MainActivity.this);
         LogFileUtils.startSession(MainActivity.this, session);
-        LogFileUtils.logInfo(TAG, "CGM-Scanner " + Utils.getAppVersion(this) + " started");
+        LogFileUtils.logInfo(TAG, "CGM-Scanner " + AppController.getInstance().getAppVersion() + " started");
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         if (session.getStdTestQrCode() != null) {
-            if (Utils.isValidateStdTestQrCode(session.getStdTestQrCode()) == QRScanActivity.STDTEST.VALID) {
+            if (QRScanActivity.isValidStdTestQrCode(session.getStdTestQrCode()) == QRScanActivity.STDTEST.VALID) {
                 session.setStdTestQrCode(null);
                 showStdTestButtonInMenu(false);
             }
@@ -141,9 +140,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             Log.e("PersonRecycler", "Observer called");
 
             if (lytManager.getItemCount() == 0 && list != null && list.size() == 0) {
-                activityMainBinding.contentMain.lytNoPerson.setVisibility(View.VISIBLE);
+                activityMainBinding.lytNoPerson.setVisibility(View.VISIBLE);
             } else {
-                activityMainBinding.contentMain.lytNoPerson.setVisibility(View.GONE);
+                activityMainBinding.lytNoPerson.setVisibility(View.GONE);
                 adapterData.clear();
                 adapterData.addPersons(list);
             }
@@ -155,14 +154,14 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         setupSortDialog();
 
         lytManager = new LinearLayoutManager(MainActivity.this);
-        activityMainBinding.contentMain.recyclerData.setLayoutManager(lytManager);
-        activityMainBinding.contentMain.recyclerData.setItemAnimator(new DefaultItemAnimator());
-        activityMainBinding.contentMain.recyclerData.setHasFixedSize(true);
+        activityMainBinding.recyclerData.setLayoutManager(lytManager);
+        activityMainBinding.recyclerData.setItemAnimator(new DefaultItemAnimator());
+        activityMainBinding.recyclerData.setHasFixedSize(true);
 
 
-        adapterData = new RecyclerPersonAdapter(this, activityMainBinding.contentMain.recyclerData, viewModel);
+        adapterData = new RecyclerPersonAdapter(this, activityMainBinding.recyclerData, viewModel);
         adapterData.setPersonDetailListener(this);
-        activityMainBinding.contentMain.recyclerData.setAdapter(adapterData);
+        activityMainBinding.recyclerData.setAdapter(adapterData);
 
         startService(new Intent(this, DeviceService.class));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -201,7 +200,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                     break;
                 case R.id.menuLogout:
-                    logout();
+                    showLogoutAlertDialog();
                     break;
                 case R.id.menuQuitStdTest:
                     showConfirmDialog(R.string.std_test_deactivate, STD_TEST_DEACTIVE);
@@ -229,8 +228,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     }
 
     private void setupActionBar() {
-        activityMainBinding.contentMain.searchbar.setVisibility(View.GONE);
-        setSupportActionBar(activityMainBinding.contentMain.toolbar);
+        activityMainBinding.searchbar.setVisibility(View.GONE);
+        setSupportActionBar(activityMainBinding.toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -239,7 +238,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             invalidateOptionsMenu();
         }
 
-        mDrawerToggle = new ActionBarDrawerToggle(this, activityMainBinding.drawer, activityMainBinding.contentMain.toolbar, R.string.drawer_open, R.string.drawer_close) {
+        mDrawerToggle = new ActionBarDrawerToggle(this, activityMainBinding.drawer, activityMainBinding.toolbar, R.string.drawer_open, R.string.drawer_close) {
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
             }
@@ -253,14 +252,14 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     }
 
     private void openSearchBar() {
-        activityMainBinding.contentMain.searchbar.setVisibility(View.VISIBLE);
-        setSupportActionBar(activityMainBinding.contentMain.searchbar);
+        activityMainBinding.searchbar.setVisibility(View.VISIBLE);
+        setSupportActionBar(activityMainBinding.searchbar);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
         invalidateOptionsMenu();
 
-        activityMainBinding.contentMain.searchview.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        activityMainBinding.searchview.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
@@ -274,14 +273,14 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         });
 
-        ImageView closeButton = activityMainBinding.contentMain.searchview.findViewById(R.id.search_close_btn);
+        ImageView closeButton = activityMainBinding.searchview.findViewById(R.id.search_close_btn);
         closeButton.setOnClickListener(v -> {
-            activityMainBinding.contentMain.searchview.setQuery("", false);
+            activityMainBinding.searchview.setQuery("", false);
 
             viewModel.clearFilterOwn();
         });
 
-        ImageView magImage = activityMainBinding.contentMain.searchview.findViewById(R.id.search_mag_icon);
+        ImageView magImage = activityMainBinding.searchview.findViewById(R.id.search_mag_icon);
         magImage.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
     }
 
@@ -318,7 +317,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         });
         sortDialog.findViewById(R.id.sortLocation).setOnClickListener(v -> {
             adapterData.clear();
-            Loc loc = Utils.getLastKnownLocation(getBaseContext());
+            Loc loc = GPS.getLastKnownLocation(getBaseContext());
             if (loc != null) {
                 viewModel.setLocation(loc);
                 viewModel.setSortType(AppConstants.SORT_LOCATION);
@@ -426,7 +425,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
 
-        if (activityMainBinding.contentMain.searchbar.getVisibility() == View.VISIBLE) {
+        if (activityMainBinding.searchbar.getVisibility() == View.VISIBLE) {
             menuInflater.inflate(R.menu.menu_search, menu);
         } else {
             menuInflater.inflate(R.menu.menu_tool, menu);
@@ -454,7 +453,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 openSort();
                 break;
             case android.R.id.home:
-                if (activityMainBinding.contentMain.searchbar.getVisibility() == View.VISIBLE) {
+                if (activityMainBinding.searchbar.getVisibility() == View.VISIBLE) {
                     setupActionBar();
                 } else {
                     finish();
@@ -536,10 +535,10 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     private void checkIfStdTestActive() {
         if (session.getStdTestQrCode() != null) {
-            activityMainBinding.contentMain.toolbar.setBackgroundResource(R.color.colorPink);
+            activityMainBinding.toolbar.setBackgroundResource(R.color.colorPink);
             showStdTestButtonInMenu(true);
         } else {
-            activityMainBinding.contentMain.toolbar.setBackgroundResource(R.color.colorPrimary);
+            activityMainBinding.toolbar.setBackgroundResource(R.color.colorPrimary);
             showStdTestButtonInMenu(false);
         }
     }
@@ -562,4 +561,19 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         }
     }
 
+
+    public void showLogoutAlertDialog() {
+        new AlertDialog.Builder(this)
+                .setMessage(R.string.logout_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        logout();
+                    }
+                }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        }).show();
+    }
 }

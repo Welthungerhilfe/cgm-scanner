@@ -30,7 +30,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -39,14 +38,13 @@ import androidx.databinding.DataBindingUtil;
 import java.io.File;
 import java.util.ArrayList;
 
-
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.DialogContactSupportBinding;
+import de.welthungerhilfe.cgm.scanner.hardware.Audio;
+import de.welthungerhilfe.cgm.scanner.hardware.io.FileSystem;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
-import de.welthungerhilfe.cgm.scanner.hardware.io.IO;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
 
 public class ContactSupportDialog extends Dialog implements View.OnClickListener {
 
@@ -81,39 +79,20 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         }
 
         if (!recording) {
-            Utils.playShooterSound(context, MediaActionSound.START_VIDEO_RECORDING);
+            Audio.playShooterSound(context, MediaActionSound.START_VIDEO_RECORDING);
             dialogContactSupportBinding.recordAudio.setImageDrawable(context.getDrawable(R.drawable.stop));
             recording = true;
 
             audioFile = new File(AppController.getInstance().getPublicAppDirectory(context), "voice_record.wav");
-            audioEncoder = new MediaRecorder();
-            audioEncoder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            audioEncoder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
-            audioEncoder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-            audioEncoder.setAudioEncodingBitRate(128000);
-            audioEncoder.setAudioSamplingRate(44100);
-            audioEncoder.setOutputFile(audioFile.getAbsolutePath());
-            try {
-                audioEncoder.prepare();
-                audioEncoder.start();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            audioEncoder = Audio.startRecording(audioFile);
         } else {
-            try {
-                audioEncoder.stop();
-                audioEncoder.release();
-                audioEncoder = null;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            Utils.playShooterSound(context, MediaActionSound.STOP_VIDEO_RECORDING);
+            Audio.stopRecording(audioEncoder);
+            Audio.playShooterSound(context, MediaActionSound.STOP_VIDEO_RECORDING);
             dialogContactSupportBinding.recordAudio.setImageDrawable(context.getDrawable(R.drawable.ic_record_audio));
+            audioEncoder = null;
             recording = false;
         }
     }
-
 
     void onConfirm() {
         if (recording) {
@@ -126,7 +105,7 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         } else {
             type = " - " + type;
         }
-        String subject = "CGM-Scanner version " + Utils.getAppVersion(context) + type;
+        String subject = "CGM-Scanner version " + AppController.getInstance().getAppVersion() + type;
         String message = dialogContactSupportBinding.inputMessage.getText().toString();
         if (footer != null) {
             message += "\n\n" + footer;
@@ -194,7 +173,7 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
             paths[i] = files[i].getAbsolutePath();
         }
         zip = new File(AppController.getInstance().getPublicAppDirectory(context), "report.zip");
-        IO.zip(paths, zip.getAbsolutePath());
+        FileSystem.zip(paths, zip.getAbsolutePath());
         return Uri.fromFile(zip);
     }
 
@@ -215,7 +194,7 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         }
 
         File screenshot = new File(AppController.getInstance().getPublicAppDirectory(activity), "screenshot.png");
-        IO.takeScreenshot(activity, screenshot);
+        FileSystem.takeScreenshot(activity, screenshot);
         ContactSupportDialog contactSupportDialog = new ContactSupportDialog(activity);
         contactSupportDialog.attachScreenshot(screenshot);
         contactSupportDialog.setFooter(footer);

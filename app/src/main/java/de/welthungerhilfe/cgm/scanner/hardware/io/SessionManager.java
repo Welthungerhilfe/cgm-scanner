@@ -16,24 +16,21 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package de.welthungerhilfe.cgm.scanner.utils;
+package de.welthungerhilfe.cgm.scanner.hardware.io;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
 public class SessionManager {
     private final String PREF_KEY_USER = "pref_key_user";
@@ -137,8 +134,8 @@ public class SessionManager {
 
     public Loc getLocation() {
         Loc location = new Loc();
-        location.setLatitude(Utils.parseDouble(pref.getString(KEY_USER_LOCATION_LATITUDE, "0")));
-        location.setLongitude(Utils.parseDouble(pref.getString(KEY_USER_LOCATION_LONGITUDE, "0")));
+        location.setLatitude(DataFormat.parseDouble(pref.getString(KEY_USER_LOCATION_LATITUDE, "0")));
+        location.setLongitude(DataFormat.parseDouble(pref.getString(KEY_USER_LOCATION_LONGITUDE, "0")));
         location.setAddress(pref.getString(KEY_USER_LOCATION_ADDRESS, ""));
 
         return location;

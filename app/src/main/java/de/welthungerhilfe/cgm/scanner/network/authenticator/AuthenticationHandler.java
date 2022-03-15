@@ -47,9 +47,8 @@ import java.util.concurrent.TimeUnit;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
-import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
+import de.welthungerhilfe.cgm.scanner.network.NetworkUtils;
 
 public class AuthenticationHandler {
 
@@ -156,7 +155,7 @@ public class AuthenticationHandler {
     }
 
     private void doSignInAction(Runnable onFail) {
-        if (!Utils.isNetworkAvailable(context)) {
+        if (!NetworkUtils.isNetworkAvailable(context)) {
             Toast.makeText(context, R.string.error_network, Toast.LENGTH_LONG).show();
             onFail.run();
             return;

@@ -38,8 +38,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
-import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
 public class RecyclerUploadAdapter extends RecyclerView.Adapter<RecyclerUploadAdapter.ViewHolder> {
     private Context context;
@@ -85,7 +84,7 @@ public class RecyclerUploadAdapter extends RecyclerView.Adapter<RecyclerUploadAd
         artifactRepository.getMeasureUploadProgress(measureId).observeForever(statusObserver);
 
         holder.txtDate.setText(DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE_AND_TIME, measure.getDate()));
-        holder.txtAuthor.setText(Utils.getNameFromEmail(measure.getCreatedBy()));
+        holder.txtAuthor.setText(DataFormat.getNameFromEmail(measure.getCreatedBy()));
         holder.txtQr.setText(measure.getQrCode());
     }
 

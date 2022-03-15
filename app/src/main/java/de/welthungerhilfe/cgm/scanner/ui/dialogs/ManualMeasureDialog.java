@@ -46,9 +46,8 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
-import de.welthungerhilfe.cgm.scanner.utils.CalculateZscoreUtils;
-import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.ZscoreUtils;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
 public class ManualMeasureDialog extends Dialog implements View.OnClickListener {
 
@@ -72,9 +71,9 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
             return;
         }
 
-        boolean wfa = validZscore(CalculateZscoreUtils.ChartType.WEIGHT_FOR_AGE);
-        boolean hfa = validZscore(CalculateZscoreUtils.ChartType.HEIGHT_FOR_AGE);
-        boolean mfa = validZscore(CalculateZscoreUtils.ChartType.MUAC_FOR_AGE);
+        boolean wfa = validZscore(ZscoreUtils.ChartType.WEIGHT_FOR_AGE);
+        boolean hfa = validZscore(ZscoreUtils.ChartType.HEIGHT_FOR_AGE);
+        boolean mfa = validZscore(ZscoreUtils.ChartType.MUAC_FOR_AGE);
 
         if (wfa && hfa && mfa) {
             updateManualMeasurements();
@@ -118,9 +117,9 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                     oedema = true;
                     measureListener.onManualMeasure(
                             measure != null ? measure.getId() : null,
-                            Utils.parseDouble(dialogManualMeasureBinding.editManualHeight.getText().toString()),
-                            Utils.parseDouble(dialogManualMeasureBinding.editManualWeight.getText().toString()),
-                            Utils.parseDouble(dialogManualMeasureBinding.editManualMuac.getText().toString()),
+                            DataFormat.parseDouble(dialogManualMeasureBinding.editManualHeight.getText().toString()),
+                            DataFormat.parseDouble(dialogManualMeasureBinding.editManualWeight.getText().toString()),
+                            DataFormat.parseDouble(dialogManualMeasureBinding.editManualMuac.getText().toString()),
                             0f,
                             location,
                             oedema,
@@ -134,9 +133,9 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
                 oedema = false;
                 measureListener.onManualMeasure(
                         measure != null ? measure.getId() : null,
-                        Utils.parseDouble(dialogManualMeasureBinding.editManualHeight.getText().toString()),
-                        Utils.parseDouble(dialogManualMeasureBinding.editManualWeight.getText().toString()),
-                        Utils.parseDouble(dialogManualMeasureBinding.editManualMuac.getText().toString()),
+                        DataFormat.parseDouble(dialogManualMeasureBinding.editManualHeight.getText().toString()),
+                        DataFormat.parseDouble(dialogManualMeasureBinding.editManualWeight.getText().toString()),
+                        DataFormat.parseDouble(dialogManualMeasureBinding.editManualMuac.getText().toString()),
                         0f,
                         location,
                         oedema,
@@ -264,13 +263,13 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         if (height.isEmpty()) {
             dialogManualMeasureBinding.editManualHeight.setError(getString(R.string.tooltip_cm));
             valid = false;
-        } else if (Utils.checkDoubleDecimals(height) != 1) {
+        } else if (DataFormat.checkDoubleDecimals(height) != 1) {
             dialogManualMeasureBinding.editManualHeight.setError(getString(R.string.tooltip_decimal));
             valid = false;
-        } else if (Utils.parseDouble(height) <= 45) {
+        } else if (DataFormat.parseDouble(height) <= 45) {
             dialogManualMeasureBinding.editManualHeight.setError(getString(R.string.tooltipe_height_min));
             valid = false;
-        } else if (Utils.parseDouble(height) >= 130) {
+        } else if (DataFormat.parseDouble(height) >= 130) {
             dialogManualMeasureBinding.editManualHeight.setError(getString(R.string.tooltipe_height_max));
             valid = false;
         } else {
@@ -280,13 +279,13 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         if (weight.isEmpty()) {
             dialogManualMeasureBinding.editManualWeight.setError(getString(R.string.tooltip_kg));
             valid = false;
-        } else if (Utils.checkDoubleDecimals(weight) != 3) {
+        } else if (DataFormat.checkDoubleDecimals(weight) != 3) {
             dialogManualMeasureBinding.editManualWeight.setError(getString(R.string.tooltip_kg_precision));
             valid = false;
-        } else if (Utils.parseDouble(weight) < 2) {
+        } else if (DataFormat.parseDouble(weight) < 2) {
             dialogManualMeasureBinding.editManualWeight.setError(getString(R.string.tooltipe_weight_min));
             valid = false;
-        } else if (Utils.parseDouble(weight) > 30) {
+        } else if (DataFormat.parseDouble(weight) > 30) {
             dialogManualMeasureBinding.editManualWeight.setError(getString(R.string.tooltipe_weight_max));
             valid = false;
         } else {
@@ -296,13 +295,13 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         if (muac.isEmpty()) {
             dialogManualMeasureBinding.editManualMuac.setError(getString(R.string.tooltip_cm));
             valid = false;
-        } else if (Utils.checkDoubleDecimals(muac) != 1) {
+        } else if (DataFormat.checkDoubleDecimals(muac) != 1) {
             dialogManualMeasureBinding.editManualMuac.setError(getString(R.string.tooltip_decimal));
             valid = false;
-        } else if (Utils.parseDouble(muac) < 7) {
+        } else if (DataFormat.parseDouble(muac) < 7) {
             dialogManualMeasureBinding.editManualMuac.setError(getString(R.string.tooltipe_muac_min));
             valid = false;
-        } else if (Utils.parseDouble(muac) > 22) {
+        } else if (DataFormat.parseDouble(muac) > 22) {
             dialogManualMeasureBinding.editManualMuac.setError(getString(R.string.tooltipe_muac_max));
             valid = false;
         } else {
@@ -316,12 +315,12 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         return mContext.getResources().getString(string);
     }
 
-    private boolean validZscore(CalculateZscoreUtils.ChartType chartType) {
+    private boolean validZscore(ZscoreUtils.ChartType chartType) {
         String height = dialogManualMeasureBinding.editManualHeight.getText().toString();
         String weight = dialogManualMeasureBinding.editManualWeight.getText().toString();
         String muac = dialogManualMeasureBinding.editManualMuac.getText().toString();
         long age = (System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24;
-        double zScore = CalculateZscoreUtils.getZScoreSlow(mContext,Utils.parseDouble(height),Utils.parseDouble(weight), Utils.parseDouble(muac),age,person.getSex(), chartType);
+        double zScore = ZscoreUtils.getZScoreSlow(mContext,DataFormat.parseDouble(height),DataFormat.parseDouble(weight), DataFormat.parseDouble(muac),age,person.getSex(), chartType);
         return Math.abs(zScore) < 3.0;
     }
 

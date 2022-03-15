@@ -78,6 +78,7 @@
     <string name="add_scans">To start scanning, tap [+] button</string>
     <string name="title_scans">Scans-Scheduled</string>
     <string name="data_not_synced">No permission to sync the data with the backend</string>
+    <string name="logout_alert">Are you sure want to log out?</string>
 
     <!-- Filtering and sorting !-->
     <string name="filter">Filter</string>
@@ -152,6 +153,7 @@
     <string name="birthday_tooltip">birthday</string>
     <string name="guardian_tooltip">guardian</string>
     <string name="title_image_view">Image View</string>
+    <string name="age_warning">Entered child age is not between 6 months and 5 years, Are you okay with it?</string>
 
     <!-- Measures listing !-->
     <string name="tab_personal">PERSONAL</string>
@@ -198,7 +200,7 @@
     <string name="tooltipe_height_max">height should be less than 130cm</string>
     <string name="tooltipe_weight_min">weight should be more than 2kg</string>
     <string name="tooltipe_weight_max">weight should be less than 30kg</string>
-    <string name="tooltipe_muac_min">MUAC should be more than 9cm</string>
+    <string name="tooltipe_muac_min">MUAC should be more than 7cm</string>
     <string name="tooltipe_muac_max">MUAC should be less than 22cm</string>
     <string name="tooltip_kg">value in kilograms</string>
     <string name="tooltip_decimal">enter exact one digit after the decimal point</string>
@@ -334,5 +336,6 @@
     <string name="result_for">result for</string>
     <string name="scan_is_uploading">Scan is uploading</string>
     <string name="wifi_state_change_watcher">Process for checking of the WiFi status is running</string>
+
 
 </resources>

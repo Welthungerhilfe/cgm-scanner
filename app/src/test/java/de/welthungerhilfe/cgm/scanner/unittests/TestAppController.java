@@ -1,4 +1,4 @@
-package de.welthungerhilfe.cgm.scanner.utils;
+package de.welthungerhilfe.cgm.scanner.unittests;
 
 import org.junit.Test;
 
@@ -8,12 +8,14 @@ import java.util.ArrayList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
+import de.welthungerhilfe.cgm.scanner.AppController;
+
 
 public class TestAppController {
     @Test
     public void getPersonId() {
         //String validId = AppController.getInstance().getPersonId();
-        String valid =  String.format("%s_person_%s_%s", "AndroidUUID", Utils.getUniversalTimestamp(), Utils.getSaltString(16));
+        String valid =  String.format("%s_person_%s_%s", "AndroidUUID", AppController.getUniversalTimestamp(), AppController.getSaltString(16));
         String invalidId = "9e58cfb935e72628_Mandloi_1545035711986_cyd2vEf3TUTPBzyq";
 
         String[] array = valid.split("_");
@@ -31,7 +33,7 @@ public class TestAppController {
 
     @Test
     public void getMeasureId() {
-        String valid = String.format("%s_measure_%s_%s", "AndroidUUID", Utils.getUniversalTimestamp(), Utils.getSaltString(16));
+        String valid = String.format("%s_measure_%s_%s", "AndroidUUID", AppController.getUniversalTimestamp(), AppController.getSaltString(16));
         String invalidId = "9e58cfb935e72628_measure1_1545035746888_CetMsJLZJvUsTboi";
 
         String[] array = valid.split("_");
@@ -49,7 +51,7 @@ public class TestAppController {
 
     @Test
     public void getArtifactId() {
-        String valid = String.format("%s_artifact-%s_%s_%s", "AndroidUUID", "pcd", Utils.getUniversalTimestamp(), Utils.getSaltString(16));
+        String valid = String.format("%s_artifact-%s_%s_%s", "AndroidUUID", "pcd", AppController.getUniversalTimestamp(), AppController.getSaltString(16));
         String invalidId = "9e58cfb935e72628_artifact-pcd2_1550288920148_eKtxZ4ZRBdXXIbQL";
 
         String[] array = valid.split("_");

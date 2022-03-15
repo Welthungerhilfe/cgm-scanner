@@ -19,12 +19,14 @@
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DialogFragment;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -48,6 +50,9 @@ import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
@@ -59,7 +64,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
-import de.welthungerhilfe.cgm.scanner.utils.SessionManager;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
@@ -67,8 +72,7 @@ import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
 import de.welthungerhilfe.cgm.scanner.ui.views.DateEditText;
-import de.welthungerhilfe.cgm.scanner.utils.DataFormat;
-import de.welthungerhilfe.cgm.scanner.utils.Utils;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
 public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, DateEditText.DateInputListener, TextWatcher {
 
@@ -93,6 +97,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     ViewModelProvider.Factory factory;
     FirebaseAnalytics firebaseAnalytics;
+
+    boolean ageAlertShown = false;
 
     public static PersonalDataFragment getInstance(String qrCode) {
         PersonalDataFragment fragment = new PersonalDataFragment();
@@ -162,7 +168,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 String id = person.getId();
                 String qrCode = person.getQrcode();
                 BaseActivity activity = (BaseActivity) getActivity();
-                new ContextMenuDialog(context, new ContextMenuDialog.Item[] {
+                new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
                         new ContextMenuDialog.Item(R.string.contact_support, R.drawable.ic_contact_support),
                 }, which -> {
                     ContactSupportDialog.show(activity, "data " + qrCode, "personID:" + id);
@@ -174,7 +180,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     public void initUI() {
         if (person == null) {
-            firebaseAnalytics.logEvent(FirebaseService.CREATE_PERSON_START,null);
+            firebaseAnalytics.logEvent(FirebaseService.CREATE_PERSON_START, null);
             setLocation(((CreateDataActivity) getActivity()).location);
             return;
         } else {
@@ -267,8 +273,17 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 break;
             case R.id.btnNext:
                 if (validate()) {
-                    long birthday = DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, editBirth.getText().toString());
+                    String birth = editBirth.getText().toString();
+                    if (birth != null && !birth.isEmpty() && !ageAlertShown) {
+                        int months = DataFormat.monthsBetweenDates(birth);
+                        if (months < 7 || months > 60) {
+                            ageAlertShown = true;
+                            showAgeAlertDialog();
+                            return;
+                        }
+                    }
 
+                    long birthday = DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, editBirth.getText().toString());
                     String sex = "";
                     if (radioMale.isChecked())
                         sex = "male";
@@ -280,7 +295,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         person.setQrcode(qrCode);
                         person.setEnvironment(session.getEnvironment());
                         person.setCreated(System.currentTimeMillis());
-                        firebaseAnalytics.logEvent(FirebaseService.CREATE_PERSON_STOP,null);
+                        firebaseAnalytics.logEvent(FirebaseService.CREATE_PERSON_STOP, null);
 
                     }
 
@@ -289,7 +304,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setGuardian(editGuardian.getText().toString());
                     person.setSex(sex);
                     person.setAgeEstimated(checkAge.isChecked());
-                    person.setTimestamp(Utils.getUniversalTimestamp());
+                    person.setTimestamp(AppController.getInstance().getUniversalTimestamp());
                     person.setCreatedBy(session.getUserEmail());
                     person.setSchema_version(CgmDatabase.version);
                     person.setDevice_updated_at_timestamp(System.currentTimeMillis());
@@ -317,6 +332,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void onDateTimeRecurrenceSet(SelectedDate selectedDate, int hourOfDay, int minute, SublimeRecurrencePicker.RecurrenceOption recurrenceOption, String recurrenceRule) {
         long birthday = selectedDate.getStartDate().getTimeInMillis();
         editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, birthday));
+        ageAlertShown = false;
+        PersonalDataFragment.this.onTextChanged();
+
     }
 
     @Override
@@ -338,6 +356,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         long birthday = DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, value);
         editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, birthday));
         editBirth.clearFocus();
+        ageAlertShown = false;
         PersonalDataFragment.this.onTextChanged();
     }
 
@@ -366,5 +385,24 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             btnNext.setTextColor(getResources().getColor(R.color.colorGreyDark));
             btnNext.setBackground(getResources().getDrawable(R.drawable.button_grey_round));
         }
+    }
+
+    public void showAgeAlertDialog() {
+        ageAlertShown = true;
+        new AlertDialog.Builder(context)
+                .setMessage(R.string.age_warning)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        btnNext.performClick();
+                        dialog.dismiss();
+                    }
+                }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                editBirth.setText("");
+                onTextChanged();
+                dialog.dismiss();
+            }
+        }).show();
     }
 }

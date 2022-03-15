@@ -36,9 +36,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-public class IO {
+public class FileSystem {
 
-    private static final String TAG = IO.class.getName();
+    private static final String TAG = FileSystem.class.getName();
 
     private static final int BUFFER = 80000;
 

@@ -87,7 +87,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="15dp"
-                            android:background="@drawable/button_pink_round"
+                            android:background="@drawable/button_green_round"
                             android:text="@string/backup_now"
                             android:textColor="@color/colorWhite"
                             android:textSize="14sp" />
@@ -97,7 +97,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="15dp"
-                            android:background="@drawable/button_pink_round"
+                            android:background="@drawable/button_green_round"
                             android:text="@string/contact_support"
                             android:textColor="@color/colorWhite"
                             android:textSize="14sp" />

@@ -20,6 +20,7 @@ package de.welthungerhilfe.cgm.scanner.ui.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
@@ -43,6 +44,7 @@ public class TwoLineTextView extends LinearLayout {
     private ImageView mSubmenu;
     private TextView mTitleLine;
     private TextView mDescriptionLine;
+    private TextView mValue;
     private View mSeparator;
     private SwitchCompat mSwitch;
 
@@ -71,6 +73,7 @@ public class TwoLineTextView extends LinearLayout {
         mSeparator = root.findViewById(R.id.separator);
         mSubmenu = root.findViewById(R.id.submenu_button);
         mSwitch = root.findViewById(R.id.toggle_switch);
+        mValue = root.findViewById(R.id.text_value);
 
         mLayout = root.findViewById(R.id.item_layout);
         setOnClickListener(mListener);
@@ -82,6 +85,7 @@ public class TwoLineTextView extends LinearLayout {
         //set texts
         setText(1, a.getString(R.styleable.TwoLineTextView_titleText));
         setText(2, a.getString(R.styleable.TwoLineTextView_descriptionText));
+        mTitleLine.setTextColor(a.getColor(R.styleable.TwoLineTextView_titleTextColor, Color.BLACK));
         float titleSize = a.getDimensionPixelSize(R.styleable.TwoLineTextView_titleTextSize, 0);
         if (titleSize > 0) {
             mTitleLine.setTextSize(TypedValue.COMPLEX_UNIT_PX, titleSize);
@@ -96,6 +100,13 @@ public class TwoLineTextView extends LinearLayout {
         mSubmenu.setVisibility(submenu ? View.VISIBLE : View.GONE);
         boolean toggle = a.getBoolean(R.styleable.TwoLineTextView_toggleVisible, false);
         mSwitch.setVisibility(toggle ? View.VISIBLE : View.GONE);
+        boolean value = a.getBoolean(R.styleable.TwoLineTextView_valueVisible, false);
+        mValue.setVisibility(value ? View.VISIBLE : View.GONE);
+        if (value) {
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mLayout.getLayoutParams();
+            lp.topMargin = 0;
+            mLayout.setLayoutParams(lp);
+        }
 
         a.recycle();
     }
@@ -142,5 +153,9 @@ public class TwoLineTextView extends LinearLayout {
         } else {
             view.setVisibility(View.GONE);
         }
+    }
+
+    public void setValue(String value) {
+        mValue.setText(value);
     }
 }
