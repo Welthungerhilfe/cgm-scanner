@@ -27,6 +27,8 @@ import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -198,7 +200,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                     break;
                 case R.id.menuLogout:
-                    logout();
+                    showLogoutAlertDialog();
                     break;
                 case R.id.menuQuitStdTest:
                     showConfirmDialog(R.string.std_test_deactivate, STD_TEST_DEACTIVE);
@@ -557,5 +559,21 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    public void showLogoutAlertDialog() {
+        new AlertDialog.Builder(this)
+                .setMessage(R.string.logout_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        logout();
+                    }
+                }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        }).show();
     }
 }

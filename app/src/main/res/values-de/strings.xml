@@ -73,6 +73,8 @@
     <string name="no_scans">Keine Scans</string>
     <string name="add_scans">Tippen Sie zum Starten des Scannens auf die Schaltfläche [+]</string>
     <string name="title_scans">Scans-Scheduled</string>
+    <string name="logout_alert">Möchten Sie sich wirklich abmelden?</string>
+
 
     <!-- Filtering and sorting !-->
     <string name="filter">Filter</string>

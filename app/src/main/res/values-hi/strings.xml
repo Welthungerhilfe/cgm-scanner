@@ -72,6 +72,8 @@
     <string name="add_scans">स्कैनिंग शुरू करने के लिए, [+] बटन टैप करें</string>
     <string name="title_scans">स्कैन का समय</string>
     <string name="data_not_synced">बैकएंड के साथ डेटा सिंक करने की अनुमति नहीं</string>
+    <string name="logout_alert">क्या आप वाकई लॉग आउट करना चाहते हैं?</string>
+
 
 
     <!-- Filtering and sorting !-->
