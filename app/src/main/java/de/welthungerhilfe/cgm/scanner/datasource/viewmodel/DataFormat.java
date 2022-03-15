@@ -21,7 +21,9 @@ package de.welthungerhilfe.cgm.scanner.datasource.viewmodel;
 import android.content.Context;
 import android.os.Build;
 import android.text.format.DateFormat;
+import android.util.Log;
 
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -35,7 +37,9 @@ public class DataFormat {
         DATE,
         DATE_AND_TIME,
         TIME
-    };
+    }
+
+    ;
 
     public static long averageValue(ArrayList<Long> values) {
         long value = 0;
@@ -242,5 +246,44 @@ public class DataFormat {
         } catch (Exception e) {
         }
         return 0;
+    }
+
+    public static int monthsBetweenDates(String endDateStr) {
+
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        String strDate = formatter.format(new Date());
+        SimpleDateFormat endDateFormatter = new SimpleDateFormat("dd-MM-yyyy");
+
+        ParsePosition parsePosition = new ParsePosition(0);
+        Date endDate = endDateFormatter.parse(endDateStr, parsePosition);
+        endDateStr = formatter.format(endDate);
+
+        Calendar start = Calendar.getInstance();
+        Calendar end = Calendar.getInstance();
+
+        ParsePosition parsePosition1 = new ParsePosition(0);
+        end.setTime(formatter.parse(strDate, parsePosition1));
+
+        ParsePosition parsePosition2 = new ParsePosition(0);
+        start.setTime(formatter.parse(endDateStr, parsePosition2));
+
+
+        int monthsBetween = 0;
+        int dateDiff = end.get(Calendar.DAY_OF_MONTH) - start.get(Calendar.DAY_OF_MONTH);
+
+        if (dateDiff < 0) {
+            int borrrow = end.getActualMaximum(Calendar.DAY_OF_MONTH);
+            dateDiff = (end.get(Calendar.DAY_OF_MONTH) + borrrow) - start.get(Calendar.DAY_OF_MONTH);
+            monthsBetween--;
+
+            if (dateDiff > 0) {
+                monthsBetween++;
+            }
+        } else {
+            monthsBetween++;
+        }
+        monthsBetween += end.get(Calendar.MONTH) - start.get(Calendar.MONTH);
+        monthsBetween += (end.get(Calendar.YEAR) - start.get(Calendar.YEAR)) * 12;
+        return monthsBetween;
     }
 }

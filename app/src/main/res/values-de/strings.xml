@@ -149,6 +149,8 @@
     <string name="birthday_tooltip">Geburtstag</string>
     <string name="guardian_tooltip">Erziehungsberechtigte/n</string>
     <string name="title_image_view">Bildansicht</string>
+    <string name="age_warning">Das eingegebene Alter des Kindes liegt nicht zwischen 6 Monaten und 5 Jahren. Sind Sie damit einverstanden?</string>
+
 
     <!-- Measures listing !-->
     <string name="tab_personal">PERSON</string>

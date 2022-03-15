@@ -148,6 +148,8 @@
     <string name="birthday_tooltip">जन्मदिन</string>
     <string name="guardian_tooltip">अभिभावक</string>
     <string name="title_image_view">इमेज व्यू</string>
+    <string name="age_warning">दर्ज बच्चे की उम्र 6 महीने से 5 साल के बीच नहीं है, क्या आप इसके साथ ठीक हैं??</string>
+
 
     <!-- Measures listing !-->
     <string name="tab_personal">निजी</string>

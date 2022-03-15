@@ -152,6 +152,7 @@
     <string name="birthday_tooltip">birthday</string>
     <string name="guardian_tooltip">guardian</string>
     <string name="title_image_view">Image View</string>
+    <string name="age_warning">Entered child age is not between 6 months and 5 years, Are you okay with it?</string>
 
     <!-- Measures listing !-->
     <string name="tab_personal">PERSONAL</string>
@@ -334,5 +335,6 @@
     <string name="result_for">result for</string>
     <string name="scan_is_uploading">Scan is uploading</string>
     <string name="wifi_state_change_watcher">Process for checking of the WiFi status is running</string>
+
 
 </resources>
