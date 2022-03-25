@@ -10,13 +10,9 @@ pool:
   vmImage: 'macos-latest'
 
 steps:
-- task: Bash@3
-  displayName: "run appcenter post-clone pre-build script for legacy reasons"
-  inputs:
-    targetType: "inline"
-    script: ./app/appcenter-post-clone.sh
-#- bash: |
-#    ./app/appcenter-post-clone.sh
+- bash: |
+    chmod + x ./app/appcenter-post-clone.sh
+    ./app/appcenter-post-clone.sh
   env:
     APP_CENTER_KEY: $(APP_CENTER_KEY) # the recommended way to map to an env variable
     GOOGLE_MAPS_KEY: $(GOOGLE_MAPS_KEY)
