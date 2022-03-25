@@ -11,7 +11,7 @@ pool:
 
 steps:
 - bash: |
-    chmod + x ./app/appcenter-post-clone.sh
+    chmod +x ./app/appcenter-post-clone.sh
     ./app/appcenter-post-clone.sh
   env:
     APP_CENTER_KEY: $(APP_CENTER_KEY) # the recommended way to map to an env variable
