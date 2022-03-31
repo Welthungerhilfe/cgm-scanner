@@ -298,6 +298,8 @@
     <string name="lang_english">Englisch</string>
     <string name="lang_german">Deutsch</string>
     <string name="lang_hindi">Hindi</string>
+    <string name="lang_nepali">Nepali</string>
+    <string name="lang_bangla">Bangla</string>
     <string name="backup">Backup und Support</string>
     <string name="last_backup_date">Letztes Sicherungsdatum</string>
     <string name="backup_now">Jetzt sichern</string>
