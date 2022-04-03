@@ -78,8 +78,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             session.setSigned(true);
             LogFileUtils.startSession(LoginActivity.this, session);
 
-
-            startApp();
+            startActivity(new Intent(getApplicationContext(), LanguageSelectionActivity.class));
+            //startApp();
         } else {
             if (session.getEnvironment() != AppConstants.ENV_UNKNOWN) {
                 Log.d(TAG, "Login into " + SyncingWorkManager.getAPI());

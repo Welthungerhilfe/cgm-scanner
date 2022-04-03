@@ -185,6 +185,10 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.activities.LanguageSelectionActivity"
+            android:screenOrientation="portrait" />
+
         <service
             android:name=".network.service.UploadService"
             android:exported="false" />
