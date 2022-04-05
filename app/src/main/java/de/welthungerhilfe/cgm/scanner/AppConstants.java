@@ -57,11 +57,16 @@ public class AppConstants {
     public static final String LANG_ENGLISH = "en";
     public static final String LANG_GERMAN = "de";
     public static final String LANG_HINDI = "hi";
+    public static final String LANG_NEPALI = "ne";
+    public static final String LANG_BANGLA = "bn";
+
 
     public static final String[] SUPPORTED_LANGUAGES = {
             LANG_ENGLISH,
             LANG_GERMAN,
-            LANG_HINDI
+            LANG_HINDI,
+            LANG_NEPALI,
+            LANG_BANGLA
     };
 
     public static final String EXTRA_QR = "extra_qr";

@@ -167,6 +167,19 @@
                             android:layout_height="wrap_content"
                             app:flagImage="@drawable/india"
                             app:language="@string/lang_hindi" />
+
+                        <de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView
+                            android:id="@+id/radioNepali"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:flagImage="@drawable/india"
+                            app:language="@string/lang_hindi" />
+                        <de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView
+                            android:id="@+id/radioBangla"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:flagImage="@drawable/india"
+                            app:language="@string/lang_bangla" />
                     </RadioGroup>
                 </LinearLayout>
 

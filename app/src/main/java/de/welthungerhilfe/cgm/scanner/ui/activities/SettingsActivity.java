@@ -131,11 +131,18 @@ public class SettingsActivity extends BaseActivity {
             case AppConstants.LANG_HINDI:
                 activitySettingsBinding.radioHindi.setChecked(true);
                 break;
+            case AppConstants.LANG_NEPALI:
+                activitySettingsBinding.radioNepali.setChecked(true);
+                break;
+            case AppConstants.LANG_BANGLA:
+                activitySettingsBinding.radioBangla.setChecked(true);
+
         }
         activitySettingsBinding.radioEnglish.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_ENGLISH));
         activitySettingsBinding.radioGerman.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_GERMAN));
         activitySettingsBinding.radioHindi.setOnCheckedChangeListener((compoundButton, b) -> changeLanguage(AppConstants.LANG_HINDI));
-
+        activitySettingsBinding.radioNepali.setOnCheckedChangeListener((compoundButton, b)->changeLanguage(AppConstants.LANG_NEPALI));
+        activitySettingsBinding.radioBangla.setOnCheckedChangeListener((compoundButton, b)->changeLanguage(AppConstants.LANG_BANGLA));
         if (session.getBackupTimestamp() == 0)
             activitySettingsBinding.txtSettingBackupDate.setText(2, getString(R.string.no_backups));
         else
