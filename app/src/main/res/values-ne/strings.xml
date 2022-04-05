@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources><!-- Login screen !-->
-    <string name="error_login"> लगइन असफल भयो</string>
+    <string name="error_login">लगइन असफल भयो</string>
     <string name="login_microsoft">माइक्रोसफ्टसँग साइन इन गर्नुहोस्</string>        <string name="login_backend_environment">कृपया फाइलचयन गर्नुहोस् ।</string>
     <string name="login_error_parse">टोकन पद वर्णन असफल भयो</string>
     <string name="login_error_invalid">प्रयोगकर्ता इमेल प्राप्त गर्न सकेन, कृपया फेरि प्रयास गर्नुहोस्</string>
@@ -9,7 +9,7 @@
 <!-- Device check !-->
     <string name="device_check_reminder">यो यन्त्रमा हालै गरिएको यन्त्र जाँच गरिएको थिएन । तपाईँ अहिले नै गर्न चाहनुहुन्छ?</string>
     <string name="device_check1">यन्त्र जाँचको लागि के चाहिन्छ? </string>
-    <string name="device_check11"> आवश्यक क्यालिब्रेसन तस्वीर तपाईँले चाइल्ड ग्रोथ मोनिटर सहयोग समूहबाट प्राप्त गर्न सक्ने छ.</string>
+    <string name="device_check11">आवश्यक क्यालिब्रेसन तस्वीर तपाईँले चाइल्ड ग्रोथ मोनिटर सहयोग समूहबाट प्राप्त गर्न सक्ने छ.</string>
     <string name="device_check12">मैले क्यालिब्रेसन तस्वीर छापेको छु र यसलाई स्क्यान गर्न तयार छु।</string>
     <string name="device_check2">कृपया क्यामेरालाई क्यालिब्रेसन तस्वीरमा इङ्कित गर्नुहोस् ।</string>
     <string name="device_check21">RGB क्यामेरा</string>
@@ -28,22 +28,22 @@
     <string name="device_check4_backend">यन्त्र CGM ब्याकइन्डमा जडान गर्न सक्षम थिएन । त्यहाँ कुनै पनि डेटा समक्रमण (Synchronize) गर्न सम्भव हुनेछैन ।</string>
     <string name="device_check42">माथि उल्लिखित समस्याहरूको कारण हुन सक्ने समस्याहरूको लागि म जिम्मेवार छु ।</string>
     <string name="device_check5">तपाईँयसबाट यन्त्र जाँच सन्दर्भ गर्न सक्नुहुन्छ ।<u color="#FF0000">Menu</u> कुनै पनि समय!</string>
-    <string name="device_check_step_finished"> चरण समाप्त जाँच गर्नुहोस्</string>
-    <string name="device_check_detecting_image"> तस्वीर पत्ता लगाउने</string>
-    <string name="device_check_testing"> परीक्षण गर्नुहोस्</string>
+    <string name="device_check_step_finished">चरण समाप्त जाँच गर्नुहोस्</string>
+    <string name="device_check_detecting_image">तस्वीर पत्ता लगाउने</string>
+    <string name="device_check_testing">परीक्षण गर्नुहोस्</string>
     <string name="device_check_failed">असफल भयो</string>
-    <string name="device_check_too_low_energy"> अति न्यून शक्ति</string>
-    <string name="device_check_finish"> तपाईँले यन्त्र जाँच समाप्त गर्नुभयो ।</string>
+    <string name="device_check_too_low_energy">अति न्यून शक्ति</string>
+    <string name="device_check_finish">तपाईँले यन्त्र जाँच समाप्त गर्नुभयो ।</string>
 
 
 <!-- Tutorial !-->
-    <string name="tutorial1"> म कसरी बच्चाको लागि नयाँ प्रोफाइल सिर्जना गर्न सक्छु?</string>
-    <string name="tutorial11"> 1-1. बच्चाको प्रोफाइल सिर्जना गर्न वा फेला पार्न QR कोड स्क्यान गर्नुहोस्</string>
-    <string name="tutorial12"> १-२. बच्चालाई यसअघि स्क्यान नगरेको भए उनीहरुको व्यक्तिगत विवरण भर्नुहोस्</string>
-    <string name="tutorial2"> उभिइरहेको बच्चालाई म कसरी स्क्यान गर्छु ?</string>
-    <string name="tutorial21"> २- १. बच्चा स्क्यान गर्न सुरु गर्नु भन्दा पहिले \\"standing up\" मोड चयन गर्नुहोस्</string>
+    <string name="tutorial1">म कसरी बच्चाको लागि नयाँ प्रोफाइल सिर्जना गर्न सक्छु?</string>
+    <string name="tutorial11">1-1. बच्चाको प्रोफाइल सिर्जना गर्न वा फेला पार्न QR कोड स्क्यान गर्नुहोस्</string>
+    <string name="tutorial12">१-२. बच्चालाई यसअघि स्क्यान नगरेको भए उनीहरुको व्यक्तिगत विवरण भर्नुहोस्</string>
+    <string name="tutorial2">उभिइरहेको बच्चालाई म कसरी स्क्यान गर्छु ?</string>
+    <string name="tutorial21">२- १. बच्चा स्क्यान गर्न सुरु गर्नु भन्दा पहिले \\"standing up\" मोड चयन गर्नुहोस्</string>
     <string name="tutorial22">२-२. तीन ५ सेकेन्ड स्क्यान लिनुहोस्, अगाडिको दृश्यबाट, पछाडिको दृश्य र ३६०\' दृश्य</string>
-    <string name="tutorial3"> ढल्किरहेको बच्चालाई म कसरी स्क्यान गर्न सक्छु?</string>
+    <string name="tutorial3">ढल्किरहेको बच्चालाई म कसरी स्क्यान गर्न सक्छु?</string>
     <string name="tutorial31">३- १. बच्चा स्क्यान गर्न सुरु गर्नु भन्दा पहिले \\"ढल्किरहेको\" मोड रोज्नुहोस्</string>
     <string name="tutorial32">३-२. अगाडिको दृश्यबाट, पछाडिको दृश्य र बायाँबाट दायाँतर्फ तीन ५ सेकेन्ड स्क्यान लिनुहोस्</string>
     <string name="tutorial4">स्क्यान गर्दाको नतिजालाई म कस्तो ठान्छु?</string>
@@ -73,7 +73,7 @@
     <string name="add_scans">स्क्यानिङ सुरु गर्न, [+] बटन ट्याप गर्नुहोस्</string>
     <string name="title_scans">स्क्यान-कार्यतालिका</string>
     <string name="data_not_synced">ब्याकइन्डसँग डेटा समक्रमण गर्न अनुमति छैन</string>
-    <string name="logout_alert">Are you sure want to log out?</string>
+    <string name="logout_alert">के तपाइँ निश्चित रूपमा लग आउट गर्न चाहनुहुन्छ?</string>
 
 
 
@@ -85,7 +85,7 @@
     <string name="last_location_error">अन्तिम स्थान उपलब्ध छैन</string>
     <string name="sort_date">माथि को नयाँ व्यक्ति</string>
     <string name="sort_location">सबैभन्दा नजिकको व्यक्ति माथि</string>
-    <string name="wasting"> खयाउते</string>
+    <string name="wasting">खयाउते</string>
     <string name="wasting_weight_height">माथि सबैभन्दा कम वजन/उचाइ</string>
     <string name="stunting">स्टन्टिङ</string>
     <string name="stunting_height_age">सबैभन्दा कम उचाइ/माथि</string>
@@ -131,7 +131,7 @@
 
 <!-- Create person / Person details!-->
     <string name="name">बचचाको नाम</string>
-    <string name="guardian"> अभिभावकको नाम</string>
+    <string name="guardian">अभिभावकको नाम</string>
     <string name="birth">जन्म</string>
     <string name="sex_male">पुरुष</string>
     <string name="sex_female">महिला</string>
@@ -151,9 +151,9 @@
     <string name="tooltip_input">कृपया % 1$s प्रविष्ट गर्नुहोस् </string>
     <string name="name_tooltip">नाम</string>
     <string name="birthday_tooltip">जन्मदिन</string>
-    <string name="guardian_tooltip"> अभिभावक</string>
-    <string name="title_image_view"> तसविर हेरनुहोस </string>
-    <string name="age_warning">Entered child age is not between 6 months and 5 years, Are you okay with it?</string>
+    <string name="guardian_tooltip">अभिभावक</string>
+    <string name="title_image_view">तसविर हेरनुहोस </string>
+    <string name="age_warning">भर्खरको बच्चाको उमेर ६ महिना र ५ वर्षको बीचमा छैन, के तपाईलाई यो ठीक छ?</string>
 
 
 
@@ -190,9 +190,9 @@
     <string name="measure_height">उचाइ</string>
     <string name="measure_weight">वजन</string>
     <string name="measure_muac">MUAC</string>
-    <string name="min_error"> न्यून त्रुटि</string>
+    <string name="min_error">न्यून त्रुटि</string>
     <string name="max_error">अधिकतम त्रुटि</string>
-    <string name="measure_oedema"> सुनिएको छन </string>
+    <string name="measure_oedema">सुनिएको छन </string>
     <string name="edema_check">के तपाईंको बच्चा सुनिएको छ भन्ने कुरामा ढुक्क हुनुहुन्छ? </string>
     <string name="invalid_zscore">तपाईँ प्रविष्टि मानहरूको बारेमा निश्चित हुनुहुन्छ?</string>
     <string name="edema_link">द्विपक्षीय एडेमा कसरी जाँच गर्ने\nyoutu.be/3pQUtOsjjSY?t=85</string>
@@ -205,7 +205,7 @@
     <string name="tooltipe_height_max">उचाइ १३० सेन्टिमिटर भन्दा कम हुनुपर्दछ</string>
     <string name="tooltipe_weight_min">वजन २ किलो भन्दा बढी हुनुपर्छ</string>
     <string name="tooltipe_weight_max">वजन ३० किलो भन्दा कम हुनुपर्छ</string>
-    <string name="tooltipe_muac_min"> पाखुराको गोलाई 9 सेन्टिमिटर भन्दा बढी हुनुपर्दछ</string>
+    <string name="tooltipe_muac_min">पाखुराको गोलाई 9 सेन्टिमिटर भन्दा बढी हुनुपर्दछ</string>
     <string name="tooltipe_muac_max">पाखुराको गोलाई २२ सेन्टिमिटर भन्दा कम हुनुपर्दछ</string>
     <string name="tooltip_kg">किलोग्राममा मान</string>
     <string name="tooltip_decimal">दशमलव बिन्दु पछि दुरुस्त एक अङ्क प्रविष्ट गर्नुहोस्</string>
@@ -234,7 +234,7 @@
     <string name="side_scan">०२. ३६०\' स्क्यान</string>
     <string name="back_scan">०३. ब्याक स्क्यान</string>
     <string name="scan_quality">स्क्यान गुणस्तर : </string>
-    <string name="score_light"> चम्किलो प्राप्ताङ्क : </string>
+    <string name="score_light">चम्किलो प्राप्ताङ्क : </string>
     <string name="score_light_bright">हलका चम्किलो प्राप्ताङ्क </string>
     <string name="score_light_dark">हलका अध्यारो प्राप्ताङ्क </string>
     <string name="capture_inside">रेखाभित्रको बालकलाई पक्रनुहोस्</string>
@@ -246,18 +246,18 @@
 <!-- Growth chart !-->
     <string name="axis_y">Y Axis</string>
     <string name="axis_x">X Axis</string>
-    <string name="axis_age"> उमेर महिनमा </string>
+    <string name="axis_age">उमेर महिनमा </string>
     <string name="axis_height">उचाइ (सेन्टिमिटर)</string>
-    <string name="axis_weight"> तौल किलोग्राममा </string>
-    <string name="axis_muac"> पाखुराको गोलाई सी.एम.मा </string>
+    <string name="axis_weight">तौल किलोग्राममा </string>
+    <string name="axis_muac">पाखुराको गोलाई सी.एम.मा </string>
     <string name="filter_age_weight">उमेर अनुसार तौल </string>
     <string name="filter_age_height">उमेर अनुसार उचाई </string>
     <string name="filter_height_weight">उचाई अनुसार तौल </string>
     <string name="filter_muac_age">उमेर अनुसार पाखुराको गोलाई </string>
     <string name="height_for_age_manual">उचाइ (म्यानुअल)</string>
     <string name="height_for_age_scan">उचाइ (स्क्यान)</string>
-    <string name="weight_for_age_manual"> तौल (म्यानुअल)</string>
-    <string name="weight_for_age_scan"> तौल (स्क्यान)</string>
+    <string name="weight_for_age_manual">तौल (म्यानुअल)</string>
+    <string name="weight_for_age_scan">तौल (स्क्यान)</string>
     <string name="muac_for_age_manual">MUAC(म्यानुअल)</string>
     <string name="muac_for_age_scan">MUAC(स्क्यान)</string>
     <string name="percentile_error">पर्सेन्टाइल त्रुटि</string>
@@ -273,13 +273,13 @@
     <string name="sam_wfa_title">बच्चाको तौल एकदमै कम छ</string>
     <string name="sam_wfa_message">कृपया नजिकको OTC वा पोषण पुनरसथापना केन्द्रमा जानुहोस्</string>
     <string name="mam_wfa_title">बच्चामा मधयम किसिमको कम तौल छ</string>
-    <string name="mam_wfa_message"> कृपया सवासथय केन्द्र वा महिला सवासथय कार्यकर्ता मा जानुहोस्</string>
-    <string name="sam_acfa_title"> कुपोषित</string>
+    <string name="mam_wfa_message">कृपया सवासथय केन्द्र वा महिला सवासथय कार्यकर्ता मा जानुहोस्</string>
+    <string name="sam_acfa_title">कुपोषित</string>
     <string name="sam_acfa_message">कृपया नजिकको OTC वा पोषण पुनरसथापना केन्द्रमा जानुहोस्</string>
     <string name="mam_acfa_title">मधयम कुपोषित</string>
     <string name="mam_acfa_message">कृपया तपाईंको नजिकको स्वास्थ्य केन्द्रमा ASHA वा AWW हेर्नुहोस्</string>
-    <string name="mam_wfh_title"> बच्चामा मधयम किसिमको खयाउटेपाना छ </string>
-    <string name="sam_wfh_title"> बच्चामा कडा किसिमको खयाउटेपाना छ </string>
+    <string name="mam_wfh_title">बच्चामा मधयम किसिमको खयाउटेपाना छ </string>
+    <string name="sam_wfh_title">बच्चामा कडा किसिमको खयाउटेपाना छ </string>
     <string name="sam_wfh_message">कृपया नजिकको OTC वा पोषण पुनरसथापना केन्द्रमा जानुहोस्</string>
     <string name="mam_wfh_message">कृपया तपाईँको AWW हेर्नुहोस्</string>
     <string name="sam_hfa_title">बच्चामा कडा किसिमको पुड्कोपना छ</string>
@@ -294,7 +294,7 @@
     <string name="label_upload_expect">अपेक्षित समय : </string>
     <string name="label_total_size">जम्मा साइज : </string>
     <string name="label_uploaded_size">अपलोड गरिएको आकार : </string>
-    <string name="menuUploadManager"> अपलोड प्रबन्धक</string>
+    <string name="menuUploadManager">अपलोड प्रबन्धक</string>
     <string name="label_upload_status">Upload Status स्थिति अपलोड गर्नुहोस्</string>
     <string name="upload_completed">अपलोड पूरा भयो</string>
     <string name="less_than_minute">१ मिनेट भन्दा कम</string>
@@ -311,11 +311,12 @@
     <string name="account">खाता</string>
     <string name="azure_account">ए पि आई खाता</string>
     <string name="language">भाषा</string>
-    <string name="lang_english">अंग्रेजी</string>
-    <string name="lang_german">जर्मन</string>
-    <string name="lang_hindi">Hindi</string>
+    <string name="lang_english">English</string>
+    <string name="lang_german">Deutsch</string>
+    <string name="lang_hindi">हिन्दी</string>
     <string name="lang_nepali">नेपाली</string>
-    <string name="lang_bangla">Bangla</string>
+    <string name="lang_bangla">বাংলা</string>
+
 
 
     <string name="backup">Backup and support</string>
@@ -326,7 +327,7 @@
     <string name="profile_result_title">परिणाम प्राप्त गर्ने समय मापन गर्नुहोस्</string>
     <string name="profile_result_timestamp_scan">अन्तिम स्क्यान समाप्त भयो</string>
     <string name="profile_result_timestamp_start">अन्तिम स्क्यान अपलोड सुरु</string>
-    <string name="profile_result_timestamp_end"> अन्तिम स्क्यान अपलोड अन्त्य</string>
+    <string name="profile_result_timestamp_end">अन्तिम स्क्यान अपलोड अन्त्य</string>
     <string name="profile_result_timestamp_receive">अन्तिम स्क्यान परिणाम प्राप्त गर्नुहोस्</string>
     <string name="profile_result_timestamp_average">अन्तिम १० ले औसत प्रक्रिया समय स्क्यान गर्दछ</string>
     <string name="profile_performance_title">स्क्यानिङ कार्यसम्पादन मापन गर्नुहोस्</string>

@@ -302,10 +302,10 @@
     <string name="azure_account">API Account</string>
     <string name="language">Language</string>
     <string name="lang_english">English</string>
-    <string name="lang_german">German</string>
-    <string name="lang_hindi">Hindi</string>
-    <string name="lang_nepali">Nepali</string>
-    <string name="lang_bangla">Bangla</string>
+    <string name="lang_german">Deutsch</string>
+    <string name="lang_hindi">हिन्दी</string>
+    <string name="lang_nepali">नेपाली</string>
+    <string name="lang_bangla">বাংলা</string>
     <string name="backup">Backup and support</string>
     <string name="last_backup_date">Last Backup Date</string>
     <string name="backup_now">Backup Now</string>
