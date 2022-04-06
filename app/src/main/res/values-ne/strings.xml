@@ -148,7 +148,7 @@
     <string name="tooltip_birthday">कृपया जन्मदिन प्रविष्ट गर्नुहोस्</string>
     <string name="tooltip_guardian">कृपया अभिभावकको नाम प्रविष्ट गर्नुहोस् </string>
     <string name="tooltipe_sex">कृपया लिनग चयन गर्नुहोस्</string>
-    <string name="tooltip_input">कृपया % 1$s प्रविष्ट गर्नुहोस् </string>
+    <string name="tooltip_input">कृपया %1$s प्रविष्ट गर्नुहोस् </string>
     <string name="name_tooltip">नाम</string>
     <string name="birthday_tooltip">जन्मदिन</string>
     <string name="guardian_tooltip">अभिभावक</string>
