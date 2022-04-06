@@ -20,6 +20,6 @@ public interface LanguageSelectedDao {
     @Update(onConflict = REPLACE)
     void updateLanguageSelected(LanguageSelected languageSelected);
 
-    @Query("SELECT * FROM " + TABLE_LANGUAGE_SELECTED + " WHERE id=:id")
-    LanguageSelected getLanguageSelectedId(String id);
+    @Query("SELECT selectedLanguage FROM " + TABLE_LANGUAGE_SELECTED + " WHERE id=:id")
+    String getLanguageBySelectedId(String id);
 }

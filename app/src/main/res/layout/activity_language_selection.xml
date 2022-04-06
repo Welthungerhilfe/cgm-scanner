@@ -54,7 +54,7 @@
         android:orientation="vertical">
 
         <RadioButton
-            android:id="@+id/rb_prod_aah"
+            android:id="@+id/rb_english"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="English"
@@ -66,7 +66,7 @@
             android:textSize="18sp" />
 
         <RadioButton
-            android:id="@+id/rb_prod_darshna"
+            android:id="@+id/rb_hindi"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="हिन्दी"
@@ -78,7 +78,7 @@
             android:textSize="18sp" />
 
         <RadioButton
-            android:id="@+id/rb_prod_namibia"
+            android:id="@+id/rb_bangla"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="বাংলা"
@@ -90,7 +90,7 @@
             android:textSize="18sp" />
 
         <RadioButton
-            android:id="@+id/rb_demo_qa"
+            android:id="@+id/rb_nepali"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="नेपाली"
@@ -101,7 +101,7 @@
             android:textColor="@color/colorBlack"
             android:textSize="18sp" />
         <RadioButton
-            android:id="@+id/rb_demo_qa1"
+            android:id="@+id/rb_deutsch"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="Deutsch"

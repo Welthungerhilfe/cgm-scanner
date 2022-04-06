@@ -42,6 +42,7 @@ import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityLoginBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.LanguageSelectedRepository;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
@@ -61,6 +62,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
     String selectedBackend;
 
+    LanguageSelectedRepository languageSelectedRepository;
+
 
     public void doSignIn(View view) {
         if (!checkStoragePermissions()) {
@@ -78,8 +81,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             session.setSigned(true);
             LogFileUtils.startSession(LoginActivity.this, session);
 
-            startActivity(new Intent(getApplicationContext(), LanguageSelectionActivity.class));
-            //startApp();
+            startApp();
         } else {
             if (session.getEnvironment() != AppConstants.ENV_UNKNOWN) {
                 Log.d(TAG, "Login into " + SyncingWorkManager.getAPI());
@@ -102,11 +104,12 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        BaseActivity.forceSelectedLanguage(this);
+        //BaseActivity.forceSelectedLanguage(this);
 
        activityLoginBinding = DataBindingUtil.setContentView(this,R.layout.activity_login);
        firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         session = new SessionManager(this);
+        languageSelectedRepository = LanguageSelectedRepository.getInstance(this);
         try {
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             String version = pInfo.versionName;
@@ -146,10 +149,10 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         new Thread(() -> {
             AppController.getInstance().getRootDirectory(getApplicationContext());
             runOnUiThread(() -> {
-                if (session.getTutorial())
+                if (languageSelectedRepository.getLanguageSelectedId(session.getUserEmail())!= null)
                     startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 else
-                    startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
+                    startActivity(new Intent(getApplicationContext(), LanguageSelectionActivity.class));
                 Bundle bundle = new Bundle();
                 bundle.putString("backend_selected",selectedBackend);
                 firebaseAnalytics.logEvent("signin_finished",bundle);
