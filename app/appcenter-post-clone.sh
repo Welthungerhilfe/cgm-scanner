@@ -22,6 +22,7 @@ APP_OAUTH_SANDBOX_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_con
 APP_OAUTH_QA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_demoqa.json
 APP_OAUTH_PRODUCTION_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_inbmz.json
 APP_OAUTH_NAMIBIA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_namibia.json
+APP_OAUTH_NEPAL_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_nepal.json
 APP_CONSTANTS=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/AppConstants.java
 APP_SPLASH_ACTIVITY=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/ui/activities/SplashActivity.java
 
