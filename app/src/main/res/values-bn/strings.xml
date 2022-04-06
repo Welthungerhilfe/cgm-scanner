@@ -2,151 +2,151 @@
 <resources>
     <!-- Login screen !-->
 
-    <string name="error_login"> লগইন ব্যর্থ </string>
+    <string name="error_login">লগইন ব্যর্থ </string>
 
-    <string name="login_microsoft"> মাইক্রোসফট এর সাথে সাইন ইন করুন </string>
+    <string name="login_microsoft">মাইক্রোসফট এর সাথে সাইন ইন করুন </string>
 
-    <string name="login_backend_environment"> একটি ব্যাকএন্ড নির্বাচন করুন </string>
+    <string name="login_backend_environment">একটি ব্যাকএন্ড নির্বাচন করুন </string>
 
-    <string name="login_error_parse"> টোকেন পার্স ব্যর্থ হয়েছে </string>
+    <string name="login_error_parse">টোকেন পার্স ব্যর্থ হয়েছে </string>
 
-    <string name="login_error_invalid"> ব্যবহারকারীর ইমেল পাওয়া যায়নি, আবার চেষ্টা করুন </string>
+    <string name="login_error_invalid">ব্যবহারকারীর ইমেল পাওয়া যায়নি, আবার চেষ্টা করুন </string>
 
 
 
     <!-- Device check !-->
 
-    <string name="device_check_reminder"> এই ডিভাইসে সাম্প্রতিক কোনো ডিভাইস চেক করা হয়নি। আপনি এখন এটা করতে চান? </string>
+    <string name="device_check_reminder">এই ডিভাইসে সাম্প্রতিক কোনো ডিভাইস চেক করা হয়নি। আপনি এখন এটা করতে চান? </string>
 
-    <string name="device_check1"> ডিভাইস পরীক্ষা করার জন্য কি প্রয়োজন? </string>
+    <string name="device_check1">ডিভাইস পরীক্ষা করার জন্য কি প্রয়োজন? </string>
 
-    <string name="device_check11"> সেখানে একটি ক্রমাঙ্কন চিত্র প্রয়োজন যা আপনি চাইল্ড গ্রোথ মনিটর সহায়তাকারী দলের কাছ থেকে পেতে পারেন। </string>
+    <string name="device_check11">সেখানে একটি ক্রমাঙ্কন চিত্র প্রয়োজন যা আপনি চাইল্ড গ্রোথ মনিটর সহায়তাকারী দলের কাছ থেকে পেতে পারেন। </string>
 
-    <string name="device_check12"> আমি ক্রমাঙ্কন চিত্রটি প্রিন্ট করেছি এবং আমি এটি স্ক্যান করতে প্রস্তুত। </string>
+    <string name="device_check12">আমি ক্রমাঙ্কন চিত্রটি প্রিন্ট করেছি এবং আমি এটি স্ক্যান করতে প্রস্তুত। </string>
 
-    <string name="device_check2"> ক্যামেরাটিকে ক্রমাঙ্কন চিত্রের দিকে নির্দেশ করুন৷ </string>
+    <string name="device_check2">ক্যামেরাটিকে ক্রমাঙ্কন চিত্রের দিকে নির্দেশ করুন৷ </string>
 
-    <string name="device_check21"> RGB ক্যামেরা </string>
+    <string name="device_check21">RGB ক্যামেরা </string>
 
-    <string name="device_check22"> ToF সেন্সর </string>
+    <string name="device_check22">ToF সেন্সর </string>
 
-    <string name="device_check3"> সব পরীক্ষা সম্পন্ন না হওয়া পর্যন্ত অপেক্ষা করুন৷ </string>
+    <string name="device_check3">সব পরীক্ষা সম্পন্ন না হওয়া পর্যন্ত অপেক্ষা করুন৷ </string>
 
-    <string name="device_check31"> ব্যাটারি </string>lat
+    <string name="device_check31">ব্যাটারি </string>lat
 
-    <string name="device_check32"> ডিভাইস স্টোরেজ </string>
+    <string name="device_check32">ডিভাইস স্টোরেজ </string>
 
     <string name="device_check33">জিপিএস </string>
 
-    <string name="device_check34"> ইন্টারনেট সংযোগ </string>
+    <string name="device_check34">ইন্টারনেট সংযোগ </string>
 
-    <string name="device_check4"> সমস্যা নিয়ে পরীক্ষা শেষ হয়েছে। আপনি কি চালিয়ে যেতে চান? </string>
+    <string name="device_check4">সমস্যা নিয়ে পরীক্ষা শেষ হয়েছে। আপনি কি চালিয়ে যেতে চান? </string>
 
-    <string name="device_check4_rgb"> রঙিন ক্যামেরা ক্রমাঙ্কন চিত্রের একটি ভুল মাত্রা সনাক্ত করেছে, এটি লেন্সের ত্রুটির কারণে হতে পারে। </string>
+    <string name="device_check4_rgb">রঙিন ক্যামেরা ক্রমাঙ্কন চিত্রের একটি ভুল মাত্রা সনাক্ত করেছে, এটি লেন্সের ত্রুটির কারণে হতে পারে। </string>
 
-    <string name="device_check4_tof"> ToF সেন্সর ক্রমাঙ্কন চিত্রের একটি ভুল মাত্রা সনাক্ত করেছে, এটি লেন্সের ত্রুটির কারণে হতে পারে। </string>
+    <string name="device_check4_tof">ToF সেন্সর ক্রমাঙ্কন চিত্রের একটি ভুল মাত্রা সনাক্ত করেছে, এটি লেন্সের ত্রুটির কারণে হতে পারে। </string>
 
-    <string name="device_check4_battery"> ব্যাটারি লেভেল কম, বেশি পরিমাণ তথ্য ধারন করার জন্য যথেষ্ট শক্তি নাও থাকতে পারে। </string>
+    <string name="device_check4_battery">ব্যাটারি লেভেল কম, বেশি পরিমাণ তথ্য ধারন করার জন্য যথেষ্ট শক্তি নাও থাকতে পারে। </string>
 
-    <string name="device_check4_gps"> GPS সেন্সর আপনার অবস্থান নির্ধারণ করতে সক্ষম ছিল না৷ ক্যাপচার করা তথ্য ট্র্যাক করা হবে না৷ </string>
+    <string name="device_check4_gps">GPS সেন্সর আপনার অবস্থান নির্ধারণ করতে সক্ষম ছিল না৷ ক্যাপচার করা তথ্য ট্র্যাক করা হবে না৷ </string>
 
-    <string name="device_check4_storage"> ডিভাইসের স্টোরেজ কম, বেশি পরিমাণ তথ্য ধারন করার জন্য পর্যাপ্ত জায়গা নাও হতে পারে। </string>
+    <string name="device_check4_storage">ডিভাইসের স্টোরেজ কম, বেশি পরিমাণ তথ্য ধারন করার জন্য পর্যাপ্ত জায়গা নাও হতে পারে। </string>
 
-    <string name="device_check4_backend"> ডিভাইসটি CGM ব্যাকএন্ডের সাথে সংযোগ করতে সক্ষম হয়নি, এখানে কোনো তথ্য সিঙ্ক্রোনাইজ করা সম্ভব নয়। </string>
+    <string name="device_check4_backend">ডিভাইসটি CGM ব্যাকএন্ডের সাথে সংযোগ করতে সক্ষম হয়নি, এখানে কোনো তথ্য সিঙ্ক্রোনাইজ করা সম্ভব নয়। </string>
 
-    <string name="device_check42"> আমি উপরের সমস্যার কারণে সৃষ্ট সম্ভাব্য সমস্যার জন্য দায়ী। </string>
+    <string name="device_check42">আমি উপরের সমস্যার কারণে সৃষ্ট সম্ভাব্য সমস্যার জন্য দায়ী। </string>
 
-    <string name="device_check5"> আপনি যে কোনো সময় <u color="#FF0000">মেনু</u> থেকে ডিভাইস চেক দেখতে পারেন! </string>
+    <string name="device_check5">আপনি যে কোনো সময় <u color="#FF0000">মেনু</u> থেকে ডিভাইস চেক দেখতে পারেন! </string>
 
-    <string name="device_check_step_finished"> পরীক্ষা ধাপ সমাপ্ত </string>
+    <string name="device_check_step_finished">পরীক্ষা ধাপ সমাপ্ত </string>
 
-    <string name="device_check_detecting_image"> ছবি সনাক্তকরণ করা হচ্ছে </string>
+    <string name="device_check_detecting_image">ছবি সনাক্তকরণ করা হচ্ছে </string>
 
-    <string name="device_check_testing"> পরীক্ষামূলক </string>
+    <string name="device_check_testing">পরীক্ষামূলক </string>
 
-    <string name="device_check_failed"> ব্যর্থ </string>
+    <string name="device_check_failed">ব্যর্থ </string>
 
-    <string name="device_check_too_low_energy"> অনেক কম শক্তি </string>
+    <string name="device_check_too_low_energy">অনেক কম শক্তি </string>
 
-    <string name="device_check_finish"> আপনি ডিভাইস পরীক্ষা সম্পন্ন করেছেন </string>
+    <string name="device_check_finish">আপনি ডিভাইস পরীক্ষা সম্পন্ন করেছেন </string>
 
 
 
     <!-- Tutorial !-->
 
-    <string name="tutorial1"> আমি কিভাবে একটি নতুন শিশুর প্রোফাইল তৈরি করব? </string>
+    <string name="tutorial1">আমি কিভাবে একটি নতুন শিশুর প্রোফাইল তৈরি করব? </string>
 
-    <string name="tutorial11"> 1-1. শিশুর প্রোফাইল তৈরি করতে বা খুঁজতে QR কোড স্ক্যান করুন। </string>
+    <string name="tutorial11">1-1. শিশুর প্রোফাইল তৈরি করতে বা খুঁজতে QR কোড স্ক্যান করুন। </string>
 
-    <string name="tutorial12"> 1-2. যদি শিশুকে স্ক্যান করা হয় না হয়ে থাকে তাহলে তাদের ব্যক্তিগত বিবরণ আগে পূরণ করুন। </string>
+    <string name="tutorial12">1-2. যদি শিশুকে স্ক্যান করা হয় না হয়ে থাকে তাহলে তাদের ব্যক্তিগত বিবরণ আগে পূরণ করুন। </string>
 
-    <string name="tutorial2"> আমি কিভাবে একটি  দাঁড়িয়ে থাকা শিশুকে স্ক্যান করব? </string>
+    <string name="tutorial2">আমি কিভাবে একটি  দাঁড়িয়ে থাকা শিশুকে স্ক্যান করব? </string>
 
-    <string name="tutorial21"> 2-1. শিশুকে স্ক্যান করার আগে\"স্ট্যান্ডিং আপ\" মোড বেছে নিন। </string>
+    <string name="tutorial21">2-1. শিশুকে স্ক্যান করার আগে\"স্ট্যান্ডিং আপ\" মোড বেছে নিন। </string>
 
-    <string name="tutorial22"> 2-2. শিশুদের সামনে থেকে, পিছনে থেকে এবং 360 ডিগ্রি ঘুরতে 3 থেকে 5 সেকেন্ড পর্যন্ত স্ক্যান করুন </string>
+    <string name="tutorial22">2-2. শিশুদের সামনে থেকে, পিছনে থেকে এবং 360 ডিগ্রি ঘুরতে 3 থেকে 5 সেকেন্ড পর্যন্ত স্ক্যান করুন </string>
 
-    <string name="tutorial3"> আমি কীভাবে শুয়ে থাকা একটি শিশুকে  স্ক্যান করব? </string>
+    <string name="tutorial3">আমি কীভাবে শুয়ে থাকা একটি শিশুকে  স্ক্যান করব? </string>
 
-    <string name="tutorial31"> 3-1. শিশুটিকে স্ক্যান করা শুরু করার আগে \"Lying down\" মোড নির্বাচন করে নিন। </string>
+    <string name="tutorial31">3-1. শিশুটিকে স্ক্যান করা শুরু করার আগে \"Lying down\" মোড নির্বাচন করে নিন। </string>
 
-    <string name="tutorial32"> 3-2.একটি সামনের দিক থেকে, একটি পিছনের  দিক থেকে এবং অপরটি বাম হতে ডান দিক পর্যন্ত শিশুর 3 থেকে 5 সেকেন্ডের স্ক্যান করুন। </string>
+    <string name="tutorial32">3-2.একটি সামনের দিক থেকে, একটি পিছনের  দিক থেকে এবং অপরটি বাম হতে ডান দিক পর্যন্ত শিশুর 3 থেকে 5 সেকেন্ডের স্ক্যান করুন। </string>
 
-    <string name="tutorial4"> আমি কিভাবে স্ক্যানের ফলাফল দেখতে পারি? </string>
+    <string name="tutorial4">আমি কিভাবে স্ক্যানের ফলাফল দেখতে পারি? </string>
 
-    <string name="tutorial41"> 4-1. বিভিন্ন গ্রাফে স্ক্যান পরিমাপের ফলাফলগুলি দেখুন। </string>
+    <string name="tutorial41">4-1. বিভিন্ন গ্রাফে স্ক্যান পরিমাপের ফলাফলগুলি দেখুন। </string>
 
-    <string name="tutorial42"> 4-2. শিশুটি অপুষ্টিতে ভুগছে কিনা তা দ্রুত এবং সহজে সনাক্ত করুন </string>
+    <string name="tutorial42">4-2. শিশুটি অপুষ্টিতে ভুগছে কিনা তা দ্রুত এবং সহজে সনাক্ত করুন </string>
 
-    <string name="tutorial5"> আপনি যে কোনো সময় <u color="#FF0000">Menu</u> থেকে টিউটোরিয়ালটি দেখতে পারেন! </string>
+    <string name="tutorial5">আপনি যে কোনো সময় <u color="#FF0000">Menu</u> থেকে টিউটোরিয়ালটি দেখতে পারেন! </string>
 
-    <string name="next_tutorial"> পরবর্তী </string>
+    <string name="next_tutorial">পরবর্তী </string>
 
-    <string name="congratulation"> অভিনন্দন! </string>
+    <string name="congratulation">অভিনন্দন! </string>
 
-    <string name="finish_tutorial"> আপনি CGM স্ক্যানার টিউটোরিয়াল শেষ করেছেন </string>
+    <string name="finish_tutorial">আপনি CGM স্ক্যানার টিউটোরিয়াল শেষ করেছেন </string>
 
-    <string name="get_start"> শুরু করুন </string>
+    <string name="get_start">শুরু করুন </string>
 
 
 
     <!-- Main screen !-->
 
-    <string name="username"> ব্যবহারকারীর নাম </string>
+    <string name="username">ব্যবহারকারীর নাম </string>
 
-    <string name="menuScans"> স্ক্যান </string>
+    <string name="menuScans">স্ক্যান </string>
 
-    <string name="menuDeviceCheck"> ডিভাইস পরীক্ষা </string>
+    <string name="menuDeviceCheck">ডিভাইস পরীক্ষা </string>
 
     <string name="menuTutorial">টিউটোরিয়াল </string>
 
     <string name="menuSettings">সেটিং </string>
 
-    <string name="menuLogout"> লগ আউট </string>
+    <string name="menuLogout">লগ আউট </string>
 
-    <string name="menuStdTest"> Std টেস্ট বাদ দিন </string>
+    <string name="menuStdTest">Std টেস্ট বাদ দিন </string>
 
-    <string name="menu_qr"> QR খুজুঁন </string>
+    <string name="menu_qr">QR খুজুঁন </string>
 
-    <string name="menu_search"> খুজুঁন </string>
+    <string name="menu_search">খুজুঁন </string>
 
     <string name="menu_filter">বাছাই করুন এবং ফিল্টার করুন </string>
 
     <string name="drawer_open">খুলুন </string>
 
-    <string name="drawer_close"> বন্ধ করুন </string>
+    <string name="drawer_close">বন্ধ করুন </string>
 
     <string name="no_scans">স্ক্যান হয়নি </string>
 
-    <string name="add_scans"> স্ক্যান শুরু করতে [+] বাটন চাপুন </string>
+    <string name="add_scans">স্ক্যান শুরু করতে [+] বাটন চাপুন </string>
 
     <string name="title_scans">স্ক্যান-নির্ধারিত </string>
 
-    <string name="data_not_synced"> ব্যাকএন্ড এর সাথে তথ্য সিনক্রোনাইজ এর অনুমতি নাই </string>
+    <string name="data_not_synced">ব্যাকএন্ড এর সাথে তথ্য সিনক্রোনাইজ এর অনুমতি নাই </string>
 
-    <string name="logout_alert">Are you sure want to log out?</string>
+    <string name="logout_alert">আপনি কি নিশ্চিত লগ আউট করতে চান?</string>
 
-    <string name="age_warning">Entered child age is not between 6 months and 5 years, Are you okay with it?</string>
+    <string name="age_warning">প্রবেশ করা শিশুর বয়স 6 মাস থেকে 5 বছরের মধ্যে নয়, আপনি কি ঠিক আছেন?</string>
 
 
 
@@ -155,55 +155,55 @@
 
     <string name="filter">ফিল্টার </string>
 
-    <string name="sortby"> বাছাই </string>
+    <string name="sortby">বাছাই </string>
 
     <string name="date">তারিখ </string>
 
-    <string name="last_days"> গত %1$d দিন </string>
+    <string name="last_days">গত %1$d দিন </string>
 
-    <string name="last_location_error"> পূর্ববর্তী অবস্থান খুজেঁ পাওয়া যায় নি </string>
+    <string name="last_location_error">পূর্ববর্তী অবস্থান খুজেঁ পাওয়া যায় নি </string>
 
     <string name="sort_date">নতুন ব্যাক্তি উপরে </string>
 
     <string name="sort_location">কাছাকাছি ব্যাক্তি উপরে </string>
 
-    <string name="wasting"> কৃশকায় </string>
+    <string name="wasting">কৃশকায় </string>
 
-    <string name="wasting_weight_height"> সর্বনিম্ন ওজন/ উচ্চতা উপরে  </string>
+    <string name="wasting_weight_height">সর্বনিম্ন ওজন/ উচ্চতা উপরে  </string>
 
     <string name="stunting">খর্বাকৃতি</string>
 
-    <string name="stunting_height_age"> সর্বনিম্ন উচ্চতা /বয়স উপরে </string>
+    <string name="stunting_height_age">সর্বনিম্ন উচ্চতা /বয়স উপরে </string>
 
     <string name="no_filter">ফিল্টার </string>
 
     <string name="clear_filters">সকল ফিল্টার মুছুন </string>
 
-    <string name="circuit"> সারকামসাইজ  </string>
+    <string name="circuit">সারকামসাইজ  </string>
 
     <string name="own_data">শুধুমাত্র নিজের তথ্য </string>
 
-    <string name="created_by_self"> শুধুমাত্র নিজের তৈরিকৃত শিশুদের দেখুন </string>
+    <string name="created_by_self">শুধুমাত্র নিজের তৈরিকৃত শিশুদের দেখুন </string>
 
 
 
     <!-- Data handling !-->
 
-    <string name="error_network"> অনুগ্রহ করে আপনার নেটওয়ার্ক যাচাই করুন। আপনি এখন অফলাইনে আছেন। </string>
+    <string name="error_network">অনুগ্রহ করে আপনার নেটওয়ার্ক যাচাই করুন। আপনি এখন অফলাইনে আছেন। </string>
 
     <string name="error_person_first">প্রথমে ব্যাক্তির নিবন্ধন করুন </string>
 
     <string name="error_location">অবস্থানের মিল খুজেঁ পাওয়া যায় নি </string>
 
-    <string name="delete_measure"> আপনি কি সত্যিই এই পরিমাপের তথ্য মুছে ফেলতে চান? </string>
+    <string name="delete_measure">আপনি কি সত্যিই এই পরিমাপের তথ্য মুছে ফেলতে চান? </string>
 
     <string name="delete_person">আপনি কি সত্যিই এই ব্যাক্তির তথ্য মুছে ফেলতে চান?  </string>
 
-    <string name="permission_delete"> দুখিঃত,আপনার তথ্য মুছে ফেলার অনুমতি  নেই </string>
+    <string name="permission_delete">দুখিঃত,আপনার তথ্য মুছে ফেলার অনুমতি  নেই </string>
 
     <string name="permission_edit">দুখিঃত,আপনার তথ্য edit করার অনুমতি নেই  </string>
 
-    <string name="permission_expired"> দুখিঃত, তথ্য সম্পাদনা করার সময়সীমা শেষ </string>
+    <string name="permission_expired">দুখিঃত, তথ্য সম্পাদনা করার সময়সীমা শেষ </string>
 
     <string name="no_authorazation">অনুমতি নেই,ব্যাক্তির তথ্য একটি ভিন্ন ব্যাকএন্ড এ তৈরি হয়েছিল। </string>
 
@@ -217,27 +217,27 @@
 
 <string name="message_legal">আইনি জটিলতা এড়াতে অনুগ্রহ করে অভিভাবকের সম্মতি ফর্মের ছবি তুলুন  </string>
 
-<string name="abbr_qr"> QR কোড:  </string>
+<string name="abbr_qr">QR কোড:  </string>
 
-<string name="qr_not_readable"> QR কোড পাঠযোগ্য নয়  </string>
+<string name="qr_not_readable">QR কোড পাঠযোগ্য নয়  </string>
 
-<string name="search_by_qr"> QR কোড দিয়ে অনুসন্ধান করুন </string>
+<string name="search_by_qr">QR কোড দিয়ে অনুসন্ধান করুন </string>
 
-<string name="scan_qr_code_desc"> প্রোফাইল অনুসন্ধান করতে সম্মতি ফর্মে QR  কোড স্ক্যান করুন </string>
+<string name="scan_qr_code_desc">প্রোফাইল অনুসন্ধান করতে সম্মতি ফর্মে QR  কোড স্ক্যান করুন </string>
 
-<string name="std_scan_qr_code_desc"> মান নির্ধারণ টেস্ট শুরু করতে স্ক্যানকৃত QR কোড দিন </string>
+<string name="std_scan_qr_code_desc">মান নির্ধারণ টেস্ট শুরু করতে স্ক্যানকৃত QR কোড দিন </string>
 
 <string name="std_test_will_start">মান নির্ধারণ টেস্ট শুরু হচ্ছে। আপনি কি এটা চালিয়ে যেতে চান? </string>
 
 <string name="std_test_started">এই ডিভাইসে মান নির্ধারণ টেস্ট সক্রিয় হয়েছে </string>
 
-<string name="std_test_deactivate">  আপনি কি মান নির্ধারণ পরীক্ষা নিষ্ক্রিয় করার বিষয়ে নিশ্চিত? </string>
+<string name="std_test_deactivate">আপনি কি মান নির্ধারণ পরীক্ষা নিষ্ক্রিয় করার বিষয়ে নিশ্চিত? </string>
 
-<string name="std_test_invalid_qrcode"> স্ক্যানকৃত মান নির্ধারণ পরীক্ষার QR কোডটি অকার্য্কর৷ </string>
+<string name="std_test_invalid_qrcode">স্ক্যানকৃত মান নির্ধারণ পরীক্ষার QR কোডটি অকার্য্কর৷ </string>
 
-<string name="std_test_old_qrcode"> স্ক্যানকৃত মান নির্ধারণ পরীক্ষার QR  কোড ইভেন্ট পূর্বে শেষ করা হয়েছে ।</string>
+<string name="std_test_old_qrcode">স্ক্যানকৃত মান নির্ধারণ পরীক্ষার QR  কোড ইভেন্ট পূর্বে শেষ করা হয়েছে ।</string>
 
-<string name="std_test_future_qrcode"> স্ক্যানকৃত মান নির্ধারণ টেস্ট QR কোড ইভেন্ট  পরবর্তীতে পরিকল্পনা করা হবে। </string>
+<string name="std_test_future_qrcode">স্ক্যানকৃত মান নির্ধারণ টেস্ট QR কোড ইভেন্ট  পরবর্তীতে পরিকল্পনা করা হবে। </string>
 
 <string name="retake">আবার তুলুন </string>
 
@@ -245,7 +245,7 @@
 
 <string name="error">কিছু ভুল হচ্ছে </string>
 
-<string name="empty_qr_code"> QR কোড নেই, অনুগ্রহ করে সঠিক QR কোড ব্যবহার করুন।   </string>
+<string name="empty_qr_code">QR কোড নেই, অনুগ্রহ করে সঠিক QR কোড ব্যবহার করুন।   </string>
 
 
 
@@ -269,11 +269,11 @@
 
 <string name="address_parse_error">অবস্থান থেকে ঠিকানা পার্স করা যায়নি </string>
 
-<string name="ok"> সঠিক </string>
+<string name="ok">সঠিক </string>
 
 <string name="confirm">নিশ্চিত </string>
 
-<string name="cancel"> বাদ দিন </string>
+<string name="cancel">বাদ দিন </string>
 
 <string name="back">পিছনে </string>
 
@@ -283,15 +283,15 @@
 
 <string name="tooltip_birthday">জন্মদিন লিখুন </string>
 
-<string name="tooltip_guardian"> অভিভাবক </string>
+<string name="tooltip_guardian">অভিভাবক </string>
 
 <string name="tooltipe_sex">লিঙ্গ নির্ধারণ করুন </string>
 
-<string name="tooltip_input"> অনুগ্রহ করে %1$s ইনপুট করুন </string>
+<string name="tooltip_input">অনুগ্রহ করে %1$s ইনপুট করুন </string>
 
 <string name="name_tooltip">নাম </string>
 
-<string name="birthday_tooltip"> জন্মদিন </string>
+<string name="birthday_tooltip">জন্মদিন </string>
 
 <string name="guardian_tooltip">অভিভাবক </string>
 
@@ -301,13 +301,13 @@
 
     <!-- Measures listing !-->
 
-<string name="tab_personal"> ব্যক্তিগত </string>
+<string name="tab_personal">ব্যক্তিগত </string>
 
-<string name="tab_measures"> পরিমাপ  করা </string>
+<string name="tab_measures">পরিমাপ  করা </string>
 
 <string name="tab_growth">বৃদ্ধি </string>
 
-<string name="field_concealed"> গোপন করা </string>
+<string name="field_concealed">গোপন করা </string>
 
 <string name="by">দ্বারা </string>
 
@@ -325,21 +325,21 @@
 
 <string name="unit_kg">কেজি </string>
 
-<string name="selector_manual"> ম্যানুয়াল পরিমাপ যোগ করুন </string>
+<string name="selector_manual">ম্যানুয়াল পরিমাপ যোগ করুন </string>
 
-<string name="selector_scan"> স্ক্যানের পরিমাপ যোগ করুন </string>
+<string name="selector_scan">স্ক্যানের পরিমাপ যোগ করুন </string>
 
 
 
     <!-- Context menu !-->
 
-<string name="edit_data"> তথ্য Edit করুন </string>
+<string name="edit_data">তথ্য Edit করুন </string>
 
 <string name="delete_data">তথ্য মুছুন  </string>
 
 <string name="show_details">বিস্তারিত দেখুন </string>
 
-<string name="contact_support"> যোগাযোগের সহায়তা</string>
+<string name="contact_support">যোগাযোগের সহায়তা</string>
 
 
 
@@ -347,33 +347,33 @@
 
 <string name="manual_measure">ম্যানুয়াল পরিমাপ </string>
 
-<string name="scan_measure"> স্ক্যানের পরিমাপ </string>
+<string name="scan_measure">স্ক্যানের পরিমাপ </string>
 
-<string name="machine_measure"> মেশিনের পরিমাপ </string>
+<string name="machine_measure">মেশিনের পরিমাপ </string>
 
 <string name="measure_date">তারিখ</string>
 
-<string name="measure_location"> স্খান </string>
+<string name="measure_location">স্খান </string>
 
 <string name="measure_height">উচ্চতা </string>
 
-<string name="measure_weight"> ওজন </string>
+<string name="measure_weight">ওজন </string>
 
 <string name="measure_muac">মুয়াক </string>
 
-<string name="min_error"> সর্বনিম্ন ত্রুটি </string>
+<string name="min_error">সর্বনিম্ন ত্রুটি </string>
 
 <string name="max_error">সর্বোচ্চ ত্রুটি </string>
 
-<string name="measure_oedema"> ইডিমা নাই </string>
+<string name="measure_oedema">ইডিমা নাই </string>
 
-<string name="edema_check"> আপনি কি নিশ্চিত যে, শিশুটি ইডিমায় ভুগছে? </string>
+<string name="edema_check">আপনি কি নিশ্চিত যে, শিশুটি ইডিমায় ভুগছে? </string>
 
-<string name="invalid_zscore"> যে মানটি বসানো হয়েছে এটি কি সঠিক? </string>
+<string name="invalid_zscore">যে মানটি বসানো হয়েছে এটি কি সঠিক? </string>
 
-<string name="edema_link"> বাইল্যাট্যারাল ইডিমা কিভাবে পরীক্ষা করবো? \nyoutu.be/3pQUtOsjjSY?t=85</string>
+<string name="edema_link">বাইল্যাট্যারাল ইডিমা কিভাবে পরীক্ষা করবো? \nyoutu.be/3pQUtOsjjSY?t=85</string>
 
-<string name="selector_yes"> হ্যাঁ </string>
+<string name="selector_yes">হ্যাঁ </string>
 
 <string name="selector_no">না </string>
 
@@ -383,27 +383,27 @@
 
 <string name="tooltipe_height_min">উচ্চতা ৪৫ সেন্টিমিটার এর বেশী হওয়া উচিত </string>
 
-<string name="tooltipe_height_max"> উচ্চতা ১৩০ সেন্টিমিটার এর কম হওয়া উচিত</string>
+<string name="tooltipe_height_max">উচ্চতা ১৩০ সেন্টিমিটার এর কম হওয়া উচিত</string>
 
-<string name="tooltipe_weight_min"> ওজন ২ কেজি এর বেশী হওয়া উচিত </string>
+<string name="tooltipe_weight_min">ওজন ২ কেজি এর বেশী হওয়া উচিত </string>
 
-<string name="tooltipe_weight_max"> ওজন ৩০ কেজি এর কম হওয়া উচিত  </string>
+<string name="tooltipe_weight_max">ওজন ৩০ কেজি এর কম হওয়া উচিত  </string>
 
 <string name="tooltipe_muac_min">মুয়াক ৯ সেন্টিমিটার এর বেশী হওয়া উচিত </string>
 
 <string name="tooltipe_muac_max">মুয়াক ২২ সেন্টিমিটার এর কম হওয়া উচিত </string>
 
-<string name="tooltip_kg"> মান কেজিতে </string>
+<string name="tooltip_kg">মান কেজিতে </string>
 
-<string name="tooltip_decimal"> দশমিকের পরে ১ টি সংখ্যা বসান </string>
+<string name="tooltip_decimal">দশমিকের পরে ১ টি সংখ্যা বসান </string>
 
 <string name="tooltip_kg_precision">দশমিকের পরে ৩ টি সংখ্যা বসান </string>
 
-<string name="tooltip_weight_ex"> i.e. ১২.৫৯৫ </string>
+<string name="tooltip_weight_ex">i.e. ১২.৫৯৫ </string>
 
-<string name="tooltip_cm"> মান সেন্টিমিটারে </string>
+<string name="tooltip_cm">মান সেন্টিমিটারে </string>
 
-<string name="tooltip_height_ex"> i.e.৯৫.৬ </string>
+<string name="tooltip_height_ex">i.e.৯৫.৬ </string>
 
 
 
@@ -411,7 +411,7 @@
 
 <string name="title_add_measure">পরিমাপ যুক্ত করুন </string>
 
-<string name="mode_standing"> দাঁড়ানো অবস্থায় </string>
+<string name="mode_standing">দাঁড়ানো অবস্থায় </string>
 
 <string name="mode_lying">শুয়ে পড়ুন </string>
 
@@ -419,53 +419,53 @@
 
 <string name="complete_scan">স্ক্যান সম্পন্ন </string>
 
-<string name="help_front_view_2"> শিশুটিকে আউটলাইনের ভিতরে রাখতে চেষ্টা করুন । শিশুটির সামনের ‍দিক স্ক্যান করুন  </string>
+<string name="help_front_view_2">শিশুটিকে আউটলাইনের ভিতরে রাখতে চেষ্টা করুন । শিশুটির সামনের ‍দিক স্ক্যান করুন  </string>
 
-<string name="help_lateral_view"> সকল দিকের চিত্র নিতে ফোনটি হাতে নিয়ে শিশুটির চারপাশে হাটুন </string>
+<string name="help_lateral_view">সকল দিকের চিত্র নিতে ফোনটি হাতে নিয়ে শিশুটির চারপাশে হাটুন </string>
 
-<string name="help_back_view"> শিশুর শরীরের পিছনের অংশ স্ক্যান করুন.</string>
+<string name="help_back_view">শিশুর শরীরের পিছনের অংশ স্ক্যান করুন.</string>
 
-<string name="person_not_defined"> ব্যক্তিকে নির্ধারণ করা যায় নি </string>
+<string name="person_not_defined">ব্যক্তিকে নির্ধারণ করা যায় নি </string>
 
-<string name="storage_permission_needed"> সংরক্ষণের অনুমতি প্রয়োজন! </string>
+<string name="storage_permission_needed">সংরক্ষণের অনুমতি প্রয়োজন! </string>
 
-<string name="label_wait"> কিছুক্ষন অপেক্ষা করুন…</string>
+<string name="label_wait">কিছুক্ষন অপেক্ষা করুন…</string>
 
-<string name="btn_retake"> আবার তুলুন </string>
+<string name="btn_retake">আবার তুলুন </string>
 
-<string name="btn_tutorial"> টিউটোরিয়াল </string>
+<string name="btn_tutorial">টিউটোরিয়াল </string>
 
-<string name="scan_feedback"> স্ক্যান ফিডব্যাক </string>
+<string name="scan_feedback">স্ক্যান ফিডব্যাক </string>
 
-<string name="front_scan"> ০১. সামনে স্ক্যান করুন </string>
+<string name="front_scan">০১. সামনে স্ক্যান করুন </string>
 
 <string name="side_scan">০২. ৩৬০ ডিগ্রী স্ক্যান করুন </string>
 
-<string name="back_scan"> ০৩. পিছনে স্ক্যান করুন </string>
+<string name="back_scan">০৩. পিছনে স্ক্যান করুন </string>
 
-<string name="scan_quality"> স্ক্যান কোয়ালিটি: </string>
+<string name="scan_quality">স্ক্যান কোয়ালিটি: </string>
 
-<string name="score_light">  আলোর স্কোর : </string>
+<string name="score_light">আলোর স্কোর : </string>
 
-<string name="score_light_bright"> বেশী উজ্জল </string>
+<string name="score_light_bright">বেশী উজ্জল </string>
 
-<string name="score_light_dark"> বেশী অন্ধকার </string>
+<string name="score_light_dark">বেশী অন্ধকার </string>
 
-<string name="capture_inside"> আউটলাইনের ভিতরে শিশুটিকে তুলুন </string>
+<string name="capture_inside">আউটলাইনের ভিতরে শিশুটিকে তুলুন </string>
 
-<string name="standup"> শিশুটিকে পরিষ্কার একটি ব্যাকগ্রাউন্ডের সামনে রাখার চেষ্টা করুন এবং শিশুর পুরো শরীরকে ক্যামেরার ভিউ এর মধ্যে রাখুন </string>
+<string name="standup">শিশুটিকে পরিষ্কার একটি ব্যাকগ্রাউন্ডের সামনে রাখার চেষ্টা করুন এবং শিশুর পুরো শরীরকে ক্যামেরার ভিউ এর মধ্যে রাখুন </string>
 
-<string name="lyedown"> শিশুটিকে পরিষ্কার একটি ব্যাকগ্রাউন্ডের সামনে রাখার চেষ্টা করুন এবং শিশুর পুরো শরীরকে ক্যামেরার ভিউ এর মধ্যে রাখুন </string>
+<string name="lyedown">শিশুটিকে পরিষ্কার একটি ব্যাকগ্রাউন্ডের সামনে রাখার চেষ্টা করুন এবং শিশুর পুরো শরীরকে ক্যামেরার ভিউ এর মধ্যে রাখুন </string>
 
-<string name="done"> সম্পন্ন </string>
+<string name="done">সম্পন্ন </string>
 
 
 
     <!-- Growth chart !-->
 
-<string name="axis_y"> Y Axis</string>
+<string name="axis_y">Y Axis</string>
 
-<string name="axis_x"> X Axis</string>
+<string name="axis_x">X Axis</string>
 
 <string name="axis_age">বয়স মাসে</string>
 
@@ -475,27 +475,27 @@
 
 <string name="axis_muac">মুয়াক সেন্টিমিটারে</string>
 
-<string name="filter_age_weight"> বয়সের তুলনায় ওজন </string>
+<string name="filter_age_weight">বয়সের তুলনায় ওজন </string>
 
-<string name="filter_age_height"> বয়সের তুলনায় উচ্চতা </string>
+<string name="filter_age_height">বয়সের তুলনায় উচ্চতা </string>
 
-<string name="filter_height_weight"> উচ্চতার তুলনায় ওজন </string>
+<string name="filter_height_weight">উচ্চতার তুলনায় ওজন </string>
 
-<string name="filter_muac_age"> বয়সের তুলনায় মুয়াক </string>
+<string name="filter_muac_age">বয়সের তুলনায় মুয়াক </string>
 
-<string name="height_for_age_manual"> উচ্চতা (ম্যানুয়াল) </string>
+<string name="height_for_age_manual">উচ্চতা (ম্যানুয়াল) </string>
 
-<string name="height_for_age_scan"> উচ্চতা (স্ক্যান) </string>
+<string name="height_for_age_scan">উচ্চতা (স্ক্যান) </string>
 
-<string name="weight_for_age_manual"> ওজন (ম্যানুয়াল) </string>
+<string name="weight_for_age_manual">ওজন (ম্যানুয়াল) </string>
 
-<string name="weight_for_age_scan"> ওজন (স্ক্যান) </string>
+<string name="weight_for_age_scan">ওজন (স্ক্যান) </string>
 
-<string name="muac_for_age_manual"> মুয়াক (ম্যানুয়াল) </string>
+<string name="muac_for_age_manual">মুয়াক (ম্যানুয়াল) </string>
 
-<string name="muac_for_age_scan"> মুয়াক (স্ক্যান) </string>
+<string name="muac_for_age_scan">মুয়াক (স্ক্যান) </string>
 
-<string name="percentile_error"> শতকরা ত্রুটি </string>
+<string name="percentile_error">শতকরা ত্রুটি </string>
 
 <string-array name="filters" translatable="false">
 
@@ -513,37 +513,37 @@
 
     <!-- Diagnoses !-->
 
-<string name="sam_wfa_title"> শিশুটি মারাত্নক কম ওজন </string>
+<string name="sam_wfa_title">শিশুটি মারাত্নক কম ওজন </string>
 
 <string name="sam_wfa_message">অনুগ্রহ করে উপজেলা স্বাস্খ্য সেবা কেন্দ্রে নিয়ে যান </string>
 
-<string name="mam_wfa_title"> শিশুটি মাঝারী কম ওজন </string>
+<string name="mam_wfa_title">শিশুটি মাঝারী কম ওজন </string>
 
-<string name="mam_wfa_message"> অনুগ্রহ করে কমিউনিটি ক্লিনিকে নিয়ে যান </string>
+<string name="mam_wfa_message">অনুগ্রহ করে কমিউনিটি ক্লিনিকে নিয়ে যান </string>
 
-<string name="sam_acfa_title"> মারাত্নক অপুষ্টিতে আক্রান্ত </string>
+<string name="sam_acfa_title">মারাত্নক অপুষ্টিতে আক্রান্ত </string>
 
-<string name="sam_acfa_message"> অনুগ্রহ করে উপজেলা স্বাস্খ্যসেবা কেন্দ্রে নিয়ে যান </string>
+<string name="sam_acfa_message">অনুগ্রহ করে উপজেলা স্বাস্খ্যসেবা কেন্দ্রে নিয়ে যান </string>
 
-<string name="mam_acfa_title"> মাঝারী অপুষ্টিতে আক্রান্ত </string>
+<string name="mam_acfa_title">মাঝারী অপুষ্টিতে আক্রান্ত </string>
 
-<string name="mam_acfa_message"> অনুগ্রহ করে কমিউনিটি ক্লিনিকে নিয়ে যান </string>
+<string name="mam_acfa_message">অনুগ্রহ করে কমিউনিটি ক্লিনিকে নিয়ে যান </string>
 
-<string name="mam_wfh_title"> শিশুটি মাঝারী কৃশকায় </string>
+<string name="mam_wfh_title">শিশুটি মাঝারী কৃশকায় </string>
 
-<string name="sam_wfh_title"> শিশুটি মারাত্নক কৃশকায় </string>
+<string name="sam_wfh_title">শিশুটি মারাত্নক কৃশকায় </string>
 
-<string name="sam_wfh_message"> অনুগ্রহ করে উপজেলা স্বাস্খ্যসেবা কেন্দ্রে নিয়ে যান </string>
+<string name="sam_wfh_message">অনুগ্রহ করে উপজেলা স্বাস্খ্যসেবা কেন্দ্রে নিয়ে যান </string>
 
-<string name="mam_wfh_message"> অনুগ্রহ করে কমিউনিটি ক্লিনিকে নিয়ে যান </string>
+<string name="mam_wfh_message">অনুগ্রহ করে কমিউনিটি ক্লিনিকে নিয়ে যান </string>
 
-<string name="sam_hfa_title"> শিশুটি মারাত্নক খর্ব </string>
+<string name="sam_hfa_title">শিশুটি মারাত্নক খর্ব </string>
 
-<string name="sam_hfa_message"> স্থানীয় ডাক্তার বা স্বাস্থ্য কর্মকর্তার সাথে যোগাযোগ করুন </string>
+<string name="sam_hfa_message">স্থানীয় ডাক্তার বা স্বাস্থ্য কর্মকর্তার সাথে যোগাযোগ করুন </string>
 
-<string name="mam_hfa_title"> শিশুটি মাঝারী খর্ব </string>
+<string name="mam_hfa_title">শিশুটি মাঝারী খর্ব </string>
 
-<string name="mam_hfa_message"> স্থানীয় ডাক্তার বা স্বাস্থ্য কর্মকর্তার সাথে যোগাযোগ করুন </string>
+<string name="mam_hfa_message">স্থানীয় ডাক্তার বা স্বাস্থ্য কর্মকর্তার সাথে যোগাযোগ করুন </string>
 
 
 
@@ -551,27 +551,27 @@
 
 <string name="label_overview">সার্বিক অবস্থা </string>
 
-<string name="label_upload_speed"> আপলোড স্পিড: </string>
+<string name="label_upload_speed">আপলোড স্পিড: </string>
 
-<string name="label_upload_expect"> সম্ভাব্য সময়: </string>
+<string name="label_upload_expect">সম্ভাব্য সময়: </string>
 
-<string name="label_total_size"> মোট সাইজ: </string>
+<string name="label_total_size">মোট সাইজ: </string>
 
-<string name="label_uploaded_size"> আপলোডকৃত সাইজ: </string>
+<string name="label_uploaded_size">আপলোডকৃত সাইজ: </string>
 
-<string name="menuUploadManager"> আপলোড ম্যানেজার </string>
+<string name="menuUploadManager">আপলোড ম্যানেজার </string>
 
-<string name="label_upload_status"> আপলোড এর অবস্খা </string>
+<string name="label_upload_status">আপলোড এর অবস্খা </string>
 
-<string name="upload_completed"> আপলোড সম্পন্ন </string>
+<string name="upload_completed">আপলোড সম্পন্ন </string>
 
-<string name="less_than_minute"> ১ মিনিটের কম সময় </string>
+<string name="less_than_minute">১ মিনিটের কম সময় </string>
 
-<string name="minutes"> মিনিট </string>
+<string name="minutes">মিনিট </string>
 
-<string name="hours"> ঘন্টা </string>
+<string name="hours">ঘন্টা </string>
 
-<string name="days"> দিন </string>
+<string name="days">দিন </string>
 
 
 
@@ -579,78 +579,76 @@
 
 <string name="title_settings">সেটিং </string>
 
-<string name="about"> অ্যাবাউট </string>
+<string name="about">অ্যাবাউট </string>
 
-<string name="version"> ভার্সন </string>
+<string name="version">ভার্সন </string>
 
-<string name="uuid"> UUID</string>
+<string name="uuid">UUID</string>
 
-<string name="account"> অ্যাকাউন্ট </string>
+<string name="account">অ্যাকাউন্ট </string>
 
-<string name="azure_account"> API অ্যাকাউন্ট </string>
+<string name="azure_account">API অ্যাকাউন্ট </string>
 
 <string name="language">ভাষা </string>
 
-<string name="lang_english">ইংরেজি </string>
+    <string name="lang_english">English</string>
+    <string name="lang_german">Deutsch</string>
+    <string name="lang_hindi">हिन्दी</string>
+    <string name="lang_nepali">नेपाली</string>
+    <string name="lang_bangla">বাংলা</string>
 
-<string name="lang_german"> জার্মান </string>
 
-<string name="lang_hindi"> হিন্দি Hindi</string>
+<string name="backup">ব্যাকআপ এবং সাপোর্ট  </string>
 
-    <string name="lang_nepali">Nepali</string>
-    <string name="lang_bangla">Bangla</string>
+<string name="last_backup_date">পূর্ববর্তী ব্যাকআপ এর তারিখ </string>
 
-<string name="backup"> ব্যাকআপ এবং সাপোর্ট  </string>
+<string name="backup_now">ব্যাকআপ দিন </string>
 
-<string name="last_backup_date"> পূর্ববর্তী ব্যাকআপ এর তারিখ </string>
+<string name="no_backups">কোন ব্যাকআপ নেই </string>
 
-<string name="backup_now"> ব্যাকআপ দিন </string>
+<string name="test_qa_environment">পরীক্ষা/QA পরিবেশ </string>
 
-<string name="no_backups"> কোন ব্যাকআপ নেই </string>
+<string name="profile_result_title">ফলাফল পেতে সময় পরিমাপ করুন </string>
 
-<string name="test_qa_environment"> পরীক্ষা/QA পরিবেশ </string>
+<string name="profile_result_timestamp_scan">স্ক্যান সম্পন </string>
 
-<string name="profile_result_title"> ফলাফল পেতে সময় পরিমাপ করুন </string>
+<string name="profile_result_timestamp_start">স্ক্যান আপলোড শুরু </string>
 
-<string name="profile_result_timestamp_scan"> স্ক্যান সম্পন </string>
+<string name="profile_result_timestamp_end">স্ক্যান আপলোড সম্পন্ন </string>
 
-<string name="profile_result_timestamp_start"> স্ক্যান আপলোড শুরু </string>
+<string name="profile_result_timestamp_receive">পূর্ববর্তী স্ক্যান এর ফলাফল সংগ্রহ </string>
 
-<string name="profile_result_timestamp_end"> স্ক্যান আপলোড সম্পন্ন </string>
+<string name="profile_result_timestamp_average">১০ টি স্ক্যান প্রক্রিয়াকরন এর গড়  সময় </string>
 
-<string name="profile_result_timestamp_receive"> পূর্ববর্তী স্ক্যান এর ফলাফল সংগ্রহ </string>
+<string name="profile_performance_title">স্ক্যানিং কার্যক্রম পরিমাপ </string>
 
-<string name="profile_result_timestamp_average">  ১০ টি স্ক্যান প্রক্রিয়াকরন এর গড়  সময় </string>
+<string name="profile_performance_color_time">রঙিন কাঠামো প্রক্রিয়াকরন এর সময় </string>
 
-<string name="profile_performance_title"> স্ক্যানিং কার্যক্রম পরিমাপ </string>
+<string name="profile_performance_depth_time">জটিল কাঠামো প্রক্রিয়াকরন এর সময় </string>
 
-<string name="profile_performance_color_time"> রঙিন কাঠামো প্রক্রিয়াকরন এর সময় </string>
+<string name="profile_performance_color_size">পূর্ববর্তী স্ক্যান এর রঙিন ডাটার সাইজ </string>
 
-<string name="profile_performance_depth_time"> জটিল কাঠামো প্রক্রিয়াকরন এর সময় </string>
+<string name="profile_performance_depth_size">পূর্ববর্তী স্ক্যান এর depth ডাটার সাইজ </string>
 
-<string name="profile_performance_color_size"> পূর্ববর্তী স্ক্যান এর রঙিন ডাটার সাইজ </string>
+<string name="performance_measurement">কার্যক্রম পরিমাপ </string>
 
-<string name="profile_performance_depth_size"> পূর্ববর্তী স্ক্যান এর depth ডাটার সাইজ </string>
+<string name="remote_config">দুরবর্তী কনফিগারেশন </string>
 
-<string name="performance_measurement"> কার্যক্রম পরিমাপ </string>
-
-<string name="remote_config"> দুরবর্তী কনফিগারেশন </string>
-
-<string name="remote_debug"> Debug</string>
+<string name="remote_debug">Debug</string>
 
 <string name="remote_sync_period">সিনক্রোনাইজ এর  সময়কাল ‍</string>
 
-<string name="remote_allow_delete"> Delete করার ‍অনুমতি </string>
+<string name="remote_allow_delete">Delete করার ‍অনুমতি </string>
 
-<string name="remote_allow_edit"> Edit করার ‍অনুমতি </string>
+<string name="remote_allow_edit">Edit করার ‍অনুমতি </string>
 
-<string name="remote_edit_time"> Edit করার ‍অনুমতি দেয়ার সময় </string>
+<string name="remote_edit_time">Edit করার ‍অনুমতি দেয়ার সময় </string>
 
-<string name="remote_measure_visibility"> দৃশ্যমানতা পরিমাপ </string>
+<string name="remote_measure_visibility">দৃশ্যমানতা পরিমাপ </string>
 
-<string name="show_depth_data"> depth তথ্য দেখান </string>
+<string name="show_depth_data">depth তথ্য দেখান </string>
 
-<string name="upload_over_wifi"> শুধুমাত্র ওয়াইফাই এর মাধ্যমে স্ক্যান আপলোড করুন </string>
+<string name="upload_over_wifi">শুধুমাত্র ওয়াইফাই এর মাধ্যমে স্ক্যান আপলোড করুন </string>
 
 
 
@@ -658,9 +656,9 @@
 
 <string name="result_generation_at">ফলাফল তৈরি </string>
 
-<string name="result_for"> ফলাফলের জন্য </string>
+<string name="result_for">ফলাফলের জন্য </string>
 
-<string name="scan_is_uploading"> স্ক্যান আপলোড করা হচ্ছে </string>
+<string name="scan_is_uploading">স্ক্যান আপলোড করা হচ্ছে </string>
 
-<string name="wifi_state_change_watcher"> ওয়াইফাই স্ট্যাটাস‍ পর্য্বেক্ষন প্রক্রিয়া চলমান </string>
+<string name="wifi_state_change_watcher">ওয়াইফাই স্ট্যাটাস‍ পর্য্বেক্ষন প্রক্রিয়া চলমান </string>
     </resources>

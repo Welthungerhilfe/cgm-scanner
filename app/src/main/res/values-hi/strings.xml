@@ -289,11 +289,11 @@
     <string name="account">खाता</string>
     <string name="azure_account">API खाता</string>
     <string name="language">भाषा</string>
-    <string name="lang_english">अंग्रेज़ी</string>
-    <string name="lang_german">जर्मन</string>
-    <string name="lang_hindi">हिंदी</string>
-    <string name="lang_nepali">Nepali</string>
-    <string name="lang_bangla">Bangla</string>
+    <string name="lang_english">English</string>
+    <string name="lang_german">Deutsch</string>
+    <string name="lang_hindi">हिन्दी</string>
+    <string name="lang_nepali">नेपाली</string>
+    <string name="lang_bangla">বাংলা</string>
     <string name="backup">बैकअप और समर्थन</string>
     <string name="last_backup_date">अंतिम बैकअप तिथि</string>
     <string name="backup_now">अब समर्थन देना</string>
