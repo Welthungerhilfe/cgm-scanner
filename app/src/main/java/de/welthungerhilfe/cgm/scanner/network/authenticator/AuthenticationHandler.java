@@ -125,6 +125,8 @@ public class AuthenticationHandler {
                 return R.raw.auth_config_inbmz;
             case AppConstants.ENV_NAMIBIA:
                 return R.raw.auth_config_namibia;
+            case AppConstants.ENV_NEPAL:
+                return R.raw.auth_config_nepal;
             default:
                 Log.e(TAG, "Environment not configured");
                 System.exit(0);
@@ -147,6 +149,8 @@ public class AuthenticationHandler {
                 return new String[]{AppConstants.AUTH_IN_BMZ};
             case AppConstants.ENV_NAMIBIA:
                 return new String[]{AppConstants.AUTH_NAMIBIA};
+            case AppConstants.ENV_NEPAL:
+                return new String[]{AppConstants.AUTH_NEPAL};
             default:
                 Log.e(TAG, "Environment not configured");
                 System.exit(0);

@@ -3,7 +3,7 @@
     <!-- Login screen !-->
     <string name="error_login">Login fehlgeschlagen</string>
     <string name="login_microsoft">Melden Sie sich bei Microsoft an</string>
-    <string name="login_backend_environment">Bitte wählen Sie ein Backend</string>
+    <string name="login_backend_environment">Bitte wählen Sie Ihre Organisation aus</string>
     <string name="login_error_parse">Token-Analyse fehlgeschlagen</string>
     <string name="login_error_invalid">Benutzer-E-Mail konnte nicht abgerufen werden. Bitte versuchen Sie es erneut</string>
 

@@ -6,7 +6,7 @@
 
     <string name="login_microsoft">মাইক্রোসফট এর সাথে সাইন ইন করুন </string>
 
-    <string name="login_backend_environment">একটি ব্যাকএন্ড নির্বাচন করুন </string>
+    <string name="login_backend_environment">আপনার প্রতিষ্ঠান নির্বাচন করুন</string>
 
     <string name="login_error_parse">টোকেন পার্স ব্যর্থ হয়েছে </string>
 

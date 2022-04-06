@@ -201,9 +201,12 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         if (checked) {
             switch (button.getId()) {
                 case R.id.rb_prod_aah:
-                case R.id.rb_prod_darshna:
                     session.setEnvironment(AppConstants.ENV_IN_BMZ);
                     selectedBackend = "in_bmz";
+                    break;
+                case R.id.rb_prod_darshna:
+                    session.setEnvironment(AppConstants.ENV_NEPAL);
+                    selectedBackend = "nepal";
                     break;
                 case R.id.rb_prod_namibia:
                     session.setEnvironment(AppConstants.ENV_NAMIBIA);

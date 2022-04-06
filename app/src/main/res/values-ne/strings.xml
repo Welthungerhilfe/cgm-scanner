@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources><!-- Login screen !-->
     <string name="error_login">लगइन असफल भयो</string>
-    <string name="login_microsoft">माइक्रोसफ्टसँग साइन इन गर्नुहोस्</string>        <string name="login_backend_environment">कृपया फाइलचयन गर्नुहोस् ।</string>
+    <string name="login_microsoft">माइक्रोसफ्टसँग साइन इन गर्नुहोस्</string>
+    <string name="login_backend_environment">कृपया आफ्नो संस्था चयन गर्नुहोस्</string>
     <string name="login_error_parse">टोकन पद वर्णन असफल भयो</string>
     <string name="login_error_invalid">प्रयोगकर्ता इमेल प्राप्त गर्न सकेन, कृपया फेरि प्रयास गर्नुहोस्</string>
 
