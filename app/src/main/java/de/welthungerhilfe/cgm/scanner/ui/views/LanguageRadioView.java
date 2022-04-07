@@ -65,7 +65,6 @@ public class LanguageRadioView extends LinearLayout {
 
     private void initView() {
         View root = inflate(getContext(), R.layout.lv_language_radio_view, this);
-        mFlag = root.findViewById(R.id.lang_flag);
         mLayout = root.findViewById(R.id.lang_layout);
         mRadio = root.findViewById(R.id.lang_radio);
         mText = root.findViewById(R.id.lang_text);
@@ -75,7 +74,6 @@ public class LanguageRadioView extends LinearLayout {
 
     private void getAttributes(Context context, AttributeSet attrs, int defStyleAttr) {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LanguageRadioView, defStyleAttr, 0);
-        mFlag.setImageDrawable(a.getDrawable(R.styleable.LanguageRadioView_flagImage));
         mText.setText(a.getString(R.styleable.LanguageRadioView_language));
         a.recycle();
     }
