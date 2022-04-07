@@ -4,9 +4,9 @@
 
     <string name="error_login">লগইন ব্যর্থ </string>
 
-    <string name="login_microsoft">মাইক্রোসফট এর সাথে সাইন ইন করুন </string>
+    <string name="login_microsoft">Sign In with Microsoft</string>
 
-    <string name="login_backend_environment">আপনার প্রতিষ্ঠান নির্বাচন করুন</string>
+    <string name="login_backend_environment">Please select a backend</string>
 
     <string name="login_error_parse">টোকেন পার্স ব্যর্থ হয়েছে </string>
 
@@ -121,6 +121,9 @@
     <string name="menuTutorial">টিউটোরিয়াল </string>
 
     <string name="menuSettings">সেটিং </string>
+
+    <string name="menuLanguage">ভাষা</string>
+
 
     <string name="menuLogout">লগ আউট </string>
 

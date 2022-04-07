@@ -30,18 +30,20 @@ import androidx.annotation.NonNull;
 
 import de.welthungerhilfe.cgm.scanner.datasource.dao.DeviceDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.FileLogDao;
+import de.welthungerhilfe.cgm.scanner.datasource.dao.LanguageSelectedDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.MeasureDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.PersonDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.PostScanResultDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.WorkfolwDao;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.datasource.models.LanguageSelected;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Workflow;
 
-@Database(entities = {Person.class, Measure.class, FileLog.class, Device.class, PostScanResult.class, Workflow.class}, version = 30)
+@Database(entities = {Person.class, Measure.class, FileLog.class, Device.class, PostScanResult.class, Workflow.class, LanguageSelected.class}, version = 31)
 public abstract class CgmDatabase extends RoomDatabase {
     private static final Object sLock = new Object();
 
@@ -59,7 +61,9 @@ public abstract class CgmDatabase extends RoomDatabase {
 
     public abstract WorkfolwDao workfolwDao();
 
-    public static final int version = 30;
+    public abstract LanguageSelectedDao languageSelectedDao();
+
+    public static final int version = 31;
 
     public static final String DATABASE = "offline_db";
 
@@ -69,6 +73,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final String TABLE_DEVICE = "devices";
     public static final String TABLE_POST_SCAN_RESULT = "post_scan_result";
     public static final String TABLE_WORKFLOWS = "workflows";
+    public static final String TABLE_LANGUAGE_SELECTED ="language_selected";
 
 
 
@@ -306,6 +311,13 @@ public abstract class CgmDatabase extends RoomDatabase {
         }
     };
 
+    public static final Migration MIGRATION_30_31 = new Migration(30, 31) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS `language_selected` (`id` TEXT PRIMARY KEY NOT NULL, `selectedLanguage` TEXT)");
+        }
+    };
+
     public static CgmDatabase getInstance(Context context) {
         synchronized (sLock) {
             if (instance == null) {
@@ -315,7 +327,7 @@ public abstract class CgmDatabase extends RoomDatabase {
                                 MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15,
                                 MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18,MIGRATION_18_19, MIGRATION_19_20,
                                 MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25,
-                                MIGRATION_25_26,MIGRATION_26_27,MIGRATION_27_28,MIGRATION_28_29, MIGRATION_29_30)
+                                MIGRATION_25_26,MIGRATION_26_27,MIGRATION_27_28,MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31)
                         .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
                         .allowMainThreadQueries()
                         .build();

@@ -36,6 +36,8 @@ import com.microsoft.appcenter.crashes.Crashes;
 import java.util.HashMap;
 import java.util.Locale;
 
+import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.LanguageSelectedRepository;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 public class BaseActivity extends AppCompatActivity {
@@ -43,7 +45,8 @@ public class BaseActivity extends AppCompatActivity {
     public static final int PERMISSION_LOCATION = 0x0001;
     public static final int PERMISSION_CAMERA = 0x0002;
     public static final int PERMISSION_STORAGE = 0x0003;
-
+    public LanguageSelectedRepository languageSelectedRepository;
+    SessionManager sessionManager;
     public interface ResultListener {
         void onActivityResult(int requestCode, int resultCode, @Nullable Intent data);
 
@@ -62,8 +65,13 @@ public class BaseActivity extends AppCompatActivity {
 
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
-
-        forceSelectedLanguage(this);
+        languageSelectedRepository = LanguageSelectedRepository.getInstance(this);
+        sessionManager = new SessionManager(this);
+        String lang = languageSelectedRepository.getLanguageSelectedId(sessionManager.getUserEmail());
+        if(lang==null) {
+            lang = AppConstants.LANG_ENGLISH;
+        }
+        forceSelectedLanguage(this,lang);
         Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
     }
 
@@ -99,8 +107,7 @@ public class BaseActivity extends AppCompatActivity {
     }
 
 
-    public static Context forceSelectedLanguage(Context context) {
-        String lang = getPersistedData(context);
+    public static Context forceSelectedLanguage(Context context, String lang) {
         return setLanguage(context, lang);
     }
 

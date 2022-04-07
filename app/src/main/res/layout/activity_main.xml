@@ -76,17 +76,17 @@
                     android:id="@+id/lytNoPerson"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/colorGreyLight"
-                    android:visibility="visible"
                     android:layout_centerInParent="true"
+                    android:background="@color/colorGreyLight"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:visibility="visible">
 
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:tint="@color/colorGreyDark"
                         android:src="@drawable/alert"
+                        android:tint="@color/colorGreyDark"
                         tools:ignore="ContentDescription" />
 
                     <TextView
@@ -94,17 +94,17 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
                         android:text="@string/no_scans"
+                        android:textColor="@color/colorGreyDark"
                         android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorGreyDark" />
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
                         android:text="@string/add_scans"
-                        android:textSize="18sp"
-                        android:textColor="@color/colorGreyDark" />
+                        android:textColor="@color/colorGreyDark"
+                        android:textSize="18sp" />
 
                 </LinearLayout>
             </RelativeLayout>
