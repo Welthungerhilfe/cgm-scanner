@@ -9,7 +9,7 @@
     <!-- Login screen !-->
     <string name="error_login">Login failed</string>
     <string name="login_microsoft">Sign In with Microsoft</string>
-    <string name="login_backend_environment">Please select your organization</string>
+    <string name="login_backend_environment">Select your organization</string>
     <string name="login_error_parse">Token Parse Failed</string>
     <string name="login_error_invalid">Couldn\'t get user email, please try again</string>
 
