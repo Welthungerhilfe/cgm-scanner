@@ -62,6 +62,7 @@
     <string name="menuDeviceCheck">यन्त्र जाँच</string>
     <string name="menuTutorial">अभ्यास गर्नुहोस्</string>
     <string name="menuSettings">सेटिङ</string>
+    <string name="menuLanguage">भाषा</string>
     <string name="menuLogout">लगआउट गर्नुहोस्</string>
     <string name="menuStdTest">Std परीक्षण अन्त्य गर्नुहोस्</string>
     <string name="menu_qr">QR खोजी</string>

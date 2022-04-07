@@ -67,6 +67,7 @@
     <string name="menuDeviceCheck">Device Check</string>
     <string name="menuTutorial">Tutorial</string>
     <string name="menuSettings">Settings</string>
+    <string name="menuLanguage">Language</string>
     <string name="menuLogout">Logout</string>
     <string name="menuStdTest">Quit Std Test</string>
     <string name="menu_qr">QR Search</string>

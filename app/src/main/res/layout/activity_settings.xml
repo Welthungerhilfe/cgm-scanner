@@ -140,12 +140,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/language"
+                        android:visibility="gone"
                         android:textColor="@color/colorPrimary"
                         android:textSize="20sp" />
 
                     <RadioGroup
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:visibility="gone">
 
                         <de.welthungerhilfe.cgm.scanner.ui.views.LanguageRadioView
                             android:id="@+id/radioEnglish"

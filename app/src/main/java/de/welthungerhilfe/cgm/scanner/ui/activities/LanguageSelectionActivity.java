@@ -3,6 +3,7 @@ package de.welthungerhilfe.cgm.scanner.ui.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CompoundButton;
 
 import androidx.databinding.DataBindingUtil;
 
@@ -19,18 +20,60 @@ public class LanguageSelectionActivity extends BaseActivity {
     ActivityLanguageSelectionBinding activityLanguageSelectionBinding;
     private SessionManager sessionManager;
     LanguageSelectedRepository languageSelectedRepository;
-    String code;
+    public String code;
+    boolean startFromHomeScreen;
     protected void onCreate(Bundle saveBundle) {
         super.onCreate(saveBundle);
         activityLanguageSelectionBinding = DataBindingUtil.setContentView(this, R.layout.activity_language_selection);
         languageSelectedRepository = LanguageSelectedRepository.getInstance(this);
+        startFromHomeScreen = getIntent().getBooleanExtra("startFromHomeScreen",false);
+        sessionManager = new SessionManager(this);
         initUI();
-        activityLanguageSelectionBinding.rbEnglish.setOnCheckedChangeListener((compoundButton, b) -> code=AppConstants.LANG_ENGLISH);
-        activityLanguageSelectionBinding.rbBangla.setOnCheckedChangeListener((compoundButton, b) -> code=AppConstants.LANG_BANGLA);
-        activityLanguageSelectionBinding.rbNepali.setOnCheckedChangeListener((compoundButton, b) -> code=AppConstants.LANG_NEPALI);
-        activityLanguageSelectionBinding.rbHindi.setOnCheckedChangeListener((compoundButton, b) -> code=AppConstants.LANG_HINDI);
-        activityLanguageSelectionBinding.rbDeutsch.setOnCheckedChangeListener((compoundButton, b) -> code=AppConstants.LANG_GERMAN);
 
+        activityLanguageSelectionBinding.rbEnglish.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    selectedLanguage(AppConstants.LANG_ENGLISH);
+                }
+            }
+        });
+        activityLanguageSelectionBinding.rbHindi.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                    if(isChecked){
+                        selectedLanguage(AppConstants.LANG_HINDI);
+                    }
+            }
+        });
+        activityLanguageSelectionBinding.rbDeutsch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                        selectedLanguage(AppConstants.LANG_GERMAN);
+                    }
+
+            }
+        });
+        activityLanguageSelectionBinding.rbNepali.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                        selectedLanguage(AppConstants.LANG_NEPALI);
+                    }
+            }
+        });
+        activityLanguageSelectionBinding.rbBangla.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    if(isChecked){
+                        selectedLanguage(AppConstants.LANG_BANGLA);
+                    }
+                }
+            }
+        });
         activityLanguageSelectionBinding.btDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -39,14 +82,19 @@ public class LanguageSelectionActivity extends BaseActivity {
         });
     }
 
+    public void selectedLanguage(String selectedCode){
+        code = selectedCode;
+    }
+
     private void changeLanguage(String code) {
         LanguageSelected languageSelected = new LanguageSelected();
         languageSelected.setId(sessionManager.getUserEmail());
         languageSelected.setSelectedLanguage(code);
         languageSelectedRepository.insertLanguageSelected(languageSelected);
-
-        Intent i = new Intent(this,TutorialActivity.class);
-        startActivity(i);
+        if (!startFromHomeScreen){
+            Intent i = new Intent(this, TutorialActivity.class);
+            startActivity(i);
+         }
         forceSelectedLanguage(this,code);
         finish();
     }

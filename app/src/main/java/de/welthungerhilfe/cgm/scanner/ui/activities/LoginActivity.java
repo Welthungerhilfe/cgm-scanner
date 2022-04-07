@@ -145,7 +145,6 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     private void startApp() {
         activityLoginBinding.layoutLogin.setVisibility(View.GONE);
         activityLoginBinding.loginProgressbar.setVisibility(View.VISIBLE);
-
         new Thread(() -> {
             AppController.getInstance().getRootDirectory(getApplicationContext());
             runOnUiThread(() -> {

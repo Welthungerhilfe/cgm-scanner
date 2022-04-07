@@ -61,6 +61,7 @@
     <string name="menuDeviceCheck">डिवाइस की जांच</string>
     <string name="menuTutorial">ट्यूटोरियल</string>
     <string name="menuSettings">सेटिंग्स</string>
+    <string name="menuLanguage">भाषा</string>
     <string name="menuLogout">लोग आउट</string>
     <string name="menuStdTest">एसटीडी टेस्ट छोड़ें</string>
     <string name="menu_qr">क्यूआर खोजे </string>

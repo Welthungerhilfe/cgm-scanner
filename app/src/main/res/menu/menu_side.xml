@@ -45,6 +45,12 @@
     </group>
     <group>
         <item
+            android:id="@+id/menuLanguage"
+            android:icon="@drawable/menu_settings"
+            android:title="@string/menuLanguage" />
+    </group>
+    <group>
+        <item
             android:id="@+id/menuSettings"
             android:icon="@drawable/menu_settings"
             android:title="@string/menuSettings" />

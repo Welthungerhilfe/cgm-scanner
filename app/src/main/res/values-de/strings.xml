@@ -63,6 +63,7 @@
     <string name="menuDeviceCheck">Geräteprüfung</string>
     <string name="menuTutorial">Tutorial</string>
     <string name="menuSettings">Einstellungen</string>
+    <string name="menuLanguage">Sprache</string>
     <string name="menuLogout">Ausloggen</string>
     <string name="menuStdTest">Ganz normaler Test</string>
     <string name="menu_qr">QR Suche</string>
