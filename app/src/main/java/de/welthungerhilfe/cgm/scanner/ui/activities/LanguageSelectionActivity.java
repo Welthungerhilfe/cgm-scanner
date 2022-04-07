@@ -91,12 +91,17 @@ public class LanguageSelectionActivity extends BaseActivity {
         languageSelected.setId(sessionManager.getUserEmail());
         languageSelected.setSelectedLanguage(code);
         languageSelectedRepository.insertLanguageSelected(languageSelected);
-        if (!startFromHomeScreen){
-            Intent i = new Intent(this, TutorialActivity.class);
-            startActivity(i);
-         }
         forceSelectedLanguage(this,code);
-        finish();
+        Intent i = new Intent(this, TutorialActivity.class);
+
+        if (!startFromHomeScreen){
+            startActivity(i);
+            finish();
+        }
+        else {
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+        }
     }
 
     public void initUI(){
