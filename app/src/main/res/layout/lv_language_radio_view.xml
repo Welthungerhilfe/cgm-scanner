@@ -22,8 +22,9 @@
 
             <ImageView
                 android:id="@+id/lang_flag"
-                android:layout_width="42dp"
-                android:layout_height="42dp"
+                android:layout_width="30dp"
+                android:layout_height="33dp"
+                android:visibility="gone"
                 android:contentDescription="@string/content_image" />
 
             <TextView

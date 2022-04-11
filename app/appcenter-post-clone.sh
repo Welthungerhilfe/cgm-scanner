@@ -22,6 +22,7 @@ APP_OAUTH_SANDBOX_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_con
 APP_OAUTH_QA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_demoqa.json
 APP_OAUTH_PRODUCTION_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_inbmz.json
 APP_OAUTH_NAMIBIA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_namibia.json
+APP_OAUTH_NEPAL_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_nepal.json
 APP_CONSTANTS=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/AppConstants.java
 APP_SPLASH_ACTIVITY=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/ui/activities/SplashActivity.java
 
@@ -57,3 +58,10 @@ sed -i '' "s|{OAUTH_REDIRECT_URL}|$OAUTH_REDIRECT_URL|g" $APP_OAUTH_NAMIBIA_JSON
 sed -i '' "s|{OAUTH_URL_NAMIBIA}|$OAUTH_URL_NAMIBIA|g" $APP_OAUTH_NAMIBIA_JSON
 sed -i '' "s|{OAUTH_SCOPE_NAMIBIA}|$OAUTH_SCOPE_NAMIBIA|g" $APP_CONSTANTS
 sed -i '' "s|{API_URL_NAMIBIA}|$API_URL_NAMIBIA|g" $APP_CONSTANTS
+
+echo "Updating API nepal KEYS"
+sed -i '' "s|{OAUTH_CLIENT_ID_NEPAL}|$OAUTH_CLIENT_ID_NEPAL|g" $APP_OAUTH_NEPAL_JSON
+sed -i '' "s|{OAUTH_REDIRECT_URL}|$OAUTH_REDIRECT_URL|g" $APP_OAUTH_NEPAL_JSON
+sed -i '' "s|{OAUTH_URL_NEPAL}|$OAUTH_URL_NEPAL|g" $APP_OAUTH_NEPAL_JSON
+sed -i '' "s|{OAUTH_SCOPE_NEPAL}|$OAUTH_SCOPE_NEPAL|g" $APP_CONSTANTS
+sed -i '' "s|{API_URL_NEPAL}|$API_URL_NEPAL|g" $APP_CONSTANTS

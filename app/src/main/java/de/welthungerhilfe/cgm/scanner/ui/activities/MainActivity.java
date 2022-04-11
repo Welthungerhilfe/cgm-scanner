@@ -199,6 +199,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 case R.id.menuSettings:
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                     break;
+                case R.id.menuLanguage:
+                    startActivity(new Intent(MainActivity.this, LanguageSelectionActivity.class).putExtra("startFromHomeScreen",true));
+                    break;
                 case R.id.menuLogout:
                     showLogoutAlertDialog();
                     break;

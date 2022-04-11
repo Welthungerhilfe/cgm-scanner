@@ -25,10 +25,14 @@ public class AppConstants {
     public static final String AUTH_DEMO_QA = "{OAUTH_SCOPE_QA}";
     public static final String AUTH_IN_BMZ = "{OAUTH_SCOPE_PRODUCTION}";
     public static final String AUTH_NAMIBIA = "{OAUTH_SCOPE_NAMIBIA}";
+    public static final String AUTH_NEPAL = "{OAUTH_SCOPE_NEPAL}";
+
+
     public static final String API_URL_SANDBOX = "{API_URL_SANDBOX}/";
     public static final String API_URL_DEMO_QA = "{API_URL_QA}/";
     public static final String API_URL_IN_BMZ = "{API_URL_PRODUCTION}/";
     public static final String API_URL_NAMIBIA = "{API_URL_NAMIBIA}/";
+    public static final String API_URL_NEPAL = "{API_URL_NEPAL}/";
     public static final String API_TESTING_URL = "http://192.168.43.252:5001/api/";
 
 
@@ -39,6 +43,7 @@ public class AppConstants {
     public static final int ENV_DEMO_QA = 2;
     public static final int ENV_IN_BMZ = 3;
     public static final int ENV_NAMIBIA = 4;
+    public static final int ENV_NEPAL = 5;
 
     public static final int MAX_IMAGE_SIZE = 512;
 

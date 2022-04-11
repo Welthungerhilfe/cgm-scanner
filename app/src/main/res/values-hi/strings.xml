@@ -2,8 +2,8 @@
 
     <!-- Login screen !-->
     <string name="error_login">लॉगिन विफल हुआ</string>
-    <string name="login_microsoft">Microsoft के साथ साइन इन करें</string>
-    <string name="login_backend_environment">कृपया एक बैकेंड चुनें</string>
+    <string name="login_microsoft">Sign In with Microsoft</string>
+    <string name="login_backend_environment">Please select a backend</string>
     <string name="login_error_parse">टोकन पार्स असफल</string>
     <string name="login_error_invalid">उपयोगकर्ता ईमेल प्राप्त नहीं कर सका, कृपया पुनः प्रयास करें</string>
 
@@ -61,6 +61,7 @@
     <string name="menuDeviceCheck">डिवाइस की जांच</string>
     <string name="menuTutorial">ट्यूटोरियल</string>
     <string name="menuSettings">सेटिंग्स</string>
+    <string name="menuLanguage">भाषा</string>
     <string name="menuLogout">लोग आउट</string>
     <string name="menuStdTest">एसटीडी टेस्ट छोड़ें</string>
     <string name="menu_qr">क्यूआर खोजे </string>

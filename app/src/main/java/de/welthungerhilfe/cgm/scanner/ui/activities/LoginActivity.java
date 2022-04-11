@@ -42,6 +42,7 @@ import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityLoginBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.LanguageSelectedRepository;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
@@ -61,6 +62,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
     String selectedBackend;
 
+    LanguageSelectedRepository languageSelectedRepository;
+
 
     public void doSignIn(View view) {
         if (!checkStoragePermissions()) {
@@ -77,7 +80,6 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             }
             session.setSigned(true);
             LogFileUtils.startSession(LoginActivity.this, session);
-
 
             startApp();
         } else {
@@ -102,11 +104,12 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        BaseActivity.forceSelectedLanguage(this);
+        //BaseActivity.forceSelectedLanguage(this);
 
        activityLoginBinding = DataBindingUtil.setContentView(this,R.layout.activity_login);
        firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         session = new SessionManager(this);
+        languageSelectedRepository = LanguageSelectedRepository.getInstance(this);
         try {
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             String version = pInfo.versionName;
@@ -142,14 +145,13 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     private void startApp() {
         activityLoginBinding.layoutLogin.setVisibility(View.GONE);
         activityLoginBinding.loginProgressbar.setVisibility(View.VISIBLE);
-
         new Thread(() -> {
             AppController.getInstance().getRootDirectory(getApplicationContext());
             runOnUiThread(() -> {
-                if (session.getTutorial())
+                if (languageSelectedRepository.getLanguageSelectedId(session.getUserEmail())!= null)
                     startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 else
-                    startActivity(new Intent(getApplicationContext(), TutorialActivity.class));
+                    startActivity(new Intent(getApplicationContext(), LanguageSelectionActivity.class));
                 Bundle bundle = new Bundle();
                 bundle.putString("backend_selected",selectedBackend);
                 firebaseAnalytics.logEvent("signin_finished",bundle);
@@ -201,9 +203,12 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         if (checked) {
             switch (button.getId()) {
                 case R.id.rb_prod_aah:
-                case R.id.rb_prod_darshna:
                     session.setEnvironment(AppConstants.ENV_IN_BMZ);
                     selectedBackend = "in_bmz";
+                    break;
+                case R.id.rb_prod_darshna:
+                    session.setEnvironment(AppConstants.ENV_NEPAL);
+                    selectedBackend = "nepal";
                     break;
                 case R.id.rb_prod_namibia:
                     session.setEnvironment(AppConstants.ENV_NAMIBIA);

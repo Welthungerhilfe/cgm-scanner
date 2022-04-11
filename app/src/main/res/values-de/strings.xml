@@ -2,8 +2,9 @@
 
     <!-- Login screen !-->
     <string name="error_login">Login fehlgeschlagen</string>
-    <string name="login_microsoft">Melden Sie sich bei Microsoft an</string>
-    <string name="login_backend_environment">Bitte wählen Sie ein Backend</string>
+    <string name="login_microsoft">Sign In with Microsoft</string>
+    <string name="login_backend_environment">Please select a backend</string>
+
     <string name="login_error_parse">Token-Analyse fehlgeschlagen</string>
     <string name="login_error_invalid">Benutzer-E-Mail konnte nicht abgerufen werden. Bitte versuchen Sie es erneut</string>
 
@@ -63,6 +64,7 @@
     <string name="menuDeviceCheck">Geräteprüfung</string>
     <string name="menuTutorial">Tutorial</string>
     <string name="menuSettings">Einstellungen</string>
+    <string name="menuLanguage">Sprache</string>
     <string name="menuLogout">Ausloggen</string>
     <string name="menuStdTest">Ganz normaler Test</string>
     <string name="menu_qr">QR Suche</string>
