@@ -67,6 +67,7 @@ public class SyncingWorkManager extends Worker {
                 .build();
 
         //build retrofit
+        Log.d(TAG, "Url backend " + getUrl());
         return new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
@@ -79,6 +80,7 @@ public class SyncingWorkManager extends Worker {
         if (BuildConfig.DEBUG) {
             return "localhost";
         }
+        Log.d(TAG, "Url backend " + getUrl());
 
         String apiURL = getUrl();
         if (apiURL.contains("https://")) {
