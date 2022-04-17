@@ -131,7 +131,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         if (session.getStdTestQrCode() != null) {
-            if (QRScanActivity.isValidStdTestQrCode(session.getStdTestQrCode()) == QRScanActivity.STDTEST.VALID) {
+            if (QRScanActivity.isValidStdTestQrCode(session.getStdTestQrCode()) != QRScanActivity.STDTEST.VALID) {
                 session.setStdTestQrCode(null);
                 showStdTestButtonInMenu(false);
             }
@@ -170,9 +170,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         }
 
-        File log = new File(AppController.getInstance().getPublicAppDirectory(MainActivity.this)
-                + "/cgm");
-        showStdTestButtonInMenu(false);
+
     }
 
     @Override
