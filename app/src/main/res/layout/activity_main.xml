@@ -70,7 +70,8 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerData"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="48dp"/>
 
                 <LinearLayout
                     android:id="@+id/lytNoPerson"
@@ -107,6 +108,66 @@
                         android:textSize="18sp" />
 
                 </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:orientation="horizontal"
+                    android:weightSum="2"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/colorWhite">
+
+                    <RelativeLayout
+                        android:id="@+id/rlt_search"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:id="@+id/iv_search"
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:layout_centerHorizontal="true"
+                            android:src="@drawable/ic_search_bottom"
+                            android:tint="@color/colorGreen"></ImageView>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/iv_search"
+                            android:layout_centerHorizontal="true"
+                            android:text="Search"
+                            android:textColor="@color/colorGreen"></TextView>
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/rlt_add_child"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:id="@+id/iv_add_child"
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:paddingTop="2dp"
+                            android:layout_centerHorizontal="true"
+                            android:src="@drawable/ic_scan_child"
+                            ></ImageView>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/iv_add_child"
+                            android:layout_centerHorizontal="true"
+                            android:text="Add Child"
+                            android:textColor="@color/colorGreen"></TextView>
+
+                    </RelativeLayout>
+
+                </LinearLayout>
             </RelativeLayout>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -119,7 +180,8 @@
                 app:fabCustomSize="@dimen/design_fab_size_mini"
                 android:layout_margin="@dimen/activity_horizontal_margin"
                 app:srcCompat="@drawable/plus"
-                android:onClick="createData"/>
+                android:onClick="createData"
+                android:visibility="gone"/>
 
         </RelativeLayout>
 
@@ -130,7 +192,8 @@
             android:layout_gravity="start"
             android:fitsSystemWindows="false"
             app:headerLayout="@layout/header_sidemenu"
-            app:menu="@menu/menu_side" />
+            app:menu="@menu/menu_side"
+            android:visibility="gone"/>
 
     </androidx.drawerlayout.widget.DrawerLayout>
 </layout>

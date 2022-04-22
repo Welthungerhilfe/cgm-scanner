@@ -23,13 +23,15 @@
     <item android:id="@+id/actionQr"
         android:title="@string/menu_qr"
         android:icon="@drawable/qr"
-        app:showAsAction="always"/>
+        app:showAsAction="always"
+        android:visible="false"/>
 
     <item
         android:id="@+id/actionSearch"
         android:title="@string/menu_search"
         android:icon="@drawable/search"
-        app:showAsAction="always" />
+        app:showAsAction="always"
+        android:visible="false"/>
 
     <item android:id="@+id/actionFilter"
         android:title="@string/menu_filter"

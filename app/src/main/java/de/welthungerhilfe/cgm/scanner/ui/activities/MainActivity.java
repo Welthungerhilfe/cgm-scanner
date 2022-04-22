@@ -169,7 +169,25 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 startForegroundService(new Intent(this, WifiStateChangereceiverHelperService.class));
             }
         }
+        activityMainBinding.rltSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openSearchBar();
+            }
+        });
 
+        activityMainBinding.rltAddChild.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    runnable = () -> startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
+                    addResultListener(PERMISSION_CAMERA, listener);
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, PERMISSION_CAMERA);
+                } else {
+                    startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
+                }
+            }
+        });
 
     }
 
