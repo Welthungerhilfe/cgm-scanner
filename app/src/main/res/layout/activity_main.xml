@@ -71,7 +71,7 @@
                     android:id="@+id/recyclerData"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginBottom="48dp"/>
+                    android:layout_marginBottom="52dp"/>
 
                 <LinearLayout
                     android:id="@+id/lytNoPerson"
@@ -108,7 +108,13 @@
                         android:textSize="18sp" />
 
                 </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:layout_above="@id/bottom_view"
+                    android:background="@drawable/bottom_shadow"/>
                 <LinearLayout
+                    android:id="@+id/bottom_view"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:orientation="horizontal"
@@ -193,7 +199,7 @@
             android:fitsSystemWindows="false"
             app:headerLayout="@layout/header_sidemenu"
             app:menu="@menu/menu_side"
-            android:visibility="gone"/>
+            />
 
     </androidx.drawerlayout.widget.DrawerLayout>
 </layout>

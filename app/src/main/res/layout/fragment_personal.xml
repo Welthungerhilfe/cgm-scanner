@@ -38,15 +38,16 @@
             <RelativeLayout
                 android:id="@+id/rytConsentDetail"
                 android:layout_width="100dp"
-                android:layout_height="100dp">
+                android:layout_height="100dp"
+                android:visibility="gone">
 
                 <ImageView
                     android:id="@+id/imgConsent"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:contentDescription="@string/content_image"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/consent"
-                    android:contentDescription="@string/content_image"/>
+                    android:src="@drawable/consent" />
 
                 <ImageView
                     android:layout_width="30dp"
@@ -63,10 +64,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
                 android:text="@string/label_date"
                 android:textColor="@color/colorGreyDark"
-                android:textSize="20sp"
+                android:textSize="17sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -75,8 +75,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text=""
+                android:layout_marginLeft="7dp"
                 android:textColor="@color/colorGreyDark"
-                android:textSize="20sp"
+                android:textSize="17sp"
                 android:textStyle="bold" />
 
             <ImageView
@@ -88,6 +89,69 @@
                 android:tint="@color/colorGreyDark"
                 android:contentDescription="@string/content_image"/>
         </LinearLayout>
+        
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:background="#EDFFED"
+            android:layout_marginTop="12dp">
+
+            <ImageView
+                android:id="@+id/iv_consent_form"
+                android:layout_width="30dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_consent_form"
+                android:layout_marginLeft="7dp"></ImageView>
+
+            <TextView
+                android:id="@+id/tv_consent_form"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="14dp"
+                android:layout_toRightOf="@+id/iv_consent_form"
+                android:fontFamily="sans-serif-medium"
+                android:text="Consent Form"
+                android:textColor="@color/colorBlack"
+                android:textSize="18sp"></TextView>
+
+            <View
+                android:id="@+id/view"
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/colorGreyLight"
+                android:layout_toRightOf="@+id/tv_consent_form"
+                android:layout_marginLeft="24dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                ></View>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_toRightOf="@+id/view">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_centerInParent="true">
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_retake_photo"></ImageView>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorGreyDark"
+                        android:layout_marginTop="8dp"
+                        android:layout_gravity="center_horizontal"
+                        android:textSize="16sp"
+                        android:text="Retake Photo"></TextView>
+                </LinearLayout>
+            </RelativeLayout>
+
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
