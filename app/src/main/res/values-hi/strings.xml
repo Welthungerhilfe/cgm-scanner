@@ -333,5 +333,11 @@
     <string name="scan_is_uploading">Sस्कैन अपलोड हो रहा है</string>
     <string name="wifi_state_change_watcher">वाईफ़ाई स्थिति की जाँच के लिए प्रक्रिया चल रही है</string>
 
+    <!-- 7.4.0 !-->
+    <string name="add_edit_child">बच्चे को जोड़ें/संपादित करें</string>
+    <string name="consent_form">सहमति पत्र</string>
+    <string name="retake_photo">फोटो रीटेक करें</string>
+    <string name="consent_upload_successfully">सहमति फ़ॉर्म सफलतापूर्वक सहेजा गया.</string>
+
 
 </resources>

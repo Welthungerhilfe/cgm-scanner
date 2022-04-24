@@ -340,5 +340,11 @@
     <string name="scan_is_uploading">Scan is uploading</string>
     <string name="wifi_state_change_watcher">Process for checking of the WiFi status is running</string>
 
+    <!-- 7.4.0 !-->
+    <string name="add_edit_child">Add/Edit Child</string>
+    <string name="consent_form">Consent Form</string>
+    <string name="retake_photo">Retake Photo</string>
+    <string name="consent_upload_successfully">Consent form saved successfully.</string>
+
 
 </resources>

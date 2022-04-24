@@ -355,4 +355,10 @@
     <string name="result_for">यसका लागि परिणाम</string>
     <string name="scan_is_uploading">स्क्यान अनलोड गर्दैछ</string>
     <string name="wifi_state_change_watcher">वाईफाई को स्थिति जाँच गर्ने प्रक्रिया चलिरहेको छ</string>
+
+    <!-- 7.4.0 !-->
+    <string name="add_edit_child">শबच्चा थप्नुहोस् / सम्पादन गर्नुहोस्</string>
+    <string name="consent_form">सहमति फारम</string>
+    <string name="retake_photo">फोटो पुन: लिनुहोस्</string>
+    <string name="consent_upload_successfully">सहमति फारम सफलतापूर्वक सुरक्षित गरियो।</string>
 </resources>

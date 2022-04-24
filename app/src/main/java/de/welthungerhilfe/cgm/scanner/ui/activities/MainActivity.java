@@ -131,7 +131,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         if (session.getStdTestQrCode() != null) {
-            if (QRScanActivity.isValidStdTestQrCode(session.getStdTestQrCode()) == QRScanActivity.STDTEST.VALID) {
+            if (QRScanActivity.isValidStdTestQrCode(session.getStdTestQrCode()) != QRScanActivity.STDTEST.VALID) {
                 session.setStdTestQrCode(null);
                 showStdTestButtonInMenu(false);
             }
@@ -169,10 +169,26 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 startForegroundService(new Intent(this, WifiStateChangereceiverHelperService.class));
             }
         }
+        activityMainBinding.rltSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openSearchBar();
+            }
+        });
 
-        File log = new File(AppController.getInstance().getPublicAppDirectory(MainActivity.this)
-                + "/cgm");
-        showStdTestButtonInMenu(false);
+        activityMainBinding.rltAddChild.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    runnable = () -> startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
+                    addResultListener(PERMISSION_CAMERA, listener);
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, PERMISSION_CAMERA);
+                } else {
+                    startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
+                }
+            }
+        });
+
     }
 
     @Override
