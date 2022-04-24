@@ -111,7 +111,8 @@
                 android:layout_marginLeft="14dp"
                 android:layout_toRightOf="@+id/iv_consent_form"
                 android:fontFamily="sans-serif-medium"
-                android:text="Consent Form"
+                android:maxWidth="160dp"
+                android:text="@string/consent_form"
                 android:textColor="@color/colorBlack"
                 android:textSize="18sp"></TextView>
 
@@ -130,24 +131,29 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_toRightOf="@+id/view">
+
                 <LinearLayout
+                    android:id="@+id/ll_retake_photo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_centerInParent="true">
+                    android:layout_centerInParent="true"
+                    android:orientation="vertical">
+
                     <ImageView
                         android:layout_width="36dp"
                         android:layout_height="24dp"
                         android:layout_gravity="center_horizontal"
                         android:src="@drawable/ic_retake_photo"></ImageView>
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/colorGreyDark"
-                        android:layout_marginTop="8dp"
                         android:layout_gravity="center_horizontal"
-                        android:textSize="16sp"
-                        android:text="Retake Photo"></TextView>
+                        android:layout_marginTop="8dp"
+                        android:text="@string/retake_photo"
+                        android:gravity="center"
+                        android:textColor="@color/colorGreyDark"
+                        android:textSize="16sp"></TextView>
                 </LinearLayout>
             </RelativeLayout>
 

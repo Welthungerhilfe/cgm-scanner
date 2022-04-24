@@ -18,15 +18,26 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
+import static android.app.Activity.RESULT_OK;
+
+import static androidx.core.content.ContextCompat.checkSelfPermission;
+
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -35,8 +46,10 @@ import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatRadioButton;
 
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,12 +57,17 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -58,16 +76,21 @@ import java.util.Date;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
+import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
+import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
+import de.welthungerhilfe.cgm.scanner.hardware.io.FileSystem;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
+import de.welthungerhilfe.cgm.scanner.ui.activities.QRScanActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
@@ -94,11 +117,17 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private String qrCode;
     private Person person;
     private Loc location;
-
+    LinearLayout ll_retake_photo;
     ViewModelProvider.Factory factory;
     FirebaseAnalytics firebaseAnalytics;
 
+    private static final int IMAGE_CAPTURED_REQUEST = 100;
+
     boolean ageAlertShown = false;
+
+    String TAG = PersonalDataFragment.class.getSimpleName();
+
+    FileLogRepository fileLogRepository;
 
     public static PersonalDataFragment getInstance(String qrCode) {
         PersonalDataFragment fragment = new PersonalDataFragment();
@@ -121,6 +150,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         View view = inflater.inflate(R.layout.fragment_personal, container, false);
 
         factory = new CreateDataViewModelProvideFactory(getActivity());
+        fileLogRepository = FileLogRepository.getInstance(getActivity());
         viewModel = new ViewModelProvider(getActivity(), factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
@@ -162,6 +192,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         radioMale = view.findViewById(R.id.radioMale);
         radioMale.setOnCheckedChangeListener(this);
 
+        ll_retake_photo = view.findViewById(R.id.ll_retake_photo);
         View contextMenu = view.findViewById(R.id.contextMenuButton);
         contextMenu.setOnClickListener(v -> {
             if (person != null) {
@@ -175,7 +206,38 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 });
             }
         });
+
+        ll_retake_photo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED &&
+                        checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                  requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
+                  return;
+                }
+                firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_START, null);
+                startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), IMAGE_CAPTURED_REQUEST);
+            }
+        });
+
+
         return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == IMAGE_CAPTURED_REQUEST && resultCode == RESULT_OK) {
+            try {
+
+                Bitmap capturedImageBitmap = (Bitmap) data.getExtras().get("data");
+                capturedImageBitmap = BitmapHelper.getAcceptableBitmap(capturedImageBitmap);
+                ImageSaver(capturedImageBitmap, getActivity());
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void initUI() {
@@ -404,5 +466,81 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 dialog.dismiss();
             }
         }).show();
+    }
+
+    void ImageSaver(Bitmap data1, Context context) {
+
+
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                final long timestamp = AppController.getInstance().getUniversalTimestamp();
+                final String consentFileString = timestamp + "_" + qrCode + ".jpg";
+
+                File extFileDir = AppController.getInstance().getRootDirectory(context);
+                File consentFileFolder = new File(extFileDir, AppConstants.LOCAL_CONSENT_URL.replace("{qrcode}", qrCode).replace("{scantimestamp}", String.valueOf(timestamp)));
+                File consentFile = new File(consentFileFolder, consentFileString);
+                if (!consentFileFolder.exists()) {
+                    boolean created = consentFileFolder.mkdirs();
+                    if (created) {
+                        Log.i(TAG, "Folder: \"" + consentFileFolder + "\" created\n");
+                    } else {
+                        Log.e(TAG, "Folder: \"" + consentFileFolder + "\" could not be created!\n");
+                    }
+
+                    BitmapHelper.writeBitmapToFile(data1, consentFile);
+
+
+                }
+
+                FileOutputStream output = null;
+                try {
+                    FileLog log = new FileLog();
+                    log.setId(AppController.getInstance().getArtifactId("consent"));
+                    log.setType("consent");
+                    log.setPath(consentFile.getPath());
+                    log.setHashValue(FileSystem.getMD5(consentFile.getPath()));
+                    log.setFileSize(consentFile.length());
+                    log.setUploadDate(0);
+                    log.setQrCode(qrCode);
+                    log.setDeleted(false);
+                    log.setCreateDate(AppController.getInstance().getUniversalTimestamp());
+                    log.setCreatedBy(new SessionManager(context).getUserEmail());
+                    log.setEnvironment(new SessionManager(context).getEnvironment());
+                    log.setSchema_version(CgmDatabase.version);
+                    fileLogRepository.insertFileLog(log);
+                    return true;
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (output != null) {
+                        try {
+                            output.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                return false;
+
+            }
+
+
+            @Override
+            protected void onPostExecute(Boolean flag) {
+                super.onPostExecute(flag);
+                if (flag) {
+                    firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_STOP, null);
+                    Toast.makeText(context,R.string.consent_upload_successfully, Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(context, R.string.error, Toast.LENGTH_LONG).show();
+                }
+
+
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+
     }
 }

@@ -142,7 +142,7 @@
                             android:layout_height="wrap_content"
                             android:layout_below="@+id/iv_search"
                             android:layout_centerHorizontal="true"
-                            android:text="Search"
+                            android:text="@string/menu_search"
                             android:textColor="@color/colorGreen"></TextView>
 
                     </RelativeLayout>
@@ -168,7 +168,7 @@
                             android:layout_height="wrap_content"
                             android:layout_below="@+id/iv_add_child"
                             android:layout_centerHorizontal="true"
-                            android:text="Add Child"
+                            android:text="@string/add_edit_child"
                             android:textColor="@color/colorGreen"></TextView>
 
                     </RelativeLayout>

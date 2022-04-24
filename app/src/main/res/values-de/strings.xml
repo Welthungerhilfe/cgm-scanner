@@ -336,4 +336,10 @@
     <string name="scan_is_uploading">Scan wird hochgeladen</string>
     <string name="wifi_state_change_watcher">Prozess zur Überprüfung des WiFi-Status läuft</string>
 
+    <!-- 7.4.0 !-->
+    <string name="add_edit_child">Kind hinzufügen / bearbeiten</string>
+    <string name="consent_form">Einverständniserklärung</string>
+    <string name="retake_photo">Foto wiederholen</string>
+    <string name="consent_upload_successfully">Einverständniserklärung erfolgreich gespeichert.</string>
+
 </resources>

@@ -664,4 +664,10 @@
 <string name="scan_is_uploading">স্ক্যান আপলোড করা হচ্ছে </string>
 
 <string name="wifi_state_change_watcher">ওয়াইফাই স্ট্যাটাস‍ পর্য্বেক্ষন প্রক্রিয়া চলমান </string>
+
+    <!-- 7.4.0 !-->
+    <string name="add_edit_child">শিশু যোগ/সম্পাদনা করুন</string>
+    <string name="consent_form">অনুমতি ফরম</string>
+    <string name="retake_photo">ছবি আবার তুলুন</string>
+    <string name="consent_upload_successfully">সম্মতি ফর্ম সফলভাবে সংরক্ষণ করা হয়েছে৷</string>
     </resources>
