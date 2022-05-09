@@ -83,6 +83,17 @@
                         android:buttonTint="@color/colorPrimary"
                         android:textColor="@color/colorPrimary"
                         android:textSize="18sp" />
+                    <RadioButton
+                        android:id="@+id/rb_uganda"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Welthungerhilfe Uganda"
+                        android:fontFamily="sans-serif-medium"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:buttonTint="@color/colorPrimary"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="18sp" />
 
                     <RadioButton
                         android:id="@+id/rb_prod_namibia"

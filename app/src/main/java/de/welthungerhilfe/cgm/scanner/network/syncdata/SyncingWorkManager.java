@@ -110,6 +110,8 @@ public class SyncingWorkManager extends Worker {
                     return AppConstants.API_URL_NAMIBIA;
                 case AppConstants.ENV_NEPAL:
                     return AppConstants.API_URL_NEPAL;
+                case AppConstants.ENV_UGANDA:
+                    return AppConstants.API_URL_UGANDA;
                 default:
                     Log.e(TAG, "Environment not configured");
                     System.exit(0);

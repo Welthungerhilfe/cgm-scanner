@@ -23,6 +23,7 @@ APP_OAUTH_QA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_d
 APP_OAUTH_PRODUCTION_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_inbmz.json
 APP_OAUTH_NAMIBIA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_namibia.json
 APP_OAUTH_NEPAL_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_nepal.json
+APP_OAUTH_UGANDA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_uganda.json
 APP_CONSTANTS=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/AppConstants.java
 APP_SPLASH_ACTIVITY=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/ui/activities/SplashActivity.java
 
@@ -65,3 +66,10 @@ sed -i '' "s|{OAUTH_REDIRECT_URL}|$OAUTH_REDIRECT_URL|g" $APP_OAUTH_NEPAL_JSON
 sed -i '' "s|{OAUTH_URL_NEPAL}|$OAUTH_URL_NEPAL|g" $APP_OAUTH_NEPAL_JSON
 sed -i '' "s|{OAUTH_SCOPE_NEPAL}|$OAUTH_SCOPE_NEPAL|g" $APP_CONSTANTS
 sed -i '' "s|{API_URL_NEPAL}|$API_URL_NEPAL|g" $APP_CONSTANTS
+
+echo "Updating API uganda KEYS"
+sed -i '' "s|{OAUTH_CLIENT_ID_UGANDA}|$OAUTH_CLIENT_ID_UGANDA|g" $APP_OAUTH_UGANDA_JSON
+sed -i '' "s|{OAUTH_REDIRECT_URL}|$OAUTH_REDIRECT_URL|g" $APP_OAUTH_UGANDA_JSON
+sed -i '' "s|{OAUTH_URL_UGANDA}|$OAUTH_URL_UGANDA|g" $APP_OAUTH_UGANDA_JSON
+sed -i '' "s|{OAUTH_SCOPE_UGANDA}|$OAUTH_SCOPE_UGANDA|g" $APP_CONSTANTS
+sed -i '' "s|{API_URL_UGANDA}|$API_URL_UGANDA|g" $APP_CONSTANTS
