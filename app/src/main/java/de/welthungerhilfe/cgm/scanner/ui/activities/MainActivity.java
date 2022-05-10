@@ -189,6 +189,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         });
 
+        LogFileUtils.logInfo(TAG, "authtoken " + session.getAuthTokenWithBearer());
+
     }
 
     @Override
