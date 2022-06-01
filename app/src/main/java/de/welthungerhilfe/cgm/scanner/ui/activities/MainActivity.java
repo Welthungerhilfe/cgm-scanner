@@ -50,6 +50,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
@@ -66,6 +67,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityMainBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
 import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.network.service.DeviceService;
@@ -190,6 +192,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         });
 
         LogFileUtils.logInfo(TAG, "authtoken " + session.getAuthTokenWithBearer());
+        Toast.makeText(MainActivity.this, DataFormat.convertMilliSeconsToServerDate(System.currentTimeMillis()),Toast.LENGTH_LONG).show();
 
     }
 

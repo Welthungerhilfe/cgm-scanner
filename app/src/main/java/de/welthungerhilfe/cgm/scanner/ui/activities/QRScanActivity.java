@@ -334,8 +334,10 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
             String date = arrOfStr[2];
             Date c = Calendar.getInstance().getTime();
 
-            SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
-            String formattedDate = df.format(c);
+           // SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd",Locale.ENGLISH);
+            String formattedDate =  sdf.format(new Date(System.currentTimeMillis()));
+            //String formattedDate = df.format(c);
 
             if (date.equals(formattedDate)) {
                 return STDTEST.VALID;

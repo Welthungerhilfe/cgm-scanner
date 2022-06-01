@@ -79,14 +79,19 @@ public class DataFormat {
     }
 
     public static String convertMilliSeconsToServerDate(Long timeStamp) {
-        TimeZone timeZone = TimeZone.getTimeZone("UTC");
+        /*TimeZone timeZone = TimeZone.getTimeZone("UTC");
         Calendar cal = Calendar.getInstance(timeZone);
         cal.setTimeInMillis(timeStamp);
-        return DateFormat.format("yyyy-MM-dd HH:mm:ss", cal).toString();
+        return DateFormat.format("yyyy-MM-dd HH:mm:ss", cal).toString();*/
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",Locale.ENGLISH);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf.format(new Date(timeStamp));
     }
 
     public static String convertMilliSecondToBirthDay(Long timeStamp) {
-        return DateFormat.format("yyyy-MM-dd", timeStamp).toString();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd",Locale.ENGLISH);
+        return sdf.format(new Date(timeStamp));
     }
 
     public static long convertServerDateToMilliSeconds(String str) {
