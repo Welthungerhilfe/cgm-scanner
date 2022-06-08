@@ -97,7 +97,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
 
     private PersonListViewModel viewModel;
-    PersonRepository personRepository;
 
 
     public void createData(View view) {
@@ -194,8 +193,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         });
 
         LogFileUtils.logInfo(TAG, "authtoken " + session.getAuthTokenWithBearer());
-        Toast.makeText(MainActivity.this, DataFormat.convertMilliSeconsToServerDate(System.currentTimeMillis()),Toast.LENGTH_LONG).show();
-        personRepository = PersonRepository.getInstance(MainActivity.this);
     }
 
     @Override
