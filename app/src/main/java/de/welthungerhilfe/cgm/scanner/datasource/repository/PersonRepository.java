@@ -23,6 +23,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery;
 
 import android.content.Context;
 import android.location.Location;
+import android.util.Log;
 
 import java.util.List;
 import java.util.Locale;
@@ -99,7 +100,7 @@ public class PersonRepository {
         }
 
         if (filter.isOwn()) {
-            whereClause += String.format(" AND p.createdBy LIKE '%s' AND p.environment=%d", Objects.requireNonNull(session.getUserEmail()), session.getEnvironment());
+            whereClause += String.format(" AND p.createdBy LIKE '%s'", Objects.requireNonNull(session.getUserEmail()));
         }
 
         if (filter.isLocation()) {
@@ -155,6 +156,7 @@ public class PersonRepository {
 
 
         String query = String.format("SELECT %s FROM %s p WHERE %s ORDER BY %s %s", selectClause, CgmDatabase.TABLE_PERSON, whereClause, orderByClause, limitClause);
+        Log.i("PersonRepo","this is query "+query);
         return database.personDao().getResultPerson(new SimpleSQLiteQuery(query));
     }
 

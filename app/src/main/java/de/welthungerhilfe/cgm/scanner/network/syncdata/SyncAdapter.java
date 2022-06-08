@@ -271,6 +271,11 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     Person person = personRepository.getPersonById(localPersonId);
                     String backendPersonId = person.getServerId();
                     if (backendPersonId == null) {
+                        try {
+                            LogFileUtils.logInfo(TAG, "this is measures/scans to sync issue person id-> " + backendPersonId + " type -> " + measure.getType() + " measureid-> " + measure.getId() + " time-> " + DataFormat.convertMilliSeconsToServerDate(measure.getDate()) + " std code-> " + measure.getStd_test_qr_code());
+                        }catch (Exception e){
+                            LogFileUtils.logInfo(TAG, "this is measures/scans to sync issue person id missing ");
+                        }
                         continue;
                     }
 
@@ -285,6 +290,12 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         HashMap<Integer, Scan> scans = measure.split(fileLogRepository, session.getEnvironment());
                         if (!scans.isEmpty()) {
                             postScans(scans, measure);
+                        } else {
+                            try {
+                                LogFileUtils.logInfo(TAG, "this is measures/scans to sync issue scan empty person id-> " + backendPersonId + " type -> " + measure.getType() + " measureid-> " + measure.getId() + " time-> " + DataFormat.convertMilliSeconsToServerDate(measure.getDate()) + " std code-> " + measure.getStd_test_qr_code());
+                            }catch (Exception e){
+                                LogFileUtils.logInfo(TAG, "this is measures/scans to sync issue scan empty");
+                            }
                         }
                     }
                 }
@@ -345,7 +356,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             for (Scan scan : scans.values()) {
 
                 onThreadChange(1);
-                LogFileUtils.logInfo(TAG, "posting scan " + scan.getId());
+                LogFileUtils.logInfo(TAG, "this is posting scan " + scan.getId());
                 RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(scan))).toString());
                 retrofit.create(ApiService.class).postScans(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -381,7 +392,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                             @Override
                             public void onError(@NonNull Throwable e) {
-                                LogFileUtils.logError(TAG, "scan " + scan.getId() + " posting failed " + e.getMessage());
+                                LogFileUtils.logError(TAG, "scan error " + scan.getId() + " posting failed " + e.getMessage());
                                 if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                     AuthenticationHandler.restoreToken(context);
                                 }
