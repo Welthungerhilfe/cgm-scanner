@@ -287,7 +287,12 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             postMeasurement(measure);
                         }
                     } else {
+                        try {
+                            LogFileUtils.logInfo(TAG, "this is measures/scans to post measureid-> " + measure.getId() + " time-> " + DataFormat.convertMilliSeconsToServerDate(measure.getDate()) + " std code-> " + measure.getStd_test_qr_code());
+                        }catch (Exception e){
+                        }
                         HashMap<Integer, Scan> scans = measure.split(fileLogRepository, session.getEnvironment());
+
                         if (!scans.isEmpty()) {
                             postScans(scans, measure);
                         } else {

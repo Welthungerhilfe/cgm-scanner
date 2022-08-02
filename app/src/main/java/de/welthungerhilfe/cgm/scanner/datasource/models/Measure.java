@@ -41,6 +41,7 @@ import java.util.Set;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.CsvExportableModel;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 
 import static androidx.room.ForeignKey.CASCADE;
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_MEASURE;
@@ -426,12 +427,28 @@ public class Measure extends CsvExportableModel implements Serializable {
 
         //check if measure is ready to be synced
         HashMap<Integer, Scan> output = new HashMap<>();
+
         List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(getId(), environment);
+        try{
+            if(measureArtifacts == null || measureArtifacts.size()==0){
+                LogFileUtils.logInfo("Measure","this is measure error1 "+getId()+" "+getStd_test_qr_code()+" "+getEnvironment()+" "+environment+" "+getQrCode());
+            }
+            LogFileUtils.logInfo("Measure","this is milestone 0 "+getId()+" "+getEnvironment()+" "+environment);
+        }catch (Exception e){
+            LogFileUtils.logInfo("Measure","this is measure error1 catch");
+        }
         for (FileLog log : measureArtifacts) {
             if (log.getServerId() == null) {
+                try {
+                    LogFileUtils.logInfo("Measure","this is measure error2 "+log.getMeasureId()+" "+log.getId()+" "+log.getQrCode());
+                }catch (Exception e){
+                    LogFileUtils.logInfo("Measure","this is measure error2 catch");
+                }
                 return output;
             }
         }
+        LogFileUtils.logInfo("Measure","this is milestone 1 "+getId());
+
 
         //create structure to split artifacts by scan step
         FileLog calibration = null;
@@ -444,6 +461,7 @@ public class Measure extends CsvExportableModel implements Serializable {
                 calibration = log;
             }
         }
+        LogFileUtils.logInfo("Measure","this is milestone 2 "+getId());
 
         //fill the structure
         Set<Integer> keys = output.keySet();
@@ -473,6 +491,7 @@ public class Measure extends CsvExportableModel implements Serializable {
                     scanArtifacts.add(artifact);
                 }
             }
+            LogFileUtils.logInfo("Measure","this is milestone 3 "+getId());
 
             //set the artifacts order
             Collections.sort(scanArtifacts, (a, b) -> {
@@ -483,6 +502,7 @@ public class Measure extends CsvExportableModel implements Serializable {
                     return diff;
                 }
             });
+            LogFileUtils.logInfo("Measure","this is milestone 4 "+getId());
 
             //ordering from one
             int order = 0;
@@ -495,6 +515,7 @@ public class Measure extends CsvExportableModel implements Serializable {
                     artifact.setOrder(++order);
                 }
             }
+            LogFileUtils.logInfo("Measure","this is milestone 5 "+getId());
 
             //create scan object
             Scan scan = new Scan();
@@ -511,7 +532,7 @@ public class Measure extends CsvExportableModel implements Serializable {
             scan.setStd_test_qr_code(getStd_test_qr_code());
             output.put(key, scan);
         }
-
+        LogFileUtils.logInfo("Measure","this is milestone 5 "+getId());
         //add calibration file
         if (calibration != null) {
             for (Scan scan : output.values()) {
@@ -524,6 +545,7 @@ public class Measure extends CsvExportableModel implements Serializable {
                 scan.getArtifacts().add(0, artifact);
             }
         }
+        LogFileUtils.logInfo("Measure","this is milestone 6 "+getId());
         return output;
     }
 }
