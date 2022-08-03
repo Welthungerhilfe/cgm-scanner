@@ -491,7 +491,7 @@ public class Measure extends CsvExportableModel implements Serializable {
                     scanArtifacts.add(artifact);
                 }
             }
-            LogFileUtils.logInfo("Measure","this is milestone 3 "+getId());
+            LogFileUtils.logInfo("Measure","this is milestone 3 "+getId()+" "+key);
 
             //set the artifacts order
             Collections.sort(scanArtifacts, (a, b) -> {
@@ -532,7 +532,7 @@ public class Measure extends CsvExportableModel implements Serializable {
             scan.setStd_test_qr_code(getStd_test_qr_code());
             output.put(key, scan);
         }
-        LogFileUtils.logInfo("Measure","this is milestone 6 "+getId()+" "+key);
+        LogFileUtils.logInfo("Measure","this is milestone 6 "+getId());
         //add calibration file
         if (calibration != null) {
             for (Scan scan : output.values()) {
