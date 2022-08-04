@@ -320,6 +320,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         continue;
                     }
                     Person person = personRepository.findPersonByQr(fileLog.getQrCode());
+                    LogFileUtils.logInfo(TAG,"Person consent to sync is "+person);
                     String backendPersonId = person.getServerId();
                     if (backendPersonId == null) {
                         continue;

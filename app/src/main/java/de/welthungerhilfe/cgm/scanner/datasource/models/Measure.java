@@ -430,6 +430,7 @@ public class Measure extends CsvExportableModel implements Serializable {
 
         List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(getId(), environment);
         try{
+            printAllLogFilesWithError(measureArtifacts);
             if(measureArtifacts == null || measureArtifacts.size()==0){
                 LogFileUtils.logInfo("Measure","this is measure error1 "+getId()+" "+getStd_test_qr_code()+" "+getEnvironment()+" "+environment+" "+getQrCode());
             }
@@ -441,6 +442,7 @@ public class Measure extends CsvExportableModel implements Serializable {
             if (log.getServerId() == null) {
                 try {
                     LogFileUtils.logInfo("Measure","this is measure error2 "+log.getMeasureId()+" "+log.getId()+" "+log.getQrCode());
+                    printAllLogFilesWithError(measureArtifacts);
                 }catch (Exception e){
                     LogFileUtils.logInfo("Measure","this is measure error2 catch");
                 }
@@ -547,5 +549,17 @@ public class Measure extends CsvExportableModel implements Serializable {
         }
         LogFileUtils.logInfo("Measure","this is milestone 7 "+getId());
         return output;
+    }
+
+    public static void printAllLogFilesWithError(List<FileLog> measureArtifacts){
+        try {
+            for (FileLog log : measureArtifacts) {
+                LogFileUtils.logInfo("Measure","this is file values in measure id->"+log.getId()+" "+log.getServerId()+" "+log.getStatus()+" "+log.isDeleted()+" "+log.getType()+" "+log.getMeasureId()+" "+log.getPath());
+            }
+        }catch (Exception e){
+
+        }
+
+
     }
 }
