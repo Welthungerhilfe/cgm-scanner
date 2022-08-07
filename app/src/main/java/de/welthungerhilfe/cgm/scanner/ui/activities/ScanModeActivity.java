@@ -94,6 +94,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     boolean scanCompleted = false;
     boolean scanStarted = false;
 
+
     public void scanStanding(View view) {
         SCAN_MODE = AppConstants.SCAN_STANDING;
 
@@ -852,6 +853,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             log.setSchema_version(CgmDatabase.version);
             log.setMeasureId(measure.getId());
             log.setEnvironment(session.getEnvironment());
+
             synchronized (lock) {
                 files.add(log);
             }

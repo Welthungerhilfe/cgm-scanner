@@ -344,8 +344,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
 
                     @Override
                     public void onNext(@NonNull String id) {
-                        LogFileUtils.logInfo(TAG, "File " + file.getPath() + " successfully uploaded");
-
+                        LogFileUtils.logInfo(TAG, "File " + file.getPath() + " successfully uploaded with server id "+id);
                         log.setUploadDate(AppController.getInstance().getUniversalTimestamp());
                         log.setServerId(id);
 
