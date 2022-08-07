@@ -93,8 +93,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     FirebaseAnalytics firebaseAnalytics;
     boolean scanCompleted = false;
     boolean scanStarted = false;
-    int i=0;
-    int j=0;
+
 
     public void scanStanding(View view) {
         SCAN_MODE = AppConstants.SCAN_STANDING;
@@ -854,16 +853,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             log.setSchema_version(CgmDatabase.version);
             log.setMeasureId(measure.getId());
             log.setEnvironment(session.getEnvironment());
-            if(log.getType().equals("rgb") && i < 2){
-                File file = new File(log.getPath());
-                file.delete();
-                i++;
-            }
-            if(log.getType().equals("depth") && j < 3){
-                File file = new File(log.getPath());
-                file.delete();
-                j++;
-            }
+
             synchronized (lock) {
                 files.add(log);
             }
