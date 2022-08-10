@@ -334,6 +334,10 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
         if (retrofit == null) {
             retrofit = SyncingWorkManager.provideRetrofit();
         }
+        if(log.isDeleted()){
+            LogFileUtils.logInfo(TAG, "Uploading file restapi not calling because deleted " + file.getPath());
+            return;
+        }
         retrofit.create(ApiService.class).uploadFiles(sessionManager.getAuthTokenWithBearer(), body, filename).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<String>() {
@@ -347,15 +351,16 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                         LogFileUtils.logInfo(TAG, "File " + file.getPath() + " successfully uploaded with server id "+id);
                         log.setUploadDate(AppController.getInstance().getUniversalTimestamp());
                         log.setServerId(id);
+                        if(log.getServerId()!=null && !log.getServerId().isEmpty()) {
+                            if (file.delete()) {
+                                log.setDeleted(true);
+                                log.setStatus(UPLOADED_DELETED);
+                            } else {
+                                log.setStatus(UPLOADED);
+                            }
 
-                        if (file.delete()) {
-                            log.setDeleted(true);
-                            log.setStatus(UPLOADED_DELETED);
-                        } else {
-                            log.setStatus(UPLOADED);
+                            updateFileLog(log);
                         }
-
-                        updateFileLog(log);
                         resetOnErrorCount();
                     }
 

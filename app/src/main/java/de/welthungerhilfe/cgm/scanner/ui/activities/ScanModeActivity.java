@@ -277,7 +277,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             Crashes.trackError(throwable);
             finish();
         });
-
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
         measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
 
@@ -853,6 +852,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             log.setSchema_version(CgmDatabase.version);
             log.setMeasureId(measure.getId());
             log.setEnvironment(session.getEnvironment());
+
 
             synchronized (lock) {
                 files.add(log);
