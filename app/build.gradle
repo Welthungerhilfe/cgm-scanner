@@ -7,7 +7,7 @@ android {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 24
         targetSdkVersion 30
-        versionCode 719
+        versionCode 720
         versionName "7.4.3"
 
 
