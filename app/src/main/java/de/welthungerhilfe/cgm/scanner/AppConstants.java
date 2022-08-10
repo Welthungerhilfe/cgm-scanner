@@ -147,5 +147,5 @@ public class AppConstants {
 
     public static final String[] workflowsList = {APP_AUTO_DETECT_1_0, APP_HEIGHT_1_0};
 
-
+    public static int scanmodecount = 0;
 }

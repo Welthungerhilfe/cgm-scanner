@@ -426,6 +426,7 @@ public class Measure extends CsvExportableModel implements Serializable {
     public HashMap<Integer, Scan> split(FileLogRepository fileLogRepository, int environment) {
 
         //check if measure is ready to be synced
+        int trashCounter = 0;
         HashMap<Integer, Scan> output = new HashMap<>();
 
         List<FileLog> measureArtifacts = fileLogRepository.getArtifactsForMeasure(getId(), environment);
@@ -443,10 +444,11 @@ public class Measure extends CsvExportableModel implements Serializable {
                 try {
                     LogFileUtils.logInfo("Measure","this is measure error2 == "+log.getMeasureId()+" "+log.getId()+" "+log.getQrCode());
                     printAllLogFilesWithError(log);
+                    trashCounter++;
                 }catch (Exception e){
                     LogFileUtils.logInfo("Measure","this is measure error2 catch");
                 }
-                if(log.isDeleted() == false) {
+                if(log.isDeleted() == false && trashCounter > 8) {
                     return output;
                 }else {
                     trashArtifacts.add(log);
