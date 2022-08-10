@@ -277,7 +277,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             Crashes.trackError(throwable);
             finish();
         });
-
+        AppConstants.scanmodecount++;
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
         measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
 
