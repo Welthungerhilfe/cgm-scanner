@@ -277,7 +277,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             Crashes.trackError(throwable);
             finish();
         });
-        AppConstants.scanmodecount++;
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
         measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
 
@@ -812,8 +811,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    int i=0;
-    int j=0;
     private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight) {
         if (artifactFile.exists()) {
             FileLog log = new FileLog();
@@ -856,29 +853,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             log.setMeasureId(measure.getId());
             log.setEnvironment(session.getEnvironment());
 
-            if(AppConstants.scanmodecount % 2 == 0) {
-                if (log.getType().equals("rgb") && i < 2) {
-                    File file = new File(log.getPath());
-                    file.delete();
-                    i++;
-                }
-                if (log.getType().equals("depth") && j < 3) {
-                    File file = new File(log.getPath());
-                    file.delete();
-                    j++;
-                }
-            }else {
-                if (log.getType().equals("rgb") && i < 4) {
-                    File file = new File(log.getPath());
-                    file.delete();
-                    i++;
-                }
-                if (log.getType().equals("depth") && j < 5) {
-                    File file = new File(log.getPath());
-                    file.delete();
-                    j++;
-                }
-            }
+
             synchronized (lock) {
                 files.add(log);
             }
