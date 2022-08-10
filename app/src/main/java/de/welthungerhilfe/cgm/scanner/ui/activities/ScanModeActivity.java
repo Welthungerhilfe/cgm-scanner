@@ -879,7 +879,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     j++;
                 }
             }
-            Toast.makeText(ScanModeActivity.this,"this is "+i+" "+j,Toast.LENGTH_LONG).show();
             synchronized (lock) {
                 files.add(log);
             }
