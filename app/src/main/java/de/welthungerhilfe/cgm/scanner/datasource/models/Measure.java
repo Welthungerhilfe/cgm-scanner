@@ -449,6 +449,7 @@ public class Measure extends CsvExportableModel implements Serializable {
                     LogFileUtils.logInfo("Measure","this is measure error2 catch");
                 }
                 if(log.isDeleted() == false && trashCounter > 8) {
+                    LogFileUtils.logInfo("Measure","this is inside stop uploading scan "+trashCounter);
                     return output;
                 }else {
                     trashArtifacts.add(log);
