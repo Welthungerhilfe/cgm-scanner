@@ -43,10 +43,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.appcompat.widget.SearchView;
 
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -77,6 +79,7 @@ import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.StatisticsDialogfragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.DeviceCheckFragment;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
@@ -464,13 +467,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 openSearchBar();
                 break;
             case R.id.actionQr:
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    runnable = () -> startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
-                    addResultListener(PERMISSION_CAMERA, listener);
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSION_CAMERA);
-                } else {
-                    startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
-                }
+                StatisticsDialogfragment statisticsDialogfragment = new StatisticsDialogfragment();
+                statisticsDialogfragment.show(getSupportFragmentManager(),"StatisticsDialogfragment");
                 break;
             case R.id.actionFilter:
                 openSort();

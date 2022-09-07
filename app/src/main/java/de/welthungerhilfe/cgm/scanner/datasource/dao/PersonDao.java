@@ -47,6 +47,9 @@ public interface PersonDao {
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE isSynced=0 And environment=:environment ORDER By timestamp")
     List<Person> getSyncablePersons(int environment);
 
+    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE last_updated > :currentDate")
+    List<Person> getPersonStat(long currentDate);
+
     @Insert(onConflict = REPLACE)
     void insertPerson(Person person);
 

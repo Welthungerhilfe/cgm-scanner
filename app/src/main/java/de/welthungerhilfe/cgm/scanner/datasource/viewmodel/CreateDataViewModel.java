@@ -112,7 +112,6 @@ public class CreateDataViewModel extends ViewModel {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-
                 personRepository.insertPerson(person);
                 startSyncImmediate();
                 return null;

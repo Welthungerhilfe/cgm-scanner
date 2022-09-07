@@ -120,6 +120,8 @@ public class Person extends CsvExportableModel implements Serializable {
     @Ignore
     private Measure lastMeasure;
 
+    private long last_updated = 0;
+
 
     public String getServerId() {
         return serverId;
@@ -330,6 +332,14 @@ public class Person extends CsvExportableModel implements Serializable {
             fullname = getName() + " " + getSurname();
         }
         return fullname;
+    }
+
+    public long getLast_updated() {
+        return last_updated;
+    }
+
+    public void setLast_updated(long last_updated) {
+        this.last_updated = last_updated;
     }
 
     @Override

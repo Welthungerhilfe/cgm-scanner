@@ -43,7 +43,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Workflow;
 
-@Database(entities = {Person.class, Measure.class, FileLog.class, Device.class, PostScanResult.class, Workflow.class, LanguageSelected.class}, version = 31)
+@Database(entities = {Person.class, Measure.class, FileLog.class, Device.class, PostScanResult.class, Workflow.class, LanguageSelected.class}, version = 32)
 public abstract class CgmDatabase extends RoomDatabase {
     private static final Object sLock = new Object();
 
@@ -63,7 +63,7 @@ public abstract class CgmDatabase extends RoomDatabase {
 
     public abstract LanguageSelectedDao languageSelectedDao();
 
-    public static final int version = 31;
+    public static final int version = 32;
 
     public static final String DATABASE = "offline_db";
 
@@ -318,6 +318,13 @@ public abstract class CgmDatabase extends RoomDatabase {
         }
     };
 
+    public static final Migration MIGRATION_31_32 = new Migration(31, 32) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE persons ADD COLUMN last_updated INTEGER NOT NULL DEFAULT 0;");
+        }
+    };
+
     public static CgmDatabase getInstance(Context context) {
         synchronized (sLock) {
             if (instance == null) {
@@ -327,7 +334,8 @@ public abstract class CgmDatabase extends RoomDatabase {
                                 MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15,
                                 MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18,MIGRATION_18_19, MIGRATION_19_20,
                                 MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25,
-                                MIGRATION_25_26,MIGRATION_26_27,MIGRATION_27_28,MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31)
+                                MIGRATION_25_26,MIGRATION_26_27,MIGRATION_27_28,MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31,
+                                MIGRATION_31_32)
                         .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
                         .allowMainThreadQueries()
                         .build();

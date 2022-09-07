@@ -88,6 +88,10 @@ public class PersonRepository {
         return database.personDao().getSyncablePersons(environment);
     }
 
+    public List<Person> getPersonStat(long currentDate){
+        return database.personDao().getPersonStat(currentDate);
+    }
+
     public LiveData<List<Person>> getAvailablePersons(PersonFilter filter) {
         String selectClause = "*";
         String whereClause = "p.deleted=0";

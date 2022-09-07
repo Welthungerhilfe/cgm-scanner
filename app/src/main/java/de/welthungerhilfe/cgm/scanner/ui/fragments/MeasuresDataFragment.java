@@ -208,7 +208,8 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         measure.setEnvironment(person.getEnvironment());
         measure.setSynced(false);
         measure.setStd_test_qr_code(session.getStdTestQrCode());
-
+        person.setLast_updated(System.currentTimeMillis());
+        viewModel.savePerson(person);
         viewModel.insertMeasure(measure);
         firebaseAnalytics.logEvent(FirebaseService.MANUAL_MEASURE_STOP,null);
     }

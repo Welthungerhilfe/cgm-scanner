@@ -69,6 +69,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.hardware.Audio;
 import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARCoreCamera;
@@ -206,6 +207,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     public Loc location;
 
     private MeasureRepository measureRepository;
+    private PersonRepository personRepository;
     private FileLogRepository fileLogRepository;
     private HashMap<Integer, ArrayList<Float>> lightScores;
     private ArrayList<FileLog> files;
@@ -323,6 +325,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         getCamera().onCreate(colorCameraPreview, depthCameraPreview, glSurfaceView);
 
         measureRepository = MeasureRepository.getInstance(this);
+        personRepository = PersonRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
         lightScores = new HashMap<>();
         files = new ArrayList<>();
@@ -948,6 +951,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 for (FileLog log : files) {
                     fileLogRepository.insertFileLog(log);
                 }
+                person.setLast_updated(System.currentTimeMillis());
+                personRepository.updatePerson(person);
                 measureRepository.insertMeasure(measure);
             }
 
