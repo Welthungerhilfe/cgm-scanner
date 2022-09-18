@@ -150,6 +150,7 @@ public class AuthenticationHandler {
             case AppConstants.ENV_IN_BMZ:
                 return new String[]{AppConstants.AUTH_IN_BMZ};
             case AppConstants.ENV_NAMIBIA:
+
                 return new String[]{AppConstants.AUTH_NAMIBIA};
             case AppConstants.ENV_NEPAL:
                 return new String[]{AppConstants.AUTH_NEPAL};

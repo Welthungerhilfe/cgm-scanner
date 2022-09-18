@@ -8,7 +8,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 30
         versionCode 722
-        versionName "7.4.4-dev"
+        versionName "7.4.5-dev"
 
 
         manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", arengineValue:"optional"]

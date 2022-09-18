@@ -89,7 +89,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
                     height = measure.getHeight();
                     weight = measure.getWeight();
                 }
-                holder.txtHeight.setText(String.format(Locale.getDefault(), "%.2f", height) + context.getString(R.string.unit_cm));
+                holder.txtHeight.setText(String.format(Locale.getDefault(), "%.1f", height) + context.getString(R.string.unit_cm));
                 holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f", weight) + context.getString(R.string.unit_kg));
             }
         });
