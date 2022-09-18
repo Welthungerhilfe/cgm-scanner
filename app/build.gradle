@@ -7,8 +7,8 @@ android {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 24
         targetSdkVersion 30
-        versionCode 722
-        versionName "7.4.4-dev"
+        versionCode 723
+        versionName "7.4.4"
 
 
         manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", arengineValue:"optional"]
