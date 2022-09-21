@@ -59,6 +59,7 @@ public class SettingsActivity extends BaseActivity {
     public static final String KEY_SHOW_DEPTH = "KEY_SHOW_DEPTH";
     public static final String KEY_UPLOAD_WIFI = "KEY_UPLOAD_WIFI";
     FirebaseAnalytics firebaseAnalytics;
+    String selectedBackend ="";
 
     public void openPerformanceMeasurement(View view) {
         Intent intent = new Intent(SettingsActivity.this, SettingsPerformanceActivity.class);
@@ -118,7 +119,33 @@ public class SettingsActivity extends BaseActivity {
 
         activitySettingsBinding.txtSettingVersion.setText(2, AppController.getInstance().getAppVersion());
         activitySettingsBinding.txtSettingAccount.setText(1, session.getUserEmail());
-        activitySettingsBinding.txtSettingAzureAccount.setText(1, SyncingWorkManager.getAPI());
+        switch (session.getEnvironment()) {
+            case 1:
+                session.setEnvironment(AppConstants.ENV_IN_BMZ);
+                selectedBackend = "Sandbox";
+                break;
+            case 2:
+                session.setEnvironment(AppConstants.ENV_NEPAL);
+                selectedBackend = "Demo/Test";
+                break;
+            case 3:
+                session.setEnvironment(AppConstants.ENV_NAMIBIA);
+                selectedBackend = "India";
+                break;
+            case 4:
+                session.setEnvironment(AppConstants.ENV_DEMO_QA);
+                selectedBackend = "Namibia";
+                break;
+            case 5:
+                session.setEnvironment(AppConstants.ENV_SANDBOX);
+                selectedBackend = "Nepal";
+                break;
+            case 6:
+                session.setEnvironment(AppConstants.ENV_UGANDA);
+                selectedBackend = "Uganda";
+                break;
+        }
+        activitySettingsBinding.txtSettingAzureAccount.setText(1, selectedBackend);
 
         String code = session.getLanguage();
         switch (code) {

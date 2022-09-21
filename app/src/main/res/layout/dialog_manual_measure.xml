@@ -140,6 +140,39 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="2dp"
                     android:layout_marginRight="5dp"
+                    android:src="@drawable/ic_weight" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <de.welthungerhilfe.cgm.scanner.ui.views.UnitEditText
+                        android:id="@+id/editManualWeight"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/measure_weight"
+                        android:inputType="numberDecimal"
+                        android:singleLine="true"
+                        app:unit="@string/unit_kg"
+                        app:unitMargin="3dp"
+                        app:unitPadding="2dp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginRight="5dp"
                     android:src="@drawable/ic_height" />
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -161,38 +194,7 @@
 
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal">
 
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="2dp"
-                    android:layout_marginRight="5dp"
-                    android:src="@drawable/ic_weight" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <de.welthungerhilfe.cgm.scanner.ui.views.UnitEditText
-                        android:id="@+id/editManualWeight"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/measure_weight"
-                        android:inputType="numberDecimal"
-                        android:singleLine="true"
-                        app:unit="@string/unit_kg"
-                        app:unitMargin="3dp"
-                        app:unitPadding="2dp" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"

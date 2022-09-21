@@ -38,6 +38,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
+import java.util.Locale;
+
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.DialogManualMeasureBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
@@ -237,9 +239,9 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         dialogManualMeasureBinding.editManualDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, measure.getDate()));
         if (measure.getLocation() != null)
             dialogManualMeasureBinding.editManualLocation.setText(measure.getLocation().getAddress());
-            dialogManualMeasureBinding.editManualHeight.setText(String.valueOf(measure.getHeight()));
-            dialogManualMeasureBinding.editManualWeight.setText(String.valueOf(measure.getWeight()));
-            dialogManualMeasureBinding.editManualMuac.setText(String.valueOf(measure.getMuac()));
+            dialogManualMeasureBinding.editManualHeight.setText(String.format(Locale.getDefault(), "%.1f", measure.getHeight()));
+            dialogManualMeasureBinding.editManualWeight.setText(String.format(Locale.getDefault(), "%.3f", measure.getWeight()));
+            dialogManualMeasureBinding.editManualMuac.setText(String.format(Locale.getDefault(), "%.1f", measure.getMuac()));
             dialogManualMeasureBinding.checkManualOedema.setChecked(!measure.isOedema());
 
         location = measure.getLocation();
