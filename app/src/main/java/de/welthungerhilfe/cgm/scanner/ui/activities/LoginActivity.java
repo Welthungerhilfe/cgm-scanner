@@ -227,6 +227,10 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                     session.setEnvironment(AppConstants.ENV_UGANDA);
                     selectedBackend = "uganda";
                     break;
+                case R.id.rb_bangladesh:
+                    session.setEnvironment(AppConstants.ENV_BAN);
+                    selectedBackend = "bangladesh";
+                    break;
             }
         }
     }

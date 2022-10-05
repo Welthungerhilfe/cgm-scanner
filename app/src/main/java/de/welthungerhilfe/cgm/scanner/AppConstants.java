@@ -27,6 +27,7 @@ public class AppConstants {
     public static final String AUTH_NAMIBIA = "{OAUTH_SCOPE_NAMIBIA}";
     public static final String AUTH_NEPAL = "{OAUTH_SCOPE_NEPAL}";
     public static final String AUTH_UGANDA = "{OAUTH_SCOPE_UGANDA}";
+    public static final String AUTH_BAN = "{OAUTH_SCOPE_BAN}";
 
 
     public static final String API_URL_SANDBOX = "{API_URL_SANDBOX}/";
@@ -35,6 +36,8 @@ public class AppConstants {
     public static final String API_URL_NAMIBIA = "{API_URL_NAMIBIA}/";
     public static final String API_URL_NEPAL = "{API_URL_NEPAL}/";
     public static final String API_URL_UGANDA = "{API_URL_UGANDA}/";
+    public static final String API_URL_BAN = "{API_URL_BAN}/";
+
 
     public static final String API_TESTING_URL = "http://192.168.43.252:5001/api/";
 
@@ -48,6 +51,9 @@ public class AppConstants {
     public static final int ENV_NAMIBIA = 4;
     public static final int ENV_NEPAL = 5;
     public static final int ENV_UGANDA = 6;
+    public static final int ENV_BAN = 7;
+
+
 
 
     public static final int MAX_IMAGE_SIZE = 512;

@@ -129,6 +129,8 @@ public class AuthenticationHandler {
                 return R.raw.auth_config_nepal;
             case AppConstants.ENV_UGANDA:
                 return R.raw.auth_config_uganda;
+            case AppConstants.ENV_BAN:
+                return R.raw.auth_config_bangladesh;
             default:
                 Log.e(TAG, "Environment not configured");
                 System.exit(0);
@@ -156,6 +158,8 @@ public class AuthenticationHandler {
                 return new String[]{AppConstants.AUTH_NEPAL};
             case AppConstants.ENV_UGANDA:
                 return new String[]{AppConstants.AUTH_UGANDA};
+            case AppConstants.ENV_BAN:
+                return new String[]{AppConstants.AUTH_BAN};
             default:
                 Log.e(TAG, "Environment not configured");
                 System.exit(0);

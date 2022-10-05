@@ -107,6 +107,18 @@
                         android:textColor="@color/colorPrimary"
                         android:textSize="18sp" />
 
+                    <RadioButton
+                        android:id="@+id/rb_bangladesh"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/colorPrimary"
+                        android:fontFamily="sans-serif-medium"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:text="Bangladesh"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="18sp" />
+
 
                     <RadioButton
                         android:id="@+id/rb_demo_qa"

@@ -42,7 +42,6 @@ public class DeviceCheckActivity extends BaseActivity {
     public static final String KEY_LAST_DEVICE_CHECK_ISSUES = "KEY_LAST_DEVICE_CHECK_ISSUES";
 
 
-   ;
 
     private ArrayList<TutorialData> dataList;
     private ArrayList<DeviceCheckFragment> fragments;
