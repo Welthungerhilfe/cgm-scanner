@@ -126,6 +126,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         activityLoginBinding.rbDemoQa.setOnCheckedChangeListener(this);
         activityLoginBinding.rbSandbox.setOnCheckedChangeListener(this);
         activityLoginBinding.rbUganda.setOnCheckedChangeListener(this);
+        activityLoginBinding.rbBangladesh.setOnCheckedChangeListener(this);
     }
 
 
