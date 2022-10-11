@@ -9,7 +9,7 @@ android {
         targetSdkVersion 30
 
         versionCode 724
-        versionName "7.4.5"
+        versionName "7.4.6-dev"
 
         manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", arengineValue:"optional"]
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
@@ -98,8 +98,9 @@ dependencies {
     implementation 'org.jcodec:jcodec-android:0.2.3'
 
     // Network
-    implementation "com.microsoft.appcenter:appcenter-analytics:2.5.0" //AppCenter analytics
-    implementation "com.microsoft.appcenter:appcenter-crashes:2.5.0" //AppCenter crash reports
+    def appCenterSdkVersion = '4.1.0'
+    implementation "com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}"
+    implementation "com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}"
     implementation 'androidx.room:room-runtime:2.2.5' //database syntax helper
     implementation 'com.android.volley:volley:1.1.1' //Authentication answer parser
     implementation 'com.microsoft.identity.client:msal:2.0.5' //Microsoft authentication
