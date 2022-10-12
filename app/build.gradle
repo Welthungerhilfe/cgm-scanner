@@ -9,7 +9,7 @@ android {
         targetSdkVersion 30
 
         versionCode 724
-        versionName "7.4.6-dev"
+        versionName "7.4.6"
 
         manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", arengineValue:"optional"]
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'

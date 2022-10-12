@@ -139,7 +139,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         LogFileUtils.logInfo(TAG, "CGM-Scanner " + AppController.getInstance().getAppVersion() + " started");
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
-        LogFileUtils.writeAppCenter(sessionManager,"SCAN_ERROR","Scan not uploading due to some artifact missing");
         if (session.getStdTestQrCode() != null) {
             if (QRScanActivity.isValidStdTestQrCode(session.getStdTestQrCode()) != QRScanActivity.STDTEST.VALID) {
                 session.setStdTestQrCode(null);
