@@ -26,6 +26,10 @@ import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.Settings;
 
+import com.microsoft.appcenter.AppCenter;
+import com.microsoft.appcenter.analytics.Analytics;
+import com.microsoft.appcenter.crashes.Crashes;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -47,6 +51,9 @@ public class AppController extends Application {
         overrideFont(getApplicationContext(), "SERIF", "roboto.ttf");
 
         mInstance = this;
+
+        AppCenter.start(this, AppConstants.APP_CENTER_KEY,
+                Analytics.class, Crashes.class);
 
     }
 

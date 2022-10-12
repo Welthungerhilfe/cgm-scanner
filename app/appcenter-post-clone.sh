@@ -24,10 +24,14 @@ APP_OAUTH_PRODUCTION_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_
 APP_OAUTH_NAMIBIA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_namibia.json
 APP_OAUTH_NEPAL_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_nepal.json
 APP_OAUTH_UGANDA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_uganda.json
+APP_OAUTH_BANGLADESH_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_bangladesh.json
+
 APP_CONSTANTS=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/AppConstants.java
 APP_SPLASH_ACTIVITY=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/ui/activities/SplashActivity.java
 
+
 echo "Updating API KEYS"
+sed -i '' "s|{APP_CENTER_KEY}|$APP_CENTER_KEY|g" $APP_CONSTANTS
 sed -i '' "s|{APP_CENTER_KEY}|$APP_CENTER_KEY|g" $APP_SPLASH_ACTIVITY
 sed -i '' "s|{GOOGLE_MAPS_KEY}|$GOOGLE_MAPS_KEY|g" $APP_MANIFEST_FILE
 sed -i '' "s|{OAUTH_PATH}|$OAUTH_PATH|g" $APP_MANIFEST_FILE
@@ -73,3 +77,10 @@ sed -i '' "s|{OAUTH_REDIRECT_URL}|$OAUTH_REDIRECT_URL|g" $APP_OAUTH_UGANDA_JSON
 sed -i '' "s|{OAUTH_URL_UGANDA}|$OAUTH_URL_UGANDA|g" $APP_OAUTH_UGANDA_JSON
 sed -i '' "s|{OAUTH_SCOPE_UGANDA}|$OAUTH_SCOPE_UGANDA|g" $APP_CONSTANTS
 sed -i '' "s|{API_URL_UGANDA}|$API_URL_UGANDA|g" $APP_CONSTANTS
+
+echo "Updating API bangladesh KEYS"
+sed -i '' "s|{OAUTH_CLIENT_ID_BAN}|$OAUTH_CLIENT_ID_BAN|g" $APP_OAUTH_BANGLADESH_JSON
+sed -i '' "s|{OAUTH_REDIRECT_URL}|$OAUTH_REDIRECT_URL|g" $APP_OAUTH_BANGLADESH_JSON
+sed -i '' "s|{OAUTH_URL_BAN}|$OAUTH_URL_BAN|g" $APP_OAUTH_BANGLADESH_JSON
+sed -i '' "s|{OAUTH_SCOPE_BAN}|$OAUTH_SCOPE_BAN|g" $APP_CONSTANTS
+sed -i '' "s|{API_URL_BAN}|$API_URL_BAN|g" $APP_CONSTANTS

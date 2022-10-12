@@ -42,6 +42,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.CsvExportableModel;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 import static androidx.room.ForeignKey.CASCADE;
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_MEASURE;
@@ -423,7 +424,7 @@ public class Measure extends CsvExportableModel implements Serializable {
         return "id,personId,date,type,age,height,weight,muac,headCircumference,artifact,visible,oedema,timestamp,createdBy,deleted,deletedBy,qrCode,schema_version,artifact_synced,uploaded_at,resulted_at,received_at,heightConfidence,weightConfidence,scannedBy,environment,st_qr_code,measure_updated";
     }
 
-    public HashMap<Integer, Scan> split(FileLogRepository fileLogRepository, int environment) {
+    public HashMap<Integer, Scan> split(SessionManager sessionManager,FileLogRepository fileLogRepository, int environment) {
 
         //check if measure is ready to be synced
         int trashCounter = 0;
@@ -450,6 +451,11 @@ public class Measure extends CsvExportableModel implements Serializable {
                 }
                 if(log.isDeleted() == false || trashCounter > 8) {
                     LogFileUtils.logInfo("Measure","this is inside stop uploading scan "+trashCounter);
+                    try {
+                        LogFileUtils.writeAppCenter(sessionManager, "SCAN_ERROR", "this is inside stop uploading scan " + trashCounter);
+                    }catch (Exception e){
+
+                    }
                     return output;
                 }else {
                     trashArtifacts.add(log);

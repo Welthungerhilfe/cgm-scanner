@@ -126,6 +126,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         activityLoginBinding.rbDemoQa.setOnCheckedChangeListener(this);
         activityLoginBinding.rbSandbox.setOnCheckedChangeListener(this);
         activityLoginBinding.rbUganda.setOnCheckedChangeListener(this);
+        activityLoginBinding.rbBangladesh.setOnCheckedChangeListener(this);
     }
 
 
@@ -226,6 +227,10 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                 case R.id.rb_uganda:
                     session.setEnvironment(AppConstants.ENV_UGANDA);
                     selectedBackend = "uganda";
+                    break;
+                case R.id.rb_bangladesh:
+                    session.setEnvironment(AppConstants.ENV_BAN);
+                    selectedBackend = "bangladesh";
                     break;
             }
         }
