@@ -4,12 +4,16 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.microsoft.appcenter.analytics.Analytics;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
@@ -86,6 +90,18 @@ public class LogFileUtils {
     public static void startAsyncToWrite(String str) {
         writeToLogFileAsynck = new WriteToLogFileAsynck();
         writeToLogFileAsynck.execute(str);
+    }
+
+    public static void writeAppCenter(SessionManager sessionManager,String TAG,String msg){
+        Map<String, String> properties = new HashMap<>();
+        properties.put("User",sessionManager.getUserEmail());
+        if(sessionManager.getStdTestQrCode()!=null) {
+            properties.put("Msg", msg + " " + sessionManager.getUserEmail() + " - " + sessionManager.getStdTestQrCode() + " - " + sessionManager.getEnvironment());
+        }
+        else {
+            properties.put("Msg", msg + " " + sessionManager.getUserEmail()+" - " + sessionManager.getEnvironment());
+        }
+        Analytics.trackEvent(TAG, properties);
     }
 
     static class WriteToLogFileAsynck extends AsyncTask<String, Void, Void> {

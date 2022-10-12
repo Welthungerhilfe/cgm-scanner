@@ -29,7 +29,9 @@ APP_OAUTH_BANGLADESH_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_
 APP_CONSTANTS=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/AppConstants.java
 APP_SPLASH_ACTIVITY=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/ui/activities/SplashActivity.java
 
+
 echo "Updating API KEYS"
+sed -i '' "s|{APP_CENTER_KEY}|$APP_CENTER_KEY|g" $APP_CONSTANTS
 sed -i '' "s|{APP_CENTER_KEY}|$APP_CENTER_KEY|g" $APP_SPLASH_ACTIVITY
 sed -i '' "s|{GOOGLE_MAPS_KEY}|$GOOGLE_MAPS_KEY|g" $APP_MANIFEST_FILE
 sed -i '' "s|{OAUTH_PATH}|$OAUTH_PATH|g" $APP_MANIFEST_FILE

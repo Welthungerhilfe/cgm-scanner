@@ -52,7 +52,7 @@ public class AppController extends Application {
 
         mInstance = this;
 
-        AppCenter.start(this, "06dcad3d-049d-458e-8ca6-d022a12344e9",
+        AppCenter.start(this, AppConstants.APP_CENTER_KEY,
                 Analytics.class, Crashes.class);
 
     }

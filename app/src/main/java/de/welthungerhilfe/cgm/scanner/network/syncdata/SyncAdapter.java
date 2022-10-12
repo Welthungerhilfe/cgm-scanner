@@ -27,6 +27,7 @@ import android.os.Build;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.microsoft.appcenter.ingestion.models.Log;
 
 import org.json.JSONObject;
 
@@ -291,13 +292,14 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             LogFileUtils.logInfo(TAG, "this is measures/scans to post measureid-> " + measure.getId() + " time-> " + DataFormat.convertMilliSeconsToServerDate(measure.getDate()) + " std code-> " + measure.getStd_test_qr_code());
                         }catch (Exception e){
                         }
-                        HashMap<Integer, Scan> scans = measure.split(fileLogRepository, session.getEnvironment());
+                        HashMap<Integer, Scan> scans = measure.split(session, fileLogRepository, session.getEnvironment());
 
                         if (!scans.isEmpty()) {
                             postScans(scans, measure);
                         } else {
                             try {
                                 LogFileUtils.logInfo(TAG, "this is measures/scans to sync issue scan empty person id-> " + backendPersonId + " type -> " + measure.getType() + " measureid-> " + measure.getId() + " time-> " + DataFormat.convertMilliSeconsToServerDate(measure.getDate()) + " std code-> " + measure.getStd_test_qr_code());
+                                LogFileUtils.writeAppCenter(session,"SCAN_ERROR","this is measures/scans to sync issue scan empty");
                             }catch (Exception e){
                                 LogFileUtils.logInfo(TAG, "this is measures/scans to sync issue scan empty");
                             }

@@ -63,7 +63,9 @@ import com.orhanobut.dialogplus.ViewHolder;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -137,7 +139,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         LogFileUtils.logInfo(TAG, "CGM-Scanner " + AppController.getInstance().getAppVersion() + " started");
         viewModel = ViewModelProviders.of(this).get(PersonListViewModel.class);
         firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
-        Analytics.trackEvent("this is inside main activity");
+        LogFileUtils.writeAppCenter(sessionManager,"SCAN_ERROR","Scan not uploading due to some artifact missing");
         if (session.getStdTestQrCode() != null) {
             if (QRScanActivity.isValidStdTestQrCode(session.getStdTestQrCode()) != QRScanActivity.STDTEST.VALID) {
                 session.setStdTestQrCode(null);

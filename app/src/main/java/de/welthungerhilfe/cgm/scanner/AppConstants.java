@@ -41,6 +41,7 @@ public class AppConstants {
 
     public static final String API_TESTING_URL = "http://192.168.43.252:5001/api/";
 
+    public static final String APP_CENTER_KEY="{APP_CENTER_KEY}";
 
 
     //Environments Type
