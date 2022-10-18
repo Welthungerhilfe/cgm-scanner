@@ -144,6 +144,11 @@ public class SettingsActivity extends BaseActivity {
                 session.setEnvironment(AppConstants.ENV_UGANDA);
                 selectedBackend = "Uganda";
                 break;
+            case 7:
+                session.setEnvironment(AppConstants.ENV_BAN);
+                selectedBackend = "Bangladesh";
+                break;
+
         }
         activitySettingsBinding.txtSettingAzureAccount.setText(1, selectedBackend);
 
