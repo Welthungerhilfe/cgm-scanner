@@ -8,7 +8,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 30
 
-        versionCode 724
+        versionCode 725
         versionName "7.4.6"
 
 
