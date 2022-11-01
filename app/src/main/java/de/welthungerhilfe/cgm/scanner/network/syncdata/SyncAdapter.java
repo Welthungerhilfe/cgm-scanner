@@ -29,6 +29,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.appcenter.ingestion.models.Log;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -792,6 +793,11 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             LogFileUtils.logError(TAG, "consent " + fileLog.getPath() + " posting failed " + e.getMessage());
+                            try {
+                                LogFileUtils.logError(TAG,"consent request body "+new JSONObject(gson.toJson(consent)));
+                            } catch (JSONException jsonException) {
+                                jsonException.printStackTrace();
+                            }
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                             }
@@ -1159,7 +1165,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
-            List<FileLog> fileLogsList = fileLogRepository.loadAppHeightFileLog();
+            List<FileLog> fileLogsList = fileLogRepository.loadAppHeightFileLog(session.getEnvironment());
             if (fileLogsList.size() == 0) {
                 return;
             }

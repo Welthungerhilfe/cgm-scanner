@@ -123,7 +123,7 @@ public class FileLogRepository {
         return database.fileLogDao().loadAutoDetectedFileLog();
     }
 
-    public List<FileLog> loadAppHeightFileLog() {
-        return database.fileLogDao().loadAppHeightFileLog();
+    public List<FileLog> loadAppHeightFileLog(int environment) {
+        return database.fileLogDao().loadAppHeightFileLog(environment);
     }
 }
