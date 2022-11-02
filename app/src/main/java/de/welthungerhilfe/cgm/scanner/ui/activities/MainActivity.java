@@ -211,7 +211,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         LogFileUtils.logInfo(TAG, "authtoken " + session.getAuthTokenWithBearer());
 
         List<FileLog> fileLogsList = fileLogRepository.loadAppHeightFileLog(session.getEnvironment());
-        List<FileLog> fileLogsListdetect = fileLogRepository.loadAutoDetectedFileLog();
+        List<FileLog> fileLogsListdetect = fileLogRepository.loadAutoDetectedFileLog(session.getEnvironment());
         LogFileUtils.logInfo(TAG,"this is value of height & autodetect "+fileLogsList.size()+" "+fileLogsListdetect.size());
 
 
