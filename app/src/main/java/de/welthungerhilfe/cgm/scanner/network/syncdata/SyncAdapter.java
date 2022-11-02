@@ -1086,7 +1086,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
-            List<FileLog> fileLogsList = fileLogRepository.loadAutoDetectedFileLog();
+            List<FileLog> fileLogsList = fileLogRepository.loadAutoDetectedFileLog(session.getEnvironment());
             if (fileLogsList.size() == 0) {
                 return;
             }

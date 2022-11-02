@@ -119,8 +119,8 @@ public class FileLogRepository {
         return database.fileLogDao().getFileLogByArtifactId(artifactId);
     }
 
-    public List<FileLog> loadAutoDetectedFileLog() {
-        return database.fileLogDao().loadAutoDetectedFileLog();
+    public List<FileLog> loadAutoDetectedFileLog(int environment) {
+        return database.fileLogDao().loadAutoDetectedFileLog(environment);
     }
 
     public List<FileLog> loadAppHeightFileLog(int environment) {
