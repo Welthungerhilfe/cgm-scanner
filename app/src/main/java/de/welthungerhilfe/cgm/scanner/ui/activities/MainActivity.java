@@ -212,7 +212,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         List<FileLog> fileLogsList = fileLogRepository.loadAppHeightFileLog(session.getEnvironment());
         List<FileLog> fileLogsListdetect = fileLogRepository.loadAutoDetectedFileLog();
-        LogFileUtils.logInfo(TAG,"this is value of height & autodetect "+fileLogsList+" "+fileLogsListdetect);
+        LogFileUtils.logInfo(TAG,"this is value of height & autodetect "+fileLogsList.size()+" "+fileLogsListdetect.size());
 
 
     }
