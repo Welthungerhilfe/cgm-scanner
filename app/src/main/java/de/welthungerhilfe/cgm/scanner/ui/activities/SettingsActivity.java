@@ -121,31 +121,24 @@ public class SettingsActivity extends BaseActivity {
         activitySettingsBinding.txtSettingAccount.setText(1, session.getUserEmail());
         switch (session.getEnvironment()) {
             case 1:
-                session.setEnvironment(AppConstants.ENV_IN_BMZ);
                 selectedBackend = "Sandbox";
                 break;
             case 2:
-                session.setEnvironment(AppConstants.ENV_NEPAL);
                 selectedBackend = "Demo/Test";
                 break;
             case 3:
-                session.setEnvironment(AppConstants.ENV_NAMIBIA);
                 selectedBackend = "India";
                 break;
             case 4:
-                session.setEnvironment(AppConstants.ENV_DEMO_QA);
                 selectedBackend = "Namibia";
                 break;
             case 5:
-                session.setEnvironment(AppConstants.ENV_SANDBOX);
                 selectedBackend = "Nepal";
                 break;
             case 6:
-                session.setEnvironment(AppConstants.ENV_UGANDA);
                 selectedBackend = "Uganda";
                 break;
             case 7:
-                session.setEnvironment(AppConstants.ENV_BAN);
                 selectedBackend = "Bangladesh";
                 break;
 

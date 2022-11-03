@@ -57,6 +57,8 @@ import android.widget.Toast;
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.microsoft.appcenter.analytics.Analytics;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
@@ -70,7 +72,10 @@ import java.util.Map;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityMainBinding;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
+import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
@@ -94,6 +99,9 @@ import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 
 import static de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity.KEY_LAST_DEVICE_CHECK_ISSUES;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -103,6 +111,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
 
     private PersonListViewModel viewModel;
+    private FileLogRepository fileLogRepository;
+
 
 
     public void createData(View view) {
@@ -132,7 +142,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        fileLogRepository = FileLogRepository.getInstance(this);
         activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         session = new SessionManager(MainActivity.this);
         LogFileUtils.startSession(MainActivity.this, session);
@@ -199,6 +209,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         });
 
         LogFileUtils.logInfo(TAG, "authtoken " + session.getAuthTokenWithBearer());
+
+        List<FileLog> fileLogsList = fileLogRepository.loadAppHeightFileLog(session.getEnvironment());
+        List<FileLog> fileLogsListdetect = fileLogRepository.loadAutoDetectedFileLog(session.getEnvironment());
+        LogFileUtils.logInfo(TAG,"this is value of height & autodetect "+fileLogsList.size()+" "+fileLogsListdetect.size());
+
+
     }
 
     @Override
