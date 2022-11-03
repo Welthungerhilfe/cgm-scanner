@@ -9,8 +9,8 @@ android {
         targetSdkVersion 30
 
 
-        versionCode 726
-        versionName "7.4.7-dev"
+        versionCode 727
+        versionName "7.4.7"
 
 
 

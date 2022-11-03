@@ -127,7 +127,7 @@
                         android:id="@+id/txtSettingAzureAccount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:descriptionText="@string/azure_account" />
+                        app:descriptionText="Selected organization" />
                 </LinearLayout>
 
                 <LinearLayout
