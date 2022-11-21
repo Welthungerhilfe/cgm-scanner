@@ -198,6 +198,7 @@ public class SessionManager {
     public String getAuthToken() {
         if (BuildConfig.DEBUG) {
             return null;
+
         } else {
             return pref.getString(KEY_USER_TOKEN, null);
         }

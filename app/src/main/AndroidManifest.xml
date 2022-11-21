@@ -101,7 +101,8 @@
 
         <activity
             android:name=".ui.activities.SplashActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -180,7 +181,7 @@
                 -->
                 <data
                     android:host="de.welthungerhilfe.cgm.scanner"
-                    android:path="{OAUTH_PATH}"
+                    android:path="/1yf0pLcYkjlLIHk4lnmTM2N7D2w="
                     android:scheme="msauth" />
             </intent-filter>
         </activity>

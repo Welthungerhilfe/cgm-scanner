@@ -77,7 +77,7 @@ public class SyncingWorkManager extends Worker {
     }
 
     public static String getAPI() {
-        if (BuildConfig.DEBUG) {
+       if (BuildConfig.DEBUG) {
             return "localhost";
         }
         Log.d(TAG, "Url backend " + getUrl());

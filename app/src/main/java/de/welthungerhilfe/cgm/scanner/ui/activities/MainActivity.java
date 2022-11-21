@@ -30,7 +30,9 @@ import androidx.lifecycle.ViewModelProviders;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -42,6 +44,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.appcompat.widget.SearchView;
 
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -64,6 +67,8 @@ import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 
 import java.io.File;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -214,7 +219,20 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         List<FileLog> fileLogsListdetect = fileLogRepository.loadAutoDetectedFileLog(session.getEnvironment());
         LogFileUtils.logInfo(TAG,"this is value of height & autodetect "+fileLogsList.size()+" "+fileLogsListdetect.size());
 
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(
+                    "de.welthungerhilfe.cgm.scanner",
+                    PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                Log.i("KeyHash:", "this is key hash"+Base64.encodeToString(md.digest(), Base64.DEFAULT));
+            }
+        } catch (PackageManager.NameNotFoundException e) {
 
+        } catch (NoSuchAlgorithmException e) {
+
+        }
     }
 
     @Override

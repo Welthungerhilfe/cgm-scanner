@@ -81,4 +81,7 @@ public interface FileLogDao {
 
     @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND childHeightSynced=0 AND type='depth' AND environment=:environment ORDER BY createDate")
     List<FileLog> loadAppHeightFileLog(int environment);
+
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND poseScoreSynced=0 AND type='rgb' AND environment=:environment ORDER BY createDate")
+    List<FileLog> loadAppPoseScoreFileLog(int environment);
 }

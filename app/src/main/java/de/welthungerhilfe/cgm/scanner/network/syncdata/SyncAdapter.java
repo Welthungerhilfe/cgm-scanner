@@ -40,6 +40,7 @@ import java.util.UUID;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
+import de.welthungerhilfe.cgm.scanner.Utils;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Artifact;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
@@ -51,6 +52,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ReceivedResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAppHeight;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAppScore;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAutoDetect;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Results;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultsData;
@@ -1079,6 +1081,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         lastSyncResultTimeStamp = System.currentTimeMillis();
         postAutoDetectResult();
         postAppHeightResult();
+        postAppPoseScoreResult();
     }
 
     public void postAutoDetectResult() {
@@ -1239,5 +1242,117 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         }
     }
 
+
+    public void postAppPoseScoreResult() {
+        try {
+            Gson gson = new GsonBuilder()
+                    .excludeFieldsWithoutExposeAnnotation()
+                    .create();
+            List<FileLog> fileLogsList = fileLogRepository.loadAppPoseScoreFileLog(session.getEnvironment());
+            if (fileLogsList.size() == 0) {
+                return;
+            }
+            String workflow[] = AppConstants.APP_POSE_PREDICITION_1_0.split("-");
+            String appPoseScoreWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
+            if (appPoseScoreWorkFlowId == null) {
+                return;
+            }
+            ArrayList<Results> resultList = new ArrayList();
+            for (FileLog fileLog : fileLogsList) {
+                ResultAppScore resultAppScore = new ResultAppScore();
+                resultAppScore.setId(UUID.randomUUID().toString());
+                resultAppScore.setGenerated(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
+                resultAppScore.setScan(fileLog.getScanServerId());
+                resultAppScore.setWorkflow(appPoseScoreWorkFlowId);
+                ArrayList<String> sourceArtifacts = new ArrayList<>();
+                sourceArtifacts.add(fileLog.getArtifactId());
+                resultAppScore.setSource_artifacts(sourceArtifacts);
+                ArrayList<String> sourceResults = new ArrayList<>();
+                resultAppScore.setSource_results(sourceResults);
+                ResultAppScore.Data data = new ResultAppScore.Data();
+                data.setPoseScore(fileLog.getPoseScore());
+                data.setPoseCoordinates(formatPoseCoordinates(fileLog.getPoseCoordinates(),fileLog.getPoseScore()));
+                resultAppScore.setData(data);
+                resultList.add(resultAppScore);
+            }
+            ResultsData resultsData = new ResultsData();
+            resultsData.setResults(resultList);
+
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
+            LogFileUtils.logError(TAG,"pose score offline body  "+new JSONObject(gson.toJson(resultsData)));
+
+            onThreadChange(1);
+            LogFileUtils.logInfo(TAG, "posting appPoseScore workflows... ");
+            retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<ResultsData>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull ResultsData resultsData1) {
+                            LogFileUtils.logInfo(TAG, "AppPoseScore workflow successfully posted...");
+                            for (Results results : resultsData1.getResults()) {
+                                FileLog fileLog = fileLogRepository.getFileLogByArtifactId(results.getSource_artifacts().get(0));
+                                fileLog.setPoseScoreSynced(true);
+                                fileLogRepository.updateFileLog(fileLog);
+                            }
+                            updated = true;
+                            updateDelay = 0;
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            LogFileUtils.logError(TAG, "AppPoseScore workflow posting failed " + e.getMessage());
+
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(context);
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            LogFileUtils.logException(e);
+        }
+    }
+
+    public String formatPoseCoordinates(String poseCoordinates, float poseScore){
+        String full = null;
+
+        try {
+        String[] result = poseCoordinates.split(" ");
+        int i,j;
+        String key_points_coordinate = "\"key_points_coordinate\":[";
+        String key_points_prob = "\"key_points_prob\":[";
+        for(i=0 ; i<result.length;i++){
+            if(result[i] != null && !result[i].trim().isEmpty()) {
+                String[] result1 = result[i].split(",");
+                String landmarkType = Utils.getLandmarkType(i);
+                if(result1!=null) {
+                    key_points_coordinate = key_points_coordinate + "{" + "\""+landmarkType+"\":{\"x\":\"" + result1[1] + "\"," + "\"y\":\"" + result1[2] + "\"}},";
+                    key_points_prob = key_points_prob + "{" + "\""+landmarkType+"\":{\"score\":\"" + result1[0] + "\"}},";
+                }
+            }
+
+
+        }
+
+            full = "{\"body_pose_score\":\"" + poseScore + "\"," + key_points_coordinate.substring(0, key_points_coordinate.length() - 1) + "],"
+                    + key_points_prob.substring(0, key_points_prob.length() - 1) + "]}";
+        }catch (Exception e){
+            LogFileUtils.logException(e);
+
+        }
+        return full;
+
+    }
 
 }

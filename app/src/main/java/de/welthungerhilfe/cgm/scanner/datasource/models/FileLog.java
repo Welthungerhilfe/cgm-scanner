@@ -56,6 +56,9 @@ public class FileLog extends CsvExportableModel implements Serializable {
     private String artifactId;
     private boolean autoDetectSynced;
     private boolean childHeightSynced;
+    private boolean poseScoreSynced;
+    private float poseScore;
+    private String poseCoordinates;
 
     @NonNull
     public String getId() {
@@ -240,6 +243,30 @@ public class FileLog extends CsvExportableModel implements Serializable {
 
     public boolean isChildHeightSynced() {
         return childHeightSynced;
+    }
+
+    public float getPoseScore() {
+        return poseScore;
+    }
+
+    public void setPoseScore(float poseScore) {
+        this.poseScore = poseScore;
+    }
+
+    public String getPoseCoordinates() {
+        return poseCoordinates;
+    }
+
+    public void setPoseCoordinates(String poseCoordinates) {
+        this.poseCoordinates = poseCoordinates;
+    }
+
+    public boolean isPoseScoreSynced() {
+        return poseScoreSynced;
+    }
+
+    public void setPoseScoreSynced(boolean poseScoreSynced) {
+        this.poseScoreSynced = poseScoreSynced;
     }
 
     @Override
