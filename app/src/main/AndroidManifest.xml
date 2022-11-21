@@ -168,7 +168,8 @@
             android:name=".ui.activities.UploadManagerActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name="com.microsoft.identity.client.BrowserTabActivity">
+        <activity android:name="com.microsoft.identity.client.BrowserTabActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
