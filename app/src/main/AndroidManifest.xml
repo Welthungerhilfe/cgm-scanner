@@ -181,7 +181,7 @@
                 -->
                 <data
                     android:host="de.welthungerhilfe.cgm.scanner"
-                    android:path="/1yf0pLcYkjlLIHk4lnmTM2N7D2w="
+                    android:path="{OAUTH_PATH}"
                     android:scheme="msauth" />
             </intent-filter>
         </activity>
