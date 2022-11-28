@@ -69,7 +69,7 @@ public class AppConstants {
     public static final String VAL_SEX_MALE = "male";
 
     public static final String VAL_MEASURE_MANUAL = "manual";
-    public static final String VAL_MEASURE_AUTO = "v1.2.0";
+    public static final String VAL_MEASURE_AUTO = "v1.2.1";
 
     public static final String LANG_ENGLISH = "en";
     public static final String LANG_GERMAN = "de";
@@ -152,6 +152,8 @@ public class AppConstants {
 
     public static final String APP_HEIGHT_1_0 = "app_height-1.0";
 
-    public static final String[] workflowsList = {APP_AUTO_DETECT_1_0, APP_HEIGHT_1_0};
+    public static final String APP_POSE_PREDICITION_1_0 = "app_pose_predicition-1.0";
+
+    public static final String[] workflowsList = {APP_AUTO_DETECT_1_0, APP_HEIGHT_1_0, APP_POSE_PREDICITION_1_0};
 
 }

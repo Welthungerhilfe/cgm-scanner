@@ -6,11 +6,13 @@ buildscript {
         google()
         jcenter()
        // maven { url "https://maven.aliyun.com/repository/jcenter" }
-        maven { url "http://developer.huawei.com/repo/" }
+        maven { url "http://developer.huawei.com/repo/"
+            allowInsecureProtocol = true
+        }
         maven { url "https://kotlin.bintray.com/kotlinx/" }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.2'
+        classpath 'com.android.tools.build:gradle:7.0.2'
         classpath 'com.google.gms:google-services:4.3.10'
     }
 }
@@ -34,6 +36,7 @@ allprojects {
         }
         maven {
             url "http://developer.huawei.com/repo/"
+            allowInsecureProtocol = true
         }
         maven {
             url 'https://pkgs.dev.azure.com/MicrosoftDeviceSDK/DuoSDK-Public/_packaging/Duo-SDK-Feed/maven/v1'

@@ -126,4 +126,8 @@ public class FileLogRepository {
     public List<FileLog> loadAppHeightFileLog(int environment) {
         return database.fileLogDao().loadAppHeightFileLog(environment);
     }
+
+    public List<FileLog> loadAppPoseScoreFileLog(int environment) {
+        return database.fileLogDao().loadAppPoseScoreFileLog(environment);
+    }
 }

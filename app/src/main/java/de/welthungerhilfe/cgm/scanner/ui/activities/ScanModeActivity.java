@@ -30,6 +30,7 @@ import android.location.LocationManager;
 import android.media.MediaActionSound;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -45,13 +46,22 @@ import androidx.appcompat.app.ActionBar;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.pose.Pose;
+import com.google.mlkit.vision.pose.PoseDetection;
+import com.google.mlkit.vision.pose.PoseDetector;
+import com.google.mlkit.vision.pose.PoseLandmark;
+import com.google.mlkit.vision.pose.accurate.AccuratePoseDetectorOptions;
 import com.microsoft.appcenter.crashes.Crashes;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -251,6 +261,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private AbstractARCamera mCameraInstance;
     private ImageView mOutline;
     private float mOutlineAlpha = 1;
+    AccuratePoseDetectorOptions options;
+    PoseDetector poseDetector;
 
     public void onStart() {
         super.onStart();
@@ -348,6 +360,13 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         activityScanModeBinding.scanType1.setListener(1, this);
         activityScanModeBinding.scanType2.setListener(2, this);
         activityScanModeBinding.scanType3.setListener(3, this);
+
+         options =
+                new AccuratePoseDetectorOptions.Builder()
+                        .setDetectorMode(AccuratePoseDetectorOptions.SINGLE_IMAGE_MODE)
+                        .build();
+        poseDetector = PoseDetection.getClient(options);
+
     }
 
     @Override
@@ -625,7 +644,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     @Override
     public void onColorDataReceived(Bitmap bitmap, int frameIndex) {
-        if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
+        Log.i(TAG,"this is value of bitmap & frameindex "+bitmap+" "+frameIndex);
+        createPose(bitmap, frameIndex);
+    }
+
+    public void onPostColorDataReceived(Bitmap bitmap, int frameIndex, float poseScore, String poseCoordinates){
 
             long profile = System.currentTimeMillis();
             boolean hasCameraCalibration = mCameraInstance.hasCameraCalibration();
@@ -639,7 +662,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     currentImgFilename = currentImgFilename.replace('/', '_');
                     File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
                     BitmapHelper.writeBitmapToFile(bitmap, artifactFile);
-                    onProcessArtifact(artifactFile, ArtifactType.RGB, 0);
+                    onProcessArtifact(artifactFile, ArtifactType.RGB, 0, poseScore, poseCoordinates);
 
                     //save RGB metadata
                     if (artifactFile.exists()) {
@@ -660,7 +683,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                 fileOutputStream.write(cameraCalibration.getBytes());
                                 fileOutputStream.flush();
                                 fileOutputStream.close();
-                                onProcessArtifact(artifactFile, ArtifactType.CALIBRATION, 0);
+                                onProcessArtifact(artifactFile, ArtifactType.CALIBRATION, 0,0,null);
 
                             } catch (Exception e) {
                                 LogFileUtils.logException(e);
@@ -675,7 +698,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             };
             onThreadChange(1);
             executor.execute(thread);
-        }
+
     }
 
     @Override
@@ -712,7 +735,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     //write depthmap
                     File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                     depthmap.save(artifactFile);
-                    onProcessArtifact(artifactFile, ArtifactType.DEPTH, finalHeight);
+                    onProcessArtifact(artifactFile, ArtifactType.DEPTH, finalHeight,0,null);
 
                     //profile process
                     if (artifactFile.exists()) {
@@ -814,7 +837,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight) {
+    private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight, float poseScore, String poseCordinates) {
         if (artifactFile.exists()) {
             FileLog log = new FileLog();
 
@@ -841,6 +864,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             boolean childDetected = getCamera().getPersonCount() == 1;
             log.setChildDetected(childDetected);
             log.setChildHeight(childHeight);
+            log.setPoseScore(poseScore);
+            log.setPoseCoordinates(poseCordinates);
 
             //set metadata
             log.setPath(artifactFile.getPath());
@@ -968,4 +993,67 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             });
         }
     };
+
+    public void createPose(Bitmap bitmap, int frameIndex) {
+        Log.i(TAG,"this is inside point 0");
+
+        if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
+            Log.i(TAG,"this is inside point 1");
+            if(bitmap==null){
+                return;
+            }
+            String[] ans = new String[2];
+            InputImage image = InputImage.fromBitmap(bitmap, 0);
+            poseDetector.process(image)
+                    .addOnSuccessListener(
+                            new OnSuccessListener<Pose>() {
+                                @Override
+                                public void onSuccess(Pose pose) {
+                                    // Task completed successfully
+                                    // ...
+                                    Log.i(TAG,"this is inside point 3");
+
+                                    String poseCoordinates = null;
+                                    float poseTotal = 0.0f;
+                                    float poseScore = 0.0f;
+
+                                    List<PoseLandmark> allPoseLandmarks = pose.getAllPoseLandmarks();
+                                    if (allPoseLandmarks != null && allPoseLandmarks.size() > 0) {
+                                        poseCoordinates = "";
+                                        for (int i = 0; i < allPoseLandmarks.size(); i++) {
+                                            poseCoordinates = poseCoordinates+" "+ allPoseLandmarks.get(i).getInFrameLikelihood() + "," +allPoseLandmarks.get(i).getPosition().x+","+allPoseLandmarks.get(i).getPosition().y;
+                                            poseTotal = poseTotal + allPoseLandmarks.get(i).getInFrameLikelihood();
+                                        }
+                                        poseScore = (float) (poseTotal / 33.0);
+                                        Log.i("ScaneModeActivity", "this is value pf pose " + poseScore + " " + poseCoordinates);
+
+
+                                        ans[0] = String.valueOf(poseScore);
+                                        ans[1] = poseCoordinates;
+
+                                    }
+                                        if(ans[0]==null){
+                                            ans[0]="0.0";
+                                        }
+                                    Log.i(TAG,"this is inside point 4" + ans[0] + " " + ans[1]);
+
+                                    onPostColorDataReceived(bitmap, frameIndex, Float.parseFloat(ans[0]), ans[1]);
+
+                                }
+                            })
+                    .addOnFailureListener(
+                            new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    // Task failed with an exception
+                                    // ...
+                                    Log.i(TAG,"this is inside point 5");
+
+                                    onPostColorDataReceived(bitmap, frameIndex, 0.0f, null);
+
+                                }
+                            });
+        }
+    }
+
 }
