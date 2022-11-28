@@ -18,11 +18,14 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.syncdata;
 
+import static android.content.Context.TELEPHONY_SERVICE;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.telephony.TelephonyManager;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
@@ -51,6 +54,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ReceivedResult;
+import de.welthungerhilfe.cgm.scanner.datasource.models.RemainingData;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAppHeight;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAppScore;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAutoDetect;
@@ -209,6 +213,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             LogFileUtils.logInfo(TAG, "start updating");
             synchronized (getLock()) {
                 try {
+                  //  postRemainingData();
                     processPersonQueue();
                     processMeasureQueue();
                     processDeviceQueue();
@@ -1335,7 +1340,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         for(i=0 ; i<result.length;i++){
             if(result[i] != null && !result[i].trim().isEmpty()) {
                 String[] result1 = result[i].split(",");
-                String landmarkType = Utils.getLandmarkType(i);
+                String landmarkType = Utils.getLandmarkType(i-1);
                 if(result1!=null) {
                     key_points_coordinate = key_points_coordinate + "{" + "\""+landmarkType+"\":{\"x\":\"" + result1[1] + "\"," + "\"y\":\"" + result1[2] + "\"}},";
                     key_points_prob = key_points_prob + "{" + "\""+landmarkType+"\":{\"score\":\"" + result1[0] + "\"}},";
@@ -1354,5 +1359,70 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         return full;
 
     }
+
+    public void postRemainingData() {
+        try {
+            Gson gson = new GsonBuilder()
+                    .excludeFieldsWithoutExposeAnnotation()
+                    .create();
+            RemainingData remainingData = new RemainingData();
+            remainingData.setArtifact((int) fileLogRepository.getArtifactCount());
+            remainingData.setConsent(fileLogRepository.loadConsentFile(session.getEnvironment()).size());
+            remainingData.setDevice_id(AppController.getInstance().getAndroidID());
+            remainingData.setUser(session.getUserEmail());
+            remainingData.setVersion(AppController.getInstance().getAppVersion());
+            remainingData.setMeasure(measureRepository.getSyncableMeasure(session.getEnvironment()).size());
+            remainingData.setPerson(personRepository.getSyncablePerson(session.getEnvironment()).size());
+            remainingData.setScan(0);
+            remainingData.setError("---");
+
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(remainingData))).toString());
+
+            onThreadChange(1);
+            LogFileUtils.logInfo(TAG, "posting remaining data ");
+            retrofit.create(ApiService.class).postRemainingData(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<RemainingData>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+
+                        @Override
+                        public void onNext(@NonNull RemainingData remainingData1) {
+                            LogFileUtils.logInfo(TAG, "RemainingData successfully posted");
+
+                            updated = true;
+                            updateDelay = 0;
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                           LogFileUtils.logError(TAG, "RemainingData posting failed " + e.getMessage());
+
+                            try {
+                                LogFileUtils.logError(TAG,"RemainingData request body "+new JSONObject(gson.toJson(remainingData)));
+                            } catch (JSONException jsonException) {
+                                jsonException.printStackTrace();
+                            }
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(context);
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            LogFileUtils.logException(e);
+        }
+    }
+
+
 
 }

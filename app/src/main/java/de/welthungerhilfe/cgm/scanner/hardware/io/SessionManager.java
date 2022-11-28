@@ -209,12 +209,12 @@ public class SessionManager {
         if (BuildConfig.DEBUG) {
             return null;
 
-            /*Or for testing authorazation like sandbox, demo/qa, pass X-API-KEY with "admin_secret"
+          /*  Or for testing authorazation like sandbox, demo/qa, pass X-API-KEY with "admin_secret"
             in header*/
             //return "admin_secret";
         } else {
             return "bearer " + getAuthToken();
-        }
+       }
 
     }
 

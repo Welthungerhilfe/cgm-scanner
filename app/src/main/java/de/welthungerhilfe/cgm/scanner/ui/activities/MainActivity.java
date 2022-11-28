@@ -219,20 +219,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         List<FileLog> fileLogsListdetect = fileLogRepository.loadAutoDetectedFileLog(session.getEnvironment());
         LogFileUtils.logInfo(TAG,"this is value of height & autodetect "+fileLogsList.size()+" "+fileLogsListdetect.size());
 
-        try {
-            PackageInfo info = getPackageManager().getPackageInfo(
-                    "de.welthungerhilfe.cgm.scanner",
-                    PackageManager.GET_SIGNATURES);
-            for (Signature signature : info.signatures) {
-                MessageDigest md = MessageDigest.getInstance("SHA");
-                md.update(signature.toByteArray());
-                Log.i("KeyHash:", "this is key hash"+Base64.encodeToString(md.digest(), Base64.DEFAULT));
-            }
-        } catch (PackageManager.NameNotFoundException e) {
 
-        } catch (NoSuchAlgorithmException e) {
-
-        }
     }
 
     @Override
@@ -551,7 +538,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             repository.setUpdated(false);
         }
         SyncingWorkManager.startSyncingWithWorkManager(getApplicationContext());
-        deviceCheckPopup();
+      //  deviceCheckPopup();
         checkIfStdTestActive();
     }
 
