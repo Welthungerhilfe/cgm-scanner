@@ -328,7 +328,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final Migration MIGRATION_32_33 = new Migration(32, 33) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE file_logs ADD COLUMN poseScore REAL;");
+            database.execSQL("ALTER TABLE file_logs ADD COLUMN poseScore REAL NOT NULL DEFAULT 0;");
             database.execSQL("ALTER TABLE file_logs ADD COLUMN poseCoordinates TEXT;");
             database.execSQL("ALTER TABLE file_logs ADD COLUMN poseScoreSynced INTEGER NOT NULL DEFAULT 0;");
         }
