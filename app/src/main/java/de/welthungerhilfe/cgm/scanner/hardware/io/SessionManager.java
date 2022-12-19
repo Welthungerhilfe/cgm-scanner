@@ -201,25 +201,25 @@ public class SessionManager {
     }
 
     public String getAuthToken() {
-       /* if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) {
             return null;
 
-        } else {*/
+        } else {
             return pref.getString(KEY_USER_TOKEN, null);
-    //    }
+        }
     }
 
     public String getAuthTokenWithBearer() {
 
-       /* if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) {
             return null;
 
-          *//*  Or for testing authorazation like sandbox, demo/qa, pass X-API-KEY with "admin_secret"
-            in header*//*
+            /*Or for testing authorazation like sandbox, demo/qa, pass X-API-KEY with "admin_secret"
+            in header*/
             //return "admin_secret";
-        } else {*/
+        } else {
             return "bearer " + getAuthToken();
-    //   }
+       }
 
     }
 
