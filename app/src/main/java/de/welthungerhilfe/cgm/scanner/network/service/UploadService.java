@@ -369,6 +369,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                         LogFileUtils.logError(TAG, "File " + file.getPath() + " upload fail - " + e.getMessage());
                         if (NetworkUtils.isExpiredToken(e.getMessage())) {
                             AuthenticationHandler.restoreToken(getApplicationContext());
+                            error401();
                             stopSelf();
                         } else {
                             updateFileLog(log);
@@ -414,5 +415,11 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
 
     private void resetOnErrorCount() {
         onErrorCount = 0;
+    }
+
+    public void error401(){
+        int count = sessionManager.getSessionError()+1;
+        sessionManager.setSessionError(count);
+        LogFileUtils.logInfo(TAG,"error 401 "+count);
     }
 }

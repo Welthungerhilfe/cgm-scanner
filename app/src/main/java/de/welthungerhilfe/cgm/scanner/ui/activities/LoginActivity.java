@@ -106,8 +106,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         //BaseActivity.forceSelectedLanguage(this);
 
-       activityLoginBinding = DataBindingUtil.setContentView(this,R.layout.activity_login);
-       firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
+        activityLoginBinding = DataBindingUtil.setContentView(this,R.layout.activity_login);
+        firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         session = new SessionManager(this);
         languageSelectedRepository = LanguageSelectedRepository.getInstance(this);
         try {

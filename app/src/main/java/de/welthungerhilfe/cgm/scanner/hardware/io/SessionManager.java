@@ -51,6 +51,11 @@ public class SessionManager {
     private final String LOG_FILE = "log_file";
     private final String KEY_STD_TEST_QR_CODE = "key_std_test_qr_code";
     private final String KEY_PERSON_SYNC_TIMESTAMP = "person_sync_timestamp";
+    private final String KEY_SESSION_ERROR = "key_session_error";
+    private final String KEY_LAST_SYNC_DAILY_REPORT= "key_last_sync_daily_report";
+
+
+
 
 
     private SharedPreferences pref;
@@ -209,7 +214,7 @@ public class SessionManager {
         if (BuildConfig.DEBUG) {
             return null;
 
-          /*  Or for testing authorazation like sandbox, demo/qa, pass X-API-KEY with "admin_secret"
+            /*Or for testing authorazation like sandbox, demo/qa, pass X-API-KEY with "admin_secret"
             in header*/
             //return "admin_secret";
         } else {
@@ -225,6 +230,15 @@ public class SessionManager {
 
     public int getEnvironment() {
         return pref.getInt(SELECTED_ENVIRONMENT, AppConstants.ENV_UNKNOWN);
+    }
+
+    public void setSessionError(int count) {
+        editor.putInt(KEY_SESSION_ERROR, count);
+        editor.commit();
+    }
+
+    public int getSessionError() {
+        return pref.getInt(KEY_SESSION_ERROR, 0);
     }
 
     public String getCurrentLogFilePath() {
@@ -252,6 +266,15 @@ public class SessionManager {
 
     public long getLastPersonSyncTimestamp() {
         return pref.getLong(KEY_PERSON_SYNC_TIMESTAMP, 0);
+    }
+
+    public void setLastSyncDailyReport(long timestamp) {
+        editor.putLong(KEY_LAST_SYNC_DAILY_REPORT, timestamp);
+        editor.commit();
+    }
+
+    public long getLastSyncDailyReport() {
+        return pref.getLong(KEY_LAST_SYNC_DAILY_REPORT, 0);
     }
 
     //Store and retrive workflows ids
