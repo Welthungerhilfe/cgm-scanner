@@ -21,8 +21,7 @@ package de.welthungerhilfe.cgm.scanner;
 
 public class AppConstants {
 
-    //public static final String AUTH_SANDBOX = "{OAUTH_SCOPE_SANDBOX}";
-    public static final String AUTH_SANDBOX = "https://cgmb2csandbox.onmicrosoft.com/cgm-api/scannerapp";
+    public static final String AUTH_SANDBOX = "{OAUTH_SCOPE_SANDBOX}";
 
     public static final String AUTH_DEMO_QA = "{OAUTH_SCOPE_QA}";
     public static final String AUTH_IN_BMZ = "{OAUTH_SCOPE_PRODUCTION}";
@@ -32,8 +31,7 @@ public class AppConstants {
     public static final String AUTH_BAN = "{OAUTH_SCOPE_BAN}";
 
 
-   // public static final String API_URL_SANDBOX = "{API_URL_SANDBOX}/";
-    public static final String API_URL_SANDBOX = "https://cgm-be-ci-dev-scanner-api.azurewebsites.net/api//";
+    public static final String API_URL_SANDBOX = "{API_URL_SANDBOX}/";
 
     public static final String API_URL_DEMO_QA = "{API_URL_QA}/";
     public static final String API_URL_IN_BMZ = "{API_URL_PRODUCTION}/";
