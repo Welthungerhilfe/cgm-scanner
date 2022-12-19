@@ -116,6 +116,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     private Context context;
     FirebaseAnalytics firebaseAnalytics;
     private long lastSyncResultTimeStamp = 0L;
+    private long lastSyncDailyReport = 0L;
 
 
     public SyncAdapter(Context context) {
@@ -223,6 +224,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     migrateEnvironmentColumns();
                     getWorkflows();
                     postWorkFlowsResult();
+                    postRemainingData();
 
                     session.setSyncTimestamp(currentTimestamp);
                 } catch (Exception e) {
@@ -411,6 +413,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 LogFileUtils.logError(TAG, "scan error " + scan.getId() + " posting failed " + e.getMessage());
                                 if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                     AuthenticationHandler.restoreToken(context);
+                                    error401();
                                 }
 
                                 onThreadChange(-1);
@@ -495,6 +498,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             }
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
+                                error401();
                             }
                             onThreadChange(-1);
                         }
@@ -560,6 +564,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             LogFileUtils.logError(TAG, "person " + person1.getQrcode() + " putting failed " + e.getMessage());
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
+                                error401();
                             }
                             onThreadChange(-1);
                         }
@@ -634,6 +639,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             LogFileUtils.logError(TAG, "Sync person failed " + e.getMessage());
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
+                                error401();
                             }
                             onThreadChange(-1);
                         }
@@ -693,6 +699,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             LogFileUtils.logError(TAG, "measure " + measure.getId() + " posting failed " + e.getMessage());
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
+                                error401();
                             }
                             onThreadChange(-1);
                         }
@@ -751,6 +758,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             LogFileUtils.logError(TAG, "measure " + measure.getId() + " putting failed " + e.getMessage());
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
+                                error401();
                             }
                             onThreadChange(-1);
                         }
@@ -807,6 +815,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             }
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
+                                error401();
                             }
                             onThreadChange(-1);
                         }
@@ -919,6 +928,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             LogFileUtils.logError(TAG, "scan result " + measure.getId() + " estimate receiving failed " + e.getMessage());
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
+                                error401();
                             }
                             onThreadChange(-1);
                         }
@@ -1154,6 +1164,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
+                                error401();
                             }
                             onThreadChange(-1);
                         }
@@ -1233,6 +1244,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
+                                error401();
                             }
                             onThreadChange(-1);
                         }
@@ -1284,7 +1296,6 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             resultsData.setResults(resultList);
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
-            LogFileUtils.logError(TAG,"pose score offline body  "+new JSONObject(gson.toJson(resultsData)));
 
             onThreadChange(1);
             LogFileUtils.logInfo(TAG, "posting appPoseScore workflows... ");
@@ -1315,6 +1326,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
+                                error401();
                             }
                             onThreadChange(-1);
                         }
@@ -1361,68 +1373,80 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void postRemainingData() {
-        try {
-            Gson gson = new GsonBuilder()
-                    .excludeFieldsWithoutExposeAnnotation()
-                    .create();
-            RemainingData remainingData = new RemainingData();
-            remainingData.setArtifact((int) fileLogRepository.getArtifactCount());
-            remainingData.setConsent(fileLogRepository.loadConsentFile(session.getEnvironment()).size());
-            remainingData.setDevice_id(AppController.getInstance().getAndroidID());
-            remainingData.setUser(session.getUserEmail());
-            remainingData.setVersion(AppController.getInstance().getAppVersion());
-            remainingData.setMeasure(measureRepository.getSyncableMeasure(session.getEnvironment()).size());
-            remainingData.setPerson(personRepository.getSyncablePerson(session.getEnvironment()).size());
-            remainingData.setScan(0);
-            remainingData.setError("---");
 
-            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(remainingData))).toString());
+        lastSyncDailyReport = session.getLastSyncDailyReport();
 
-            onThreadChange(1);
-            LogFileUtils.logInfo(TAG, "posting remaining data ");
-            retrofit.create(ApiService.class).postRemainingData(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<RemainingData>() {
-                        @Override
-                        public void onSubscribe(@NonNull Disposable d) {
+        if((System.currentTimeMillis() - lastSyncResultTimeStamp) > 86400000 ) {
+            session.setLastSyncDailyReport(System.currentTimeMillis());
+            try {
+                Gson gson = new GsonBuilder()
+                        .excludeFieldsWithoutExposeAnnotation()
+                        .create();
+                RemainingData remainingData = new RemainingData();
+                remainingData.setArtifact((int) fileLogRepository.getArtifactCount());
+                remainingData.setConsent(fileLogRepository.loadConsentFile(session.getEnvironment()).size());
+                remainingData.setDevice_id(AppController.getInstance().getAndroidID());
+                remainingData.setUser(session.getUserEmail());
+                remainingData.setVersion(AppController.getInstance().getAppVersion());
+                remainingData.setMeasure(measureRepository.getSyncableMeasure(session.getEnvironment()).size());
+                remainingData.setPerson(personRepository.getSyncablePerson(session.getEnvironment()).size());
+                remainingData.setScan(measureRepository.getSyncableMeasure(session.getEnvironment()).size());
+                remainingData.setError("---");
 
-                        }
+                RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(remainingData))).toString());
 
+                onThreadChange(1);
+                LogFileUtils.logInfo(TAG, "posting remaining data ");
+                retrofit.create(ApiService.class).postRemainingData(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Observer<RemainingData>() {
+                            @Override
+                            public void onSubscribe(@NonNull Disposable d) {
 
-                        @Override
-                        public void onNext(@NonNull RemainingData remainingData1) {
-                            LogFileUtils.logInfo(TAG, "RemainingData successfully posted");
-
-                            updated = true;
-                            updateDelay = 0;
-                            onThreadChange(-1);
-                        }
-
-                        @Override
-                        public void onError(@NonNull Throwable e) {
-                           LogFileUtils.logError(TAG, "RemainingData posting failed " + e.getMessage());
-
-                            try {
-                                LogFileUtils.logError(TAG,"RemainingData request body "+new JSONObject(gson.toJson(remainingData)));
-                            } catch (JSONException jsonException) {
-                                jsonException.printStackTrace();
                             }
-                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
-                                AuthenticationHandler.restoreToken(context);
+
+
+                            @Override
+                            public void onNext(@NonNull RemainingData remainingData1) {
+                                LogFileUtils.logInfo(TAG, "RemainingData successfully posted");
+
+                                updated = true;
+                                updateDelay = 0;
+                                onThreadChange(-1);
                             }
-                            onThreadChange(-1);
-                        }
 
-                        @Override
-                        public void onComplete() {
+                            @Override
+                            public void onError(@NonNull Throwable e) {
+                                LogFileUtils.logError(TAG, "RemainingData posting failed " + e.getMessage());
 
-                        }
-                    });
-        } catch (Exception e) {
-            LogFileUtils.logException(e);
+                                try {
+                                    LogFileUtils.logError(TAG, "RemainingData request body " + new JSONObject(gson.toJson(remainingData)));
+                                } catch (JSONException jsonException) {
+                                    jsonException.printStackTrace();
+                                }
+                                if (NetworkUtils.isExpiredToken(e.getMessage())) {
+                                    AuthenticationHandler.restoreToken(context);
+                                    error401();
+                                }
+                                onThreadChange(-1);
+                            }
+
+                            @Override
+                            public void onComplete() {
+
+                            }
+                        });
+            } catch (Exception e) {
+                LogFileUtils.logException(e);
+            }
         }
     }
 
 
+    public void error401(){
+        int count = session.getSessionError()+1;
+        session.setSessionError(count);
+        LogFileUtils.logInfo(TAG,"error 401 "+count);
+    }
 
 }

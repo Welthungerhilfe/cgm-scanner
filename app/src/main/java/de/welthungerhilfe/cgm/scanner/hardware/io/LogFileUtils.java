@@ -77,6 +77,7 @@ public class LogFileUtils {
         if (sortedByDate.length > 1) {
             Arrays.sort(sortedByDate, (object1, object2) -> Long.compare(object2.lastModified(), object1.lastModified()));
         }
+        dirSize(sortedByDate);
         if (sortedByDate.length > maxFiles) {
             for (int i = maxFiles; i < sortedByDate.length; i++) {
                 File deleteFile = new File(sortedByDate[i].getAbsolutePath());
@@ -92,14 +93,13 @@ public class LogFileUtils {
         writeToLogFileAsynck.execute(str);
     }
 
-    public static void writeAppCenter(SessionManager sessionManager,String TAG,String msg){
+    public static void writeAppCenter(SessionManager sessionManager, String TAG, String msg) {
         Map<String, String> properties = new HashMap<>();
-        properties.put("User",sessionManager.getUserEmail());
-        if(sessionManager.getStdTestQrCode()!=null) {
+        properties.put("User", sessionManager.getUserEmail());
+        if (sessionManager.getStdTestQrCode() != null) {
             properties.put("Msg", msg + " " + sessionManager.getUserEmail() + " - " + sessionManager.getStdTestQrCode() + " - " + sessionManager.getEnvironment());
-        }
-        else {
-            properties.put("Msg", msg + " " + sessionManager.getUserEmail()+" - " + sessionManager.getEnvironment());
+        } else {
+            properties.put("Msg", msg + " " + sessionManager.getUserEmail() + " - " + sessionManager.getEnvironment());
         }
         Analytics.trackEvent(TAG, properties);
     }
@@ -131,6 +131,36 @@ public class LogFileUtils {
                 e.printStackTrace();
             }
         }
+    }
+
+    private static void dirSize(File[] fileList) {
+
+
+        long result = 0;
+
+        if (fileList != null) {
+            for (int i = 0; i < fileList.length; i++) {
+                result = fileList[i].length();
+                Log.i("LogfileUtils ", "this is size of file" + fileList[i].getName() + " " + fileList[i].length());
+
+
+            }
+        }
+        Log.i("LogfileUtils ", "this is size of file" + result / 1048576);
+
+        if ((result / 1048576) > 3060) {
+            for (int i = 1; i < fileList.length; i++) {
+                Log.i("LogfileUtils ", "this is size of file" + fileList[i].getName() + " " + fileList[i].length());
+                File deleteFile = new File(fileList[i].getAbsolutePath());
+                if (deleteFile.exists()) {
+                    deleteFile.delete();
+                }
+
+            }
+
+        }
+
+
     }
 }
 

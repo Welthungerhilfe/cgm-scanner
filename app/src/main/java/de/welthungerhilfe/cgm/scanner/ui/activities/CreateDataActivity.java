@@ -30,10 +30,19 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Looper;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.ActionBar;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.List;
 
@@ -70,6 +79,10 @@ public class CreateDataActivity extends BaseActivity {
     ActivityCreateBinding activityCreateBinding;
 
     SessionManager sessionManager;
+    boolean requestingLocationUpdates = false;
+    LocationRequest locationRequest;
+    private FusedLocationProviderClient fusedLocationClient;
+    private LocationCallback locationCallback;
 
 
     @Override
@@ -92,6 +105,26 @@ public class CreateDataActivity extends BaseActivity {
             activityCreateBinding.viewpager.setCurrentItem(tab);
         });
         viewModel.syncManualMeasurements(qrCode);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        createLocationRequest();
+
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                if (locationResult == null) {
+                    return;
+                }
+                /*for (Location location : locationResult.getLocations()) {
+                    Toast.makeText(CreateDataActivity.this, "data -> " + location.getLongitude() + " " + location.getLatitude(), Toast.LENGTH_LONG).show();
+                }*/
+                getCurrentLocation();
+                stopLocationUpdates();
+
+            }
+
+        };
+
 
     }
 
@@ -177,6 +210,39 @@ public class CreateDataActivity extends BaseActivity {
             activityCreateBinding.toolbar.setBackgroundResource(R.color.colorPrimary);
             activityCreateBinding.tabs.setBackgroundResource(R.color.colorPrimary);
         }
+        if (!requestingLocationUpdates) {
+            requestingLocationUpdates = true;
+            startLocationUpdates();
+        }
     }
 
-}
+    private void startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            return;
+        }
+        fusedLocationClient.requestLocationUpdates(locationRequest,
+                locationCallback,
+                Looper.getMainLooper());
+    }
+
+    protected void createLocationRequest() {
+
+             locationRequest = LocationRequest.create();
+            locationRequest.setInterval(10000);
+            locationRequest.setFastestInterval(5000);
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    private void stopLocationUpdates() {
+        if(requestingLocationUpdates) {
+            requestingLocationUpdates = false;
+            fusedLocationClient.removeLocationUpdates(locationCallback);
+        }
+    }}

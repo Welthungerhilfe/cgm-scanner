@@ -213,13 +213,28 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         });
 
-        LogFileUtils.logInfo(TAG, "authtoken " + session.getAuthTokenWithBearer());
+        LogFileUtils.logInfo(TAG, "this is authtoken" + session.getAuthTokenWithBearer());
 
         List<FileLog> fileLogsList = fileLogRepository.loadAppHeightFileLog(session.getEnvironment());
         List<FileLog> fileLogsListdetect = fileLogRepository.loadAutoDetectedFileLog(session.getEnvironment());
         LogFileUtils.logInfo(TAG,"this is value of height & autodetect "+fileLogsList.size()+" "+fileLogsListdetect.size());
 
+        if(session.getSessionError() > 50){
+            sessionExpirePopUp();
+            session.setSessionError(0);
+        }
 
+       /* String str = "File /data/user/0/de.welthungerhilfe.cgm.scanner/IN_AAH_RJ_22274/measurements/1670824691622/rgb/rgb_IN_AAH_RJ_22274_1670824691622_102_1182.jpg successfully uploaded with server id 43e45ce0-7c2f-11ed-bee4-9feca8086205\n" +
+                "2022-12-15 04:16:36 : Info-UploadService -> File /data/user/0/de.welthungerhilfe.cgm.scanner/IN_AAH_RJ_22274/measurements/1670824691622/rgb/rgb_IN_AAH_RJ_22274_1670824691622_102_1188.jpg successfully uploaded with server id 43ebfe00-7c2f-11ed-bee4-7bc950ba4e25\n" +
+                "2022-12-15 04:16:36 : Info-UploadService -> File /data/user/0/de.welthungerhilfe.cgm.scanner/IN_AAH_RJ_22274/measurements/1670824691622/depth/depth_IN_AAH_RJ_22274_1670824691622_102_1194.depth successfully uploaded with server id 43f83300-7c2f-11ed-bee4-9f0e0c1f7f50\n" +
+                "2022-12-15 04:16:36 : Info-UploadService -> File /data/user/0/de.welthungerhilfe.cgm.scanner/IN_AAH_RJ_22274/measurements/1670824691622/depth/depth_IN_AAH_RJ_22274_1670824691622_102_1188.depth successfully uploaded with server id 43f39f20-7c2f-11ed-bee4-d7f31798d1a8\n";
+        for(int i =0; i<20; i++){
+            for (int j =0; j<20; j++);
+            {
+                str = str + str;
+            }
+            LogFileUtils.logInfo(TAG,"testing "+str);
+        }*/
     }
 
     @Override
@@ -250,8 +265,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     startActivity(new Intent(MainActivity.this, LanguageSelectionActivity.class).putExtra("startFromHomeScreen",true));
                     break;
                 case R.id.menuLogout:
-                    sessionExpirePopUp();
-                  //  showLogoutAlertDialog();
+                    showLogoutAlertDialog();
                     break;
                 case R.id.menuQuitStdTest:
                     showConfirmDialog(R.string.std_test_deactivate, STD_TEST_DEACTIVE);
@@ -625,16 +639,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     public void sessionExpirePopUp(){
         new AlertDialog.Builder(this)
+                .setCancelable(false)
                 .setMessage("Your session has been expired. Please logout and login again")
                 .setPositiveButton("Logout", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         logout();
                     }
-                }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        }).show();
+                }).show();
     }
 }

@@ -10,7 +10,7 @@ android {
 
 
         versionCode 726
-        versionName "7.4.8"
+        versionName "7.4.9-dev"
 
 
 
@@ -134,8 +134,8 @@ dependencies {
     implementation 'com.balysv:material-ripple:1.0.2' //custom tab (e.g.in scan mode)
     implementation 'com.appeaser.sublimepickerlibrary:sublimepickerlibrary:2.1.1' //date selector
     implementation 'com.orhanobut:dialogplus:1.11@aar' //filter popup (scans tab)
-    implementation 'com.google.android.gms:play-services-location:17.0.0' //google location
-    implementation 'com.google.android.gms:play-services-maps:17.0.0' //google maps
+    implementation 'com.google.android.gms:play-services-location:21.0.1' //google location
+    implementation 'com.google.android.gms:play-services-maps:18.1.0' //google maps
     implementation 'com.jaredrummler:material-spinner:1.2.4' //growth chart type selector
     implementation 'com.google.guava:guava:28.1-android' //growth chart data iterator
     implementation 'com.github.bumptech.glide:glide:4.11.0' //image preview
