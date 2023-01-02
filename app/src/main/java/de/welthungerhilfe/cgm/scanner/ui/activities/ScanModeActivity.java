@@ -106,7 +106,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     boolean scanStarted = false;
 
 
-    public void scanStanding(View view) {
+    public void scanStanding() {
         SCAN_MODE = AppConstants.SCAN_STANDING;
 
         activityScanModeBinding.lytScanLying.setActive(false);
@@ -115,7 +115,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         changeMode();
     }
 
-    public void scanLying(View view) {
+    public void scanLying() {
         SCAN_MODE = AppConstants.SCAN_LYING;
 
         activityScanModeBinding.lytScanLying.setActive(true);
@@ -366,6 +366,12 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         .setDetectorMode(AccuratePoseDetectorOptions.SINGLE_IMAGE_MODE)
                         .build();
         poseDetector = PoseDetection.getClient(options);
+
+        if(age > 730){
+            scanStanding();
+        }else{
+            scanLying();
+        }
 
     }
 

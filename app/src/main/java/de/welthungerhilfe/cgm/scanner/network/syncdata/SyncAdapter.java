@@ -26,11 +26,11 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.microsoft.appcenter.ingestion.models.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1375,9 +1375,12 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     public void postRemainingData() {
 
         lastSyncDailyReport = session.getLastSyncDailyReport();
-
-        if((System.currentTimeMillis() - lastSyncResultTimeStamp) > 86400000 ) {
+        Log.i(TAG,"this is remaining data 1 "+lastSyncDailyReport);
+        Log.i(TAG,"this is remaining data 1.5 "+(System.currentTimeMillis() - lastSyncDailyReport));
+        if((System.currentTimeMillis() - lastSyncDailyReport) > 86400000 ) {
             session.setLastSyncDailyReport(System.currentTimeMillis());
+            Log.i(TAG,"this is remaining data 2 "+session.getLastSyncDailyReport());
+
             try {
                 Gson gson = new GsonBuilder()
                         .excludeFieldsWithoutExposeAnnotation()
@@ -1394,6 +1397,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 remainingData.setError("---");
 
                 RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(remainingData))).toString());
+                Log.i(TAG,"this is remaining data 3 "+(new JSONObject(gson.toJson(remainingData))).toString());
 
                 onThreadChange(1);
                 LogFileUtils.logInfo(TAG, "posting remaining data ");
@@ -1409,6 +1413,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             @Override
                             public void onNext(@NonNull RemainingData remainingData1) {
                                 LogFileUtils.logInfo(TAG, "RemainingData successfully posted");
+                                Log.i(TAG,"this is remaining data 4 update ");
 
                                 updated = true;
                                 updateDelay = 0;
@@ -1418,6 +1423,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             @Override
                             public void onError(@NonNull Throwable e) {
                                 LogFileUtils.logError(TAG, "RemainingData posting failed " + e.getMessage());
+                                Log.i(TAG,"this is remaining data 5 error "+e.getMessage());
 
                                 try {
                                     LogFileUtils.logError(TAG, "RemainingData request body " + new JSONObject(gson.toJson(remainingData)));

@@ -219,7 +219,7 @@ public class SessionManager {
             //return "admin_secret";
         } else {
             return "bearer " + getAuthToken();
-       }
+      }
 
     }
 

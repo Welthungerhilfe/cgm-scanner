@@ -63,7 +63,7 @@
                     app:scanmodeactive="true"
                     app:scanmodeicon="@drawable/standing"
                     app:scanmodetext="@string/mode_standing"
-                    android:onClick="scanStanding"/>
+                    />
 
                 <de.welthungerhilfe.cgm.scanner.ui.views.ScanModeView
                     android:id="@+id/lytScanLying"
@@ -72,7 +72,7 @@
                     android:layout_weight="1"
                     app:scanmodeicon="@drawable/lying"
                     app:scanmodetext="@string/mode_lying"
-                    android:onClick="scanLying"/>
+                    />
             </LinearLayout>
 
             <androidx.core.widget.NestedScrollView

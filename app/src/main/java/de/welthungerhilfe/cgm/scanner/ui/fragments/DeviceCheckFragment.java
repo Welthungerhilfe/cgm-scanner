@@ -29,6 +29,7 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
+import android.util.Log;
 import android.util.SizeF;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -75,7 +76,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     private final int CALIBRATIONS_MIN = 10; //measures
     private final int CALIBRATIONS_TIMEOUT = 10000; //miliseconds
     private final float CALIBRATION_TOLERANCE_RGB = 0.04f; //meters
-    private final float CALIBRATION_TOLERANCE_TOF = 0.02f; //meters
+    private final float CALIBRATION_TOLERANCE_TOF = 0.05f; //meters
     private final SizeF CALIBRATION_IMAGE_SIZE = new SizeF(0.15f, 0.15f); //meters
 
     private final int BATTERY_MIN = 50; //percent
@@ -89,6 +90,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     private AbstractARCamera camera;
     private TutorialData tutorialData;
     private FragmentDeviceCheckBinding fragmentDeviceCheckBinding;
+    String TAG = DeviceCheckFragment.class.getSimpleName();
 
     public static DeviceCheckFragment newInstance(TutorialData tutorialData) {
 
@@ -216,6 +218,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         if (frameIndex % 10 == 0) {
             SizeF calibrationRGB = camera.getCalibrationImageSize(false);
             SizeF calibrationToF = camera.getCalibrationImageSize(true);
+            LogFileUtils.logInfo(TAG,"this is device check fragment onDepthDataReceived "+calibrationRGB+" "+calibrationsToF);
             if (calibrationRGB != null) {
                 Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
                     updateCalibration(calibrationRGB, calibrationsRGB);
@@ -357,6 +360,8 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     }
 
     private void updateCalibrationResult(ArrayList<SizeF> calibrations, TestView result, float tolerance, IssueType onFail) {
+        LogFileUtils.logInfo(TAG,"this is device check fragment updateCalibrationResult "+calibrations+" "+tolerance);
+
         if (calibrations.size() == 1) {
             result.setResult(getString(R.string.device_check_testing));
             result.setState(TestView.TestState.TESTING);
@@ -367,8 +372,11 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
             calibrationTimestamp = System.currentTimeMillis();
         } else if ((calibrations.size() == CALIBRATIONS_MIN) || (System.currentTimeMillis() - calibrationTimestamp >= CALIBRATIONS_TIMEOUT)) {
             boolean valid = false;
+
             for (int i = 2; i < calibrations.size(); i++) {
                 SizeF calibration = calibrations.get(i);
+                LogFileUtils.logInfo(TAG,"this is device check fragment height & weight "+calibration.getHeight()+" "+calibration.getWidth()+" "+tolerance);
+
                 float dx = Math.abs(calibration.getWidth() - CALIBRATION_IMAGE_SIZE.getWidth());
                 float dy = Math.abs(calibration.getHeight() - CALIBRATION_IMAGE_SIZE.getHeight());
                 float avg = (dx + dy) / 2.0f;
