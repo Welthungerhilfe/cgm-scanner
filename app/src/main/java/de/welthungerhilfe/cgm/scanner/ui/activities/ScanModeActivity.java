@@ -92,6 +92,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
+import de.welthungerhilfe.cgm.scanner.ui.views.ScanModeView;
 import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
@@ -372,6 +373,20 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }else{
             scanLying();
         }
+
+        activityScanModeBinding.lytScanStanding.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                scanStanding();
+            }
+        });
+
+        activityScanModeBinding.lytScanLying.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                scanLying();
+            }
+        });
 
     }
 
