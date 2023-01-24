@@ -63,6 +63,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.appcenter.analytics.Analytics;
+import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 
@@ -92,6 +93,7 @@ import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.SelectModeDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.StatisticsDialogfragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.DeviceCheckFragment;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
@@ -107,7 +109,7 @@ import static de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity.K
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback {
+public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback, SelectModeDialog.SetupmodeListner {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final long REQUEST_DEVICE_CHECK_TIME = 1000 * 3600 * 12; //12h
@@ -117,6 +119,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     private PersonListViewModel viewModel;
     private FileLogRepository fileLogRepository;
+    ActionBar actionBar;
 
 
 
@@ -172,6 +175,24 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
         };
         viewModel.getPersonListLiveData().observe(this, observer);
+
+        if(session.getSelectedMode() == AppConstants.NO_MODE_SELECTED){
+            if(session.getEnvironmentMode() == AppConstants.CGM_RST_MODE){
+                SelectModeDialog selectModeDialog = new SelectModeDialog();
+                selectModeDialog.show(getSupportFragmentManager(),"SelectModeDialog");
+                activityMainBinding.navMenu.getMenu().findItem(R.id.menuSelectMode).setVisible(true);
+            }else if(session.getEnvironmentMode() == AppConstants.CGM_MODE){
+                session.setSelectedMode(AppConstants.CGM_MODE);
+                activityMainBinding.navMenu.getMenu().findItem(R.id.menuSelectMode).setVisible(false);
+
+                // setUpSelectedMode();
+            } else if(session.getEnvironmentMode() == AppConstants.RST_MODE){
+                session.setSelectedMode(AppConstants.RST_MODE);
+                activityMainBinding.navMenu.getMenu().findItem(R.id.menuSelectMode).setVisible(false);
+
+                // setUpSelectedMode();
+            }
+        }
 
         setupSidemenu();
         setupActionBar();
@@ -267,6 +288,11 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 case R.id.menuQuitStdTest:
                     showConfirmDialog(R.string.std_test_deactivate, STD_TEST_DEACTIVE);
                     break;
+                case R.id.menuSelectMode:
+                    SelectModeDialog selectModeDialog = new SelectModeDialog();
+                    selectModeDialog.show(getSupportFragmentManager(),"SelectModeDialog");
+                    break;
+
             }
             activityMainBinding.drawer.closeDrawers();
             return true;
@@ -278,6 +304,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     public void logout() {
         session.setSigned(false);
+        session.setSelectedMode(AppConstants.NO_MODE_SELECTED);
         session.setCurrentLogFilePath(null);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (WifiStateChangereceiverHelperService.isServiceRunning) {
@@ -292,7 +319,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     private void setupActionBar() {
         activityMainBinding.searchbar.setVisibility(View.GONE);
         setSupportActionBar(activityMainBinding.toolbar);
-        ActionBar actionBar = getSupportActionBar();
+         actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
@@ -316,7 +343,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     private void openSearchBar() {
         activityMainBinding.searchbar.setVisibility(View.VISIBLE);
         setSupportActionBar(activityMainBinding.searchbar);
-        ActionBar actionBar = getSupportActionBar();
+        actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
         invalidateOptionsMenu();
@@ -552,6 +579,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         SyncingWorkManager.startSyncingWithWorkManager(getApplicationContext());
       //  deviceCheckPopup();
         checkIfStdTestActive();
+        setUpSelectedMode();
     }
 
 
@@ -643,5 +671,27 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                         logout();
                     }
                 }).show();
+    }
+
+    public void setUpSelectedMode(){
+        Log.i(TAG,"this is inside setupSelectedmode");
+        if(session.getSelectedMode() == AppConstants.NO_MODE_SELECTED){
+            return;
+        }
+        String title = null;
+        if(session.getSelectedMode() == AppConstants.CGM_MODE){
+            title = "Child Growth Monitor";
+
+        }else {
+            title = "Rapid Survey Tool";
+
+        }
+        activityMainBinding.navMenu.getMenu().findItem(R.id.menuScans).setTitle(title);
+        actionBar.setTitle(title);
+    }
+
+    @Override
+    public void changeSetupMode() {
+        setUpSelectedMode();
     }
 }

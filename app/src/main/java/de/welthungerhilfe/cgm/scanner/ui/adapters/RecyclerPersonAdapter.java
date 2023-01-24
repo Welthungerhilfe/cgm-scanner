@@ -22,6 +22,7 @@ import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -38,6 +39,7 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
@@ -76,10 +78,20 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
     public void onBindViewHolder(RecyclerPersonAdapter.ViewHolder holder, int position) {
         Person person = getItem(position);
         holder.txtName.setText(person.getFullName());
+      //  holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f", weight) + context.getString(R.string.unit_kg));
+
+        holder.tv_age.setText(DataFormat.calculateAge(person.getBirthday()));
+
+        if(person.getSex().equals("male")){
+            holder.iv_child.setImageResource(R.drawable.ic_boy_black);
+        }else {
+            holder.iv_child.setImageResource(R.drawable.ic_girl_black);
+
+        }
 
         repository.getPersonLastMeasureLiveData(person.getId()).observe(context, measure -> {
             SessionManager sessionManager = new SessionManager(context);
-            if (sessionManager.getStdTestQrCode() != null) {
+            /*if (sessionManager.getStdTestQrCode() != null) {
                 holder.txtHeight.setText(R.string.field_concealed);
                 holder.txtWeight.setText(R.string.field_concealed);
             } else {
@@ -89,9 +101,8 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
                     height = measure.getHeight();
                     weight = measure.getWeight();
                 }
-                holder.txtHeight.setText(String.format(Locale.getDefault(), "%.1f", height) + context.getString(R.string.unit_cm));
-                holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f", weight) + context.getString(R.string.unit_kg));
-            }
+                holder.txtHeight.setText(String.format(Locale.getDefault(), "%.1f", height) + context.getString(R.string.unit_cm));*/
+          //  }
         });
 
         if (personDetailListener != null) {
@@ -171,18 +182,21 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
         public TextView txtHeight;
         private View contextMenu;
         private LinearLayout ll_measure, ll_denied;
+        ImageView iv_child;
+        TextView tv_age;
 
         ViewHolder(View itemView) {
             super(itemView);
 
             rytItem = itemView.findViewById(R.id.rytItem);
-
+            iv_child = itemView.findViewById(R.id.iv_child);
             txtName = itemView.findViewById(R.id.txtName);
             txtWeight = itemView.findViewById(R.id.txtWeight);
             txtHeight = itemView.findViewById(R.id.txtHeight);
             contextMenu = itemView.findViewById(R.id.contextMenuButton);
             ll_denied = itemView.findViewById(R.id.ll_denied);
             ll_measure = itemView.findViewById(R.id.ll_measure);
+            tv_age = itemView.findViewById(R.id.tv_age);
         }
 
         void bindPersonDetail(int position) {

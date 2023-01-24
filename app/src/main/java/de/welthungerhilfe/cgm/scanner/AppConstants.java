@@ -160,4 +160,14 @@ public class AppConstants {
 
     public static final String[] workflowsList = {APP_AUTO_DETECT_1_0, APP_HEIGHT_1_0, APP_POSE_PREDICITION_1_0};
 
+    public static final int NO_MODE_SELECTED = 0;
+
+    public static final int CGM_MODE = 1;
+
+    public static final int RST_MODE = 2;
+
+    public static final int CGM_RST_MODE = 3;
+
+
+
 }

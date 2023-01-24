@@ -4,7 +4,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/background"
+        android:background="@color/colorGreenTransparent"
         android:orientation="vertical">
 
         <LinearLayout
@@ -36,13 +36,42 @@
             android:paddingTop="92dp"
             android:orientation="vertical">
 
+            <Spinner
+                android:id="@+id/spinner_country"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:background="@drawable/spinner_green_rounded"
+
+                ></Spinner>
+
+            <Spinner
+                android:id="@+id/spinner_cluster"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="80dp"
+                android:background="@drawable/spinner_green_rounded"
+                ></Spinner>
+
+            <Button
+                android:layout_marginTop="60dp"
+                android:id="@+id/btn_next"
+                android:layout_width="100dp"
+                android:layout_height="44dp"
+                android:layout_gravity="center_horizontal"
+                android:text="NEXT"
+                android:textColor="@color/colorWhite"
+                android:background="@drawable/button_green_round">
+
+            </Button>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginBottom="16dp"
                 android:padding="14dp"
-                android:background="@drawable/rounded_transparent_white">
+                android:background="@drawable/rounded_transparent_white"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -155,7 +184,7 @@
                 android:background="@drawable/rounded_transparent_white"
                 android:gravity="center"
                 android:padding="5dp"
-                android:onClick="doSignIn">
+                android:visibility="gone">
 
                 <ImageView
                     android:layout_width="35dp"

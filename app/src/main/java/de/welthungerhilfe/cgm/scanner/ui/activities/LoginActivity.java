@@ -28,6 +28,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
@@ -61,11 +63,23 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     FirebaseAnalytics firebaseAnalytics;
 
     String selectedBackend;
+    String selectedCountry = null;
+    String selectedOrganization = null;
 
     LanguageSelectedRepository languageSelectedRepository;
+    String country[]={"Select Country","India","Namibia","Nepal","Uganda","Bangladesh","Demo/Test","Sandbox"};
+    String india[] ={"India"};
+    String namibia[] ={"Select Organization","Namibia"};
+    String nepal[] ={"Select Organization","Nepal"};
+    String uganda[] ={"Select Organization","Uganda"};
+    String bangladesh[] ={"Select Organization","Bangladesh"};
+    String demo[] ={"Demo/Test"};
+    String sandbox[] ={"Select Organization","Sandbox"};
+    String organization[] = null;
 
 
-    public void doSignIn(View view) {
+
+    public void doSignIn() {
         if (!checkStoragePermissions()) {
             return;
         }
@@ -127,8 +141,148 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         activityLoginBinding.rbSandbox.setOnCheckedChangeListener(this);
         activityLoginBinding.rbUganda.setOnCheckedChangeListener(this);
         activityLoginBinding.rbBangladesh.setOnCheckedChangeListener(this);
+
+        ArrayAdapter countryAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item,country);
+
+        activityLoginBinding.spinnerCountry.setAdapter(countryAdapter);
+
+        activityLoginBinding.spinnerCountry.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                switch (country[i]){
+                    case "India":
+                        selectedCountry = country[i];
+                        organization = india;
+                        break;
+                    case "Namibia":
+                        selectedCountry = country[i];
+                        organization = namibia;
+                        break;
+                    case "Nepal":
+                        selectedCountry = country[i];
+                        organization = nepal;
+                        break;
+                    case "Uganda":
+                        selectedCountry = country[i];
+                        organization = uganda;
+                        break;
+                    case "Bangladesh":
+                        selectedCountry = country[i];
+                        organization = bangladesh;
+                        break;
+                    case "Demo/Test":
+                        selectedCountry = country[i];
+                        organization = demo;
+                        break;
+                    case "Sandbox":
+                        selectedCountry = country[i];
+                        organization = sandbox;
+                        break;
+                    default:
+                        selectedCountry = null;
+                        organization = null;
+                        break;
+                }
+
+                if(organization == null){
+                    organization = new String[]{"Select Organization"};
+                }
+                ArrayAdapter organazationAdapter = new ArrayAdapter(LoginActivity.this, android.R.layout.simple_spinner_dropdown_item,organization);
+                activityLoginBinding.spinnerCluster.setAdapter(organazationAdapter);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        if(organization == null){
+            organization = new String[]{"Select Organization"};
+        }
+        ArrayAdapter organazationAdapter = new ArrayAdapter(LoginActivity.this, android.R.layout.simple_spinner_dropdown_item,organization);
+        activityLoginBinding.spinnerCluster.setAdapter(organazationAdapter);
+        setupOrganazationListner();
+
+
+        activityLoginBinding.btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                doSignIn();
+            }
+        });
     }
 
+    public void setupOrganazationListner(){
+        activityLoginBinding.spinnerCluster.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                Log.i(TAG,"this is spinner org inside ");
+
+                if(organization==null){
+                    return;
+                }
+                Log.i(TAG,"this is spinner org "+organization[i]);
+                switch (organization[i]){
+                    case "India":
+                        selectedCountry = country[i];
+                        selectedOrganization = "India";
+                        session.setEnvironment(AppConstants.ENV_IN_BMZ);
+                        selectedBackend = "in_bmz";
+                        break;
+                    case "Namibia":
+                        selectedCountry = country[i];
+                        selectedOrganization = "Namibia";
+                        session.setEnvironment(AppConstants.ENV_NAMIBIA);
+                        selectedBackend = "namibia";
+                        break;
+                    case "Nepal":
+                        selectedCountry = country[i];
+                        selectedOrganization = "Nepal";
+                        session.setEnvironment(AppConstants.ENV_NEPAL);
+                        selectedBackend = "nepal";
+                        break;
+                    case "Uganda":
+                        selectedCountry = country[i];
+                        selectedOrganization = "Uganda";
+                        session.setEnvironment(AppConstants.ENV_UGANDA);
+                        selectedBackend = "uganda";
+                        break;
+                    case "Bangladesh":
+                        selectedCountry = country[i];
+                        selectedOrganization = "Bangladesh";
+                        session.setEnvironment(AppConstants.ENV_BAN);
+                        selectedBackend = "bangladesh";
+                        break;
+                    case "Demo/Test":
+                        selectedCountry = country[i];
+                        selectedOrganization = "Demo/Test";
+                        session.setEnvironment(AppConstants.ENV_DEMO_QA);
+                        session.setEnvironmentMode(AppConstants.CGM_RST_MODE);
+                        selectedBackend = "demo_qa";
+                        break;
+                    case "Sandbox":
+                        selectedCountry = country[i];
+                        selectedOrganization = "Sandbox";
+                        session.setEnvironment(AppConstants.ENV_SANDBOX);
+                        session.setEnvironmentMode(AppConstants.CGM_MODE);
+                        selectedBackend = "sandbox";
+                        break;
+                    default:
+                        selectedCountry = null;
+
+                        break;
+
+
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+    }
 
     @Override
     public void onStart() {

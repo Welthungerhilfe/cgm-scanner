@@ -31,6 +31,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAutoDetect;
+
 public class DataFormat {
 
     public enum TimestampFormat {
@@ -290,5 +292,54 @@ public class DataFormat {
         monthsBetween += end.get(Calendar.MONTH) - start.get(Calendar.MONTH);
         monthsBetween += (end.get(Calendar.YEAR) - start.get(Calendar.YEAR)) * 12;
         return monthsBetween;
+    }
+
+    public static String calculateAge(Long endDatemillisecond) {
+        String endDateStr = convertMilliSeconsToServerDate(endDatemillisecond);
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        String strDate = formatter.format(new Date());
+        SimpleDateFormat endDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+
+        ParsePosition parsePosition = new ParsePosition(0);
+        Date endDate = endDateFormatter.parse(endDateStr, parsePosition);
+        endDateStr = formatter.format(endDate);
+
+        Calendar start = Calendar.getInstance();
+        Calendar end = Calendar.getInstance();
+
+        ParsePosition parsePosition1 = new ParsePosition(0);
+        end.setTime(formatter.parse(strDate, parsePosition1));
+
+        ParsePosition parsePosition2 = new ParsePosition(0);
+        start.setTime(formatter.parse(endDateStr, parsePosition2));
+
+
+        int monthsBetween = 0;
+        int dateDiff = end.get(Calendar.DAY_OF_MONTH) - start.get(Calendar.DAY_OF_MONTH);
+
+        if (dateDiff < 0) {
+            int borrrow = end.getActualMaximum(Calendar.DAY_OF_MONTH);
+            dateDiff = (end.get(Calendar.DAY_OF_MONTH) + borrrow) - start.get(Calendar.DAY_OF_MONTH);
+            monthsBetween--;
+
+            if (dateDiff > 0) {
+                monthsBetween++;
+            }
+        } else {
+            monthsBetween++;
+        }
+        monthsBetween += end.get(Calendar.MONTH) - start.get(Calendar.MONTH);
+        monthsBetween += (end.get(Calendar.YEAR) - start.get(Calendar.YEAR)) * 12;
+
+        int year = monthsBetween/12;
+        int months = monthsBetween%12;
+        String age = null;
+                if(year > 0){
+                    age = year +" years "+months+" months";
+                }else {
+                    age = months+" months";
+
+                }
+        return age;
     }
 }

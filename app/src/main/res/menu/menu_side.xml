@@ -25,6 +25,13 @@
             android:icon="@drawable/menu_scans"
             android:title="@string/menuScans" />
     </group>
+
+    <group>
+        <item
+            android:id="@+id/menuSelectMode"
+            android:icon="@drawable/menu_scans"
+            android:title="Select your purpose" />
+    </group>
     <group>
         <item
             android:id="@+id/menuUploadManager"

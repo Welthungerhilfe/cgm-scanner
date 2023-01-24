@@ -53,6 +53,10 @@ public class SessionManager {
     private final String KEY_PERSON_SYNC_TIMESTAMP = "person_sync_timestamp";
     private final String KEY_SESSION_ERROR = "key_session_error";
     private final String KEY_LAST_SYNC_DAILY_REPORT= "key_last_sync_daily_report";
+    private final String KEY_ENVIRONMENT_MODE= "key_environment_mode";
+    private final String KEY_SELECTED_MODE= "key_selected_mode";
+
+
 
 
 
@@ -230,6 +234,24 @@ public class SessionManager {
 
     public int getEnvironment() {
         return pref.getInt(SELECTED_ENVIRONMENT, AppConstants.ENV_UNKNOWN);
+    }
+
+    public void setEnvironmentMode(int environmentMode) {
+        editor.putInt(KEY_ENVIRONMENT_MODE, environmentMode);
+        editor.commit();
+    }
+
+    public int getEnvironmentMode() {
+        return pref.getInt(KEY_ENVIRONMENT_MODE, AppConstants.NO_MODE_SELECTED);
+    }
+
+    public void setSelectedMode(int selectedMode) {
+        editor.putInt(KEY_SELECTED_MODE, selectedMode);
+        editor.commit();
+    }
+
+    public int getSelectedMode() {
+        return pref.getInt(KEY_SELECTED_MODE, AppConstants.NO_MODE_SELECTED);
     }
 
     public void setSessionError(int count) {

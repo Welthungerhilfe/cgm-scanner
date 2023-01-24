@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorWhite"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingLeft="25dp"
         android:paddingRight="@dimen/activity_horizontal_margin">
 
         <LinearLayout
@@ -24,15 +24,28 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical">
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
-                <TextView
-                    android:id="@+id/txtName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    android:text=""
-                    android:textColor="@color/colorBlack"
-                    android:textSize="20sp" />
+    <TextView
+        android:id="@+id/txtName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:text=""
+        android:textColor="@color/colorBlack"
+        android:textSize="20sp" />
+
+    <ImageView
+        android:id="@+id/iv_child"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="17dp"
+        android:src="@drawable/ic_boy_black"></ImageView>
+</RelativeLayout>
 
                 <LinearLayout
                     android:id="@+id/ll_measure"
@@ -40,16 +53,21 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:visibility="visible">
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:text="@string/label_height"
-                        android:textSize="16sp" />
+    <TextView
+        android:id="@+id/tv_age"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:text="3 years 2 month"
+        android:textSize="16sp" />
 
                     <TextView
                         android:id="@+id/txtHeight"
+                        android:visibility="gone"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="8dp"
@@ -62,6 +80,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="@dimen/activity_horizontal_margin"
                         android:singleLine="true"
+                        android:visibility="gone"
                         android:text="@string/label_weight"
                         android:textSize="16sp" />
 
@@ -69,10 +88,14 @@
                         android:id="@+id/txtWeight"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
                         android:layout_marginLeft="10dp"
+                        android:visibility="visible"
                         android:singleLine="true"
-                        android:text="-"
+                        android:text="20/01/23"
+                        android:layout_marginRight="17dp"
                         android:textSize="16sp" />
+</RelativeLayout>
                 </LinearLayout>
 
                 <LinearLayout

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+
+            <corners android:radius="10dp" />
+            <stroke android:width="1dp" android:color="@color/colorGreen" />
+
+        </shape>
+    </item>
+    <item android:gravity="center_vertical|right" android:right="8dp">
+        <layer-list>
+            <item android:width="10dp" android:height="10dp"  android:gravity="center" android:bottom="10dp">
+                <rotate
+                    android:fromDegrees="45"
+                    android:toDegrees="45">
+                    <shape android:shape="rectangle">
+                        <solid android:color="@color/colorPrimary" />
+                    </shape>
+                </rotate>
+            </item>
+            <item android:width="20dp" android:height="10dp" android:bottom="21dp" android:gravity="center">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/colorWhite"/>
+                </shape>
+            </item>
+            <item android:width="20dp" android:height="10dp" android:bottom="21dp" android:gravity="center">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/colorGreenTransparent"/>
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</layer-list>
+<!--<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item>
+
+        <layer-list>
+
+            <item>
+                <shape android:shape="rectangle">
+                    <padding
+                        android:left="4dp"
+                        android:top="4dp"
+                        android:right="4dp"
+                        android:bottom="4dp"
+                        />
+
+                    <gradient android:startColor="#00c4c7a9" android:endColor="#00d6dadf" android:angle="270" />
+                    <stroke android:width="1dp" android:color="@color/colorGreen" />
+                    <corners android:radius="2dp" />
+                </shape>
+            </item>
+
+
+
+        </layer-list>
+
+    </item>
+
+</selector>-->
+    <!--
+    <selector xmlns:android="http://schemas.android.com/apk/res/android">
+        <item><layer-list>
+            <item>
+                <shape>
+                    <solid
+                        android:color="@color/colorWhite">
+                    </solid>
+
+                    <corners android:radius="3dp" />
+
+                    <padding
+                        android:bottom="10dp"
+                        android:left="10dp"
+                        android:right="10dp"
+                        android:top="10dp" />
+                    <stroke
+                        android:width="2dp"
+                        android:color="@color/colorBlack"/>
+                </shape>
+            </item>
+            <item >
+                <bitmap android:gravity="bottom|right"
+                    android:src="@drawable/ic_arrow_drop_down" />
+            </item>
+        </layer-list></item>
+    </selector>-->

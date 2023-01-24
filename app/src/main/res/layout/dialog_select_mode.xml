@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorGreenTransparent"
+    android:orientation="vertical">
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:background="@color/colorGreenLight">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="select your purpose"
+            android:textColor="@color/colorWhite"
+            android:textSize="17sp"></TextView>
+    </androidx.appcompat.widget.Toolbar>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingLeft="17dp">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorBlack"
+        android:fontFamily="sans-serif-black"
+        android:layout_marginTop="24dp"
+        android:textSize="17sp"
+        android:text="Choose the mode as per your need"></TextView>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_marginTop="5dp"
+            android:layout_height="1dp"
+            android:background="@color/colorGreyLight"
+            android:layout_marginRight="34dp"></View>
+
+        <TextView
+            android:id="@+id/text_rapid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlack"
+            android:layout_marginTop="32dp"
+            android:textSize="15sp"
+            android:text="Rapid Screening : screenaig at child level to know the malnutritation revalance"></TextView>
+        <TextView
+            android:id="@+id/text_growth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlack"
+            android:layout_marginTop="32dp"
+            android:textSize="15sp"
+            android:text="Rapid Screening : screenaig at child level to know the malnutritation revalance"></TextView>
+
+        <Button
+            android:id="@+id/bt_rapid_screening"
+            android:layout_width="200dp"
+            android:layout_height="88dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="60dp"
+            android:text="Rapid Screening"
+            android:textAllCaps="false"
+            android:textColor="@color/colorPrimary"
+            android:background="@drawable/rounded_greycolor_greenborder"></Button>
+
+        <Button
+            android:id="@+id/bt_growth_monitiring"
+            android:layout_width="200dp"
+            android:layout_height="88dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="44dp"
+            android:text="Growth Monitiring"
+            android:textAllCaps="false"
+            android:textColor="@color/colorPrimary"
+            android:background="@drawable/rounded_greycolor_greenborder"></Button>
+
+        <Button
+            android:id="@+id/bt_next"
+            android:layout_width="100dp"
+            android:layout_height="44dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="60dp"
+            android:text="Next"
+            android:textColor="@color/colorWhite"></Button>
+
+        <TextView
+            android:id="@+id/tv_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="@color/colorBlack"
+            android:layout_gravity="center_horizontal"
+            android:text="Cancel"
+            android:layout_marginTop="22dp"></TextView>
+    </LinearLayout>
+</LinearLayout>
+</layout>
