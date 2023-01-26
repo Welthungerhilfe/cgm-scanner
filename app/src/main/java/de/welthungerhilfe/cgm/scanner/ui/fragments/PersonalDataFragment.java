@@ -357,6 +357,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         person.setQrcode(qrCode);
                         person.setEnvironment(session.getEnvironment());
                         person.setCreated(System.currentTimeMillis());
+                        if(session.getSelectedMode() == AppConstants.CGM_MODE){
+                            person.setBelongs_to_rst(false);
+                        }else {
+                            person.setBelongs_to_rst(true);
+                        }
                         firebaseAnalytics.logEvent(FirebaseService.CREATE_PERSON_STOP, null);
 
                     }

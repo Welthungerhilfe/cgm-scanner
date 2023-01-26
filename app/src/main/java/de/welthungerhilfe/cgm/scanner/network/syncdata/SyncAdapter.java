@@ -592,8 +592,15 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             } else {
                 LogFileUtils.logInfo(TAG, "Syncing persons for the first time");
             }
+            boolean belongs_to_rst;
+            if(session.getSelectedMode()==AppConstants.CGM_MODE){
+                belongs_to_rst = false;
+            }
+            else {
+                belongs_to_rst = true;
+            }
             onThreadChange(1);
-            retrofit.create(ApiService.class).getSyncPersons(session.getAuthTokenWithBearer(), lastPersonSyncTime)
+            retrofit.create(ApiService.class).getSyncPersons(session.getAuthTokenWithBearer(), lastPersonSyncTime, belongs_to_rst)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<SyncPersonsResponse>() {
                         @Override

@@ -185,12 +185,10 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 session.setSelectedMode(AppConstants.CGM_MODE);
                 activityMainBinding.navMenu.getMenu().findItem(R.id.menuSelectMode).setVisible(false);
 
-                // setUpSelectedMode();
             } else if(session.getEnvironmentMode() == AppConstants.RST_MODE){
                 session.setSelectedMode(AppConstants.RST_MODE);
                 activityMainBinding.navMenu.getMenu().findItem(R.id.menuSelectMode).setVisible(false);
 
-                // setUpSelectedMode();
             }
         }
 
@@ -242,17 +240,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             session.setSessionError(0);
         }
 
-       /* String str = "File /data/user/0/de.welthungerhilfe.cgm.scanner/IN_AAH_RJ_22274/measurements/1670824691622/rgb/rgb_IN_AAH_RJ_22274_1670824691622_102_1182.jpg successfully uploaded with server id 43e45ce0-7c2f-11ed-bee4-9feca8086205\n" +
-                "2022-12-15 04:16:36 : Info-UploadService -> File /data/user/0/de.welthungerhilfe.cgm.scanner/IN_AAH_RJ_22274/measurements/1670824691622/rgb/rgb_IN_AAH_RJ_22274_1670824691622_102_1188.jpg successfully uploaded with server id 43ebfe00-7c2f-11ed-bee4-7bc950ba4e25\n" +
-                "2022-12-15 04:16:36 : Info-UploadService -> File /data/user/0/de.welthungerhilfe.cgm.scanner/IN_AAH_RJ_22274/measurements/1670824691622/depth/depth_IN_AAH_RJ_22274_1670824691622_102_1194.depth successfully uploaded with server id 43f83300-7c2f-11ed-bee4-9f0e0c1f7f50\n" +
-                "2022-12-15 04:16:36 : Info-UploadService -> File /data/user/0/de.welthungerhilfe.cgm.scanner/IN_AAH_RJ_22274/measurements/1670824691622/depth/depth_IN_AAH_RJ_22274_1670824691622_102_1188.depth successfully uploaded with server id 43f39f20-7c2f-11ed-bee4-d7f31798d1a8\n";
-        for(int i =0; i<20; i++){
-            for (int j =0; j<20; j++);
-            {
-                str = str + str;
-            }
-            LogFileUtils.logInfo(TAG,"testing "+str);
-        }*/
+
     }
 
     @Override

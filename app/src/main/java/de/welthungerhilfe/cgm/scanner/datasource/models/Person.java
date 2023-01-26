@@ -111,6 +111,9 @@ public class Person extends CsvExportableModel implements Serializable {
     @Expose
     private int schema_version;
 
+    @Expose
+    private boolean belongs_to_rst;
+
 
     @SerializedName("lastLocation")
     @Expose
@@ -324,6 +327,14 @@ public class Person extends CsvExportableModel implements Serializable {
 
     public void setLast_sync_measurments(long last_sync_measurments) {
         this.last_sync_measurments = last_sync_measurments;
+    }
+
+    public boolean isBelongs_to_rst() {
+        return belongs_to_rst;
+    }
+
+    public void setBelongs_to_rst(boolean belongs_to_rst) {
+        this.belongs_to_rst = belongs_to_rst;
     }
 
     public String getFullName() {

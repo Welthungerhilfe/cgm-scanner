@@ -51,7 +51,7 @@ public interface ApiService {
     Observable<Person> putPerson(@Header("Authorization") String auth, @Body RequestBody person, @Path("id") String id);
 
     @GET("persons/sync_persons")
-    Observable<SyncPersonsResponse> getSyncPersons(@Header("Authorization") String auth, @Query("sync_date") String sync_date);
+    Observable<SyncPersonsResponse> getSyncPersons(@Header("Authorization") String auth, @Query("sync_date") String sync_date, @Query("belongs_to_rst") boolean belongs_to_rst);
 
     @POST("measurements")
     Observable<Measure> postMeasure(@Header("Authorization") String auth, @Body RequestBody measure);
