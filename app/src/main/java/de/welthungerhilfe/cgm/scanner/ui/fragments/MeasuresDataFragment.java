@@ -18,6 +18,8 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Context;
@@ -42,6 +44,7 @@ import android.view.inputmethod.InputMethodManager;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 
+import de.welthungerhilfe.cgm.scanner.databinding.DialogMeasureMenuBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
@@ -56,6 +59,7 @@ import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.MeasureMenuDialog;
 
 public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.ManualMeasureListener {
     private Context context;
@@ -142,7 +146,44 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void createMeasure() {
-        new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
+
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+// ...Irrelevant code for customizing the buttons and title
+        LayoutInflater inflater = this.getLayoutInflater();
+        DialogMeasureMenuBinding dialogMeasureMenuBinding = DataBindingUtil.inflate(inflater, R.layout.dialog_measure_menu,null,false);
+
+      //  View dialogView = inflater.inflate(R.layout.dialog_measure_menu, null);
+        dialogBuilder.setView(dialogMeasureMenuBinding.getRoot());
+        AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.show();
+        dialogMeasureMenuBinding.btStartManual.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ManualMeasureDialog measureDialog = new ManualMeasureDialog(context);
+                measureDialog.setManualMeasureListener(MeasuresDataFragment.this);
+                measureDialog.setPerson(person);
+                measureDialog.show();
+                firebaseAnalytics.logEvent(FirebaseService.MANUAL_MEASURE_START,null);
+                alertDialog.dismiss();
+
+            }
+        });
+
+        dialogMeasureMenuBinding.btStartScan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), ScanModeActivity.class);
+                intent.putExtra(AppConstants.EXTRA_PERSON, person);
+                startActivity(intent);
+                alertDialog.dismiss();
+            }
+        });
+
+
+
+       /* MeasureMenuDialog measureMenuDialog = new MeasureMenuDialog();
+        measureMenuDialog.show(getActivity().getSupportFragmentManager(),"MeasureMenuDialog");*/
+       /* new ContextMenuDialog(context, new ContextMenuDialog.Item[]{
                 new ContextMenuDialog.Item(R.string.selector_manual, R.drawable.ic_manual),
                 new ContextMenuDialog.Item(R.string.selector_scan, R.drawable.ic_machine)
         }, which -> {
@@ -160,7 +201,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                     startActivity(intent);
                     break;
             }
-        });
+        });*/
     }
 
     @Override

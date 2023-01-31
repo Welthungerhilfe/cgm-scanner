@@ -163,19 +163,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 showStdTestButtonInMenu(false);
             }
         }
-        final Observer<List<Person>> observer = list -> {
-            Log.e("PersonRecycler", "Observer called");
 
-            if (lytManager.getItemCount() == 0 && list != null && list.size() == 0) {
-                activityMainBinding.lytNoPerson.setVisibility(View.VISIBLE);
-            } else {
-                activityMainBinding.lytNoPerson.setVisibility(View.GONE);
-                adapterData.clear();
-                adapterData.addPersons(list);
-            }
-        };
-        viewModel.getPersonListLiveData().observe(this, observer);
-
+        observePersionList();
         if(session.getSelectedMode() == AppConstants.NO_MODE_SELECTED){
             if(session.getEnvironmentMode() == AppConstants.CGM_RST_MODE){
                 SelectModeDialog selectModeDialog = new SelectModeDialog();
@@ -241,6 +230,22 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         }
 
 
+    }
+
+    public void observePersionList(){
+        final Observer<List<Person>> observer = list -> {
+            Log.e("PersonRecycler", "Observer called");
+
+            if (lytManager.getItemCount() == 0 && list != null && list.size() == 0) {
+                activityMainBinding.lytNoPerson.setVisibility(View.VISIBLE);
+            } else {
+                activityMainBinding.lytNoPerson.setVisibility(View.GONE);
+                adapterData.clear();
+                adapterData.addPersons(list);
+                Log.i(TAG,"this is inside list call");
+            }
+        };
+        viewModel.getPersonListLiveData().observe(this, observer);
     }
 
     @Override
@@ -680,6 +685,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     @Override
     public void changeSetupMode() {
-        setUpSelectedMode();
+        Intent intent = getIntent();
+        overridePendingTransition(0, 0);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(intent);
+
     }
 }

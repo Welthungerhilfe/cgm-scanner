@@ -99,6 +99,13 @@ public class PersonRepository {
         int PAGE_SIZE = 30;
         String limitClause = String.format(Locale.US, "LIMIT %d OFFSET %d", PAGE_SIZE, filter.getPage() * PAGE_SIZE);
 
+        if(session.getSelectedMode() == AppConstants.CGM_MODE){
+            whereClause += String.format(Locale.US, " AND p.belongs_to_rst=0");
+        }
+        else {
+            whereClause += String.format(Locale.US, " AND p.belongs_to_rst=1");
+
+        }
         if (filter.isDate()) {
             whereClause += String.format(Locale.US, " AND p.created<=%d AND p.created>=%d", filter.getToDate(), filter.getFromDate());
         }

@@ -599,6 +599,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             else {
                 belongs_to_rst = true;
             }
+            LogFileUtils.logInfo(TAG, "Syncing persons "+belongs_to_rst);
+
             onThreadChange(1);
             retrofit.create(ApiService.class).getSyncPersons(session.getAuthTokenWithBearer(), lastPersonSyncTime, belongs_to_rst)
                     .observeOn(AndroidSchedulers.mainThread())

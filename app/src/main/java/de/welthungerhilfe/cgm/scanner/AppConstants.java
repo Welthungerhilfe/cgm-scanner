@@ -25,6 +25,7 @@ public class AppConstants {
 
     public static final String AUTH_DEMO_QA = "{OAUTH_SCOPE_QA}";
 
+
     public static final String AUTH_IN_BMZ = "{OAUTH_SCOPE_PRODUCTION}";
     public static final String AUTH_NAMIBIA = "{OAUTH_SCOPE_NAMIBIA}";
     public static final String AUTH_NEPAL = "{OAUTH_SCOPE_NEPAL}";
