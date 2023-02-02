@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.test.espresso.remote.EspressoRemoteMessage;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -67,7 +68,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     String selectedOrganization = null;
 
     LanguageSelectedRepository languageSelectedRepository;
-    String country[]={"Select Country","India","Namibia","Nepal","Uganda","Bangladesh","Demo/Test","Sandbox"};
+    String[] country;
     String india[] ={"India"};
     String namibia[] ={"Select Organization","Namibia"};
     String nepal[] ={"Select Organization","Nepal"};
@@ -128,7 +129,12 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             String version = pInfo.versionName;
             if (version.contains("dev")) {
-                activityLoginBinding.rbSandbox.setVisibility(View.VISIBLE);
+              //  activityLoginBinding.rbSandbox.setVisibility(View.VISIBLE);
+               country =new String[]{"Select Country","India","Namibia","Nepal","Uganda","Bangladesh","Demo/Test","Sandbox"};
+            }
+            else {
+                country =new String[]{"Select Country","India","Namibia","Nepal","Uganda","Bangladesh","Demo/Test"};
+
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -149,6 +155,13 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         activityLoginBinding.spinnerCountry.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+                if(country[i].equals("Select Country")) {
+                    view.setAlpha(0.4F);
+                }
+                else {
+                    view.setAlpha(1);
+                }
                 switch (country[i]){
                     case "India":
                         selectedCountry = country[i];
@@ -208,6 +221,14 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         activityLoginBinding.btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(selectedCountry==null){
+                    Toast.makeText(LoginActivity.this,"Please select country and organization", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if(selectedOrganization==null){
+                    Toast.makeText(LoginActivity.this,"Please select organization", Toast.LENGTH_LONG).show();
+                    return;
+                }
                 doSignIn();
             }
         });
@@ -221,6 +242,13 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
                 if(organization==null){
                     return;
+                }
+                if(view!=null) {
+                    if (organization[i].equals("Select Organization")) {
+                        view.setAlpha(0.4F);
+                    } else {
+                        view.setAlpha(1);
+                    }
                 }
                 Log.i(TAG,"this is spinner org "+organization[i]);
                 switch (organization[i]){

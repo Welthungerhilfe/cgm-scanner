@@ -35,15 +35,18 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityTutorialBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.SelectModeDialog;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.TutorialFragment;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
-public class TutorialActivity extends BaseActivity {
+public class TutorialActivity extends BaseActivity implements SelectModeDialog.SetupmodeListner {
 
     ArrayList<TutorialData> tutorialDataList;
 
     ActivityTutorialBinding activityTutorialBinding;
+
+    SessionManager session;
 
     public void startWork(View view) {
         new SessionManager(this).setTutorial(true);
@@ -70,6 +73,19 @@ public class TutorialActivity extends BaseActivity {
         activityTutorialBinding.viewPager.setAdapter(adapter);
         activityTutorialBinding.viewPager.setOffscreenPageLimit(4);
         activityTutorialBinding.viewPager.setSwipeEnabled(false);
+        session = new SessionManager(TutorialActivity.this);
+        if(session.getSelectedMode() == AppConstants.NO_MODE_SELECTED){
+            if(session.getEnvironmentMode() == AppConstants.CGM_RST_MODE){
+                SelectModeDialog selectModeDialog = new SelectModeDialog();
+                selectModeDialog.show(getSupportFragmentManager(),"SelectModeDialog");
+            }else if(session.getEnvironmentMode() == AppConstants.CGM_MODE){
+                session.setSelectedMode(AppConstants.CGM_MODE);
+
+            } else if(session.getEnvironmentMode() == AppConstants.RST_MODE){
+                session.setSelectedMode(AppConstants.RST_MODE);
+
+            }
+        }
     }
 
     public void gotoNext() {
@@ -97,5 +113,10 @@ public class TutorialActivity extends BaseActivity {
         tutorialDataList.add(new TutorialData(R.drawable.tutorial3 ,getString(R.string.tutorial3), getString(R.string.tutorial31), getString(R.string.tutorial32),2));
         tutorialDataList.add(new TutorialData(R.drawable.tutorial4 ,getString(R.string.tutorial4), getString(R.string.tutorial41), getString(R.string.tutorial42),3));
         return tutorialDataList;
+    }
+
+    @Override
+    public void changeSetupMode() {
+
     }
 }

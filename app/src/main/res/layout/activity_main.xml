@@ -116,7 +116,7 @@
                 <LinearLayout
                     android:id="@+id/bottom_view"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
+                    android:layout_height="54dp"
                     android:orientation="horizontal"
                     android:weightSum="2"
                     android:layout_alignParentBottom="true"

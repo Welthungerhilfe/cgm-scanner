@@ -29,8 +29,8 @@
     <group>
         <item
             android:id="@+id/menuSelectMode"
-            android:icon="@drawable/menu_scans"
-            android:title="Select your purpose" />
+            android:icon="@drawable/ic_select_goal"
+            android:title="Select Goal" />
     </group>
     <group>
         <item
