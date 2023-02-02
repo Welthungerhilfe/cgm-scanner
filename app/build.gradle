@@ -10,7 +10,7 @@ android {
 
 
         versionCode 726
-        versionName "7.4.10"
+        versionName "8.0.0gt"
 
 
 
