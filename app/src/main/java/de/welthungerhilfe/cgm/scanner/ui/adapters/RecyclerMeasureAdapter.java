@@ -151,7 +151,14 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
 
         SessionManager sessionManager = new SessionManager(context);
         boolean stdtest = sessionManager.getStdTestQrCode() != null;
-        if (config.isMeasure_visibility() && !stdtest) {
+        boolean showMeasureInRstMode = false;
+
+        if(person.isBelongs_to_rst() && !measure.getType().equals(AppConstants.VAL_MEASURE_MANUAL) ) {
+            showMeasureInRstMode = false;
+        }else {
+            showMeasureInRstMode = true;
+        }
+        if (config.isMeasure_visibility() && !stdtest && showMeasureInRstMode) {
 
             holder.txtHeight.setText(String.format(Locale.getDefault(), "%.1f", measure.getHeight() ) + context.getString(R.string.unit_cm));
             holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f", measure.getWeight()) + context.getString(R.string.unit_kg));
@@ -174,6 +181,7 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.txtHeightConfidence.setVisibility(View.GONE);
             holder.txtWeightConfidence.setVisibility(View.GONE);
         }
+
         holder.bindSelectListener(measure);
     }
 

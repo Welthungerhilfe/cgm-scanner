@@ -189,6 +189,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         measure.setSchema_version(CgmDatabase.version);
         measure.setScannedBy(session.getDevice());
         measure.setStd_test_qr_code(session.getStdTestQrCode());
+        measure.setReceived_at(System.currentTimeMillis());
+
 
         if (!heights.isEmpty()) {
             Collections.sort(heights, (a, b) -> (int) (1000 * (a - b)));

@@ -78,9 +78,7 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
     public void onBindViewHolder(RecyclerPersonAdapter.ViewHolder holder, int position) {
         Person person = getItem(position);
         holder.txtName.setText(person.getFullName());
-      //  holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f", weight) + context.getString(R.string.unit_kg));
 
-        holder.tv_age.setText(DataFormat.calculateAge(person.getBirthday()));
 
         if(person.getSex().equals("male")){
             holder.iv_child.setImageResource(R.drawable.ic_boy_black);
@@ -88,23 +86,39 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
             holder.iv_child.setImageResource(R.drawable.ic_girl_black);
 
         }
+        if(person.isBelongs_to_rst()) {
+            holder.tv_age.setVisibility(View.VISIBLE);
+            holder.tv_age.setText(DataFormat.calculateAge(person.getBirthday()));
+            holder.tv_label_weight.setVisibility(View.GONE);
+            holder.tv_lable_height.setVisibility(View.GONE);
+            holder.txtHeight.setVisibility(View.GONE);
+            holder.txtWeight.setVisibility(View.GONE);
+          //  holder.txtLastMeasure.setVisibility(View.VISIBLE);
+        }else {
+           // holder.txtLastMeasure.setVisibility(View.GONE);
+            holder.tv_age.setVisibility(View.GONE);
+            holder.tv_label_weight.setVisibility(View.VISIBLE);
+            holder.tv_lable_height.setVisibility(View.VISIBLE);
+            holder.txtHeight.setVisibility(View.VISIBLE);
+            holder.txtWeight.setVisibility(View.VISIBLE);
+            repository.getPersonLastMeasureLiveData(person.getId()).observe(context, measure -> {
+                SessionManager sessionManager = new SessionManager(context);
+                if (sessionManager.getStdTestQrCode() != null) {
+                    holder.txtHeight.setText(R.string.field_concealed);
+                    holder.txtWeight.setText(R.string.field_concealed);
+                } else {
+                    double height = 0;
+                    double weight = 0;
+                    if (measure != null) {
+                        height = measure.getHeight();
+                        weight = measure.getWeight();
+                    }
+                    holder.txtHeight.setText(String.format(Locale.getDefault(), "%.1f", height) + context.getString(R.string.unit_cm));
+                    holder.txtWeight.setText(String.format(Locale.getDefault(), "%.3f", weight) + context.getString(R.string.unit_kg));
 
-        repository.getPersonLastMeasureLiveData(person.getId()).observe(context, measure -> {
-            SessionManager sessionManager = new SessionManager(context);
-            /*if (sessionManager.getStdTestQrCode() != null) {
-                holder.txtHeight.setText(R.string.field_concealed);
-                holder.txtWeight.setText(R.string.field_concealed);
-            } else {
-                double height = 0;
-                double weight = 0;
-                if (measure != null) {
-                    height = measure.getHeight();
-                    weight = measure.getWeight();
                 }
-                holder.txtHeight.setText(String.format(Locale.getDefault(), "%.1f", height) + context.getString(R.string.unit_cm));*/
-          //  }
-        });
-
+            });
+        }
         if (personDetailListener != null) {
             holder.bindPersonDetail(position);
         }
@@ -183,7 +197,8 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
         private View contextMenu;
         private LinearLayout ll_measure, ll_denied;
         ImageView iv_child;
-        TextView tv_age;
+        TextView tv_age, txtLastMeasure;
+        TextView tv_lable_height, tv_label_weight;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -197,6 +212,9 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
             ll_denied = itemView.findViewById(R.id.ll_denied);
             ll_measure = itemView.findViewById(R.id.ll_measure);
             tv_age = itemView.findViewById(R.id.tv_age);
+            txtLastMeasure = itemView.findViewById(R.id.txtLastMeasure);
+            tv_lable_height = itemView.findViewById(R.id.tv_lable_height);
+            tv_label_weight = itemView.findViewById(R.id.tv_lable_weight);
         }
 
         void bindPersonDetail(int position) {

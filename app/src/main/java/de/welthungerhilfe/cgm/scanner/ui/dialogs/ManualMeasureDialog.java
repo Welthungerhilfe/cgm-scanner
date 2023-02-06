@@ -32,6 +32,7 @@ import android.view.Window;
 import android.widget.CompoundButton;
 
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -69,30 +70,39 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
     }
 
     public void OnConfirm() {
+        if(person.isBelongs_to_rst()){
+            if(!validateForRst()){
+                return;
+            }
+            updateManualMeasurements();
+        }
+        else {
         if(!validate()){
             return;
         }
+            boolean wfa = validZscore(ZscoreUtils.ChartType.WEIGHT_FOR_AGE);
+            boolean hfa = validZscore(ZscoreUtils.ChartType.HEIGHT_FOR_AGE);
+            boolean mfa = validZscore(ZscoreUtils.ChartType.MUAC_FOR_AGE);
 
-        boolean wfa = validZscore(ZscoreUtils.ChartType.WEIGHT_FOR_AGE);
-        boolean hfa = validZscore(ZscoreUtils.ChartType.HEIGHT_FOR_AGE);
-        boolean mfa = validZscore(ZscoreUtils.ChartType.MUAC_FOR_AGE);
-
-        if (wfa && hfa && mfa) {
-            updateManualMeasurements();
-        } else {
-            if (!wfa) dialogManualMeasureBinding.editManualWeight.setError(mContext.getString(R.string.invalid_zscore));
-            if (!hfa) dialogManualMeasureBinding.editManualHeight.setError(mContext.getString(R.string.invalid_zscore));
-            if (!mfa) dialogManualMeasureBinding.editManualMuac.setError(mContext.getString(R.string.invalid_zscore));
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-            builder.setTitle(R.string.invalid_zscore);
-            builder.setPositiveButton(R.string.selector_yes, (dialogInterface, i) -> {
+            if (wfa && hfa && mfa) {
                 updateManualMeasurements();
-                dismiss();
-            });
-            builder.setNegativeButton(R.string.selector_no, (dialogInterface, i) -> show());
-            builder.show();
+            } else {
+                if (!wfa) dialogManualMeasureBinding.editManualWeight.setError(mContext.getString(R.string.invalid_zscore));
+                if (!hfa) dialogManualMeasureBinding.editManualHeight.setError(mContext.getString(R.string.invalid_zscore));
+                if (!mfa) dialogManualMeasureBinding.editManualMuac.setError(mContext.getString(R.string.invalid_zscore));
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                builder.setTitle(R.string.invalid_zscore);
+                builder.setPositiveButton(R.string.selector_yes, (dialogInterface, i) -> {
+                    updateManualMeasurements();
+                    dismiss();
+                });
+                builder.setNegativeButton(R.string.selector_no, (dialogInterface, i) -> show());
+                builder.show();
+            }
         }
+
+
     }
 
     public void updateManualMeasurements(){
@@ -312,6 +322,75 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
 
         return valid;
     }
+
+    private boolean validateForRst() {
+        boolean valid = true;
+
+        String height = dialogManualMeasureBinding.editManualHeight.getText().toString();
+        String weight = dialogManualMeasureBinding.editManualWeight.getText().toString();
+        String muac = dialogManualMeasureBinding.editManualMuac.getText().toString();
+
+        if(height.isEmpty() && weight.isEmpty() && muac.isEmpty()){
+            return false;
+        }
+
+        if(!height.isEmpty()) {
+            if (height.isEmpty()) {
+                dialogManualMeasureBinding.editManualHeight.setError(getString(R.string.tooltip_cm));
+                valid = false;
+            } else if (DataFormat.checkDoubleDecimals(height) != 1) {
+                dialogManualMeasureBinding.editManualHeight.setError(getString(R.string.tooltip_decimal));
+                valid = false;
+            } else if (DataFormat.parseDouble(height) <= 45) {
+                dialogManualMeasureBinding.editManualHeight.setError(getString(R.string.tooltipe_height_min));
+                valid = false;
+            } else if (DataFormat.parseDouble(height) >= 130) {
+                dialogManualMeasureBinding.editManualHeight.setError(getString(R.string.tooltipe_height_max));
+                valid = false;
+            } else {
+                dialogManualMeasureBinding.editManualHeight.setError(null);
+            }
+        }
+
+        if(!weight.isEmpty()) {
+            if (weight.isEmpty()) {
+                dialogManualMeasureBinding.editManualWeight.setError(getString(R.string.tooltip_kg));
+                valid = false;
+            } else if (DataFormat.checkDoubleDecimals(weight) != 3) {
+                dialogManualMeasureBinding.editManualWeight.setError(getString(R.string.tooltip_kg_precision));
+                valid = false;
+            } else if (DataFormat.parseDouble(weight) < 2) {
+                dialogManualMeasureBinding.editManualWeight.setError(getString(R.string.tooltipe_weight_min));
+                valid = false;
+            } else if (DataFormat.parseDouble(weight) > 30) {
+                dialogManualMeasureBinding.editManualWeight.setError(getString(R.string.tooltipe_weight_max));
+                valid = false;
+            } else {
+                dialogManualMeasureBinding.editManualWeight.setError(null);
+            }
+        }
+
+        if(!muac.isEmpty()) {
+            if (muac.isEmpty()) {
+                dialogManualMeasureBinding.editManualMuac.setError(getString(R.string.tooltip_cm));
+                valid = false;
+            } else if (DataFormat.checkDoubleDecimals(muac) != 1) {
+                dialogManualMeasureBinding.editManualMuac.setError(getString(R.string.tooltip_decimal));
+                valid = false;
+            } else if (DataFormat.parseDouble(muac) < 7) {
+                dialogManualMeasureBinding.editManualMuac.setError(getString(R.string.tooltipe_muac_min));
+                valid = false;
+            } else if (DataFormat.parseDouble(muac) > 22) {
+                dialogManualMeasureBinding.editManualMuac.setError(getString(R.string.tooltipe_muac_max));
+                valid = false;
+            } else {
+                dialogManualMeasureBinding.editManualMuac.setError(null);
+            }
+        }
+        return valid;
+    }
+
+
 
     private String getString(int string){
         return mContext.getResources().getString(string);

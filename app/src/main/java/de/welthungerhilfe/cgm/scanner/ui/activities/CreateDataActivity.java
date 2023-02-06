@@ -43,6 +43,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 
 import java.util.List;
 
@@ -50,6 +51,8 @@ import java.util.List;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityCreateBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
@@ -83,6 +86,8 @@ public class CreateDataActivity extends BaseActivity {
     LocationRequest locationRequest;
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
+    Person person;
+    PersonRepository personRepository;
 
 
     @Override
@@ -91,9 +96,12 @@ public class CreateDataActivity extends BaseActivity {
         activityCreateBinding = DataBindingUtil.setContentView(this, R.layout.activity_create);
 
         sessionManager = new SessionManager(this);
+        personRepository = PersonRepository.getInstance(this);
         getCurrentLocation();
 
         qrCode = getIntent().getStringExtra(AppConstants.EXTRA_QR);
+        person = personRepository.findPersonByQr(qrCode);
+
 
         setupActionBar();
         initFragments();
@@ -147,8 +155,22 @@ public class CreateDataActivity extends BaseActivity {
         FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
         adapter.addFragment(personalFragment, getResources().getString(R.string.tab_personal));
         adapter.addFragment(measureFragment, getResources().getString(R.string.tab_measures));
-        adapter.addFragment(growthFragment, getResources().getString(R.string.tab_growth));
-        activityCreateBinding.viewpager.setOffscreenPageLimit(3);
+        if(person!=null) {
+            if (person.isBelongs_to_rst()) {
+                activityCreateBinding.viewpager.setOffscreenPageLimit(2);
+
+            } else {
+                adapter.addFragment(growthFragment, getResources().getString(R.string.tab_growth));
+                activityCreateBinding.viewpager.setOffscreenPageLimit(3);
+            }
+        }else{
+            if (sessionManager.getSelectedMode() == AppConstants.RST_MODE) {
+                activityCreateBinding.viewpager.setOffscreenPageLimit(2);
+
+            } else {
+                adapter.addFragment(growthFragment, getResources().getString(R.string.tab_growth));
+                activityCreateBinding.viewpager.setOffscreenPageLimit(3);
+            }        }
         activityCreateBinding.viewpager.setAdapter(adapter);
 
         activityCreateBinding.tabs.setupWithViewPager(activityCreateBinding.viewpager);
