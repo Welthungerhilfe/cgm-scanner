@@ -113,7 +113,7 @@
     <!-- QR Code / Consent sheet !-->
     <string name="permission_camera">"Camera permission needed!"</string>
     <string name="content_image">Content Image</string>
-    <string name="message_legal">Please make sure to take a photo of the consent form from the parents to avoid legal issues</string>
+    <string name="message_legal">Please take photo of the signed consent form from the parents</string>
     <string name="abbr_qr">QR code : </string>
     <string name="qr_not_readable">QR Code is not readable</string>
     <string name="search_by_qr">Search by QR</string>

@@ -70,12 +70,12 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     LanguageSelectedRepository languageSelectedRepository;
     String[] country;
     String india[] ={"India"};
-    String namibia[] ={"Select Organization","Namibia"};
-    String nepal[] ={"Select Organization","Nepal"};
-    String uganda[] ={"Select Organization","Uganda"};
-    String bangladesh[] ={"Select Organization","Bangladesh"};
+    String namibia[] ={"Namibia"};
+    String nepal[] ={"Nepal"};
+    String uganda[] ={"Uganda"};
+    String bangladesh[] ={"Bangladesh"};
     String demo[] ={"Demo/Test"};
-    String sandbox[] ={"Select Organization","Sandbox"};
+    String sandbox[] ={"Sandbox"};
     String organization[] = null;
 
 
@@ -256,30 +256,35 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                         selectedCountry = country[i];
                         selectedOrganization = "India";
                         session.setEnvironment(AppConstants.ENV_IN_BMZ);
+                        session.setEnvironmentMode(AppConstants.CGM_MODE);
                         selectedBackend = "in_bmz";
                         break;
                     case "Namibia":
                         selectedCountry = country[i];
                         selectedOrganization = "Namibia";
                         session.setEnvironment(AppConstants.ENV_NAMIBIA);
+                        session.setEnvironmentMode(AppConstants.CGM_MODE);
                         selectedBackend = "namibia";
                         break;
                     case "Nepal":
                         selectedCountry = country[i];
                         selectedOrganization = "Nepal";
                         session.setEnvironment(AppConstants.ENV_NEPAL);
+                        session.setEnvironmentMode(AppConstants.CGM_MODE);
                         selectedBackend = "nepal";
                         break;
                     case "Uganda":
                         selectedCountry = country[i];
                         selectedOrganization = "Uganda";
                         session.setEnvironment(AppConstants.ENV_UGANDA);
+                        session.setEnvironmentMode(AppConstants.CGM_MODE);
                         selectedBackend = "uganda";
                         break;
                     case "Bangladesh":
                         selectedCountry = country[i];
                         selectedOrganization = "Bangladesh";
                         session.setEnvironment(AppConstants.ENV_BAN);
+                        session.setEnvironmentMode(AppConstants.CGM_MODE);
                         selectedBackend = "bangladesh";
                         break;
                     case "Demo/Test":
@@ -294,6 +299,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                         selectedOrganization = "Sandbox";
                         session.setEnvironment(AppConstants.ENV_SANDBOX);
                         session.setEnvironmentMode(AppConstants.CGM_MODE);
+
                         selectedBackend = "sandbox";
                         break;
                     default:

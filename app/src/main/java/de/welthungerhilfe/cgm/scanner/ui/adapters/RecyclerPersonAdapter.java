@@ -93,9 +93,15 @@ public class RecyclerPersonAdapter extends RecyclerView.Adapter<RecyclerPersonAd
             holder.tv_lable_height.setVisibility(View.GONE);
             holder.txtHeight.setVisibility(View.GONE);
             holder.txtWeight.setVisibility(View.GONE);
-          //  holder.txtLastMeasure.setVisibility(View.VISIBLE);
+            holder.txtLastMeasure.setVisibility(View.VISIBLE);
+            if(person.getLast_updated() > 0){
+                holder.txtLastMeasure.setText(DataFormat.convertMilliSecondToLastMeasure(person.getLast_updated()));
+            }else {
+                holder.txtLastMeasure.setText("");
+
+            }
         }else {
-           // holder.txtLastMeasure.setVisibility(View.GONE);
+            holder.txtLastMeasure.setVisibility(View.GONE);
             holder.tv_age.setVisibility(View.GONE);
             holder.tv_label_weight.setVisibility(View.VISIBLE);
             holder.tv_lable_height.setVisibility(View.VISIBLE);

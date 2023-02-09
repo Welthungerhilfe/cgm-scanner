@@ -374,6 +374,11 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 .setOutAnimation(R.anim.abc_fade_out)
                 .create();
 
+        if(session.getSelectedMode()==AppConstants.RST_MODE){
+            sortDialog.findViewById(R.id.sortWasting).setVisibility(View.GONE);
+            sortDialog.findViewById(R.id.sortStunting).setVisibility(View.GONE);
+        }
+
         //set filter action
         sortDialog.findViewById(R.id.filterData).setOnClickListener(v -> {
             viewModel.setFilterOwn();

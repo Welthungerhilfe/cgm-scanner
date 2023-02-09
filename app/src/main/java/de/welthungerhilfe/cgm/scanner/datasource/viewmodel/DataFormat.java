@@ -96,6 +96,11 @@ public class DataFormat {
         return sdf.format(new Date(timeStamp));
     }
 
+    public static String convertMilliSecondToLastMeasure(Long timeStamp) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy",Locale.ENGLISH);
+        return sdf.format(new Date(timeStamp));
+    }
+
     public static long convertServerDateToMilliSeconds(String str) {
         if (str == null) {
             return 0;

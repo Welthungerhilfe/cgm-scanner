@@ -18,11 +18,15 @@
                 android:background="@color/colorPrimaryDark">
 
                 <ImageView
-                    android:layout_width="150dp"
-                    android:layout_height="100dp"
+                    android:layout_width="120dp"
+                    android:layout_height="80dp"
                     android:contentDescription="@string/content_image"
                     android:scaleType="fitStart"
-                    android:src="@drawable/logo" />
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/ic_logo_white"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginLeft="17dp"
+                    />
             </LinearLayout>
         </LinearLayout>
 

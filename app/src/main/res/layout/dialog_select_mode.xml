@@ -48,6 +48,7 @@
             android:textColor="@color/colorBlack"
             android:layout_marginTop="32dp"
             android:textSize="15sp"
+            android:layout_marginRight="34dp"
             android:text="Rapid Screening : screenaig at child level to know the malnutritation revalance"></TextView>
         <TextView
             android:id="@+id/text_growth"
@@ -56,6 +57,7 @@
             android:textColor="@color/colorBlack"
             android:layout_marginTop="32dp"
             android:textSize="15sp"
+            android:layout_marginRight="34dp"
             android:text="Rapid Screening : screenaig at child level to know the malnutritation revalance"></TextView>
 
         <Button
