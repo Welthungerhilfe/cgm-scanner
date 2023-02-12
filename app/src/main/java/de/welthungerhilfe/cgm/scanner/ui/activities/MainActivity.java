@@ -181,6 +181,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             }
             else if(session.getEnvironment() == AppConstants.NO_MODE_SELECTED){
                 session.setSelectedMode(AppConstants.CGM_MODE);
+                session.setEnvironmentMode(AppConstants.CGM_MODE);
                 activityMainBinding.navMenu.getMenu().findItem(R.id.menuSelectMode).setVisible(false);
             }
         }
