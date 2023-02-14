@@ -21,12 +21,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.FragmentStatisticsBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.hardware.io.FileSystem;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 public class StatisticsDialogfragment extends DialogFragment {
 
@@ -38,11 +40,14 @@ public class StatisticsDialogfragment extends DialogFragment {
     private static final String SUPPORT_APP = "com.google.android.gm";
     private static final String SUPPORT_MIME = "application/zip";
     String body;
+    boolean belongs_to_rst=false;
+    SessionManager sessionManager;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
        fragmentStatisticsBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_statistics, container, false);
        currentDate = getCurrentDate();
+       sessionManager = new SessionManager(getActivity());
        Log.i("StatisticsDialogfragment","this is current date "+currentDate);
        currentTime = System.currentTimeMillis();
        Log.i("StatisticsDialogfragment","this is current time "+currentTime);
@@ -50,8 +55,13 @@ public class StatisticsDialogfragment extends DialogFragment {
         Log.i("StatisticsDialogfragment","this is current time in date "+getTimeStamp(currentTime));
         Log.i("StatisticsDialogfragment","this is current time in date "+getTimeStamp(getMilliFromDate(currentDate)));
         personRepository = PersonRepository.getInstance(getActivity());
-        Log.i("StatisticsDialogfragment","this is current count "+personRepository.getPersonStat(getMilliFromDate(currentDate)).size());
-        countData(personRepository.getPersonStat(getMilliFromDate(currentDate)));
+        Log.i("StatisticsDialogfragment","this is current count "+personRepository.getPersonStat(getMilliFromDate(currentDate),belongs_to_rst).size());
+        if(sessionManager.getSelectedMode()== AppConstants.RST_MODE){
+            belongs_to_rst = true;
+        }else {
+            belongs_to_rst = false;
+        }
+        countData(personRepository.getPersonStat(getMilliFromDate(currentDate),belongs_to_rst));
         fragmentStatisticsBinding.btShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

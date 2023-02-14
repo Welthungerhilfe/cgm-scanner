@@ -51,7 +51,7 @@ public class SelectModeDialog extends DialogFragment {
 
         String rapidBuilder = "<b>Rapid Survey Tool :</b> To know the prevalence of malnutrition at population level";
         dialogSelectModeBinding.textRapid.setText(Html.fromHtml(rapidBuilder,Html.FROM_HTML_MODE_LEGACY));
-        String growthBuilder = "<b>Growth Monitiring :</b> To regularly monitor child growth and nutrition status";
+        String growthBuilder = "<b>Growth Monitoring :</b> To regularly monitor child growth and nutrition status";
         dialogSelectModeBinding.textGrowth.setText(Html.fromHtml(growthBuilder,Html.FROM_HTML_MODE_LEGACY));
         sessionManager = new SessionManager(getActivity());
 

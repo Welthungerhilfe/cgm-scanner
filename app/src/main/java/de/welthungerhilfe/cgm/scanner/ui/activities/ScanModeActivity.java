@@ -372,7 +372,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         .build();
         poseDetector = PoseDetection.getClient(options);
 
-        if(age > 730){
+        if(age >= 730){
             scanStanding();
         }else{
             scanLying();

@@ -88,8 +88,8 @@ public class PersonRepository {
         return database.personDao().getSyncablePersons(environment);
     }
 
-    public List<Person> getPersonStat(long currentDate){
-        return database.personDao().getPersonStat(currentDate);
+    public List<Person> getPersonStat(long currentDate, boolean belongs_to_rst){
+        return database.personDao().getPersonStat(currentDate,belongs_to_rst);
     }
 
     public LiveData<List<Person>> getAvailablePersons(PersonFilter filter) {

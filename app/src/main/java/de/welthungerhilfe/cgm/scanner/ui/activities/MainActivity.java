@@ -287,9 +287,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     showConfirmDialog(R.string.std_test_deactivate, STD_TEST_DEACTIVE);
                     break;
                 case R.id.menuSelectMode:
-                    SelectModeDialog selectModeDialog = new SelectModeDialog();
-                    selectModeDialog.show(getSupportFragmentManager(),"SelectModeDialog");
-                    break;
+                    if (session.getStdTestQrCode() == null) {
+                        SelectModeDialog selectModeDialog = new SelectModeDialog();
+                        selectModeDialog.show(getSupportFragmentManager(),"SelectModeDialog");
+                        break;
+                    }
+
+
 
             }
             activityMainBinding.drawer.closeDrawers();
