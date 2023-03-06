@@ -122,6 +122,7 @@
                         android:layout_height="wrap_content"
                         android:focusable="false"
                         android:hint="@string/measure_location"
+                        android:maxLines="2"
                         android:inputType="none" />
 
                 </com.google.android.material.textfield.TextInputLayout>

@@ -249,9 +249,15 @@ public class ManualMeasureDialog extends Dialog implements View.OnClickListener 
         dialogManualMeasureBinding.editManualDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, measure.getDate()));
         if (measure.getLocation() != null)
             dialogManualMeasureBinding.editManualLocation.setText(measure.getLocation().getAddress());
+        if(measure.getHeight() > 0) {
             dialogManualMeasureBinding.editManualHeight.setText(String.format(Locale.getDefault(), "%.1f", measure.getHeight()));
+        }
+        if(measure.getWeight() > 0) {
             dialogManualMeasureBinding.editManualWeight.setText(String.format(Locale.getDefault(), "%.3f", measure.getWeight()));
+        }
+        if(measure.getMuac() > 0) {
             dialogManualMeasureBinding.editManualMuac.setText(String.format(Locale.getDefault(), "%.1f", measure.getMuac()));
+        }
             dialogManualMeasureBinding.checkManualOedema.setChecked(!measure.isOedema());
 
         location = measure.getLocation();

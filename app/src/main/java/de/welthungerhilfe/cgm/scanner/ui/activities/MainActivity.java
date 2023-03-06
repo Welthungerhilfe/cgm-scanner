@@ -169,21 +169,18 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             if(session.getEnvironmentMode() == AppConstants.CGM_RST_MODE){
                 SelectModeDialog selectModeDialog = new SelectModeDialog();
                 selectModeDialog.show(getSupportFragmentManager(),"SelectModeDialog");
-                activityMainBinding.navMenu.getMenu().findItem(R.id.menuSelectMode).setVisible(true);
             }else if(session.getEnvironmentMode() == AppConstants.CGM_MODE){
                 session.setSelectedMode(AppConstants.CGM_MODE);
-                activityMainBinding.navMenu.getMenu().findItem(R.id.menuSelectMode).setVisible(false);
 
             } else if(session.getEnvironmentMode() == AppConstants.RST_MODE){
                 session.setSelectedMode(AppConstants.RST_MODE);
-                activityMainBinding.navMenu.getMenu().findItem(R.id.menuSelectMode).setVisible(false);
 
             }
             else if(session.getEnvironmentMode() == AppConstants.NO_MODE_SELECTED){
                 session.setSelectedMode(AppConstants.CGM_MODE);
                 session.setEnvironmentMode(AppConstants.CGM_MODE);
-                activityMainBinding.navMenu.getMenu().findItem(R.id.menuSelectMode).setVisible(false);
             }
+
         }
 
         setupSidemenu();
@@ -695,7 +692,14 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         }
 
-        activityMainBinding.navMenu.getMenu().findItem(R.id.menuScans).setTitle(title);
+        if(session.getEnvironmentMode() == AppConstants.CGM_RST_MODE) {
+            activityMainBinding.navMenu.getMenu().findItem(R.id.menuSelectMode).setVisible(true);
+
+        }else {
+            activityMainBinding.navMenu.getMenu().findItem(R.id.menuSelectMode).setVisible(false);
+
+        }
+            activityMainBinding.navMenu.getMenu().findItem(R.id.menuScans).setTitle(title);
         actionBar.setTitle(title);
     }
 

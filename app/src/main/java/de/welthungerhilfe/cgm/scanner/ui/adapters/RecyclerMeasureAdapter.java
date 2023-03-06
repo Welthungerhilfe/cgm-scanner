@@ -176,10 +176,18 @@ public class RecyclerMeasureAdapter extends RecyclerView.Adapter<RecyclerMeasure
             holder.txtHeightConfidence.setVisibility(View.GONE);
             holder.txtWeightConfidence.setVisibility(View.GONE);
         } else {
-            holder.txtHeight.setText(R.string.field_concealed);
-            holder.txtWeight.setText(R.string.field_concealed);
+
             holder.txtHeightConfidence.setVisibility(View.GONE);
             holder.txtWeightConfidence.setVisibility(View.GONE);
+            if(person.isBelongs_to_rst() && !stdtest){
+                holder.txtHeight.setText("NA");
+                holder.txtWeight.setText("NA");
+            }
+            else
+            {
+                holder.txtHeight.setText(R.string.field_concealed);
+                holder.txtWeight.setText(R.string.field_concealed);
+            }
         }
 
         holder.bindSelectListener(measure);
