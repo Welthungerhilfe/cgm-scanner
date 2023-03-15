@@ -1275,11 +1275,16 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
             List<FileLog> fileLogsList = fileLogRepository.loadAppPoseScoreFileLog(session.getEnvironment());
-            if (fileLogsList.size() == 0) {
+            if(fileLogsList!=null){
+                LogFileUtils.logInfo(TAG,"Post app posecore size "+fileLogsList.size());
+            }
+            if (fileLogsList==null || fileLogsList.size() == 0) {
                 return;
             }
             String workflow[] = AppConstants.APP_POSE_PREDICITION_1_0.split("-");
             String appPoseScoreWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
+            LogFileUtils.logInfo(TAG,"Post app posecore workflowid:wq "+fileLogsList.size());
+
             if (appPoseScoreWorkFlowId == null) {
                 return;
             }

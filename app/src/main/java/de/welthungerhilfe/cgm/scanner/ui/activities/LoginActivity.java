@@ -74,7 +74,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     String nepal[] ={"Nepal"};
     String uganda[] ={"Uganda"};
     String bangladesh[] ={"Bangladesh"};
-    String demo[] ={"Demo/Test"};
+    String demo[] ={"Demo/Test","Demo/Test - CGM","Demo/Test - RST"};
     String sandbox[] ={"Sandbox"};
     String organization[] = null;
 
@@ -287,6 +287,22 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                         session.setEnvironmentMode(AppConstants.CGM_MODE);
                         selectedBackend = "bangladesh";
                         break;
+                    case "Demo/Test - CGM":
+                        selectedCountry = country[i];
+                        selectedOrganization = "Demo/Test - CGM";
+                        session.setEnvironment(AppConstants.ENV_DEMO_QA);
+                        session.setEnvironmentMode(AppConstants.CGM_MODE);
+                        selectedBackend = "demo_qa";
+                        break;
+
+                    case "Demo/Test - RST":
+                        selectedCountry = country[i];
+                        selectedOrganization = "Demo/Test - RST";
+                        session.setEnvironment(AppConstants.ENV_DEMO_QA);
+                        session.setEnvironmentMode(AppConstants.RST_MODE);
+                        selectedBackend = "demo_qa";
+                        break;
+
                     case "Demo/Test":
                         selectedCountry = country[i];
                         selectedOrganization = "Demo/Test";
@@ -294,6 +310,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                         session.setEnvironmentMode(AppConstants.CGM_RST_MODE);
                         selectedBackend = "demo_qa";
                         break;
+
                     case "Sandbox":
                         selectedCountry = country[i];
                         selectedOrganization = "Sandbox";
