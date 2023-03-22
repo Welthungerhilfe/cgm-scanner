@@ -44,7 +44,8 @@
 
     <!-- Tutorial !-->
     <string name="tutorial1">How do I create a new profile for the child?</string>
-    <string name="tutorial11">1-1. Scan the QR code to create or find the child\'s profile</string>
+    <string name="tutorial11">Scan the child from all sides. You can do this in following ways:\n \u2022 Ask child to spin slowly\n \u2022You go around the child
+ </string>
     <string name="tutorial12">1-2. Fill in their personal details if the child has not been scanned before</string>
     <string name="tutorial2">How do I scan a child that is standing up?</string>
     <string name="tutorial21">2-1. Chose \"Standing up\" mode before starting to scan child</string>
@@ -345,6 +346,16 @@
     <string name="consent_form">Consent Form</string>
     <string name="retake_photo">Retake Photo</string>
     <string name="consent_upload_successfully">Consent form saved successfully.</string>
+
+   <!-- 8.0.0 !-->
+<!--   <string name="growth_monitor">Growth Monitoring Tool</string>
+   <string name="rapid_survey_tool">Rapid Survey tool</string>
+   <string name="child_profile">Child Profile</string>
+   <string name="rapid_survey_tool">Child Position</string>
+   <string name="rapid_survey_tool">Rapid Survey tool</string>
+   <string name="child_profile">Child Profile</string>
+   <string name="rapid_survey_tool">Child Position</string>-->
+
 
 
 </resources>

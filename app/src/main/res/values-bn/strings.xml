@@ -670,4 +670,8 @@
     <string name="consent_form">অনুমতি ফরম</string>
     <string name="retake_photo">ছবি আবার তুলুন</string>
     <string name="consent_upload_successfully">সম্মতি ফর্ম সফলভাবে সংরক্ষণ করা হয়েছে৷</string>
-    </resources>
+
+
+    <string name="growth_monitor">Growth Monitoring Tool</string>
+
+</resources>

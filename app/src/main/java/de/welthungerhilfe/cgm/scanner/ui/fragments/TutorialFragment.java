@@ -73,6 +73,8 @@ public class TutorialFragment extends Fragment implements CompoundButton.OnCheck
         fragmentTutorialBinding.guide2.setOnCheckedChangeListener(this);
         fragmentTutorialBinding.btnNext.setOnClickListener(this);
         fragmentTutorialBinding.stepView.go(tutorialData.getPosition(),true);
+        fragmentTutorialBinding.btnNext.setBackgroundResource(R.drawable.button_green_circular);
+
         if(tutorialData.getPosition() == 3) {
             fragmentTutorialBinding.btnNext.setText(getString(R.string.done).toUpperCase());
         }
@@ -89,8 +91,8 @@ public class TutorialFragment extends Fragment implements CompoundButton.OnCheck
 
     @Override
     public void onClick(View v) {
-        if (fragmentTutorialBinding.guide1.isChecked() && fragmentTutorialBinding.guide2.isChecked()) {
+       // if (fragmentTutorialBinding.guide1.isChecked() && fragmentTutorialBinding.guide2.isChecked()) {
             ((TutorialActivity)context).gotoNext();
-        }
+      //  }
     }
 }
