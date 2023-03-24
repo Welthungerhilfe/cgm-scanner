@@ -21,7 +21,7 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginLeft="25dp"
                 android:textSize="17sp"
-                android:text="Select the measure type"></TextView>
+                android:text="@string/measure_type"></TextView>
 
             <View
                 android:layout_width="250dp"
@@ -54,7 +54,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Scan Measure"
+                        android:text="@string/scan_measure"
                         android:textSize="16sp"
                         android:textColor="@color/colorPrimary"
                         android:layout_marginLeft="7dp"
@@ -87,7 +87,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Manual Measure"
+                        android:text="@string/manual_measure"
                         android:textSize="16sp"
                         android:textColor="@color/colorPrimary"
                         android:layout_marginLeft="7dp"

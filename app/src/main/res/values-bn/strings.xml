@@ -672,6 +672,19 @@
     <string name="consent_upload_successfully">সম্মতি ফর্ম সফলভাবে সংরক্ষণ করা হয়েছে৷</string>
 
 
-    <string name="growth_monitor">Growth Monitoring Tool</string>
+    <string name="growth_monitor">গ্রোথ মনিটর</string>
+    <string name="rapid_survey_tool">দ্রুত সমীক্ষা টুল</string>
+    <string name="select_tool">টুল নির্বাচন করুন</string>
+    <string name="rapid_survey_tool_desc"><b>দ্রুত সমীক্ষা টুল :</b> জনসংখ্যার মানদণ্ডে অপুষ্টিতের প্রবলতা জানতে</string>
+    <string name="growth_monitor_desc"><b>গ্রোথ মনিটরিং :</b> নিয়মিতভাবে শিশু উন্নয়ন এবং পুষ্টির অবস্থা মনিটর করতে</string>
+
+    <string name="report">রিপোর্ট</string>
+    <string name="total_children">মোট শিশু</string>
+    <string name="years">বছর</string>
+    <string name="share">শেয়ার করুন</string>
+
+    <string name="measure_type">মাপের ধরণ নির্বাচন করুন</string>
+    <string name="choose_the_goal">আপনার প্রয়োজন অনুযায়ী সরঞ্জাম নির্বাচন করুন</string>
+
 
 </resources>

@@ -48,7 +48,10 @@ public class StatisticsDialogfragment extends DialogFragment {
        fragmentStatisticsBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_statistics, container, false);
        currentDate = getCurrentDate();
        sessionManager = new SessionManager(getActivity());
-       Log.i("StatisticsDialogfragment","this is current date "+currentDate);
+       fragmentStatisticsBinding.ltTwo.setText("< 2 "+getString(R.string.years));
+        fragmentStatisticsBinding.gtTwo.setText("> 2 "+getString(R.string.years));
+
+        Log.i("StatisticsDialogfragment","this is current date "+currentDate);
        currentTime = System.currentTimeMillis();
        Log.i("StatisticsDialogfragment","this is current time "+currentTime);
         Log.i("StatisticsDialogfragment","this is current date in millisecond "+getMilliFromDate(currentDate));
@@ -140,7 +143,7 @@ public class StatisticsDialogfragment extends DialogFragment {
         updateUi();
     }
     public void updateUi(){
-        fragmentStatisticsBinding.tvDate.setText("Date:- "+getCurrentDate());
+        fragmentStatisticsBinding.tvDate.setText(getString(R.string.date) +" :- "+getCurrentDate());
         fragmentStatisticsBinding.tvTotalChildren.setText(""+totalChildren);
         fragmentStatisticsBinding.tvMale.setText(""+male);
         fragmentStatisticsBinding.tvFemale.setText(""+female);

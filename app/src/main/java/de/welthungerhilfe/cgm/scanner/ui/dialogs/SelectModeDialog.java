@@ -49,9 +49,9 @@ public class SelectModeDialog extends DialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         dialogSelectModeBinding = DataBindingUtil.inflate(inflater, R.layout.dialog_select_mode,container,false);
 
-        String rapidBuilder = "<b>Rapid Survey Tool :</b> To know the prevalence of malnutrition at population level";
+        String rapidBuilder = getString(R.string.rapid_survey_tool_desc);
         dialogSelectModeBinding.textRapid.setText(Html.fromHtml(rapidBuilder,Html.FROM_HTML_MODE_LEGACY));
-        String growthBuilder = "<b>Growth Monitoring :</b> To regularly monitor child growth and nutrition status";
+        String growthBuilder = getString(R.string.growth_monitor_desc);
         dialogSelectModeBinding.textGrowth.setText(Html.fromHtml(growthBuilder,Html.FROM_HTML_MODE_LEGACY));
         sessionManager = new SessionManager(getActivity());
 

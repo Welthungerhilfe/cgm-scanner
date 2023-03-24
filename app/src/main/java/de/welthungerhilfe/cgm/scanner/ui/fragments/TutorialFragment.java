@@ -91,8 +91,8 @@ public class TutorialFragment extends Fragment implements CompoundButton.OnCheck
 
     @Override
     public void onClick(View v) {
-       // if (fragmentTutorialBinding.guide1.isChecked() && fragmentTutorialBinding.guide2.isChecked()) {
+        if (fragmentTutorialBinding.guide1.isChecked() && fragmentTutorialBinding.guide2.isChecked()) {
             ((TutorialActivity)context).gotoNext();
-      //  }
+        }
     }
 }

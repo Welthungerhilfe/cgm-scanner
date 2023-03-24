@@ -339,5 +339,20 @@
     <string name="retake_photo">फोटो रीटेक करें</string>
     <string name="consent_upload_successfully">सहमति फ़ॉर्म सफलतापूर्वक सहेजा गया.</string>
 
+    <string name="growth_monitor">ग्रोथ मॉनिटर</string>
+    <string name="rapid_survey_tool">रैपिड सर्वे टूल</string>
+    <string name="select_tool">टूल चुनें</string>
+    <string name="rapid_survey_tool_desc"><b>रैपिड सर्वे टूल :</b> जनसँख्या स्तर पर कुपोषण के प्रसार को जानने के लिए</string>
+    <string name="growth_monitor_desc"><b>ग्रोथ मॉनिटरिंग :</b> बाल विकास और पोषण स्तर का नियमित रूप से मॉनिटरिंग करने के लिए</string>
+
+    <string name="report">रिपोर्ट</string>
+    <string name="total_children">कुल बच्चे</string>
+    <string name="years">साल</string>
+    <string name="share">शेयर करें</string>
+
+    <string name="measure_type">माप विधि चुनें</string>
+    <string name="choose_the_goal">अपनी आवश्यकतानुसार उपकरण चुनें</string>
+
+
 
 </resources>

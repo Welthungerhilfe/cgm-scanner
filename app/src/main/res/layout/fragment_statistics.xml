@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Report"
+        android:text="@string/report"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="22dp"
         android:layout_marginBottom="10dp"
@@ -55,7 +55,7 @@
             android:layout_width="170dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
-            android:text="Total Children"
+            android:text="@string/total_children"
             android:paddingLeft="30dp"></TextView>
         <View
             android:layout_width="1dp"
@@ -83,7 +83,7 @@
                 android:layout_width="170dp"
                 android:layout_height="wrap_content"
                 android:paddingLeft="30dp"                android:layout_marginBottom="5dp"
-                android:text="Male"></TextView>
+                android:text="@string/sex_male"></TextView>
             <View
                 android:layout_width="1dp"
                 android:layout_height="40dp"
@@ -111,7 +111,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:paddingLeft="30dp"
-            android:text="Female"></TextView>
+            android:text="@string/sex_female"></TextView>
         <View
             android:layout_width="1dp"
             android:layout_height="40dp"
@@ -135,6 +135,7 @@
         android:orientation="horizontal"
         >
         <TextView
+            android:id="@+id/lt_two"
             android:layout_width="170dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
@@ -164,6 +165,7 @@
         android:orientation="horizontal"
         >
         <TextView
+            android:id="@+id/gt_two"
             android:layout_width="170dp"
             android:layout_height="wrap_content"
             android:paddingLeft="30dp"
@@ -193,7 +195,7 @@
         android:layout_marginTop="50dp"
         android:layout_marginBottom="35dp"
         android:background="@drawable/button_green_round"
-        android:text="Share"
+        android:text="@string/share"
         android:textAllCaps="false"
         android:textColor="@color/colorWhite"
         android:drawableLeft="@drawable/ic_share_icon"

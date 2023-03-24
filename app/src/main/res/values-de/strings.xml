@@ -344,4 +344,18 @@
 
     <!-- 8.0.0 !-->
 
+    <string name="growth_monitor">Wachstumsmonitor</string>
+    <string name="rapid_survey_tool">Schnelles Umfrage-Werkzeug</string>
+    <string name="select_tool">Werkzeug auswählen</string>
+    <string name="rapid_survey_tool_desc"><b>Schnelles Umfrage-Werkzeug:</b> Zur Ermittlung der Häufigkeit von Mangelernährung auf Bevölkerungsebene.</string>
+    <string name="growth_monitor_desc"><b>Wachstumsüberwachung:</b> Zur regelmäßigen Überwachung des Wachstums und Ernährungsstatus von Kindern.</string>
+
+    <string name="report">Bericht</string>
+    <string name="total_children">Gesamtzahl der Kinder</string>
+    <string name="years">Jahre</string>
+    <string name="share">Teilen</string>
+
+    <string name="measure_type">Wählen Sie die Messart aus</string>
+    <string name="choose_the_goal">Wählen Sie das Tool entsprechend Ihrer Bedürfnisse</string>
+
 </resources>

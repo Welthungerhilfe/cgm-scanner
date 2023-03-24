@@ -684,10 +684,10 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         }
         String title = null;
         if(session.getSelectedMode() == AppConstants.CGM_MODE){
-            title = "Child Growth Monitor";
+            title = getString(R.string.growth_monitor);
             activityMainBinding.navMenu.getMenu().findItem(R.id.menuScans).setIcon(R.drawable.menu_scans);
         }else {
-            title = "Rapid Survey Tool";
+            title = getString(R.string.rapid_survey_tool);
             activityMainBinding.navMenu.getMenu().findItem(R.id.menuScans).setIcon(R.drawable.ic_rapid_survey);
 
         }

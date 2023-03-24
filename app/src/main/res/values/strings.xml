@@ -356,6 +356,18 @@
    <string name="child_profile">Child Profile</string>
    <string name="rapid_survey_tool">Child Position</string>-->
 
+   <string name="growth_monitor">Growth Monitor</string>
+   <string name="rapid_survey_tool">Rapid Survey Tool</string>
+   <string name="select_tool">Select Tool</string>
+   <string name="rapid_survey_tool_desc"><b>Rapid Survey Tool :</b> To know the prevalence of malnutrition at population level</string>
+   <string name="growth_monitor_desc"><b>Growth Monitoring :</b> To regularly monitor child growth and nutrition status</string>
 
+   <string name="report">Report</string>
+   <string name="total_children">Total Children</string>
+   <string name="years">years</string>
+   <string name="share">Share</string>
+
+   <string name="measure_type">Select the measure type</string>
+   <string name="choose_the_goal">Choose the tool as per your need</string>
 
 </resources>

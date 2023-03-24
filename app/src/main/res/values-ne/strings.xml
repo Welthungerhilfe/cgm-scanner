@@ -361,4 +361,19 @@
     <string name="consent_form">सहमति फारम</string>
     <string name="retake_photo">फोटो पुन: लिनुहोस्</string>
     <string name="consent_upload_successfully">सहमति फारम सफलतापूर्वक सुरक्षित गरियो।</string>
+
+    <!-- 8.0.0 !-->
+    <string name="growth_monitor">बृद्धि मोनिटर</string>
+    <string name="rapid_survey_tool">त्वरित सर्वेक्षण उपकरण</string>
+    <string name="select_tool">उपकरण छनौट गर्नुहोस्</string>
+    <string name="rapid_survey_tool_desc"><b>त्वरित सर्वेक्षण उपकरण :</b> जनसँख्या स्तरमा अपोषणको फैलावको जानकारी पाउनको लागि</string>
+    <string name="growth_monitor_desc"><b>बृद्धि मोनिटरिंग :</b> बाल वृद्धि र पोषण स्तर नियमित रूपमा मोनिटर गर्नुहोस्</string>
+
+    <string name="report">रिपोर्ट</string>
+    <string name="total_children">कुल बालबालिकाहरु</string>
+    <string name="years">वर्षहरु</string>
+    <string name="share">शेयर गर्नुहोस्</string>
+
+    <string name="measure_type">माप ढाँचा छनौट गर्नुहोस्</string>
+    <string name="choose_the_goal">तपाईंको आवश्यकताको अनुसार उपकरण छनौट गर्नुहोस्</string>
 </resources>

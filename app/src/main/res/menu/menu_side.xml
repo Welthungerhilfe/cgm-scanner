@@ -30,7 +30,7 @@
         <item
             android:id="@+id/menuSelectMode"
             android:icon="@drawable/ic_select_goal"
-            android:title="Select Goal"
+            android:title="@string/select_tool"
             android:visible="false"/>
     </group>
     <group>

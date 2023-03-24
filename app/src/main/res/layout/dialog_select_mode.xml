@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Select Goal"
+            android:text="@string/select_tool"
             android:textColor="@color/colorWhite"
             android:textSize="17sp"></TextView>
     </androidx.appcompat.widget.Toolbar>
@@ -32,7 +32,7 @@
         android:fontFamily="sans-serif"
         android:layout_marginTop="24dp"
         android:textSize="17sp"
-        android:text="Choose the goal as per your need"></TextView>
+        android:text="@string/choose_the_goal"></TextView>
 
         <View
             android:layout_width="match_parent"
@@ -66,7 +66,7 @@
             android:layout_height="80dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="60dp"
-            android:text="Rapid Survey Tool"
+            android:text="@string/rapid_survey_tool"
             android:textAllCaps="false"
             android:textColor="@color/colorPrimary"
             android:background="@drawable/rounded_greycolor_greenborder"></Button>
@@ -77,7 +77,7 @@
             android:layout_height="80dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="44dp"
-            android:text="Growth Monitoring"
+            android:text="@string/growth_monitor"
             android:textAllCaps="false"
             android:textColor="@color/colorPrimary"
             android:background="@drawable/rounded_greycolor_greenborder"></Button>
@@ -88,7 +88,7 @@
             android:layout_height="50dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="60dp"
-            android:text="Next"
+            android:text="@string/next_tutorial"
             android:textColor="@color/colorWhite"></Button>
 
         <TextView
@@ -98,7 +98,7 @@
             android:textSize="18sp"
             android:textColor="@color/colorBlack"
             android:layout_gravity="center_horizontal"
-            android:text="Cancel"
+            android:text="@string/cancel"
             android:layout_marginTop="22dp"></TextView>
     </LinearLayout>
 </LinearLayout>
