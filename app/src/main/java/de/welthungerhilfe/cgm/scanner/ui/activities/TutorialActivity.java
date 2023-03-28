@@ -62,7 +62,17 @@ public class TutorialActivity extends BaseActivity implements SelectModeDialog.S
         activityTutorialBinding = DataBindingUtil.setContentView(this,R.layout.activity_tutorial);
 
         again = getIntent().getBooleanExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, false);
+        session = new SessionManager(TutorialActivity.this);
+
         tutorialDataList = getTutorialData();
+        if(session.getSelectedMode()==AppConstants.CGM_MODE) {
+            activityTutorialBinding.stepView.setStepsNumber(4);
+            activityTutorialBinding.viewPager.setOffscreenPageLimit(4);
+        }else{
+            activityTutorialBinding.stepView.setStepsNumber(3);
+            activityTutorialBinding.viewPager.setOffscreenPageLimit(3);
+        }
+        activityTutorialBinding.viewPager.setSwipeEnabled(false);
 
         FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
 
@@ -71,9 +81,8 @@ public class TutorialActivity extends BaseActivity implements SelectModeDialog.S
         }
 
         activityTutorialBinding.viewPager.setAdapter(adapter);
-        activityTutorialBinding.viewPager.setOffscreenPageLimit(4);
-        activityTutorialBinding.viewPager.setSwipeEnabled(false);
-        session = new SessionManager(TutorialActivity.this);
+
+
         if(session.getSelectedMode() == AppConstants.NO_MODE_SELECTED){
             if(session.getEnvironmentMode() == AppConstants.CGM_RST_MODE){
                 SelectModeDialog selectModeDialog = new SelectModeDialog();
@@ -99,8 +108,14 @@ public class TutorialActivity extends BaseActivity implements SelectModeDialog.S
 
     private void showCompleteView() {
         activityTutorialBinding.lytStart.setVisibility(View.VISIBLE);
-        activityTutorialBinding.stepView.go(3,false);
-        activityTutorialBinding.stepView.done(true);
+        if(session.getSelectedMode()==AppConstants.CGM_MODE) {
+            activityTutorialBinding.stepView.go(3,false);
+            activityTutorialBinding.stepView.done(true);
+        }else{
+            activityTutorialBinding.stepView.go(2,false);
+            activityTutorialBinding.stepView.done(true);
+        }
+
         activityTutorialBinding.lytStart.animate()
                 .translationY(0)
                 .setDuration(500);
@@ -111,7 +126,9 @@ public class TutorialActivity extends BaseActivity implements SelectModeDialog.S
         tutorialDataList.add(new TutorialData(R.drawable.tutorial1 ,getString(R.string.tutorial1), getString(R.string.tutorial11), getString(R.string.tutorial12),0));
         tutorialDataList.add(new TutorialData(R.drawable.tutorial2 ,getString(R.string.tutorial2), getString(R.string.tutorial21), getString(R.string.tutorial22),1));
         tutorialDataList.add(new TutorialData(R.drawable.tutorial3 ,getString(R.string.tutorial3), getString(R.string.tutorial31), getString(R.string.tutorial32),2));
-        tutorialDataList.add(new TutorialData(R.drawable.tutorial4 ,getString(R.string.tutorial4), getString(R.string.tutorial41), getString(R.string.tutorial42),3));
+       if(session.getSelectedMode()==AppConstants.CGM_MODE) {
+           tutorialDataList.add(new TutorialData(R.drawable.tutorial4, getString(R.string.tutorial4), getString(R.string.tutorial41), getString(R.string.tutorial42), 3));
+       }
         return tutorialDataList;
     }
 

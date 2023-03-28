@@ -1,43 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="16dp"
     android:gravity="center_vertical"
-    android:orientation="vertical">
-<TextView
-android:id="@+id/tv_title"
-android:layout_width="wrap_content"
-android:textSize="16sp"
-android:text="child above 2 years"
-android:layout_height="wrap_content"
-    android:fontFamily="sans-serif-black"
-    android:textColor="@color/colorBlack"></TextView>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="17dp"
-    android:gravity="center_vertical"
     android:orientation="horizontal">
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_standing_up_tutorial"
-        android:layout_marginRight="10dp"></ImageView>
+
     <TextView
         android:id="@+id/checkbox_text"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:text="@string/tutorial11"
         android:textColor="@color/colorBlack"
-        android:textSize="14sp" />
+        android:textSize="22sp" />
 
     <androidx.appcompat.widget.AppCompatCheckBox
         android:id="@+id/checkbox_switch"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"/>
+        android:layout_height="wrap_content" />
 
-</LinearLayout>
 </LinearLayout>

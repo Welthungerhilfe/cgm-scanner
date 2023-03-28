@@ -18,7 +18,10 @@
  */
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
+import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_MEASURE;
+
 import androidx.lifecycle.LiveData;
+import androidx.room.Query;
 
 import android.content.Context;
 
@@ -97,5 +100,15 @@ public class MeasureRepository {
 
     public List<Measure> getMeasureWithoutScanResult(){
         return database.measureDao().getMeasureWithoutScanResult();
+    }
+
+
+    public long getScanMeasureCount(){
+        return database.measureDao().getScanMeasureCount();
+    }
+
+
+    public long getStdScanMeasureCount(){
+        return database.measureDao().getStdScanMeasureCount();
     }
 }

@@ -27,6 +27,7 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="CGM Scanner"
@@ -64,7 +65,7 @@
                     app:sv_stepNumberTextSize="12sp"
                     app:sv_stepPadding="2dp"
                     app:sv_stepViewStyle="@style/StepView"
-                    app:sv_stepsNumber="4" />
+                     />
 
                 <LinearLayout
                     android:layout_width="wrap_content"

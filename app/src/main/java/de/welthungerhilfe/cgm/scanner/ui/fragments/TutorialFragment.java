@@ -29,9 +29,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.FragmentTutorialBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.TutorialActivity;
 
 public class TutorialFragment extends Fragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener {
@@ -39,7 +41,7 @@ public class TutorialFragment extends Fragment implements CompoundButton.OnCheck
     private Context context;
     private TutorialData tutorialData;
     private FragmentTutorialBinding fragmentTutorialBinding;
-
+    SessionManager session;
     public static TutorialFragment newInstance(TutorialData tutorialData) {
 
         Bundle args = new Bundle();
@@ -59,6 +61,7 @@ public class TutorialFragment extends Fragment implements CompoundButton.OnCheck
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         fragmentTutorialBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_tutorial, container, false);
         tutorialData = getArguments().getParcelable("TutorialData");
+        session = new SessionManager(getActivity());
         return fragmentTutorialBinding.getRoot();
     }
 
@@ -72,12 +75,27 @@ public class TutorialFragment extends Fragment implements CompoundButton.OnCheck
         fragmentTutorialBinding.guide1.setOnCheckedChangeListener(this);
         fragmentTutorialBinding.guide2.setOnCheckedChangeListener(this);
         fragmentTutorialBinding.btnNext.setOnClickListener(this);
-        fragmentTutorialBinding.stepView.go(tutorialData.getPosition(),true);
-        fragmentTutorialBinding.btnNext.setBackgroundResource(R.drawable.button_green_circular);
+        if(session.getSelectedMode()==AppConstants.CGM_MODE) {
+            fragmentTutorialBinding.stepView.setStepsNumber(4);
+            fragmentTutorialBinding.title.setText(R.string.growth_monitor);
+        }else{
+            fragmentTutorialBinding.stepView.setStepsNumber(3);
+            fragmentTutorialBinding.title.setText(R.string.rapid_survey_tool);
 
-        if(tutorialData.getPosition() == 3) {
-            fragmentTutorialBinding.btnNext.setText(getString(R.string.done).toUpperCase());
         }
+        fragmentTutorialBinding.stepView.go(tutorialData.getPosition(),true);
+
+        if(session.getSelectedMode()== AppConstants.CGM_MODE) {
+            if(tutorialData.getPosition() == 3) {
+                fragmentTutorialBinding.btnNext.setText(getString(R.string.done).toUpperCase());
+            }
+        }else{
+            if(tutorialData.getPosition() == 2) {
+                fragmentTutorialBinding.btnNext.setText(getString(R.string.done).toUpperCase());
+            }
+
+        }
+
     }
 
     @Override

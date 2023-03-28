@@ -77,6 +77,9 @@ public class UploadManagerActivity extends BaseActivity implements Runnable {
             adapter.setData(measures);
         });
 
+       /* activityUploadManagerBinding.tvScan.setText("Remaining scan -> "+repository.getScanMeasureCount());
+        activityUploadManagerBinding.tvStdscan.setText("Remaining STD test scan -> "+repository.getStdScanMeasureCount());*/
+
         View contextMenu = activityUploadManagerBinding.contextMenuButton;
         contextMenu.setOnClickListener(v -> {
             BaseActivity activity = UploadManagerActivity.this;
