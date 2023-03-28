@@ -41,7 +41,7 @@ public class TutorialFragment extends Fragment implements CompoundButton.OnCheck
     private Context context;
     private TutorialData tutorialData;
     private FragmentTutorialBinding fragmentTutorialBinding;
-    SessionManager session;
+
     public static TutorialFragment newInstance(TutorialData tutorialData) {
 
         Bundle args = new Bundle();
@@ -61,7 +61,6 @@ public class TutorialFragment extends Fragment implements CompoundButton.OnCheck
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         fragmentTutorialBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_tutorial, container, false);
         tutorialData = getArguments().getParcelable("TutorialData");
-        session = new SessionManager(getActivity());
         return fragmentTutorialBinding.getRoot();
     }
 
@@ -75,27 +74,10 @@ public class TutorialFragment extends Fragment implements CompoundButton.OnCheck
         fragmentTutorialBinding.guide1.setOnCheckedChangeListener(this);
         fragmentTutorialBinding.guide2.setOnCheckedChangeListener(this);
         fragmentTutorialBinding.btnNext.setOnClickListener(this);
-        if(session.getSelectedMode()==AppConstants.CGM_MODE) {
-            fragmentTutorialBinding.stepView.setStepsNumber(4);
-            fragmentTutorialBinding.title.setText(R.string.growth_monitor);
-        }else{
-            fragmentTutorialBinding.stepView.setStepsNumber(3);
-            fragmentTutorialBinding.title.setText(R.string.rapid_survey_tool);
-
-        }
         fragmentTutorialBinding.stepView.go(tutorialData.getPosition(),true);
-
-        if(session.getSelectedMode()== AppConstants.CGM_MODE) {
-            if(tutorialData.getPosition() == 3) {
-                fragmentTutorialBinding.btnNext.setText(getString(R.string.done).toUpperCase());
-            }
-        }else{
-            if(tutorialData.getPosition() == 2) {
-                fragmentTutorialBinding.btnNext.setText(getString(R.string.done).toUpperCase());
-            }
-
+        if(tutorialData.getPosition() == 3) {
+            fragmentTutorialBinding.btnNext.setText(getString(R.string.done).toUpperCase());
         }
-
     }
 
     @Override
