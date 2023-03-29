@@ -376,4 +376,7 @@
 
     <string name="measure_type">माप ढाँचा छनौट गर्नुहोस्</string>
     <string name="choose_the_goal">तपाईंको आवश्यकताको अनुसार उपकरण छनौट गर्नुहोस्</string>
+
+    <string name="upload_desc">Keep the network <font color='#01C6DB'>‘ON’</font> till the remaining scans show <font color='#01C6DB'>‘0’</font></string>
+
 </resources>

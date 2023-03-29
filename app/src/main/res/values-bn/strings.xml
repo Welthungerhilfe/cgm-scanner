@@ -686,5 +686,8 @@
     <string name="measure_type">মাপের ধরণ নির্বাচন করুন</string>
     <string name="choose_the_goal">আপনার প্রয়োজন অনুযায়ী সরঞ্জাম নির্বাচন করুন</string>
 
+    <string name="upload_desc">Keep the network <font color='#01C6DB'>‘ON’</font> till the remaining scans show <font color='#01C6DB'>‘0’</font></string>
+
+
 
 </resources>

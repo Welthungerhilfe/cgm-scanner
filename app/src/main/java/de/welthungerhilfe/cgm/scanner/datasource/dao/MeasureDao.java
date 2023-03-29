@@ -65,10 +65,10 @@ public interface MeasureDao {
     long getTotalMeasureCount();
 
     @Query("SELECT COUNT(id) FROM " + TABLE_MEASURE + " WHERE isSynced=0 AND type!='manual'")
-    long getScanMeasureCount();
+    LiveData<Long> getScanMeasureCount();
 
     @Query("SELECT COUNT(id) FROM " + TABLE_MEASURE + " WHERE isSynced=0 AND type!='manual' AND std_test_qr_code NOT NULL")
-    long getStdScanMeasureCount();
+    LiveData<Long> getStdScanMeasureCount();
 
     @Query("SELECT * FROM " + TABLE_MEASURE)
     List<Measure> getAll();
