@@ -678,8 +678,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             long profile = System.currentTimeMillis();
             boolean hasCameraCalibration = mCameraInstance.hasCameraCalibration();
             String cameraCalibration = mCameraInstance.getCameraCalibration();
+            LogFileUtils.logInfo("ARENGINE","arcore step3 calibration value "+hasCameraCalibration+" "+cameraCalibration);
 
-            Runnable thread = () -> {
+
+        Runnable thread = () -> {
                 try {
 
                     //write RGB data
