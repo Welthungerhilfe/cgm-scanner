@@ -73,7 +73,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
 
     public enum IssueType { RGB_DEFECT, TOF_DEFECT, BATTERY_LOW, GPS_FAILED, STORAGE_LOW, BACKEND_ERROR, CHECK_REFUSED };
 
-    private final int CALIBRATIONS_MIN = 10; //measures
+    private final int CALIBRATIONS_MIN = 30; //measures
     private final int CALIBRATIONS_TIMEOUT = 10000; //miliseconds
     private final float CALIBRATION_TOLERANCE_RGB = 0.04f; //meters
     private final float CALIBRATION_TOLERANCE_TOF = 0.05f; //meters
@@ -341,11 +341,11 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     private void startCamera() {
         AbstractARCamera.DepthPreviewMode depthMode = AbstractARCamera.DepthPreviewMode.CALIBRATION;
         AbstractARCamera.PreviewSize previewSize = AbstractARCamera.PreviewSize.SMALL;
-        if (AREngineCamera.shouldUseAREngine()) {
+        /*if (AREngineCamera.shouldUseAREngine()) {
             camera = new AREngineCamera(getActivity(), depthMode, previewSize);
-        } else {
+        } else {*/
             camera = new ARCoreCamera(getActivity(), depthMode, previewSize);
-        }
+     //   }
         if (camera != null) {
             camera.onCreate(fragmentDeviceCheckBinding.colorCameraPreview,
                     fragmentDeviceCheckBinding.depthCameraPreview,

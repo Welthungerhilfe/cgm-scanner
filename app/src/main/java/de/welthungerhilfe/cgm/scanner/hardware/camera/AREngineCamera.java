@@ -136,7 +136,7 @@ public class AREngineCamera extends AbstractARCamera {
       }
       config.setEnableItem(ARConfigBase.ENABLE_DEPTH);
       config.setFocusMode(ARConfigBase.FocusMode.AUTO_FOCUS);
-      config.setLightingMode(ARConfigBase.LightingMode.AMBIENT_INTENSITY);
+      config.setLightingMode(ARConfigBase.LIGHT_MODE_AMBIENT_INTENSITY);
       config.setPowerMode(ARConfigBase.PowerMode.PERFORMANCE_FIRST);
       config.setUpdateMode(ARConfigBase.UpdateMode.BLOCKING);
       mSession.configure(config);

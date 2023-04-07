@@ -645,24 +645,24 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             AbstractARCamera.DepthPreviewMode depthMode;
             AbstractARCamera.PreviewSize previewSize = AbstractARCamera.PreviewSize.CLIPPED;
             if (LocalPersistency.getBoolean(this, SettingsActivity.KEY_SHOW_DEPTH)) {
-                if (AREngineCamera.shouldUseAREngine()) {
+               /* if (AREngineCamera.shouldUseAREngine()) {
                     depthMode = AbstractARCamera.DepthPreviewMode.CENTER;
-                } else {
+                } else {*/
                     depthMode = AbstractARCamera.DepthPreviewMode.CENTER_LOW_POWER;
-                }
+              //  }
             } else {
-                if (AREngineCamera.shouldUseAREngine()) {
+               /* if (AREngineCamera.shouldUseAREngine()) {
                     depthMode = AbstractARCamera.DepthPreviewMode.FOCUS;
-                } else {
+                } else {*/
                     depthMode = AbstractARCamera.DepthPreviewMode.FOCUS_LOW_POWER;
-                }
+               // }
             }
 
-            if (AREngineCamera.shouldUseAREngine()) {
+           /* if (AREngineCamera.shouldUseAREngine()) {
                 mCameraInstance = new AREngineCamera(this, depthMode, previewSize);
-            } else {
+            } else {*/
                 mCameraInstance = new ARCoreCamera(this, depthMode, previewSize);
-            }
+          //  }
         }
         return mCameraInstance;
     }
