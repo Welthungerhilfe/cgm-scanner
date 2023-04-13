@@ -59,6 +59,10 @@ public class FileLog extends CsvExportableModel implements Serializable {
     private boolean poseScoreSynced;
     private float poseScore;
     private String poseCoordinates;
+    private float child_distance;
+    private float light_score;
+    private boolean child_distance_synced;
+    private boolean light_score_synced;
 
     @NonNull
     public String getId() {
@@ -267,6 +271,38 @@ public class FileLog extends CsvExportableModel implements Serializable {
 
     public void setPoseScoreSynced(boolean poseScoreSynced) {
         this.poseScoreSynced = poseScoreSynced;
+    }
+
+    public float getChild_distance() {
+        return child_distance;
+    }
+
+    public void setChild_distance(float child_distance) {
+        this.child_distance = child_distance;
+    }
+
+    public float getLight_score() {
+        return light_score;
+    }
+
+    public void setLight_score(float light_score) {
+        this.light_score = light_score;
+    }
+
+    public boolean isChild_distance_synced() {
+        return child_distance_synced;
+    }
+
+    public void setChild_distance_synced(boolean child_distance_synced) {
+        this.child_distance_synced = child_distance_synced;
+    }
+
+    public boolean isLight_score_synced() {
+        return light_score_synced;
+    }
+
+    public void setLight_score_synced(boolean light_score_synced) {
+        this.light_score_synced = light_score_synced;
     }
 
     @Override

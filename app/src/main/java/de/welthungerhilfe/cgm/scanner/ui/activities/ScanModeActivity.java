@@ -399,6 +399,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         super.onResume();
         getCamera().onResume();
         getCamera().addListener(this);
+
         if(session.getStdTestQrCode()!=null){
             activityScanModeBinding.toolbar.setBackgroundResource(R.color.colorPink);
         } else {
@@ -411,6 +412,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         super.onPause();
         getCamera().removeListener(this);
         getCamera().onPause();
+
     }
 
     @Override
@@ -645,24 +647,25 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             AbstractARCamera.DepthPreviewMode depthMode;
             AbstractARCamera.PreviewSize previewSize = AbstractARCamera.PreviewSize.CLIPPED;
             if (LocalPersistency.getBoolean(this, SettingsActivity.KEY_SHOW_DEPTH)) {
-               /* if (AREngineCamera.shouldUseAREngine()) {
+                if (AREngineCamera.shouldUseAREngine()) {
                     depthMode = AbstractARCamera.DepthPreviewMode.CENTER;
-                } else {*/
+                } else {
                     depthMode = AbstractARCamera.DepthPreviewMode.CENTER_LOW_POWER;
-              //  }
+                }
             } else {
-               /* if (AREngineCamera.shouldUseAREngine()) {
+                if (AREngineCamera.shouldUseAREngine()) {
                     depthMode = AbstractARCamera.DepthPreviewMode.FOCUS;
-                } else {*/
+                } else {
                     depthMode = AbstractARCamera.DepthPreviewMode.FOCUS_LOW_POWER;
-               // }
+                }
             }
 
-           /* if (AREngineCamera.shouldUseAREngine()) {
+            if (AREngineCamera.shouldUseAREngine()) {
                 mCameraInstance = new AREngineCamera(this, depthMode, previewSize);
-            } else {*/
+                AbstractARCamera.DepthPreviewMode depthModear;
+            } else {
                 mCameraInstance = new ARCoreCamera(this, depthMode, previewSize);
-          //  }
+            }
         }
         return mCameraInstance;
     }
@@ -689,7 +692,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     currentImgFilename = currentImgFilename.replace('/', '_');
                     File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
                     BitmapHelper.writeBitmapToFile(bitmap, artifactFile);
-                    onProcessArtifact(artifactFile, ArtifactType.RGB, 0, poseScore, poseCoordinates);
+                    onProcessArtifact(artifactFile, ArtifactType.RGB, 0, poseScore, poseCoordinates,0,0);
 
                     //save RGB metadata
                     if (artifactFile.exists()) {
@@ -710,7 +713,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                 fileOutputStream.write(cameraCalibration.getBytes());
                                 fileOutputStream.flush();
                                 fileOutputStream.close();
-                                onProcessArtifact(artifactFile, ArtifactType.CALIBRATION, 0,0,null);
+                                onProcessArtifact(artifactFile, ArtifactType.CALIBRATION, 0,0,null,0,0);
 
                             } catch (Exception e) {
                                 LogFileUtils.logException(e);
@@ -734,9 +737,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         float height = 0;
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
             height = getCamera().getTargetHeight();
+
             if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
                 if (SCAN_STEP == AppConstants.SCAN_STANDING_FRONT) {
                     heights.add(height);
+
                 }
             }
 
@@ -748,6 +753,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         onFeedbackUpdate();
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
+
+            float light = mCameraInstance.getLightIntensity();
+            float child_distance = mCameraInstance.getTargetDistance();
+            if (light > 1) {
+                light = 1.0f - (light - 1.0f);
+            }
+            LogFileUtils.logInfo(TAG,"this is valur of distance & light "+child_distance+" "+light);
+            float light_score = light;
             long profile = System.currentTimeMillis();
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
             mNumberOfFilesWritten++;
@@ -762,7 +775,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     //write depthmap
                     File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                     depthmap.save(artifactFile);
-                    onProcessArtifact(artifactFile, ArtifactType.DEPTH, finalHeight,0,null);
+                    onProcessArtifact(artifactFile, ArtifactType.DEPTH, finalHeight,0,null,child_distance,light_score);
 
                     //profile process
                     if (artifactFile.exists()) {
@@ -785,6 +798,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void onLightScore(float score) {
+        Log.i(TAG,"this is valur light score "+score);
         synchronized (lock) {
             if (!lightScores.containsKey(SCAN_STEP)) {
                 lightScores.put(SCAN_STEP, new ArrayList<>());
@@ -839,6 +853,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private void setFeedback(String feedback) {
         //check if the feedback changed
+        if(feedback!=null) {
+            Log.i(TAG, "this is valur feedback " + feedback);
+        }
         String lastFeedback = null;
         if (mTxtFeedback.getVisibility() == View.VISIBLE) {
             lastFeedback = mTxtFeedback.getText().toString();
@@ -864,7 +881,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight, float poseScore, String poseCordinates) {
+    private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight, float poseScore, String poseCordinates,float child_distance, float light_score) {
         if (artifactFile.exists()) {
             FileLog log = new FileLog();
 
@@ -907,6 +924,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             log.setSchema_version(CgmDatabase.version);
             log.setMeasureId(measure.getId());
             log.setEnvironment(session.getEnvironment());
+            log.setChild_distance(child_distance);
+            log.setLight_score(light_score);
 
 
             synchronized (lock) {

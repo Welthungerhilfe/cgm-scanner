@@ -130,4 +130,8 @@ public class FileLogRepository {
     public List<FileLog> loadAppPoseScoreFileLog(int environment) {
         return database.fileLogDao().loadAppPoseScoreFileLog(environment);
     }
+
+    public List<FileLog> loadChildDistanceFileLog(int environment) {
+        return database.fileLogDao().loadChildDistanceFileLog(environment);
+    }
 }

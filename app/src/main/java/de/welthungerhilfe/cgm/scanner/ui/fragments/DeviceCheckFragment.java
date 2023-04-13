@@ -218,6 +218,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         if (frameIndex % 10 == 0) {
             SizeF calibrationRGB = camera.getCalibrationImageSize(false);
             SizeF calibrationToF = camera.getCalibrationImageSize(true);
+            Log.i("Tag","this is value of "+camera.getCameraCalibration());
             LogFileUtils.logInfo(TAG,"this is device check fragment onDepthDataReceived "+calibrationRGB+" "+calibrationsToF);
             if (calibrationRGB != null) {
                 Objects.requireNonNull(getActivity()).runOnUiThread(() -> {

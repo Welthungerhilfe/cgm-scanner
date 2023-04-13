@@ -398,6 +398,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
     public Bitmap getDepthPreview(Depthmap depthmap, ArrayList<Float> planes, float[] calibration) {
 
+
         DepthPreviewMode mode = mDepthMode;
         switch (mDepthMode) {
             case CENTER_LOW_POWER:

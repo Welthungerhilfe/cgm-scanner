@@ -159,7 +159,11 @@ public class AppConstants {
 
     public static final String APP_POSE_PREDICITION_1_0 = "app_pose_predicition-1.0";
 
-    public static final String[] workflowsList = {APP_AUTO_DETECT_1_0, APP_HEIGHT_1_0, APP_POSE_PREDICITION_1_0};
+    public static final String APP_CHILD_DISTANCE_1_0 = "app_child_distance-1.0";
+
+    public static final String APP_LIGHT_SCORE_1_0 = "app_lightscore-1.0";
+
+    public static final String[] workflowsList = {APP_AUTO_DETECT_1_0, APP_HEIGHT_1_0, APP_POSE_PREDICITION_1_0,APP_CHILD_DISTANCE_1_0,APP_LIGHT_SCORE_1_0};
 
     public static final int NO_MODE_SELECTED = 0;
 

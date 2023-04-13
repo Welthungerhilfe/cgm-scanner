@@ -136,7 +136,7 @@ public class AREngineCamera extends AbstractARCamera {
       }
       config.setEnableItem(ARConfigBase.ENABLE_DEPTH);
       config.setFocusMode(ARConfigBase.FocusMode.AUTO_FOCUS);
-      config.setLightingMode(ARConfigBase.LIGHT_MODE_AMBIENT_INTENSITY);
+      config.setLightingMode(ARConfigBase.LightingMode.AMBIENT_INTENSITY);
       config.setPowerMode(ARConfigBase.PowerMode.PERFORMANCE_FIRST);
       config.setUpdateMode(ARConfigBase.UpdateMode.BLOCKING);
       mSession.configure(config);
@@ -169,24 +169,24 @@ public class AREngineCamera extends AbstractARCamera {
       //get calibration from AREngine
       ARFrame frame = mSession.update();
       ARCameraIntrinsics intrinsics = frame.getCamera().getCameraImageIntrinsics();
-      LogFileUtils.logInfo("ARENGINE","arcore step1 intrinsics value "+intrinsics);
+     /* LogFileUtils.logInfo("ARENGINE","arcore step1 intrinsics value "+intrinsics);
       LogFileUtils.logInfo("ARENGINE","arcore step1 focalLength value "+intrinsics.getFocalLength()[0]+" "+intrinsics.getFocalLength()[1]);
       LogFileUtils.logInfo("ARENGINE","arcore step1 imagedimension value "+intrinsics.getImageDimensions()[0]+" "+intrinsics.getImageDimensions()[1]);
-      LogFileUtils.logInfo("ARENGINE","arcore step1 principalpoint value "+intrinsics.getPrincipalPoint()[0]+" "+intrinsics.getPrincipalPoint()[0]);
+      LogFileUtils.logInfo("ARENGINE","arcore step1 principalpoint value "+intrinsics.getPrincipalPoint()[0]+" "+intrinsics.getPrincipalPoint()[0]);*/
       mColorCameraIntrinsic[0] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
       mColorCameraIntrinsic[1] = intrinsics.getFocalLength()[0] / (float)intrinsics.getImageDimensions()[0];
       mColorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[1] / (float)intrinsics.getImageDimensions()[1];
       mColorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];
 
-      LogFileUtils.logInfo("ARENGINE","arcore step2 camerainstrics value "+mColorCameraIntrinsic[0]+" "+mColorCameraIntrinsic[1]+" "+mColorCameraIntrinsic[2]+" "+mColorCameraIntrinsic[3]);
+      /*LogFileUtils.logInfo("ARENGINE","arcore step2 camerainstrics value "+mColorCameraIntrinsic[0]+" "+mColorCameraIntrinsic[1]+" "+mColorCameraIntrinsic[2]+" "+mColorCameraIntrinsic[3]);
       LogFileUtils.logInfo("ARENGINE","arcore step2 builversion value "+Build.VERSION.SDK_INT);
-
+*/
       if (Build.MODEL.startsWith("VOG") && (Build.VERSION.SDK_INT <= 28)) {
         mColorCameraIntrinsic[0] = 0.77124846f;
         mColorCameraIntrinsic[1] = 1.0283293f;
         mColorCameraIntrinsic[2] = 0.4991906f;
         mColorCameraIntrinsic[3] = 0.5016229f;
-        LogFileUtils.logInfo("ARENGINE","arcore step2 camerainstrics value "+mColorCameraIntrinsic[0]+" "+mColorCameraIntrinsic[1]+" "+mColorCameraIntrinsic[2]+" "+mColorCameraIntrinsic[3]);
+     //   LogFileUtils.logInfo("ARENGINE","arcore step2 camerainstrics value "+mColorCameraIntrinsic[0]+" "+mColorCameraIntrinsic[1]+" "+mColorCameraIntrinsic[2]+" "+mColorCameraIntrinsic[3]);
 
       }
       mDepthCameraIntrinsic = mColorCameraIntrinsic;

@@ -84,4 +84,7 @@ public interface FileLogDao {
 
     @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND poseScoreSynced=0 AND type='rgb' AND environment=:environment AND poseCoordinates IS NOT NULL ORDER BY createDate")
     List<FileLog>  loadAppPoseScoreFileLog(int environment);
+
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND child_distance_synced=0 AND type='depth' AND environment=:environment AND child_distance IS NOT 0 ORDER BY createDate")
+    List<FileLog>  loadChildDistanceFileLog(int environment);
 }
