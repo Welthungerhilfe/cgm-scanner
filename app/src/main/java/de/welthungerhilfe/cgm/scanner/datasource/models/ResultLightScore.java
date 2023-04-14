@@ -20,13 +20,13 @@ public class ResultLightScore extends Results{
 
     public static class Data {
         @Expose
-        float light_score;
+        String light_score;
 
-        public float getLight_score() {
+        public String getLight_score() {
             return light_score;
         }
 
-        public void setLight_score(float light_score) {
+        public void setLight_score(String light_score) {
             this.light_score = light_score;
         }
     }

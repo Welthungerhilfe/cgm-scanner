@@ -59,6 +59,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAppHeight;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAppScore;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAutoDetect;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultChildDistance;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ResultLightScore;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Results;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultsData;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
@@ -1108,6 +1109,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         postAppHeightResult();
         postAppPoseScoreResult();
         postChildDistance();
+        postChildLightScore();
     }
 
     public void postAutoDetectResult() {
@@ -1388,6 +1390,92 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
     }
 
+    public void postChildLightScore()  {
+        try {
+            Gson gson = new GsonBuilder()
+                    .excludeFieldsWithoutExposeAnnotation()
+                    .create();
+            List<FileLog> fileLogsList = fileLogRepository.loadChildLightScoreFileLog(session.getEnvironment());
+            if(fileLogsList!=null){
+                LogFileUtils.logInfo(TAG,"Post app child lightscore size "+fileLogsList.size());
+            }
+            if (fileLogsList==null || fileLogsList.size() == 0) {
+                return;
+            }
+            String workflow[] = AppConstants.APP_LIGHT_SCORE_1_0.split("-");
+            String appLightScoreWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
+            LogFileUtils.logInfo(TAG,"Post app light score workflowid:wq "+fileLogsList.size());
+
+            if (appLightScoreWorkFlowId == null) {
+                return;
+            }
+            ArrayList<Results> resultList = new ArrayList();
+            for (FileLog fileLog : fileLogsList) {
+                ResultLightScore resultLightScore = new ResultLightScore();
+                resultLightScore.setId(UUID.randomUUID().toString());
+                resultLightScore.setGenerated(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
+                resultLightScore.setScan(fileLog.getScanServerId());
+                resultLightScore.setWorkflow(appLightScoreWorkFlowId);
+                ArrayList<String> sourceArtifacts = new ArrayList<>();
+                sourceArtifacts.add(fileLog.getArtifactId());
+                resultLightScore.setSource_artifacts(sourceArtifacts);
+                ArrayList<String> sourceResults = new ArrayList<>();
+                resultLightScore.setSource_results(sourceResults);
+                ResultLightScore.Data data = new ResultLightScore.Data();
+                data.setLight_score(String.valueOf(fileLog.getLight_score()));
+                resultLightScore.setData(data);
+                resultList.add(resultLightScore);
+            }
+            ResultsData resultsData = new ResultsData();
+            resultsData.setResults(resultList);
+
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
+
+            onThreadChange(1);
+            LogFileUtils.logInfo(TAG, "posting light score workflows... ");
+            retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<ResultsData>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull ResultsData resultsData1) {
+                            LogFileUtils.logInfo(TAG, "App light score workflow successfully posted...");
+                            for (Results results : resultsData1.getResults()) {
+                                FileLog fileLog = fileLogRepository.getFileLogByArtifactId(results.getSource_artifacts().get(0));
+                                fileLog.setLight_score_synced(true);
+                                fileLogRepository.updateFileLog(fileLog);
+                            }
+                            updated = true;
+                            updateDelay = 0;
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            LogFileUtils.logError(TAG, "App light score workflow posting failed " + e.getMessage());
+
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(context);
+                                error401();
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            LogFileUtils.logException(e);
+        }
+    }
+
+
     public void postChildDistance() {
         try {
             Gson gson = new GsonBuilder()
@@ -1402,7 +1490,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             }
             String workflow[] = AppConstants.APP_CHILD_DISTANCE_1_0.split("-");
             String appChildDistanceWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
-            LogFileUtils.logInfo(TAG,"Post app posecore workflowid:wq "+fileLogsList.size());
+            LogFileUtils.logInfo(TAG,"Post app child distance workflowid:wq "+fileLogsList.size());
 
             if (appChildDistanceWorkFlowId == null) {
                 return;
@@ -1420,7 +1508,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 ArrayList<String> sourceResults = new ArrayList<>();
                 resultChildDistanc.setSource_results(sourceResults);
                 ResultChildDistance.Data data = new ResultChildDistance.Data();
-                data.setChild_distance(fileLog.getChild_distance());
+                data.setChild_distance(String.valueOf(fileLog.getChild_distance()));
                 resultChildDistanc.setData(data);
                 resultList.add(resultChildDistanc);
             }
@@ -1444,7 +1532,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             LogFileUtils.logInfo(TAG, "App child distance workflow successfully posted...");
                             for (Results results : resultsData1.getResults()) {
                                 FileLog fileLog = fileLogRepository.getFileLogByArtifactId(results.getSource_artifacts().get(0));
-                                fileLog.setPoseScoreSynced(true);
+                                fileLog.setChild_distance_synced(true);
                                 fileLogRepository.updateFileLog(fileLog);
                             }
                             updated = true;

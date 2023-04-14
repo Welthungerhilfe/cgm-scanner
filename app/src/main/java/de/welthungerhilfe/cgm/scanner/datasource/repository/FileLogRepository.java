@@ -134,4 +134,8 @@ public class FileLogRepository {
     public List<FileLog> loadChildDistanceFileLog(int environment) {
         return database.fileLogDao().loadChildDistanceFileLog(environment);
     }
+
+    public List<FileLog> loadChildLightScoreFileLog(int environment) {
+        return database.fileLogDao().loadChildLightScoreFileLog(environment);
+    }
 }
