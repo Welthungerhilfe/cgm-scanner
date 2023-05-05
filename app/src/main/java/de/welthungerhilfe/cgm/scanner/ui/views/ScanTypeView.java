@@ -62,6 +62,9 @@ public class ScanTypeView extends LinearLayout {
         mChildIcon.setImageResource(res);
     }
 
+    public void setTitle(int res) {
+        mTitle.setText(res);
+    }
     public void setListener(int buttonId, ScanTypeListener listener) {
         mButtonId = buttonId;
         mListener = listener;

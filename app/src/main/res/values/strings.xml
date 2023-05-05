@@ -227,6 +227,7 @@
     <string name="scan_feedback">Scan Feedback</string>
     <string name="front_scan">01. Front Scan</string>
     <string name="side_scan">02. 360\' Scan</string>
+    <string name="lying_side_scan">02. 180\' Scan</string>
     <string name="back_scan">03. Back Scan</string>
     <string name="scan_quality">Scan Quality : </string>
     <string name="score_light">Light Score : </string>

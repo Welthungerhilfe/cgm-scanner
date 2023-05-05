@@ -484,11 +484,13 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             activityScanModeBinding.scanType1.setChildIcon(R.drawable.stand_front);
             activityScanModeBinding.scanType2.setChildIcon(R.drawable.stand_side);
             activityScanModeBinding.scanType3.setChildIcon(R.drawable.stand_back);
+            activityScanModeBinding.scanType2.setTitle(R.string.side_scan);
             getCamera().setPlaneMode(AbstractARCamera.PlaneMode.LOWEST);
         } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
             activityScanModeBinding.scanType1.setChildIcon(R.drawable.lying_front);
             activityScanModeBinding.scanType2.setChildIcon(R.drawable.lying_side);
             activityScanModeBinding.scanType3.setChildIcon(R.drawable.lying_back);
+            activityScanModeBinding.scanType2.setTitle(R.string.lying_side_scan);
             getCamera().setPlaneMode(AbstractARCamera.PlaneMode.VISIBLE);
         }
     }

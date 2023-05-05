@@ -235,6 +235,7 @@
     <string name="scan_feedback">पृष्ठपोषण स्क्यान गर्नुहोस्</string>
     <string name="front_scan">०१. फ्रन्ट स्क्यान</string>
     <string name="side_scan">०२. ३६०\' स्क्यान</string>
+    <string name="lying_side_scan">०२. १८०\' स्क्यान</string>
     <string name="back_scan">०३. ब्याक स्क्यान</string>
     <string name="scan_quality">स्क्यान गुणस्तर : </string>
     <string name="score_light">चम्किलो प्राप्ताङ्क : </string>

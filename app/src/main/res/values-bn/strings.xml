@@ -444,7 +444,11 @@
 
 <string name="side_scan">০২. ৩৬০ ডিগ্রী স্ক্যান করুন </string>
 
-<string name="back_scan">০৩. পিছনে স্ক্যান করুন </string>
+    <string name="lying_side_scan">০২। ১৮০\' স্ক্যান</string>
+
+
+
+    <string name="back_scan">০৩. পিছনে স্ক্যান করুন </string>
 
 <string name="scan_quality">স্ক্যান কোয়ালিটি: </string>
 
