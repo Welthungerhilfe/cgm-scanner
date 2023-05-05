@@ -358,4 +358,7 @@
     <string name="measure_type">Wählen Sie die Messart aus</string>
     <string name="choose_the_goal">Wählen Sie das Tool entsprechend Ihrer Bedürfnisse</string>
 
+    <string name="upload_desc">Keep the network <font color='#01C6DB'>‘ON’</font> till the remaining scans show <font color='#01C6DB'>‘0’</font></string>
+
+
 </resources>

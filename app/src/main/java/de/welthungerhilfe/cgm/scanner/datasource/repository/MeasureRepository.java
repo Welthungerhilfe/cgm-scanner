@@ -103,12 +103,12 @@ public class MeasureRepository {
     }
 
 
-    public long getScanMeasureCount(){
+    public LiveData<Long> getScanMeasureCount(){
         return database.measureDao().getScanMeasureCount();
     }
 
 
-    public long getStdScanMeasureCount(){
+    public LiveData<Long> getStdScanMeasureCount(){
         return database.measureDao().getStdScanMeasureCount();
     }
 }

@@ -68,13 +68,21 @@ public class UploadManagerActivity extends BaseActivity implements Runnable {
             viewModel = ViewModelProviders.of(this).get(UploadManagerViewModel.class);
         }
 
-        RecyclerUploadAdapter adapter = new RecyclerUploadAdapter(this);
+       /* RecyclerUploadAdapter adapter = new RecyclerUploadAdapter(this);
         activityUploadManagerBinding.recyclerScans.setAdapter(adapter);
         activityUploadManagerBinding.recyclerScans.setLayoutManager(new LinearLayoutManager(this));
-
+*/
         MeasureRepository repository = MeasureRepository.getInstance(this);
-        repository.getUploadMeasures().observe(this, measures -> {
+        /*repository.getUploadMeasures().observe(this, measures -> {
             adapter.setData(measures);
+        });*/
+
+        repository.getScanMeasureCount().observe(this, data ->{
+            activityUploadManagerBinding.tvRemainScan.setText(""+data);
+        });
+
+        repository.getStdScanMeasureCount().observe(this, data ->{
+            activityUploadManagerBinding.tvRemainStdscan.setText(""+data);
         });
 
        /* activityUploadManagerBinding.tvScan.setText("Remaining scan -> "+repository.getScanMeasureCount());

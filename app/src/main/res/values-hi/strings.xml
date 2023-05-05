@@ -353,6 +353,9 @@
     <string name="measure_type">माप विधि चुनें</string>
     <string name="choose_the_goal">अपनी आवश्यकतानुसार उपकरण चुनें</string>
 
+    <string name="upload_desc">Keep the network <font color='#01C6DB'>‘ON’</font> till the remaining scans show <font color='#01C6DB'>‘0’</font></string>
+
+
 
 
 </resources>
