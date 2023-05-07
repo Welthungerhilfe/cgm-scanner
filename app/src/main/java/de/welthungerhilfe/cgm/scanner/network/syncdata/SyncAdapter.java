@@ -46,6 +46,7 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.Utils;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Artifact;
+import de.welthungerhilfe.cgm.scanner.datasource.models.CompleteScan;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Device;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
@@ -373,6 +374,88 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     .create();
 
             final int[] count = {scans.values().size()};
+            CompleteScan completeScan = new CompleteScan();
+            ArrayList<Scan> scanList = new ArrayList();
+            for (Scan scan : scans.values()) {
+                scanList.add(scan);
+                LogFileUtils.logInfo(TAG, "this is posting scan " + scan.getId());
+
+            }
+            completeScan.setScans(scanList);
+
+            LogFileUtils.logInfo(TAG, "this is posting scan raw data " + (new JSONObject(gson.toJson(completeScan))).toString());
+
+            onThreadChange(1);
+                RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(completeScan))).toString());
+                retrofit.create(ApiService.class).postScans(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Observer<String[]>() {
+                            @Override
+                            public void onSubscribe(@NonNull Disposable d) {
+
+                            }
+
+                            @Override
+                            public void onNext(@NonNull String[] scans) {
+
+                                if(scans==null || scans.length==0){
+                                    return;
+                                }
+                                Log.i(TAG,"this is value of post scan server id "+ scans[0]+" "+scans[1]+" "+scans[2]);
+
+                                for (int i =0; i<scans.length ;i++) {
+                                    LogFileUtils.logInfo(TAG, "scan " + scans[i] + " successfully posted");
+                                    PostScanResult postScanResult = new PostScanResult();
+                                    postScanResult.setEnvironment(measure.getEnvironment());
+                                    postScanResult.setId(scans[i]);
+                                    postScanResult.setMeasure_id(measure.getId());
+                                    postScanResult.setTimestamp(prevTimestamp);
+                                    postScanResultrepository.insertPostScanResult(postScanResult);
+                                    addScanDataToFileLogs(scans[i], scanList.get(i).getArtifacts());
+
+                                    count[0]--;
+                                    if (count[0] == 0) {
+                                        measure.setArtifact_synced(true);
+                                        measure.setTimestamp(session.getSyncTimestamp());
+                                        measure.setUploaded_at(System.currentTimeMillis());
+                                        measure.setSynced(true);
+                                        updated = true;
+                                        updateDelay = 0;
+                                        measureRepository.updateMeasure(measure);
+                                    }
+                                }
+                                onThreadChange(-1);
+                            }
+
+                            @Override
+                            public void onError(@NonNull Throwable e) {
+                                LogFileUtils.logError(TAG, "scan error  posting failed " + e.getMessage());
+                                if (NetworkUtils.isExpiredToken(e.getMessage())) {
+                                    AuthenticationHandler.restoreToken(context);
+                                    error401();
+                                }
+
+                                onThreadChange(-1);
+                            }
+
+                            @Override
+                            public void onComplete() {
+
+                            }
+                        });
+
+        } catch (Exception e) {
+            LogFileUtils.logException(e);
+        }
+    }
+
+    /*private void postScans(HashMap<Integer, Scan> scans, Measure measure) {
+        try {
+            Gson gson = new GsonBuilder()
+                    .excludeFieldsWithoutExposeAnnotation()
+                    .create();
+
+            final int[] count = {scans.values().size()};
             for (Scan scan : scans.values()) {
 
                 onThreadChange(1);
@@ -430,7 +513,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         } catch (Exception e) {
             LogFileUtils.logException(e);
         }
-    }
+    }*/
 
     public void addScanDataToFileLogs(String scanServerId, List<Artifact> artifactsList) {
         for (Artifact artifact : artifactsList) {
