@@ -145,4 +145,6 @@ public class Scan implements Serializable {
     public void setStd_test_qr_code(String std_test_qr_code) {
         this.std_test_qr_code = std_test_qr_code;
     }
+
+
 }

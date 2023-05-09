@@ -18,6 +18,7 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.service;
 
+import de.welthungerhilfe.cgm.scanner.datasource.models.CompleteScan;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
@@ -66,7 +67,7 @@ public interface ApiService {
     Observable<Scan> postScans(@Header("Authorization") String auth, @Body RequestBody scan);*/
 
     @POST("complete-scan")
-    Observable<String []> postScans(@Header("Authorization") String auth, @Body RequestBody scans);
+    Observable<CompleteScan> postScans(@Header("Authorization") String auth, @Body RequestBody scans);
 
     @Multipart
     @POST("files")

@@ -389,41 +389,41 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(completeScan))).toString());
                 retrofit.create(ApiService.class).postScans(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Observer<String[]>() {
+                        .subscribe(new Observer<CompleteScan>() {
                             @Override
                             public void onSubscribe(@NonNull Disposable d) {
 
                             }
 
                             @Override
-                            public void onNext(@NonNull String[] scans) {
+                            public void onNext(@NonNull CompleteScan completeScan) {
 
-                                if(scans==null || scans.length==0){
+                                if(completeScan==null || completeScan.getScans().size() == 0){
                                     return;
                                 }
-                                Log.i(TAG,"this is value of post scan server id "+ scans[0]+" "+scans[1]+" "+scans[2]);
-
-                                for (int i =0; i<scans.length ;i++) {
-                                    LogFileUtils.logInfo(TAG, "scan " + scans[i] + " successfully posted");
+                                try {
+                                    LogFileUtils.logInfo(TAG,"this is value of response complete scan"+  (new JSONObject(gson.toJson(completeScan))).toString());
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                for(Scan scan:completeScan.getScans()){
+                                    LogFileUtils.logInfo(TAG, "scan " + scan.getId() + " successfully posted");
                                     PostScanResult postScanResult = new PostScanResult();
                                     postScanResult.setEnvironment(measure.getEnvironment());
-                                    postScanResult.setId(scans[i]);
+                                    postScanResult.setId(scan.getId());
                                     postScanResult.setMeasure_id(measure.getId());
                                     postScanResult.setTimestamp(prevTimestamp);
                                     postScanResultrepository.insertPostScanResult(postScanResult);
-                                    addScanDataToFileLogs(scans[i], scanList.get(i).getArtifacts());
-
-                                    count[0]--;
-                                    if (count[0] == 0) {
-                                        measure.setArtifact_synced(true);
-                                        measure.setTimestamp(session.getSyncTimestamp());
-                                        measure.setUploaded_at(System.currentTimeMillis());
-                                        measure.setSynced(true);
-                                        updated = true;
-                                        updateDelay = 0;
-                                        measureRepository.updateMeasure(measure);
-                                    }
+                                    addScanDataToFileLogs(scan.getId(), scan.getArtifacts());
                                 }
+
+                                measure.setArtifact_synced(true);
+                                measure.setTimestamp(session.getSyncTimestamp());
+                                measure.setUploaded_at(System.currentTimeMillis());
+                                measure.setSynced(true);
+                                updated = true;
+                                updateDelay = 0;
+                                measureRepository.updateMeasure(measure);
                                 onThreadChange(-1);
                             }
 
@@ -1513,7 +1513,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             resultsData.setResults(resultList);
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
-
+            Log.i(TAG,"this is light score body "+(new JSONObject(gson.toJson(resultsData))).toString());
             onThreadChange(1);
             LogFileUtils.logInfo(TAG, "posting light score workflows... ");
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())

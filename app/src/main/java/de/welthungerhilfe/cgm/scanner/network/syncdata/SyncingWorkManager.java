@@ -119,6 +119,6 @@ public class SyncingWorkManager extends Worker {
                     System.exit(0);
                     return null;
             }
-        }
+       }
     }
 }
