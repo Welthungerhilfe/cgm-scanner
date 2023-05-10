@@ -227,6 +227,7 @@
     <string name="scan_feedback">Scan Feedback</string>
     <string name="front_scan">01. Front Scan</string>
     <string name="side_scan">02. 360\' Scan</string>
+    <string name="lying_side_scan">02. 180\' Scan</string>
     <string name="back_scan">03. Back Scan</string>
     <string name="scan_quality">Scan Quality : </string>
     <string name="score_light">Light Score : </string>
@@ -281,13 +282,13 @@
     <string name="mam_hfa_message">Contact a local doctor or health officer</string>
 
     <!-- Upload manager !-->
-    <string name="label_overview">Overview</string>
+    <string name="label_overview">Upload Status</string>
     <string name="label_upload_speed">Upload Speed : </string>
     <string name="label_upload_expect">Expected Time : </string>
     <string name="label_total_size">Total Size : </string>
     <string name="label_uploaded_size">Uploaded Size : </string>
     <string name="menuUploadManager">Upload Manager</string>
-    <string name="label_upload_status">Upload Status</string>
+    <string name="label_upload_status">Scan Upload Status</string>
     <string name="upload_completed">Upload Completed</string>
     <string name="less_than_minute">less than 1 minute</string>
     <string name="minutes">minutes</string>
@@ -368,5 +369,8 @@
 
    <string name="measure_type">Select the measure type</string>
    <string name="choose_the_goal">Choose the tool as per your need</string>
+
+
+    <string name="upload_desc">Keep the network <font color='#39B54A'>‘ON’</font> till the remaining scans show <font color='#39B54A'>‘0’</font></string>
 
 </resources>

@@ -444,7 +444,11 @@
 
 <string name="side_scan">০২. ৩৬০ ডিগ্রী স্ক্যান করুন </string>
 
-<string name="back_scan">০৩. পিছনে স্ক্যান করুন </string>
+    <string name="lying_side_scan">০২। ১৮০\' স্ক্যান</string>
+
+
+
+    <string name="back_scan">০৩. পিছনে স্ক্যান করুন </string>
 
 <string name="scan_quality">স্ক্যান কোয়ালিটি: </string>
 
@@ -685,6 +689,9 @@
 
     <string name="measure_type">মাপের ধরণ নির্বাচন করুন</string>
     <string name="choose_the_goal">আপনার প্রয়োজন অনুযায়ী সরঞ্জাম নির্বাচন করুন</string>
+
+    <string name="upload_desc">Keep the network <font color='#01C6DB'>‘ON’</font> till the remaining scans show <font color='#01C6DB'>‘0’</font></string>
+
 
 
 </resources>

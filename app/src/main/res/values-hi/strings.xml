@@ -225,6 +225,7 @@
     <string name="scan_feedback">स्कैन प्रतिक्रिया</string>
     <string name="front_scan">01. सामने स्कैन</string>
     <string name="side_scan">02. 360\' स्कैन</string>
+    <string name="lying_side_scan">02. 180\' स्कैन</string>
     <string name="back_scan">03. बैक स्कैन</string>
     <string name="scan_quality">स्कैन गुणवत्ता : </string>
     <string name="score_light">लाइट स्कोर : </string>
@@ -352,6 +353,9 @@
 
     <string name="measure_type">माप विधि चुनें</string>
     <string name="choose_the_goal">अपनी आवश्यकतानुसार उपकरण चुनें</string>
+
+    <string name="upload_desc">Keep the network <font color='#01C6DB'>‘ON’</font> till the remaining scans show <font color='#01C6DB'>‘0’</font></string>
+
 
 
 
