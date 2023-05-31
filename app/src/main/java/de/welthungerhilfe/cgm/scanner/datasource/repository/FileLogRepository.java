@@ -131,6 +131,10 @@ public class FileLogRepository {
         return database.fileLogDao().loadAppPoseScoreFileLog(environment);
     }
 
+    public List<FileLog> loadAppBoundingBox(int environment) {
+        return database.fileLogDao().loadAppBoundingBox(environment);
+    }
+
     public List<FileLog> loadChildDistanceFileLog(int environment) {
         return database.fileLogDao().loadChildDistanceFileLog(environment);
     }

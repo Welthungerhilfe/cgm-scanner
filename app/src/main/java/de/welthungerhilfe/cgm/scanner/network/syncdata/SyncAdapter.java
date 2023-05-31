@@ -59,6 +59,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.RemainingData;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAppHeight;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAppScore;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAutoDetect;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ResultBoundingBox;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultChildDistance;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultLightScore;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Results;
@@ -378,7 +379,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             ArrayList<Scan> scanList = new ArrayList();
             for (Scan scan : scans.values()) {
                 scanList.add(scan);
-                LogFileUtils.logInfo(TAG, "this is posting scan " + scan.getId());
+                LogFileUtils.logInfo(TAG, "this is posting scan " + measure.getId());
 
             }
             completeScan.setScans(scanList);
@@ -407,7 +408,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                     e.printStackTrace();
                                 }
                                 for(Scan scan:completeScan.getScans()){
-                                    LogFileUtils.logInfo(TAG, "scan " + scan.getId() + " successfully posted");
+                                    LogFileUtils.logInfo(TAG, "scan " + measure.getId() + " successfully posted");
                                     PostScanResult postScanResult = new PostScanResult();
                                     postScanResult.setEnvironment(measure.getEnvironment());
                                     postScanResult.setId(scan.getId());
@@ -1193,6 +1194,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         postAppPoseScoreResult();
         postChildDistance();
         postChildLightScore();
+        postAppBoundingBoxResult();
     }
 
     public void postAutoDetectResult() {
@@ -1725,6 +1727,91 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         int count = session.getSessionError()+1;
         session.setSessionError(count);
         LogFileUtils.logInfo(TAG,"error 401 "+count);
+    }
+
+    public void postAppBoundingBoxResult() {
+        try {
+            Gson gson = new GsonBuilder()
+                    .excludeFieldsWithoutExposeAnnotation()
+                    .create();
+            List<FileLog> fileLogsList = fileLogRepository.loadAppBoundingBox(session.getEnvironment());
+            if(fileLogsList!=null){
+                LogFileUtils.logInfo(TAG,"Post app boundingbox size "+fileLogsList.size());
+            }
+            if (fileLogsList==null || fileLogsList.size() == 0) {
+                return;
+            }
+            String workflow[] = AppConstants.APP_BOUNDING_BOX_1_0.split("-");
+            String appBoundingBoxWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
+            LogFileUtils.logInfo(TAG,"Post app bounding box workflowid:wq "+fileLogsList.size());
+
+            if (appBoundingBoxWorkFlowId == null) {
+                return;
+            }
+            ArrayList<Results> resultList = new ArrayList();
+            for (FileLog fileLog : fileLogsList) {
+                ResultBoundingBox resultBoundingBox = new ResultBoundingBox();
+                resultBoundingBox.setId(UUID.randomUUID().toString());
+                resultBoundingBox.setGenerated(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
+                resultBoundingBox.setScan(fileLog.getScanServerId());
+                resultBoundingBox.setWorkflow(appBoundingBoxWorkFlowId);
+                ArrayList<String> sourceArtifacts = new ArrayList<>();
+                sourceArtifacts.add(fileLog.getArtifactId());
+                resultBoundingBox.setSource_artifacts(sourceArtifacts);
+                ArrayList<String> sourceResults = new ArrayList<>();
+                resultBoundingBox.setSource_results(sourceResults);
+                ResultBoundingBox.Data data = new ResultBoundingBox.Data();
+                data.setAppBoundingBox(fileLog.getBoundingBox());
+                resultBoundingBox.setData(data);
+                resultList.add(resultBoundingBox);
+            }
+            ResultsData resultsData = new ResultsData();
+            resultsData.setResults(resultList);
+
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
+
+            onThreadChange(1);
+            LogFileUtils.logInfo(TAG, "posting appPoseScore workflows... ");
+            retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<ResultsData>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull ResultsData resultsData1) {
+                            LogFileUtils.logInfo(TAG, "AppPoseScore workflow successfully posted...");
+                            for (Results results : resultsData1.getResults()) {
+                                FileLog fileLog = fileLogRepository.getFileLogByArtifactId(results.getSource_artifacts().get(0));
+                                fileLog.setBounding_box_synced(true);
+                                fileLogRepository.updateFileLog(fileLog);
+                            }
+                            updated = true;
+                            updateDelay = 0;
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            LogFileUtils.logError(TAG, "AppPoseScore workflow posting failed " + e.getMessage());
+
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(context);
+                                error401();
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            LogFileUtils.logException(e);
+        }
     }
 
 }

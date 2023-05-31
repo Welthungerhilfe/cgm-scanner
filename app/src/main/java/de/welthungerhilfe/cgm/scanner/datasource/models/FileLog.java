@@ -63,6 +63,8 @@ public class FileLog extends CsvExportableModel implements Serializable {
     private float light_score;
     private boolean child_distance_synced;
     private boolean light_score_synced;
+    private String boundingBox;
+    private boolean bounding_box_synced;
 
     @NonNull
     public String getId() {
@@ -303,6 +305,22 @@ public class FileLog extends CsvExportableModel implements Serializable {
 
     public void setLight_score_synced(boolean light_score_synced) {
         this.light_score_synced = light_score_synced;
+    }
+
+    public String getBoundingBox() {
+        return boundingBox;
+    }
+
+    public void setBoundingBox(String boundingBox) {
+        this.boundingBox = boundingBox;
+    }
+
+    public boolean isBounding_box_synced() {
+        return bounding_box_synced;
+    }
+
+    public void setBounding_box_synced(boolean bounding_box_synced) {
+        this.bounding_box_synced = bounding_box_synced;
     }
 
     @Override

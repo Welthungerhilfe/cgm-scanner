@@ -66,7 +66,7 @@ public class AREngineCamera extends AbstractARCamera {
 
   //AREngine API
   private boolean mFirstRequest;
-  private int mOrientation;
+ // private int mOrientation;
   private ARSession mSession;
 
   public AREngineCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
@@ -84,6 +84,10 @@ public class AREngineCamera extends AbstractARCamera {
     if (orientationEventListener.canDetectOrientation()) {
       orientationEventListener.enable();
     }
+  }
+
+  public float getOrientation(){
+    return mOrientation;
   }
 
 

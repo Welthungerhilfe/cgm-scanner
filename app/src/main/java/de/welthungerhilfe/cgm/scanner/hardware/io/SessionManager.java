@@ -214,7 +214,6 @@ public class SessionManager {
     }
 
     public String getAuthTokenWithBearer() {
-
         if (BuildConfig.DEBUG) {
             return null;
 

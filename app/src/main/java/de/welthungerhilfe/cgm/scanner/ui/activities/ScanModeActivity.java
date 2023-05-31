@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.MediaActionSound;
@@ -51,6 +52,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.objects.DetectedObject;
+import com.google.mlkit.vision.objects.ObjectDetection;
+import com.google.mlkit.vision.objects.ObjectDetector;
+import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions;
 import com.google.mlkit.vision.pose.Pose;
 import com.google.mlkit.vision.pose.PoseDetection;
 import com.google.mlkit.vision.pose.PoseDetector;
@@ -268,6 +273,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private float mOutlineAlpha = 1;
     AccuratePoseDetectorOptions options;
     PoseDetector poseDetector;
+    ObjectDetectorOptions objectDetectorOptions;
+    ObjectDetector objectDetector;
 
     public void onStart() {
         super.onStart();
@@ -372,6 +379,12 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         .build();
         poseDetector = PoseDetection.getClient(options);
 
+        objectDetectorOptions = new ObjectDetectorOptions.Builder()
+                .setDetectorMode(ObjectDetectorOptions.SINGLE_IMAGE_MODE)
+                .enableClassification()  // Optional
+                .build();
+
+        objectDetector = ObjectDetection.getClient(objectDetectorOptions);
         if(age >= 730){
             scanStanding();
         }else{
@@ -678,7 +691,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         createPose(bitmap, frameIndex);
     }
 
-    public void onPostColorDataReceived(Bitmap bitmap, int frameIndex, float poseScore, String poseCoordinates){
+    public void onPostColorDataReceived(Bitmap bitmap, int frameIndex, float poseScore, String poseCoordinates, String boundingBox){
 
             long profile = System.currentTimeMillis();
             boolean hasCameraCalibration = mCameraInstance.hasCameraCalibration();
@@ -694,7 +707,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     currentImgFilename = currentImgFilename.replace('/', '_');
                     File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
                     BitmapHelper.writeBitmapToFile(bitmap, artifactFile);
-                    onProcessArtifact(artifactFile, ArtifactType.RGB, 0, poseScore, poseCoordinates,0,0);
+                    onProcessArtifact(artifactFile, ArtifactType.RGB, 0, poseScore, poseCoordinates,0,0,boundingBox);
 
                     //save RGB metadata
                     if (artifactFile.exists()) {
@@ -715,7 +728,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                 fileOutputStream.write(cameraCalibration.getBytes());
                                 fileOutputStream.flush();
                                 fileOutputStream.close();
-                                onProcessArtifact(artifactFile, ArtifactType.CALIBRATION, 0,0,null,0,0);
+                                onProcessArtifact(artifactFile, ArtifactType.CALIBRATION, 0,0,null,0,0,null);
 
                             } catch (Exception e) {
                                 LogFileUtils.logException(e);
@@ -757,6 +770,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             float light = mCameraInstance.getLightIntensity();
+            float orientation = mCameraInstance.getOrientation();
+            Log.i("ScanModeActivity","this is value of orientation "+orientation);
             double child_distance = mCameraInstance.getTargetDistance();
             if (light > 1) {
                 light = 1.0f - (light - 1.0f);
@@ -777,7 +792,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     //write depthmap
                     File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                     depthmap.save(artifactFile);
-                    onProcessArtifact(artifactFile, ArtifactType.DEPTH, finalHeight,0,null,child_distance,light_score);
+                    onProcessArtifact(artifactFile, ArtifactType.DEPTH, finalHeight,0,null,child_distance,light_score,null);
 
                     //profile process
                     if (artifactFile.exists()) {
@@ -883,7 +898,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight, float poseScore, String poseCordinates,double child_distance, float light_score) {
+    private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight, float poseScore, String poseCordinates,double child_distance, float light_score, String boundinBox) {
         if (artifactFile.exists()) {
             FileLog log = new FileLog();
 
@@ -912,6 +927,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             log.setChildHeight(childHeight);
             log.setPoseScore(poseScore);
             log.setPoseCoordinates(poseCordinates);
+            log.setBoundingBox(boundinBox);
 
             //set metadata
             log.setPath(artifactFile.getPath());
@@ -1084,8 +1100,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                             ans[0]="0.0";
                                         }
                                     Log.i(TAG,"this is inside point 4" + ans[0] + " " + ans[1]);
-
-                                    onPostColorDataReceived(bitmap, frameIndex, Float.parseFloat(ans[0]), ans[1]);
+                                    cretaeBoundingbox(bitmap, frameIndex, Float.parseFloat(ans[0]), ans[1]);
 
                                 }
                             })
@@ -1096,12 +1111,50 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                     // Task failed with an exception
                                     // ...
                                     Log.i(TAG,"this is inside point 5");
+                                    cretaeBoundingbox(bitmap, frameIndex, 0.0f, null);
 
-                                    onPostColorDataReceived(bitmap, frameIndex, 0.0f, null);
 
                                 }
                             });
         }
     }
 
+    public void cretaeBoundingbox(Bitmap bitmap, int frameIndex,float poseScore,String poseCoordinates){
+        InputImage image = InputImage.fromBitmap(bitmap, 0);
+        String boundingBox = null;
+        objectDetector.process(image)
+                .addOnSuccessListener(
+                        new OnSuccessListener<List<DetectedObject>>() {
+                            @Override
+                            public void onSuccess(List<DetectedObject> detectedObjects) {
+
+                                Log.i("ObjectDetector ", "this is value of bounding box " + detectedObjects);
+                                String boundingBox= null;
+                                    if(detectedObjects.size()!= 0 &&    detectedObjects.get(0) !=null) {
+                                        Rect rect = detectedObjects.get(0).getBoundingBox();
+                                        if(rect!=null) {
+                                            boundingBox = "{\"left\":\""+rect.left+"\", \"right\":\""+rect.right+"\", \"top\":\""+rect.top+"\", \"bottom\":\""+rect.bottom+"\"}";
+                                            LogFileUtils.logInfo(TAG,"this is value of bounding box "+boundingBox);
+
+                                        }
+
+                                     }
+                                    else
+                                    {
+                                    }
+                                onPostColorDataReceived(bitmap, frameIndex, poseScore, poseCoordinates,boundingBox);
+                                    }
+
+                        })
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // Task failed with an exception
+                                // ...
+                                onPostColorDataReceived(bitmap, frameIndex, poseScore, poseCoordinates,null);
+
+                            }
+                        });
+    }
 }

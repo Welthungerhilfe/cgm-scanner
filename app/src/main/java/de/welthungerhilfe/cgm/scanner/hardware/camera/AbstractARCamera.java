@@ -103,6 +103,8 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     protected int mFrameIndex;
     protected float mPixelIntensity;
     protected float mTargetDistance;
+    protected int mOrientation;
+
     protected float mTargetHeight;
     protected ComputerVisionUtils.Point3F[] mCalibrationImageEdges;
     protected SizeF mCalibrationImageSizeCV;
@@ -152,6 +154,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         mSessionStart = 0;
         mTargetHeight = 0;
         mTargetDistance = 1;
+        mOrientation = -1;
     }
 
     public void onCreate(ImageView colorPreview, ImageView depthPreview, GLSurfaceView surfaceview) {
@@ -491,6 +494,10 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
     public float getTargetDistance() {
         return mTargetDistance;
+    }
+
+    public float getOrientation() {
+        return mOrientation;
     }
 
     public float getTargetHeight() {
