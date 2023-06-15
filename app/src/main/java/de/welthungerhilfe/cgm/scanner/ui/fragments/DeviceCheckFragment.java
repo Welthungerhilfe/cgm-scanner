@@ -91,6 +91,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     private TutorialData tutorialData;
     private FragmentDeviceCheckBinding fragmentDeviceCheckBinding;
     String TAG = DeviceCheckFragment.class.getSimpleName();
+    SessionManager session;
 
     public static DeviceCheckFragment newInstance(TutorialData tutorialData) {
 
@@ -116,6 +117,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         fragmentDeviceCheckBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_device_check, container, false);
         tutorialData = getArguments().getParcelable("TutorialData");
+        session = new SessionManager(getActivity());
         return fragmentDeviceCheckBinding.getRoot();
     }
 
@@ -394,6 +396,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                 result.setState(TestView.TestState.ERROR);
                 addIssue(onFail);
             }
+
             if (canContinue()) {
                 fragmentDeviceCheckBinding.arHandImage.getAnimation().setOffset(Integer.MAX_VALUE, Integer.MAX_VALUE);
             }
@@ -544,6 +547,14 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
             test.setState(state);
         } catch (Exception e) {
             //expected if the result is updated after leaving the screen
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if(camera!=null){
+            session.setArcoreCaliFile(camera.getCameraCalibration());
         }
     }
 }

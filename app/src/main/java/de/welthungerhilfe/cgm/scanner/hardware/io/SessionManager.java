@@ -55,6 +55,8 @@ public class SessionManager {
     private final String KEY_LAST_SYNC_DAILY_REPORT= "key_last_sync_daily_report";
     private final String KEY_ENVIRONMENT_MODE= "key_environment_mode";
     private final String KEY_SELECTED_MODE= "key_selected_mode";
+    private final String KEY_AR_CORE_CALI= "key_ar_core_cali";
+
 
 
 
@@ -305,6 +307,15 @@ public class SessionManager {
 
     public void setWorkFlowId(String key, String values) {
         editor.putString(key, values);
+        editor.commit();
+    }
+
+    public String getArcoreCaliFile() {
+        return pref.getString(KEY_AR_CORE_CALI, null);
+    }
+
+    public void setArcoreCaliFile(String values) {
+        editor.putString(KEY_AR_CORE_CALI, values);
         editor.commit();
     }
 }

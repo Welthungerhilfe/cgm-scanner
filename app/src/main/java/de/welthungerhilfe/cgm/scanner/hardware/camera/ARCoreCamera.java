@@ -180,6 +180,7 @@ public class ARCoreCamera extends AbstractARCamera {
       mHasCameraCalibration = true;
       LogFileUtils.logInfo("ARCORE","arcore step2 camerainstrics value "+mColorCameraIntrinsic[0]+" "+mColorCameraIntrinsic[1]+" "+mColorCameraIntrinsic[2]+" "+mColorCameraIntrinsic[3]);
 
+
       //get calibration image dimension
       for (AugmentedImage img : frame.getUpdatedTrackables(AugmentedImage.class)) {
         Pose[] localBoundaryPoses = {

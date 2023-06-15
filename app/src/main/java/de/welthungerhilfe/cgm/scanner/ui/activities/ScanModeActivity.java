@@ -786,6 +786,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             onLightScore(getCamera().getLightIntensity());
 
             float finalHeight = height * 100.0f;
+
             Runnable thread = () -> {
                 try {
 
@@ -1132,6 +1133,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                 String boundingBox= null;
                                     if(detectedObjects.size()!= 0 &&    detectedObjects.get(0) !=null) {
                                         Rect rect = detectedObjects.get(0).getBoundingBox();
+
                                         if(rect!=null) {
                                             boundingBox = "{\"left\":\""+rect.left+"\", \"right\":\""+rect.right+"\", \"top\":\""+rect.top+"\", \"bottom\":\""+rect.bottom+"\"}";
                                             LogFileUtils.logInfo(TAG,"this is value of bounding box "+boundingBox);
