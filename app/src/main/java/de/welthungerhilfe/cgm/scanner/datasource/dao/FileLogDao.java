@@ -88,6 +88,9 @@ public interface FileLogDao {
     @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND bounding_box_synced=0 AND type='rgb' AND environment=:environment AND boundingBox IS NOT NULL ORDER BY createDate")
     List<FileLog>  loadAppBoundingBox(int environment);
 
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND orientation_synced=0 AND type='depth' AND environment=:environment AND orientation IS NOT NULL ORDER BY createDate")
+    List<FileLog>  loadAppOrientation(int environment);
+
     @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND child_distance_synced=0 AND type='depth' AND environment=:environment AND child_distance IS NOT 0 ORDER BY createDate")
     List<FileLog>  loadChildDistanceFileLog(int environment);
 

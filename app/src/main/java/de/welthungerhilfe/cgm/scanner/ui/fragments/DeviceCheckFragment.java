@@ -554,7 +554,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     public void onStop() {
         super.onStop();
         if(camera!=null){
-            session.setArcoreCaliFile(camera.getCameraCalibration());
+            session.setArcoreCaliFile("ARCORE CAMERA :\n"+camera.getCameraCalibration());
         }
     }
 }

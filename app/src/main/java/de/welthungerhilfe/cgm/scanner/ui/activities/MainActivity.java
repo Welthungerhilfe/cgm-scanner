@@ -112,7 +112,7 @@ import org.json.JSONObject;
 public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback, SelectModeDialog.SetupmodeListner {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final long REQUEST_DEVICE_CHECK_TIME = 1000 * 3600 * 12; //12h
+    private static final long REQUEST_DEVICE_CHECK_TIME = 1000 * 3600 * 48; //48h
 
     private static final int STD_TEST_DEACTIVE = 1;
 
@@ -581,7 +581,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             repository.setUpdated(false);
         }
         SyncingWorkManager.startSyncingWithWorkManager(getApplicationContext());
-      //  deviceCheckPopup();
+        deviceCheckPopup();
         checkIfStdTestActive();
         setUpSelectedMode();
     }

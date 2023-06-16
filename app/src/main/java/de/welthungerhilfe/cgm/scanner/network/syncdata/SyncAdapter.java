@@ -62,6 +62,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.ResultAutoDetect;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultBoundingBox;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultChildDistance;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultLightScore;
+import de.welthungerhilfe.cgm.scanner.datasource.models.ResultOrientation;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Results;
 import de.welthungerhilfe.cgm.scanner.datasource.models.ResultsData;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
@@ -1195,6 +1196,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         postChildDistance();
         postChildLightScore();
         postAppBoundingBoxResult();
+        postAppOrientationResult();
     }
 
     public void postAutoDetectResult() {
@@ -1814,4 +1816,88 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         }
     }
 
+    public void postAppOrientationResult() {
+        try {
+            Gson gson = new GsonBuilder()
+                    .excludeFieldsWithoutExposeAnnotation()
+                    .create();
+            List<FileLog> fileLogsList = fileLogRepository.loadAppOrientation(session.getEnvironment());
+            if(fileLogsList!=null){
+                LogFileUtils.logInfo(TAG,"Post app orientation size "+fileLogsList.size());
+            }
+            if (fileLogsList==null || fileLogsList.size() == 0) {
+                return;
+            }
+            String workflow[] = AppConstants.APP_ORIENTATION_1_0.split("-");
+            String appOrientationWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
+            LogFileUtils.logInfo(TAG,"Post app orientation box workflowid:wq "+fileLogsList.size());
+
+            if (appOrientationWorkFlowId == null) {
+                return;
+            }
+            ArrayList<Results> resultList = new ArrayList();
+            for (FileLog fileLog : fileLogsList) {
+                ResultOrientation resultOrientation = new ResultOrientation();
+                resultOrientation.setId(UUID.randomUUID().toString());
+                resultOrientation.setGenerated(DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()));
+                resultOrientation.setScan(fileLog.getScanServerId());
+                resultOrientation.setWorkflow(appOrientationWorkFlowId);
+                ArrayList<String> sourceArtifacts = new ArrayList<>();
+                sourceArtifacts.add(fileLog.getArtifactId());
+                resultOrientation.setSource_artifacts(sourceArtifacts);
+                ArrayList<String> sourceResults = new ArrayList<>();
+                resultOrientation.setSource_results(sourceResults);
+                ResultOrientation.Data data = new ResultOrientation.Data();
+                data.setAppOrientation(fileLog.getOrientation());
+                resultOrientation.setData(data);
+                resultList.add(resultOrientation);
+            }
+            ResultsData resultsData = new ResultsData();
+            resultsData.setResults(resultList);
+
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
+
+            onThreadChange(1);
+            LogFileUtils.logInfo(TAG, "posting appOrientation workflows... ");
+            retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<ResultsData>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull ResultsData resultsData1) {
+                            LogFileUtils.logInfo(TAG, "AppOrientation workflow successfully posted...");
+                            for (Results results : resultsData1.getResults()) {
+                                FileLog fileLog = fileLogRepository.getFileLogByArtifactId(results.getSource_artifacts().get(0));
+                                fileLog.setOrientation_synced(true);
+                                fileLogRepository.updateFileLog(fileLog);
+                            }
+                            updated = true;
+                            updateDelay = 0;
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            LogFileUtils.logError(TAG, "AppPoseScore workflow posting failed " + e.getMessage());
+
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(context);
+                                error401();
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            LogFileUtils.logException(e);
+        }
+    }
 }
