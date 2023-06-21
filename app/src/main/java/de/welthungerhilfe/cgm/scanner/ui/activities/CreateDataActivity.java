@@ -31,6 +31,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -106,7 +107,12 @@ public class CreateDataActivity extends BaseActivity {
         setupActionBar();
         initFragments();
 
-
+        activityCreateBinding.ivBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
         factory = new CreateDataViewModelProvideFactory(this);
         viewModel = new ViewModelProvider(this, factory).get(CreateDataViewModel.class);
         viewModel.getCurrentTab().observe(this, tab -> {
@@ -140,9 +146,12 @@ public class CreateDataActivity extends BaseActivity {
         setSupportActionBar(activityCreateBinding.toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-            actionBar.setTitle("ID: " + qrCode);
+           /* actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);*/
+            //actionBar.setTitle("ID: " + qrCode);
+            actionBar.setTitle("");
+            activityCreateBinding.tvTitle.setText("ID: " + qrCode);
+
             invalidateOptionsMenu();
         }
     }
