@@ -110,6 +110,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     FirebaseAnalytics firebaseAnalytics;
     boolean scanCompleted = false;
     boolean scanStarted = false;
+    String cameraCalibration;
 
 
     public void scanStanding() {
@@ -695,7 +696,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
             long profile = System.currentTimeMillis();
             boolean hasCameraCalibration = mCameraInstance.hasCameraCalibration();
-            String cameraCalibration = mCameraInstance.getCameraCalibration();
+             cameraCalibration = mCameraInstance.getCameraCalibration();
+            if(cameraCalibration!= null && cameraCalibration.contains("NaN")){
+                cameraCalibration = session.getArcoreCaliFile();
+            }
             LogFileUtils.logInfo("ARENGINE","arcore step3 calibration value "+hasCameraCalibration+" "+cameraCalibration);
 
 
@@ -707,7 +711,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     currentImgFilename = currentImgFilename.replace('/', '_');
                     File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
                     BitmapHelper.writeBitmapToFile(bitmap, artifactFile);
-                    onProcessArtifact(artifactFile, ArtifactType.RGB, 0, poseScore, poseCoordinates,0,0,boundingBox);
+                    onProcessArtifact(artifactFile, ArtifactType.RGB, 0, poseScore, poseCoordinates,0,0,boundingBox,null);
 
                     //save RGB metadata
                     if (artifactFile.exists()) {
@@ -728,7 +732,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                 fileOutputStream.write(cameraCalibration.getBytes());
                                 fileOutputStream.flush();
                                 fileOutputStream.close();
-                                onProcessArtifact(artifactFile, ArtifactType.CALIBRATION, 0,0,null,0,0,null);
+                                onProcessArtifact(artifactFile, ArtifactType.CALIBRATION, 0,0,null,0,0,null,null);
 
                             } catch (Exception e) {
                                 LogFileUtils.logException(e);
@@ -786,13 +790,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             onLightScore(getCamera().getLightIntensity());
 
             float finalHeight = height * 100.0f;
+
             Runnable thread = () -> {
                 try {
 
                     //write depthmap
                     File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                     depthmap.save(artifactFile);
-                    onProcessArtifact(artifactFile, ArtifactType.DEPTH, finalHeight,0,null,child_distance,light_score,null);
+                    onProcessArtifact(artifactFile, ArtifactType.DEPTH, finalHeight,0,null,child_distance,light_score,null, String.valueOf(orientation));
 
                     //profile process
                     if (artifactFile.exists()) {
@@ -898,7 +903,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight, float poseScore, String poseCordinates,double child_distance, float light_score, String boundinBox) {
+    private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight, float poseScore, String poseCordinates,double child_distance, float light_score, String boundinBox, String orientation) {
         if (artifactFile.exists()) {
             FileLog log = new FileLog();
 
@@ -944,6 +949,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             log.setEnvironment(session.getEnvironment());
             log.setChild_distance(child_distance);
             log.setLight_score(light_score);
+            log.setOrientation(orientation);
 
 
             synchronized (lock) {
@@ -1132,6 +1138,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                 String boundingBox= null;
                                     if(detectedObjects.size()!= 0 &&    detectedObjects.get(0) !=null) {
                                         Rect rect = detectedObjects.get(0).getBoundingBox();
+
                                         if(rect!=null) {
                                             boundingBox = "{\"left\":\""+rect.left+"\", \"right\":\""+rect.right+"\", \"top\":\""+rect.top+"\", \"bottom\":\""+rect.bottom+"\"}";
                                             LogFileUtils.logInfo(TAG,"this is value of bounding box "+boundingBox);

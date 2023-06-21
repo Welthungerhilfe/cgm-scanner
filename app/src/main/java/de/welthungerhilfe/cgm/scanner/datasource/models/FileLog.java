@@ -65,6 +65,8 @@ public class FileLog extends CsvExportableModel implements Serializable {
     private boolean light_score_synced;
     private String boundingBox;
     private boolean bounding_box_synced;
+    private String orientation;
+    private boolean orientation_synced;
 
     @NonNull
     public String getId() {
@@ -323,6 +325,22 @@ public class FileLog extends CsvExportableModel implements Serializable {
         this.bounding_box_synced = bounding_box_synced;
     }
 
+    public String getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(String orientation) {
+        this.orientation = orientation;
+    }
+
+    public boolean isOrientation_synced() {
+        return orientation_synced;
+    }
+
+    public void setOrientation_synced(boolean orientation_synced) {
+        this.orientation_synced = orientation_synced;
+    }
+
     @Override
     public String getCsvFormattedString() {
         return String.format(Locale.US, "%s,%s,%s,%s,%d,%d,%b,%s,%d,%s,%d,%d,%d,%s,%d,%s,%d,%s,%f,%s,%s,%b",
@@ -336,4 +354,6 @@ public class FileLog extends CsvExportableModel implements Serializable {
         return "id,type,path,hashValue,fileSize,uploadDate,deleted,qrCode,createDate,createdBy,status,age," +
                "schema_version,measureId,step,serverId,environment,childDetected,childHeight,scanServerId,artifactId,autoDetectSynced";
     }
+
+
 }
