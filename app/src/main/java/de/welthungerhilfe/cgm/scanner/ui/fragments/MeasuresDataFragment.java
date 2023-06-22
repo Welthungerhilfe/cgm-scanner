@@ -23,6 +23,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -214,10 +215,44 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                     createMeasure();
                 } else {
                     Snackbar.make(fabCreate, R.string.no_authorazation, Snackbar.LENGTH_LONG).show();
+                    String selectedBackend = null;
+                    switch (person.getEnvironment()){
+                        case AppConstants.ENV_IN_BMZ:
+                            selectedBackend = "in_bmz";
+                            break;
+                        case AppConstants.ENV_NAMIBIA:
+                            selectedBackend = "namibia";
+                            break;
+                        case AppConstants.ENV_NEPAL:
+                            selectedBackend = "nepal";
+                            break;
+                        case AppConstants.ENV_UGANDA:
+                            selectedBackend = "uganda";
+                            break;
+                        case AppConstants.ENV_BAN:
+                            selectedBackend = "bangladesh";
+                            break;
+                        case AppConstants.ENV_DEMO_QA:
+                            selectedBackend = "demo_qa";
+                            break;
+                    }
 
+                    showAlert("this QR code is created by "+person.getCreatedBy()+" in "+selectedBackend+", so only "+person.getCreatedBy()+" can add measure for this QR code.");
                 }
             }
         }
+    }
+
+    public void showAlert(String msg){
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(msg)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     @Override
