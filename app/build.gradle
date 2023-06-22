@@ -133,7 +133,7 @@ dependencies {
 
     // UI items
     implementation 'com.balysv:material-ripple:1.0.2' //custom tab (e.g.in scan mode)
-    implementation 'com.appeaser.sublimepickerlibrary:sublimepickerlibrary:2.1.1' //date selector
+    implementation 'com.appeaser.sublimepickerlibrary:sublimepickerlibrary:2.1.2' //date selector
     implementation 'com.orhanobut:dialogplus:1.11@aar' //filter popup (scans tab)
     implementation 'com.google.android.gms:play-services-location:21.0.1' //google location
     implementation 'com.google.android.gms:play-services-maps:18.1.0' //google maps
