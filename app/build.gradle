@@ -141,7 +141,7 @@ dependencies {
     implementation 'com.google.guava:guava:28.1-android' //growth chart data iterator
     implementation 'com.github.bumptech.glide:glide:4.11.0' //image preview
     implementation 'com.romandanylyk:pageindicatorview:1.0.3' //indicator of current page (in tutorial)
-    implementation 'com.shuhart.stepview:stepview:1.5.1' //for showing steps(in tutorial)
+    implementation 'com.shuhart.stepview:stepview:1.5.2' //for showing steps(in tutorial)
     implementation 'id.zelory:compressor:3.0.1' //ImageCompression library
     //implementation 'com.google.mlkit:pose-detection:18.0.0-beta3'
     // If you want to use the accurate sdk
