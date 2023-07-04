@@ -21,6 +21,7 @@ package de.welthungerhilfe.cgm.scanner.hardware.camera;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -31,9 +32,12 @@ import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.util.Log;
 import android.util.Size;
 import android.util.SizeF;
 import android.widget.ImageView;
+
+import androidx.core.widget.ImageViewCompat;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -77,9 +81,11 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     //app connection
     protected Activity mActivity;
     protected ImageView mColorCameraPreview;
+    protected ImageView mOutline;
     protected ImageView mDepthCameraPreview;
     protected GLSurfaceView mGLSurfaceView;
     protected ArrayList<Object> mListeners;
+    int color;
 
     //camera calibration
     protected float[] mColorCameraIntrinsic;
@@ -157,13 +163,14 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         mOrientation = -1;
     }
 
-    public void onCreate(ImageView colorPreview, ImageView depthPreview, GLSurfaceView surfaceview) {
+    public void onCreate(ImageView colorPreview, ImageView depthPreview, GLSurfaceView surfaceview, ImageView boundingBox) {
         Bitmap bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
         bitmap.setPixel(0, 0, Color.TRANSPARENT);
         mColorCameraPreview = colorPreview;
         mColorCameraPreview.setImageBitmap(bitmap);
         mDepthCameraPreview = depthPreview;
         mDepthCameraPreview.setImageBitmap(bitmap);
+        mOutline = boundingBox;
 
         mGLSurfaceView = surfaceview;
         mGLSurfaceView.setPreserveEGLContextOnPause(true);
@@ -254,7 +261,16 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
         Bitmap preview = getDepthPreview(depthmap, mPlanes, mColorCameraIntrinsic);
         Bitmap finalPreview = skeletonVisualisation(preview);
-        mActivity.runOnUiThread(() -> mDepthCameraPreview.setImageBitmap(finalPreview));
+
+
+        mActivity.runOnUiThread(() -> {
+            mDepthCameraPreview.setImageBitmap(preview);
+            ImageViewCompat.setImageTintList(mOutline, ColorStateList.valueOf(color));
+
+           // mOutline.setColorFilter(color);
+            Log.i("AbstractArCamera","this is value of outline "+color);
+        });
+
     }
 
     public void addListener(Object listener) {
@@ -550,6 +566,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
         if (mSkeletonMode == SkeletonMode.OFF) {
             mOutlineAlpha = -2;
+            color = Color.WHITE;
             return preview;
         }
 
@@ -564,7 +581,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
             //define look of the visualisation
             mOutlineAlpha = mOutlineAlpha * 0.9f + 0.1f;
             int alpha = Math.max(0, (int)(mOutlineAlpha * 128));
-            int color = Color.GREEN;
+               color = Color.GREEN;
             if ((mTargetDistance < AppConstants.TOO_NEAR) || (mTargetDistance > AppConstants.TOO_FAR)) {
                 color = Color.YELLOW;
             } else if (!mSkeletonValid) {

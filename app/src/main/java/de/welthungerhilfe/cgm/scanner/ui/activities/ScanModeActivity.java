@@ -347,7 +347,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         ImageView colorCameraPreview = findViewById(R.id.colorCameraPreview);
         ImageView depthCameraPreview = findViewById(R.id.depthCameraPreview);
         GLSurfaceView glSurfaceView = findViewById(R.id.surfaceview);
-        getCamera().onCreate(colorCameraPreview, depthCameraPreview, glSurfaceView);
+
+        getCamera().onCreate(colorCameraPreview, depthCameraPreview, glSurfaceView,mOutline);
 
         measureRepository = MeasureRepository.getInstance(this);
         personRepository = PersonRepository.getInstance(this);
@@ -769,6 +770,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             "\nNoise amount: " + String.format(Locale.US, "%.3f", getCamera().getDepthNoiseAmount());
             runOnUiThread(() -> mTitleView.setText(text));*/
         }
+        Log.i("ScanModeActivity","this is before on feedback update ");
         onFeedbackUpdate();
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
@@ -832,13 +834,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private void onFeedbackUpdate() {
         AbstractARCamera.LightConditions light = getCamera().getLightConditionState();
         boolean childDetected = getCamera().getPersonCount() == 1;
+        float distance = mCameraInstance.getTargetDistance();
         runOnUiThread(() -> {
 
             if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
                 getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OFF);
                 setOutline(true);
             } else if (childDetected) {
-                getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OFF);
+                getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OUTLINE);
                 setFeedback(null);
                 setOutline(true);
             } else {
@@ -846,9 +849,15 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 setOutline(true);
             }
 
-            if (mTxtFeedback.getVisibility() == View.GONE) {
+           // if (mTxtFeedback.getVisibility() == View.GONE) {
                 switch (light) {
                     case NORMAL:
+
+                       /* if(mCameraInstance.getTargetDistance() < 0.7) {
+
+                        }else if(mCameraInstance.getTargetDistance() > 1.5){
+                            break;
+                        }*/
                         setFeedback(null);
                         break;
                     case BRIGHT:
@@ -858,8 +867,21 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         setFeedback(getString(R.string.score_light_dark));
                         break;
                 }
-            }
+           // }
+
+           // if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
+                if (distance < 0.7) {
+                    setFeedback("Too Close-"+distance);
+
+                } else if (distance > 1.5f) {
+                    setFeedback("Too Far-"+distance);
+
+                } else {
+                    setFeedback(null);
+                }
+         //   }
         });
+
     }
 
     private void setOutline(boolean visible) {
@@ -875,9 +897,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private void setFeedback(String feedback) {
         //check if the feedback changed
-        if(feedback!=null) {
-            Log.i(TAG, "this is valur feedback " + feedback);
-        }
+
+        Log.i(TAG, "this is valur feedback " + feedback);
+
         String lastFeedback = null;
         if (mTxtFeedback.getVisibility() == View.VISIBLE) {
             lastFeedback = mTxtFeedback.getText().toString();

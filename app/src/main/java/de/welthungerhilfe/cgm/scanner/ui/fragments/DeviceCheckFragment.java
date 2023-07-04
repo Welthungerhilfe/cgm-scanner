@@ -352,7 +352,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         if (camera != null) {
             camera.onCreate(fragmentDeviceCheckBinding.colorCameraPreview,
                     fragmentDeviceCheckBinding.depthCameraPreview,
-                    fragmentDeviceCheckBinding.surfaceview);
+                    fragmentDeviceCheckBinding.surfaceview,null);
         }
     }
 

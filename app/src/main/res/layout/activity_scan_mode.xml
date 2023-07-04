@@ -193,10 +193,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:paddingLeft="50dp"
-                    android:paddingTop="175dp"
+                    android:paddingTop="150dp"
                     android:paddingRight="50dp"
-                    android:paddingBottom="175dp"
+                    android:paddingBottom="150dp"
                     android:src="@drawable/square"
+
                     android:visibility="visible" />
 
                 <TextView
