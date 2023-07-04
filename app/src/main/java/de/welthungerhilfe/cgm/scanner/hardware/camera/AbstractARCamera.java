@@ -583,9 +583,9 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
             int alpha = Math.max(0, (int)(mOutlineAlpha * 128));
                color = Color.GREEN;
             if ((mTargetDistance < AppConstants.TOO_NEAR) || (mTargetDistance > AppConstants.TOO_FAR)) {
-                color = Color.YELLOW;
+                color = Color.RED;
             } else if (!mSkeletonValid) {
-                color = Color.YELLOW;
+                color = Color.RED;
             }
             color = Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
 
