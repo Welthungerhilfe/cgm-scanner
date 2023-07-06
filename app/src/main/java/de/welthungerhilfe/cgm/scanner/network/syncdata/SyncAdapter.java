@@ -1491,7 +1491,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             }
             String workflow[] = AppConstants.APP_LIGHT_SCORE_1_0.split("-");
             String appLightScoreWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
-            LogFileUtils.logInfo(TAG,"Post app light score workflowid:wq "+fileLogsList.size());
+            LogFileUtils.logInfo(TAG,"Post app light score workflowid:wq "+appLightScoreWorkFlowId);
 
             if (appLightScoreWorkFlowId == null) {
                 return;
@@ -1577,7 +1577,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             }
             String workflow[] = AppConstants.APP_CHILD_DISTANCE_1_0.split("-");
             String appChildDistanceWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
-            LogFileUtils.logInfo(TAG,"Post app child distance workflowid:wq "+fileLogsList.size());
+            LogFileUtils.logInfo(TAG,"Post app childdistance workflowid:wq "+appChildDistanceWorkFlowId);
 
             if (appChildDistanceWorkFlowId == null) {
                 return;
@@ -1605,7 +1605,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
 
             onThreadChange(1);
-            LogFileUtils.logInfo(TAG, "posting appPoseScore workflows... ");
+            LogFileUtils.logInfo(TAG, "posting childdistance workflows... raw data "+(new JSONObject(gson.toJson(resultsData))).toString());
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<ResultsData>() {
@@ -1629,7 +1629,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            LogFileUtils.logError(TAG, "App child distance workflow posting failed " + e.getMessage());
+                            LogFileUtils.logError(TAG, "App childdistance workflow posting failed " + e.getMessage());
 
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
