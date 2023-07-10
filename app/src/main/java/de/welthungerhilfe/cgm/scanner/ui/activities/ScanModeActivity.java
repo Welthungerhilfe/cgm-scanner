@@ -873,10 +873,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
            // if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
                 if (distance < 0.7) {
-                    setFeedback("Too Close-"+distance);
+                    setFeedback("Too Close- "+distance);
 
                 } else if (distance > 1.5f) {
-                    setFeedback("Too Far-"+distance);
+                    setFeedback("Too Far- "+distance);
 
                 } else {
                     setFeedback(null);

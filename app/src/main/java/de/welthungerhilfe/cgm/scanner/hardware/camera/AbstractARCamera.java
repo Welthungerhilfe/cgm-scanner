@@ -265,7 +265,9 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
         mActivity.runOnUiThread(() -> {
             mDepthCameraPreview.setImageBitmap(preview);
-            ImageViewCompat.setImageTintList(mOutline, ColorStateList.valueOf(color));
+            if(mOutline!=null) {
+                ImageViewCompat.setImageTintList(mOutline, ColorStateList.valueOf(color));
+            }
 
            // mOutline.setColorFilter(color);
             Log.i("AbstractArCamera","this is value of outline "+color);
