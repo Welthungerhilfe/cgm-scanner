@@ -200,6 +200,13 @@
                         android:layout_height="wrap_content"
                         app:titleText="@string/upload_over_wifi"
                         app:toggleVisible="true" />
+
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                        android:id="@+id/enable_arcore"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:titleText="Enable ARcore"
+                        app:toggleVisible="true" />
                 </LinearLayout>
 
                 <LinearLayout

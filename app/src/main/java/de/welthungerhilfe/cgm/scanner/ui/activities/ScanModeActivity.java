@@ -18,6 +18,8 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
+import static de.welthungerhilfe.cgm.scanner.ui.activities.SettingsActivity.KEY_ENABLE_ARCORE;
+
 import android.Manifest;
 import android.animation.Animator;
 import android.app.AlertDialog;
@@ -664,20 +666,20 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             AbstractARCamera.DepthPreviewMode depthMode;
             AbstractARCamera.PreviewSize previewSize = AbstractARCamera.PreviewSize.CLIPPED;
             if (LocalPersistency.getBoolean(this, SettingsActivity.KEY_SHOW_DEPTH)) {
-                if (AREngineCamera.shouldUseAREngine()) {
+                if (!LocalPersistency.getBoolean(this, KEY_ENABLE_ARCORE)) {
                     depthMode = AbstractARCamera.DepthPreviewMode.CENTER;
                 } else {
                     depthMode = AbstractARCamera.DepthPreviewMode.CENTER_LOW_POWER;
                 }
             } else {
-                if (AREngineCamera.shouldUseAREngine()) {
+                if (!LocalPersistency.getBoolean(this, KEY_ENABLE_ARCORE)) {
                     depthMode = AbstractARCamera.DepthPreviewMode.FOCUS;
                 } else {
                     depthMode = AbstractARCamera.DepthPreviewMode.FOCUS_LOW_POWER;
                 }
             }
 
-            if (AREngineCamera.shouldUseAREngine()) {
+            if (!LocalPersistency.getBoolean(this, KEY_ENABLE_ARCORE)) {
                 mCameraInstance = new AREngineCamera(this, depthMode, previewSize);
                 AbstractARCamera.DepthPreviewMode depthModear;
             } else {

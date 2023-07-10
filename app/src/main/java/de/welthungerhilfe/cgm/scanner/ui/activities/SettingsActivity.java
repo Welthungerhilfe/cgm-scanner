@@ -58,6 +58,8 @@ public class SettingsActivity extends BaseActivity {
 
     public static final String KEY_SHOW_DEPTH = "KEY_SHOW_DEPTH";
     public static final String KEY_UPLOAD_WIFI = "KEY_UPLOAD_WIFI";
+    public static final String KEY_ENABLE_ARCORE = "KEY_ENABLE_ARCORE";
+
     FirebaseAnalytics firebaseAnalytics;
     String selectedBackend ="";
 
@@ -113,6 +115,9 @@ public class SettingsActivity extends BaseActivity {
         activitySettingsBinding.txtSettingUuid.setText(2, AppController.getInstance().getAndroidID());
         activitySettingsBinding.showDepthData.setChecked(LocalPersistency.getBoolean(this, KEY_SHOW_DEPTH));
         activitySettingsBinding.showDepthData.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_SHOW_DEPTH, value));
+
+        activitySettingsBinding.enableArcore.setChecked(LocalPersistency.getBoolean(this, KEY_ENABLE_ARCORE));
+        activitySettingsBinding.enableArcore.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_ENABLE_ARCORE, value));
 
         activitySettingsBinding.uploadOverWifi.setChecked(LocalPersistency.getBoolean(this, KEY_UPLOAD_WIFI));
         activitySettingsBinding.uploadOverWifi.setOnCheckedChangeListener((compoundButton, value) -> LocalPersistency.setBoolean(SettingsActivity.this, KEY_UPLOAD_WIFI, value));
