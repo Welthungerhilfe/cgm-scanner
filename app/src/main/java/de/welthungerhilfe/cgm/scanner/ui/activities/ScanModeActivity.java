@@ -879,7 +879,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     setFeedback("Too Far- "+distance);
 
                 } else {
-                    setFeedback(null);
+                    setFeedback("Okay- "+distance);
+
+                    //setFeedback(null);
                 }
          //   }
         });

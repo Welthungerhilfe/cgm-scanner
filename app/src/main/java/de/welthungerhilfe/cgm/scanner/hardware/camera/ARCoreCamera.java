@@ -263,12 +263,12 @@ public class ARCoreCamera extends AbstractARCamera {
     return 1;
   }
 
-  @Override
+ /* @Override
   public float getTargetDistance() {
     //unsupported on ARCore
     return 1;
   }
-
+*/
   @Override
   public float getOrientation() {
     return 1;
