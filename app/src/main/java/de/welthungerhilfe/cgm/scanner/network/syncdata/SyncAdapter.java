@@ -175,24 +175,31 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         if (!session.isSigned()) {
             return;
         }
+        LogFileUtils.logInfo(TAG, "Start syncing requested after signed ");
 
         synchronized (activeThreads) {
             if (activeThreads > 0) {
                 return;
             }
         }
+        LogFileUtils.logInfo(TAG, "Start syncing requested after activeThreads 0");
 
         if (syncTask == null) {
             prevTimestamp = session.getSyncTimestamp();
             currentTimestamp = System.currentTimeMillis();
+            LogFileUtils.logInfo(TAG, "Start syncing requested after synctask null");
 
             if (retrofit == null) {
                 retrofit = SyncingWorkManager.provideRetrofit();
+                LogFileUtils.logInfo(TAG, "Start syncing requested after retrofit null");
+
             }
 
             syncTask = new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             LogFileUtils.logInfo(TAG, "Start syncing started");
         }
+        LogFileUtils.logInfo(TAG, "Start syncing started with synctask null");
+
     }
 
 
