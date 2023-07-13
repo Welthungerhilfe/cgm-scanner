@@ -229,8 +229,10 @@ public class AREngineCamera extends AbstractARCamera {
 
       //get planes
       mPlanes.clear();
+
       for (ARPlane plane : mSession.getAllPlanes()) {
         mPlanes.add(plane.getCenterPose().ty());
+
       }
 
       //get pose from AREngine

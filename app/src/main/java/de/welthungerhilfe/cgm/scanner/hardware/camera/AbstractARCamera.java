@@ -109,6 +109,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     protected int mFrameIndex;
     protected float mPixelIntensity;
     protected float mTargetDistance;
+    protected float mBackgroundDistance;
     protected int mOrientation;
 
     protected float mTargetHeight;
@@ -161,6 +162,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         mTargetHeight = 0;
         mTargetDistance = 1;
         mOrientation = -1;
+        mBackgroundDistance = 1;
     }
 
     public void onCreate(ImageView colorPreview, ImageView depthPreview, GLSurfaceView surfaceview, ImageView boundingBox) {
@@ -301,6 +303,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         }
 
         //extract data
+
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
         buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -337,11 +340,16 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         int cx = width / 2;
         int cy = height / 2;
         int center = Integer.MAX_VALUE;
+        float center_backgound = Integer.MIN_VALUE;
+        int minimum_pixel_range = 0;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
+
                 int depthSample = pixel.get((y / 2) * stride + x);
                 int depthRange = depthSample & 0x1FFF;
+
                 int depthConfidence = ((depthSample >> 13) & 0x7);
+
                 if ((x < 1) || (y < 1) || (x >= width - 1) || (y >= height - 1)) {
                     depthConfidence = 0;
                     depthRange = 0;
@@ -351,7 +359,22 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
                     if (center > value) {
                         center = value;
                         mDepthmap.distance = depthRange * 0.001f;
+
+                        if(center_backgound < mDepthmap.distance){
+                            if(minimum_pixel_range > 1) {
+                                center_backgound = mDepthmap.distance;
+                            }else {
+                                minimum_pixel_range++;
+                            }
+
+
+                        }
+
+
+
                     }
+                    mDepthmap.backgroundDistance = center_backgound;
+
                     avgCount++;
                     avgDepth += depthRange * 0.001f;
                     mDepthmap.count++;
@@ -363,7 +386,15 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
                     diffCount++;
                 }
             }
+
         }
+        Log.i("Abstractar","this is values of center depth "+mDepthmap.distance+" "+mDepthmap.backgroundDistance);
+
+        /*center_backgound=0;
+        minimum_pixel_range=0;*/
+        Log.i("Abstractar","this is values of center depth=>>>> "+" finish");
+
+
 
         //depth fusion
         if (avgCount > 0) {
@@ -438,6 +469,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
                 }
         }
         mTargetDistance = mTargetDistance * 0.9f + depthmap.distance * 0.1f;
+        mBackgroundDistance = mBackgroundDistance * 0.9f + depthmap.backgroundDistance*0.1f;
 
         float bestPlane;
         float[] matrix = depthmap.getMatrix();
@@ -512,6 +544,10 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
     public float getTargetDistance() {
         return mTargetDistance;
+    }
+
+    public float getmBackgroundDistance(){
+        return mBackgroundDistance;
     }
 
     public float getOrientation() {

@@ -28,6 +28,7 @@ public class Depthmap {
     byte[][] confidence;
     float[][] depth;
     float distance;
+    float backgroundDistance;
     int count;
     int width;
     int height;
@@ -41,6 +42,7 @@ public class Depthmap {
 
         count = 0;
         distance = 0;
+        backgroundDistance = 0;
         confidence = new byte[width][height];
         depth = new float[width][height];
         position = new float[] {0, 0, 0};

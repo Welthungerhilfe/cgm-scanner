@@ -67,6 +67,7 @@ import com.microsoft.appcenter.crashes.Crashes;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -113,6 +114,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     boolean scanCompleted = false;
     boolean scanStarted = false;
     String cameraCalibration;
+    DecimalFormat df;
 
 
     public void scanStanding() {
@@ -408,6 +410,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 scanLying();
             }
         });
+
+        df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
 
     }
 
@@ -837,6 +842,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         AbstractARCamera.LightConditions light = getCamera().getLightConditionState();
         boolean childDetected = getCamera().getPersonCount() == 1;
         float distance = mCameraInstance.getTargetDistance();
+        float mBackgroundDistance = mCameraInstance.getmBackgroundDistance();
+
+        //Log.i(TAG,"this is values of distances "+distance+" "+mBackgroundDistance);
         runOnUiThread(() -> {
 
             if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
@@ -873,13 +881,13 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
            // if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
                 if (distance < 0.7) {
-                    setFeedback("Too Close- "+distance);
+                    setFeedback("Too Close- "+df.format(distance)+"\n backg "+df.format(mBackgroundDistance));
 
                 } else if (distance > 1.5f) {
-                    setFeedback("Too Far- "+distance);
+                    setFeedback("Too Far- "+df.format(distance)+"\n backg "+df.format(mBackgroundDistance));
 
                 } else {
-                    setFeedback("Okay- "+distance);
+                    setFeedback("Okay- "+df.format(distance)+"\n backg "+df.format(mBackgroundDistance));
 
                     //setFeedback(null);
                 }
