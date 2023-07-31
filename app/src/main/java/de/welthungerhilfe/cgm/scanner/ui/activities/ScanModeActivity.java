@@ -887,7 +887,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     setFeedback("Too Far- "+df.format(distance)+"\n backg "+df.format(mBackgroundDistance));
 
                 } else {
-                    setFeedback("Okay- "+df.format(distance)+"\n backg "+df.format(mBackgroundDistance));
+              //      setFeedback("Okay- "+df.format(distance)+"\n backg "+df.format(mBackgroundDistance));
 
                     //setFeedback(null);
                 }

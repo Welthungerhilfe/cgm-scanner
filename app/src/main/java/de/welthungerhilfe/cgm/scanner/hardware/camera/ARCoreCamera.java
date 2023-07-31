@@ -167,10 +167,10 @@ public class ARCoreCamera extends AbstractARCamera {
 
       //get calibration from ARCore
       CameraIntrinsics intrinsics = frame.getCamera().getImageIntrinsics();
-      LogFileUtils.logInfo("ARCORE","arcore step1 intrinsics value "+intrinsics);
+     /* LogFileUtils.logInfo("ARCORE","arcore step1 intrinsics value "+intrinsics);
       LogFileUtils.logInfo("ARCORE","arcore step1 focalLength value "+intrinsics.getFocalLength()[0]+" "+intrinsics.getFocalLength()[1]);
       LogFileUtils.logInfo("ARCORE","arcore step1 imagedimension value "+intrinsics.getImageDimensions()[0]+" "+intrinsics.getImageDimensions()[1]);
-      LogFileUtils.logInfo("ARCORE","arcore step1 principalpoint value "+intrinsics.getPrincipalPoint()[0]+" "+intrinsics.getPrincipalPoint()[0]);
+      LogFileUtils.logInfo("ARCORE","arcore step1 principalpoint value "+intrinsics.getPrincipalPoint()[0]+" "+intrinsics.getPrincipalPoint()[0]);*/
 
       mColorCameraIntrinsic[0] = intrinsics.getFocalLength()[0] / (float)intrinsics.getImageDimensions()[0];
       mColorCameraIntrinsic[1] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
@@ -237,9 +237,9 @@ public class ARCoreCamera extends AbstractARCamera {
       Depthmap depth = null;
       try {
         color = mRTT.renderData(mCameraTextureId, mTextureRes);
-        if (hasCameraCalibration() && mSession.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+        if (true && mSession.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
           if (mFrameIndex % AppConstants.SCAN_FRAMESKIP == 0) {
-            Image image = frame.acquireRawDepthImage();
+            Image image = frame.acquireRawDepthImage16Bits();
             depth = updateDepthmap(image, pose.getTranslation(), pose.getRotationQuaternion());
           }
         }
