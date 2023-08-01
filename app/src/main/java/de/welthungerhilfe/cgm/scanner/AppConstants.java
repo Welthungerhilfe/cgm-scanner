@@ -71,7 +71,7 @@ public class AppConstants {
     public static final String VAL_SEX_MALE = "male";
 
     public static final String VAL_MEASURE_MANUAL = "manual";
-    public static final String VAL_MEASURE_AUTO = "v1.2.1";
+    public static final String VAL_MEASURE_AUTO = "v1.2.2";
 
     public static final String LANG_ENGLISH = "en";
     public static final String LANG_GERMAN = "de";
