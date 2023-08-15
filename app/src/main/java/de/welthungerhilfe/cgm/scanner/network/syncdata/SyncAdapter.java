@@ -343,7 +343,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     if (!fileLog.isDeleted()) {
                         continue;
                     }
-                    Person person = personRepository.findPersonByQr(fileLog.getQrCode());
+                    Person person = personRepository.findPersonByQr(fileLog.getQrCode(),session.getEnvironment());
                     LogFileUtils.logInfo(TAG,"Person consent to sync is "+person);
                     String backendPersonId = person.getServerId();
                     if (backendPersonId == null) {
@@ -711,7 +711,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             if (syncPersonsResponse.persons != null && syncPersonsResponse.persons.size() > 0) {
                                 for (int i = 0; i < syncPersonsResponse.persons.size(); i++) {
                                     Person person = syncPersonsResponse.persons.get(i);
-                                    Person existingPerson = personRepository.findPersonByQr(person.getQrcode());
+                                    Person existingPerson = personRepository.findPersonByQr(person.getQrcode(),person.getEnvironment());
                                     person.setSynced(true);
                                     person.setEnvironment(session.getEnvironment());
                                     person.setBirthday(DataFormat.convertBirthDateToMilliSeconds(person.getBirthdayString()));

@@ -57,6 +57,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
@@ -92,6 +93,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
 
     private ArrayList<Entry> SD3neg, SD2neg;
     private ArrayList<Entry> SD0, SD2, SD3;
+    SessionManager sessionManager;
 
     public static GrowthDataFragment getInstance(String qrCode) {
         GrowthDataFragment fragment = new GrowthDataFragment();
@@ -134,7 +136,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
         first_dot_text = view.findViewById(R.id.first_dot_text);
         second_dot_text = view.findViewById(R.id.second_dot_text);
         third_dot_text = view.findViewById(R.id.third_dot_text);
-
+        sessionManager = new SessionManager(getActivity());
         mChart = view.findViewById(R.id.chart1);
         MaterialSpinner dropChart = view.findViewById(R.id.dropChart);
 
@@ -147,7 +149,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
 
         View contextMenu = view.findViewById(R.id.contextMenuButton);
         contextMenu.setOnClickListener(v -> {
-            Person person = PersonRepository.getInstance(getContext()).findPersonByQr(qrCode);
+            Person person = PersonRepository.getInstance(getContext()).findPersonByQr(qrCode,sessionManager.getEnvironment());
             if (person != null) {
                 String id = person.getId();
                 String qrCode = person.getQrcode();
@@ -194,7 +196,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
     }
 
     public void setData() {
-        Person person = PersonRepository.getInstance(getContext()).findPersonByQr(qrCode);
+        Person person = PersonRepository.getInstance(getContext()).findPersonByQr(qrCode,sessionManager.getEnvironment());
         if (person == null) {
             return;
         }

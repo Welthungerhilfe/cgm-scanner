@@ -152,7 +152,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         factory = new CreateDataViewModelProvideFactory(getActivity());
         fileLogRepository = FileLogRepository.getInstance(getActivity());
         viewModel = new ViewModelProvider(getActivity(), factory).get(CreateDataViewModel.class);
-        viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
+        viewModel.getPersonLiveData(qrCode,session.getEnvironment()).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
             initUI();
         });

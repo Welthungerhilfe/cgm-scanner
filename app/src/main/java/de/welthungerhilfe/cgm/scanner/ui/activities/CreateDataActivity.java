@@ -101,7 +101,7 @@ public class CreateDataActivity extends BaseActivity {
         getCurrentLocation();
 
         qrCode = getIntent().getStringExtra(AppConstants.EXTRA_QR);
-        person = personRepository.findPersonByQr(qrCode);
+        person = personRepository.findPersonByQr(qrCode,sessionManager.getEnvironment());
 
 
         setupActionBar();
@@ -118,7 +118,7 @@ public class CreateDataActivity extends BaseActivity {
         viewModel.getCurrentTab().observe(this, tab -> {
             activityCreateBinding.viewpager.setCurrentItem(tab);
         });
-        viewModel.syncManualMeasurements(qrCode);
+        viewModel.syncManualMeasurements(qrCode,sessionManager.getEnvironment());
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         createLocationRequest();
 
