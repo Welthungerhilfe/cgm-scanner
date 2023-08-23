@@ -711,7 +711,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             if (syncPersonsResponse.persons != null && syncPersonsResponse.persons.size() > 0) {
                                 for (int i = 0; i < syncPersonsResponse.persons.size(); i++) {
                                     Person person = syncPersonsResponse.persons.get(i);
-                                    Person existingPerson = personRepository.findPersonByQr(person.getQrcode(),person.getEnvironment());
+                                    Person existingPerson = personRepository.findPersonByQr(person.getQrcode(),session.getEnvironment());
                                     person.setSynced(true);
                                     person.setEnvironment(session.getEnvironment());
                                     person.setBirthday(DataFormat.convertBirthDateToMilliSeconds(person.getBirthdayString()));
