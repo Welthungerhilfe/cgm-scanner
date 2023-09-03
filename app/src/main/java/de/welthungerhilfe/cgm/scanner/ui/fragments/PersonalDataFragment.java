@@ -94,6 +94,7 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.QRScanActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.LocationDialogFragment;
 import de.welthungerhilfe.cgm.scanner.ui.views.DateEditText;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
@@ -107,7 +108,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private AppCompatCheckBox checkAge;
 
     private DateEditText editBirth;
-    private EditText editName, editLocation, editGuardian;
+    private EditText editName, editLocation, editGuardian, editArea;
 
     private AppCompatRadioButton radioFemale, radioMale;
 
@@ -166,6 +167,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         view.findViewById(R.id.imgBirth).setOnClickListener(this);
 
         view.findViewById(R.id.txtBack).setOnClickListener(this);
+
         btnNext = view.findViewById(R.id.btnNext);
         btnNext.setOnClickListener(this);
 
@@ -179,6 +181,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         editLocation = view.findViewById(R.id.editLocation);
         editLocation.setOnClickListener(this);
+
+        editArea = view.findViewById(R.id.editArea);
+        editArea.setOnClickListener(this);
 
         editBirth = view.findViewById(R.id.editBirth);
         editBirth.setOnDateInputListener(this);
@@ -391,6 +396,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 LocationDetectActivity.navigate((AppCompatActivity) getActivity(), editLocation, location, location -> {
                     setLocation(location);
                 });
+
+            case R.id.editArea:
+                LocationDialogFragment dialogFragment = new LocationDialogFragment();
+                dialogFragment.show(getActivity().getSupportFragmentManager(), "location_dialog");
                 break;
         }
     }
