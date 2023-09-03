@@ -256,7 +256,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                         selectedCountry = country[i];
                         selectedOrganization = "India";
                         session.setEnvironment(AppConstants.ENV_IN_BMZ);
-                        session.setEnvironmentMode(AppConstants.CGM_MODE);
+                        session.setEnvironmentMode(AppConstants.CGM_RST_MODE);
                         selectedBackend = "in_bmz";
                         break;
                     case "Namibia":
