@@ -27,6 +27,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -45,6 +46,7 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatRadioButton;
+import androidx.test.espresso.remote.EspressoRemoteMessage;
 
 import android.provider.MediaStore;
 import android.text.Editable;
@@ -72,14 +74,17 @@ import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
+import de.welthungerhilfe.cgm.scanner.datasource.location.india.IndiaLocation;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.IndiaLocationRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
@@ -98,7 +103,7 @@ import de.welthungerhilfe.cgm.scanner.ui.dialogs.LocationDialogFragment;
 import de.welthungerhilfe.cgm.scanner.ui.views.DateEditText;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
-public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, DateEditText.DateInputListener, TextWatcher {
+public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, DateEditText.DateInputListener, TextWatcher, LocationDialogFragment.PassDataToPersonDataFragment {
 
     public Context context;
     private SessionManager session;
@@ -108,7 +113,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private AppCompatCheckBox checkAge;
 
     private DateEditText editBirth;
-    private EditText editName, editLocation, editGuardian, editArea;
+    private EditText editName, editLocation, editGuardian, editArea, editCenter;
 
     private AppCompatRadioButton radioFemale, radioMale;
 
@@ -117,7 +122,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private CreateDataViewModel viewModel;
     private String qrCode;
     private Person person;
-    private Loc location;
+    private Loc  location;
     LinearLayout ll_retake_photo;
     ViewModelProvider.Factory factory;
     FirebaseAnalytics firebaseAnalytics;
@@ -130,6 +135,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     FileLogRepository fileLogRepository;
 
+    IndiaLocationRepository indiaLocationRepository;
+    String center_location_id;
+
+    LocationDialogFragment.PassDataToPersonDataFragment passDataToPersonDataFragment;
+
     public static PersonalDataFragment getInstance(String qrCode) {
         PersonalDataFragment fragment = new PersonalDataFragment();
         fragment.qrCode = qrCode;
@@ -138,12 +148,14 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
 
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
         this.context = context;
         session = new SessionManager(context);
+
     }
 
     @Override
@@ -152,6 +164,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         factory = new CreateDataViewModelProvideFactory(getActivity());
         fileLogRepository = FileLogRepository.getInstance(getActivity());
+        indiaLocationRepository = IndiaLocationRepository.getInstance(getActivity());
         viewModel = new ViewModelProvider(getActivity(), factory).get(CreateDataViewModel.class);
         viewModel.getPersonLiveData(qrCode,session.getEnvironment()).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
@@ -185,6 +198,17 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         editArea = view.findViewById(R.id.editArea);
         editArea.setOnClickListener(this);
 
+        editCenter = view.findViewById(R.id.editCenter);
+        editCenter.setOnClickListener(this);
+
+        if(session.getEnvironment() == AppConstants.ENV_DEMO_QA || session.getEnvironment() == AppConstants.ENV_NAMIBIA){
+            editCenter.setVisibility(View.VISIBLE);
+            editArea.setVisibility(view.VISIBLE);
+        }else {
+            editCenter.setVisibility(View.GONE);
+            editArea.setVisibility(view.GONE);
+        }
+
         editBirth = view.findViewById(R.id.editBirth);
         editBirth.setOnDateInputListener(this);
 
@@ -196,6 +220,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         radioMale = view.findViewById(R.id.radioMale);
         radioMale.setOnCheckedChangeListener(this);
+
+
 
         ll_retake_photo = view.findViewById(R.id.ll_retake_photo);
         View contextMenu = view.findViewById(R.id.contextMenuButton);
@@ -257,6 +283,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         txtDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getCreated()));
 
         editName.setText(person.getFullName());
+        if(person.getCenter_location_id()!=null){
+            IndiaLocation indiaLocation = indiaLocationRepository.getLocationFromId(person.getCenter_location_id());
+            editArea.setText(indiaLocation.getVillage());
+            editCenter.setText(indiaLocation.getAganwadi());
+        }
         editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getBirthday()));
         editGuardian.setText(person.getGuardian());
 
@@ -275,8 +306,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void setLocation(Loc loc) {
         if (loc != null) {
             String address = loc.getAddress();
-            if ((location == null) && (address != null) && (address.length() > 0)) {
-                if (editLocation != null) {
+            setVillageDefault(loc.getLocality());
+           // if ((location == null) && (address != null) && (address.length() > 0)) {
+                if ((address != null) && (address.length() > 0)) {
+
+                    if (editLocation != null) {
                     Editable oldAddress = editLocation.getText();
                     if ((oldAddress != null) && (oldAddress.toString().compareTo(address) != 0)) {
                         editLocation.setText(address);
@@ -284,6 +318,17 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 }
                 location = loc;
             }
+        }
+    }
+
+    public void setVillageDefault(String village){
+        if(village==null){
+            return;
+        }
+        IndiaLocation indiaLocation = indiaLocationRepository.getVillageObject(village.toUpperCase(Locale.ENGLISH));
+
+        if(indiaLocation != null){
+            editArea.setText(indiaLocation.getVillage());
         }
     }
 
@@ -321,6 +366,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         if (!radioFemale.isChecked() && !radioMale.isChecked()) {
             valid = false;
             Snackbar.make(radioFemale, R.string.tooltipe_sex, Snackbar.LENGTH_SHORT).show();
+        }
+
+        if(center_location_id==null){
+            Toast.makeText(getActivity(),"Please enter center location",Toast.LENGTH_LONG).show();
         }
 
         return valid;
@@ -382,6 +431,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setDevice_updated_at_timestamp(System.currentTimeMillis());
                     person.setLastLocation(location);
                     person.setSynced(false);
+                    person.setCenter_location_id(center_location_id);
                     viewModel.savePerson(person);
                 }
 
@@ -395,11 +445,28 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             case R.id.editLocation:
                 LocationDetectActivity.navigate((AppCompatActivity) getActivity(), editLocation, location, location -> {
                     setLocation(location);
+                    Log.i(TAG,"this is location value "+location.getLocality());
                 });
-
+                break;
             case R.id.editArea:
-                LocationDialogFragment dialogFragment = new LocationDialogFragment();
+
+                LocationDialogFragment dialogFragment = LocationDialogFragment.newInstance(null,passDataToPersonDataFragment);
+
+                dialogFragment.setTargetFragment(PersonalDataFragment.this,1000);
                 dialogFragment.show(getActivity().getSupportFragmentManager(), "location_dialog");
+                break;
+
+            case R.id.editCenter:
+
+                if(editArea.getText() == null || editArea.getText().toString().isEmpty()){
+                    Toast.makeText(context,"Please seleact area first", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                LocationDialogFragment dialogFragment1 = LocationDialogFragment.newInstance(editArea.getText().toString(),passDataToPersonDataFragment);
+
+                dialogFragment1.setTargetFragment(PersonalDataFragment.this,1001);
+                dialogFragment1.show(getActivity().getSupportFragmentManager(), "location_dialog");
                 break;
         }
     }
@@ -557,4 +624,17 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
 
     }
+
+    @Override
+    public void onPassDate(String area, String data) {
+        if(area==null){
+            editArea.setText(data);
+        }
+        else{
+            editCenter.setText(data);
+            center_location_id = indiaLocationRepository.getCenterLocationId(area,data);
+        }
+    }
+
+
 }

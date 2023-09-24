@@ -215,7 +215,7 @@ public class CreateDataActivity extends BaseActivity {
                     location.setLatitude(loc.getLatitude());
                     location.setLongitude(loc.getLongitude());
                     location.setAddress(GPS.getAddress(this, location));
-
+                    location.setLocality(GPS.getLocality());
                     if (personalFragment != null) {
                         personalFragment.setLocation(location);
                     }

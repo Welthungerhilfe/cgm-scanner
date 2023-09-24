@@ -114,6 +114,9 @@ public class Person extends CsvExportableModel implements Serializable {
     @Expose
     private boolean belongs_to_rst;
 
+    @Expose
+    private String center_location_id;
+
 
     @SerializedName("lastLocation")
     @Expose
@@ -351,6 +354,15 @@ public class Person extends CsvExportableModel implements Serializable {
 
     public void setLast_updated(long last_updated) {
         this.last_updated = last_updated;
+    }
+
+
+    public String getCenter_location_id() {
+        return center_location_id;
+    }
+
+    public void setCenter_location_id(String center_location_id) {
+        this.center_location_id = center_location_id;
     }
 
     @Override

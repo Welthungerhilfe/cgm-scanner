@@ -45,6 +45,8 @@ public class GPS {
 
     private static final String PACKAGE_GOOGLE_PLAY = "com.android.vending";
 
+    public static String locality = null;
+
     public static String getAddress(Activity context, Loc location) {
         if (location != null) {
             Geocoder geocoder = new Geocoder(context, Locale.getDefault());
@@ -63,7 +65,7 @@ public class GPS {
             } else {
                 Address address = addresses.get(0);
                 StringBuilder sb = new StringBuilder();
-
+                locality = address.getLocality();
                 for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
                     sb.append(address.getAddressLine(i));
 
@@ -71,6 +73,10 @@ public class GPS {
             }
         }
         return "";
+    }
+
+    public static String getLocality(){
+        return locality;
     }
 
     public static Loc getLastKnownLocation(Context context) {

@@ -1,6 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.ui.adapters;
 
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,8 +17,12 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.ViewHo
 
     private ArrayList<String> locations;
 
-    public LocationAdapter(ArrayList<String> locations) {
+    private OnItemClickListener listener;
+
+
+    public LocationAdapter(ArrayList<String> locations, OnItemClickListener onItemClickListener) {
         this.locations = locations;
+        this.listener = onItemClickListener;
     }
 
     @Override
@@ -28,7 +33,15 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(LocationAdapter.ViewHolder holder, int position) {
-        holder.tvLocation.setText(locations.get(position));
+        final String item = locations.get(position);
+        holder.tvLocation.setText(item);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.i("Adapter","this is clicked item "+item);
+                listener.onItemClick(item);
+            }
+        });
     }
 
     @Override
@@ -45,6 +58,12 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.ViewHo
 
             tvLocation = itemView.findViewById(R.id.tv_location);
         }
+    }
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
+    public interface OnItemClickListener {
+        void onItemClick(String item);
     }
 }
 
