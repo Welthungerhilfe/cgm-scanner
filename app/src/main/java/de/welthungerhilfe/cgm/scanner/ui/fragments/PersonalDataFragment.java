@@ -27,10 +27,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Context;
@@ -46,7 +44,6 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatRadioButton;
-import androidx.test.espresso.remote.EspressoRemoteMessage;
 
 import android.provider.MediaStore;
 import android.text.Editable;
@@ -70,9 +67,6 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -95,7 +89,6 @@ import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
-import de.welthungerhilfe.cgm.scanner.ui.activities.QRScanActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
@@ -285,7 +278,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         editName.setText(person.getFullName());
         if(person.getCenter_location_id()!=null){
             IndiaLocation indiaLocation = indiaLocationRepository.getLocationFromId(person.getCenter_location_id());
-            editArea.setText(indiaLocation.getVillage());
+            editArea.setText(indiaLocation.getVillage_full_name());
             editCenter.setText(indiaLocation.getAganwadi());
         }
         editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getBirthday()));
@@ -328,7 +321,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         IndiaLocation indiaLocation = indiaLocationRepository.getVillageObject(village.toUpperCase(Locale.ENGLISH));
 
         if(indiaLocation != null){
-            editArea.setText(indiaLocation.getVillage());
+            editArea.setText(indiaLocation.getVillage_full_name());
         }
     }
 
@@ -338,6 +331,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         String name = editName.getText().toString();
         String birth = editBirth.getText().toString();
         String guardian = editGuardian.getText().toString();
+        String area = editArea.getText().toString();
+        String aganwadi = editCenter.getText().toString();
 
         if (name.isEmpty()) {
             editName.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.name_tooltip)));
@@ -368,9 +363,22 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             Snackbar.make(radioFemale, R.string.tooltipe_sex, Snackbar.LENGTH_SHORT).show();
         }
 
-        if(center_location_id==null){
-            Toast.makeText(getActivity(),"Please enter center location",Toast.LENGTH_LONG).show();
+
+        if (area.isEmpty()) {
+            editArea.setError("Please search a village");
+            valid = false;
+        } else {
+            editArea.setError(null);
         }
+
+
+        if (aganwadi.isEmpty()) {
+            editCenter.setError("Please select aganwadi");
+            valid = false;
+        } else {
+            editName.setError(null);
+        }
+
 
         return valid;
     }

@@ -21,17 +21,17 @@ public interface IndiaLocationDao {
     @Update(onConflict = REPLACE)
     void updateIndianLocation(IndiaLocation indiaLocation);
 
-    @Query("SELECT DISTINCT village FROM india_location")
+    @Query("SELECT DISTINCT village_full_name FROM india_location")
     List<String> getVillage();
 
-    @Query("SELECT aganwadi FROM india_location WHERE village =:village")
-    List<String> getAganwadi(String village);
+    @Query("SELECT aganwadi FROM india_location WHERE village_full_name =:village_full_name")
+    List<String> getAganwadi(String village_full_name);
 
     @Query("SELECT * FROM india_location WHERE villageName =:villageName LIMIT 1")
     IndiaLocation getVillageObject(String villageName);
 
-    @Query("SELECT id FROM india_location WHERE village =:village AND aganwadi=:aganwadi LIMIT 1")
-    String getCenterLocationId(String village, String aganwadi);
+    @Query("SELECT id FROM india_location WHERE village_full_name =:village_full_name AND aganwadi=:aganwadi LIMIT 1")
+    String getCenterLocationId(String village_full_name, String aganwadi);
 
     @Query("SELECT * FROM india_location WHERE id =:id LIMIT 1")
     IndiaLocation getLocationFromId(String id);

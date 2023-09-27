@@ -166,7 +166,7 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="40dp"
+                android:layout_width="32dp"
                 android:layout_height="match_parent"
                 android:layout_marginRight="5dp"
                 android:src="@drawable/ic_guardian"/>
@@ -193,7 +193,7 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="40dp"
+                android:layout_width="32dp"
                 android:layout_height="match_parent"
                 android:layout_marginRight="5dp"
                 android:src="@drawable/ic_child"/>
@@ -220,7 +220,7 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="40dp"
+                android:layout_width="32dp"
                 android:layout_height="match_parent"
                 android:layout_marginRight="5dp"
                 android:src="@drawable/ic_location"/>
@@ -258,7 +258,82 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="40dp"
+                android:layout_width="32dp"
+                android:layout_height="match_parent"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/village_icon"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editArea"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:inputType="none"
+                    android:hint="Search village"
+                    android:singleLine="false" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <ImageView
+                android:id="@+id/imgLocation1"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/location"
+                android:visibility="gone"
+                android:contentDescription="@string/label_location"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="match_parent"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/aaganwadi_center_location"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editCenter"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:inputType="none"
+                    android:hint="Select aaganwadi"
+                    android:singleLine="false" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <ImageView
+                android:id="@+id/imgLocation2"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/location"
+                android:visibility="gone"
+                android:contentDescription="@string/label_location"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="32dp"
                 android:layout_height="match_parent"
                 android:layout_marginRight="5dp"
                 android:src="@drawable/ic_calender"/>
@@ -349,80 +424,7 @@
 
         </RadioGroup>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal">
 
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="match_parent"
-                android:layout_marginRight="5dp"
-                android:src="@drawable/ic_location"/>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editArea"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:focusable="false"
-                    android:inputType="none"
-                    android:hint="@string/label_location"
-                    android:singleLine="false" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <ImageView
-                android:id="@+id/imgLocation1"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center_vertical"
-                android:src="@drawable/location"
-                android:visibility="gone"
-                android:contentDescription="@string/label_location"/>
-
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="match_parent"
-                android:layout_marginRight="5dp"
-                android:src="@drawable/ic_location"/>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editCenter"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:focusable="false"
-                    android:inputType="none"
-                    android:hint="@string/label_location"
-                    android:singleLine="false" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <ImageView
-                android:id="@+id/imgLocation2"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center_vertical"
-                android:src="@drawable/location"
-                android:visibility="gone"
-                android:contentDescription="@string/label_location"/>
-
-        </LinearLayout>
 
 
         <LinearLayout

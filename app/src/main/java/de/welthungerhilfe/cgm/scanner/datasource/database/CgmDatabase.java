@@ -378,7 +378,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static final Migration MIGRATION_37_38 = new Migration(37, 38) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("CREATE TABLE `india_location` (`id` TEXT NOT NULL, `village` TEXT,`aganwadi` TEXT ,`villageName` TEXT, PRIMARY KEY(`id`))");
+            database.execSQL("CREATE TABLE `india_location` (`id` TEXT NOT NULL, `village_full_name` TEXT,`aganwadi` TEXT ,`villageName` TEXT, `location_id` TEXT, PRIMARY KEY(`id`))");
             database.execSQL("ALTER TABLE persons ADD COLUMN center_location_id TEXT;");
 
 

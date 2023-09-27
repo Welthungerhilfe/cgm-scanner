@@ -14,11 +14,13 @@ public class IndiaLocation {
     @NonNull
     private String id;
 
-    private String village;
+    private String village_full_name;
 
     private String aganwadi;
 
     private String villageName;
+
+    private String location_id;
 
     public String getId() {
         return id;
@@ -28,12 +30,12 @@ public class IndiaLocation {
         this.id = id;
     }
 
-    public String getVillage() {
-        return village;
+    public String getVillage_full_name() {
+        return village_full_name;
     }
 
-    public void setVillage(String village) {
-        this.village = village;
+    public void setVillage_full_name(String village_full_name) {
+        this.village_full_name = village_full_name;
     }
 
     public String getAganwadi() {
@@ -50,5 +52,13 @@ public class IndiaLocation {
 
     public void setVillageName(String villageName) {
         this.villageName = villageName;
+    }
+
+    public String getLocation_id() {
+        return location_id;
+    }
+
+    public void setLocation_id(String location_id) {
+        this.location_id = location_id;
     }
 }

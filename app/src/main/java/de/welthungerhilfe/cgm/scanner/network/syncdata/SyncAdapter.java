@@ -18,14 +18,11 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.syncdata;
 
-import static android.content.Context.TELEPHONY_SERVICE;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -45,7 +42,6 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.Utils;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
-import de.welthungerhilfe.cgm.scanner.datasource.location.india.AANGANWADICENTER;
 import de.welthungerhilfe.cgm.scanner.datasource.location.india.IndiaLocation;
 import de.welthungerhilfe.cgm.scanner.datasource.location.india.Root;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Artifact;
@@ -1957,9 +1953,10 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                                                     IndiaLocation indiaLocation = new IndiaLocation();
                                                     indiaLocation.setId(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).id);
-                                                    indiaLocation.setVillage(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).tree_string);
+                                                    indiaLocation.setVillage_full_name(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).tree_string);
                                                     indiaLocation.setAganwadi(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).location_name);
                                                     indiaLocation.setVillageName(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).location_name);
+                                                    indiaLocation.setLocation_id(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).id);
                                                     indiaLocationRepository.insertIndiaLocation(indiaLocation);
 
                                                 }
