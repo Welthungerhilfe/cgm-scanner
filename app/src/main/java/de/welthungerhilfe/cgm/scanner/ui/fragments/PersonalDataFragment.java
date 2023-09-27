@@ -131,6 +131,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     IndiaLocationRepository indiaLocationRepository;
     String center_location_id;
 
+    String location_id;
+
     LocationDialogFragment.PassDataToPersonDataFragment passDataToPersonDataFragment;
 
     public static PersonalDataFragment getInstance(String qrCode) {
@@ -440,6 +442,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setLastLocation(location);
                     person.setSynced(false);
                     person.setCenter_location_id(center_location_id);
+                    person.setLocation_id(location_id);
                     viewModel.savePerson(person);
                 }
 
@@ -640,7 +643,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         }
         else{
             editCenter.setText(data);
-            center_location_id = indiaLocationRepository.getCenterLocationId(area,data);
+            IndiaLocation indiaLocation = indiaLocationRepository.getCenterLocationId(area,data);
+            center_location_id = indiaLocation.getId();
+            location_id = indiaLocation.getLocation_id();
         }
     }
 

@@ -62,7 +62,7 @@ public class IndiaLocationRepository {
         return database.indiaLocationDao().getVillageObject(villageName);
     }
 
-    public String getCenterLocationId(String village, String aganwadi){
+    public IndiaLocation getCenterLocationId(String village, String aganwadi){
         return database.indiaLocationDao().getCenterLocationId(village, aganwadi);
 
     }

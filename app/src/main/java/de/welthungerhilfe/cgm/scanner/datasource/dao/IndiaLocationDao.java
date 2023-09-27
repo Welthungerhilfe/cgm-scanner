@@ -30,8 +30,8 @@ public interface IndiaLocationDao {
     @Query("SELECT * FROM india_location WHERE villageName =:villageName LIMIT 1")
     IndiaLocation getVillageObject(String villageName);
 
-    @Query("SELECT id FROM india_location WHERE village_full_name =:village_full_name AND aganwadi=:aganwadi LIMIT 1")
-    String getCenterLocationId(String village_full_name, String aganwadi);
+    @Query("SELECT * FROM india_location WHERE village_full_name =:village_full_name AND aganwadi=:aganwadi LIMIT 1")
+    IndiaLocation getCenterLocationId(String village_full_name, String aganwadi);
 
     @Query("SELECT * FROM india_location WHERE id =:id LIMIT 1")
     IndiaLocation getLocationFromId(String id);

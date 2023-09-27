@@ -623,8 +623,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             putPerson.setName(person1.getName());
             putPerson.setSex(person1.getSex());
             putPerson.setDevice_updated_at(DataFormat.convertMilliSeconsToServerDate(person1.getDevice_updated_at_timestamp()));
-
-
+            putPerson.setLocation_id(person1.getLocation_id());
+            putPerson.setCenter_location_id(person1.getCenter_location_id());
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
