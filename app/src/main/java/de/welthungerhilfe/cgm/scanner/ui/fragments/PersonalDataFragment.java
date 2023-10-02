@@ -470,7 +470,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             case R.id.editCenter:
 
                 if(editArea.getText() == null || editArea.getText().toString().isEmpty()){
-                    Toast.makeText(context,"Please seleact area first", Toast.LENGTH_LONG).show();
+                    editArea.setError("Please search a village");
                     return;
                 }
 
