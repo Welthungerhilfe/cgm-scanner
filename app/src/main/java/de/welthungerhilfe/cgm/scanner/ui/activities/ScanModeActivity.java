@@ -354,7 +354,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         personRepository = PersonRepository.getInstance(this);
         fileLogRepository = FileLogRepository.getInstance(this);
         lightScores = new HashMap<>();
-        files = new ArrayList<>();
+        //files = new ArrayList<>();
 
         setupToolbar();
 
@@ -500,12 +500,20 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             activityScanModeBinding.scanType2.setChildIcon(R.drawable.stand_side);
             activityScanModeBinding.scanType3.setChildIcon(R.drawable.stand_back);
             activityScanModeBinding.scanType2.setTitle(R.string.side_scan);
+            if(files!=null) {
+                files.clear();
+            }
+            files = new ArrayList<>();
             getCamera().setPlaneMode(AbstractARCamera.PlaneMode.LOWEST);
         } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
             activityScanModeBinding.scanType1.setChildIcon(R.drawable.lying_front);
             activityScanModeBinding.scanType2.setChildIcon(R.drawable.lying_side);
             activityScanModeBinding.scanType3.setChildIcon(R.drawable.lying_back);
             activityScanModeBinding.scanType2.setTitle(R.string.lying_side_scan);
+            if(files!=null) {
+                files.clear();
+            }
+            files = new ArrayList<>();
             getCamera().setPlaneMode(AbstractARCamera.PlaneMode.VISIBLE);
         }
     }

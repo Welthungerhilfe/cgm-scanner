@@ -60,17 +60,17 @@ public class PersonRepository {
         return database.personDao().getAll(createdBy);
     }
 
-    public LiveData<Person> getPerson(String key) {
-        return database.personDao().getPersonByQr(key);
+    public LiveData<Person> getPerson(String key, int environment) {
+        return database.personDao().getPersonByQr(key,environment);
     }
 
     public Person getPersonById(String id) {
         return database.personDao().getPersonById(id);
     }
 
-    public Person findPersonByQr(String qrCode)
+    public Person findPersonByQr(String qrCode, int environment)
     {
-        return database.personDao().findPersonByQr(qrCode);
+        return database.personDao().findPersonByQr(qrCode,environment);
 
     }
 
@@ -92,9 +92,9 @@ public class PersonRepository {
         return database.personDao().getPersonStat(currentDate,belongs_to_rst);
     }
 
-    public LiveData<List<Person>> getAvailablePersons(PersonFilter filter) {
+    public LiveData<List<Person>> getAvailablePersons(PersonFilter filter,int environment) {
         String selectClause = "*";
-        String whereClause = "p.deleted=0";
+        String whereClause = "p.deleted=0 AND p.environment="+environment;
         String orderByClause = "p.created DESC";
         int PAGE_SIZE = 30;
         String limitClause = String.format(Locale.US, "LIMIT %d OFFSET %d", PAGE_SIZE, filter.getPage() * PAGE_SIZE);

@@ -35,6 +35,8 @@ public class Loc implements Serializable {
     @Expose
     private String address;
 
+    private String locality;
+
     public double getLatitude() {
         return latitude;
     }
@@ -57,5 +59,13 @@ public class Loc implements Serializable {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getLocality() {
+        return locality;
+    }
+
+    public void setLocality(String locality) {
+        this.locality = locality;
     }
 }

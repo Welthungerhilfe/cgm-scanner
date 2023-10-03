@@ -18,6 +18,7 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.service;
 
+import de.welthungerhilfe.cgm.scanner.datasource.location.india.Root;
 import de.welthungerhilfe.cgm.scanner.datasource.models.CompleteScan;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
 import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
@@ -93,6 +94,9 @@ public interface ApiService {
 
     @GET("test")
     Observable<String> test(@Header("Authorization") String auth);
+
+    @GET("get_locations_hierarchy?country=INDIA")
+    Observable<Root> getLocationIndia(@Header("Authorization") String auth);
 
 }
 

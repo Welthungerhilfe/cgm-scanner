@@ -35,11 +35,11 @@ import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TAB
 
 @Dao
 public interface PersonDao {
-    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE qrcode=:qrCode AND deleted=0 LIMIT 1")
-    LiveData<Person> getPersonByQr(String qrCode);
+    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE qrcode=:qrCode AND deleted=0 AND environment=:environment LIMIT 1")
+    LiveData<Person> getPersonByQr(String qrCode,int environment);
 
-    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE qrcode=:qrCode AND deleted=0 LIMIT 1")
-    Person findPersonByQr(String qrCode);
+    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE qrcode=:qrCode AND deleted=0 AND environment=:environment LIMIT 1")
+    Person findPersonByQr(String qrCode,int environment);
 
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE id=:id AND deleted=0 LIMIT 1")
     Person getPersonById(String id);

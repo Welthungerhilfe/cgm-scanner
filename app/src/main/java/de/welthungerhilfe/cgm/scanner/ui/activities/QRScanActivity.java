@@ -210,7 +210,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         }
 
         if (activityBehaviourType == AppConstants.QR_SCAN_REQUEST) {
-            if (personRepository.findPersonByQr(qrCode) == null) {
+            if (personRepository.findPersonByQr(qrCode,sessionManager.getEnvironment()) == null) {
                 showConfirmDialog(R.string.message_legal, CAPTURED_CONSENT_SHEET_STEP);
             } else {
                 Intent intent = new Intent(QRScanActivity.this, CreateDataActivity.class);

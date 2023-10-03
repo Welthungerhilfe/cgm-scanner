@@ -193,7 +193,8 @@ public class LocationDetectActivity extends BaseActivity implements OnMapReadyCa
                 addressList = geocoder.getFromLocationName(address, 1);
                 if (addressList != null && addressList.size() > 0) {
                     Address addr = addressList.get(0);
-                    location.setAddress(address);
+                    location.setAddress(addr.getLocality());
+                    location.setLocality(address);
                     location.setLongitude(addr.getLongitude());
                     location.setLatitude(addr.getLatitude());
 
@@ -209,6 +210,7 @@ public class LocationDetectActivity extends BaseActivity implements OnMapReadyCa
     }
 
     private void getAddressFromLocation(LatLng latLng) {
+
         runOnUiThread(() -> {
             Geocoder geocoder = new Geocoder(LocationDetectActivity.this, Locale.getDefault());
             String result = null;
@@ -217,7 +219,7 @@ public class LocationDetectActivity extends BaseActivity implements OnMapReadyCa
                 if (addressList != null && addressList.size() > 0) {
                     Address address = addressList.get(0);
                     StringBuilder sb = new StringBuilder();
-
+                    location.setLocality(address.getLocality());
                     for (int i = 0; i <= address.getMaxAddressLineIndex(); i++)
                         sb.append(address.getAddressLine(i));
 

@@ -79,6 +79,8 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     FirebaseAnalytics firebaseAnalytics;
 
 
+
+
     public static MeasuresDataFragment getInstance(String qrCode) {
         MeasuresDataFragment fragment = new MeasuresDataFragment();
         fragment.qrCode = qrCode;
@@ -109,7 +111,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
         factory = new CreateDataViewModelProvideFactory(getActivity());
         viewModel = new ViewModelProvider(getActivity(), factory).get(CreateDataViewModel.class);
-        viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
+        viewModel.getPersonLiveData(qrCode,session.getEnvironment()).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
             if(adapterMeasure!=null){
                 adapterMeasure.setPerson(person);

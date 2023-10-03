@@ -18,14 +18,11 @@
  */
 package de.welthungerhilfe.cgm.scanner.network.syncdata;
 
-import static android.content.Context.TELEPHONY_SERVICE;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -45,6 +42,8 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.Utils;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
+import de.welthungerhilfe.cgm.scanner.datasource.location.india.IndiaLocation;
+import de.welthungerhilfe.cgm.scanner.datasource.location.india.Root;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Artifact;
 import de.welthungerhilfe.cgm.scanner.datasource.models.CompleteScan;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
@@ -71,6 +70,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Workflow;
 import de.welthungerhilfe.cgm.scanner.datasource.models.WorkflowsResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.DeviceRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.IndiaLocationRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PostScanResultrepository;
@@ -115,6 +115,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     private PostScanResultrepository postScanResultrepository;
     private WorkflowRepository workflowRepository;
 
+    private IndiaLocationRepository indiaLocationRepository;
+
     private SessionManager session;
     private AsyncTask<Void, Void, Void> syncTask;
     private Retrofit retrofit;
@@ -133,6 +135,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         postScanResultrepository = PostScanResultrepository.getInstance(context);
         firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(context);
         workflowRepository = WorkflowRepository.getInstance(context);
+        indiaLocationRepository = IndiaLocationRepository.getInstance(context);
         activeThreads = 0;
         session = new SessionManager(context);
     }
@@ -179,6 +182,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
         synchronized (activeThreads) {
             if (activeThreads > 0) {
+                LogFileUtils.logInfo(TAG,"Start syncing activatedthread "+activeThreads);
                 return;
             }
         }
@@ -237,6 +241,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     getWorkflows();
                     postWorkFlowsResult();
                     postRemainingData();
+                    getLocationIndia();
 
                     session.setSyncTimestamp(currentTimestamp);
                 } catch (Exception e) {
@@ -343,7 +348,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     if (!fileLog.isDeleted()) {
                         continue;
                     }
-                    Person person = personRepository.findPersonByQr(fileLog.getQrCode());
+                    Person person = personRepository.findPersonByQr(fileLog.getQrCode(),session.getEnvironment());
                     LogFileUtils.logInfo(TAG,"Person consent to sync is "+person);
                     String backendPersonId = person.getServerId();
                     if (backendPersonId == null) {
@@ -558,7 +563,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onNext(@NonNull Person person) {
-                            LogFileUtils.logInfo(TAG, "person " + person.getQrcode() + " successfully posted");
+                            LogFileUtils.logInfo(TAG, "posting person successfully posted" + person.getQrcode());
                             person.setTimestamp(prevTimestamp);
                             person.setId(person1.getId());
                             person.setCreatedBy(person1.getCreatedBy());
@@ -585,7 +590,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            LogFileUtils.logError(TAG, "person " + person1.getQrcode() + " posting failed " + e.getMessage());
+                            LogFileUtils.logError(TAG, "posting person failed" + person1.getQrcode() + " error  " + e.getMessage());
                             if (NetworkUtils.isDenied(e.getMessage())) {
                                 person1.setDenied(true);
                                 personRepository.updatePerson(person1);
@@ -618,8 +623,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             putPerson.setName(person1.getName());
             putPerson.setSex(person1.getSex());
             putPerson.setDevice_updated_at(DataFormat.convertMilliSeconsToServerDate(person1.getDevice_updated_at_timestamp()));
-
-
+            putPerson.setLocation_id(person1.getLocation_id());
+            putPerson.setCenter_location_id(person1.getCenter_location_id());
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
@@ -711,7 +716,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             if (syncPersonsResponse.persons != null && syncPersonsResponse.persons.size() > 0) {
                                 for (int i = 0; i < syncPersonsResponse.persons.size(); i++) {
                                     Person person = syncPersonsResponse.persons.get(i);
-                                    Person existingPerson = personRepository.findPersonByQr(person.getQrcode());
+                                    Person existingPerson = personRepository.findPersonByQr(person.getQrcode(),session.getEnvironment());
                                     person.setSynced(true);
                                     person.setEnvironment(session.getEnvironment());
                                     person.setBirthday(DataFormat.convertBirthDateToMilliSeconds(person.getBirthdayString()));
@@ -780,7 +785,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onNext(@NonNull Measure measure1) {
-                            LogFileUtils.logInfo(TAG, "measure " + measure1.getId() + " successfully posted");
+                            LogFileUtils.logInfo(TAG, "posting measure successfully posted" + measure1.getId());
                             measure1.setTimestamp(DataFormat.convertServerDateToMilliSeconds(measure.getMeasure_updated()));
                             measure1.setId(measure.getId());
                             measure1.setPersonId(measure.getPersonId());
@@ -799,7 +804,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            LogFileUtils.logError(TAG, "measure " + measure.getId() + " posting failed " + e.getMessage());
+                            LogFileUtils.logError(TAG, "posting measure failed" + measure.getId() + "error  " + e.getMessage());
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
@@ -1907,4 +1912,81 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             LogFileUtils.logException(e);
         }
     }
+
+    public void getLocationIndia() {
+        try {
+
+
+
+            LogFileUtils.logInfo(TAG, "Syncing Location india address ");
+
+            onThreadChange(1);
+            retrofit.create(ApiService.class).getLocationIndia(session.getAuthTokenWithBearer())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Root>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(@NonNull Root root) {
+                            LogFileUtils.logInfo(TAG, "Sync location successfully fetched " + root.country);
+                                    if(session.getIndiaVersionLocation() >= root.getVersion()){
+                                        onThreadChange(-1);
+                                        return;
+                                    }
+                                    session.setLocationIndiaVersion(root.version);
+                                for (int i = 0; i < root.location_json.size(); i++) {
+                                    Log.i(TAG,"this is inside address onnext A "+i);
+                                    for (int j = 0; j < root.location_json.get(i).dISTRICT.size(); j++) {
+                                        Log.i(TAG,"this is inside address onnext B "+i+" "+j);
+
+                                        for (int k = 0; k < root.location_json.get(i).dISTRICT.get(j).bLOCK.size(); k++) {
+
+                                            Log.i(TAG,"this is inside address onnext C "+i+" "+j+" "+k);
+
+                                            for (int l = 0; l < root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.size(); l++) {
+
+                                                for (int m = 0; m < root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.size(); m++) {
+                                                    Log.i(TAG, "this is values of location " + root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).tree_string+" "+root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).location_name);
+
+                                                    IndiaLocation indiaLocation = new IndiaLocation();
+                                                    indiaLocation.setId(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).id);
+                                                    indiaLocation.setVillage_full_name(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).tree_string);
+                                                    indiaLocation.setAganwadi(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).location_name);
+                                                    indiaLocation.setVillageName(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).location_name);
+                                                    indiaLocation.setLocation_id(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).id);
+                                                    indiaLocationRepository.insertIndiaLocation(indiaLocation);
+
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            LogFileUtils.logError(TAG, "Sync person failed " + e.getMessage());
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(context);
+                                error401();
+                            }
+                            onThreadChange(-1);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } catch (Exception e) {
+            LogFileUtils.logException(e);
+        }
+    }
+
 }

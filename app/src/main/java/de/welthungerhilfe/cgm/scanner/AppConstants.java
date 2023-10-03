@@ -32,7 +32,9 @@ public class AppConstants {
     public static final String AUTH_BAN = "{OAUTH_SCOPE_BAN}";
     public static final String AUTH_DEMO_QA = "{OAUTH_SCOPE_QA}";
 
+
     public static final String API_URL_DEMO_QA = "{API_URL_QA}/";
+
     public static final String API_URL_SANDBOX = "{API_URL_SANDBOX}/";
     public static final String API_URL_IN_BMZ = "{API_URL_PRODUCTION}/";
     public static final String API_URL_NAMIBIA = "{API_URL_NAMIBIA}/";

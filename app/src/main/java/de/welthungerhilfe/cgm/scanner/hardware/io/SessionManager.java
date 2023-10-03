@@ -57,6 +57,12 @@ public class SessionManager {
     private final String KEY_SELECTED_MODE= "key_selected_mode";
     private final String KEY_AR_CORE_CALI= "key_ar_core_cali";
 
+    private final String KEY_LOCATION_INDIA_VERSION= "key_location_india_version";
+
+    private final String KEY_LOCATLITY= "key_locality";
+
+
+
 
 
 
@@ -216,15 +222,13 @@ public class SessionManager {
     }
 
     public String getAuthTokenWithBearer() {
-        if (BuildConfig.DEBUG) {
+       if (BuildConfig.DEBUG) {
             return null;
 
-           /* Or for testing authorazation like sandbox, demo/qa, pass X-API-KEY with "admin_secret"
-            in header
-            return "admin_secret";*/
+
         } else {
             return "bearer " + getAuthToken();
-     }
+    }
 
     }
 
@@ -318,4 +322,23 @@ public class SessionManager {
         editor.putString(KEY_AR_CORE_CALI, values);
         editor.commit();
     }
+
+    public void setLocationIndiaVersion(int environment) {
+        editor.putInt(KEY_LOCATION_INDIA_VERSION, environment);
+        editor.commit();
+    }
+
+    public int getIndiaVersionLocation() {
+        return pref.getInt(KEY_LOCATION_INDIA_VERSION,0);
+    }
+
+    public void setLocality(String locality){
+        editor.putString(KEY_LOCATLITY, locality);
+        editor.commit();
+    }
+
+    public String getLocality() {
+        return pref.getString(KEY_LOCATLITY, null);
+    }
+
 }

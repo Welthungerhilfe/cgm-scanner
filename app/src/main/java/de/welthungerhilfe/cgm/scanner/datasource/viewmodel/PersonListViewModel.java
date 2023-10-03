@@ -55,7 +55,7 @@ public class PersonListViewModel extends AndroidViewModel {
         filterLiveData.postValue(filter);
 
         personListLiveData = Transformations.switchMap(filterLiveData, filter ->
-            repository.getAvailablePersons(filter)
+            repository.getAvailablePersons(filter,session.getEnvironment())
         );
     }
 

@@ -29,7 +29,6 @@ import android.app.DialogFragment;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Context;
@@ -68,18 +67,18 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
+import de.welthungerhilfe.cgm.scanner.datasource.location.india.IndiaLocation;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.IndiaLocationRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
@@ -90,14 +89,14 @@ import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
-import de.welthungerhilfe.cgm.scanner.ui.activities.QRScanActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.LocationDialogFragment;
 import de.welthungerhilfe.cgm.scanner.ui.views.DateEditText;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
-public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, DateEditText.DateInputListener, TextWatcher {
+public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, DateEditText.DateInputListener, TextWatcher, LocationDialogFragment.PassDataToPersonDataFragment {
 
     public Context context;
     private SessionManager session;
@@ -107,7 +106,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private AppCompatCheckBox checkAge;
 
     private DateEditText editBirth;
-    private EditText editName, editLocation, editGuardian;
+    private EditText editName, editLocation, editGuardian, editArea, editCenter;
 
     private AppCompatRadioButton radioFemale, radioMale;
 
@@ -116,7 +115,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     private CreateDataViewModel viewModel;
     private String qrCode;
     private Person person;
-    private Loc location;
+    private Loc  location;
     LinearLayout ll_retake_photo;
     ViewModelProvider.Factory factory;
     FirebaseAnalytics firebaseAnalytics;
@@ -129,6 +128,13 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     FileLogRepository fileLogRepository;
 
+    IndiaLocationRepository indiaLocationRepository;
+    String center_location_id;
+
+    String location_id;
+
+    LocationDialogFragment.PassDataToPersonDataFragment passDataToPersonDataFragment;
+
     public static PersonalDataFragment getInstance(String qrCode) {
         PersonalDataFragment fragment = new PersonalDataFragment();
         fragment.qrCode = qrCode;
@@ -137,12 +143,14 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
 
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
         this.context = context;
         session = new SessionManager(context);
+
     }
 
     @Override
@@ -151,8 +159,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         factory = new CreateDataViewModelProvideFactory(getActivity());
         fileLogRepository = FileLogRepository.getInstance(getActivity());
+        indiaLocationRepository = IndiaLocationRepository.getInstance(getActivity());
         viewModel = new ViewModelProvider(getActivity(), factory).get(CreateDataViewModel.class);
-        viewModel.getPersonLiveData(qrCode).observe(getViewLifecycleOwner(), person -> {
+        viewModel.getPersonLiveData(qrCode,session.getEnvironment()).observe(getViewLifecycleOwner(), person -> {
             this.person = person;
             initUI();
         });
@@ -166,6 +175,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         view.findViewById(R.id.imgBirth).setOnClickListener(this);
 
         view.findViewById(R.id.txtBack).setOnClickListener(this);
+
         btnNext = view.findViewById(R.id.btnNext);
         btnNext.setOnClickListener(this);
 
@@ -180,6 +190,20 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         editLocation = view.findViewById(R.id.editLocation);
         editLocation.setOnClickListener(this);
 
+        editArea = view.findViewById(R.id.editArea);
+        editArea.setOnClickListener(this);
+
+        editCenter = view.findViewById(R.id.editCenter);
+        editCenter.setOnClickListener(this);
+
+        if(session.getEnvironment() == AppConstants.ENV_DEMO_QA || session.getEnvironment() == AppConstants.ENV_NAMIBIA){
+            editCenter.setVisibility(View.VISIBLE);
+            editArea.setVisibility(view.VISIBLE);
+        }else {
+            editCenter.setVisibility(View.GONE);
+            editArea.setVisibility(view.GONE);
+        }
+
         editBirth = view.findViewById(R.id.editBirth);
         editBirth.setOnDateInputListener(this);
 
@@ -191,6 +215,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         radioMale = view.findViewById(R.id.radioMale);
         radioMale.setOnCheckedChangeListener(this);
+
+
 
         ll_retake_photo = view.findViewById(R.id.ll_retake_photo);
         View contextMenu = view.findViewById(R.id.contextMenuButton);
@@ -252,6 +278,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         txtDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getCreated()));
 
         editName.setText(person.getFullName());
+        if(person.getCenter_location_id()!=null){
+            IndiaLocation indiaLocation = indiaLocationRepository.getLocationFromId(person.getCenter_location_id());
+            editArea.setText(indiaLocation.getVillage_full_name());
+            editCenter.setText(indiaLocation.getAganwadi());
+        }
         editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getBirthday()));
         editGuardian.setText(person.getGuardian());
 
@@ -270,8 +301,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void setLocation(Loc loc) {
         if (loc != null) {
             String address = loc.getAddress();
-            if ((location == null) && (address != null) && (address.length() > 0)) {
-                if (editLocation != null) {
+            setVillageDefault(loc.getLocality());
+           // if ((location == null) && (address != null) && (address.length() > 0)) {
+                if ((address != null) && (address.length() > 0)) {
+
+                    if (editLocation != null) {
                     Editable oldAddress = editLocation.getText();
                     if ((oldAddress != null) && (oldAddress.toString().compareTo(address) != 0)) {
                         editLocation.setText(address);
@@ -282,12 +316,25 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         }
     }
 
+    public void setVillageDefault(String village){
+        if(village==null){
+            return;
+        }
+        IndiaLocation indiaLocation = indiaLocationRepository.getVillageObject(village.toUpperCase(Locale.ENGLISH));
+
+        if(indiaLocation != null){
+            editArea.setText(indiaLocation.getVillage_full_name());
+        }
+    }
+
     public boolean validate() {
         boolean valid = true;
 
         String name = editName.getText().toString();
         String birth = editBirth.getText().toString();
         String guardian = editGuardian.getText().toString();
+        String area = editArea.getText().toString();
+        String aganwadi = editCenter.getText().toString();
 
         if (name.isEmpty()) {
             editName.setError(getResources().getString(R.string.tooltip_input, getResources().getString(R.string.name_tooltip)));
@@ -317,6 +364,23 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             valid = false;
             Snackbar.make(radioFemale, R.string.tooltipe_sex, Snackbar.LENGTH_SHORT).show();
         }
+
+
+        if (area.isEmpty()) {
+            editArea.setError("Please search a village");
+            valid = false;
+        } else {
+            editArea.setError(null);
+        }
+
+
+        if (aganwadi.isEmpty()) {
+            editCenter.setError("Please select aganwadi");
+            valid = false;
+        } else {
+            editName.setError(null);
+        }
+
 
         return valid;
     }
@@ -377,6 +441,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setDevice_updated_at_timestamp(System.currentTimeMillis());
                     person.setLastLocation(location);
                     person.setSynced(false);
+                    person.setCenter_location_id(center_location_id);
+                    person.setLocation_id(location_id);
                     viewModel.savePerson(person);
                 }
 
@@ -390,7 +456,28 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             case R.id.editLocation:
                 LocationDetectActivity.navigate((AppCompatActivity) getActivity(), editLocation, location, location -> {
                     setLocation(location);
+                    Log.i(TAG,"this is location value "+location.getLocality());
                 });
+                break;
+            case R.id.editArea:
+
+                LocationDialogFragment dialogFragment = LocationDialogFragment.newInstance(null,passDataToPersonDataFragment);
+
+                dialogFragment.setTargetFragment(PersonalDataFragment.this,1000);
+                dialogFragment.show(getActivity().getSupportFragmentManager(), "location_dialog");
+                break;
+
+            case R.id.editCenter:
+
+                if(editArea.getText() == null || editArea.getText().toString().isEmpty()){
+                    editArea.setError("Please search a village");
+                    return;
+                }
+
+                LocationDialogFragment dialogFragment1 = LocationDialogFragment.newInstance(editArea.getText().toString(),passDataToPersonDataFragment);
+
+                dialogFragment1.setTargetFragment(PersonalDataFragment.this,1001);
+                dialogFragment1.show(getActivity().getSupportFragmentManager(), "location_dialog");
                 break;
         }
     }
@@ -548,4 +635,19 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
 
     }
+
+    @Override
+    public void onPassDate(String area, String data) {
+        if(area==null){
+            editArea.setText(data);
+        }
+        else{
+            editCenter.setText(data);
+            IndiaLocation indiaLocation = indiaLocationRepository.getCenterLocationId(area,data);
+            center_location_id = indiaLocation.getId();
+            location_id = indiaLocation.getLocation_id();
+        }
+    }
+
+
 }

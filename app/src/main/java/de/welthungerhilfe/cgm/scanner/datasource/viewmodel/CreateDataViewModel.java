@@ -70,8 +70,8 @@ public class CreateDataViewModel extends ViewModel {
         tabLiveData.setValue(tab);
     }
 
-    public LiveData<Person> getPersonLiveData(String qrCode) {
-        personLiveData = personRepository.getPerson(qrCode);
+    public LiveData<Person> getPersonLiveData(String qrCode,int environment) {
+        personLiveData = personRepository.getPerson(qrCode,environment);
         Log.i(TAG, "this is value of person livedata " + personLiveData.getValue());
 
         return personLiveData;
@@ -101,8 +101,8 @@ public class CreateDataViewModel extends ViewModel {
         return lastMeasureLiveData;
     }
 
-    public void syncManualMeasurements(String qrCode) {
-        Person person = personRepository.findPersonByQr(qrCode);
+    public void syncManualMeasurements(String qrCode,int environment) {
+        Person person = personRepository.findPersonByQr(qrCode,environment);
         SyncManualMeasureAdapter syncManualMeasureAdapter = SyncManualMeasureAdapter.getInstance(context);
         syncManualMeasureAdapter.getSyncManualMeasure(person);
     }
