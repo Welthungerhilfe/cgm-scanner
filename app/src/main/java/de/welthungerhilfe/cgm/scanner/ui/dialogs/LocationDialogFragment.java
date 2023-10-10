@@ -103,7 +103,7 @@ public class LocationDialogFragment extends DialogFragment implements LocationAd
             dialogFragmentLocationBinding.searchEditText.setHint("Search village");
         }else{
             locations = (ArrayList<String>) indiaLocationRepository.getAganwadi(area);
-            dialogFragmentLocationBinding.searchEditText.setHint("Select aaganwadi");
+            dialogFragmentLocationBinding.searchEditText.setHint("Select anganwadi");
 
             filterLocations("");
         }
