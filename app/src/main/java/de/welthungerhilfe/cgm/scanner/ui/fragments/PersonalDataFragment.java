@@ -63,6 +63,7 @@ import android.widget.Toast;
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -119,6 +120,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     LinearLayout ll_retake_photo;
     ViewModelProvider.Factory factory;
     FirebaseAnalytics firebaseAnalytics;
+
+    LinearLayout ll_village, ll_aganwadi;
 
     private static final int IMAGE_CAPTURED_REQUEST = 100;
 
@@ -187,21 +190,27 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         editName = view.findViewById(R.id.editName);
         editName.addTextChangedListener(this);
 
+
         editLocation = view.findViewById(R.id.editLocation);
         editLocation.setOnClickListener(this);
 
         editArea = view.findViewById(R.id.editArea);
         editArea.setOnClickListener(this);
+        editArea.addTextChangedListener(this);
 
         editCenter = view.findViewById(R.id.editCenter);
         editCenter.setOnClickListener(this);
+        editCenter.addTextChangedListener(this);
 
-        if(session.getEnvironment() == AppConstants.ENV_DEMO_QA || session.getEnvironment() == AppConstants.ENV_NAMIBIA){
-            editCenter.setVisibility(View.VISIBLE);
-            editArea.setVisibility(view.VISIBLE);
+        ll_aganwadi = view.findViewById(R.id.ll_aaganwadi);
+        ll_village = view.findViewById(R.id.ll_village);
+
+        if(session.getEnvironment() == AppConstants.ENV_DEMO_QA || session.getEnvironment() == AppConstants.ENV_IN_BMZ){
+            ll_aganwadi.setVisibility(View.VISIBLE);
+            ll_village.setVisibility(view.VISIBLE);
         }else {
-            editCenter.setVisibility(View.GONE);
-            editArea.setVisibility(view.GONE);
+            ll_aganwadi.setVisibility(View.GONE);
+            ll_village.setVisibility(view.GONE);
         }
 
         editBirth = view.findViewById(R.id.editBirth);
@@ -324,6 +333,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         if(indiaLocation != null){
             editArea.setText(indiaLocation.getVillage_full_name());
+
         }
     }
 
@@ -366,19 +376,27 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         }
 
 
-        if (area.isEmpty()) {
-            editArea.setError("Please search a village");
-            valid = false;
-        } else {
-            editArea.setError(null);
+
+        if(session.getEnvironment() == AppConstants.ENV_DEMO_QA || session.getEnvironment() == AppConstants.ENV_IN_BMZ){
+            if (area.isEmpty()) {
+                editArea.setError("Please search a village");
+                valid = false;
+            } else {
+                editArea.setError(null);
+            }
+
+
+            if (aganwadi.isEmpty()) {
+                editCenter.setError("Please select aganwadi");
+                valid = false;
+            } else {
+                editCenter.setError(null);
+            }
+
+
         }
+        else {
 
-
-        if (aganwadi.isEmpty()) {
-            editCenter.setError("Please select aganwadi");
-            valid = false;
-        } else {
-            editName.setError(null);
         }
 
 
@@ -531,14 +549,28 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         String name = editName.getText().toString();
         String birth = editBirth.getText().toString();
         String guardian = editGuardian.getText().toString();
+        String area = editArea.getText().toString();
+        String center = editCenter.getText().toString();
 
-        if (!name.isEmpty() && !birth.isEmpty() && !guardian.isEmpty() && (radioMale.isChecked() || radioFemale.isChecked())) {
-            btnNext.setTextColor(getResources().getColor(R.color.colorWhite));
-            btnNext.setBackground(getResources().getDrawable(R.drawable.button_green_round));
-        } else {
-            btnNext.setTextColor(getResources().getColor(R.color.colorGreyDark));
-            btnNext.setBackground(getResources().getDrawable(R.drawable.button_grey_round));
+        if(session.getEnvironment() == AppConstants.ENV_DEMO_QA || session.getEnvironment() == AppConstants.ENV_IN_BMZ){
+            if (!name.isEmpty() && !birth.isEmpty() && !guardian.isEmpty() && (radioMale.isChecked() || radioFemale.isChecked())) {
+                btnNext.setTextColor(getResources().getColor(R.color.colorWhite));
+                btnNext.setBackground(getResources().getDrawable(R.drawable.button_green_round));
+            } else {
+                btnNext.setTextColor(getResources().getColor(R.color.colorGreyDark));
+                btnNext.setBackground(getResources().getDrawable(R.drawable.button_grey_round));
+            }
         }
+        else {
+            if (!name.isEmpty() && !birth.isEmpty() && !guardian.isEmpty() && (radioMale.isChecked() || radioFemale.isChecked()) && area.isEmpty() && center.isEmpty()) {
+                btnNext.setTextColor(getResources().getColor(R.color.colorWhite));
+                btnNext.setBackground(getResources().getDrawable(R.drawable.button_green_round));
+            } else {
+                btnNext.setTextColor(getResources().getColor(R.color.colorGreyDark));
+                btnNext.setBackground(getResources().getDrawable(R.drawable.button_grey_round));
+            }
+        }
+
     }
 
     public void showAgeAlertDialog() {
@@ -640,12 +672,20 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void onPassDate(String area, String data) {
         if(area==null){
             editArea.setText(data);
+            if(data!=null){
+                editArea.setError(null);
+            }
+            editArea.setError(null);
         }
         else{
             editCenter.setText(data);
             IndiaLocation indiaLocation = indiaLocationRepository.getCenterLocationId(area,data);
             center_location_id = indiaLocation.getId();
             location_id = indiaLocation.getLocation_id();
+            if(data!=null){
+                editCenter.setError(null);
+            }
+
         }
     }
 
