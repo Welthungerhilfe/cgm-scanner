@@ -18,6 +18,8 @@
  */
 package de.welthungerhilfe.cgm.scanner.datasource.models;
 
+import androidx.room.Ignore;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -35,6 +37,7 @@ public class Loc implements Serializable {
     @Expose
     private String address;
 
+    @Ignore
     private String locality;
 
     public double getLatitude() {
