@@ -44,6 +44,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.DialogContactSupportBinding;
 import de.welthungerhilfe.cgm.scanner.hardware.Audio;
 import de.welthungerhilfe.cgm.scanner.hardware.io.FileSystem;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 
 public class ContactSupportDialog extends Dialog implements View.OnClickListener {
@@ -69,6 +70,7 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
 
     DialogContactSupportBinding dialogContactSupportBinding;
 
+    SessionManager sessionManager;
 
     void onRecord() {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -105,7 +107,7 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         } else {
             type = " - " + type;
         }
-        String subject = "CGM-Scanner version " + AppController.getInstance().getAppVersion() + type;
+        String subject = "CGM-Scanner version " + AppController.getInstance().getAppVersion() + type +" "+sessionManager.getUserEmail();
         String message = dialogContactSupportBinding.inputMessage.getText().toString();
         if (footer != null) {
             message += "\n\n" + footer;
@@ -160,6 +162,7 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         dialogContactSupportBinding.recordAudio.setOnClickListener(this);
         dialogContactSupportBinding.txtCancel.setOnClickListener(this);
         dialogContactSupportBinding.txtOK.setOnClickListener(this);
+        sessionManager = new SessionManager(getContext());
 
     }
 
