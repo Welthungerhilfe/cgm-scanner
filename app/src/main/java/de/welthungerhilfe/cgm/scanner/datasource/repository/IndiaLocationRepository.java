@@ -48,26 +48,26 @@ public class IndiaLocationRepository {
     }
 
 
-    public List<String> getVillage(){
-       return database.indiaLocationDao().getVillage();
+    public List<String> getVillage(int environment){
+       return database.indiaLocationDao().getVillage(environment);
     }
 
 
-    public List<String> getAganwadi(String village){
-        return database.indiaLocationDao().getAganwadi(village);
+    public List<String> getAganwadi(String village, int environment){
+        return database.indiaLocationDao().getAganwadi(village,environment);
     }
 
 
-    public IndiaLocation getVillageObject(String villageName){
-        return database.indiaLocationDao().getVillageObject(villageName);
+    public IndiaLocation getVillageObject(String villageName, int environment){
+        return database.indiaLocationDao().getVillageObject(villageName,environment);
     }
 
-    public IndiaLocation getCenterLocationId(String village, String aganwadi){
-        return database.indiaLocationDao().getCenterLocationId(village, aganwadi);
+    public IndiaLocation getCenterLocationId(String village, String aganwadi, int environment){
+        return database.indiaLocationDao().getCenterLocationId(village, aganwadi,environment);
 
     }
-    public IndiaLocation getLocationFromId(String id){
-        return database.indiaLocationDao().getLocationFromId(id);
+    public IndiaLocation getLocationFromId(String id, int environment){
+        return database.indiaLocationDao().getLocationFromId(id,environment);
 
     }
 

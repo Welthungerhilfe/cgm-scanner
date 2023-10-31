@@ -288,7 +288,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         editName.setText(person.getFullName());
         if(person.getCenter_location_id()!=null){
-            IndiaLocation indiaLocation = indiaLocationRepository.getLocationFromId(person.getCenter_location_id());
+            IndiaLocation indiaLocation = indiaLocationRepository.getLocationFromId(person.getCenter_location_id(),session.getEnvironment());
             editArea.setText(indiaLocation.getVillage_full_name());
             editCenter.setText(indiaLocation.getAganwadi());
         }
@@ -329,7 +329,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         if(village==null){
             return;
         }
-        IndiaLocation indiaLocation = indiaLocationRepository.getVillageObject(village.toUpperCase(Locale.ENGLISH));
+        IndiaLocation indiaLocation = indiaLocationRepository.getVillageObject(village.toUpperCase(Locale.ENGLISH),session.getEnvironment());
 
         if(indiaLocation != null){
             editArea.setText(indiaLocation.getVillage_full_name());
@@ -679,7 +679,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         }
         else{
             editCenter.setText(data);
-            IndiaLocation indiaLocation = indiaLocationRepository.getCenterLocationId(area,data);
+            IndiaLocation indiaLocation = indiaLocationRepository.getCenterLocationId(area,data,session.getEnvironment());
             center_location_id = indiaLocation.getId();
             location_id = indiaLocation.getLocation_id();
             if(data!=null){

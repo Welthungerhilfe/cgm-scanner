@@ -22,6 +22,8 @@ public class IndiaLocation {
 
     private String location_id;
 
+    private int environment;
+
     public String getId() {
         return id;
     }
@@ -60,5 +62,13 @@ public class IndiaLocation {
 
     public void setLocation_id(String location_id) {
         this.location_id = location_id;
+    }
+
+    public int getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(int environment) {
+        this.environment = environment;
     }
 }

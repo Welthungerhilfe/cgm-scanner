@@ -1932,11 +1932,23 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         @Override
                         public void onNext(@NonNull Root root) {
                             LogFileUtils.logInfo(TAG, "Sync location successfully fetched " + root.country);
+
+                            switch (session.getEnvironment()){
+                                case AppConstants.ENV_DEMO_QA:
+                                    if(session.getDemoQaVersionLocation() >= root.getVersion()){
+                                        onThreadChange(-1);
+                                        return;
+                                    }
+                                    session.setLocationDemoQAVersion(root.version);
+                                case AppConstants.ENV_IN_BMZ:
                                     if(session.getIndiaVersionLocation() >= root.getVersion()){
                                         onThreadChange(-1);
                                         return;
                                     }
                                     session.setLocationIndiaVersion(root.version);
+
+                            }
+
                                 for (int i = 0; i < root.location_json.size(); i++) {
                                     Log.i(TAG,"this is inside address onnext A "+i);
                                     for (int j = 0; j < root.location_json.get(i).dISTRICT.size(); j++) {
@@ -1957,6 +1969,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                                     indiaLocation.setAganwadi(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).location_name);
                                                     indiaLocation.setVillageName(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).location_name);
                                                     indiaLocation.setLocation_id(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).id);
+                                                    indiaLocation.setEnvironment(session.getEnvironment());
                                                     indiaLocationRepository.insertIndiaLocation(indiaLocation);
 
                                                 }

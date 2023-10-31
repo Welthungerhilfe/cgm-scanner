@@ -59,6 +59,8 @@ public class SessionManager {
 
     private final String KEY_LOCATION_INDIA_VERSION= "key_location_india_version";
 
+    private final String KEY_LOCATION_DEMO_QA_VERSION= "key_location_demo_qa_version";
+
     private final String KEY_LOCATLITY= "key_locality";
 
 
@@ -330,6 +332,15 @@ public class SessionManager {
 
     public int getIndiaVersionLocation() {
         return pref.getInt(KEY_LOCATION_INDIA_VERSION,0);
+    }
+
+    public void setLocationDemoQAVersion(int environment) {
+        editor.putInt(KEY_LOCATION_DEMO_QA_VERSION, environment);
+        editor.commit();
+    }
+
+    public int getDemoQaVersionLocation() {
+        return pref.getInt(KEY_LOCATION_DEMO_QA_VERSION,0);
     }
 
     public void setLocality(String locality){
