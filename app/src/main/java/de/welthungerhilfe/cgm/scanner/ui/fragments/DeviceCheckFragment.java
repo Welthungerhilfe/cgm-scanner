@@ -378,7 +378,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
 
             for (int i = 2; i < calibrations.size(); i++) {
                 SizeF calibration = calibrations.get(i);
-                LogFileUtils.logInfo(TAG,"this is device check fragment height & weight "+calibration.getHeight()+" "+calibration.getWidth()+" "+tolerance);
+            //    LogFileUtils.logInfo(TAG,"this is device check fragment height & weight "+calibration.getHeight()+" "+calibration.getWidth()+" "+tolerance);
 
                 float dx = Math.abs(calibration.getWidth() - CALIBRATION_IMAGE_SIZE.getWidth());
                 float dy = Math.abs(calibration.getHeight() - CALIBRATION_IMAGE_SIZE.getHeight());

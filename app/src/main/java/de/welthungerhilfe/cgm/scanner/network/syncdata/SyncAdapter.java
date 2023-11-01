@@ -680,17 +680,21 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
     public void getSyncPersons() {
         try {
+            LogFileUtils.logInfo(TAG,"get Syncing persons works step 1");
             if ((System.currentTimeMillis() - session.getLastPersonSyncTimestamp()) < 10000L) {
                 return;
             }
+            LogFileUtils.logInfo(TAG,"get Syncing persons works step 2");
 
             String lastPersonSyncTime = null;
             if (session.getLastPersonSyncTimestamp() > 0) {
                 lastPersonSyncTime = DataFormat.convertMilliSeconsToServerDate(session.getLastPersonSyncTimestamp());
-                LogFileUtils.logInfo(TAG, "Syncing persons, the last sync was " + lastPersonSyncTime);
+                LogFileUtils.logInfo(TAG, "get Syncing persons, the last sync was " + lastPersonSyncTime);
             } else {
-                LogFileUtils.logInfo(TAG, "Syncing persons for the first time");
+                LogFileUtils.logInfo(TAG, "get Syncing persons for the first time");
             }
+            LogFileUtils.logInfo(TAG,"get Syncing persons works step 3");
+
             boolean belongs_to_rst;
             if(session.getSelectedMode()==AppConstants.CGM_MODE){
                 belongs_to_rst = false;
@@ -698,7 +702,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             else {
                 belongs_to_rst = true;
             }
-            LogFileUtils.logInfo(TAG, "Syncing persons "+belongs_to_rst);
+            LogFileUtils.logInfo(TAG, "get Syncing persons "+belongs_to_rst);
 
             onThreadChange(1);
             retrofit.create(ApiService.class).getSyncPersons(session.getAuthTokenWithBearer(), lastPersonSyncTime, belongs_to_rst)
@@ -1940,12 +1944,14 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                         return;
                                     }
                                     session.setLocationDemoQAVersion(root.version);
+                                    break;
                                 case AppConstants.ENV_IN_BMZ:
                                     if(session.getIndiaVersionLocation() >= root.getVersion()){
                                         onThreadChange(-1);
                                         return;
                                     }
                                     session.setLocationIndiaVersion(root.version);
+                                    break;
 
                             }
 

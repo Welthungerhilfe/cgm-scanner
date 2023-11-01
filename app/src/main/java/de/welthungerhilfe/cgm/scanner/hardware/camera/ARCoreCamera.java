@@ -167,11 +167,11 @@ public class ARCoreCamera extends AbstractARCamera {
 
       //get calibration from ARCore
       CameraIntrinsics intrinsics = frame.getCamera().getImageIntrinsics();
-      LogFileUtils.logInfo("ARCORE","arcore step1 intrinsics value "+intrinsics);
+      /*LogFileUtils.logInfo("ARCORE","arcore step1 intrinsics value "+intrinsics);
       LogFileUtils.logInfo("ARCORE","arcore step1 focalLength value "+intrinsics.getFocalLength()[0]+" "+intrinsics.getFocalLength()[1]);
       LogFileUtils.logInfo("ARCORE","arcore step1 imagedimension value "+intrinsics.getImageDimensions()[0]+" "+intrinsics.getImageDimensions()[1]);
       LogFileUtils.logInfo("ARCORE","arcore step1 principalpoint value "+intrinsics.getPrincipalPoint()[0]+" "+intrinsics.getPrincipalPoint()[0]);
-
+*/
       mColorCameraIntrinsic[0] = intrinsics.getFocalLength()[0] / (float)intrinsics.getImageDimensions()[0];
       mColorCameraIntrinsic[1] = intrinsics.getFocalLength()[1] / (float)intrinsics.getImageDimensions()[1];
       mColorCameraIntrinsic[2] = intrinsics.getPrincipalPoint()[0] / (float)intrinsics.getImageDimensions()[0];

@@ -72,6 +72,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
+import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.location.india.IndiaLocation;
@@ -276,6 +277,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void initUI() {
+        if (BuildConfig.DEBUG) {
+            editArea.setText("debug");
+            editCenter.setText("debug");
+
+        }
         if (person == null) {
             firebaseAnalytics.logEvent(FirebaseService.CREATE_PERSON_START, null);
             setLocation(((CreateDataActivity) getActivity()).location);
@@ -287,7 +293,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         txtDate.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, person.getCreated()));
 
         editName.setText(person.getFullName());
-        if(person.getCenter_location_id()!=null){
+        if(person.getCenter_location_id()!=null && !BuildConfig.DEBUG){
             IndiaLocation indiaLocation = indiaLocationRepository.getLocationFromId(person.getCenter_location_id(),session.getEnvironment());
             editArea.setText(indiaLocation.getVillage_full_name());
             editCenter.setText(indiaLocation.getAganwadi());
@@ -303,6 +309,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 radioMale.setChecked(true);
             }
         }
+
 
         checkAge.setChecked(person.isAgeEstimated());
     }
@@ -461,6 +468,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setSynced(false);
                     person.setCenter_location_id(center_location_id);
                     person.setLocation_id(location_id);
+                    if (BuildConfig.DEBUG) {
+                        person.setCenter_location_id("1111");
+                        person.setLocation_id("115566");
+                    }
                     viewModel.savePerson(person);
                 }
 

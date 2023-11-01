@@ -352,4 +352,10 @@ public class SessionManager {
         return pref.getString(KEY_LOCATLITY, null);
     }
 
+
+    public void clearSharedpreference(){
+        editor.clear();
+        editor.commit();
+    }
+
 }
