@@ -28,6 +28,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.DialogFragmentLocationBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.location.india.IndiaLocation;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.IndiaLocationRepository;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.LocationAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.PersonalDataFragment;
@@ -104,6 +105,12 @@ public class LocationDialogFragment extends DialogFragment implements LocationAd
         if(area == null){
             locations = (ArrayList<String>) indiaLocationRepository.getVillage(sessionManager.getEnvironment());
             dialogFragmentLocationBinding.searchEditText.setHint("Search village");
+            filterLocations("");
+            String str="";
+            for(int i=0; i < locations.size(); i++){
+                str = str+locations.get(i)+", ";
+            }
+            LogFileUtils.logInfo("LocationDialogfragment","this is list of location village "+str);
         }else{
             locations = (ArrayList<String>) indiaLocationRepository.getAganwadi(area,sessionManager.getEnvironment());
             dialogFragmentLocationBinding.searchEditText.setHint("Select anganwadi");

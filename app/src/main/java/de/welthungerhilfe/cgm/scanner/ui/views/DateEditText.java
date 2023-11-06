@@ -64,7 +64,7 @@ public class DateEditText extends TextInputEditText {
 
         //reset on first selection
         if (focused) {
-            fillFormat();
+           // fillFormat();
         }
     }
 
