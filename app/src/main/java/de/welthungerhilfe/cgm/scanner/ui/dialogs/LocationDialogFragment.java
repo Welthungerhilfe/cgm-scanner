@@ -105,12 +105,12 @@ public class LocationDialogFragment extends DialogFragment implements LocationAd
         if(area == null){
             locations = (ArrayList<String>) indiaLocationRepository.getVillage(sessionManager.getEnvironment());
             dialogFragmentLocationBinding.searchEditText.setHint("Search village");
-            filterLocations("");
+           /* filterLocations("");
             String str="";
             for(int i=0; i < locations.size(); i++){
                 str = str+locations.get(i)+", ";
             }
-            LogFileUtils.logInfo("LocationDialogfragment","this is list of location village "+str);
+            LogFileUtils.logInfo("LocationDialogfragment","this is list of location village "+str);*/
         }else{
             locations = (ArrayList<String>) indiaLocationRepository.getAganwadi(area,sessionManager.getEnvironment());
             dialogFragmentLocationBinding.searchEditText.setHint("Select anganwadi");
