@@ -1956,28 +1956,29 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             }
 
                                 for (int i = 0; i < root.location_json.size(); i++) {
-                                    Log.i(TAG,"this is inside address onnext A "+i);
+                                    Log.i(TAG,"this is inside address onnext A "+root.location_json.get(i).location_name);
                                     for (int j = 0; j < root.location_json.get(i).dISTRICT.size(); j++) {
-                                        Log.i(TAG,"this is inside address onnext B "+i+" "+j);
+                                        Log.i(TAG,"this is inside address onnext B "+root.location_json.get(i).location_name+" "+j);
 
                                         for (int k = 0; k < root.location_json.get(i).dISTRICT.get(j).bLOCK.size(); k++) {
 
                                             Log.i(TAG,"this is inside address onnext C "+i+" "+j+" "+k);
 
                                             for (int l = 0; l < root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.size(); l++) {
+                                                if(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER != null) {
+                                                    for (int m = 0; m < root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.size(); m++) {
+                                                        Log.i(TAG, "this is values of location " + root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).tree_string + " " + root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).location_name);
 
-                                                for (int m = 0; m < root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.size(); m++) {
-                                                    Log.i(TAG, "this is values of location " + root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).tree_string+" "+root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).location_name);
+                                                        IndiaLocation indiaLocation = new IndiaLocation();
+                                                        indiaLocation.setId(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).id);
+                                                        indiaLocation.setVillage_full_name(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).tree_string);
+                                                        indiaLocation.setAganwadi(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).location_name);
+                                                        indiaLocation.setVillageName(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).location_name);
+                                                        indiaLocation.setLocation_id(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).id);
+                                                        indiaLocation.setEnvironment(session.getEnvironment());
+                                                        indiaLocationRepository.insertIndiaLocation(indiaLocation);
 
-                                                    IndiaLocation indiaLocation = new IndiaLocation();
-                                                    indiaLocation.setId(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).id);
-                                                    indiaLocation.setVillage_full_name(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).tree_string);
-                                                    indiaLocation.setAganwadi(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).location_name);
-                                                    indiaLocation.setVillageName(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).location_name);
-                                                    indiaLocation.setLocation_id(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).id);
-                                                    indiaLocation.setEnvironment(session.getEnvironment());
-                                                    indiaLocationRepository.insertIndiaLocation(indiaLocation);
-
+                                                    }
                                                 }
                                             }
                                         }
