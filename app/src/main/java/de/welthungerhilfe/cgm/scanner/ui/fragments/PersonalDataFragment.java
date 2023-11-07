@@ -317,6 +317,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void setLocation(Loc loc) {
         if (loc != null) {
             String address = loc.getAddress();
+
+            Log.i(TAG,"this is value locality "+loc.getLocality());
+
+
             setVillageDefault(loc.getLocality());
            // if ((location == null) && (address != null) && (address.length() > 0)) {
                 if ((address != null) && (address.length() > 0)) {
@@ -325,6 +329,15 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     Editable oldAddress = editLocation.getText();
                     if ((oldAddress != null) && (oldAddress.toString().compareTo(address) != 0)) {
                         editLocation.setText(address);
+                        if(person==null){
+                            Log.i(TAG,"this is value locality "+loc.getLocality());
+                        }
+                        else{
+                            if(person.getCenter_location_id()==null){
+
+                            }
+                        }
+
                     }
                 }
                 location = loc;
@@ -333,10 +346,15 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void setVillageDefault(String village){
+        Log.i(TAG,"this is value locality "+village);
+
         if(village==null){
             return;
         }
         IndiaLocation indiaLocation = indiaLocationRepository.getVillageObject(village.toUpperCase(Locale.ENGLISH),session.getEnvironment());
+       if(indiaLocation!=null) {
+           Log.i(TAG, "this is value locality " + indiaLocation);
+       }
 
         if(indiaLocation != null){
             editArea.setText(indiaLocation.getVillage_full_name());

@@ -109,7 +109,7 @@ public class LocationDetectActivity extends BaseActivity implements OnMapReadyCa
         location = (Loc) getIntent().getSerializableExtra(EXTRA_LOCATION);
 
         if (location != null)
-            activityLocationDetectBinding.editAddress.setText(location.getAddress());
+            activityLocationDetectBinding.editAddress.setText(location.getAddress()+" L: "+location.getLocality());
         else
             location = new Loc();
 
@@ -241,6 +241,7 @@ public class LocationDetectActivity extends BaseActivity implements OnMapReadyCa
         location.setLatitude(l.latitude);
         location.setLongitude(l.longitude);
 
+        getAddressFromLocation(l);
         getAddressFromLocation(l);
     }
 
