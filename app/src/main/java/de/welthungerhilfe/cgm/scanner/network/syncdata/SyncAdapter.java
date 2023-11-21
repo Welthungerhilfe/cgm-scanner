@@ -1667,11 +1667,11 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     public void postRemainingData() {
 
         lastSyncDailyReport = session.getLastSyncDailyReport();
-        Log.i(TAG,"this is remaining data 1 "+lastSyncDailyReport);
-        Log.i(TAG,"this is remaining data 1.5 "+(System.currentTimeMillis() - lastSyncDailyReport));
-        if((System.currentTimeMillis() - lastSyncDailyReport) > 86400000 ) {
+        LogFileUtils.logInfo(TAG,"this is remaining data 1 "+lastSyncDailyReport);
+        LogFileUtils.logInfo(TAG,"this is remaining data 1.5 "+(System.currentTimeMillis() - lastSyncDailyReport));
+        if((System.currentTimeMillis() - lastSyncDailyReport) > 1000 ) {
             session.setLastSyncDailyReport(System.currentTimeMillis());
-            Log.i(TAG,"this is remaining data 2 "+session.getLastSyncDailyReport());
+            LogFileUtils.logInfo(TAG,"this is remaining data 2 "+session.getLastSyncDailyReport());
 
             try {
                 Gson gson = new GsonBuilder()
@@ -1689,7 +1689,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 remainingData.setError("---");
 
                 RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(remainingData))).toString());
-                Log.i(TAG,"this is remaining data 3 "+(new JSONObject(gson.toJson(remainingData))).toString());
+                LogFileUtils.logInfo(TAG,"this is remaining data 3 "+(new JSONObject(gson.toJson(remainingData))).toString());
 
                 onThreadChange(1);
                 LogFileUtils.logInfo(TAG, "posting remaining data ");
@@ -1715,7 +1715,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             @Override
                             public void onError(@NonNull Throwable e) {
                                 LogFileUtils.logError(TAG, "RemainingData posting failed " + e.getMessage());
-                                Log.i(TAG,"this is remaining data 5 error "+e.getMessage());
+                                LogFileUtils.logInfo(TAG,"this is remaining data 5 error "+e.getMessage());
 
                                 try {
                                     LogFileUtils.logError(TAG, "RemainingData request body " + new JSONObject(gson.toJson(remainingData)));
