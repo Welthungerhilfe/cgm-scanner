@@ -6,13 +6,13 @@ public class RemainingData {
     @Expose
     String device_id;
     @Expose
-    int artifact;
+    String artifact;
     @Expose
-    int measure;
+    String measure;
     @Expose
-    int person;
+    String person;
     @Expose
-    int consent;
+    String consent;
     @Expose
     String version;
     @Expose
@@ -20,7 +20,7 @@ public class RemainingData {
     @Expose
     String error;
     @Expose
-    int scan;
+    String scan;
 
 
     public String getDevice_id() {
@@ -31,35 +31,35 @@ public class RemainingData {
         this.device_id = device_id;
     }
 
-    public int getArtifact() {
+    public String getArtifact() {
         return artifact;
     }
 
-    public void setArtifact(int artifact) {
+    public void setArtifact(String artifact) {
         this.artifact = artifact;
     }
 
-    public int getMeasure() {
+    public String getMeasure() {
         return measure;
     }
 
-    public void setMeasure(int measure) {
+    public void setMeasure(String measure) {
         this.measure = measure;
     }
 
-    public int getPerson() {
+    public String getPerson() {
         return person;
     }
 
-    public void setPerson(int person) {
+    public void setPerson(String person) {
         this.person = person;
     }
 
-    public int getConsent() {
+    public String getConsent() {
         return consent;
     }
 
-    public void setConsent(int consent) {
+    public void setConsent(String consent) {
         this.consent = consent;
     }
 
@@ -87,11 +87,11 @@ public class RemainingData {
         this.error = error;
     }
 
-    public int getScan() {
+    public String getScan() {
         return scan;
     }
 
-    public void setScan(int scan) {
+    public void setScan(String scan) {
         this.scan = scan;
     }
 }

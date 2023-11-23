@@ -1678,14 +1678,14 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         .excludeFieldsWithoutExposeAnnotation()
                         .create();
                 RemainingData remainingData = new RemainingData();
-                remainingData.setArtifact((int) fileLogRepository.getArtifactCount());
-                remainingData.setConsent(fileLogRepository.loadConsentFile(session.getEnvironment()).size());
+                remainingData.setArtifact(String.valueOf((int) fileLogRepository.getArtifactCount()));
+                remainingData.setConsent(String.valueOf(fileLogRepository.loadConsentFile(session.getEnvironment()).size()));
                 remainingData.setDevice_id(AppController.getInstance().getAndroidID());
                 remainingData.setUser(session.getUserEmail());
                 remainingData.setVersion(AppController.getInstance().getAppVersion());
-                remainingData.setMeasure(measureRepository.getSyncableMeasure(session.getEnvironment()).size());
-                remainingData.setPerson(personRepository.getSyncablePerson(session.getEnvironment()).size());
-                remainingData.setScan(measureRepository.getSyncableMeasure(session.getEnvironment()).size());
+                remainingData.setMeasure(String.valueOf(measureRepository.getSyncableMeasure(session.getEnvironment()).size()));
+                remainingData.setPerson(String.valueOf(personRepository.getSyncablePerson(session.getEnvironment()).size()));
+                remainingData.setScan(String.valueOf(measureRepository.getSyncableMeasure(session.getEnvironment()).size()));
                 remainingData.setError("---");
 
                 RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(remainingData))).toString());
