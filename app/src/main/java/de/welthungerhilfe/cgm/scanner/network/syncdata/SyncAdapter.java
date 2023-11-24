@@ -1686,6 +1686,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 remainingData.setMeasure(String.valueOf(measureRepository.getSyncableMeasure(session.getEnvironment()).size()));
                 remainingData.setPerson(String.valueOf(personRepository.getSyncablePerson(session.getEnvironment()).size()));
                 remainingData.setScan(String.valueOf(measureRepository.getSyncableMeasure(session.getEnvironment()).size()));
+                remainingData.setApp_auto_detect("--");
+                remainingData.setApp_height("--");
+                remainingData.setApp_light_score("--");
+                remainingData.setApp_pose_Score("--");
+                remainingData.setApp_distance("--");
+                remainingData.setApp_bounding_box("--");
+                remainingData.setApp_orientation("--");
                 remainingData.setError("---");
 
                 RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(remainingData))).toString());
