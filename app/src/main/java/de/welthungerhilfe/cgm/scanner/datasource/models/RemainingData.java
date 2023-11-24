@@ -29,7 +29,7 @@ public class RemainingData {
     @Expose
     String app_light_score;
     @Expose
-    String app_pose_Score;
+    String app_pose_score;
     @Expose
     String app_distance;
     @Expose
@@ -37,6 +37,8 @@ public class RemainingData {
 
     @Expose
     String app_orientation;
+
+
 
 
 
@@ -137,11 +139,11 @@ public class RemainingData {
     }
 
     public String getApp_pose_Score() {
-        return app_pose_Score;
+        return app_pose_score;
     }
 
-    public void setApp_pose_Score(String app_pose_Score) {
-        this.app_pose_Score = app_pose_Score;
+    public void setApp_pose_Score(String app_pose_score) {
+        this.app_pose_score = app_pose_score;
     }
 
     public String getApp_distance() {
