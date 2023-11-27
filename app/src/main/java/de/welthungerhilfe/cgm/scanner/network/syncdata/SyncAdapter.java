@@ -231,17 +231,29 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             synchronized (getLock()) {
                 try {
                   //  postRemainingData();
+                    LogFileUtils.logInfo(TAG,"this is calling processPersonQueue");
                     processPersonQueue();
+                    LogFileUtils.logInfo(TAG,"this is calling processMeasureQueue");
                     processMeasureQueue();
+                    LogFileUtils.logInfo(TAG,"this is calling processDeviceQueue");
                     processDeviceQueue();
+                    LogFileUtils.logInfo(TAG,"this is calling processConsentSheet");
                     processConsentSheet();
+                    LogFileUtils.logInfo(TAG,"this is calling processMeasureResults");
                     processMeasureResults();
+                    LogFileUtils.logInfo(TAG,"this is calling getSyncPersons");
                     getSyncPersons();
+                    LogFileUtils.logInfo(TAG,"this is calling migrateEnvironmentColumns");
                     migrateEnvironmentColumns();
+                    LogFileUtils.logInfo(TAG,"this is calling getWorkflows");
                     getWorkflows();
+                    LogFileUtils.logInfo(TAG,"this is calling postWorkFlowsResult");
                     postWorkFlowsResult();
+                    LogFileUtils.logInfo(TAG,"this is calling postRemainingData");
                     postRemainingData();
+                    LogFileUtils.logInfo(TAG,"this is calling getLocationIndia");
                     getLocationIndia();
+
 
                     session.setSyncTimestamp(currentTimestamp);
                 } catch (Exception e) {
