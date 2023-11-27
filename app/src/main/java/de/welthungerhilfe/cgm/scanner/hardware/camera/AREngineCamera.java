@@ -123,7 +123,7 @@ public class AREngineCamera extends AbstractARCamera {
         Bitmap b = BitmapFactory.decodeStream(mGLSurfaceView.getContext().getAssets().open(CALIBRATION_IMAGE_FILE));
         db.addImage("image", b);
       } catch (Exception e) {
-        LogFileUtils.logException(e);
+        LogFileUtils.logException(e,"ARENGINE CAMERA");
       }
 
       // Set AR configuration

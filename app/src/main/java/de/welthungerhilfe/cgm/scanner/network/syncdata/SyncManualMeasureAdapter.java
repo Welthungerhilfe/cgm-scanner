@@ -124,7 +124,7 @@ public class SyncManualMeasureAdapter {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"syncManualMeasure");
         }
     }
 

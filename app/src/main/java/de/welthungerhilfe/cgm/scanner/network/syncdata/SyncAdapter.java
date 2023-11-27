@@ -245,7 +245,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                     session.setSyncTimestamp(currentTimestamp);
                 } catch (Exception e) {
-                    LogFileUtils.logException(e);
+                    LogFileUtils.logException(e,"doInBackground");
                 }
             }
             LogFileUtils.logInfo(TAG, "end updating");
@@ -258,14 +258,14 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             try {
                 List<Measure> measures = measureRepository.getMeasureWithoutScanResult();
-                LogFileUtils.logInfo(TAG, measures.size() + " scan results to update");
+                LogFileUtils.logInfo(TAG, measures.size() + "this is scan results to update");
 
                 for (Measure measure : measures) {
                     getEstimates(measure);
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
-                LogFileUtils.logException(e);
+                LogFileUtils.logException(e,"processMeasureResult");
             }
 
         }
@@ -273,7 +273,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         private void processPersonQueue() {
             try {
                 List<Person> syncablePersons = personRepository.getSyncablePerson(session.getEnvironment());
-                LogFileUtils.logInfo(TAG, syncablePersons.size() + " persons to sync");
+                LogFileUtils.logInfo(TAG, syncablePersons.size() + "this is persons to sync");
 
                 for (Person person : syncablePersons) {
                     if (person.getServerId() == null || person.getServerId().isEmpty()) {
@@ -284,7 +284,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
-                LogFileUtils.logException(e);
+                LogFileUtils.logException(e,"processPersonQueue");
             }
         }
 
@@ -292,7 +292,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         private void processMeasureQueue() {
             try {
                 List<Measure> syncableMeasures = measureRepository.getSyncableMeasure(session.getEnvironment());
-                LogFileUtils.logInfo(TAG, syncableMeasures.size() + " measures/scans to sync");
+                LogFileUtils.logInfo(TAG, syncableMeasures.size() + "this is measures/scans to sync");
 
                 for (Measure measure : syncableMeasures) {
                     String localPersonId = measure.getPersonId();
@@ -335,7 +335,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
-                LogFileUtils.logException(e);
+                LogFileUtils.logException(e,"processMeasureQueue");
             }
         }
 
@@ -358,7 +358,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
-                LogFileUtils.logException(e);
+                LogFileUtils.logException(e,"processConsentSheet");
             }
         }
 
@@ -376,7 +376,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
-                LogFileUtils.logException(e);
+                LogFileUtils.logException(e,"processDeviceQueue");
             }
         }
     }
@@ -397,7 +397,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             }
             completeScan.setScans(scanList);
 
-            LogFileUtils.logInfo(TAG, "this is posting scan raw data " + (new JSONObject(gson.toJson(completeScan))).toString());
+           // LogFileUtils.logInfo(TAG, "this is posting scan raw data " + (new JSONObject(gson.toJson(completeScan))).toString());
 
             onThreadChange(1);
                 RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(completeScan))).toString());
@@ -415,11 +415,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 if(completeScan==null || completeScan.getScans().size() == 0){
                                     return;
                                 }
-                                try {
-                                    LogFileUtils.logInfo(TAG,"this is value of response complete scan"+  (new JSONObject(gson.toJson(completeScan))).toString());
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
+
                                 for(Scan scan:completeScan.getScans()){
                                     LogFileUtils.logInfo(TAG, "scan " + measure.getId() + " successfully posted");
                                     PostScanResult postScanResult = new PostScanResult();
@@ -459,7 +455,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         });
 
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"postScan");
         }
     }
 
@@ -608,7 +604,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"postPerson");
         }
     }
 
@@ -674,7 +670,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"putPerson");
         }
     }
 
@@ -762,7 +758,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"getSyncPerson");
         }
     }
 
@@ -822,7 +818,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"postmeasure");
         }
     }
 
@@ -881,7 +877,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"putmeasure");
         }
     }
 
@@ -938,7 +934,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"postConsentsheet");
         }
     }
 
@@ -1051,7 +1047,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"getEstimation");
         }
     }
 
@@ -1060,7 +1056,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         try {
             return measureRepository.getMeasureById(measureId).getQrCode();
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"getQRcode");
         }
         return null;
     }
@@ -1144,7 +1140,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     list.get(i).setEnvironment(session.getEnvironment());
                     fileLogRepository.updateFileLog(list.get(i));
                 } catch (Exception e) {
-                    LogFileUtils.logException(e);
+                    LogFileUtils.logException(e,"getfileLogsLoaded");
                 }
             }
             loadQueueFileLogs();
@@ -1152,7 +1148,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void getWorkflows() {
-
+        LogFileUtils.logInfo(TAG, "this is Workflow lists sync ");
         for (String workflow : AppConstants.workflowsList) {
             String[] data = workflow.split("-");
             if (workflowRepository.getWorkFlowId(data[0], data[1], session.getEnvironment()) == null) {
@@ -1202,6 +1198,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void postWorkFlowsResult() {
+        LogFileUtils.logInfo(TAG, "this is post Workflow result ");
+
         if (System.currentTimeMillis() - lastSyncResultTimeStamp < 15000) {
             return;
         }
@@ -1216,6 +1214,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void postAutoDetectResult() {
+        LogFileUtils.logInfo(TAG, "this is postAutoDetectResult sync ");
+
         try {
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
@@ -1291,11 +1291,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"postAutoDetect");
         }
     }
 
     public void postAppHeightResult() {
+        LogFileUtils.logInfo(TAG, "this is postAppHeightResult sync ");
+
         try {
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
@@ -1371,12 +1373,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"postAppheight");
         }
     }
 
 
     public void postAppPoseScoreResult() {
+        LogFileUtils.logInfo(TAG, "this is postAppPoseScoreResult sync ");
         try {
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
@@ -1458,7 +1461,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"postAppPoseScore");
         }
     }
 
@@ -1486,7 +1489,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             full = "{\"body_pose_score\":\"" + poseScore + "\"," + key_points_coordinate.substring(0, key_points_coordinate.length() - 1) + "],"
                     + key_points_prob.substring(0, key_points_prob.length() - 1) + "]}";
         }catch (Exception e){
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"formatposecoordinates");
 
         }
         return full;
@@ -1494,6 +1497,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void postChildLightScore()  {
+        LogFileUtils.logInfo(TAG, "this is postChildLightScore sync ");
+
         try {
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
@@ -1574,12 +1579,14 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"postChildLightScore");
         }
     }
 
 
     public void postChildDistance() {
+        LogFileUtils.logInfo(TAG, "this is postChildDistance sync ");
+
         try {
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
@@ -1660,7 +1667,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"postChildDistance");
         }
     }
 
@@ -1742,7 +1749,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             }
                         });
             } catch (Exception e) {
-                LogFileUtils.logException(e);
+                LogFileUtils.logException(e,"postRemainingData");
             }
         }
     }
@@ -1755,6 +1762,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void postAppBoundingBoxResult() {
+        LogFileUtils.logInfo(TAG, "this is postAppBoundingBoxResult sync ");
+
         try {
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
@@ -1835,11 +1844,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"postBoundingBox");
         }
     }
 
     public void postAppOrientationResult() {
+        LogFileUtils.logInfo(TAG, "this is postAppOrientationResult sync ");
+
         try {
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
@@ -1920,11 +1931,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"postAppOrientation");
         }
     }
 
     public void getLocationIndia() {
+        LogFileUtils.logInfo(TAG, "this is getLocationIndia sync ");
+
         try {
 
 
@@ -2012,7 +2025,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     });
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"getLocationIndia");
         }
     }
 

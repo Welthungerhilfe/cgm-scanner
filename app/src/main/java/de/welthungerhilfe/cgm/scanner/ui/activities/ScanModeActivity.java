@@ -300,7 +300,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            LogFileUtils.logException(throwable);
+            LogFileUtils.logException(throwable,"Scanemode oncreate");
             Crashes.trackError(throwable);
             finish();
         });
@@ -744,12 +744,12 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                 onProcessArtifact(artifactFile, ArtifactType.CALIBRATION, 0,0,null,0,0,null,null);
 
                             } catch (Exception e) {
-                                LogFileUtils.logException(e);
+                                LogFileUtils.logException(e,"scanemode runnablethread");
                             }
                         }
                     }
                 } catch (Exception e) {
-                    LogFileUtils.logException(e);
+                    LogFileUtils.logException(e,"scanemode runnablethread1 ");
                 }
 
                 onThreadChange(-1);
@@ -819,7 +819,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         }
                     }
                 } catch (Exception e) {
-                    LogFileUtils.logException(e);
+                    LogFileUtils.logException(e,"OnDepthDataReceived");
                 }
 
                 onThreadChange(-1);

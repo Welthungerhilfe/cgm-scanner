@@ -218,7 +218,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                     Runnable worker = new UploadThread(list.get(i));
                     executor.execute(worker);
                 } catch (Exception e) {
-                    LogFileUtils.logException(e);
+                    LogFileUtils.logException(e,"onFileLogsLoaded");
                     remainingCount--;
                 }
             }
@@ -251,7 +251,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
                     try {
                         lock.wait();
                     } catch (InterruptedException e) {
-                        LogFileUtils.logException(e);
+                        LogFileUtils.logException(e, "uploadservice uploadthread");
                     }
                 }
             }
@@ -318,14 +318,14 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
             inputStream.close();
             log.setCreateDate(AppController.getInstance().getUniversalTimestamp());
         } catch (FileNotFoundException e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"uploadservice filenotfound");
 
             log.setDeleted(true);
             log.setStatus(FILE_NOT_FOUND);
             updateFileLog(log);
 
         } catch (Exception e) {
-            LogFileUtils.logException(e);
+            LogFileUtils.logException(e,"uploadservice execption");
 
             log.setStatus(UPLOAD_ERROR);
             updateFileLog(log);

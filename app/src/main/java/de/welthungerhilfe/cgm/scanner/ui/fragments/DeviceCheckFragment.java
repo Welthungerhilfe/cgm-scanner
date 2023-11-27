@@ -526,7 +526,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                                 }
                             });
                 } catch (Exception e) {
-                    LogFileUtils.logException(e);
+                    LogFileUtils.logException(e,"DeviceCheck");
                     setTestResult(fragmentDeviceCheckBinding.test4, R.string.device_check_failed, TestView.TestState.ERROR);
                     addIssue(IssueType.BACKEND_ERROR);
                     updateNextButton();

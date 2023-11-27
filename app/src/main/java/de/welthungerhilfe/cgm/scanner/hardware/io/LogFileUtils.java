@@ -63,8 +63,8 @@ public class LogFileUtils {
         startAsyncToWrite(message);
     }
 
-    public static void logException(Throwable exception) {
-        String text = DataFormat.convertMilliSeconsToServerDate(System.currentTimeMillis()) + " :Exception-> " + Log.getStackTraceString(exception);
+    public static void logException(Throwable exception,String title) {
+        String text = DataFormat.convertMilliSeconsToServerDate(System.currentTimeMillis()) + " :Exception-> "+title+": " + Log.getStackTraceString(exception);
         startAsyncToWrite(text);
     }
 

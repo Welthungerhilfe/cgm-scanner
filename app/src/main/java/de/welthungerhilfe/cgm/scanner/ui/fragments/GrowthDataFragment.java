@@ -423,7 +423,7 @@ public class GrowthDataFragment extends Fragment implements IFillFormatter {
                     }
                 }
             } catch (Exception e) {
-                LogFileUtils.logException(e);
+                LogFileUtils.logException(e,"Growth data");
             }
         }
         if (chartType != ZscoreUtils.ChartType.HEIGHT_FOR_AGE) {
