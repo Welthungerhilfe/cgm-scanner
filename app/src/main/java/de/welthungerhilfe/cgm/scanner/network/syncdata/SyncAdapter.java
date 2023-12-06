@@ -1979,16 +1979,17 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         @Override
                         public void onNext(@NonNull Root root) {
                             LogFileUtils.logInfo(TAG, "Sync location successfully fetched " + root.country);
-                            onThreadChange(-1,"LocationIndia");
                             switch (session.getEnvironment()){
                                 case AppConstants.ENV_DEMO_QA:
                                     if(session.getDemoQaVersionLocation() >= root.getVersion()){
+                                        onThreadChange(-1,"LocationIndia");
                                         return;
                                     }
                                     session.setLocationDemoQAVersion(root.version);
                                     break;
                                 case AppConstants.ENV_IN_BMZ:
                                     if(session.getIndiaVersionLocation() >= root.getVersion()){
+                                        onThreadChange(-1,"LocationIndia");
                                         return;
                                     }
                                     session.setLocationIndiaVersion(root.version);
@@ -2025,6 +2026,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                         }
                                     }
                                 }
+                            onThreadChange(-1,"LocationIndia");
 
 
 
