@@ -183,6 +183,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         synchronized (activeThreads) {
             if (activeThreads > 0) {
                 LogFileUtils.logInfo(TAG,"Start syncing activatedthread "+activeThreads);
+
                 return;
             }
         }
@@ -262,7 +263,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             }
             LogFileUtils.logInfo(TAG, "end updating");
             syncTask = null;
-            onThreadChange(0);
+            onThreadChange(0,"SyncTask");
             return null;
         }
 
@@ -411,7 +412,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
            // LogFileUtils.logInfo(TAG, "this is posting scan raw data " + (new JSONObject(gson.toJson(completeScan))).toString());
 
-            onThreadChange(1);
+            onThreadChange(1,"Post Scan");
                 RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(completeScan))).toString());
                 retrofit.create(ApiService.class).postScans(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -446,7 +447,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 updated = true;
                                 updateDelay = 0;
                                 measureRepository.updateMeasure(measure);
-                                onThreadChange(-1);
+                                onThreadChange(-1,"Post Scan");
                             }
 
                             @Override
@@ -457,7 +458,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                     error401();
                                 }
 
-                                onThreadChange(-1);
+                                onThreadChange(-1,"Post Scan");
                             }
 
                             @Override
@@ -559,7 +560,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(person1))).toString());
 
-            onThreadChange(1);
+            onThreadChange(1,"post person");
             LogFileUtils.logInfo(TAG, "posting person " + person1.getQrcode());
             retrofit.create(ApiService.class).postPerson(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -593,7 +594,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             personRepository.updatePerson(person);
                             updated = true;
                             updateDelay = 0;
-                            onThreadChange(-1);
+                            onThreadChange(-1,"post person");
                         }
 
                         @Override
@@ -607,7 +608,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
                             }
-                            onThreadChange(-1);
+                            onThreadChange(-1,"post person");
                         }
 
                         @Override
@@ -639,7 +640,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(putPerson))).toString());
 
-            onThreadChange(1);
+            onThreadChange(1,"put person");
             LogFileUtils.logInfo(TAG, "putting person " + person1.getQrcode());
             retrofit.create(ApiService.class).putPerson(session.getAuthTokenWithBearer(), body, person1.getServerId()).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -663,7 +664,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             personRepository.updatePerson(person);
                             updated = true;
                             updateDelay = 0;
-                            onThreadChange(-1);
+                            onThreadChange(-1,"put person");
                         }
 
                         @Override
@@ -673,7 +674,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
                             }
-                            onThreadChange(-1);
+                            onThreadChange(-1,"put person");
                         }
 
                         @Override
@@ -712,7 +713,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             }
             LogFileUtils.logInfo(TAG, "get Syncing persons "+belongs_to_rst);
 
-            onThreadChange(1);
+            onThreadChange(1,"sync person");
             retrofit.create(ApiService.class).getSyncPersons(session.getAuthTokenWithBearer(), lastPersonSyncTime, belongs_to_rst)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<SyncPersonsResponse>() {
@@ -751,7 +752,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             }
                             updated = true;
                             updateDelay = 0;
-                            onThreadChange(-1);
+                            onThreadChange(-1,"sync person");
                         }
 
                         @Override
@@ -761,7 +762,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
                             }
-                            onThreadChange(-1);
+                            onThreadChange(-1,"sync person");
                         }
 
                         @Override
@@ -785,7 +786,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(measure))).toString());
 
-            onThreadChange(1);
+            onThreadChange(1,"post measure");
             LogFileUtils.logInfo(TAG, "posting measure " + measure.getId());
             retrofit.create(ApiService.class).postMeasure(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -811,7 +812,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             measureRepository.updateMeasure(measure1);
                             updated = true;
                             updateDelay = 0;
-                            onThreadChange(-1);
+                            onThreadChange(-1,"post measure");
                         }
 
                         @Override
@@ -821,7 +822,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
                             }
-                            onThreadChange(-1);
+                            onThreadChange(-1,"post measure");
                         }
 
                         @Override
@@ -844,7 +845,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             measure.setPersonServerKey(null);
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(measure))).toString());
 
-            onThreadChange(1);
+            onThreadChange(1,"put measure");
             LogFileUtils.logInfo(TAG, "putting measure " + measure.getId());
             retrofit.create(ApiService.class).putMeasure(session.getAuthTokenWithBearer(), body, measure.getMeasureServerKey()).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -870,7 +871,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             measureRepository.updateMeasure(measure1);
                             updated = true;
                             updateDelay = 0;
-                            onThreadChange(-1);
+                            onThreadChange(-1,"put measure");
                         }
 
                         @Override
@@ -880,7 +881,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
                             }
-                            onThreadChange(-1);
+                            onThreadChange(-1,"put measure");
                         }
 
                         @Override
@@ -905,7 +906,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(consent))).toString());
 
-            onThreadChange(1);
+            onThreadChange(1,"post consent sheet");
             LogFileUtils.logInfo(TAG, "posting consent " + fileLog.getPath());
             retrofit.create(ApiService.class).postConsent(session.getAuthTokenWithBearer(), body, personId).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -922,7 +923,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             fileLogRepository.updateFileLog(fileLog);
                             updated = true;
                             updateDelay = 0;
-                            onThreadChange(-1);
+
+                            onThreadChange(-1,"post consent sheet");
                         }
 
                         @Override
@@ -937,7 +939,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
                             }
-                            onThreadChange(-1);
+                            onThreadChange(-1,"post consent sheet");
                         }
 
                         @Override
@@ -953,7 +955,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     public void getEstimates(Measure measure) {
         try {
 
-            onThreadChange(1);
+            onThreadChange(1,"Get Estimate");
             LogFileUtils.logInfo(TAG, "getting estimate for scan result " + measure);
             List<String> postScanResultList = postScanResultrepository.getScanIdsFromMeasureId(measure.getId());
 
@@ -1040,7 +1042,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             }
                             updated = true;
                             updateDelay = Math.min(60 * 1000, updateDelay);
-                            onThreadChange(-1);
+                            onThreadChange(-1,"Get Estimate");
                         }
 
                         @Override
@@ -1050,7 +1052,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
                             }
-                            onThreadChange(-1);
+                            onThreadChange(-1,"Get Estimate");
                         }
 
                         @Override
@@ -1099,12 +1101,20 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         }
     }
 
-    private void onThreadChange(int diff) {
+    private void onThreadChange(int diff, String name) {
         int count;
+        if(diff==1) {
+            LogFileUtils.logInfo(TAG, "this is value of thread start " + name);
+        }
+        if(diff == -1){
+            LogFileUtils.logInfo(TAG, "this is value of thread end " + name);
+
+        }
         synchronized (activeThreads) {
             activeThreads += diff;
             count = activeThreads;
         }
+        LogFileUtils.logInfo(TAG, "this is value of thread final " + activeThreads+" "+updated+" "+count);
 
         if (updated && (count == 0)) {
             new Thread(() -> {
@@ -1115,6 +1125,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             }).start();
         }
     }
+
 
     public void migrateEnvironmentColumns() {
         List<Person> syncablePersons = personRepository.getSyncablePerson(AppConstants.ENV_UNKNOWN);
@@ -1264,7 +1275,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             resultsData.setResults(resultList);
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
 
-            onThreadChange(1);
+            onThreadChange(1,"Post auto detect");
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<ResultsData>() {
@@ -1283,7 +1294,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             }
                             updated = true;
                             updateDelay = 0;
-                            onThreadChange(-1);
+                            onThreadChange(-1,"Post auto detect");
                         }
 
                         @Override
@@ -1294,7 +1305,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
                             }
-                            onThreadChange(-1);
+                            onThreadChange(-1,"Post auto detect");
                         }
 
                         @Override
@@ -1345,7 +1356,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
 
-            onThreadChange(1);
+            onThreadChange(1,"Post app Height");
             LogFileUtils.logInfo(TAG, "posting appHeight workflows... ");
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -1365,7 +1376,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             }
                             updated = true;
                             updateDelay = 0;
-                            onThreadChange(-1);
+                            onThreadChange(-1,"Post app Height");
                         }
 
                         @Override
@@ -1376,7 +1387,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
                             }
-                            onThreadChange(-1);
+                            onThreadChange(-1,"Post app Height");
                         }
 
                         @Override
@@ -1433,7 +1444,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
 
-            onThreadChange(1);
+            onThreadChange(1,"postAppPoseScoreResult");
             LogFileUtils.logInfo(TAG, "posting appPoseScore workflows... ");
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -1453,7 +1464,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             }
                             updated = true;
                             updateDelay = 0;
-                            onThreadChange(-1);
+                            onThreadChange(-1,"postAppPoseScoreResult");
                         }
 
                         @Override
@@ -1464,7 +1475,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
                             }
-                            onThreadChange(-1);
+                            onThreadChange(-1,"postAppPoseScoreResult");
                         }
 
                         @Override
@@ -1482,7 +1493,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
         try {
         String[] result = poseCoordinates.split(" ");
-        int i,j;
+        int i;
         String key_points_coordinate = "\"key_points_coordinate\":[";
         String key_points_prob = "\"key_points_prob\":[";
         for(i=0 ; i<result.length;i++){
@@ -1551,7 +1562,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
             Log.i(TAG,"this is light score body "+(new JSONObject(gson.toJson(resultsData))).toString());
-            onThreadChange(1);
+            onThreadChange(1,"postChildLightScore");
             LogFileUtils.logInfo(TAG, "posting light score workflows... ");
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -1571,7 +1582,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             }
                             updated = true;
                             updateDelay = 0;
-                            onThreadChange(-1);
+                            onThreadChange(-1,"postChildLightScore");
                         }
 
                         @Override
@@ -1582,7 +1593,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
                             }
-                            onThreadChange(-1);
+                            onThreadChange(-1,"postChildLightScore");
                         }
 
                         @Override
@@ -1639,7 +1650,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
 
-            onThreadChange(1);
+            onThreadChange(1,"postChildDistance");
             LogFileUtils.logInfo(TAG, "posting childdistance workflows... raw data "+(new JSONObject(gson.toJson(resultsData))).toString());
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -1659,7 +1670,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             }
                             updated = true;
                             updateDelay = 0;
-                            onThreadChange(-1);
+                            onThreadChange(-1,"postChildDistance");
                         }
 
                         @Override
@@ -1670,7 +1681,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
                             }
-                            onThreadChange(-1);
+                            onThreadChange(-1,"postChildDistance");
                         }
 
                         @Override
@@ -1717,7 +1728,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(remainingData))).toString());
                 LogFileUtils.logInfo(TAG,"this is remaining data 3 "+(new JSONObject(gson.toJson(remainingData))).toString());
 
-                onThreadChange(1);
+                onThreadChange(1,"postRemainingData");
                 LogFileUtils.logInfo(TAG, "posting remaining data ");
                 retrofit.create(ApiService.class).postRemainingData(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -1735,7 +1746,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                                 updated = true;
                                 updateDelay = 0;
-                                onThreadChange(-1);
+                                onThreadChange(-1,"postRemainingData");
                             }
 
                             @Override
@@ -1752,7 +1763,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                     AuthenticationHandler.restoreToken(context);
                                     error401();
                                 }
-                                onThreadChange(-1);
+                                onThreadChange(-1,"postRemainingData");
                             }
 
                             @Override
@@ -1816,7 +1827,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
 
-            onThreadChange(1);
+            onThreadChange(1,"postAppBoundingBox");
             LogFileUtils.logInfo(TAG, "posting appPoseScore workflows... ");
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -1836,7 +1847,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             }
                             updated = true;
                             updateDelay = 0;
-                            onThreadChange(-1);
+                            onThreadChange(-1,"postAppBoundingBox");
                         }
 
                         @Override
@@ -1847,7 +1858,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
                             }
-                            onThreadChange(-1);
+                            onThreadChange(-1,"postAppBoundingBox");
                         }
 
                         @Override
@@ -1903,7 +1914,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
 
-            onThreadChange(1);
+            onThreadChange(1,"postappOrientationResult");
             LogFileUtils.logInfo(TAG, "posting appOrientation workflows... ");
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -1923,7 +1934,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             }
                             updated = true;
                             updateDelay = 0;
-                            onThreadChange(-1);
+                            onThreadChange(-1,"postappOrientationResult");
                         }
 
                         @Override
@@ -1934,7 +1945,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
                             }
-                            onThreadChange(-1);
+                            onThreadChange(-1,"postappOrientationResult");
                         }
 
                         @Override
@@ -1956,7 +1967,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             LogFileUtils.logInfo(TAG, "Syncing Location india address ");
 
-            onThreadChange(1);
+            onThreadChange(1,"LocationIndia");
             retrofit.create(ApiService.class).getLocationIndia(session.getAuthTokenWithBearer())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Root>() {
@@ -1968,18 +1979,16 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         @Override
                         public void onNext(@NonNull Root root) {
                             LogFileUtils.logInfo(TAG, "Sync location successfully fetched " + root.country);
-
+                            onThreadChange(-1,"LocationIndia");
                             switch (session.getEnvironment()){
                                 case AppConstants.ENV_DEMO_QA:
                                     if(session.getDemoQaVersionLocation() >= root.getVersion()){
-                                        onThreadChange(-1);
                                         return;
                                     }
                                     session.setLocationDemoQAVersion(root.version);
                                     break;
                                 case AppConstants.ENV_IN_BMZ:
                                     if(session.getIndiaVersionLocation() >= root.getVersion()){
-                                        onThreadChange(-1);
                                         return;
                                     }
                                     session.setLocationIndiaVersion(root.version);
@@ -2018,7 +2027,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 }
 
 
-                            onThreadChange(-1);
+
                         }
 
                         @Override
@@ -2028,7 +2037,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
                             }
-                            onThreadChange(-1);
+                            onThreadChange(-1,"LocationIndia");
                         }
 
                         @Override
