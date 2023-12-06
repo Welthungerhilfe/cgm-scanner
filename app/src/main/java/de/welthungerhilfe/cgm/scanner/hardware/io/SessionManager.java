@@ -63,6 +63,8 @@ public class SessionManager {
 
     private final String KEY_LOCATLITY= "key_locality";
 
+    private final String BACKGROUND_TASK_COUNT = "background_task_count";
+
 
 
 
@@ -358,4 +360,12 @@ public class SessionManager {
         editor.commit();
     }
 
+    public void setBackgrounThreadCount(int count) {
+        editor.putInt(BACKGROUND_TASK_COUNT, count);
+        editor.commit();
+    }
+
+    public int getBackgrounThreadCount() {
+        return pref.getInt(BACKGROUND_TASK_COUNT, 0);
+    }
 }

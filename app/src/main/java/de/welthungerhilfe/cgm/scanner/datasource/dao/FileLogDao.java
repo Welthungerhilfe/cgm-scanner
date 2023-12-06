@@ -49,6 +49,9 @@ public interface FileLogDao {
     @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE deleted=0")
     long getArtifactCount();
 
+    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE deleted=0 AND environment=:environment")
+    long getArtifactCount(int environment);
+
     @Query("SELECT SUM(fileSize)/1024/1024 FROM " + TABLE_FILE_LOG + " WHERE deleted=0")
     double getArtifactFileSize();
 

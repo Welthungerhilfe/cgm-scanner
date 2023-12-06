@@ -83,6 +83,10 @@ public class FileLogRepository {
         return database.fileLogDao().getArtifactCount();
     }
 
+    public long getArtifactCount(int environment){
+        return database.fileLogDao().getArtifactCount(environment);
+    }
+
     public long getDeletedArtifactCount() {
         return database.fileLogDao().getDeletedArtifactCount();
     }

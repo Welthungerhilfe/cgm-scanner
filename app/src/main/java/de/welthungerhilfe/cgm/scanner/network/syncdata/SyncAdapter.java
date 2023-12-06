@@ -183,8 +183,20 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         synchronized (activeThreads) {
             if (activeThreads > 0) {
                 LogFileUtils.logInfo(TAG,"Start syncing activatedthread "+activeThreads);
+                if(fileLogRepository.getArtifactCount(session.getEnvironment())==0){
+                    if(session.getBackgrounThreadCount() > 2){
+                        session.setBackgrounThreadCount(0);
+                        activeThreads = 0;
+                    }else {
+                        int count = session.getBackgrounThreadCount()+1;
+                        session.setBackgrounThreadCount(count);
+                        return;
+                    }
+                }
+                else {
+                    return;
+                }
 
-                return;
             }
         }
         LogFileUtils.logInfo(TAG, "Start syncing requested after activeThreads 0");
@@ -426,6 +438,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             public void onNext(@NonNull CompleteScan completeScan) {
 
                                 if(completeScan==null || completeScan.getScans().size() == 0){
+                                    onThreadChange(-1,"Post Scan");
+
                                     return;
                                 }
 
