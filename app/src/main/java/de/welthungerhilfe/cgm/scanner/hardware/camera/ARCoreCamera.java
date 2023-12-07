@@ -178,7 +178,7 @@ public class ARCoreCamera extends AbstractARCamera {
       mColorCameraIntrinsic[3] = intrinsics.getPrincipalPoint()[1] / (float)intrinsics.getImageDimensions()[1];
       mDepthCameraIntrinsic = mColorCameraIntrinsic;
       mHasCameraCalibration = true;
-      LogFileUtils.logInfo("ARCORE","arcore step2 camerainstrics value "+mColorCameraIntrinsic[0]+" "+mColorCameraIntrinsic[1]+" "+mColorCameraIntrinsic[2]+" "+mColorCameraIntrinsic[3]);
+     // LogFileUtils.logInfo("ARCORE","arcore step2 camerainstrics value "+mColorCameraIntrinsic[0]+" "+mColorCameraIntrinsic[1]+" "+mColorCameraIntrinsic[2]+" "+mColorCameraIntrinsic[3]);
 
 
       //get calibration image dimension

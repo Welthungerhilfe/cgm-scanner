@@ -317,7 +317,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         private void processMeasureQueue() {
             try {
                 List<Measure> syncableMeasures = measureRepository.getSyncableMeasure(session.getEnvironment());
-                LogFileUtils.logInfo(TAG, syncableMeasures.size() + "this is measures/scans to sync");
+                LogFileUtils.logInfo(TAG, syncableMeasures.size() + "this is measures/scans to sync count");
 
                 for (Measure measure : syncableMeasures) {
                     String localPersonId = measure.getPersonId();
@@ -969,11 +969,11 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     public void getEstimates(Measure measure) {
         try {
 
-            onThreadChange(1,"Get Estimate");
             LogFileUtils.logInfo(TAG, "getting estimate for scan result " + measure);
             List<String> postScanResultList = postScanResultrepository.getScanIdsFromMeasureId(measure.getId());
 
             String ids = postScanResultList.get(0) + "," + postScanResultList.get(1) + "," + postScanResultList.get(2);
+            onThreadChange(1,"Get Estimate");
 
             retrofit.create(ApiService.class).getEstimatesAll(session.getAuthTokenWithBearer(), ids).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -1665,7 +1665,6 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
 
             onThreadChange(1,"postChildDistance");
-            LogFileUtils.logInfo(TAG, "posting childdistance workflows... raw data "+(new JSONObject(gson.toJson(resultsData))).toString());
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<ResultsData>() {
@@ -1993,17 +1992,17 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         @Override
                         public void onNext(@NonNull Root root) {
                             LogFileUtils.logInfo(TAG, "Sync location successfully fetched " + root.country);
+                            onThreadChange(-1,"LocationIndia");
+
                             switch (session.getEnvironment()){
                                 case AppConstants.ENV_DEMO_QA:
                                     if(session.getDemoQaVersionLocation() >= root.getVersion()){
-                                        onThreadChange(-1,"LocationIndia");
                                         return;
                                     }
                                     session.setLocationDemoQAVersion(root.version);
                                     break;
                                 case AppConstants.ENV_IN_BMZ:
                                     if(session.getIndiaVersionLocation() >= root.getVersion()){
-                                        onThreadChange(-1,"LocationIndia");
                                         return;
                                     }
                                     session.setLocationIndiaVersion(root.version);
@@ -2040,7 +2039,6 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                         }
                                     }
                                 }
-                            onThreadChange(-1,"LocationIndia");
 
 
 

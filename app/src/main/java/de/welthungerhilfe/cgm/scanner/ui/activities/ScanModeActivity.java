@@ -481,7 +481,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 24 : 8);
         float progressToAddFloat = 100.0f / cloudsToFinishScan;
         int progressToAdd = (int) progressToAddFloat;
-        LogFileUtils.logInfo(TAG, "currentProgress=" + mProgress + ", progressToAdd=" + progressToAdd);
+     //   LogFileUtils.logInfo(TAG, "currentProgress=" + mProgress + ", progressToAdd=" + progressToAdd);
         if (mProgress + progressToAdd > 100) {
             mProgress = 100;
             runOnUiThread(() -> {
@@ -709,7 +709,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             if(cameraCalibration!= null && cameraCalibration.contains("NaN")){
                 cameraCalibration = session.getArcoreCaliFile();
             }
-            LogFileUtils.logInfo("ARENGINE","arcore step3 calibration value "+hasCameraCalibration+" "+cameraCalibration);
+           // LogFileUtils.logInfo("ARENGINE","arcore step3 calibration value "+hasCameraCalibration+" "+cameraCalibration);
 
 
         Runnable thread = () -> {
@@ -790,7 +790,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             if (light > 1) {
                 light = 1.0f - (light - 1.0f);
             }
-            LogFileUtils.logInfo(TAG,"this is valur of distance & light "+child_distance+" "+light);
+            //LogFileUtils.logInfo(TAG,"this is valur of distance & light "+child_distance+" "+light);
             float light_score = light;
             long profile = System.currentTimeMillis();
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
@@ -992,9 +992,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         synchronized (threadsLock) {
             threadsCount += diff;
             if (threadsCount == 0) {
-                LogFileUtils.logInfo(TAG, "The last thread finished");
+             //   LogFileUtils.logInfo(TAG, "The last thread finished");
             } else {
-                LogFileUtils.logInfo(TAG, "Amount of threads : " + threadsCount);
+               // LogFileUtils.logInfo(TAG, "Amount of threads : " + threadsCount);
             }
         }
     }
@@ -1171,7 +1171,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
                                         if(rect!=null) {
                                             boundingBox = "{\"left\":\""+rect.left+"\", \"right\":\""+rect.right+"\", \"top\":\""+rect.top+"\", \"bottom\":\""+rect.bottom+"\"}";
-                                            LogFileUtils.logInfo(TAG,"this is value of bounding box "+boundingBox);
+                                        //    LogFileUtils.logInfo(TAG,"this is value of bounding box "+boundingBox);
 
                                         }
 
