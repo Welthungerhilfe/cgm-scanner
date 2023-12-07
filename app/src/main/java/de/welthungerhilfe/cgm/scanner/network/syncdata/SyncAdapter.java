@@ -1712,7 +1712,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         lastSyncDailyReport = session.getLastSyncDailyReport();
         LogFileUtils.logInfo(TAG,"this is remaining data 1 "+lastSyncDailyReport);
         LogFileUtils.logInfo(TAG,"this is remaining data 1.5 "+(System.currentTimeMillis() - lastSyncDailyReport));
-        if((System.currentTimeMillis() - lastSyncDailyReport) > 1000 ) {
+        if((System.currentTimeMillis() - lastSyncDailyReport) > 86400000 ) {
             session.setLastSyncDailyReport(System.currentTimeMillis());
             LogFileUtils.logInfo(TAG,"this is remaining data 2 "+session.getLastSyncDailyReport());
 
