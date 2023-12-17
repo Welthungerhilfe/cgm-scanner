@@ -608,7 +608,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 .setMessage(R.string.age_warning)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        btnNext.performClick();
+                       // btnNext.performClick();
+                        editBirth.setText("");
+                        onTextChanged();
                         dialog.dismiss();
                     }
                 }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {

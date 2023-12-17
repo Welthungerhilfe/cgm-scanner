@@ -121,6 +121,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     private FileLogRepository fileLogRepository;
     ActionBar actionBar;
 
+    private long lastCallTime = 0;
+    private static final long INTERVAL = 2000;
+
 
 
     public void createData(View view) {
@@ -565,9 +568,14 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     @Override
     public void onPersonDetail(Person person) {
-        Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
-        intent.putExtra(AppConstants.EXTRA_QR, person.getQrcode());
-        startActivity(intent);
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastCallTime >= INTERVAL) {
+            Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
+            intent.putExtra(AppConstants.EXTRA_QR, person.getQrcode());
+            startActivity(intent);
+            lastCallTime = currentTime; // Update last call time after successful execution
+        }
+
     }
 
     @Override
