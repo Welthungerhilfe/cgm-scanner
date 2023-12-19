@@ -126,6 +126,9 @@
     <string name="error">कुछ गलत हो गया</string>
     <string name="empty_qr_code">क्यूआर कोड खाली है, कृपया उचित क्यूआर कोड का उपयोग करें।</string>
 
+    <string name="message_child_from_rst">This child is created in RST mode.</string>
+    <string name="message_child_from_CGM">This child is created in CGM mode.</string>
+
 
     <!-- Create person / Person details !-->
     <string name="name">बच्चे का नाम</string>

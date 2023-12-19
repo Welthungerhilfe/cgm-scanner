@@ -50,6 +50,7 @@ import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityScanQrBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
@@ -210,9 +211,16 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         }
 
         if (activityBehaviourType == AppConstants.QR_SCAN_REQUEST) {
-            if (personRepository.findPersonByQr(qrCode,sessionManager.getEnvironment()) == null) {
+            Person person = personRepository.findPersonByQr(qrCode,sessionManager.getEnvironment());
+            if (person == null) {
                 showConfirmDialog(R.string.message_legal, CAPTURED_CONSENT_SHEET_STEP);
-            } else {
+            }
+            else if(sessionManager.getSelectedMode() == AppConstants.CGM_MODE && person.isBelongs_to_rst()) {
+                showConfirmDialog(R.string.message_child_from_rst,EMPTY_QR_CODE_FOUND);
+            }else if(sessionManager.getSelectedMode() == AppConstants.RST_MODE && !person.isBelongs_to_rst()) {
+                showConfirmDialog(R.string.message_child_from_CGM,EMPTY_QR_CODE_FOUND);
+            }else {
+
                 Intent intent = new Intent(QRScanActivity.this, CreateDataActivity.class);
                 intent.putExtra(AppConstants.EXTRA_QR, qrCode);
                 startActivity(intent);
@@ -222,7 +230,6 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
             showConfirmDialog(R.string.message_legal, CAPTURED_CONSENT_SHEET_STEP);
 
         }
-
 
     }
 

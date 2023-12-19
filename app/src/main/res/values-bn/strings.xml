@@ -250,6 +250,9 @@
 
 <string name="empty_qr_code">QR কোড নেই, অনুগ্রহ করে সঠিক QR কোড ব্যবহার করুন।   </string>
 
+    <string name="message_child_from_rst">This child is created in RST mode.</string>
+    <string name="message_child_from_CGM">This child is created in CGM mode.</string>
+
 
 
     <!-- Create person / Person details!-->
