@@ -81,8 +81,31 @@ public class SettingsPerformanceActivity extends BaseActivity implements Compoun
         activityTestPerformanceBinding.profilePerformanceSwitch.setChecked(LocalPersistency.getBoolean(this, KEY_TEST_PERFORMANCE));
         activityTestPerformanceBinding.profileResultSwitch.setChecked(LocalPersistency.getBoolean(this, KEY_TEST_RESULT));
 
-        activityTestPerformanceBinding.profilePerformanceSwitch.setOnCheckedChangeListener(this);
-        activityTestPerformanceBinding.profileResultSwitch.setOnCheckedChangeListener(this);
+        activityTestPerformanceBinding.profilePerformanceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                LocalPersistency.setBoolean(SettingsPerformanceActivity.this, KEY_TEST_PERFORMANCE, b);
+                if (!b) {
+                    LocalPersistency.setLong(SettingsPerformanceActivity.this, KEY_TEST_PERFORMANCE_COLOR_SIZE, 0);
+                    LocalPersistency.setLong(SettingsPerformanceActivity.this, KEY_TEST_PERFORMANCE_DEPTH_SIZE, 0);
+                    LocalPersistency.setLong(SettingsPerformanceActivity.this, KEY_TEST_PERFORMANCE_COLOR_TIME, 0);
+                    LocalPersistency.setLong(SettingsPerformanceActivity.this, KEY_TEST_PERFORMANCE_DEPTH_TIME, 0);
+                }
+            }
+        });
+        activityTestPerformanceBinding.profileResultSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                LocalPersistency.setBoolean(SettingsPerformanceActivity.this, KEY_TEST_RESULT, b);
+                if (!b) {
+                    LocalPersistency.setLong(SettingsPerformanceActivity.this, KEY_TEST_RESULT_SCAN, 0);
+                    LocalPersistency.setLong(SettingsPerformanceActivity.this, KEY_TEST_RESULT_START, 0);
+                    LocalPersistency.setLong(SettingsPerformanceActivity.this, KEY_TEST_RESULT_END, 0);
+                    LocalPersistency.setLong(SettingsPerformanceActivity.this, KEY_TEST_RESULT_RECEIVE, 0);
+                    LocalPersistency.setLongArray(SettingsPerformanceActivity.this, KEY_TEST_RESULT_AVERAGE, new ArrayList<>());
+                }
+            }
+        });
     }
 
     @Override
