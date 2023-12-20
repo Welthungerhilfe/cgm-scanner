@@ -87,7 +87,7 @@
     <string name="date">Date</string>
     <string name="last_days">last %1$d days</string>
     <string name="last_location_error">last location not available</string>
-    <string name="sort_date">new person on top</string>
+    <string name="sort_date">Updated person on top</string>
     <string name="sort_location">nearest person on top</string>
     <string name="wasting">Wasting</string>
     <string name="wasting_weight_height">lowest weight/height on top</string>
@@ -130,7 +130,7 @@
     <string name="error">Something went wrong</string>
     <string name="empty_qr_code">Empty QR-code, please use appropriate QR-code.</string>
     <string name="message_child_from_rst">This child is created in RST mode.</string>
-    <string name="message_child_from_CGM">This child is created in CGM mode.</string>
+    <string name="message_child_from_CGM">This child is created in GMT mode.</string>
 
     <!-- Create person / Person details!-->
     <string name="name">name of child</string>

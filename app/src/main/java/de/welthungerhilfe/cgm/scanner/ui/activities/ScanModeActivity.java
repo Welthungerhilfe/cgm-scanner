@@ -501,7 +501,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             activityScanModeBinding.scanType3.setChildIcon(R.drawable.stand_back);
             activityScanModeBinding.scanType2.setTitle(R.string.side_scan);
             if(files!=null) {
-                files.clear();
+             restartActivityWithData();
             }
             files = new ArrayList<>();
             getCamera().setPlaneMode(AbstractARCamera.PlaneMode.LOWEST);
@@ -511,11 +511,18 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             activityScanModeBinding.scanType3.setChildIcon(R.drawable.lying_back);
             activityScanModeBinding.scanType2.setTitle(R.string.lying_side_scan);
             if(files!=null) {
-                files.clear();
+                restartActivityWithData();
             }
             files = new ArrayList<>();
             getCamera().setPlaneMode(AbstractARCamera.PlaneMode.VISIBLE);
         }
+    }
+
+    public void restartActivityWithData() {
+        Intent intent = new Intent(this, ScanModeActivity.class);
+        intent.putExtra(AppConstants.EXTRA_PERSON, person);
+        startActivity(intent);
+        finish();
     }
 
     public void goToNextStep() {

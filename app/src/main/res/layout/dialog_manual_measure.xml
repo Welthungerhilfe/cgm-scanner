@@ -83,7 +83,8 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="0dp">
+                    android:layout_marginTop="0dp"
+                    android:clickable="false">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editManualDate"
@@ -91,6 +92,7 @@
                         android:layout_height="wrap_content"
                         android:hint="@string/measure_date"
                         android:inputType="none"
+                        android:clickable="false"
                         android:singleLine="true" />
 
                 </com.google.android.material.textfield.TextInputLayout>
