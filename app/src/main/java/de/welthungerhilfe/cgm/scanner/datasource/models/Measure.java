@@ -436,7 +436,7 @@ public class Measure extends CsvExportableModel implements Serializable {
             if(measureArtifacts == null || measureArtifacts.size()==0){
                 LogFileUtils.logInfo("Measure","this is measure error1 "+getId()+" "+getStd_test_qr_code()+" "+getEnvironment()+" "+environment+" "+getQrCode()+" "+getCreatedBy()+" "+sessionManager.getUserEmail());
             }
-            LogFileUtils.logInfo("Measure","this is milestone 0 "+getId()+" "+getEnvironment()+" "+environment);
+            LogFileUtils.logInfo("Measure","this is milestone 0 "+getId()+" "+getEnvironment()+" "+environment+" "+getQrCode()+" "+getCreatedBy()+" "+sessionManager.getUserEmail());
         }catch (Exception e){
             LogFileUtils.logInfo("Measure","this is measure error1 catch");
         }
