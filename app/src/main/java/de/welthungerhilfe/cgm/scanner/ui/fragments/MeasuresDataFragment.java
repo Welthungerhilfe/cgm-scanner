@@ -234,6 +234,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                         case AppConstants.ENV_BAN:
                             selectedBackend = "bangladesh";
                             break;
+                        case AppConstants.ENV_MALAWI:
+                            selectedBackend = "malawi";
+                            break;
                         case AppConstants.ENV_DEMO_QA:
                             selectedBackend = "demo_qa";
                             break;
