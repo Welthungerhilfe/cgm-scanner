@@ -270,7 +270,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                         selectedCountry = country[i];
                         selectedOrganization = "Malawi";
                         session.setEnvironment(AppConstants.ENV_MALAWI);
-                        session.setEnvironmentMode(AppConstants.CGM_MODE);
+                        session.setEnvironmentMode(AppConstants.CGM_RST_MODE);
                         selectedBackend = "malawi";
                         break;
                     case "Namibia":
