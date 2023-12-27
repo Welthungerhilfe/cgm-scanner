@@ -75,6 +75,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     String uganda[] ={"Uganda"};
     String bangladesh[] ={"Bangladesh"};
 
+    String sierra_leone[]={"Sierra Leone"};
+
     String malawi[] ={"Malawi"};
     String demo[] ={"Demo/Test","Demo/Test - CGM","Demo/Test - RST"};
     String sandbox[] ={"Sandbox"};
@@ -132,10 +134,10 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             String version = pInfo.versionName;
             if (version.contains("dev")) {
               //  activityLoginBinding.rbSandbox.setVisibility(View.VISIBLE);
-               country =new String[]{"Select Country","India","Malawi","Namibia","Nepal","Uganda","Bangladesh","Demo/Test","Sandbox"};
+               country =new String[]{"Select Country","India","Malawi","Sierra Leone","Namibia","Nepal","Uganda","Bangladesh","Demo/Test","Sandbox"};
             }
             else {
-                country =new String[]{"Select Country","India","Malawi","Namibia","Nepal","Uganda","Bangladesh","Demo/Test"};
+                country =new String[]{"Select Country","India","Malawi","Sierra Leone","Namibia","Nepal","Uganda","Bangladesh","Demo/Test"};
 
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -197,6 +199,9 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                         selectedCountry = country[i];
                         organization = sandbox;
                         break;
+                    case "Sierra Leone":
+                        selectedCountry = country[i];
+                        organization = sierra_leone;
                     default:
                         selectedCountry = null;
                         organization = null;
@@ -272,6 +277,14 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                         session.setEnvironment(AppConstants.ENV_MALAWI);
                         session.setEnvironmentMode(AppConstants.CGM_RST_MODE);
                         selectedBackend = "malawi";
+                        break;
+
+                    case "Sierra Leone":
+                        selectedCountry = country[i];
+                        selectedOrganization = "Sierra Leone";
+                        session.setEnvironment(AppConstants.ENV_SIERRA);
+                        session.setEnvironmentMode(AppConstants.CGM_RST_MODE);
+                        selectedBackend = "Sierra Leone";
                         break;
                     case "Namibia":
                         selectedCountry = country[i];

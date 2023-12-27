@@ -31,6 +31,7 @@ public class AppConstants {
     public static final String AUTH_UGANDA = "{OAUTH_SCOPE_UGANDA}";
     public static final String AUTH_BAN = "{OAUTH_SCOPE_BAN}";
     public static final String AUTH_MALAWI = "{OAUTH_SCOPE_MALAWI}";
+    public static final String AUTH_SIERRA = "{OAUTH_SCOPE_SIERRA}";
     public static final String AUTH_DEMO_QA = "{OAUTH_SCOPE_QA}";
 
     public static final String API_URL_DEMO_QA = "{API_URL_QA}/";
@@ -43,6 +44,8 @@ public class AppConstants {
     public static final String API_URL_BAN = "{API_URL_BAN}/";
 
     public static final String API_URL_MALAWI = "{API_URL_MALAWI}/";
+
+    public static final String API_URL_SIERRA = "{API_URL_SIERRA}/";
 
 
     public static final String API_TESTING_URL = "http://192.168.43.252:5001/api/";
@@ -61,6 +64,8 @@ public class AppConstants {
     public static final int ENV_BAN = 7;
 
     public static final int ENV_MALAWI = 8;
+
+    public static final int ENV_SIERRA = 9;
 
 
 

@@ -144,6 +144,9 @@ public class SettingsActivity extends BaseActivity {
             case 8:
                 selectedBackend = "Malawi";
                 break;
+            case 9:
+                selectedBackend="Sierra Leone";
+                break;
 
         }
         activitySettingsBinding.txtSettingAzureAccount.setText(1, selectedBackend);

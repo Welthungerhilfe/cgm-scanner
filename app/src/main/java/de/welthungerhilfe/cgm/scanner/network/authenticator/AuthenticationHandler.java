@@ -121,6 +121,8 @@ public class AuthenticationHandler {
                 return R.raw.auth_config_sandbox;
             case AppConstants.ENV_MALAWI:
                 return R.raw.auth_config_malawi;
+            case AppConstants.ENV_SIERRA:
+                return R.raw.auth_config_sierra;
             case AppConstants.ENV_DEMO_QA:
                 return R.raw.auth_config_demoqa;
             case AppConstants.ENV_IN_BMZ:
@@ -151,6 +153,8 @@ public class AuthenticationHandler {
                 return new String[]{AppConstants.AUTH_SANDBOX};
             case AppConstants.ENV_MALAWI:
                 return new String[]{AppConstants.AUTH_MALAWI};
+            case AppConstants.ENV_SIERRA:
+                return new String[]{AppConstants.AUTH_SIERRA};
             case AppConstants.ENV_DEMO_QA:
                 return new String[]{AppConstants.AUTH_DEMO_QA};
             case AppConstants.ENV_IN_BMZ:
