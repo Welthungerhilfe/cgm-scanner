@@ -202,6 +202,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                     case "Sierra Leone":
                         selectedCountry = country[i];
                         organization = sierra_leone;
+                        break;
                     default:
                         selectedCountry = null;
                         organization = null;
