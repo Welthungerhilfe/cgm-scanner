@@ -26,6 +26,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.MediaActionSound;
@@ -101,7 +105,9 @@ import de.welthungerhilfe.cgm.scanner.ui.views.ScanModeView;
 import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
-public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, ScanTypeView.ScanTypeListener {
+public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, ScanTypeView.ScanTypeListener, SensorEventListener {
+
+
 
     private enum ArtifactType { CALIBRATION, DEPTH, RGB };
 
@@ -111,6 +117,16 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     boolean scanCompleted = false;
     boolean scanStarted = false;
     String cameraCalibration;
+
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
+
+
+    private float[] accelerometerReading = new float[3];
+
+    double lastUpdatedAngle=0;
+
+
 
 
     public void scanStanding() {
@@ -407,6 +423,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             }
         });
 
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
     }
 
     @Override
@@ -420,6 +438,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         } else {
             activityScanModeBinding.toolbar.setBackgroundResource(R.color.colorPrimary);
         }
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
     }
 
     @Override
@@ -427,6 +447,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         super.onPause();
         getCamera().removeListener(this);
         getCamera().onPause();
+        sensorManager.unregisterListener(this);
+
 
     }
 
@@ -1193,5 +1215,43 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
                             }
                         });
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        switch (event.sensor.getType()) {
+            case Sensor.TYPE_ACCELEROMETER:
+                accelerometerReading = event.values.clone();
+                break;
+        }
+        calculateVerticalAngle(accelerometerReading);
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+
+    }
+
+    private void calculateVerticalAngle(float[] accelerometerValues) {
+        float x = accelerometerValues[0];
+        float y = accelerometerValues[1];
+        float z = accelerometerValues[2];
+
+        // Normalize the accelerometer vector
+        float norm = (float) Math.sqrt(x * x + y * y + z * z);
+        z /= norm;
+
+        // Calculate the vertical angle in degrees
+        double angle = Math.toDegrees(Math.acos(z));
+
+        if(System.currentTimeMillis() - lastUpdatedAngle > 500) {
+            lastUpdatedAngle = System.currentTimeMillis();
+            activityScanModeBinding.tvAngle.setText("Angle: " + String.format("%.0f", angle));
+        }
+
+        // Display the angle (or use it for other purposes)
+        /*TextView angleTextView = findViewById(R.id.angleTextView); // Assuming a TextView to display the angle
+        angleTextView.setText(String.format("Vertical Angle: %.2f°", angle));*/
     }
 }
