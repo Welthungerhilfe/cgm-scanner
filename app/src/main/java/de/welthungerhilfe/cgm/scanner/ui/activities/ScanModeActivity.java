@@ -1247,7 +1247,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         if(System.currentTimeMillis() - lastUpdatedAngle > 500) {
             lastUpdatedAngle = System.currentTimeMillis();
-            activityScanModeBinding.tvAngle.setText("Angle: " + String.format("%.0f", angle));
+            activityScanModeBinding.tvAngle.setText("Angle: " + String.format("%.0f", angle-90));
         }
 
         // Display the angle (or use it for other purposes)
