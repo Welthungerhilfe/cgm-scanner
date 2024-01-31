@@ -37,6 +37,7 @@ import com.google.ar.core.Frame;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
+import com.huawei.hiar.ARCameraIntrinsics;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -65,6 +66,8 @@ public class ARCoreCamera extends AbstractARCamera {
 
   @Override
   protected void openCamera() {
+    Log.i(TAG, "this is inside openCamera abstractarcamera ");
+
     if (mSession == null) {
       try {
         switch (ArCoreApk.getInstance().requestInstall(mActivity, !mInstallRequested)) {
@@ -153,6 +156,8 @@ public class ARCoreCamera extends AbstractARCamera {
 
   @Override
   protected void updateFrame() {
+    Log.i(TAG, "this is inside updateFrame abstractarcamera ");
+
     if (mSession == null) {
       return;
     }
@@ -167,6 +172,9 @@ public class ARCoreCamera extends AbstractARCamera {
 
       //get calibration from ARCore
       CameraIntrinsics intrinsics = frame.getCamera().getImageIntrinsics();
+      float[] focalLength = frame.getCamera().getImageIntrinsics().getFocalLength();
+      float[] principalPoint = frame.getCamera().getImageIntrinsics().getPrincipalPoint();
+    //  LogFileUtils.logInfo("ARCORE","arengine step0 intrinsics value "+focalLength[1]+" "+principalPoint[1]);
       /*LogFileUtils.logInfo("ARCORE","arcore step1 intrinsics value "+intrinsics);
       LogFileUtils.logInfo("ARCORE","arcore step1 focalLength value "+intrinsics.getFocalLength()[0]+" "+intrinsics.getFocalLength()[1]);
       LogFileUtils.logInfo("ARCORE","arcore step1 imagedimension value "+intrinsics.getImageDimensions()[0]+" "+intrinsics.getImageDimensions()[1]);
@@ -201,6 +209,8 @@ public class ARCoreCamera extends AbstractARCamera {
                         0.0f,
                         0.5f * img.getExtentZ()) // lower left
         };
+        Log.i(TAG, "this is inside afterCali dimension abstractarcamera ");
+
         mCalibrationImageEdges = new ComputerVisionUtils.Point3F[4];
         for (int i = 0; i < 4; ++i) {
           Pose p = img.getCenterPose().compose(localBoundaryPoses[i]);
@@ -235,6 +245,8 @@ public class ARCoreCamera extends AbstractARCamera {
       //get camera data
       Bitmap color = null;
       Depthmap depth = null;
+      Log.i(TAG, "this is inside before acquireRawDepthImage dimension abstractarcamera ");
+
       try {
         color = mRTT.renderData(mCameraTextureId, mTextureRes);
         if (hasCameraCalibration() && mSession.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {

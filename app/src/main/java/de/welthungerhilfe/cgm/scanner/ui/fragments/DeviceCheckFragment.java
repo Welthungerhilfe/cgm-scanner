@@ -18,6 +18,8 @@
  */
 package de.welthungerhilfe.cgm.scanner.ui.fragments;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -25,6 +27,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Environment;
@@ -73,10 +77,10 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
 
     public enum IssueType { RGB_DEFECT, TOF_DEFECT, BATTERY_LOW, GPS_FAILED, STORAGE_LOW, BACKEND_ERROR, CHECK_REFUSED };
 
-    private final int CALIBRATIONS_MIN = 30; //measures
-    private final int CALIBRATIONS_TIMEOUT = 10000; //miliseconds
-    private final float CALIBRATION_TOLERANCE_RGB = 0.04f; //meters
-    private final float CALIBRATION_TOLERANCE_TOF = 0.05f; //meters
+    private final int CALIBRATIONS_MIN = 20; //measures
+    private final int CALIBRATIONS_TIMEOUT = 25000; //miliseconds
+    private final float CALIBRATION_TOLERANCE_RGB = 0.02f; //meters
+    private final float CALIBRATION_TOLERANCE_TOF = 0.02f; //meters
     private final SizeF CALIBRATION_IMAGE_SIZE = new SizeF(0.15f, 0.15f); //meters
 
     private final int BATTERY_MIN = 50; //percent
@@ -212,17 +216,29 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     @Override
     public void onColorDataReceived(Bitmap bitmap, int frameIndex) {
         //dummy
+
     }
 
     @Override
     public void onDepthDataReceived(Depthmap depthmap, int frameIndex) {
 
-        if (frameIndex % 10 == 0) {
+        LogFileUtils.logInfo(TAG,"this is inside onDepthDataReceived "+depthmap+" "+frameIndex);
+
+        if (frameIndex % 5 == 0) {
             SizeF calibrationRGB = camera.getCalibrationImageSize(false);
-            SizeF calibrationToF = camera.getCalibrationImageSize(true);
+
+            Log.i(TAG,"this is value of edges first "+camera.getRgbEdges());
+
+            Log.i(TAG,"this is value of edges second "+camera.getTofEdges());
+
+            Log.i(TAG,"this is value of edges third "+calibrationRGB.getHeight()+ "---- "+calibrationRGB.getWidth());
+
+            SizeF calibrationToF = camera.getCalibrationImageSize(false);
             Log.i("Tag","this is value of "+camera.getCameraCalibration());
-            LogFileUtils.logInfo(TAG,"this is device check fragment onDepthDataReceived "+calibrationRGB+" "+calibrationsToF);
+            LogFileUtils.logInfo(TAG,"this is device check fragment onDepthDataReceived "+calibrationRGB);
             if (calibrationRGB != null) {
+                LogFileUtils.logInfo(TAG,"this is device check fragment onDepthDataReceived second "+depthmap+" "+frameIndex);
+
                 Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
                     updateCalibration(calibrationRGB, calibrationsRGB);
                     updateCalibrationResult(calibrationsRGB, fragmentDeviceCheckBinding.test1, CALIBRATION_TOLERANCE_RGB, IssueType.RGB_DEFECT);
@@ -339,17 +355,24 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
 
             ContactSupportDialog.show(activity, null, "Issues: " + footer.toString());
         });
+
+      /*  CameraManager manager = (CameraManager) getSystemService(getActivity(),Context.CAMERA_SERVICE);
+        String cameraId = manager.getCameraIdList()[0]; // Assuming you want the first camera
+        CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);*/
     }
 
     private void startCamera() {
+        LogFileUtils.logInfo(TAG,"this is inside startCamera");
         AbstractARCamera.DepthPreviewMode depthMode = AbstractARCamera.DepthPreviewMode.CALIBRATION;
         AbstractARCamera.PreviewSize previewSize = AbstractARCamera.PreviewSize.SMALL;
         /*if (AREngineCamera.shouldUseAREngine()) {
             camera = new AREngineCamera(getActivity(), depthMode, previewSize);
         } else {*/
             camera = new ARCoreCamera(getActivity(), depthMode, previewSize);
-     //   }
+        //}
         if (camera != null) {
+            LogFileUtils.logInfo(TAG,"this is inside calling oncreate");
+
             camera.onCreate(fragmentDeviceCheckBinding.colorCameraPreview,
                     fragmentDeviceCheckBinding.depthCameraPreview,
                     fragmentDeviceCheckBinding.surfaceview,null);
@@ -363,7 +386,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     }
 
     private void updateCalibrationResult(ArrayList<SizeF> calibrations, TestView result, float tolerance, IssueType onFail) {
-        LogFileUtils.logInfo(TAG,"this is device check fragment updateCalibrationResult "+calibrations+" "+tolerance);
+        LogFileUtils.logInfo(TAG,"this is inside check fragment updateCalibrationResult "+calibrations+" "+tolerance);
 
         if (calibrations.size() == 1) {
             result.setResult(getString(R.string.device_check_testing));

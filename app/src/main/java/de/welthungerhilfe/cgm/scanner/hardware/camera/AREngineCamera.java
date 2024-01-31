@@ -176,8 +176,8 @@ public class AREngineCamera extends AbstractARCamera {
       float[] focalLength = frame.getCamera().getCameraImageIntrinsics().getFocalLength();
       float[] principalPoint = frame.getCamera().getCameraImageIntrinsics().getPrincipalPoint();
       ARCameraIntrinsics intrinsics = frame.getCamera().getCameraImageIntrinsics();
-     /* LogFileUtils.logInfo("ARENGINE","arcore step0 intrinsics value "+focalLength+" "+principalPoint);
-      LogFileUtils.logInfo("ARENGINE","arcore step1 intrinsics value "+intrinsics);
+    //  LogFileUtils.logInfo("ARENGINE","arengine step0 intrinsics value "+focalLength[1]+" "+principalPoint[1]);
+      /*LogFileUtils.logInfo("ARENGINE","arcore step1 intrinsics value "+intrinsics);
       LogFileUtils.logInfo("ARENGINE","arcore step1 focalLength value "+intrinsics.getFocalLength()[0]+" "+intrinsics.getFocalLength()[1]);
       LogFileUtils.logInfo("ARENGINE","arcore step1 imagedimension value "+intrinsics.getImageDimensions()[0]+" "+intrinsics.getImageDimensions()[1]);
       LogFileUtils.logInfo("ARENGINE","arcore step1 principalpoint value "+intrinsics.getPrincipalPoint()[0]+" "+intrinsics.getPrincipalPoint()[0]);*/

@@ -22,6 +22,8 @@ public class RemainingData {
     @Expose
     String scan;
 
+    String device_check;
+
     @Expose
     String app_auto_detect;
     @Expose

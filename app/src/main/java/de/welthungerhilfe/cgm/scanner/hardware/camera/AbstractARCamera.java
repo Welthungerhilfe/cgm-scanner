@@ -113,6 +113,8 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
     protected float mTargetHeight;
     protected ComputerVisionUtils.Point3F[] mCalibrationImageEdges;
+
+    ArrayList<ComputerVisionUtils.Point3F> edges;
     protected SizeF mCalibrationImageSizeCV;
     protected SizeF mCalibrationImageSizeToF;
 
@@ -136,6 +138,8 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     protected abstract void openCamera();
     protected abstract void updateFrame();
     public abstract int getPersonCount();
+
+    String TAG = "AbstractARCamera";
 
     public AbstractARCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
         mActivity = activity;
@@ -164,6 +168,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     }
 
     public void onCreate(ImageView colorPreview, ImageView depthPreview, GLSurfaceView surfaceview, ImageView boundingBox) {
+        Log.i(TAG, "this is inside oncreate abstractarcamera ");
         Bitmap bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
         bitmap.setPixel(0, 0, Color.TRANSPARENT);
         mColorCameraPreview = colorPreview;
@@ -202,6 +207,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+        Log.i(TAG, "this is inside onSurfaceCreated abstractarcamera ");
         GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
         // Create the texture and pass it to ARCore session to be filled during update().
@@ -219,6 +225,8 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
+        Log.i(TAG, "this is inside onSurfaceChanged abstractarcamera ");
+
         GLES20.glViewport(0, 0, width, height);
         mViewportWidth = width;
         mViewportHeight = height;
@@ -227,6 +235,8 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl10) {
+        Log.i(TAG, "this is inside onDrawFrame abstractarcamera ");
+
         synchronized (AbstractARCamera.this) {
             updateFrame();
         }
@@ -254,12 +264,17 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         if (depthmap == null) {
             return;
         }
+        Log.i(TAG, "this is inside onProcessDepthData ");
+
+
+        Bitmap preview = getDepthPreview(depthmap, mPlanes, mColorCameraIntrinsic);
 
         for (Object listener : mListeners) {
             ((Camera2DataListener)listener).onDepthDataReceived(depthmap, mFrameIndex);
         }
 
-        Bitmap preview = getDepthPreview(depthmap, mPlanes, mColorCameraIntrinsic);
+
+
         Bitmap finalPreview = skeletonVisualisation(preview);
 
 
@@ -404,6 +419,13 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         return tof ? mCalibrationImageSizeToF : mCalibrationImageSizeCV;
     }
 
+    public ComputerVisionUtils.Point3F[] getRgbEdges() {
+        return mCalibrationImageEdges;
+    }
+    public ArrayList<ComputerVisionUtils.Point3F> getTofEdges() {
+        return edges;
+    }
+
     public float getLightIntensity() {
         return mPixelIntensity;
     }
@@ -444,7 +466,8 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         switch (mode) {
             case CALIBRATION:
                 Matrix.invertM(matrix, 0, matrix, 0);
-                ArrayList<ComputerVisionUtils.Point3F> edges;
+                Log.i(TAG, "this is inside calibration inside depthpreview  ");
+
                 edges = mComputerVision.getCalibrationToFEdges(depthmap.depth, calibration, matrix, mCalibrationImageEdges);
 
                 mCalibrationImageSizeCV = null;
@@ -453,8 +476,12 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
                     float y = mCalibrationImageEdges[0].distanceTo(mCalibrationImageEdges[3]);
                     if ((x > 0) && (y > 0)) {
                         mCalibrationImageSizeCV = new SizeF(x, y);
+                       Log.i("AbstractArcamera","this is value of edges first "+x+ "----"+y);
+
                     }
                 }
+
+                Log.i("AbstractArcamera","this is value of edges second "+edges.get(0)+ "---- "+edges.get(1));
 
                 mCalibrationImageSizeToF = null;
                 if (edges.size() >= 4) {
@@ -462,9 +489,12 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
                     float y = edges.get(0).distanceTo(edges.get(3));
                     if ((x > 0) && (y > 0)) {
                         mCalibrationImageSizeToF = new SizeF(x, y);
-                        mCalibrationImageSizeCV = mCalibrationImageSizeToF;
+                      //  mCalibrationImageSizeCV = mCalibrationImageSizeToF;
+                        Log.i("AbstractArcamera","this is value of edges second "+x+ "---- "+y);
+
                     }
                 }
+                Log.i(TAG, "this is inside calibration inside depthpreview  ");
 
                 return mComputerVision.getDepthPreviewCalibration(depthmap.depth, calibration, matrix, mCalibrationImageEdges);
             case CENTER:

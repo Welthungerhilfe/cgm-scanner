@@ -59,6 +59,10 @@
         android:glEsVersion="0x00020000"
         android:required="true" />
 
+    <queries>
+        <package android:name="com.huawei.arengine.service" />
+    </queries>
+
     <application
         android:name=".AppController"
         android:allowBackup="true"

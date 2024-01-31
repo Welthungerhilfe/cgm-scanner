@@ -23,6 +23,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Stack;
@@ -158,7 +159,7 @@ public class ComputerVisionUtils {
         float cx = calibration[2] * (float)w;
         float cy = calibration[3] * (float)h;
         Paint paint = new Paint();
-        paint.setColor(Color.argb(255, 255, 0, 255));
+        paint.setColor(Color.argb(255, 0, 0, 255));
         Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         int lx = 0, ly = 0;
@@ -178,6 +179,8 @@ public class ComputerVisionUtils {
                 ly = ty;
             }
         }
+        Log.i("Computervision", "this is inside getDepthPreviewCalibration");
+
         return bitmap;
     }
 

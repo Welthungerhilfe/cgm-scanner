@@ -102,6 +102,7 @@ public class DeviceCheckActivity extends BaseActivity {
         } else {
             activityDeviceCheckBinding.viewPager.setCurrentItem(curpos + 1);
         }
+
     }
 
     private void showCompleteView() {
