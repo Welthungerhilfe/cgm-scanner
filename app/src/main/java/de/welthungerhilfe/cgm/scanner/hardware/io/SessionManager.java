@@ -348,7 +348,7 @@ public class SessionManager {
     }
 
     public void setTofSensor(String values) {
-        editor.putString(RGB_SENSOR, values);
+        editor.putString(TOF_SENSOR, values);
         editor.commit();
     }
     public void setLocationIndiaVersion(int environment) {
