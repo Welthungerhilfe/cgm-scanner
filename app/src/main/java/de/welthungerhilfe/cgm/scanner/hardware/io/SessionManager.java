@@ -65,6 +65,13 @@ public class SessionManager {
 
     private final String BACKGROUND_TASK_COUNT = "background_task_count";
 
+    private final String RGB_SENSOR= "RGB_SENSOR";
+
+    private final String TOF_SENSOR= "TOF_SENSOR";
+
+
+
+
 
 
 
@@ -327,6 +334,23 @@ public class SessionManager {
         editor.commit();
     }
 
+    public String getRgbSensor() {
+        return pref.getString(RGB_SENSOR, "NOT DONE");
+    }
+
+    public void setRgbSensor(String values) {
+        editor.putString(RGB_SENSOR, values);
+        editor.commit();
+    }
+
+    public String getTofSensor() {
+        return pref.getString(TOF_SENSOR, "NOT DONE");
+    }
+
+    public void setTofSensor(String values) {
+        editor.putString(RGB_SENSOR, values);
+        editor.commit();
+    }
     public void setLocationIndiaVersion(int environment) {
         editor.putInt(KEY_LOCATION_INDIA_VERSION, environment);
         editor.commit();

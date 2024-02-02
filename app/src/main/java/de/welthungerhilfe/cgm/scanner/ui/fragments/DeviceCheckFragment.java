@@ -73,10 +73,10 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
 
     public enum IssueType { RGB_DEFECT, TOF_DEFECT, BATTERY_LOW, GPS_FAILED, STORAGE_LOW, BACKEND_ERROR, CHECK_REFUSED };
 
-    private final int CALIBRATIONS_MIN = 30; //measures
-    private final int CALIBRATIONS_TIMEOUT = 10000; //miliseconds
-    private final float CALIBRATION_TOLERANCE_RGB = 0.04f; //meters
-    private final float CALIBRATION_TOLERANCE_TOF = 0.05f; //meters
+    private final int CALIBRATIONS_MIN = 25; //measures
+    private final int CALIBRATIONS_TIMEOUT = 25000; //miliseconds
+    private final float CALIBRATION_TOLERANCE_RGB = 0.02f; //meters
+    private final float CALIBRATION_TOLERANCE_TOF = 0.02f; //meters
     private final SizeF CALIBRATION_IMAGE_SIZE = new SizeF(0.15f, 0.15f); //meters
 
     private final int BATTERY_MIN = 50; //percent
@@ -217,7 +217,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     @Override
     public void onDepthDataReceived(Depthmap depthmap, int frameIndex) {
 
-        if (frameIndex % 10 == 0) {
+        if (frameIndex % 5 == 0) {
             SizeF calibrationRGB = camera.getCalibrationImageSize(false);
             SizeF calibrationToF = camera.getCalibrationImageSize(true);
             Log.i("Tag","this is value of "+camera.getCameraCalibration());
@@ -391,10 +391,21 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
             if (valid) {
                 result.setResult(getString(R.string.ok));
                 result.setState(TestView.TestState.SUCCESS);
+                if(onFail == IssueType.RGB_DEFECT){
+                    session.setRgbSensor("PASSED");
+                }else if(onFail == IssueType.TOF_DEFECT){
+                    session.setTofSensor("PASSED");
+
+                }
             } else {
                 result.setResult(getString(R.string.device_check_failed));
                 result.setState(TestView.TestState.ERROR);
                 addIssue(onFail);
+                if(onFail == IssueType.RGB_DEFECT){
+                    session.setRgbSensor("FAILED");
+                }else if(onFail == IssueType.TOF_DEFECT){
+                    session.setTofSensor("FAILED");
+                }
             }
 
             if (canContinue()) {

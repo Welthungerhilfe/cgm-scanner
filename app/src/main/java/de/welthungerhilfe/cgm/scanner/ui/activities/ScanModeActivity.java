@@ -108,8 +108,9 @@ import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, ScanTypeView.ScanTypeListener, SensorEventListener {
 
 
+    private enum ArtifactType {CALIBRATION, DEPTH, RGB}
 
-    private enum ArtifactType { CALIBRATION, DEPTH, RGB };
+    ;
 
     ActivityScanModeBinding activityScanModeBinding;
 
@@ -124,9 +125,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private float[] accelerometerReading = new float[3];
 
-    double lastUpdatedAngle=0;
-
-
+    double lastUpdatedAngle = 0;
 
 
     public void scanStanding() {
@@ -211,7 +210,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         measure.setSchema_version(CgmDatabase.version);
         measure.setScannedBy(session.getDevice());
         measure.setStd_test_qr_code(session.getStdTestQrCode());
-        if(session.getSelectedMode()==AppConstants.RST_MODE) {
+        if (session.getSelectedMode() == AppConstants.RST_MODE) {
             measure.setReceived_at(System.currentTimeMillis());
         }
 
@@ -316,7 +315,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            LogFileUtils.logException(throwable,"Scanemode oncreate");
+            LogFileUtils.logException(throwable, "Scanemode oncreate");
             Crashes.trackError(throwable);
             finish();
         });
@@ -349,7 +348,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             measure.setEnvironment(session.getEnvironment());
         }
 
-        activityScanModeBinding = DataBindingUtil.setContentView(this,R.layout.activity_scan_mode);
+        activityScanModeBinding = DataBindingUtil.setContentView(this, R.layout.activity_scan_mode);
 
         mTxtFeedback = findViewById(R.id.txtFeedback);
         mTitleView = findViewById(R.id.txtTitle);
@@ -364,7 +363,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         ImageView depthCameraPreview = findViewById(R.id.depthCameraPreview);
         GLSurfaceView glSurfaceView = findViewById(R.id.surfaceview);
 
-        getCamera().onCreate(colorCameraPreview, depthCameraPreview, glSurfaceView,mOutline);
+        getCamera().onCreate(colorCameraPreview, depthCameraPreview, glSurfaceView, mOutline);
 
         measureRepository = MeasureRepository.getInstance(this);
         personRepository = PersonRepository.getInstance(this);
@@ -391,7 +390,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         activityScanModeBinding.scanType2.setListener(2, this);
         activityScanModeBinding.scanType3.setListener(3, this);
 
-         options =
+        options =
                 new AccuratePoseDetectorOptions.Builder()
                         .setDetectorMode(AccuratePoseDetectorOptions.SINGLE_IMAGE_MODE)
                         .build();
@@ -403,9 +402,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 .build();
 
         objectDetector = ObjectDetection.getClient(objectDetectorOptions);
-        if(age >= 730){
+        if (age >= 730) {
             scanStanding();
-        }else{
+        } else {
             scanLying();
         }
 
@@ -433,7 +432,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         getCamera().onResume();
         getCamera().addListener(this);
 
-        if(session.getStdTestQrCode()!=null){
+        if (session.getStdTestQrCode() != null) {
             activityScanModeBinding.toolbar.setBackgroundResource(R.color.colorPink);
         } else {
             activityScanModeBinding.toolbar.setBackgroundResource(R.color.colorPrimary);
@@ -456,8 +455,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     public void onDestroy() {
         super.onDestroy();
         progressDialog.dismiss();
-        if(scanStarted && !scanCompleted){
-            firebaseAnalytics.logEvent(FirebaseService.SCAN_CANCELED,null);
+        if (scanStarted && !scanCompleted) {
+            firebaseAnalytics.logEvent(FirebaseService.SCAN_CANCELED, null);
         }
     }
 
@@ -503,7 +502,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 24 : 8);
         float progressToAddFloat = 100.0f / cloudsToFinishScan;
         int progressToAdd = (int) progressToAddFloat;
-     //   LogFileUtils.logInfo(TAG, "currentProgress=" + mProgress + ", progressToAdd=" + progressToAdd);
+        //   LogFileUtils.logInfo(TAG, "currentProgress=" + mProgress + ", progressToAdd=" + progressToAdd);
         if (mProgress + progressToAdd > 100) {
             mProgress = 100;
             runOnUiThread(() -> {
@@ -522,7 +521,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             activityScanModeBinding.scanType2.setChildIcon(R.drawable.stand_side);
             activityScanModeBinding.scanType3.setChildIcon(R.drawable.stand_back);
             activityScanModeBinding.scanType2.setTitle(R.string.side_scan);
-            if(files!=null) {
+            if (files != null) {
                 files.clear();
             }
             files = new ArrayList<>();
@@ -532,7 +531,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             activityScanModeBinding.scanType2.setChildIcon(R.drawable.lying_side);
             activityScanModeBinding.scanType3.setChildIcon(R.drawable.lying_back);
             activityScanModeBinding.scanType2.setTitle(R.string.lying_side_scan);
-            if(files!=null) {
+            if (files != null) {
                 files.clear();
             }
             files = new ArrayList<>();
@@ -719,65 +718,68 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     @Override
     public void onColorDataReceived(Bitmap bitmap, int frameIndex) {
-        Log.i(TAG,"this is value of bitmap & frameindex "+bitmap+" "+frameIndex);
+        Log.i(TAG, "this is value of bitmap & frameindex " + bitmap + " " + frameIndex);
         createPose(bitmap, frameIndex);
     }
 
-    public void onPostColorDataReceived(Bitmap bitmap, int frameIndex, float poseScore, String poseCoordinates, String boundingBox){
+    public void onPostColorDataReceived(Bitmap bitmap, int frameIndex, float poseScore, String poseCoordinates, String boundingBox) {
 
-            long profile = System.currentTimeMillis();
-            boolean hasCameraCalibration = mCameraInstance.hasCameraCalibration();
-             cameraCalibration = mCameraInstance.getCameraCalibration();
-            if(cameraCalibration!= null && cameraCalibration.contains("NaN")){
-                cameraCalibration = session.getArcoreCaliFile();
-            }
-           // LogFileUtils.logInfo("ARENGINE","arcore step3 calibration value "+hasCameraCalibration+" "+cameraCalibration);
+        long profile = System.currentTimeMillis();
+        //  cameraCalibration = mCameraInstance.getCameraCalibration();
+        cameraCalibration = session.getArcoreCaliFile();
+        boolean hasCameraCalibration;
+        if (cameraCalibration != null && !cameraCalibration.contains("NaN")) {
+            hasCameraCalibration = true;
+        } else {
+            hasCameraCalibration = false;
+        }
+        LogFileUtils.logInfo("ARENGINE","arcore step3 calibration value "+hasCameraCalibration+" "+cameraCalibration);
 
 
         Runnable thread = () -> {
-                try {
+            try {
 
-                    //write RGB data
-                    String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
-                    currentImgFilename = currentImgFilename.replace('/', '_');
-                    File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
-                    BitmapHelper.writeBitmapToFile(bitmap, artifactFile);
-                    onProcessArtifact(artifactFile, ArtifactType.RGB, 0, poseScore, poseCoordinates,0,0,boundingBox,null);
+                //write RGB data
+                String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
+                currentImgFilename = currentImgFilename.replace('/', '_');
+                File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
+                BitmapHelper.writeBitmapToFile(bitmap, artifactFile);
+                onProcessArtifact(artifactFile, ArtifactType.RGB, 0, poseScore, poseCoordinates, 0, 0, boundingBox, null);
 
-                    //save RGB metadata
-                    if (artifactFile.exists()) {
-                        mColorSize += artifactFile.length();
-                        mColorTime += System.currentTimeMillis() - profile;
-                        if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
-                            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_SIZE, mColorSize);
-                            LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, mColorTime);
-                        }
+                //save RGB metadata
+                if (artifactFile.exists()) {
+                    mColorSize += artifactFile.length();
+                    mColorTime += System.currentTimeMillis() - profile;
+                    if (LocalPersistency.getBoolean(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE)) {
+                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_SIZE, mColorSize);
+                        LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, mColorTime);
                     }
-
-                    //save calibration data
-                    artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
-                    if (!artifactFile.exists()) {
-                        if (hasCameraCalibration) {
-                            try {
-                                FileOutputStream fileOutputStream = new FileOutputStream(artifactFile.getAbsolutePath());
-                                fileOutputStream.write(cameraCalibration.getBytes());
-                                fileOutputStream.flush();
-                                fileOutputStream.close();
-                                onProcessArtifact(artifactFile, ArtifactType.CALIBRATION, 0,0,null,0,0,null,null);
-
-                            } catch (Exception e) {
-                                LogFileUtils.logException(e,"scanemode runnablethread");
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    LogFileUtils.logException(e,"scanemode runnablethread1 ");
                 }
 
-                onThreadChange(-1);
-            };
-            onThreadChange(1);
-            executor.execute(thread);
+                //save calibration data
+                artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
+                if (!artifactFile.exists()) {
+                    if (hasCameraCalibration) {
+                        try {
+                            FileOutputStream fileOutputStream = new FileOutputStream(artifactFile.getAbsolutePath());
+                            fileOutputStream.write(cameraCalibration.getBytes());
+                            fileOutputStream.flush();
+                            fileOutputStream.close();
+                            onProcessArtifact(artifactFile, ArtifactType.CALIBRATION, 0, 0, null, 0, 0, null, null);
+
+                        } catch (Exception e) {
+                            LogFileUtils.logException(e, "scanemode runnablethread");
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LogFileUtils.logException(e, "scanemode runnablethread1 ");
+            }
+
+            onThreadChange(-1);
+        };
+        onThreadChange(1);
+        executor.execute(thread);
 
     }
 
@@ -800,14 +802,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             "\nNoise amount: " + String.format(Locale.US, "%.3f", getCamera().getDepthNoiseAmount());
             runOnUiThread(() -> mTitleView.setText(text));*/
         }
-        Log.i("ScanModeActivity","this is before on feedback update ");
+        Log.i("ScanModeActivity", "this is before on feedback update ");
         onFeedbackUpdate();
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             float light = mCameraInstance.getLightIntensity();
             float orientation = mCameraInstance.getOrientation();
-            Log.i("ScanModeActivity","this is value of orientation "+orientation);
+            Log.i("ScanModeActivity", "this is value of orientation " + orientation);
             double child_distance = mCameraInstance.getTargetDistance();
             if (light > 1) {
                 light = 1.0f - (light - 1.0f);
@@ -829,7 +831,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     //write depthmap
                     File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                     depthmap.save(artifactFile);
-                    onProcessArtifact(artifactFile, ArtifactType.DEPTH, finalHeight,0,null,child_distance,light_score,null, String.valueOf(orientation));
+                    onProcessArtifact(artifactFile, ArtifactType.DEPTH, finalHeight, 0, null, child_distance, light_score, null, String.valueOf(orientation));
 
                     //profile process
                     if (artifactFile.exists()) {
@@ -841,7 +843,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         }
                     }
                 } catch (Exception e) {
-                    LogFileUtils.logException(e,"OnDepthDataReceived");
+                    LogFileUtils.logException(e, "OnDepthDataReceived");
                 }
 
                 onThreadChange(-1);
@@ -852,7 +854,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void onLightScore(float score) {
-        Log.i(TAG,"this is valur light score "+score);
+        Log.i(TAG, "this is valur light score " + score);
         synchronized (lock) {
             if (!lightScores.containsKey(SCAN_STEP)) {
                 lightScores.put(SCAN_STEP, new ArrayList<>());
@@ -879,37 +881,37 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 setOutline(true);
             }
 
-           // if (mTxtFeedback.getVisibility() == View.GONE) {
-                switch (light) {
-                    case NORMAL:
+            // if (mTxtFeedback.getVisibility() == View.GONE) {
+            switch (light) {
+                case NORMAL:
 
                        /* if(mCameraInstance.getTargetDistance() < 0.7) {
 
                         }else if(mCameraInstance.getTargetDistance() > 1.5){
                             break;
                         }*/
-                        setFeedback(null);
-                        break;
-                    case BRIGHT:
-                        setFeedback(getString(R.string.score_light_bright));
-                        break;
-                    case DARK:
-                        setFeedback(getString(R.string.score_light_dark));
-                        break;
-                }
-           // }
-
-           // if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
-                if (distance < 0.7) {
-                    setFeedback("Too Close");
-
-                } else if (distance > 1.5f) {
-                    setFeedback("Too Far");
-
-                } else {
                     setFeedback(null);
-                }
-         //   }
+                    break;
+                case BRIGHT:
+                    setFeedback(getString(R.string.score_light_bright));
+                    break;
+                case DARK:
+                    setFeedback(getString(R.string.score_light_dark));
+                    break;
+            }
+            // }
+
+            // if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
+            if (distance < 0.7) {
+                setFeedback("Too Close");
+
+            } else if (distance > 1.5f) {
+                setFeedback("Too Far");
+
+            } else {
+                setFeedback(null);
+            }
+            //   }
         });
 
     }
@@ -955,7 +957,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight, float poseScore, String poseCordinates,double child_distance, float light_score, String boundinBox, String orientation) {
+    private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight, float poseScore, String poseCordinates, double child_distance, float light_score, String boundinBox, String orientation) {
         if (artifactFile.exists()) {
             FileLog log = new FileLog();
 
@@ -1014,9 +1016,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         synchronized (threadsLock) {
             threadsCount += diff;
             if (threadsCount == 0) {
-             //   LogFileUtils.logInfo(TAG, "The last thread finished");
+                //   LogFileUtils.logInfo(TAG, "The last thread finished");
             } else {
-               // LogFileUtils.logInfo(TAG, "Amount of threads : " + threadsCount);
+                // LogFileUtils.logInfo(TAG, "Amount of threads : " + threadsCount);
             }
         }
     }
@@ -1048,7 +1050,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     for (Float value : lightScores.get(SCAN_STEP)) {
                         lightScore += value;
                     }
-                    lightScore /= (float)lightScores.get(SCAN_STEP).size();
+                    lightScore /= (float) lightScores.get(SCAN_STEP).size();
                 }
 
                 //too bright values are not over 100%
@@ -1077,7 +1079,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
                 if (step1 && step2 && step3) {
                     showCompleteButton();
-                    firebaseAnalytics.logEvent(FirebaseService.SCAN_START,null);
+                    firebaseAnalytics.logEvent(FirebaseService.SCAN_START, null);
                     scanStarted = true;
                 }
             });
@@ -1110,18 +1112,18 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     UploadService.forceResume();
                 }
                 scanCompleted = true;
-                firebaseAnalytics.logEvent(FirebaseService.SCAN_SUCCESSFUL,null);
+                firebaseAnalytics.logEvent(FirebaseService.SCAN_SUCCESSFUL, null);
                 finish();
             });
         }
     };
 
     public void createPose(Bitmap bitmap, int frameIndex) {
-        Log.i(TAG,"this is inside point 0");
+        Log.i(TAG, "this is inside point 0");
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
-            Log.i(TAG,"this is inside point 1");
-            if(bitmap==null){
+            Log.i(TAG, "this is inside point 1");
+            if (bitmap == null) {
                 return;
             }
             String[] ans = new String[2];
@@ -1133,7 +1135,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                 public void onSuccess(Pose pose) {
                                     // Task completed successfully
                                     // ...
-                                    Log.i(TAG,"this is inside point 3");
+                                    Log.i(TAG, "this is inside point 3");
 
                                     String poseCoordinates = null;
                                     float poseTotal = 0.0f;
@@ -1143,7 +1145,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                     if (allPoseLandmarks != null && allPoseLandmarks.size() > 0) {
                                         poseCoordinates = "";
                                         for (int i = 0; i < allPoseLandmarks.size(); i++) {
-                                            poseCoordinates = poseCoordinates+" "+ allPoseLandmarks.get(i).getInFrameLikelihood() + "," +allPoseLandmarks.get(i).getPosition().x+","+allPoseLandmarks.get(i).getPosition().y;
+                                            poseCoordinates = poseCoordinates + " " + allPoseLandmarks.get(i).getInFrameLikelihood() + "," + allPoseLandmarks.get(i).getPosition().x + "," + allPoseLandmarks.get(i).getPosition().y;
                                             poseTotal = poseTotal + allPoseLandmarks.get(i).getInFrameLikelihood();
                                         }
                                         poseScore = (float) (poseTotal / 33.0);
@@ -1154,10 +1156,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                         ans[1] = poseCoordinates;
 
                                     }
-                                        if(ans[0]==null){
-                                            ans[0]="0.0";
-                                        }
-                                    Log.i(TAG,"this is inside point 4" + ans[0] + " " + ans[1]);
+                                    if (ans[0] == null) {
+                                        ans[0] = "0.0";
+                                    }
+                                    Log.i(TAG, "this is inside point 4" + ans[0] + " " + ans[1]);
                                     cretaeBoundingbox(bitmap, frameIndex, Float.parseFloat(ans[0]), ans[1]);
 
                                 }
@@ -1168,7 +1170,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                                 public void onFailure(@NonNull Exception e) {
                                     // Task failed with an exception
                                     // ...
-                                    Log.i(TAG,"this is inside point 5");
+                                    Log.i(TAG, "this is inside point 5");
                                     cretaeBoundingbox(bitmap, frameIndex, 0.0f, null);
 
 
@@ -1177,7 +1179,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    public void cretaeBoundingbox(Bitmap bitmap, int frameIndex,float poseScore,String poseCoordinates){
+    public void cretaeBoundingbox(Bitmap bitmap, int frameIndex, float poseScore, String poseCoordinates) {
         InputImage image = InputImage.fromBitmap(bitmap, 0);
         String boundingBox = null;
         objectDetector.process(image)
@@ -1187,22 +1189,20 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                             public void onSuccess(List<DetectedObject> detectedObjects) {
 
                                 Log.i("ObjectDetector ", "this is value of bounding box " + detectedObjects);
-                                String boundingBox= null;
-                                    if(detectedObjects.size()!= 0 &&    detectedObjects.get(0) !=null) {
-                                        Rect rect = detectedObjects.get(0).getBoundingBox();
+                                String boundingBox = null;
+                                if (detectedObjects.size() != 0 && detectedObjects.get(0) != null) {
+                                    Rect rect = detectedObjects.get(0).getBoundingBox();
 
-                                        if(rect!=null) {
-                                            boundingBox = "{\"left\":\""+rect.left+"\", \"right\":\""+rect.right+"\", \"top\":\""+rect.top+"\", \"bottom\":\""+rect.bottom+"\"}";
+                                    if (rect != null) {
+                                        boundingBox = "{\"left\":\"" + rect.left + "\", \"right\":\"" + rect.right + "\", \"top\":\"" + rect.top + "\", \"bottom\":\"" + rect.bottom + "\"}";
                                         //    LogFileUtils.logInfo(TAG,"this is value of bounding box "+boundingBox);
 
-                                        }
+                                    }
 
-                                     }
-                                    else
-                                    {
-                                    }
-                                onPostColorDataReceived(bitmap, frameIndex, poseScore, poseCoordinates,boundingBox);
-                                    }
+                                } else {
+                                }
+                                onPostColorDataReceived(bitmap, frameIndex, poseScore, poseCoordinates, boundingBox);
+                            }
 
                         })
                 .addOnFailureListener(
@@ -1211,7 +1211,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                             public void onFailure(@NonNull Exception e) {
                                 // Task failed with an exception
                                 // ...
-                                onPostColorDataReceived(bitmap, frameIndex, poseScore, poseCoordinates,null);
+                                onPostColorDataReceived(bitmap, frameIndex, poseScore, poseCoordinates, null);
 
                             }
                         });
@@ -1245,9 +1245,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         // Calculate the vertical angle in degrees
         double angle = Math.toDegrees(Math.acos(z));
 
-        if(System.currentTimeMillis() - lastUpdatedAngle > 500) {
+        if (System.currentTimeMillis() - lastUpdatedAngle > 500) {
             lastUpdatedAngle = System.currentTimeMillis();
-            activityScanModeBinding.tvAngle.setText("Angle: " + String.format("%.0f", angle-90));
+            activityScanModeBinding.tvAngle.setText("Angle: " + String.format("%.0f", angle - 90));
         }
 
         // Display the angle (or use it for other purposes)

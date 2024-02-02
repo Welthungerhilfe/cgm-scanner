@@ -37,6 +37,8 @@ public class RemainingData {
 
     @Expose
     String app_orientation;
+    @Expose
+    String device_check;
 
 
 
@@ -168,5 +170,13 @@ public class RemainingData {
 
     public void setApp_orientation(String app_orientation) {
         this.app_orientation = app_orientation;
+    }
+
+    public String getDevice_check() {
+        return device_check;
+    }
+
+    public void setDevice_check(String device_check) {
+        this.device_check = device_check;
     }
 }
