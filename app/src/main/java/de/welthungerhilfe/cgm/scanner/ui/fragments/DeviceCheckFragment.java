@@ -353,6 +353,10 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
             camera.onCreate(fragmentDeviceCheckBinding.colorCameraPreview,
                     fragmentDeviceCheckBinding.depthCameraPreview,
                     fragmentDeviceCheckBinding.surfaceview,null);
+
+            Display d = getActivity().getWindowManager().getDefaultDisplay();
+            fragmentDeviceCheckBinding.arHandImage.setVisibility(View.VISIBLE);
+            fragmentDeviceCheckBinding.arHandImage.getAnimation().setOffset(d.getWidth() / 2, d.getHeight() / 2);
         }
     }
 
@@ -369,9 +373,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
             result.setResult(getString(R.string.device_check_testing));
             result.setState(TestView.TestState.TESTING);
 
-            Display d = getActivity().getWindowManager().getDefaultDisplay();
-            fragmentDeviceCheckBinding.arHandImage.setVisibility(View.VISIBLE);
-            fragmentDeviceCheckBinding.arHandImage.getAnimation().setOffset(d.getWidth() / 2, d.getHeight() / 2);
+
             calibrationTimestamp = System.currentTimeMillis();
         } else if ((calibrations.size() == CALIBRATIONS_MIN) || (System.currentTimeMillis() - calibrationTimestamp >= CALIBRATIONS_TIMEOUT)) {
             boolean valid = false;
