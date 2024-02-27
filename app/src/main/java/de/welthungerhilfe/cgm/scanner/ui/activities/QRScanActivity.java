@@ -19,12 +19,16 @@
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -32,6 +36,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -105,6 +110,8 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
 
     public enum STDTEST {VALID, INVALID, OLDER, INFUTURE}
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -147,11 +154,67 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                 finish();
             } else {
                 firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_START, null);
-                startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), IMAGE_CAPTURED_REQUEST);
+                //  startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), IMAGE_CAPTURED_REQUEST);
+
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                // Ensure that there's a camera activity to handle the intent
+                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                    // Create the File where the photo should go
+                    File photoFile = null;
+                    try {
+                        photoFile = createImageFile();
+                    } catch (IOException ex) {
+
+                    }
+                    // Continue only if the File was successfully created
+                    if (photoFile != null) {
+                        Uri photoURI = FileProvider.getUriForFile(this,
+                                "de.welthungerhilfe.cgm.scanner.fileprovider",
+                                photoFile);
+                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                        startActivityForResult(takePictureIntent, IMAGE_CAPTURED_REQUEST);
+                    }
+                }
             }
         } else {
             finish();
         }
+    }
+
+    String currentPhotoPath;
+    private File createImageFile() throws IOException {
+        // Create an image file name
+//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+//        String imageFileName = "JPEG_" + timeStamp + "_";
+//        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+//        File image = File.createTempFile(
+//                imageFileName,  /* prefix */
+//                ".jpg",         /* suffix */
+//                storageDir      /* directory */
+//        );
+//
+//        // Save a file: path for use with ACTION_VIEW intents
+//        currentPhotoPath = image.getAbsolutePath();
+
+        final long timestamp = AppController.getInstance().getUniversalTimestamp();
+        final String consentFileString = timestamp + "_" + qrCode + ".jpg";
+
+        File extFileDir = AppController.getInstance().getRootDirectory(this);
+        File consentFileFolder = new File(extFileDir, AppConstants.LOCAL_CONSENT_URL.replace("{qrcode}", qrCode).replace("{scantimestamp}", String.valueOf(timestamp)));
+        File consentFile = new File(consentFileFolder, consentFileString);
+        if (!consentFileFolder.exists()) {
+            boolean created = consentFileFolder.mkdirs();
+            if (created) {
+                Log.i(TAG, "Folder: \"" + consentFileFolder + "\" created\n");
+            } else {
+                Log.e(TAG, "Folder: \"" + consentFileFolder + "\" could not be created!\n");
+            }
+
+           // BitmapHelper.writeBitmapToFile(data1, consentFile);
+
+        }
+        currentPhotoPath = consentFile.getAbsolutePath();
+        return consentFile;
     }
 
     @Override
@@ -159,12 +222,23 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == IMAGE_CAPTURED_REQUEST && resultCode == RESULT_OK) {
             try {
-                activityScanQrBinding.llQrDetails.setVisibility(View.GONE);
+               /* activityScanQrBinding.llQrDetails.setVisibility(View.GONE);
                 activityScanQrBinding.qrScanView.setVisibility(View.GONE);
                 Bitmap capturedImageBitmap = (Bitmap) data.getExtras().get("data");
                 capturedImageBitmap = BitmapHelper.getAcceptableBitmap(capturedImageBitmap);
                 ImageSaver(capturedImageBitmap, QRScanActivity.this);
-                return;
+                return;*/
+
+                    File f = new File(currentPhotoPath);
+                   // selectedImage.setImageURI(Uri.fromFile(f));
+                    Log.d("tag", "size of file " + f.length());
+
+                    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                    Uri contentUri = Uri.fromFile(f);
+                    mediaScanIntent.setData(contentUri);
+                    this.sendBroadcast(mediaScanIntent);
+                ImageSaver(f,QRScanActivity.this);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -241,14 +315,16 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         }
     }
 
-    void ImageSaver(Bitmap data1, Context context) {
+    void ImageSaver(File consentFile, Context context) {
 
 
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... voids) {
                 final long timestamp = AppController.getInstance().getUniversalTimestamp();
-                final String consentFileString = timestamp + "_" + qrCode + ".jpg";
+
+              Bitmap bitmap = BitmapFactory.decodeFile(consentFile.getAbsolutePath());
+            /*    final String consentFileString = timestamp + "_" + qrCode + ".jpg";
 
                 File extFileDir = AppController.getInstance().getRootDirectory(context);
                 File consentFileFolder = new File(extFileDir, AppConstants.LOCAL_CONSENT_URL.replace("{qrcode}", qrCode).replace("{scantimestamp}", String.valueOf(timestamp)));
@@ -264,7 +340,10 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                     BitmapHelper.writeBitmapToFile(data1, consentFile);
 
 
-                }
+                }*/
+
+                BitmapHelper.writeBitmapToFile(bitmap, consentFile);
+
 
                 FileOutputStream output = null;
                 try {

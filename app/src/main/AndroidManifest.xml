@@ -218,6 +218,16 @@
             android:exported="false"
             android:syncable="true" />
 
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="de.welthungerhilfe.cgm.scanner.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
+
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
