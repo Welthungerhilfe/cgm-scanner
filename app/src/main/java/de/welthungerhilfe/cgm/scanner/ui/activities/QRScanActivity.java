@@ -22,6 +22,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -34,12 +35,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.IntentSenderRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanning;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -110,7 +119,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
 
     public enum STDTEST {VALID, INVALID, OLDER, INFUTURE}
 
-
+    private ActivityResultLauncher<IntentSenderRequest> scannerLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,7 +139,8 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
             activityScanQrBinding.qrScanView.setResultHandler(this);
             activityScanQrBinding.qrScanView.startCamera();
         }
-
+        scannerLauncher =
+                registerForActivityResult(new ActivityResultContracts.StartIntentSenderForResult(), this::handleActivityResult);
 
     }
 
@@ -156,7 +166,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                 firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_START, null);
                 //  startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), IMAGE_CAPTURED_REQUEST);
 
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+               /* Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 // Ensure that there's a camera activity to handle the intent
                 if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                     // Create the File where the photo should go
@@ -174,14 +184,55 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
                         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                         startActivityForResult(takePictureIntent, IMAGE_CAPTURED_REQUEST);
                     }
-                }
+                }*/
+
+                GmsDocumentScannerOptions.Builder options =
+                        new GmsDocumentScannerOptions.Builder()
+                                .setResultFormats(
+                                        GmsDocumentScannerOptions.RESULT_FORMAT_JPEG)
+                                .setGalleryImportAllowed(false);
+
+
+                        options.setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL);
+                options.setPageLimit(1);
+
+
+
+                GmsDocumentScanning.getClient(options.build())
+                        .getStartScanIntent(this)
+                        .addOnSuccessListener(new OnSuccessListener<IntentSender>() {
+                            @Override
+                            public void onSuccess(IntentSender intentSender) {
+
+                            }
+                        })
+                        .addOnSuccessListener(
+                                intentSender ->
+                                        scannerLauncher.launch(new IntentSenderRequest.Builder(intentSender).build()))
+                        .addOnFailureListener(
+                                e -> Toast.makeText(QRScanActivity.this,"Error",Toast.LENGTH_LONG).show());
             }
         } else {
             finish();
         }
     }
 
-    String currentPhotoPath;
+    private void handleActivityResult(ActivityResult activityResult) {
+
+        int resultCode = activityResult.getResultCode();
+        GmsDocumentScanningResult result =
+                GmsDocumentScanningResult.fromActivityResultIntent(activityResult.getData());
+        if (result.getPages() != null) {
+            File file = new File(result.getPages().get(0).getImageUri().getPath());
+
+
+
+            ImageSaver(file,QRScanActivity.this);
+        }
+
+    }
+
+        String currentPhotoPath;
     private File createImageFile() throws IOException {
         // Create an image file name
 //        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -217,17 +268,17 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
         return consentFile;
     }
 
-    @Override
+ /*   @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == IMAGE_CAPTURED_REQUEST && resultCode == RESULT_OK) {
             try {
-               /* activityScanQrBinding.llQrDetails.setVisibility(View.GONE);
+               *//* activityScanQrBinding.llQrDetails.setVisibility(View.GONE);
                 activityScanQrBinding.qrScanView.setVisibility(View.GONE);
                 Bitmap capturedImageBitmap = (Bitmap) data.getExtras().get("data");
                 capturedImageBitmap = BitmapHelper.getAcceptableBitmap(capturedImageBitmap);
                 ImageSaver(capturedImageBitmap, QRScanActivity.this);
-                return;*/
+                return;*//*
 
                     File f = new File(currentPhotoPath);
                    // selectedImage.setImageURI(Uri.fromFile(f));
@@ -244,7 +295,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
             }
         }
         finish();
-    }
+    }*/
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSION_CAMERA) {
@@ -437,4 +488,6 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
             return STDTEST.INVALID;
         }
     }
+
+
 }

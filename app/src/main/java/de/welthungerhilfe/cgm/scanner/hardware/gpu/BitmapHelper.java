@@ -31,7 +31,7 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 
 public class BitmapHelper {
 
-    public static final int JPG_COMPRESSION = 90;
+    public static final int JPG_COMPRESSION = 70;
 
     public static Bitmap getAcceptableBitmap(Bitmap bmp) {
         float ratio = 0;

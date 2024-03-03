@@ -149,6 +149,10 @@ dependencies {
 
     implementation 'com.google.mlkit:object-detection:17.0.0'//ML kit object detection
 
+    implementation 'com.google.android.gms:play-services-mlkit-document-scanner:16.0.0-beta1'
+
+
+
 
     //Firebase
     implementation platform('com.google.firebase:firebase-bom:28.4.2')// When using the BoM, you don't specify versions in Firebase library dependencies
