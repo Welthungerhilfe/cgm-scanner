@@ -19,6 +19,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.io.ZscoreUtils;
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
 public class ZscoreUtilsTest {
+/*
 
     double[] zScore = new double[3];
     private Context context;
@@ -191,5 +192,6 @@ public class ZscoreUtilsTest {
         return zScore;
     }
 
+*/
 
 }

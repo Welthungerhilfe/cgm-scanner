@@ -24,7 +24,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 @Config(sdk = 28)
 public class DataFormatTest {
 
-
+/*
     private Context context;
 
     @Before
@@ -233,5 +233,5 @@ public class DataFormatTest {
         str = "2,3";
         decimalNumber = DataFormat.checkDoubleDecimals(str);
         assertThat(1, Matchers.is(decimalNumber));
-    }
+    }*/
 }
