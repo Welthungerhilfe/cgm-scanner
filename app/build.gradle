@@ -1,6 +1,8 @@
 apply plugin:'com.android.application'
 
 android {
+    namespace "de.welthungerhilfe.cgm.scanner"
+    testNamespace "de.welthungerhilfe.cgm.scanner.unittests"
     compileSdk 33
     ndkVersion "23.2.8568313"
     defaultConfig {
@@ -70,8 +72,13 @@ android {
     sourceSets {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
-    lintOptions {
+    lint {
         abortOnError true
+    }
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging true
+        }
     }
     testOptions {
         unitTests {
