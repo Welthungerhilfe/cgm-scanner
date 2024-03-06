@@ -20,8 +20,8 @@ import java.util.ArrayList;
 
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(sdk = 28)
+/*@RunWith(RobolectricTestRunner.class)
+@Config(sdk = 28)*/
 public class DataFormatTest {
 
 /*
