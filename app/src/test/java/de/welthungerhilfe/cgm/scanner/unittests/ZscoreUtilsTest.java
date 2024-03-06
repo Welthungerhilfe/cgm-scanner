@@ -16,8 +16,8 @@ import static org.junit.Assert.assertThat;
 
 import de.welthungerhilfe.cgm.scanner.hardware.io.ZscoreUtils;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(sdk = 28)
+/*@RunWith(RobolectricTestRunner.class)
+@Config(sdk = 28)*/
 public class ZscoreUtilsTest {
 /*
 
