@@ -22,7 +22,7 @@
             android:layout_centerVertical="true"
             android:contentDescription="@string/content_image"
             android:src="@drawable/ic_context_menu"
-            android:tint="@color/colorGreyDark" />
+            app:tint="@color/colorGreyDark" />
 
         <LinearLayout
             android:id="@+id/lytContainer"

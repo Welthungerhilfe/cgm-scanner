@@ -27,7 +27,7 @@
                 android:layout_centerVertical="true"
                 android:contentDescription="@string/content_image"
                 android:src="@drawable/ic_check"
-                android:tint="@color/colorPrimary"
+                app:tint="@color/colorPrimary"
                 android:visibility="gone" />
 
             <LinearLayout

@@ -87,7 +87,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/alert"
-                        android:tint="@color/colorGreyDark"
+                        app:tint="@color/colorGreyDark"
                         tools:ignore="ContentDescription" />
 
                     <TextView
@@ -135,7 +135,7 @@
                             android:layout_height="26dp"
                             android:layout_centerHorizontal="true"
                             android:src="@drawable/ic_search_bottom"
-                            android:tint="@color/colorGreen"></ImageView>
+                            app:tint="@color/colorGreen"></ImageView>
 
                         <TextView
                             android:layout_width="wrap_content"

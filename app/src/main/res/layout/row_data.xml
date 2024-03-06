@@ -158,7 +158,7 @@
                 android:layout_height="18dp"
                 android:contentDescription="@string/content_image"
                 android:src="@drawable/ic_context_menu"
-                android:tint="@color/colorGreyDark" />
+                app:tint="@color/colorGreyDark" />
 
         </LinearLayout>
 

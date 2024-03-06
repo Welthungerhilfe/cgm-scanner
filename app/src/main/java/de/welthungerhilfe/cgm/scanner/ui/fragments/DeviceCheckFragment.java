@@ -223,7 +223,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
             Log.i("Tag","this is value of "+camera.getCameraCalibration());
             LogFileUtils.logInfo(TAG,"this is device check fragment onDepthDataReceived "+calibrationRGB+" "+calibrationsToF);
             if (calibrationRGB != null) {
-                Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
+                requireActivity().runOnUiThread(() -> {
                     updateCalibration(calibrationRGB, calibrationsRGB);
                     updateCalibrationResult(calibrationsRGB, fragmentDeviceCheckBinding.test1, CALIBRATION_TOLERANCE_RGB, IssueType.RGB_DEFECT);
                     if (calibrationToF != null) {
@@ -444,7 +444,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
             int scale = batteryStatus != null ? batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1) : -1;
             float batteryPct = 100 * level / (float) scale;
 
-            Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
+            requireActivity().runOnUiThread(() -> {
                 if (batteryPct > BATTERY_MIN) {
                     setTestResult(fragmentDeviceCheckBinding.test1, R.string.ok, TestView.TestState.SUCCESS);
                 } else {
@@ -464,7 +464,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
             long bytes = stats.getAvailableBlocksLong() * stats.getBlockSizeLong();
             int gigabytes = (int) (bytes / 1024 / 1024 / 1024);
 
-            Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
+            requireActivity().runOnUiThread(() -> {
                 if (gigabytes > STORAGE_MIN) {
                     setTestResult(fragmentDeviceCheckBinding.test2, R.string.ok, TestView.TestState.SUCCESS);
                 } else {
@@ -479,7 +479,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
     private final Runnable gpsCheck = new Runnable() {
         @Override
         public void run() {
-            Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
+            requireActivity().runOnUiThread(() -> {
                 Activity activity = getActivity();
                 if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, BaseActivity.PERMISSION_LOCATION);
@@ -501,7 +501,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         public void run() {
             if (!BuildConfig.DEBUG) {
                 try {
-                    SessionManager session = new SessionManager(Objects.requireNonNull(getActivity()));
+                    SessionManager session = new SessionManager(requireActivity());
                     SyncingWorkManager.provideRetrofit().create(ApiService.class).test(session.getAuthTokenWithBearer()).subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(new Observer<String>() {
@@ -545,7 +545,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
                     updateNextButton();
                 }
             } else {
-                Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
+                requireActivity().runOnUiThread(() -> {
                     setTestResult(fragmentDeviceCheckBinding.test4, R.string.device_check_failed, TestView.TestState.ERROR);
                     addIssue(IssueType.BACKEND_ERROR);
                     updateNextButton();

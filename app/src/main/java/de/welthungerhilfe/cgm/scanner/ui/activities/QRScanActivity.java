@@ -298,6 +298,7 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
     }*/
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_CAMERA) {
             if (!(grantResults.length > 0 && grantResults[0] >= 0)) {
                 Toast.makeText(QRScanActivity.this, R.string.permission_camera, Toast.LENGTH_LONG).show();

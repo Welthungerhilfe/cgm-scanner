@@ -12,7 +12,7 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 
 
 public class TestAppController {
-   /* @Test
+    @Test
     public void getPersonId() {
         //String validId = AppController.getInstance().getPersonId();
         String valid =  String.format("%s_person_%s_%s", "AndroidUUID", AppController.getUniversalTimestamp(), AppController.getSaltString(16));
@@ -70,5 +70,5 @@ public class TestAppController {
            assertFalse("timestamp is not correct format",false);
         }
         assertThat("Random string generated incorrectly", 16, is(array[3].length()));
-    }*/
+    }
 }
