@@ -27,6 +27,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.IntentSenderRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -34,11 +38,14 @@ import androidx.lifecycle.ViewModelProvider;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.fragment.app.Fragment;
@@ -63,6 +70,9 @@ import android.widget.Toast;
 import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanning;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult;
 import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 
 import java.io.File;
@@ -91,6 +101,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.CreateDataActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
+import de.welthungerhilfe.cgm.scanner.ui.activities.QRScanActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
@@ -138,6 +149,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     String location_id;
 
     LocationDialogFragment.PassDataToPersonDataFragment passDataToPersonDataFragment;
+
+    private ActivityResultLauncher<IntentSenderRequest> scannerLauncher;
+
 
     public static PersonalDataFragment getInstance(String qrCode) {
         PersonalDataFragment fragment = new PersonalDataFragment();
@@ -227,7 +241,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         radioMale.setOnCheckedChangeListener(this);
 
 
-
+        scannerLauncher =
+                registerForActivityResult(new ActivityResultContracts.StartIntentSenderForResult(), this::handleActivityResult);
         ll_retake_photo = view.findViewById(R.id.ll_retake_photo);
         View contextMenu = view.findViewById(R.id.contextMenuButton);
         contextMenu.setOnClickListener(v -> {
@@ -252,15 +267,55 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                   return;
                 }
                 firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_START, null);
-                startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), IMAGE_CAPTURED_REQUEST);
+                //startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), IMAGE_CAPTURED_REQUEST);
+
+                GmsDocumentScannerOptions.Builder options =
+                        new GmsDocumentScannerOptions.Builder()
+                                .setResultFormats(
+                                        GmsDocumentScannerOptions.RESULT_FORMAT_JPEG)
+                                .setGalleryImportAllowed(false);
+
+
+                options.setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL);
+                options.setPageLimit(1);
+
+
+
+                GmsDocumentScanning.getClient(options.build())
+                        .getStartScanIntent(getActivity())
+                        .addOnSuccessListener(new OnSuccessListener<IntentSender>() {
+                            @Override
+                            public void onSuccess(IntentSender intentSender) {
+
+                            }
+                        })
+                        .addOnSuccessListener(
+                                intentSender ->
+                                        scannerLauncher.launch(new IntentSenderRequest.Builder(intentSender).build()))
+                        .addOnFailureListener(
+                                e -> Toast.makeText(getActivity(),"Error",Toast.LENGTH_LONG).show());
             }
-        });
+            });
 
 
         return view;
     }
 
-    @Override
+    private void handleActivityResult(ActivityResult activityResult) {
+
+        int resultCode = activityResult.getResultCode();
+        GmsDocumentScanningResult result =
+                GmsDocumentScanningResult.fromActivityResultIntent(activityResult.getData());
+        if (result.getPages() != null) {
+            File file = new File(result.getPages().get(0).getImageUri().getPath());
+
+
+
+            ImageSaver(file, getActivity());
+        }
+
+    }
+  /*  @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == IMAGE_CAPTURED_REQUEST && resultCode == RESULT_OK) {
@@ -274,7 +329,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 e.printStackTrace();
             }
         }
-    }
+    }*/
 
     public void initUI() {
         if (BuildConfig.DEBUG) {
@@ -621,14 +676,16 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         }).show();
     }
 
-    void ImageSaver(Bitmap data1, Context context) {
+    void ImageSaver(File consentFile, Context context) {
 
 
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... voids) {
                 final long timestamp = AppController.getInstance().getUniversalTimestamp();
-                final String consentFileString = timestamp + "_" + qrCode + ".jpg";
+
+                Bitmap bitmap = BitmapFactory.decodeFile(consentFile.getAbsolutePath());
+            /*    final String consentFileString = timestamp + "_" + qrCode + ".jpg";
 
                 File extFileDir = AppController.getInstance().getRootDirectory(context);
                 File consentFileFolder = new File(extFileDir, AppConstants.LOCAL_CONSENT_URL.replace("{qrcode}", qrCode).replace("{scantimestamp}", String.valueOf(timestamp)));
@@ -644,7 +701,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     BitmapHelper.writeBitmapToFile(data1, consentFile);
 
 
-                }
+                }*/
+
+                BitmapHelper.writeBitmapToFile(bitmap, consentFile);
+
 
                 FileOutputStream output = null;
                 try {
@@ -658,8 +718,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     log.setQrCode(qrCode);
                     log.setDeleted(false);
                     log.setCreateDate(AppController.getInstance().getUniversalTimestamp());
-                    log.setCreatedBy(new SessionManager(context).getUserEmail());
-                    log.setEnvironment(new SessionManager(context).getEnvironment());
+                    log.setCreatedBy(new SessionManager(getActivity()).getUserEmail());
+                    log.setEnvironment(new SessionManager(getActivity()).getEnvironment());
                     log.setSchema_version(CgmDatabase.version);
                     fileLogRepository.insertFileLog(log);
                     return true;
