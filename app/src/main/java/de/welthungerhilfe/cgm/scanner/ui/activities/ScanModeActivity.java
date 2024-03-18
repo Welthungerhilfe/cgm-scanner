@@ -741,11 +741,12 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             try {
 
                 //write RGB data
-                String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
+                String currentImgFilename = "rgb_" + person.getQrcode() + "_" + System.currentTimeMillis() + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
                 currentImgFilename = currentImgFilename.replace('/', '_');
                 File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
                 BitmapHelper.writeBitmapToFile(bitmap, artifactFile);
                 onProcessArtifact(artifactFile, ArtifactType.RGB, 0, poseScore, poseCoordinates, 0, 0, boundingBox, null);
+                LogFileUtils.logInfo(TAG,"this is value of rgb file "+currentImgFilename);
 
                 //save RGB metadata
                 if (artifactFile.exists()) {
