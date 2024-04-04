@@ -127,6 +127,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     double lastUpdatedAngle = 0;
 
+    double angle =0;
+
 
     public void scanStanding() {
         SCAN_MODE = AppConstants.SCAN_STANDING;
@@ -809,7 +811,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             float light = mCameraInstance.getLightIntensity();
-            float orientation = mCameraInstance.getOrientation();
+            String orientation = mCameraInstance.getOrientation()+", "+angle;
             Log.i("ScanModeActivity", "this is value of orientation " + orientation);
             double child_distance = mCameraInstance.getTargetDistance();
             if (light > 1) {
@@ -832,7 +834,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     //write depthmap
                     File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                     depthmap.save(artifactFile);
-                    onProcessArtifact(artifactFile, ArtifactType.DEPTH, finalHeight, 0, null, child_distance, light_score, null, String.valueOf(orientation));
+                    onProcessArtifact(artifactFile, ArtifactType.DEPTH, finalHeight, 0, null, child_distance, light_score, null, orientation);
 
                     //profile process
                     if (artifactFile.exists()) {
@@ -1244,7 +1246,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         z /= norm;
 
         // Calculate the vertical angle in degrees
-        double angle = Math.toDegrees(Math.acos(z));
+        angle = Math.toDegrees(Math.acos(z));
 
         if (System.currentTimeMillis() - lastUpdatedAngle > 500) {
             lastUpdatedAngle = System.currentTimeMillis();
