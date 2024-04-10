@@ -20,7 +20,7 @@ public class ResultAppHeight extends Results {
     public static class Data {
         @Expose
         float height;
-
+        
         public void setHeight(float height) {
             this.height = height;
         }
