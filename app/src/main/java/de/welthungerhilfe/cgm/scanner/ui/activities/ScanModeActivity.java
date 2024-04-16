@@ -73,6 +73,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -149,7 +150,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     @Override
-    public void onScan(int buttonId) {
+    public void onScan(int buttonId, boolean isRetake) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
         } else {
@@ -185,10 +186,22 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         break;
                 }
             }
+            if(isRetake){
+                updateRetakeFileLog(SCAN_STEP);
+            }
             openScan();
         }
     }
 
+    void updateRetakeFileLog(int scanStep){
+        ArrayList<FileLog> toRemove = new ArrayList<>();
+        for (FileLog file : files) {
+            if (file.getStep() == scanStep) {
+                toRemove.add(file);
+            }
+        }
+        files.removeAll(toRemove);
+    }
     @Override
     public void onTutorial() {
         Intent intent = new Intent(ScanModeActivity.this, TutorialActivity.class);

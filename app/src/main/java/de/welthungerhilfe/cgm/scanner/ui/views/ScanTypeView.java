@@ -15,7 +15,7 @@ public class ScanTypeView extends LinearLayout {
 
     public interface ScanTypeListener {
 
-        void onScan(int buttonId);
+        void onScan(int buttonId, boolean isRetake);
         void onTutorial();
     }
 
@@ -83,12 +83,12 @@ public class ScanTypeView extends LinearLayout {
 
         mRetakeButton.setOnClickListener(view -> {
             if (mListener != null) {
-                mListener.onScan(mButtonId);
+                mListener.onScan(mButtonId, true);
             }
         });
         mScanButton.setOnClickListener(view -> {
             if (mListener != null) {
-                mListener.onScan(mButtonId);
+                mListener.onScan(mButtonId, false);
             }
         });
         mTutorialButton.setOnClickListener(view -> {
