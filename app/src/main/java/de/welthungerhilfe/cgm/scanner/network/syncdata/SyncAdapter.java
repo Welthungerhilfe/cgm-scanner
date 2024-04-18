@@ -1340,11 +1340,17 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
             List<FileLog> fileLogsList = fileLogRepository.loadAppHeightFileLog(session.getEnvironment());
+            if(fileLogsList!=null){
+                LogFileUtils.logInfo(TAG,"Post app height size "+fileLogsList.size());
+            }
             if (fileLogsList.size() == 0) {
                 return;
             }
             String workflow[] = AppConstants.APP_HEIGHT_1_0.split("-");
             String appHeightWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
+            if(fileLogsList!=null){
+                LogFileUtils.logInfo(TAG,"Post app height workflow  "+appHeightWorkFlowId);
+            }
             if (appHeightWorkFlowId == null) {
                 return;
             }
