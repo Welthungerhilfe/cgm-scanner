@@ -999,6 +999,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             //set information if child is detected (note: this is unsupported on ARCore devices and for lying children wrongly oriented)
             boolean childDetected = getCamera().getPersonCount() == 1;
             log.setChildDetected(childDetected);
+
             log.setChildHeight(childHeight);
             log.setPoseScore(poseScore);
             log.setPoseCoordinates(poseCordinates);

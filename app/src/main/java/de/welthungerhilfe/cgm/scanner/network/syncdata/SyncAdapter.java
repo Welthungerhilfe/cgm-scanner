@@ -1361,7 +1361,11 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 ArrayList<String> sourceResults = new ArrayList<>();
                 resultAppHeight.setSource_results(sourceResults);
                 ResultAppHeight.Data data = new ResultAppHeight.Data();
-                data.setHeight(fileLog.getChildHeight());
+                if(fileLog.getChildHeight()==0.0){
+                    data.setHeight(9999.0F);
+                } else {
+                    data.setHeight(fileLog.getChildHeight());
+                }
                 resultAppHeight.setData(data);
                 resultList.add(resultAppHeight);
             }
@@ -1448,8 +1452,16 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 ArrayList<String> sourceResults = new ArrayList<>();
                 resultAppScore.setSource_results(sourceResults);
                 ResultAppScore.Data data = new ResultAppScore.Data();
-                data.setPoseScore(fileLog.getPoseScore());
-                data.setPoseCoordinates(formatPoseCoordinates(fileLog.getPoseCoordinates(),fileLog.getPoseScore()));
+                if(fileLog.getPoseScore()==0.0){
+                    data.setPoseScore(999.0f);
+                }else {
+                    data.setPoseScore(fileLog.getPoseScore());
+                }
+                if(fileLog.getPoseCoordinates()==null){
+                    data.setPoseCoordinates("Not generated");
+                }else {
+                    data.setPoseCoordinates(formatPoseCoordinates(fileLog.getPoseCoordinates(), fileLog.getPoseScore()));
+                }
                 resultAppScore.setData(data);
                 resultList.add(resultAppScore);
             }
@@ -1833,7 +1845,11 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 ArrayList<String> sourceResults = new ArrayList<>();
                 resultBoundingBox.setSource_results(sourceResults);
                 ResultBoundingBox.Data data = new ResultBoundingBox.Data();
-                data.setAppBoundingBox(fileLog.getBoundingBox());
+                if(fileLog.getBoundingBox()==null){
+                    data.setAppBoundingBox("Not generated");
+                }else {
+                    data.setAppBoundingBox(fileLog.getBoundingBox());
+                }
                 resultBoundingBox.setData(data);
                 resultList.add(resultBoundingBox);
             }
