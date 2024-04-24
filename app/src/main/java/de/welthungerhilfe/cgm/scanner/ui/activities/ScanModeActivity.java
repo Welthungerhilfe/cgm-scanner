@@ -130,6 +130,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     double angle =0;
 
+    private boolean isRetake = false;
 
     public void scanStanding() {
         SCAN_MODE = AppConstants.SCAN_STANDING;
@@ -151,6 +152,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     @Override
     public void onScan(int buttonId, boolean isRetake) {
+       this.isRetake = isRetake;
+       if(isRetake){
+           retakeFiles.clear();
+           retakeFiles = new ArrayList<>();
+       }
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
         } else {
@@ -186,9 +192,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         break;
                 }
             }
-            if(isRetake){
+            /*if(isRetake){
                 updateRetakeFileLog(SCAN_STEP);
-            }
+            }*/
             openScan();
         }
     }
@@ -201,6 +207,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             }
         }
         files.removeAll(toRemove);
+        files.addAll(retakeFiles);
+
+        retakeFiles.clear();
+
     }
     @Override
     public void onTutorial() {
@@ -262,6 +272,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private FileLogRepository fileLogRepository;
     private HashMap<Integer, ArrayList<Float>> lightScores;
     private ArrayList<FileLog> files;
+
+    private ArrayList<FileLog> retakeFiles;
+
     private final Object lock = new Object();
 
     private SessionManager session;
@@ -538,8 +551,13 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             activityScanModeBinding.scanType2.setTitle(R.string.side_scan);
             if (files != null) {
                 files.clear();
+
+            }
+            if(retakeFiles!=null){
+                retakeFiles.clear();
             }
             files = new ArrayList<>();
+            retakeFiles = new ArrayList<>();
             getCamera().setPlaneMode(AbstractARCamera.PlaneMode.LOWEST);
         } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
             activityScanModeBinding.scanType1.setChildIcon(R.drawable.lying_front);
@@ -549,7 +567,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             if (files != null) {
                 files.clear();
             }
+            if(retakeFiles!=null){
+                retakeFiles.clear();
+            }
             files = new ArrayList<>();
+            retakeFiles = new ArrayList<>();
             getCamera().setPlaneMode(AbstractARCamera.PlaneMode.VISIBLE);
         }
     }
@@ -738,6 +760,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         createPose(bitmap, frameIndex);
     }
 
+    int count =0;
     public void onPostColorDataReceived(Bitmap bitmap, int frameIndex, float poseScore, String poseCoordinates, String boundingBox) {
 
         long profile = System.currentTimeMillis();
@@ -750,6 +773,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             hasCameraCalibration = false;
         }
         LogFileUtils.logInfo("ARENGINE","arcore step3 calibration value "+hasCameraCalibration+" "+cameraCalibration);
+
 
 
         Runnable thread = () -> {
@@ -1024,7 +1048,13 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
 
             synchronized (lock) {
-                files.add(log);
+
+                if(isRetake){
+                    retakeFiles.add(log);
+
+                }else {
+                    files.add(log);
+                }
             }
         }
     }
@@ -1094,12 +1124,29 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     step3 = true;
                 }
 
+                Thread saveRetakeThread = new Thread(saveRetakeScan);
+                saveRetakeThread.start();
+
                 if (step1 && step2 && step3) {
                     showCompleteButton();
                     firebaseAnalytics.logEvent(FirebaseService.SCAN_START, null);
                     scanStarted = true;
                 }
             });
+        }
+    };
+
+    private final Runnable saveRetakeScan = new Runnable() {
+        @Override
+        public void run() {
+            if(isRetake){
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                updateRetakeFileLog(SCAN_STEP);
+            }
         }
     };
 
