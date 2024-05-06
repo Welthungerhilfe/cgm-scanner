@@ -214,19 +214,16 @@
     <string name="mode_lying">लेटना</string>
     <string name="start_scan">स्कैन शुरू करें</string>
     <string name="complete_scan">पूरा स्कैन</string>
-    <string name="help_front_view_2">बच्चे को रूपरेखा के अंदर रखने की कोशिश करें। बच्चे को सामने से स्कैन करें।</string>
-    <string name="help_lateral_view">सभी तरफ के व्यूज़ पाने के लिए बच्चे के चारों ओर फोन के साथ चलें।</string>
-    <string name="help_back_view">बच्चे को पीछे से स्कैन करें।</string>
+
     <string name="person_not_defined">व्यक्ति को परिभाषित नहीं किया गया था</string>
     <string name="storage_permission_needed">भंडारण अनुमति की आवश्यकता!</string>
     <string name="label_wait">कृप्या कुछ क्षण प्रतीक्षा करें…</string>
     <string name="btn_retake">फिर से देनी</string>
     <string name="btn_tutorial">ट्यूटोरियल</string>
     <string name="scan_feedback">स्कैन प्रतिक्रिया</string>
-    <string name="front_scan">01. सामने स्कैन</string>
-    <string name="side_scan">02. 360\' स्कैन</string>
+
     <string name="lying_side_scan">02. 180\' स्कैन</string>
-    <string name="back_scan">03. बैक स्कैन</string>
+
     <string name="scan_quality">स्कैन गुणवत्ता : </string>
     <string name="score_light">लाइट स्कोर : </string>
     <string name="score_light_bright">बहुत चमकीला</string>
@@ -235,6 +232,15 @@
     <string name="standup">बच्चे को एक स्पष्ट पृष्ठभूमि के खिलाफ रखने की कोशिश करें और पूरे बच्चे को कैमरे के दृश्य में रखें</string>
     <string name="lyedown">बच्चे को एक स्पष्ट पृष्ठभूमि के खिलाफ रखने की कोशिश करें और पूरे बच्चे को कैमरे के दृश्य में रखें</string>
     <string name="done">संपन्न</string>
+
+    <string name="help_front_view_2">बच्चे के सामने का स्कैन करें</string>
+    <string name="help_lateral_view">बच्चे की बाईं ओर का प्रोफ़ाइल स्कैन करें</string>
+    <string name="help_back_view">बच्चे की पीठ का स्कैन करें।</string>
+    <string name="help_right_view">बच्चे की दाईं ओर का प्रोफ़ाइल स्कैन करें</string>
+    <string name="front_scan">01. फ्रंट स्कैन</string>
+    <string name="side_scan">02. लेफ्ट साइड स्कैन</string>
+    <string name="back_scan">03. बैक स्कैन</string>
+    <string name="right_scan">04. राइट साइड स्कैन</string>
 
     <!-- Growth chart !-->
     <string name="axis_y">वाई अक्ष</string>

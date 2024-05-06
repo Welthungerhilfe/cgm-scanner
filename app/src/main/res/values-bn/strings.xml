@@ -422,11 +422,7 @@
 
 <string name="complete_scan">স্ক্যান সম্পন্ন </string>
 
-<string name="help_front_view_2">শিশুটিকে আউটলাইনের ভিতরে রাখতে চেষ্টা করুন । শিশুটির সামনের ‍দিক স্ক্যান করুন  </string>
 
-<string name="help_lateral_view">সকল দিকের চিত্র নিতে ফোনটি হাতে নিয়ে শিশুটির চারপাশে হাটুন </string>
-
-<string name="help_back_view">শিশুর শরীরের পিছনের অংশ স্ক্যান করুন.</string>
 
 <string name="person_not_defined">ব্যক্তিকে নির্ধারণ করা যায় নি </string>
 
@@ -440,15 +436,12 @@
 
 <string name="scan_feedback">স্ক্যান ফিডব্যাক </string>
 
-<string name="front_scan">০১. সামনে স্ক্যান করুন </string>
 
-<string name="side_scan">০২. ৩৬০ ডিগ্রী স্ক্যান করুন </string>
 
     <string name="lying_side_scan">০২। ১৮০\' স্ক্যান</string>
 
 
 
-    <string name="back_scan">০৩. পিছনে স্ক্যান করুন </string>
 
 <string name="scan_quality">স্ক্যান কোয়ালিটি: </string>
 
@@ -465,6 +458,15 @@
 <string name="lyedown">শিশুটিকে পরিষ্কার একটি ব্যাকগ্রাউন্ডের সামনে রাখার চেষ্টা করুন এবং শিশুর পুরো শরীরকে ক্যামেরার ভিউ এর মধ্যে রাখুন </string>
 
 <string name="done">সম্পন্ন </string>
+
+    <string name="help_front_view_2">বাচ্চার সামনের দিক स्क্যান করুন</string>
+    <string name="help_lateral_view">বাচ্চার বাম দিকের প্রোফাইল स्क্যান করুন</string>
+    <string name="help_back_view">বাচ্চার পিছনের দিক स्क্যান করুন।</string>
+    <string name="help_right_view">বাচ্চার ডান দিকের প্রোফাইল स्क্যান করুন</string>
+    <string name="front_scan">01. ফ্রন্ট স্ক্যান</string>
+    <string name="side_scan">02. লেফ্ট সাইড স্ক্যান</string>
+    <string name="back_scan">03. ব্যাক স্ক্যান</string>
+    <string name="right_scan">04. রाइट সাইড স্ক্যান</string>
 
 
 

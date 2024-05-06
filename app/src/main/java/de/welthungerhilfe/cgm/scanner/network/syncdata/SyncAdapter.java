@@ -370,16 +370,28 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 LogFileUtils.logInfo(TAG, syncableConsent.size() + " consents to sync");
 
                 for (FileLog fileLog : syncableConsent) {
+                    LogFileUtils.logInfo(TAG, "Person consent to sync1 "+fileLog.getStatus()+", "+fileLog.getQrCode()+" "+fileLog.getPath());
+
                     if (!fileLog.isDeleted()) {
                         continue;
                     }
                     Person person = personRepository.findPersonByQr(fileLog.getQrCode(),session.getEnvironment());
-                    LogFileUtils.logInfo(TAG,"Person consent to sync is "+person);
-                    String backendPersonId = person.getServerId();
-                    if (backendPersonId == null) {
+                    LogFileUtils.logInfo(TAG,"Person consent to sync2 "+person);
+                    if(person == null){
+                        Person tempPerson = personRepository.findPersonByQrinApp(fileLog.getQrCode());
+                        LogFileUtils.logInfo(TAG,"Person consent to sync3 "+personRepository.findPersonByQrinApp(fileLog.getQrCode()));
+
+                        if(tempPerson!=null){
+                            LogFileUtils.logInfo(TAG,"Person consent to sync4 "+tempPerson.getQrcode()+" "+tempPerson.getEnvironment()+" "+session.getEnvironment());
+
+                        }
+                    }
+                   // String backendPersonId = person.getServerId();
+                    if (person== null && person.getServerId()==null) {
                         continue;
                     }
-                    postConsentSheet(fileLog, backendPersonId);
+
+                    postConsentSheet(fileLog, person.getServerId());
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
@@ -571,11 +583,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             person1.setBirthdayString(DataFormat.convertMilliSecondToBirthDay(person1.getBirthday()));
             person1.setQr_scanned(DataFormat.convertMilliSeconsToServerDate(person1.getCreated()));
             person1.setDevice_updated_at(DataFormat.convertMilliSeconsToServerDate(person1.getDevice_updated_at_timestamp()));
-
+            /*person1.setCenter_location_id(null);
+            person1.setLocation_id(null);*/
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(person1))).toString());
 
-            onThreadChange(1,"post person");
+            onThreadChange(1,"post person data "+(new JSONObject(gson.toJson(person1))).toString());
             LogFileUtils.logInfo(TAG, "posting person " + person1.getQrcode());
+
             retrofit.create(ApiService.class).postPerson(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Person>() {
@@ -1054,7 +1068,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 LogFileUtils.logInfo(TAG, "scan result " + measure.getId() + " estimate not generated yet");
 
                             }
-                            updated = true;
+                            //updated = true;
                             updateDelay = Math.min(60 * 1000, updateDelay);
                             onThreadChange(-1,"Get Estimate");
                         }
@@ -1133,7 +1147,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         if (updated && (count == 0)) {
             new Thread(() -> {
                 if (updateDelay > 0) {
-                    AppController.sleep(updateDelay);
+
+                    AppController.sleep(5000);
                 }
                 startSyncing();
             }).start();

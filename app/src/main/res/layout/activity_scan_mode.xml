@@ -100,9 +100,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:scantypecolor="@color/colorGreenMedium"
-                        app:scantypeicon="@drawable/stand_side"
+                        app:scantypeicon="@drawable/side_scan_left_svg"
                         app:scantypetitle="@string/side_scan"
                         app:scantypetext="@string/help_lateral_view" />
+
 
                     <de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView
                         android:id="@+id/scanType3"
@@ -112,6 +113,16 @@
                         app:scantypeicon="@drawable/stand_back"
                         app:scantypetitle="@string/back_scan"
                         app:scantypetext="@string/help_back_view" />
+
+                    <de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView
+                        android:id="@+id/scanType4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:scantypecolor="@color/colorGreenMedium1"
+                        app:scantypeicon="@drawable/side_scan_right_svg"
+                        app:scantypetitle="@string/right_scan"
+                        app:scantypetext="@string/help_right_view" />
+
 
                     <Button
                         android:id="@+id/btnScanComplete"

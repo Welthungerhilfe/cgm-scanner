@@ -9,94 +9,103 @@
         android:paddingLeft="30dp"
         android:paddingRight="30dp"
         android:paddingTop="20dp"
-        android:paddingBottom="20dp"
+        android:paddingBottom="10dp"
         android:background="@color/colorGreenLight"
         android:orientation="vertical">
 
-
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/titleScanStep"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:id="@+id/ll_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/front_scan"
-                android:textColor="@color/colorWhite"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
-        </LinearLayout>
+                android:orientation="vertical"
+                android:gravity="center_vertical">
 
-        <LinearLayout
-            android:id="@+id/lytScanStep"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/txtScanStep"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginTop="@dimen/activity_section_margin"
-                android:text="@string/help_front_view_2"
-                android:textColor="@color/colorWhite"
-                android:textSize="14sp"/>
-
-            <FrameLayout
-                android:layout_width="100dp"
-                android:layout_height="wrap_content">
-
-                <ImageView
-                    android:id="@+id/imgScanStep"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_gravity="right"
-                    android:src="@drawable/stand_front" />
-
-                <LinearLayout
-                    android:id="@+id/lytScanAgain"
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/titleScanStep"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:visibility="gone"
-                    android:orientation="vertical">
+                    android:text="@string/front_scan"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="18sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/lytScanStep"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:layout_marginTop="15dp"
+                android:orientation="horizontal">
 
-                    <Button
-                        android:id="@+id/btnRetake"
-                        android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/txtScanStep"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginTop="@dimen/activity_section_margin"
+                    android:text="@string/help_right_view"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="14sp"/>
+
+                <FrameLayout
+                    android:layout_width="95dp"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/imgScanStep"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_gravity="right"
+                        android:src="@drawable/stand_front" />
+
+                    <LinearLayout
+                        android:id="@+id/lytScanAgain"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/button_white_green_round"
-                        android:textColor="@color/colorWhite"
-                        android:text="@string/btn_retake" />
+                        android:gravity="center"
+                        android:visibility="gone"
+                        android:orientation="vertical">
 
-                    <Button
-                        android:id="@+id/btnTutorial"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:background="@drawable/button_white_blue_round"
-                        android:textColor="@color/colorWhite"
-                        android:text="@string/btn_tutorial" />
+                        <Button
+                            android:id="@+id/btnRetake"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/button_white_green_round"
+                            android:textColor="@color/colorWhite"
+                            android:text="@string/btn_retake" />
 
-                </LinearLayout>
+                        <Button
+                            android:id="@+id/btnTutorial"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:background="@drawable/button_white_blue_round"
+                            android:textColor="@color/colorWhite"
+                            android:text="@string/btn_tutorial" />
 
-            </FrameLayout>
+                    </LinearLayout>
 
-        </LinearLayout>
+                </FrameLayout>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+
+
+
 
         <Button
             android:id="@+id/btnScanStep"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="15dp"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="7dp"
+            android:layout_marginLeft="45dp"
+            android:layout_marginRight="45dp"
             android:background="@drawable/button_white_circular"
             android:text="@string/start_scan"
             android:textColor="@color/colorPrimary"

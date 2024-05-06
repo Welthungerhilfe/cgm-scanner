@@ -37,6 +37,7 @@ public class AppConstants {
 
     public static final String API_URL_DEMO_QA = "{API_URL_QA}/";
 
+
     public static final String API_URL_SANDBOX = "{API_URL_SANDBOX}/";
     public static final String API_URL_IN_BMZ = "{API_URL_PRODUCTION}/";
     public static final String API_URL_NAMIBIA = "{API_URL_NAMIBIA}/";
@@ -123,10 +124,14 @@ public class AppConstants {
     public static final int SCAN_STANDING_FRONT = 100;
     public static final int SCAN_STANDING_SIDE = 101;
     public static final int SCAN_STANDING_BACK = 102;
+    public static final int SCAN_STANDING_SIDE_LEFT = 104;
+    public static final int SCAN_STANDING_SIDE_RIGHT = 103;
     public static final int SCAN_LYING_FRONT = 200;
     public static final int SCAN_LYING_SIDE = 201;
     public static final int SCAN_LYING_BACK = 202;
+    public static final int SCAN_LYING_SIDE_LEFT = 204;
 
+    public static final int SCAN_LYING_SIDE_RIGHT = 203;
     public static final int UPLOADED = 201;
     public static final int UPLOADED_DELETED = 202;
     public static final int CONSENT_UPLOADED = 203;

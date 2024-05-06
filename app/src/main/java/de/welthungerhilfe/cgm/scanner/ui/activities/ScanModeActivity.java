@@ -168,13 +168,17 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         mTitleView.setText(getString(R.string.front_scan) + " - " + getString(R.string.mode_standing));
                         break;
                     case 2:
-                        SCAN_STEP = AppConstants.SCAN_STANDING_SIDE;
+                        SCAN_STEP = AppConstants.SCAN_STANDING_SIDE_LEFT;
                         mTitleView.setText(getString(R.string.side_scan) + " - " + getString(R.string.mode_standing));
                         break;
                     case 3:
                         SCAN_STEP = AppConstants.SCAN_STANDING_BACK;
                         mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_standing));
                         break;
+                    case 4:
+                        SCAN_STEP = AppConstants.SCAN_STANDING_SIDE_RIGHT;
+                        mTitleView.setText(getString(R.string.right_scan) + " - " + getString(R.string.mode_standing));
+
                 }
             } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
                 switch (buttonId) {
@@ -189,6 +193,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     case 3:
                         SCAN_STEP = AppConstants.SCAN_LYING_BACK;
                         mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_lying));
+                        break;
+                    case 4:
+                        SCAN_STEP = AppConstants.SCAN_STANDING_SIDE_RIGHT;
+                        mTitleView.setText(getString(R.string.right_scan) + " - " + getString(R.string.mode_lying));
                         break;
                 }
             }
@@ -261,7 +269,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     public int SCAN_MODE = AppConstants.SCAN_STANDING;
     public int SCAN_STEP = AppConstants.SCAN_PREVIEW;
-    private boolean step1 = false, step2 = false, step3 = false;
+    private boolean step1 = false, step2 = false, step3 = false, step4 = false;
 
     public Person person;
     public Measure measure;
@@ -417,6 +425,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         activityScanModeBinding.scanType1.setListener(1, this);
         activityScanModeBinding.scanType2.setListener(2, this);
         activityScanModeBinding.scanType3.setListener(3, this);
+        activityScanModeBinding.scanType4.setListener(4,this);
 
         options =
                 new AccuratePoseDetectorOptions.Builder()
@@ -546,9 +555,12 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private void changeMode() {
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
             activityScanModeBinding.scanType1.setChildIcon(R.drawable.stand_front);
-            activityScanModeBinding.scanType2.setChildIcon(R.drawable.stand_side);
+            activityScanModeBinding.scanType2.setChildIcon(R.drawable.side_scan_left_svg);
             activityScanModeBinding.scanType3.setChildIcon(R.drawable.stand_back);
-            activityScanModeBinding.scanType2.setTitle(R.string.side_scan);
+            activityScanModeBinding.scanType4.setChildIcon(R.drawable.side_scan_right_svg);
+
+
+           // activityScanModeBinding.scanType2.setTitle(R.string.side_scan);
             if (files != null) {
                 files.clear();
 
@@ -563,7 +575,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             activityScanModeBinding.scanType1.setChildIcon(R.drawable.lying_front);
             activityScanModeBinding.scanType2.setChildIcon(R.drawable.lying_side);
             activityScanModeBinding.scanType3.setChildIcon(R.drawable.lying_back);
-            activityScanModeBinding.scanType2.setTitle(R.string.lying_side_scan);
+            activityScanModeBinding.scanType4.setChildIcon(R.drawable.lying_side);
             if (files != null) {
                 files.clear();
             }
@@ -581,10 +593,12 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         if (SCAN_STEP == AppConstants.SCAN_STANDING_FRONT || SCAN_STEP == AppConstants.SCAN_LYING_FRONT) {
             activityScanModeBinding.scanType1.goToNextStep();
-        } else if (SCAN_STEP == AppConstants.SCAN_STANDING_SIDE || SCAN_STEP == AppConstants.SCAN_LYING_SIDE) {
+        } else if (SCAN_STEP == AppConstants.SCAN_STANDING_SIDE_LEFT || SCAN_STEP == AppConstants.SCAN_LYING_SIDE_LEFT) {
             activityScanModeBinding.scanType2.goToNextStep();
         } else if (SCAN_STEP == AppConstants.SCAN_STANDING_BACK || SCAN_STEP == AppConstants.SCAN_LYING_BACK) {
             activityScanModeBinding.scanType3.goToNextStep();
+        } else if (SCAN_STEP == AppConstants.SCAN_STANDING_SIDE_RIGHT || SCAN_STEP == AppConstants.SCAN_LYING_SIDE_RIGHT) {
+            activityScanModeBinding.scanType4.goToNextStep();
         }
         new Thread(getScanQuality).start();
     }
@@ -772,7 +786,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         } else {
             hasCameraCalibration = false;
         }
-        LogFileUtils.logInfo("ARENGINE","arcore step3 calibration value "+hasCameraCalibration+" "+cameraCalibration);
 
 
 
@@ -1115,7 +1128,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 if (scanStep == AppConstants.SCAN_STANDING_FRONT || scanStep == AppConstants.SCAN_LYING_FRONT) {
                     activityScanModeBinding.scanType1.finishStep(issues);
                     step1 = true;
-                } else if (scanStep == AppConstants.SCAN_STANDING_SIDE || scanStep == AppConstants.SCAN_LYING_SIDE) {
+                } else if (scanStep == AppConstants.SCAN_STANDING_SIDE_LEFT || scanStep == AppConstants.SCAN_LYING_SIDE_LEFT) {
                     activityScanModeBinding.scanType2.finishStep(issues);
                     step2 = true;
 
@@ -1123,11 +1136,15 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                     activityScanModeBinding.scanType3.finishStep(issues);
                     step3 = true;
                 }
+                else if (scanStep == AppConstants.SCAN_STANDING_SIDE_RIGHT || scanStep == AppConstants.SCAN_LYING_SIDE_RIGHT) {
+                    activityScanModeBinding.scanType4.finishStep(issues);
+                    step4 = true;
+                }
 
                 Thread saveRetakeThread = new Thread(saveRetakeScan);
                 saveRetakeThread.start();
 
-                if (step1 && step2 && step3) {
+                if (step1 && step2 && step3 && step4) {
                     showCompleteButton();
                     firebaseAnalytics.logEvent(FirebaseService.SCAN_START, null);
                     scanStarted = true;
@@ -1141,7 +1158,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         public void run() {
             if(isRetake){
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }

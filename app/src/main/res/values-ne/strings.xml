@@ -224,19 +224,16 @@
     <string name="mode_lying">ढल्किरहेको</string>
     <string name="start_scan">स्क्यान सुरु गर्नुहोस्</string>
     <string name="complete_scan">स्क्यान पूरा गर्नुहोस्</string>
-    <string name="help_front_view_2">बच्चालाई रूपरेखाभित्र राख्न प्रयास गर्नुहोस्। बच्चाको अगाडि स्क्यान गर्नुहोस् ।</string>
-    <string name="help_lateral_view">सबै तिरबाट दृश्य प्राप्त गर्न बच्चाको वरिपरि फोन लिएर हिंड्नुहोस्।</string>
-    <string name="help_back_view">बच्चाको पछाडि स्क्यान गर्नुहोस्</string>
+
     <string name="person_not_defined">व्यक्ति परिभाषित गरिएको थिएन</string>
     <string name="storage_permission_needed">भण्डारण अनुमति आवश्यक !</string>
     <string name="label_wait">कृपया एकछिन प्रतिक्षा गर्नुहोस्...</string>
     <string name="btn_retake">पुन: लिनुहोस्</string>
     <string name="btn_tutorial">अभ्यास गर्नुहोस्</string>
     <string name="scan_feedback">पृष्ठपोषण स्क्यान गर्नुहोस्</string>
-    <string name="front_scan">०१. फ्रन्ट स्क्यान</string>
-    <string name="side_scan">०२. ३६०\' स्क्यान</string>
+
     <string name="lying_side_scan">०२. १८०\' स्क्यान</string>
-    <string name="back_scan">०३. ब्याक स्क्यान</string>
+
     <string name="scan_quality">स्क्यान गुणस्तर : </string>
     <string name="score_light">चम्किलो प्राप्ताङ्क : </string>
     <string name="score_light_bright">हलका चम्किलो प्राप्ताङ्क </string>
@@ -245,6 +242,15 @@
     <string name="standup">स्पष्ट पृष्ठभूमिमा बच्चालाई राख्न प्रयास गर्नुहोस् र पूरै बच्चालाई क्यामेरा दृश्यमा राख्नुहोस्</string>
     <string name="lyedown">स्पष्ट पृष्ठभूमिमा बच्चालाई राख्न प्रयास गर्नुहोस् र पूरै बच्चालाई क्यामेरा दृश्यमा राख्नुहोस्</string>
     <string name="done">समाप्त भयो</string>
+
+    <string name="help_front_view_2">बच्चाको अगाडिको भाग स्क्यान गर्नुहोस्</string>
+    <string name="help_lateral_view">बच्चाको बायाँ साइडको प्रोफाइल स्क्यान गर्नुहोस्</string>
+    <string name="help_back_view">बच्चाको पछाडिको भाग स्क्यान गर्नुहोस्।</string>
+    <string name="help_right_view">बच्चाको दाहिने साइडको प्रोफाइल स्क्यान गर्नुहोस्</string>
+    <string name="front_scan">01. फ्रन्ट स्क्यान</string>
+    <string name="side_scan">02. लेफ्ट साइड स्क्यान</string>
+    <string name="back_scan">03. ब्याक स्क्यान</string>
+    <string name="right_scan">04. राइट साइड स्क्यान</string>
 
 
 <!-- Growth chart !-->

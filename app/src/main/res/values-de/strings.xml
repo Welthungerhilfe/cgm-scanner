@@ -216,19 +216,16 @@
     <string name="mode_lying">Liegend</string>
     <string name="start_scan">Scan starten</string>
     <string name="complete_scan">Scan abschließen</string>
-    <string name="help_front_view_2">Platzieren Sie das Kind innerhalb des Rahmens, um einen Frontalscan zu erzeugen.</string>
-    <string name="help_lateral_view">Laufen Sie beim Scan um das Kind herum, um einen Scan von allen Seiten zu erzeugen.</string>
-    <string name="help_back_view">Scannen Sie die Rückansicht des Kindes.</string>
+
     <string name="person_not_defined">Zu dieser Person existiert kein Profil</string>
     <string name="storage_permission_needed">Speichererlaubnis erforderlich!</string>
     <string name="label_wait">Einen Moment, bitte…</string>
     <string name="btn_retake">RE-TAKE</string>
     <string name="btn_tutorial">TUTORIAL</string>
     <string name="scan_feedback">Scan Feedback</string>
-    <string name="front_scan">01. Scan Vorderansicht</string>
-    <string name="side_scan">02. 360\' Scan</string>
+
     <string name="lying_side_scan">02. 180\' Scan</string>
-    <string name="back_scan">03. Scan Rückansicht</string>
+
     <string name="scan_quality">Scanqualität : </string>
     <string name="score_light">Belichtung : </string>
     <string name="score_light_bright">Zu hell</string>
@@ -237,6 +234,15 @@
     <string name="standup">Stellen Sie sicher, dass der gesamte Körper des Kindes in der Kameransicht zu sehen ist und dass die Aufnahme vor einem klaren Hintergrund durchgeführt</string>
     <string name="lyedown">Stellen Sie sicher, dass der gesamte Körper des Kindes in der Kameransicht zu sehen ist und dass die Aufnahme vor einem klaren Hintergrund durchgeführt</string>
     <string name="done">Erledigt</string>
+
+    <string name="help_front_view_2">Scannen Sie die Vorderseite des Kindes</string>
+    <string name="help_lateral_view">Scannen Sie das Profil der linken Seite des Kindes</string>
+    <string name="help_back_view">Scannen Sie den Rücken des Kindes.</string>
+    <string name="help_right_view">Scannen Sie das Profil der rechten Seite des Kindes</string>
+    <string name="front_scan">01. Front-Scan</string>
+    <string name="side_scan">02. Seiten-Scan (links)</string>
+    <string name="back_scan">03. Rücken-Scan</string>
+    <string name="right_scan">04. Seiten-Scan (rechts)</string>
 
     <!-- Growth chart !-->
     <string name="axis_y">Y Achse</string>

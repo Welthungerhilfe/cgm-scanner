@@ -41,6 +41,9 @@ public interface PersonDao {
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE qrcode=:qrCode AND deleted=0 AND environment=:environment LIMIT 1")
     Person findPersonByQr(String qrCode,int environment);
 
+    @Query("SELECT * FROM " + TABLE_PERSON + " WHERE qrcode=:qrCode")
+    Person findPersonByQrinApp(String qrCode);
+
     @Query("SELECT * FROM " + TABLE_PERSON + " WHERE id=:id AND deleted=0 LIMIT 1")
     Person getPersonById(String id);
 
