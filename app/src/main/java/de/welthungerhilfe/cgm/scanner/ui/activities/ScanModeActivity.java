@@ -392,6 +392,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         fab = findViewById(R.id.fab_scan_result);
         fab.setOnClickListener(this);
 
+        activityScanModeBinding.llScanScreenToolbar.setOnClickListener(this);
+
         findViewById(R.id.imgClose).setOnClickListener(this);
 
         mOutline = findViewById(R.id.scanOutline);
@@ -442,7 +444,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         if (age >= 730) {
             scanStanding();
         } else {
-            scanLying();
+           // scanLying();
+            scanStanding();
         }
 
         activityScanModeBinding.lytScanStanding.setOnClickListener(new View.OnClickListener() {
@@ -455,7 +458,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         activityScanModeBinding.lytScanLying.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                scanLying();
+               // scanLying();
+                Toast.makeText(ScanModeActivity.this, "Lying scan is currently unavailable", Toast.LENGTH_SHORT).show();
+
             }
         });
 

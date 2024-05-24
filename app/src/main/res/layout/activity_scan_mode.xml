@@ -159,7 +159,8 @@
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:gravity="center_vertical"
-                android:background="@color/colorBlack">
+                android:background="@color/colorBlack"
+                android:id="@+id/ll_scan_screen_toolbar">
 
                 <ImageView
                     android:id="@+id/imgClose"
