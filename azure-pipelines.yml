@@ -1,0 +1,56 @@
+# Android
+# Build your Android project with Gradle.
+# Add steps that test, sign, and distribute the APK, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/android
+
+trigger:
+- master
+
+pool:
+  vmImage: 'macos-latest'
+
+steps:
+- bash: |
+    chmod +x ./app/appcenter-post-clone.sh
+    ./app/appcenter-post-clone.sh
+  env:
+    APP_CENTER_KEY: $(APP_CENTER_KEY) # the recommended way to map to an env variable
+    GOOGLE_MAPS_KEY: $(GOOGLE_MAPS_KEY)
+    OAUTH_PATH: $(OAUTH_PATH)
+    OAUTH_REDIRECT_URL: $(OAUTH_REDIRECT_URL)
+    PROJECT_NUMBER: $(PROJECT_NUMBER)
+    PROJECT_ID: $(PROJECT_ID)
+    MOBILESDK_APP_ID: $(MOBILESDK_APP_ID)
+    OAUTH_SCOPE_SANDBOX: $(OAUTH_SCOPE_SANDBOX)
+    OAUTH_CLIENT_ID_SANDBOX: $(OAUTH_CLIENT_ID_SANDBOX)
+    OAUTH_URL_SANDBOX: $(OAUTH_URL_SANDBOX)
+    API_URL_SANDBOX: $(API_URL_SANDBOX)
+    OAUTH_SCOPE_QA: $(OAUTH_SCOPE_QA)
+    OAUTH_CLIENT_ID_QA: $(OAUTH_CLIENT_ID_QA)
+    OAUTH_URL_QA: $(OAUTH_URL_QA)
+    API_URL_QA: $(API_URL_QA)
+    OAUTH_SCOPE_PRODUCTION: $(OAUTH_SCOPE_PRODUCTION)
+    OAUTH_CLIENT_ID_PRODUCTION: $(OAUTH_CLIENT_ID_PRODUCTION)
+    OAUTH_URL_PRODUCTION: $(OAUTH_URL_PRODUCTION)
+    API_URL_PRODUCTION: $(API_URL_PRODUCTION)
+    OAUTH_SCOPE_NAMIBIA: $(OAUTH_SCOPE_NAMIBIA)
+    OAUTH_CLIENT_ID_NAMIBIA: $(OAUTH_CLIENT_ID_NAMIBIA)
+    OAUTH_URL_NAMIBIA: $(OAUTH_URL_NAMIBIA)
+    API_URL_NAMIBIA: $(API_URL_NAMIBIA)
+- task: Gradle@2
+  inputs:
+    workingDirectory: ''
+    gradleWrapperFile: 'gradlew'
+    gradleOptions: '-Xmx3072m'
+    publishJUnitResults: true
+    testResultsFiles: '**/TEST-*.xml'
+    tasks: 'assembleDebug'
+#- task: AndroidSigning@2
+#  inputs:
+#    apkFiles: '**/*.apk'
+#    jarsign: true
+#    jarsignerKeystoreFile: 'pathToYourKeystoreFile'
+#    jarsignerKeystorePassword: '$(jarsignerKeystorePassword)'
+#    jarsignerKeystoreAlias: 'yourKeystoreAlias'
+#    jarsignerKeyPassword: '$(jarsignerKeyPassword)'
+#    zipalign: true
