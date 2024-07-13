@@ -239,7 +239,7 @@ public class ARCoreCamera extends AbstractARCamera {
         color = mRTT.renderData(mCameraTextureId, mTextureRes);
         if (hasCameraCalibration() && mSession.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
           if (mFrameIndex % AppConstants.SCAN_FRAMESKIP == 0) {
-            Image image = frame.acquireRawDepthImage();
+            Image image = frame.acquireDepthImage16Bits();
             depth = updateDepthmap(image, pose.getTranslation(), pose.getRotationQuaternion());
           }
         }

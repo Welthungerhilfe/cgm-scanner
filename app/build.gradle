@@ -4,19 +4,16 @@ plugins {
 
 android {
     namespace "de.welthungerhilfe.cgm.scanner"
-    testNamespace "de.welthungerhilfe.cgm.scanner"
-    compileSdk 33
+    compileSdk 34
     ndkVersion "23.2.8568313"
     defaultConfig {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 24
-        targetSdkVersion 33
+        targetSdkVersion 34
 
 
         versionCode 726
         versionName "9.0.0"
-
-
 
 
         manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", arengineValue:"optional"]
@@ -159,7 +156,7 @@ dependencies {
     implementation 'com.google.mlkit:object-detection:17.0.0'//ML kit object detection
 
     implementation 'com.google.android.gms:play-services-mlkit-document-scanner:16.0.0-beta1'
-
+    implementation project(':librealsense')
 
 
 

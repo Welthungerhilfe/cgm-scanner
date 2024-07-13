@@ -62,6 +62,7 @@ import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicke
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.intel.realsense.librealsense.RsContext;
 import com.microsoft.appcenter.analytics.Analytics;
 import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 import com.orhanobut.dialogplus.DialogPlus;
@@ -150,6 +151,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        RsContext.init(this);
         fileLogRepository = FileLogRepository.getInstance(this);
         activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         session = new SessionManager(MainActivity.this);
