@@ -32,6 +32,8 @@ import androidx.annotation.Nullable;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.intel.realsense.librealsense.DeviceList;
+import com.intel.realsense.librealsense.RsContext;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -41,6 +43,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
@@ -54,6 +57,7 @@ import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
+import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity1;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerMeasureAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
@@ -66,6 +70,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     private Context context;
     private SessionManager session;
 
+    private RsContext mRsContext = new RsContext();
+
+
     private RecyclerMeasureAdapter adapterMeasure;
     private FloatingActionButton fabCreate;
 
@@ -77,6 +84,8 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
     ViewModelProvider.Factory factory;
 
     FirebaseAnalytics firebaseAnalytics;
+
+    boolean isRealsenseConnected = false;
 
 
 
@@ -144,6 +153,19 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
         fabCreate = view.findViewById(R.id.fabCreate);
         fabCreate.setOnClickListener(this);
+        try (DeviceList dl = mRsContext.queryDevices()) {
+            if (dl.getDeviceCount() > 0) {
+                isRealsenseConnected = true;
+                Toast.makeText(getActivity(), "Realsense camera detected "+dl.getDeviceCount(), Toast.LENGTH_LONG).show();
+
+            }else {
+                Toast.makeText(getActivity(), "Realsense camera not detected "+dl.getDeviceCount(), Toast.LENGTH_LONG).show();
+                isRealsenseConnected = false;
+
+            }
+        }catch (Exception e){
+            isRealsenseConnected = false;
+        }
 
         return view;
     }
@@ -155,7 +177,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         LayoutInflater inflater = this.getLayoutInflater();
         DialogMeasureMenuBinding dialogMeasureMenuBinding = DataBindingUtil.inflate(inflater, R.layout.dialog_measure_menu,null,false);
 
-      //  View dialogView = inflater.inflate(R.layout.dialog_measure_menu, null);
+        //  View dialogView = inflater.inflate(R.layout.dialog_measure_menu, null);
         dialogBuilder.setView(dialogMeasureMenuBinding.getRoot());
         AlertDialog alertDialog = dialogBuilder.create();
         alertDialog.show();
@@ -175,12 +197,23 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         dialogMeasureMenuBinding.btStartScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getContext(), ScanModeActivity.class);
-                intent.putExtra(AppConstants.EXTRA_PERSON, person);
-                startActivity(intent);
+
+                if(isRealsenseConnected){
+                    Toast.makeText(getActivity(), "start realsense ", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(getContext(), ScanModeActivity1.class);
+                    intent.putExtra(AppConstants.EXTRA_PERSON, person);
+                    startActivity(intent);
+                }
+                else {
+                    Intent intent = new Intent(getContext(), ScanModeActivity.class);
+                    intent.putExtra(AppConstants.EXTRA_PERSON, person);
+                    startActivity(intent);
+                }
+
                 alertDialog.dismiss();
             }
         });
+
 
 
 
@@ -206,6 +239,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             }
         });*/
     }
+
 
     @Override
     public void onClick(View view) {

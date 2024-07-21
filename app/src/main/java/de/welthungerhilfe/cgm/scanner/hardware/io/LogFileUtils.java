@@ -56,6 +56,13 @@ public class LogFileUtils {
 
     }
 
+    public static void logInfo2(String tag, String text) {
+        Log.i(tag, text);
+        String message = DataFormat.convertMilliSeconsToServerDate(System.currentTimeMillis());
+        message += " : Info-" + tag + " -> " + text;
+        startAsyncToWrite(message);
+
+    }
     public static void logError(String tag, String text) {
         Log.e(tag, text);
         String message = DataFormat.convertMilliSeconsToServerDate(System.currentTimeMillis());

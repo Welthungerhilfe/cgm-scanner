@@ -2,6 +2,8 @@ package de.welthungerhilfe.cgm.scanner;
 
 import android.widget.Switch;
 
+import java.util.Arrays;
+
 public class Utils {
 
     public static String getLandmarkType(int i){
@@ -76,5 +78,9 @@ public class Utils {
                 return "not_detected";
 
         }
+    }
+
+    public static String printByteArrayUsingArraysToString(byte[] byteArray) {
+        return Arrays.toString(byteArray).substring(0, 25);
     }
 }

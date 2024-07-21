@@ -150,6 +150,9 @@ public class AppConstants {
 
     //scan feedback and capture parameters
     public static final int SCAN_FRAMESKIP = 6;
+
+    public static final int SCAN_FRAMESKIP_REALSENSE = 3;
+
     public static final float TOO_NEAR = 0.7f;
     public static final float TOO_FAR = 1.5f;
 

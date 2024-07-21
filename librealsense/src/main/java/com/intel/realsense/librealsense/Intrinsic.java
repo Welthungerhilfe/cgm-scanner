@@ -36,6 +36,23 @@ public class Intrinsic {
     public int getHeight() {return mHeight;}
     public DistortionType getModel() {return mModel;}
 
+    public float getmPpx() {
+        return mPpx;
+    }
+
+    public float getmPpy() {
+        return mPpy;
+    }
+
+    public float getmFx() {
+        return mFx;
+    }
+
+    public float getmFy() {
+        return mFy;
+    }
+
+
 
     public void SetModel(){
         this.mModel = DistortionType.values()[mModelValue];

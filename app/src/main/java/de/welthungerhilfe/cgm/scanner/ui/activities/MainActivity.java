@@ -151,7 +151,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        RsContext.init(this);
+
         fileLogRepository = FileLogRepository.getInstance(this);
         activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         session = new SessionManager(MainActivity.this);
@@ -232,6 +232,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             sessionExpirePopUp();
             session.setSessionError(0);
         }
+        RsContext.init(getApplicationContext());
 
 
     }
