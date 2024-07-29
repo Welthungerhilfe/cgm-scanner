@@ -103,6 +103,7 @@ public class ARCoreCamera extends AbstractARCamera {
         config.setDepthMode(Config.DepthMode.AUTOMATIC);
       } else {
         config.setDepthMode(Config.DepthMode.DISABLED);
+        Log.d(TAG, "Depth mode not supported by this device");
       }
       config.setFocusMode(Config.FocusMode.AUTO);
       config.setLightEstimationMode(Config.LightEstimationMode.AMBIENT_INTENSITY);
@@ -239,7 +240,7 @@ public class ARCoreCamera extends AbstractARCamera {
         color = mRTT.renderData(mCameraTextureId, mTextureRes);
         if (hasCameraCalibration() && mSession.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
           if (mFrameIndex % AppConstants.SCAN_FRAMESKIP == 0) {
-            Image image = frame.acquireRawDepthImage();
+            Image image = frame.acquireRawDepthImage16Bits();
             depth = updateDepthmap(image, pose.getTranslation(), pose.getRotationQuaternion());
           }
         }

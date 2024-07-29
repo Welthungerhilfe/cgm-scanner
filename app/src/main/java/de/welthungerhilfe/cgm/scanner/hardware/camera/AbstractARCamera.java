@@ -104,6 +104,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
     private Depthmap mDepthmap;
     private Depthmap mLastDepthmap;
     private float mNoiseAmount;
+    private boolean mAverageDepthmap;
 
     //AR status
     protected int mFrameIndex;
@@ -161,6 +162,8 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         mTargetHeight = 0;
         mTargetDistance = 1;
         mOrientation = -1;
+        mNoiseAmount = -1.f;
+        mAverageDepthmap = false;
     }
 
     public void onCreate(ImageView colorPreview, ImageView depthPreview, GLSurfaceView surfaceview, ImageView boundingBox) {
@@ -300,6 +303,8 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
             }
         }
 
+        mNoiseAmount = -1.f;
+
         //extract data
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
@@ -337,18 +342,28 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
         int cx = width / 2;
         int cy = height / 2;
         int center = Integer.MAX_VALUE;
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int depthSample = pixel.get((y / 2) * stride + x);
-                int depthRange = depthSample & 0x1FFF;
-                int depthConfidence = ((depthSample >> 13) & 0x7);
-                if ((x < 1) || (y < 1) || (x >= width - 1) || (y >= height - 1)) {
-                    depthConfidence = 0;
-                    depthRange = 0;
+        for (int y = 0; y < height; ++y) {
+            int currentRow = y*width; // pre compute offset once per row
+            for (int x = 0; x < width; ++x) {
+                int depthConfidence = 0;
+                int depthRange = 0;
+
+                if ((x >= 1) || (y >= 1) || (x < width - 1) || (y < height - 1)) {
+
+                    // https://developers.google.com/ar/reference/java/com/google/ar/core/Frame
+                    // Last 13 bits of sample is a depth value between 0-8191 ~ 8 meters
+                    // Shifting with 13 and masking with 0x7 gives the first 3 bits with values between 0-7
+                    // this is used as confidence part of the depth sample value
+                    int depthSample = (pixel.get(currentRow + x)).intValue();
+                    depthRange = depthSample & 0x1FFF;
+                    depthConfidence = ((depthSample >> 13) & 0x7);
                 }
+
+                // This section computes the depth map distance at the center of the image.
+                // Since the center pixel might have invalid depth values it is computed with more complexity
                 if (depthRange > 0) {
                     int value = Math.abs(x - cx) + Math.abs(y - cy);
-                    if (center > value) {
+                    if (value < center) {
                         center = value;
                         mDepthmap.distance = depthRange * 0.001f;
                     }
@@ -358,15 +373,17 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
                 }
                 mDepthmap.confidence[x][y] = (byte) depthConfidence;
                 mDepthmap.depth[x][y] = depthRange * 0.001f;
-                if (mDepthmap.depth[x][y] < DEPTH_FUSION_MAX_DEPTH) {
+
+                if (mAverageDepthmap && mDepthmap.depth[x][y] < DEPTH_FUSION_MAX_DEPTH) {
                     diffDepth += Math.abs(mLastDepthmap.depth[x][y] - mDepthmap.depth[x][y]) > DEPTH_FUSION_MAX_DIFF ? 1 : 0;
                     diffCount++;
                 }
             }
         }
 
-        //depth fusion
-        if (avgCount > 0) {
+        // average previous and current depth map data
+        if (mAverageDepthmap && avgCount > 0) {
+            //depth fusion
             avgDepth /= avgCount;
             if (avgDepth > DEPTH_FUSION_MIN_DISTANCE) {
                 if (diffCount > 0) {
@@ -384,6 +401,7 @@ public abstract class AbstractARCamera implements GLSurfaceView.Renderer {
             }
         }
         mNoiseAmount = diffDepth > 0.0005f ? diffDepth : 1000;
+
         return mDepthmap;
     }
 
