@@ -79,6 +79,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.Audio;
 import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARRealSenseCamera1;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractIntelARCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
@@ -223,7 +224,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         measure.setTimestamp(mNowTime);
         measure.setQrCode(person.getQrcode());
         measure.setSchema_version(CgmDatabase.version);
-        measure.setScannedBy(session.getDevice());
+        measure.setScannedBy("IR-"+session.getIntelrealsenseSno());
         measure.setStd_test_qr_code(session.getStdTestQrCode());
         if (session.getSelectedMode() == AppConstants.RST_MODE) {
             measure.setReceived_at(System.currentTimeMillis());
@@ -769,8 +770,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     public void onPostColorDataReceived(Bitmap bitmap, int frameIndex, float poseScore, String poseCoordinates, String boundingBox) {
 
         long profile = System.currentTimeMillis();
-        //  cameraCalibration = mCameraInstance.getCameraCalibration();
-        cameraCalibration = session.getArcoreCaliFile();
+          cameraCalibration = mCameraInstance.getCameraCalibration();
+       // cameraCalibration = session.getArcoreCaliFile();
         boolean hasCameraCalibration;
         if (cameraCalibration != null && !cameraCalibration.contains("NaN")) {
             hasCameraCalibration = true;
@@ -862,25 +863,23 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP_REALSENSE == 0)) {
             LogFileUtils.logInfo2("ScanModeActivity","this is inside onDepthDataReceived 1"+depthFrame+"-"+frameIndex);
 
-            String orientation ="vertical_angel:"+String.format("%.0f", angle - 90);
+            String orientation ="vertical_angel:"+String.format("%.0f", 180-angle);
 
-           /* float light = mCameraInstance.getLightIntensity();
-            String orientation ="horizontal_angle:"+ mCameraInstance.getOrientation()+", vertical_angel:"+String.format("%.0f", angle - 90);
+            float light = mCameraInstance.getLightIntensity();
             Log.i("ScanModeActivity", "this is value of orientation " + orientation);
-            //double child_distance = mCameraInstance.getTargetDistance();
+            double child_distance = mCameraInstance.getTargetDistance();
             if (light > 1) {
                 light = 1.0f - (light - 1.0f);
-            }*/
+            }
             //LogFileUtils.logInfo(TAG,"this is valur of distance & light "+child_distance+" "+light);
-            //      float light_score = light;
-
+            float light_score = light;
             long profile = System.currentTimeMillis();
             String depthmapFilename = "depth_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".depth";
             mNumberOfFilesWritten++;
 
             updateScanningProgress();
 
-            //     onLightScore(getCamera().getLightIntensity());
+            onLightScore(getCamera().getLightIntensity());
 
             //     float finalHeight = height * 100.0f;
             LogFileUtils.logInfo2("ScanModeActivity","this is inside onDepthDataReceived 2"+depthFrame+"-"+frameIndex);
@@ -893,7 +892,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                     File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                     //depthmap.save(artifactFile);
                     save(artifactFile,depthFrame,frameIndex,height,width,byteArray);
-                    onProcessArtifact(artifactFile,ArtifactType.DEPTH, 10, 0, null, distance, 1.0f, null,orientation);
+                    onProcessArtifact(artifactFile,ArtifactType.DEPTH, 10, 0, null, distance, light_score, null,orientation);
                     //   LogFileUtils.logInfo1("Scanmode","this is inside on Depthdata received 6"+depthFrame);
 
                     //profile process
@@ -920,7 +919,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
     @Override
     public void onAngleReceived(Double angle) {
-        activityScanModeBinding.tvAngle.setText(String.format("%.0f", angle));
+       // activityScanModeBinding.tvAngle.setText(" "+mCameraInstance.getLightIntensity());
+        activityScanModeBinding.tvAngle.setText(String.format("%.0f", 180-angle));
         this.angle = angle;
     }
 
@@ -1076,12 +1076,12 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     }
 
     private void onFeedbackUpdate() {
-        //  AbstractIntelARCamera.LightConditions light = getCamera().getLightConditionState();
-        //boolean childDetected = getCamera().getPersonCount() == 1;
+         AbstractIntelARCamera.LightConditions light = getCamera().getLightConditionState();
+        boolean childDetected = getCamera().getPersonCount() == 1;
         float distance = mCameraInstance.getTargetDistance();
         runOnUiThread(() -> {
 
-        /*    if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
+            if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
                 getCamera().setSkeletonMode(AbstractIntelARCamera.SkeletonMode.OFF);
                 setOutline(true);
             } else if (childDetected) {
@@ -1097,11 +1097,11 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             switch (light) {
                 case NORMAL:
 
-                       *//* if(mCameraInstance.getTargetDistance() < 0.7) {
+                       /* if(mCameraInstance.getTargetDistance() < 0.7) {
 
                         }else if(mCameraInstance.getTargetDistance() > 1.5){
                             break;
-                        }*//*
+                        }*/
                     setFeedback(null);
                     break;
                 case BRIGHT:
@@ -1110,7 +1110,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                 case DARK:
                     setFeedback(getString(R.string.score_light_dark));
                     break;
-            }*/
+            }
             // }
 
             // if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {

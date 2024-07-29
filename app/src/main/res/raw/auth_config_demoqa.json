@@ -1,12 +1,12 @@
 {
-  "client_id" : "{OAUTH_CLIENT_ID_QA}",
+  "client_id" : "389f8965-6486-4c55-8e02-8e5f35eb061c",
   "authorization_user_agent" : "DEFAULT",
   "account_mode" : "SINGLE",
-  "redirect_uri" : "{OAUTH_REDIRECT_URL}",
+  "redirect_uri" : "msauth://de.welthungerhilfe.cgm.scanner/1yf0pLcYkjlLIHk4lnmTM2N7D2w%3D",
   "authorities" : [
     {
       "type": "B2C",
-      "authority_url": "{OAUTH_URL_QA}",
+      "authority_url": "https://cgmb2cdemoqa.b2clogin.com/tfp/cgmb2cdemoqa.onmicrosoft.com/B2C_1_SISU_SCANNER_APP/",
       "default": true
     }
   ]

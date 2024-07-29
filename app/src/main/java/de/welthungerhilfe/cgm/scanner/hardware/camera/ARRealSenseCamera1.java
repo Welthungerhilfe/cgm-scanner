@@ -22,6 +22,7 @@ import com.intel.realsense.librealsense.Pipeline;
 import com.intel.realsense.librealsense.RsContext;
 import com.intel.realsense.librealsense.StreamFormat;
 import com.intel.realsense.librealsense.StreamType;
+import com.intel.realsense.librealsense.VideoFrame;
 import com.intel.realsense.librealsense.VideoStreamProfile;
 
 import java.util.ArrayList;
@@ -192,13 +193,13 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                             try (Frame depth = frames.first(StreamType.DEPTH)) {
                                 DepthFrame depthFrame1 = depth.as(Extension.DEPTH_FRAME);
 
-                                float depthValue = depthFrame1.getDistance(depthFrame1.getWidth() / 2, depthFrame1.getHeight() / 2);
-                                handler.post(new Runnable() {
+                                mTargetDistance = depthFrame1.getDistance(depthFrame1.getWidth() / 2, depthFrame1.getHeight() / 2);
+                               /* handler.post(new Runnable() {
                                     @Override
                                     public void run() {
                                         onProcessDistance(depthValue);
                                     }
-                                });
+                                });*/
                             }
                             if (mFrameIndex % AppConstants.SCAN_FRAMESKIP_REALSENSE == 0 && !isBackgrounThreadActive) {
                                 saveAlignFrames1(frames,mFrameIndex);
@@ -317,6 +318,18 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
         }
         bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
 
+        int totalBrightness = 0;
+        for (int i = 0; i < data.length; i += 3) {
+            int r = data[i] & 0xFF;
+            int g = data[i + 1] & 0xFF;
+            int b = data[i + 2] & 0xFF;
+            int brightness = (r + g + b) / 3;
+            totalBrightness += brightness;
+        }
+        int averageBrightness = totalBrightness / (width * height);
+        mPixelIntensity = averageBrightness / 255.0f * 2.0f; // Scale to match your Huawei AR Engine example
+
+
         return bitmap;
     }
 
@@ -382,6 +395,7 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
         }
         return angle1;
     }
+
 
 
 }

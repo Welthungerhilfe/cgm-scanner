@@ -69,6 +69,8 @@ public class SessionManager {
 
     private final String TOF_SENSOR= "TOF_SENSOR";
 
+    private final String REALSENSE_SERIALNO= "REALSENSE_SERIALNO";
+
 
 
 
@@ -224,22 +226,22 @@ public class SessionManager {
     }
 
     public String getAuthToken() {
-        if (BuildConfig.DEBUG) {
+        /*if (BuildConfig.DEBUG) {
             return null;
 
-        } else {
+        } else {*/
             return pref.getString(KEY_USER_TOKEN, null);
-        }
+       // }
     }
 
     public String getAuthTokenWithBearer() {
-       if (BuildConfig.DEBUG) {
+      /* if (BuildConfig.DEBUG) {
             return null;
 
 
-        } else {
+        } else {*/
             return "bearer " + getAuthToken();
-    }
+  //  }
 
     }
 
@@ -386,6 +388,15 @@ public class SessionManager {
 
     public void setBackgrounThreadCount(int count) {
         editor.putInt(BACKGROUND_TASK_COUNT, count);
+        editor.commit();
+    }
+
+    public String getIntelrealsenseSno() {
+        return pref.getString(REALSENSE_SERIALNO, null);
+    }
+
+    public void setIntelrealsenseSno(String serialNo) {
+        editor.putString(REALSENSE_SERIALNO, serialNo);
         editor.commit();
     }
 

@@ -32,6 +32,8 @@ import androidx.annotation.Nullable;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.intel.realsense.librealsense.CameraInfo;
+import com.intel.realsense.librealsense.Device;
 import com.intel.realsense.librealsense.DeviceList;
 import com.intel.realsense.librealsense.RsContext;
 
@@ -155,8 +157,15 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         fabCreate.setOnClickListener(this);
         try (DeviceList dl = mRsContext.queryDevices()) {
             if (dl.getDeviceCount() > 0) {
+                String serialNumber = null;
+                try (Device device = dl.createDevice(0)) {
+                    // Get the serial number of the device
+                     serialNumber = device.getInfo(CameraInfo.SERIAL_NUMBER);
+                    // Print or display the serial number
+                    System.out.println("RealSense Device Serial Number: " + serialNumber);
+                }
                 isRealsenseConnected = true;
-                Toast.makeText(getActivity(), "Realsense camera detected "+dl.getDeviceCount(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "Realsense camera detected "+serialNumber, Toast.LENGTH_LONG).show();
 
             }else {
                 Toast.makeText(getActivity(), "Realsense camera not detected "+dl.getDeviceCount(), Toast.LENGTH_LONG).show();
@@ -166,6 +175,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         }catch (Exception e){
             isRealsenseConnected = false;
         }
+
 
         return view;
     }
@@ -193,13 +203,22 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
             }
         });
+        if(isRealsenseConnected){
+            dialogMeasureMenuBinding.tvScanMeasure.setText(getString(R.string.scan_measure)+"(sensor)");
+
+        }
+        else {
+            dialogMeasureMenuBinding.tvScanMeasure.setText(R.string.scan_measure);
+
+        }
+
 
         dialogMeasureMenuBinding.btStartScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 if(isRealsenseConnected){
-                    Toast.makeText(getActivity(), "start realsense ", Toast.LENGTH_LONG).show();
+                   // Toast.makeText(getActivity(), "start realsense ", Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(getContext(), ScanModeActivity1.class);
                     intent.putExtra(AppConstants.EXTRA_PERSON, person);
                     startActivity(intent);

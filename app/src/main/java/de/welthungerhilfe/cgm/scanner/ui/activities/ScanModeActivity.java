@@ -783,7 +783,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     public void onPostColorDataReceived(Bitmap bitmap, int frameIndex, float poseScore, String poseCoordinates, String boundingBox) {
 
         long profile = System.currentTimeMillis();
-        //  cameraCalibration = mCameraInstance.getCameraCalibration();
+         // cameraCalibration = mCameraInstance.getCameraCalibration();
         cameraCalibration = session.getArcoreCaliFile();
         boolean hasCameraCalibration;
         if (cameraCalibration != null && !cameraCalibration.contains("NaN")) {
