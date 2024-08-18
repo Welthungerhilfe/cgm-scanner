@@ -20,28 +20,40 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
 public class LogFileUtils {
-    static File logFile;
+    static File logFile,logFileOffline;
     public static final int maxFiles = 10;
     public static final String TAG = LogFileUtils.class.getSimpleName();
     public static WriteToLogFileAsynck writeToLogFileAsynck;
+
+    public static WriteToLogFileOfflineAsynck writeToLogFileOfflineAsynck;
+
 
 
     public static void startSession(Context context, SessionManager sessionManager) {
 
         File extFileDir = AppController.getInstance().getRootDirectory(context);
         File logFilesFolder = new File(extFileDir, AppConstants.LOG_FILE_FOLDER);
+        File logFilesFolderOffline = new File(extFileDir, AppConstants.LOG_FILE_FOLDER_OFFLINE);
+
         if (!logFilesFolder.exists()) {
             logFilesFolder.mkdir();
         }
+
+        if (!logFilesFolderOffline.exists()) {
+            logFilesFolderOffline.mkdir();
+        }
         String fileName = new SimpleDateFormat("yyyy-MM-dd'.txt'").format(new Date());
 
+
         logFile = new File(logFilesFolder, fileName);
+        logFileOffline = new File(logFilesFolderOffline,fileName);
         try {
             if (!logFile.exists()) {
                 logFile.createNewFile();
             }
             sessionManager.setCurrentLogFilePath(logFile.getAbsolutePath());
             maintainLogFiles(logFilesFolder);
+            maintainLogFiles(logFilesFolderOffline);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -55,6 +67,17 @@ public class LogFileUtils {
         startAsyncToWrite(message);
 
     }
+
+    public static void logInfoOffline(String tag, String text) {
+        Log.i(tag, text);
+        String message = DataFormat.convertMilliSeconsToServerDate(System.currentTimeMillis());
+        message += " : Info-" + tag + " -> " + text;
+        startAsyncToWriteOffline(message);
+
+    }
+
+
+
 
     public static void logError(String tag, String text) {
         Log.e(tag, text);
@@ -91,6 +114,11 @@ public class LogFileUtils {
     public static void startAsyncToWrite(String str) {
         writeToLogFileAsynck = new WriteToLogFileAsynck();
         writeToLogFileAsynck.execute(str);
+    }
+
+    public static void startAsyncToWriteOffline(String str) {
+        writeToLogFileOfflineAsynck = new WriteToLogFileOfflineAsynck();
+        writeToLogFileOfflineAsynck.execute(str);
     }
 
     public static void writeAppCenter(SessionManager sessionManager, String TAG, String msg) {
@@ -132,6 +160,36 @@ public class LogFileUtils {
             }
         }
     }
+
+    static class WriteToLogFileOfflineAsynck extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... params) {
+            try {
+                if (params[0] != null) {
+                    addTextToFile(params[0]);
+                }
+            } catch (Exception e) {
+                e.getStackTrace();
+            }
+            return null;
+        }
+
+        public synchronized void addTextToFile(String data) {
+            try {
+                FileOutputStream output = new FileOutputStream(logFileOffline, true);
+                byte[] array = data.getBytes();
+                String lineSeparator = System.getProperty("line.separator");
+                output.write(array);
+                output.write(lineSeparator.getBytes());
+                output.flush();
+                output.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     private static void dirSize(File[] fileList) {
 

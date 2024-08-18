@@ -168,6 +168,8 @@ public class AppConstants {
     //LogFileUtils
     public static final String LOG_FILE_FOLDER = "LogFileFolder";
 
+    public static final String LOG_FILE_FOLDER_OFFLINE = "LogFileFolder-Offline";
+
     //Workflows list for result generation
 
     public static final String APP_AUTO_DETECT_1_0 = "app_auto_detect-1.0";

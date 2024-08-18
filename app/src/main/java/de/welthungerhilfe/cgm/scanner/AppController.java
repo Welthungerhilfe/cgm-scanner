@@ -81,7 +81,7 @@ public class AppController extends Application {
         return String.format("%s_artifact-%s_%s_%s", getAndroidID(), type, timestamp, getSaltString(16));
     }
 
-    public String getDeviceId() {
+    public String getDevice_ID() {
         return String.format("%s-device-%s-%s", getAndroidID(), getUniversalTimestamp(), getSaltString(16));
     }
 
