@@ -9,7 +9,6 @@ android {
     defaultConfig {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 24
-        targetSdkVersion 34
 
 
         versionCode 726

@@ -17,6 +17,32 @@ cat $gsFile
 
 echo "Updated id!"
 
+echo "Setting Gradle version to 8.0"
+
+# Set the Gradle version in gradle-wrapper.properties
+GRADLE_VERSION="8.0"
+WRAPPER_PROPERTIES="gradle/wrapper/gradle-wrapper.properties"
+
+# Ensure the gradle/wrapper directory exists
+mkdir -p gradle/wrapper
+
+# Download the specific Gradle version
+GRADLE_DISTRIBUTION_URL="https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-all.zip"
+
+# Update the gradle-wrapper.properties file with the specified Gradle version
+echo "distributionUrl=${GRADLE_DISTRIBUTION_URL}" > $WRAPPER_PROPERTIES
+
+# Download the specified Gradle distribution
+curl -L -o gradle-wrapper.zip $GRADLE_DISTRIBUTION_URL
+unzip -q gradle-wrapper.zip -d gradle/wrapper
+rm gradle-wrapper.zip
+
+# Ensure gradlew is executable
+chmod +x gradlew
+
+# Print Gradle version to confirm
+./gradlew --version
+
 APP_MANIFEST_FILE=$BUILD_REPOSITORY_LOCALPATH/app/src/main/AndroidManifest.xml
 APP_OAUTH_SANDBOX_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_sandbox.json
 APP_OAUTH_QA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_demoqa.json
