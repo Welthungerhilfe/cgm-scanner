@@ -124,9 +124,9 @@
             android:name=".ui.activities.DeviceCheckActivity"
             android:screenOrientation="portrait" />
 
-        <activity
+      <!--  <activity
             android:name=".ui.activities.TutorialActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait" />-->
 
         <activity
             android:name=".ui.activities.QRScanActivity"

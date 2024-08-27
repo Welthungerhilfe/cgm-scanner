@@ -57,8 +57,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
-import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
+
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -71,6 +70,7 @@ import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,7 +92,7 @@ import de.welthungerhilfe.cgm.scanner.network.service.WifiStateChangereceiverHel
 import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog1;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.SelectModeDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.StatisticsDialogfragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.DeviceCheckFragment;
@@ -109,7 +109,7 @@ import static de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity.K
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog.Callback, SelectModeDialog.SetupmodeListner {
+public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog1.Callback, SelectModeDialog.SetupmodeListner {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final long REQUEST_DEVICE_CHECK_TIME = 1000 * 3600 * 48; //48h
@@ -267,9 +267,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     startActivity(new Intent(MainActivity.this, DeviceCheckActivity.class));
                     break;
                 case R.id.menuTutorial:
-                    Intent intent = new Intent(MainActivity.this, TutorialActivity.class);
+                   /* Intent intent = new Intent(MainActivity.this, TutorialActivity.class);
                     intent.putExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, true);
-                    startActivity(intent);
+                    startActivity(intent);*/
                     break;
                 case R.id.menuSettings:
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
@@ -478,10 +478,10 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     }
 
     private void doFilterByDate() {
-        DateRangePickerDialog dateRangePicker = new DateRangePickerDialog();
+        DateRangePickerDialog1 dateRangePicker = new DateRangePickerDialog1();
         dateRangePicker.setCallback(this);
         dateRangePicker.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
-        dateRangePicker.show(getFragmentManager(), "DATE_RANGE_PICKER");
+        dateRangePicker.show(getSupportFragmentManager(), "DATE_RANGE_PICKER");
     }
 
     private void doFilterByLocation() {
@@ -494,24 +494,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     }
 
     @Override
-    public void onDateTimeRecurrenceSet(SelectedDate selectedDate, int hourOfDay, int minute, SublimeRecurrencePicker.RecurrenceOption recurrenceOption, String recurrenceRule) {
-        Calendar start = selectedDate.getStartDate();
-        start.set(Calendar.HOUR_OF_DAY, 0);
-        start.set(Calendar.MINUTE, 0);
-        start.set(Calendar.SECOND, 0);
-        start.set(Calendar.MILLISECOND, 0);
-        long startDate = start.getTimeInMillis();
+    public void onDateTimeRecurrenceSet(Date selectedDate, int hourOfDay, int minute, String recurrenceOption, String recurrenceRule) {
 
-        Calendar end = Calendar.getInstance();
-        end.setTimeInMillis(System.currentTimeMillis());
-        end.set(Calendar.HOUR_OF_DAY, 23);
-        end.set(Calendar.MINUTE, 59);
-        end.set(Calendar.SECOND, 59);
-        end.set(Calendar.MILLISECOND, 999);
-        long endDate = end.getTimeInMillis();
-
-
-        viewModel.setFilterDate(startDate, endDate);
     }
 
     @Override

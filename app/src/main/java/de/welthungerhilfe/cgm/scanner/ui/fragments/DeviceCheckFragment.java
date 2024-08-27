@@ -139,7 +139,7 @@ public class DeviceCheckFragment extends Fragment implements CompoundButton.OnCh
         }
         fragmentDeviceCheckBinding.guide.setOnCheckedChangeListener(this);
         fragmentDeviceCheckBinding.btnNext.setOnClickListener(this);
-        fragmentDeviceCheckBinding.stepView.go(tutorialData.getPosition(),true);
+     //   fragmentDeviceCheckBinding.stepView.go(tutorialData.getPosition(),true);
 
         camera = null;
         switch (tutorialData.getPosition()) {

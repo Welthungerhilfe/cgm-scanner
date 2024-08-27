@@ -105,8 +105,8 @@ public class DeviceCheckActivity extends BaseActivity {
     }
 
     private void showCompleteView() {
-        activityDeviceCheckBinding.stepView.go(3, false);
-        activityDeviceCheckBinding.stepView.done(true);
+      /*  activityDeviceCheckBinding.stepView.go(3, false);
+        activityDeviceCheckBinding.stepView.done(true);*/
         activityDeviceCheckBinding.viewPager.setVisibility(View.GONE);
     }
 

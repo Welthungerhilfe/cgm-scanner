@@ -9,7 +9,7 @@
         android:background="@color/colorWhite"
         android:orientation="vertical">
 
-        <LinearLayout
+     <!--   <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1.2"
@@ -195,7 +195,7 @@
             android:text="@string/next_tutorial"
             android:textColor="@color/colorWhite"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textStyle="bold" />-->
 
     </LinearLayout>
 </layout>

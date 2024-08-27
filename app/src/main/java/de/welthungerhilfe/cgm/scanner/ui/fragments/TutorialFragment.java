@@ -36,7 +36,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.TutorialData;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.TutorialActivity;
 
-public class TutorialFragment extends Fragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener {
+public class TutorialFragment {/*extends Fragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener {
 
     private Context context;
     private TutorialData tutorialData;
@@ -94,5 +94,5 @@ public class TutorialFragment extends Fragment implements CompoundButton.OnCheck
         if (fragmentTutorialBinding.guide1.isChecked() && fragmentTutorialBinding.guide2.isChecked()) {
             ((TutorialActivity)context).gotoNext();
         }
-    }
+    }*/
 }
