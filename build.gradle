@@ -5,6 +5,7 @@ buildscript {
     repositories {
         google()
         jcenter()
+        mavenCentral()
        // maven { url "https://maven.aliyun.com/repository/jcenter" }
         maven { url "http://developer.huawei.com/repo/"
             allowInsecureProtocol = true
@@ -26,6 +27,7 @@ allprojects {
     repositories {
         google()
         jcenter()
+        mavenCentral()
         //maven { url "https://maven.aliyun.com/repository/jcenter" }
         maven { url "https://jitpack.io" }
         maven {
