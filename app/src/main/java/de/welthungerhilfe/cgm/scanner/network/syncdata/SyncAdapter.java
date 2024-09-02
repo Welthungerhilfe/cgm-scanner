@@ -455,6 +455,10 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 return;
                             }
 
+                            if(true){
+                                return;
+                            }
+
                             for(Scan scan:completeScan.getScans()){
                                 LogFileUtils.logInfo(TAG, "scan " + measure.getId() + " successfully posted");
                                 PostScanResult postScanResult = new PostScanResult();
