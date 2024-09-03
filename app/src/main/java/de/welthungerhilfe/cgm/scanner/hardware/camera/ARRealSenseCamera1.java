@@ -8,6 +8,16 @@ import android.os.Looper;
 import android.renderscript.Float3;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.pose.Pose;
+import com.google.mlkit.vision.pose.PoseDetection;
+import com.google.mlkit.vision.pose.PoseDetector;
+import com.google.mlkit.vision.pose.PoseLandmark;
+import com.google.mlkit.vision.pose.accurate.AccuratePoseDetectorOptions;
 import com.intel.realsense.librealsense.Align;
 import com.intel.realsense.librealsense.Config;
 import com.intel.realsense.librealsense.DepthFrame;
@@ -26,6 +36,7 @@ import com.intel.realsense.librealsense.VideoFrame;
 import com.intel.realsense.librealsense.VideoStreamProfile;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -85,7 +96,6 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
         if(mIsStreaming)
             return;
         try{
-            LogFileUtils.logInfo2("ARRealsense1", "this is inside start-> " +mFrameIndex);
             mIsStreaming = true;
 
             configAndStart();
@@ -97,9 +107,12 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
 
         try(Config config  = new Config())
         {
+            options =
+                    new AccuratePoseDetectorOptions.Builder()
+                            .setDetectorMode(AccuratePoseDetectorOptions.SINGLE_IMAGE_MODE)
+                            .build();
+            poseDetector = PoseDetection.getClient(options);
 
-
-            LogFileUtils.logInfo2("ARRealsense1", "this is inside config and start-> " +mFrameIndex);
 
             config.enableStream(StreamType.DEPTH, 1280, 720);
             config.enableStream(StreamType.COLOR, 1280, 720);
@@ -108,20 +121,15 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
             config.enableStream(StreamType.ACCEL);
 
 
-            LogFileUtils.logInfo2("ARRealsense1", "this is after enablestream-> " +mFrameIndex);
 
             // try statement needed here to release resources allocated by the Pipeline:start() method
             mPipeline.start(config);
-            LogFileUtils.logInfo2("ARRealsense1", "this is after pipline start-> " +mFrameIndex);
 
             mAlign = new Align(StreamType.COLOR);
-            LogFileUtils.logInfo2("ARRealsense1", "this is before startstreaming-> " +mFrameIndex);
 
             startStreaming();
-            LogFileUtils.logInfo2("ARRealsense1", "this is after startstreaming-> " +mFrameIndex);
 
         }catch (Exception e){
-            LogFileUtils.logInfo2("ARRealsense1", "this is inside config start error -> " +e.getMessage());
 
         }
     }
@@ -134,7 +142,7 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
     Frame colorFrame1;
 
     boolean intrisicGenerated = false;
-    double angle =0.0;
+    String angle;
     public void startStreaming() {
         backgroundThread = new Thread(new Runnable() {
             @Override
@@ -151,20 +159,19 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                                 VideoStreamProfile videoStreamProfile = frames.getProfile().as(Extension.VIDEO_PROFILE);
                                 Intrinsic intrinsics = videoStreamProfile.getIntrinsic();
 
-                                LogFileUtils.logInfo2("Width: "," "+ intrinsics.getWidth());
-                                LogFileUtils.logInfo2("Height: "," "+ intrinsics.getHeight());
-                                LogFileUtils.logInfo2("Principal Point X (ppx): "," " + intrinsics.getmPpx());
-                                LogFileUtils.logInfo2("Principal Point Y (ppy): "," " + intrinsics.getmPpy());
-                                LogFileUtils.logInfo2("Focal Length X (fx): "," " + intrinsics.getmFx());
-                                LogFileUtils.logInfo2("Focal Length Y (fy): "," " + intrinsics.getmFy());
-                                LogFileUtils.logInfo2("Distortion Model: "," " + intrinsics.getModel());
+                                LogFileUtils.logInfoOffline("Width: "," "+ intrinsics.getWidth());
+                                LogFileUtils.logInfoOffline("Height: "," "+ intrinsics.getHeight());
+                                LogFileUtils.logInfoOffline("Principal Point X (ppx): "," " + intrinsics.getmPpx());
+                                LogFileUtils.logInfoOffline("Principal Point Y (ppy): "," " + intrinsics.getmPpy());
+                                LogFileUtils.logInfoOffline("Focal Length X (fx): "," " + intrinsics.getmFx());
+                                LogFileUtils.logInfoOffline("Focal Length Y (fy): "," " + intrinsics.getmFy());
+                                LogFileUtils.logInfoOffline("Distortion Model: "," " + intrinsics.getModel());
 
                                 mColorCameraIntrinsic[0] = intrinsics.getmFy()/ (float) intrinsics.getHeight();
                                 mColorCameraIntrinsic[1] = intrinsics.getmFx() / (float) intrinsics.getWidth();
                                 mColorCameraIntrinsic[2] = intrinsics.getmPpy() / (float) intrinsics.getHeight();
                                 mColorCameraIntrinsic[3] = intrinsics.getmPpx() / (float) intrinsics.getWidth();
 
-                                LogFileUtils.logInfo2("ARRealsense1", "this is inside saveBackground calling before pipline-> " + videoStreamProfile + " " + videoStreamProfile.getIntrinsic());
                             }
                             intrisicGenerated = true;
 
@@ -172,7 +179,6 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                                 MotionFrame motionFrame = accelFrame.as(Extension.MOTION_FRAME);
                                 angle = captureGyroData(motionFrame);
                             }catch (Exception e){
-                                LogFileUtils.logInfo2("ARRealsense1", "this is inside motion frame error-> " +e.getMessage());
                             }
 
 
@@ -185,7 +191,8 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                                     @Override
                                     public void run() {
                                         onProcessColorData(bitmap1, null, 0);
-                                        onProcessAngle(angle);
+                                        createPose(bitmap1);
+                                       // onProcessAngle();
                                     }
                                 });
                             }
@@ -205,17 +212,16 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                                 saveAlignFrames1(frames,mFrameIndex);
                             }
                         } catch (Exception e) {
-                            LogFileUtils.logInfo2(TAG, "streaming, error: " + e.getMessage());
                         }
-                        mFrameIndex++;
+
 
                         try {
                             Thread.sleep(50); // Adjust delay as needed
                         } catch (InterruptedException e) {
                             break;
                         }
+                        mFrameIndex++;
                     } catch (Exception e) {
-                        LogFileUtils.logInfo2(TAG, "streaming, error: " + e.getMessage());
 
                     }
                 }
@@ -259,7 +265,6 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                 depthFrameSave.getData(byteArray);
 
             } catch (Exception e) {
-                LogFileUtils.logInfo2(TAG, "Error in save thread: " + e.getMessage());
             }
 
             return null;
@@ -268,9 +273,10 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
         @Override
         protected void onPostExecute(Void aVoid) {
             isBackgrounThreadActive = false;
-
-            onProcessDepthData(null, depthFrameSave, height, width, byteArray, frameIndex);
             onProcessColorData(bitmap1, bitmapSave, frameIndex);
+            onProcessDepthData(null, depthFrameSave, height, width, byteArray, frameIndex);
+
+
             frameSet.close();
         }
     }
@@ -365,12 +371,15 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
     }
 
     @Override
-    public int getPersonCount() {
-        return 0;
+    public String getPersonCount() {
+        return mPersonCount;
     }
 
-    public double captureGyroData(MotionFrame motionFrame) {
+    public String captureGyroData(MotionFrame motionFrame) {
         double angle1 = 0.0;
+        double angle2 =0.0;
+        double angle3 =0.0;
+        float xAngleDeg=0, yAngleDeg=0, zAngleDeg=0;
         try {
 
             if (motionFrame != null) {
@@ -382,19 +391,107 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
 
 
                 float norm = (float) Math.sqrt(x * x + y * y + z * z);
-                x /= norm;
+                z /= norm;
 
                 // Calculate the vertical angle in degrees
-                angle1 = Math.toDegrees(Math.acos(x));
+                verticalAngle = Math.toDegrees(Math.acos(z));
+
+
+                y /= norm;
+
+                horizontalAngle = Math.toDegrees(Math.acos(y));
+
+              //  double xAngleRad = Math.atan2(y, Math.sqrt(x * x + z * z));
+              //   xAngleDeg = (float) Math.toDegrees(xAngleRad);
                 //   LogFileUtils.logInfo2("ARRealsense1", "this is inside angle -> " + angle);
+
+            /*    double xAngleRad = Math.atan2(y, x);
+                double yAngleRad = Math.atan2(z, Math.sqrt(x * x + y * y));
+                double zAngleRad = Math.atan2(y, z);
+
+                 xAngleDeg = (float) Math.toDegrees(xAngleRad);
+                yAngleDeg = (float) Math.toDegrees(yAngleRad);
+                zAngleDeg = (float) Math.toDegrees(zAngleRad);*/
 
             }
         }catch (Exception e){
-            LogFileUtils.logInfo2("ARRealsense1", "this is inside angle error -> " + e.getMessage());
 
         }
-        return angle1;
+        return String.valueOf(angle1);
     }
+
+    PoseDetector poseDetector;
+    AccuratePoseDetectorOptions options;
+
+    public void createPose(Bitmap bitmap) {
+        Log.i(TAG, "this is inside point 0");
+            mPersonCount = "HA";
+            Log.i(TAG, "this is inside point 1");
+            if (bitmap == null) {
+                return;
+            }
+            String[] ans = new String[2];
+            InputImage image = InputImage.fromBitmap(bitmap, 0);
+            poseDetector.process(image)
+                    .addOnSuccessListener(
+                            new OnSuccessListener<Pose>() {
+                                @Override
+                                public void onSuccess(Pose pose) {
+                                    // Task completed successfully
+                                    // ...
+                                    Log.i(TAG, "this is inside point 3");
+
+                                    String poseCoordinates = null;
+                                    float poseTotal = 0.0f;
+                                    float poseScore = 0.0f;
+                                    List<PoseLandmark> allPoseLandmarks = pose.getAllPoseLandmarks();
+
+                                    if(allPoseLandmarks==null && allPoseLandmarks.size() <33){
+                                        mPersonCount = "NA ";
+                                        onProcessAngle();
+                                    }
+                                    if (allPoseLandmarks != null && allPoseLandmarks.size() > 0) {
+                                        poseCoordinates = "";
+                                        for (int i = 0; i < allPoseLandmarks.size(); i++) {
+                                            poseCoordinates = poseCoordinates + " " + allPoseLandmarks.get(i).getInFrameLikelihood() + "," + allPoseLandmarks.get(i).getPosition().x + "," + allPoseLandmarks.get(i).getPosition().y;
+                                            poseTotal = poseTotal + allPoseLandmarks.get(i).getInFrameLikelihood();
+                                            if(allPoseLandmarks.get(i).getInFrameLikelihood() < 0.5){
+                                                mPersonCount = "NA "+allPoseLandmarks.get(i).getInFrameLikelihood();
+                                                break;
+                                            }
+
+                                        }
+
+                                        onProcessAngle();
+
+                                        poseScore = (float) (poseTotal / 33.0);
+                                        Log.i("ScaneModeActivity", "this is value pf pose " + poseScore + " " + poseCoordinates);
+
+
+                                        ans[0] = String.valueOf(poseScore);
+                                        ans[1] = poseCoordinates;
+
+                                    }
+                                    if (ans[0] == null) {
+                                        ans[0] = "0.0";
+                                    }
+                                    Log.i(TAG, "this is inside point 4" + ans[0] + " " + ans[1]);
+
+                                }
+                            })
+                    .addOnFailureListener(
+                            new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    // Task failed with an exception
+                                    // ...
+                                    Log.i(TAG, "this is inside point 5");
+
+                                    mPersonCount = "NA";
+                                    onProcessAngle();
+                                }
+                            });
+        }
 
 
 

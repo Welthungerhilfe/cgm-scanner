@@ -115,6 +115,10 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
     private boolean isRetake = false;
 
+    double verticalAngle=0, horizontalAngle=0;
+
+    int childCount = 0;
+
     public void scanStanding() {
         SCAN_MODE = AppConstants.SCAN_STANDING;
 
@@ -763,6 +767,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     @Override
     public void onColorDataReceived(Bitmap bitmap, int frameIndex) {
         Log.i(TAG, "this is value of bitmap & frameindex " + bitmap + " " + frameIndex);
+
         createPose(bitmap, frameIndex);
     }
 
@@ -861,9 +866,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
         onFeedbackUpdate();
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP_REALSENSE == 0)) {
-            LogFileUtils.logInfo2("ScanModeActivity","this is inside onDepthDataReceived 1"+depthFrame+"-"+frameIndex);
 
-            String orientation ="vertical_angel:"+String.format("%.0f", 180-angle);
+            String orientation ="horizontal_angle:"+ String.format("%.0f", horizontalAngle)+",vertical_angel:"+String.format("%.0f", verticalAngle);
 
             float light = mCameraInstance.getLightIntensity();
             Log.i("ScanModeActivity", "this is value of orientation " + orientation);
@@ -882,7 +886,6 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             onLightScore(getCamera().getLightIntensity());
 
             //     float finalHeight = height * 100.0f;
-            LogFileUtils.logInfo2("ScanModeActivity","this is inside onDepthDataReceived 2"+depthFrame+"-"+frameIndex);
 
 
             Runnable thread = () -> {
@@ -892,7 +895,17 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                     File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                     //depthmap.save(artifactFile);
                     save(artifactFile,depthFrame,frameIndex,height,width,byteArray);
-                    onProcessArtifact(artifactFile,ArtifactType.DEPTH, 10, 0, null, distance, light_score, null,orientation);
+                    LogFileUtils.logInfoOffline("SCANMODE","this is depth -1");
+
+                    //onProcessArtifact(artifactFile,ArtifactType.DEPTH, 10.0f, 0, null, distance, light_score, null,orientation);
+                    onProcessArtifact(artifactFile, ArtifactType.DEPTH, 10.0f, 0, null, child_distance, light_score, null, orientation);
+
+                    //  onProcessArtifact(File artifactFile, ArtifactType type, float childHeight, float poseScore, String poseCordinates, double child_distance, float light_score, String boundinBox, String orientation) {
+
+          //       onProcessArtifact(artifactFile, ArtifactType.DEPTH, 10, 0, null, 1.0, 1.0f, null, "80.0");
+
+                        LogFileUtils.logInfoOffline("SCANMODE","this is depth 0");
+
                     //   LogFileUtils.logInfo1("Scanmode","this is inside on Depthdata received 6"+depthFrame);
 
                     //profile process
@@ -905,8 +918,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                         }
                     }
                 } catch (Exception e) {
-                    LogFileUtils.logException(e, "OnDepthDataReceived");
-                    LogFileUtils.logInfo2("Scanmode","this is inside on Depthdata received error"+e.getMessage());
+                    LogFileUtils.logInfoOffline("ScanModeActivity1", "OnDepthDataReceived "+e.getMessage());
 
                 }
 
@@ -918,23 +930,33 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     }
 
     @Override
-    public void onAngleReceived(Double angle) {
+    public void onAngleReceived(double verticalAngle,double horizontalAngle) {
        // activityScanModeBinding.tvAngle.setText(" "+mCameraInstance.getLightIntensity());
-        activityScanModeBinding.tvAngle.setText(String.format("%.0f", 180-angle));
-        this.angle = angle;
+        this.verticalAngle = verticalAngle-90;
+        this.horizontalAngle = horizontalAngle;
+        activityScanModeBinding.tvAngle.setText(""+mCameraInstance.getPersonCount());
+        if (System.currentTimeMillis() - lastUpdatedAngle > 500) {
+
+            lastUpdatedAngle = System.currentTimeMillis();
+        //    activityScanModeBinding.tvAngle.setText(""+childCount);
+
+        //    activityScanModeBinding.tvAngle.setText(String.format("%.0f", this.horizontalAngle));
+
+        }
+     //   activityScanModeBinding.tvAngle.setText(angle.substring(0,4)+"");
+       // this.angle = angle;
+      //  activityScanModeBinding.tvAngle.setText(""+mCameraInstance.getPersonCount());
     }
 
     Float distance;
     @Override
     public void onDistancereceived(Float distance) {
-        LogFileUtils.logInfo2("ScanModeActivity","this is inside distance inside ScanModeActivity "+distance);
         // activityScanModeBinding.tvAngle.setText(String.format("%.2f", distance));
         this.distance =distance;
     }
 
     public void save(File file, DepthFrame depthFrame1,int frameIndex,int height, int width, byte[] byteArray) {
         try {
-            LogFileUtils.logInfo2("ScanModeActivity","this is inside onDepthDataReceived 3"+depthFrame1+"-"+frameIndex);
 
 
             // int dataSize = stride * height;
@@ -942,32 +964,18 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             // Toast.makeText(PreviewActivity.this,"this is value of frame set "+depth.getProfile().getHeight()+" ,"+depth.getProfile().getWidth(),Toast.LENGTH_LONG).show();
 
 
-            LogFileUtils.logInfo2("ScanModeActivity","this is inside onDepthDataReceived 4"+depthFrame1+"-"+frameIndex+"+width->"+width+"height->"+height);
 
             /*byte[] byteArray = new byte[dataSize];
             depthFrame1.getData(byteArray);*/
-            LogFileUtils.logInfo2("ScanModeActivity","this is inside onDepthDataReceived 5"+depthFrame1+"-"+frameIndex+"-NULL");
 
-            if(Utils.printByteArrayUsingArraysToString(byteArray) == null || !(Utils.printByteArrayUsingArraysToString(byteArray).length()>10)) {
-                LogFileUtils.logInfo2("ScanModeActivity","this is inside onDepthDataReceived 6"+depthFrame1+"-"+frameIndex+"-NULL");
 
-                //session.setBytedata("NULL");
-            }else {
-                LogFileUtils.logInfo2("ScanModeActivity","this is inside onDepthDataReceived 7"+depthFrame1+"-"+frameIndex+"-NOT NUll");
-
-                // session.setBytedata(" NOT NULL");
-
-            }
             //  byte[] data = getData();
             FileOutputStream stream = new FileOutputStream(file);
             ZipOutputStream zip = new ZipOutputStream(stream);
             byte[] info = (width + "x" + height + "_0.001_7_" + getPose("_") + "\n").getBytes();
             try {
-                LogFileUtils.logInfo2("Scanmode", "depthdata received 8->"+" "+person.getQrcode()+", "+ Utils.printByteArrayUsingArraysToString(byteArray));
-                LogFileUtils.logInfo2("ScanModeActivity","this is inside onDepthDataReceived 4"+person.getQrcode()+", "+ Utils.printByteArrayUsingArraysToString(byteArray)+"-"+frameIndex);
 
             }catch (Exception e){
-                LogFileUtils.logInfo2("Scanmode", "depthdata received 9");
 
             }
             zip.putNextEntry(new ZipEntry("data"));
@@ -977,7 +985,6 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             zip.close();
         } catch (IOException e) {
             e.printStackTrace();
-            LogFileUtils.logInfo2("Scanmode- error", "depthdata received error-> "+e.getMessage());
 
         }
     }
@@ -1077,14 +1084,14 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
     private void onFeedbackUpdate() {
          AbstractIntelARCamera.LightConditions light = getCamera().getLightConditionState();
-        boolean childDetected = getCamera().getPersonCount() == 1;
+      //  boolean childDetected = getCamera().getPersonCount() == 1;
         float distance = mCameraInstance.getTargetDistance();
         runOnUiThread(() -> {
 
             if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
                 getCamera().setSkeletonMode(AbstractIntelARCamera.SkeletonMode.OFF);
                 setOutline(true);
-            } else if (childDetected) {
+            } else if (false) {
                 getCamera().setSkeletonMode(AbstractIntelARCamera.SkeletonMode.OUTLINE);
                 setFeedback(null);
                 setOutline(true);
@@ -1169,7 +1176,10 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         }
     }
 
-    private void onProcessArtifact(File artifactFile, ScanModeActivity1.ArtifactType type, float childHeight, float poseScore, String poseCordinates, double child_distance, float light_score, String boundinBox, String orientation) {
+    private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight, float poseScore, String poseCordinates, double child_distance, float light_score, String boundinBox, String orientation) {
+        if(type == ArtifactType.DEPTH){
+            LogFileUtils.logInfoOffline("SCANMODE","this is depth 0");
+        }
         if (artifactFile.exists()) {
             FileLog log = new FileLog();
 
@@ -1181,6 +1191,9 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                     log.setType("calibration");
                     break;
                 case DEPTH:
+                    if(type == ArtifactType.DEPTH){
+                        LogFileUtils.logInfoOffline("SCANMODE","this is depth 1");
+                    }
                     log.setStep(SCAN_STEP);
                     log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
                     log.setType("depth");
@@ -1191,22 +1204,31 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                     log.setType("rgb");
                     break;
             }
-
+            if(type == ArtifactType.DEPTH){
+                LogFileUtils.logInfoOffline("SCANMODE","this is depth 1");
+            }
             //set information if child is detected (note: this is unsupported on ARCore devices and for lying children wrongly oriented)
-            boolean childDetected = getCamera().getPersonCount() == 1;
-            log.setChildDetected(childDetected);
+           // boolean childDetected = getCamera().getPersonCount() == 1;
+            log.setChildDetected(true);
 
             log.setChildHeight(childHeight);
             log.setPoseScore(poseScore);
             log.setPoseCoordinates(poseCordinates);
             log.setBoundingBox(boundinBox);
 
+            if(type == ArtifactType.DEPTH){
+                LogFileUtils.logInfoOffline("SCANMODE","this is depth 2");
+            }
             //set metadata
             log.setPath(artifactFile.getPath());
             log.setHashValue(FileSystem.getMD5(artifactFile.getPath()));
             log.setFileSize(artifactFile.length());
             log.setUploadDate(0);
             log.setDeleted(false);
+
+            if(type == ArtifactType.DEPTH){
+                LogFileUtils.logInfoOffline("SCANMODE","this is depth 3");
+            }
             log.setQrCode(person.getQrcode());
             log.setCreateDate(mNowTime);
             log.setCreatedBy(session.getUserEmail());
@@ -1215,6 +1237,9 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             log.setMeasureId(measure.getId());
             log.setEnvironment(session.getEnvironment());
             log.setChild_distance(child_distance);
+            if(type == ArtifactType.DEPTH){
+                LogFileUtils.logInfoOffline("SCANMODE","this is depth 4");
+            }
             log.setLight_score(light_score);
             log.setOrientation(orientation);
 
@@ -1360,8 +1385,9 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
     public void createPose(Bitmap bitmap, int frameIndex) {
         Log.i(TAG, "this is inside point 0");
-        LogFileUtils.logInfo2("ScanModeActivity","this is inside create pose "+bitmap);
+
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP_REALSENSE == 0)) {
+
             Log.i(TAG, "this is inside point 1");
             if (bitmap == null) {
                 return;
@@ -1402,6 +1428,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                                     Log.i(TAG, "this is inside point 4" + ans[0] + " " + ans[1]);
                                     cretaeBoundingbox(bitmap, frameIndex, Float.parseFloat(ans[0]), ans[1]);
 
+
                                 }
                             })
                     .addOnFailureListener(
@@ -1422,6 +1449,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     public void cretaeBoundingbox(Bitmap bitmap, int frameIndex, float poseScore, String poseCoordinates) {
         InputImage image = InputImage.fromBitmap(bitmap, 0);
         String boundingBox = null;
+        childCount = 0;
         objectDetector.process(image)
                 .addOnSuccessListener(
                         new OnSuccessListener<List<DetectedObject>>() {
@@ -1430,8 +1458,13 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
                                 Log.i("ObjectDetector ", "this is value of bounding box " + detectedObjects);
                                 String boundingBox = null;
+
+
+
+
                                 if (detectedObjects.size() != 0 && detectedObjects.get(0) != null) {
                                     Rect rect = detectedObjects.get(0).getBoundingBox();
+
 
                                     if (rect != null) {
                                         boundingBox = "{\"left\":\"" + rect.left + "\", \"right\":\"" + rect.right + "\", \"top\":\"" + rect.top + "\", \"bottom\":\"" + rect.bottom + "\"}";

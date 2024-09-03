@@ -37,7 +37,7 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
 
         void onDepthDataReceived(Depthmap depthmap, int frameIndex, DepthFrame depthFrame, int height, int width, byte[] byteArray);
 
-        void onAngleReceived(Double angle);
+        void onAngleReceived(double verticalAngle, double horizontalAngle);
 
         void onDistancereceived(Float distance);
     }
@@ -106,12 +106,14 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
     protected long mLastDark;
     protected long mSessionStart;
     protected float mOutlineAlpha = 0;
-    protected int mPersonCount = 0;
+    protected String mPersonCount = null;
 
     protected abstract void closeCamera();
     protected abstract void openCamera();
     protected abstract void updateFrame();
-    public abstract int getPersonCount();
+    public abstract String getPersonCount();
+
+    double verticalAngle=0, horizontalAngle=0;
 
     public AbstractIntelARCamera(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
         mActivity = activity;
@@ -213,11 +215,9 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
             if(saveFrameIndex % AppConstants.SCAN_FRAMESKIP_REALSENSE == 0 && bitmapSave!=null && bitmapPreview!=null) {
 
                 ((Camera2DataListener) listener).onColorDataReceived(bitmapSave, saveFrameIndex);
-                LogFileUtils.logInfo2("ARRealsense1", "this is inside onProcess color data -> " +bitmapSave);
 
             }
         }
-        LogFileUtils.logInfo2("ARRealsense1", "this is inside start streaming 5-> " +bitmapPreview);
 
         //update preview window
         mActivity.runOnUiThread(() -> {
@@ -231,7 +231,6 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
                 mDepthCameraPreview.setScaleX(scale);
                 mDepthCameraPreview.setScaleY(scale);
             }catch (Exception e){
-                LogFileUtils.logInfo2("ERROR","this is error "+e.getMessage());
             }
         });
     }
@@ -273,10 +272,10 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
             ((Camera2DataListener)listener).onDistancereceived(distance);
         }
     }
-    protected void onProcessAngle(double angle){
+    protected void onProcessAngle(){
         for (Object listener : mListeners) {
 
-            ((Camera2DataListener)listener).onAngleReceived(angle);
+            ((Camera2DataListener)listener).onAngleReceived(verticalAngle,horizontalAngle);
         }
 
     }
@@ -464,69 +463,6 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
     }
 
 
-    private Bitmap skeletonVisualisation(Bitmap preview) {
 
-        if (mSkeletonMode == SkeletonMode.OFF) {
-            mOutlineAlpha = -2;
-            color = Color.WHITE;
-            return preview;
-        }
-
-        //skeleton visualisation
-        if (mPersonCount == 1) {
-            if (preview == null || (preview.getWidth() == 1)) {
-                preview = Bitmap.createBitmap(240, 180, Bitmap.Config.ARGB_8888);
-            }
-            preview = preview.copy(Bitmap.Config.ARGB_8888, true);
-            Canvas c = new Canvas(preview);
-
-            //define look of the visualisation
-            mOutlineAlpha = mOutlineAlpha * 0.9f + 0.1f;
-            int alpha = Math.max(0, (int)(mOutlineAlpha * 128));
-            color = Color.GREEN;
-            if ((mTargetDistance < AppConstants.TOO_NEAR) || (mTargetDistance > AppConstants.TOO_FAR)) {
-                color = Color.RED;
-            } else if (!mSkeletonValid) {
-                color = Color.RED;
-            }
-            color = Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
-
-            //draw bones
-            for (int pass = 0; pass < ((mSkeletonMode == SkeletonMode.OUTLINE) ? 2 : 1); pass++) {
-                int r = (mSkeletonMode == SkeletonMode.OUTLINE) ? (pass == 0 ? 20 : 15) : 1;
-                Paint p = new Paint();
-                p.setColor(pass == 0 ? color : Color.BLACK);
-                p.setStrokeWidth(r * 2);
-                for (int i = 0; i < mSkeleton.size(); i += 2) {
-                    int x1 = (int) (mSkeleton.get(i).x * (float)preview.getWidth());
-                    int y1 = (int) (mSkeleton.get(i).y * (float)preview.getHeight());
-                    int x2 = (int) (mSkeleton.get(i + 1).x * (float)preview.getWidth());
-                    int y2 = (int) (mSkeleton.get(i + 1).y * (float)preview.getHeight());
-                    if ((x1 != 0) && (y1 != 0) && (x2 != 0) && (y2 != 0)) {
-                        if (mSkeletonMode == SkeletonMode.OUTLINE) {
-                            c.drawCircle(x1, y1, r, p);
-                            c.drawCircle(x2, y2, r, p);
-                        }
-                        c.drawLine(x1, y1, x2, y2, p);
-                    }
-                }
-            }
-
-            //masking which creates outline
-            if (mSkeletonMode == SkeletonMode.OUTLINE) {
-                int w = preview.getWidth();
-                int h = preview.getHeight();
-                int[] pixels = new int[w * h];
-                preview.getPixels(pixels, 0, w, 0, 0, w, h);
-                for (int i = 0; i < pixels.length; i++) {
-                    if (pixels[i] == Color.BLACK) {
-                        pixels[i] = Color.TRANSPARENT;
-                    }
-                }
-                preview.setPixels(pixels, 0, w, 0, 0, w, h);
-            }
-        }
-        return preview;
-    }
 }
 

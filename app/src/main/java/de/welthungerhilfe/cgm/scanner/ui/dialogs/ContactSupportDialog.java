@@ -64,7 +64,7 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
     public String footer;
     private String type;
     private File screenshot;
-    private File zip;
+    private File zip, zip1;
 
 
     DialogContactSupportBinding dialogContactSupportBinding;
@@ -122,7 +122,9 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         if (audioFile != null) uris.add(Uri.fromFile(audioFile));
         if (screenshot != null) uris.add(Uri.fromFile(screenshot));
         if (zip != null) uris.add(Uri.fromFile(zip));
+        if(zip1!=null)uris.add(Uri.fromFile(zip1));
         addLoggingFilesZip(uris);
+        addLoggingFilesZip1(uris);
         sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 
         try {
@@ -142,6 +144,14 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         }
     }
 
+    void addLoggingFilesZip1(ArrayList<Uri> uris) {
+        File extFileDir = AppController.getInstance().getRootDirectory(context);
+        File logFilesFolder = new File(extFileDir, AppConstants.LOG_FILE_FOLDER_OFFLINE);
+        if (logFilesFolder.exists()) {
+            File file[] = logFilesFolder.listFiles();
+            uris.add(attachFiles1(file));
+        }
+    }
     void onCancel() {
         dismiss();
     }
@@ -176,6 +186,18 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         FileSystem.zip(paths, zip.getAbsolutePath());
         return Uri.fromFile(zip);
     }
+
+    public Uri attachFiles1(File[] files) {
+        String[] paths = new String[files.length];
+        for (int i = 0; i < files.length; i++) {
+            paths[i] = files[i].getAbsolutePath();
+        }
+        zip1 = new File(AppController.getInstance().getPublicAppDirectory(context), "report1.zip");
+        FileSystem.zip(paths, zip1.getAbsolutePath());
+        return Uri.fromFile(zip1);
+    }
+
+
 
     public void setFooter(String value) {
         footer = value;
@@ -228,3 +250,4 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         }
     }
 }
+

@@ -205,9 +205,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:paddingLeft="40dp"
-                    android:paddingTop="123dp"
+                    android:paddingTop="87dp"
                     android:paddingRight="40dp"
-                    android:paddingBottom="123dp"
+                    android:paddingBottom="102dp"
                     android:src="@drawable/square"
 
                     android:visibility="visible" />

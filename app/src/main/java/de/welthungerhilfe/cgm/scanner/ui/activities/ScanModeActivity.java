@@ -1206,8 +1206,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     public void createPose(Bitmap bitmap, int frameIndex) {
         Log.i(TAG, "this is inside point 0");
-
+        LogFileUtils.logInfoOffline(TAG,"this is rgb last frame 0 "+frameIndex);
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
+            LogFileUtils.logInfoOffline(TAG,"this is rgb last frame 1"+frameIndex);
+
             Log.i(TAG, "this is inside point 1");
             if (bitmap == null) {
                 return;
@@ -1333,8 +1335,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         if (System.currentTimeMillis() - lastUpdatedAngle > 500) {
             lastUpdatedAngle = System.currentTimeMillis();
-            activityScanModeBinding.tvAngle.setText(String.format("%.0f", angle - 90));
+          //  activityScanModeBinding.tvAngle.setText(String.format("%.0f", angle - 90));
+            activityScanModeBinding.tvAngle.setText(""+getCamera().getPersonCount());
         }
+
 
         // Display the angle (or use it for other purposes)
         /*TextView angleTextView = findViewById(R.id.angleTextView); // Assuming a TextView to display the angle

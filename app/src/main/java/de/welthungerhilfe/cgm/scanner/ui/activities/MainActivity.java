@@ -234,6 +234,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         }
         RsContext.init(getApplicationContext());
 
+        LogFileUtils.logInfoOffline("MainActivity","this is test message");
+
 
     }
 
