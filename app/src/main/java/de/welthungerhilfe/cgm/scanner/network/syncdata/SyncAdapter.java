@@ -455,7 +455,10 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                                 return;
                             }
 
-                            if(true){
+                        /*    if(true){
+                                return;
+                            }*/
+                            if(!(completeScan.getScans().size()==4)){
                                 return;
                             }
 
@@ -587,7 +590,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             person1.setBirthdayString(DataFormat.convertMilliSecondToBirthDay(person1.getBirthday()));
             person1.setQr_scanned(DataFormat.convertMilliSeconsToServerDate(person1.getCreated()));
             person1.setDevice_updated_at(DataFormat.convertMilliSeconsToServerDate(person1.getDevice_updated_at_timestamp()));
-           /* person1.setCenter_location_id(null);
+            /*person1.setCenter_location_id(null);
             person1.setLocation_id(null);*/
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(person1))).toString());
 

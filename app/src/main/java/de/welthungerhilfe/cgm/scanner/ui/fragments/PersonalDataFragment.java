@@ -229,6 +229,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         editBirth = view.findViewById(R.id.editBirth);
         editBirth.setOnDateInputListener(this);
+        editBirth.setOnClickListener(this);
 
         editGuardian = view.findViewById(R.id.editGuardian);
         editGuardian.addTextChangedListener(this);
@@ -486,6 +487,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.imgBirth:
+            case R.id.editBirth:
                 long timestamp = DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, editBirth.getText().toString());
 
                 DateRangePickerDialog1 dateRangePicker = new DateRangePickerDialog1();

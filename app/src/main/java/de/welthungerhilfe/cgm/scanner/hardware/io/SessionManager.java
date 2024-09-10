@@ -228,8 +228,8 @@ public class SessionManager {
             return null;
 
         } else {
-            return pref.getString(KEY_USER_TOKEN, null);
-        }
+        return pref.getString(KEY_USER_TOKEN, null);
+         }
     }
 
     public String getAuthTokenWithBearer() {
@@ -238,8 +238,8 @@ public class SessionManager {
 
 
         } else {
-            return "bearer " + getAuthToken();
-    }
+        return "bearer " + getAuthToken();
+          }
 
     }
 

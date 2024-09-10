@@ -12,7 +12,7 @@ android {
 
 
         versionCode 726
-        versionName "9.0.0"
+        versionName "9.0.1"
 
 
 
@@ -126,7 +126,7 @@ dependencies {
     // Tests
     testImplementation 'junit:junit:4.13.2' //java unit test
     testImplementation 'org.mockito:mockito-core:2.19.0' //app mocking
-    androidTestImplementation 'androidx.room:room-testing:2.6.1' //database testing
+   // androidTestImplementation 'androidx.room:room-testing:2.6.1' //database testing
     testImplementation 'org.hamcrest:hamcrest-library:2.2'//framework for software tests
     testImplementation "org.robolectric:robolectric:4.8"//write unit tests and run them on a desktop JVM
     testImplementation 'androidx.test:core:1.5.0'
