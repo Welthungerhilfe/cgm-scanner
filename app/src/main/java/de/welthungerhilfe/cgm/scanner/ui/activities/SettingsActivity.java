@@ -105,7 +105,10 @@ public class SettingsActivity extends BaseActivity {
 
     @SuppressLint("StaticFieldLeak")
     private void initUI() {
+/*
         boolean devUser = session.getUserEmail().endsWith("@childgrowthmonitor.org");
+*/
+        boolean devUser = true;
         boolean devVersion = BuildConfig.VERSION_NAME.endsWith("dev");
         boolean showQA = BuildConfig.DEBUG || devUser || devVersion;
         activitySettingsBinding.testQAlayout.setVisibility(showQA ? View.VISIBLE : View.GONE);
