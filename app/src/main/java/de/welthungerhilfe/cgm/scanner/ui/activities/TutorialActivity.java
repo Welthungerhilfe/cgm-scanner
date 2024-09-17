@@ -40,7 +40,7 @@ import de.welthungerhilfe.cgm.scanner.ui.fragments.TutorialFragment;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
-public class TutorialActivity extends BaseActivity implements SelectModeDialog.SetupmodeListner {
+public class TutorialActivity {/*extends BaseActivity implements SelectModeDialog.SetupmodeListner {
 
     ArrayList<TutorialData> tutorialDataList;
 
@@ -123,5 +123,5 @@ public class TutorialActivity extends BaseActivity implements SelectModeDialog.S
         finish();
         overridePendingTransition(0, 0);
         startActivity(intent);
-    }
+    }*/
 }

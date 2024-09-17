@@ -71,7 +71,9 @@ public class DeviceService extends Service {
                     return;
 
                 Device device = new Device();
+
                 device.setId(AppController.getInstance().get_deviceId());
+
                 device.setUuid(AppController.getInstance().getAndroidID());
                 device.setCreate_timestamp(AppController.getInstance().getUniversalTimestamp());
                 device.setSync_timestamp(AppController.getInstance().getUniversalTimestamp());

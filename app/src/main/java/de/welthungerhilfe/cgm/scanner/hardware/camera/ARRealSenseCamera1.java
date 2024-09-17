@@ -191,8 +191,8 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                                     @Override
                                     public void run() {
                                         onProcessColorData(bitmap1, null, 0);
-                                        createPose(bitmap1);
-                                       // onProcessAngle();
+                                    //    createPose(bitmap1);
+                                       onProcessAngle();
                                     }
                                 });
                             }

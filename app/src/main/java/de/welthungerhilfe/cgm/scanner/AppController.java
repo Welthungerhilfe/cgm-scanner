@@ -82,6 +82,7 @@ public class AppController extends Application {
     }
 
     public String get_deviceId() {
+
         return String.format("%s-device-%s-%s", getAndroidID(), getUniversalTimestamp(), getSaltString(16));
     }
 

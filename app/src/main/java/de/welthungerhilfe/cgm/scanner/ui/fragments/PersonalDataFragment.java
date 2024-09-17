@@ -67,8 +67,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
-import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
+
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions;
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning;
@@ -104,12 +103,12 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.LocationDetectActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.QRScanActivity;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog1;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.LocationDialogFragment;
 import de.welthungerhilfe.cgm.scanner.ui.views.DateEditText;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 
-public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog.Callback, CompoundButton.OnCheckedChangeListener, DateEditText.DateInputListener, TextWatcher, LocationDialogFragment.PassDataToPersonDataFragment {
+public class PersonalDataFragment extends Fragment implements View.OnClickListener, DateRangePickerDialog1.Callback, CompoundButton.OnCheckedChangeListener, DateEditText.DateInputListener, TextWatcher, LocationDialogFragment.PassDataToPersonDataFragment {
 
     public Context context;
     private SessionManager session;
@@ -230,6 +229,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
         editBirth = view.findViewById(R.id.editBirth);
         editBirth.setOnDateInputListener(this);
+        editBirth.setOnClickListener(this);
 
         editGuardian = view.findViewById(R.id.editGuardian);
         editGuardian.addTextChangedListener(this);
@@ -487,13 +487,14 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.imgBirth:
+            case R.id.editBirth:
                 long timestamp = DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, editBirth.getText().toString());
 
-                DateRangePickerDialog dateRangePicker = new DateRangePickerDialog();
+                DateRangePickerDialog1 dateRangePicker = new DateRangePickerDialog1();
                 dateRangePicker.setDate(new Date(timestamp));
                 dateRangePicker.setCallback(this);
-                dateRangePicker.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
-                dateRangePicker.show(getActivity().getFragmentManager(), "DATE_RANGE_PICKER");
+               // dateRangePicker.setStyle(DI.STYLE_NO_TITLE, 0);
+                dateRangePicker.show(getActivity().getSupportFragmentManager(), "DATE_RANGE_PICKER");
                 break;
             case R.id.btnNext:
                 if (validate()) {
@@ -585,8 +586,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
     @Override
-    public void onDateTimeRecurrenceSet(SelectedDate selectedDate, int hourOfDay, int minute, SublimeRecurrencePicker.RecurrenceOption recurrenceOption, String recurrenceRule) {
-        long birthday = selectedDate.getStartDate().getTimeInMillis();
+    public void onDateTimeRecurrenceSet(Date selectedDate, int hourOfDay, int minute, String recurrenceOption, String recurrenceRule) {
+        long birthday = selectedDate.getTime();
         editBirth.setText(DataFormat.timestamp(getContext(), DataFormat.TimestampFormat.DATE, birthday));
         ageAlertShown = false;
         PersonalDataFragment.this.onTextChanged();

@@ -26,11 +26,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.appeaser.sublimepickerlibrary.SublimePicker;
-import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
-import com.appeaser.sublimepickerlibrary.helpers.SublimeListenerAdapter;
-import com.appeaser.sublimepickerlibrary.helpers.SublimeOptions;
-import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
+
 
 import java.util.Calendar;
 import java.util.Date;
@@ -38,7 +34,7 @@ import java.util.Date;
 import de.welthungerhilfe.cgm.scanner.R;
 
 public class DateRangePickerDialog extends DialogFragment {
-    SublimePicker mSublimePicker;
+   /* SublimePicker mSublimePicker;
 
     SublimeListenerAdapter mListener = new SublimeListenerAdapter() {
         @Override
@@ -90,5 +86,5 @@ public class DateRangePickerDialog extends DialogFragment {
 
     public interface Callback {
         void onDateTimeRecurrenceSet(SelectedDate selectedDate, int hourOfDay, int minute, SublimeRecurrencePicker.RecurrenceOption recurrenceOption, String recurrenceRule);
-    }
+    }*/
 }

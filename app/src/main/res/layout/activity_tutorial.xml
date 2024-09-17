@@ -7,7 +7,7 @@
         android:layout_height="match_parent"
         android:background="@color/colorWhite">
 
-        <de.welthungerhilfe.cgm.scanner.ui.views.PagerView
+        <!--<de.welthungerhilfe.cgm.scanner.ui.views.PagerView
             android:id="@+id/viewPager"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
@@ -174,7 +174,7 @@
                 android:textStyle="bold"
                 android:onClick="startWork"/>
 
-        </LinearLayout>
+        </LinearLayout>-->
 
     </RelativeLayout>
 </layout>

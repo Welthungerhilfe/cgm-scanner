@@ -9,11 +9,10 @@ android {
     defaultConfig {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 24
+
         targetSdkVersion 34
-
-
         versionCode 726
-        versionName "9.0.0"
+        versionName "9.0.1"
 
 
         manifestPlaceholders = [arCameraRequired:"false", depthCameraRequired:"false", arcoreValue:"optional", arengineValue:"optional"]
@@ -125,7 +124,7 @@ dependencies {
     // Tests
     testImplementation 'junit:junit:4.13.2' //java unit test
     testImplementation 'org.mockito:mockito-core:2.19.0' //app mocking
-    androidTestImplementation 'androidx.room:room-testing:2.6.1' //database testing
+   // androidTestImplementation 'androidx.room:room-testing:2.6.1' //database testing
     testImplementation 'org.hamcrest:hamcrest-library:2.2'//framework for software tests
     testImplementation "org.robolectric:robolectric:4.8"//write unit tests and run them on a desktop JVM
     testImplementation 'androidx.test:core:1.5.0'
@@ -139,15 +138,15 @@ dependencies {
 
     // UI items
     implementation 'com.balysv:material-ripple:1.0.2' //custom tab (e.g.in scan mode)
-    implementation 'com.appeaser.sublimepickerlibrary:sublimepickerlibrary:2.1.2' //date selector
+    //implementation 'com.appeaser.sublimepickerlibrary:sublimepickerlibrary:2.1.2' //date selector
     implementation 'com.orhanobut:dialogplus:1.11@aar' //filter popup (scans tab)
     implementation 'com.google.android.gms:play-services-location:21.0.1' //google location
     implementation 'com.google.android.gms:play-services-maps:18.1.0' //google maps
     implementation 'com.jaredrummler:material-spinner:1.2.4' //growth chart type selector
     implementation 'com.google.guava:guava:28.1-android' //growth chart data iterator
     implementation 'com.github.bumptech.glide:glide:4.11.0' //image preview
-    implementation 'com.romandanylyk:pageindicatorview:1.0.3' //indicator of current page (in tutorial)
-    implementation 'com.shuhart.stepview:stepview:1.5.1' //for showing steps(in tutorial)
+   /* implementation 'com.romandanylyk:pageindicatorview:1.0.3' //indicator of current page (in tutorial)
+    implementation 'com.shuhart.stepview:stepview:1.5.1' //for showing steps(in tutorial)*/
     implementation 'id.zelory:compressor:3.0.1' //ImageCompression library
     //implementation 'com.google.mlkit:pose-detection:18.0.0-beta3'
     // If you want to use the accurate sdk

@@ -867,7 +867,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         onFeedbackUpdate();
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP_REALSENSE == 0)) {
 
-            String orientation ="horizontal_angle:"+ String.format("%.0f", horizontalAngle)+",vertical_angel:"+String.format("%.0f", verticalAngle);
+            String orientation ="horizontal_angle:"+ String.format("%.0f", transformAngle(horizontalAngle))+",vertical_angel:"+String.format("%.0f", verticalAngle);
 
             float light = mCameraInstance.getLightIntensity();
             Log.i("ScanModeActivity", "this is value of orientation " + orientation);
@@ -929,18 +929,28 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         }
     }
 
+    public static double transformAngle(double inputAngle) {
+        if (inputAngle == 90) {
+            return 0; // Condition 1: input angle is 90, return 0
+        } else if (inputAngle < 90) {
+            return 90 - inputAngle; // Condition 2: input angle less than 90, return the difference
+        } else { // inputAngle > 90
+            return 450 - inputAngle; // Condition 3: input angle greater than 90, return based on 360-degree wrap
+        }
+    }
+
     @Override
     public void onAngleReceived(double verticalAngle,double horizontalAngle) {
        // activityScanModeBinding.tvAngle.setText(" "+mCameraInstance.getLightIntensity());
         this.verticalAngle = verticalAngle-90;
         this.horizontalAngle = horizontalAngle;
-        activityScanModeBinding.tvAngle.setText(""+mCameraInstance.getPersonCount());
-        if (System.currentTimeMillis() - lastUpdatedAngle > 500) {
+      //  activityScanModeBinding.tvAngle.setText(""+mCameraInstance.getPersonCount());
+        if (System.currentTimeMillis() - lastUpdatedAngle > 300) {
 
             lastUpdatedAngle = System.currentTimeMillis();
         //    activityScanModeBinding.tvAngle.setText(""+childCount);
 
-        //    activityScanModeBinding.tvAngle.setText(String.format("%.0f", this.horizontalAngle));
+            activityScanModeBinding.tvAngle.setText(String.format("%.0f", this.horizontalAngle));
 
         }
      //   activityScanModeBinding.tvAngle.setText(angle.substring(0,4)+"");

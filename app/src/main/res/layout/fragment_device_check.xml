@@ -51,7 +51,7 @@
                             android:textSize="22sp" />
                     </LinearLayout>
 
-                    <com.shuhart.stepview.StepView
+      <!--              <com.shuhart.stepview.StepView
                         android:id="@+id/stepView"
                         android:layout_width="150dp"
                         android:layout_height="wrap_content"
@@ -74,7 +74,7 @@
                         app:sv_stepNumberTextSize="12sp"
                         app:sv_stepPadding="2dp"
                         app:sv_stepViewStyle="@style/StepView"
-                        app:sv_stepsNumber="4"/>
+                        app:sv_stepsNumber="4"/>-->
 
                     <LinearLayout
                         android:layout_width="wrap_content"

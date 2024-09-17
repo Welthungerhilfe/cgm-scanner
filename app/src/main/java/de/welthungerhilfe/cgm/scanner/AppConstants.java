@@ -33,14 +33,10 @@ public class AppConstants {
     public static final String AUTH_MALAWI = "{OAUTH_SCOPE_MALAWI}";
     public static final String AUTH_SIERRA = "{OAUTH_SCOPE_SIERRA}";
 
+
     public static final String AUTH_DEMO_QA = "{OAUTH_SCOPE_QA}";
 
     public static final String API_URL_DEMO_QA = "{API_URL_QA}/";
-
-
-
-
-
 
 
     public static final String API_URL_SANDBOX = "{API_URL_SANDBOX}/";
@@ -175,8 +171,6 @@ public class AppConstants {
     public static final String LOG_FILE_FOLDER = "LogFileFolder";
 
     public static final String LOG_FILE_FOLDER_OFFLINE = "LogFileFolder-Offline";
-
-
 
 
     //Workflows list for result generation

@@ -79,24 +79,24 @@ public interface FileLogDao {
     @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE artifactId=:artifactId")
     public FileLog getFileLogByArtifactId(String artifactId);
 
-    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND autoDetectSynced=0 AND type='depth' AND environment=:environment ORDER BY createDate")
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND autoDetectSynced=0 AND type='depth' AND environment=:environment ORDER BY createDate LIMIT 200")
     List<FileLog> loadAutoDetectedFileLog(int environment);
 
-    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND childHeightSynced=0 AND type='depth' AND environment=:environment ORDER BY createDate")
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND childHeightSynced=0 AND type='depth' AND environment=:environment ORDER BY createDate LIMIT 200")
     List<FileLog> loadAppHeightFileLog(int environment);
 
-    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND poseScoreSynced=0 AND type='rgb' AND environment=:environment ORDER BY createDate")
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND poseScoreSynced=0 AND type='rgb' AND environment=:environment ORDER BY createDate LIMIT 200")
     List<FileLog>  loadAppPoseScoreFileLog(int environment);
 
-    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND bounding_box_synced=0 AND type='rgb' AND environment=:environment ORDER BY createDate")
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND bounding_box_synced=0 AND type='rgb' AND environment=:environment ORDER BY createDate LIMIT 200")
     List<FileLog>  loadAppBoundingBox(int environment);
 
-    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND orientation_synced=0 AND type='depth' AND environment=:environment AND orientation IS NOT NULL ORDER BY createDate")
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND orientation_synced=0 AND type='depth' AND environment=:environment AND orientation IS NOT NULL ORDER BY createDate LIMIT 200")
     List<FileLog>  loadAppOrientation(int environment);
 
-    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND child_distance_synced=0 AND type='depth' AND environment=:environment AND child_distance IS NOT 0 ORDER BY createDate LIMIT 500")
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND child_distance_synced=0 AND type='depth' AND environment=:environment AND child_distance IS NOT 0 ORDER BY createDate LIMIT 200")
     List<FileLog>  loadChildDistanceFileLog(int environment);
 
-    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND light_score_synced=0 AND type='depth' AND environment=:environment AND light_score IS NOT 0 ORDER BY createDate LIMIT 500")
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND light_score_synced=0 AND type='depth' AND environment=:environment AND light_score IS NOT 0 ORDER BY createDate LIMIT 200")
     List<FileLog>  loadChildLightScoreFileLog(int environment);
 }

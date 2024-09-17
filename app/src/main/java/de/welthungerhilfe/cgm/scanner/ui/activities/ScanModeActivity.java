@@ -222,9 +222,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
     @Override
     public void onTutorial() {
-        Intent intent = new Intent(ScanModeActivity.this, TutorialActivity.class);
+  /*      Intent intent = new Intent(ScanModeActivity.this, TutorialActivity.class);
         intent.putExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, true);
-        startActivity(intent);
+        startActivity(intent);*/
     }
 
     public void completeScan(View view) {

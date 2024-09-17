@@ -243,7 +243,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             LogFileUtils.logInfo(TAG, "start updating");
             synchronized (getLock()) {
                 try {
-                  //  postRemainingData();
+                    //  postRemainingData();
                     LogFileUtils.logInfo(TAG,"this is calling processPersonQueue");
                     processPersonQueue();
                     LogFileUtils.logInfo(TAG,"this is calling processMeasureQueue");
@@ -386,7 +386,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         }
                     }
-                   // String backendPersonId = person.getServerId();
+                    // String backendPersonId = person.getServerId();
                     if (person== null && person.getServerId()==null) {
                         continue;
                     }
@@ -434,64 +434,71 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             }
             completeScan.setScans(scanList);
 
-           // LogFileUtils.logInfo(TAG, "this is posting scan raw data " + (new JSONObject(gson.toJson(completeScan))).toString());
+            // LogFileUtils.logInfo(TAG, "this is posting scan raw data " + (new JSONObject(gson.toJson(completeScan))).toString());
 
             onThreadChange(1,"Post Scan");
-                RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(completeScan))).toString());
-                retrofit.create(ApiService.class).postScans(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Observer<CompleteScan>() {
-                            @Override
-                            public void onSubscribe(@NonNull Disposable d) {
+            RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(completeScan))).toString());
+            retrofit.create(ApiService.class).postScans(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<CompleteScan>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
 
-                            }
+                        }
 
-                            @Override
-                            public void onNext(@NonNull CompleteScan completeScan) {
+                        @Override
+                        public void onNext(@NonNull CompleteScan completeScan) {
 
-                                if(completeScan==null || completeScan.getScans().size() == 0){
-                                    onThreadChange(-1,"Post Scan");
-
-                                    return;
-                                }
-
-                                for(Scan scan:completeScan.getScans()){
-                                    LogFileUtils.logInfo(TAG, "scan " + measure.getId() + " successfully posted");
-                                    PostScanResult postScanResult = new PostScanResult();
-                                    postScanResult.setEnvironment(measure.getEnvironment());
-                                    postScanResult.setId(scan.getId());
-                                    postScanResult.setMeasure_id(measure.getId());
-                                    postScanResult.setTimestamp(prevTimestamp);
-                                    postScanResultrepository.insertPostScanResult(postScanResult);
-                                    addScanDataToFileLogs(scan.getId(), scan.getArtifacts());
-                                }
-
-                                measure.setArtifact_synced(true);
-                                measure.setTimestamp(session.getSyncTimestamp());
-                                measure.setUploaded_at(System.currentTimeMillis());
-                                measure.setSynced(true);
-                                updated = true;
-                                updateDelay = 0;
-                                measureRepository.updateMeasure(measure);
+                            if(completeScan==null || completeScan.getScans().size() == 0){
                                 onThreadChange(-1,"Post Scan");
+
+                                return;
                             }
 
-                            @Override
-                            public void onError(@NonNull Throwable e) {
-                                LogFileUtils.logError(TAG, "scan error  posting failed " + e.getMessage());
-                                if (NetworkUtils.isExpiredToken(e.getMessage())) {
-                                    AuthenticationHandler.restoreToken(context);
-                                    error401();
-                                }
-
-                                onThreadChange(-1,"Post Scan");
+                        /*    if(true){
+                                return;
+                            }*/
+                            if(!(completeScan.getScans().size()==4)){
+                                return;
                             }
 
-                            @Override
-                            public void onComplete() {
-
+                            for(Scan scan:completeScan.getScans()){
+                                LogFileUtils.logInfo(TAG, "scan " + measure.getId() + " successfully posted");
+                                PostScanResult postScanResult = new PostScanResult();
+                                postScanResult.setEnvironment(measure.getEnvironment());
+                                postScanResult.setId(scan.getId());
+                                postScanResult.setMeasure_id(measure.getId());
+                                postScanResult.setTimestamp(prevTimestamp);
+                                postScanResultrepository.insertPostScanResult(postScanResult);
+                                addScanDataToFileLogs(scan.getId(), scan.getArtifacts());
                             }
-                        });
+
+                            measure.setArtifact_synced(true);
+                            measure.setTimestamp(session.getSyncTimestamp());
+                            measure.setUploaded_at(System.currentTimeMillis());
+                            measure.setSynced(true);
+                            updated = true;
+                            updateDelay = 0;
+                            measureRepository.updateMeasure(measure);
+                            onThreadChange(-1,"Post Scan");
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            LogFileUtils.logError(TAG, "scan error  posting failed " + e.getMessage());
+                            if (NetworkUtils.isExpiredToken(e.getMessage())) {
+                                AuthenticationHandler.restoreToken(context);
+                                error401();
+                            }
+
+                            onThreadChange(-1,"Post Scan");
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
 
         } catch (Exception e) {
             LogFileUtils.logException(e,"postScan");
@@ -583,7 +590,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             person1.setBirthdayString(DataFormat.convertMilliSecondToBirthDay(person1.getBirthday()));
             person1.setQr_scanned(DataFormat.convertMilliSeconsToServerDate(person1.getCreated()));
             person1.setDevice_updated_at(DataFormat.convertMilliSeconsToServerDate(person1.getDevice_updated_at_timestamp()));
-           /* person1.setCenter_location_id(null);
+            /*person1.setCenter_location_id(null);
             person1.setLocation_id(null);*/
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(person1))).toString());
 
@@ -1550,22 +1557,22 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         String full = null;
 
         try {
-        String[] result = poseCoordinates.split(" ");
-        int i;
-        String key_points_coordinate = "\"key_points_coordinate\":[";
-        String key_points_prob = "\"key_points_prob\":[";
-        for(i=0 ; i<result.length;i++){
-            if(result[i] != null && !result[i].trim().isEmpty()) {
-                String[] result1 = result[i].split(",");
-                String landmarkType = Utils.getLandmarkType(i-1);
-                if(result1!=null) {
-                    key_points_coordinate = key_points_coordinate + "{" + "\""+landmarkType+"\":{\"x\":\"" + result1[1] + "\"," + "\"y\":\"" + result1[2] + "\"}},";
-                    key_points_prob = key_points_prob + "{" + "\""+landmarkType+"\":{\"score\":\"" + result1[0] + "\"}},";
+            String[] result = poseCoordinates.split(" ");
+            int i;
+            String key_points_coordinate = "\"key_points_coordinate\":[";
+            String key_points_prob = "\"key_points_prob\":[";
+            for(i=0 ; i<result.length;i++){
+                if(result[i] != null && !result[i].trim().isEmpty()) {
+                    String[] result1 = result[i].split(",");
+                    String landmarkType = Utils.getLandmarkType(i-1);
+                    if(result1!=null) {
+                        key_points_coordinate = key_points_coordinate + "{" + "\""+landmarkType+"\":{\"x\":\"" + result1[1] + "\"," + "\"y\":\"" + result1[2] + "\"}},";
+                        key_points_prob = key_points_prob + "{" + "\""+landmarkType+"\":{\"score\":\"" + result1[0] + "\"}},";
+                    }
                 }
+
+
             }
-
-
-        }
 
             full = "{\"body_pose_score\":\"" + poseScore + "\"," + key_points_coordinate.substring(0, key_points_coordinate.length() - 1) + "],"
                     + key_points_prob.substring(0, key_points_prob.length() - 1) + "]}";
@@ -1760,7 +1767,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         lastSyncDailyReport = session.getLastSyncDailyReport();
         LogFileUtils.logInfo(TAG,"this is remaining data 1 "+lastSyncDailyReport);
         LogFileUtils.logInfo(TAG,"this is remaining data 1.5 "+(System.currentTimeMillis() - lastSyncDailyReport));
-       if((System.currentTimeMillis() - lastSyncDailyReport) > 86400000 ) {
+        if((System.currentTimeMillis() - lastSyncDailyReport) > 86400000 ) {
 
             session.setLastSyncDailyReport(System.currentTimeMillis());
             LogFileUtils.logInfo(TAG,"this is remaining data 2 "+session.getLastSyncDailyReport());
@@ -2066,35 +2073,35 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                             }
 
-                                for (int i = 0; i < root.location_json.size(); i++) {
-                                    Log.i(TAG,"this is inside address onnext A "+root.location_json.get(i).location_name);
-                                    for (int j = 0; j < root.location_json.get(i).dISTRICT.size(); j++) {
-                                        Log.i(TAG,"this is inside address onnext B "+root.location_json.get(i).location_name+" "+j);
+                            for (int i = 0; i < root.location_json.size(); i++) {
+                                Log.i(TAG,"this is inside address onnext A "+root.location_json.get(i).location_name);
+                                for (int j = 0; j < root.location_json.get(i).dISTRICT.size(); j++) {
+                                    Log.i(TAG,"this is inside address onnext B "+root.location_json.get(i).location_name+" "+j);
 
-                                        for (int k = 0; k < root.location_json.get(i).dISTRICT.get(j).bLOCK.size(); k++) {
+                                    for (int k = 0; k < root.location_json.get(i).dISTRICT.get(j).bLOCK.size(); k++) {
 
-                                            Log.i(TAG,"this is inside address onnext C "+i+" "+j+" "+k);
+                                        Log.i(TAG,"this is inside address onnext C "+i+" "+j+" "+k);
 
-                                            for (int l = 0; l < root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.size(); l++) {
-                                                if(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER != null) {
-                                                    for (int m = 0; m < root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.size(); m++) {
-                                                        Log.i(TAG, "this is values of location " + root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).tree_string + " " + root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).location_name);
+                                        for (int l = 0; l < root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.size(); l++) {
+                                            if(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER != null) {
+                                                for (int m = 0; m < root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.size(); m++) {
+                                                    Log.i(TAG, "this is values of location " + root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).tree_string + " " + root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).location_name);
 
-                                                        IndiaLocation indiaLocation = new IndiaLocation();
-                                                        indiaLocation.setId(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).id);
-                                                        indiaLocation.setVillage_full_name(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).tree_string);
-                                                        indiaLocation.setAganwadi(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).location_name);
-                                                        indiaLocation.setVillageName(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).location_name);
-                                                        indiaLocation.setLocation_id(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).id);
-                                                        indiaLocation.setEnvironment(session.getEnvironment());
-                                                        indiaLocationRepository.insertIndiaLocation(indiaLocation);
+                                                    IndiaLocation indiaLocation = new IndiaLocation();
+                                                    indiaLocation.setId(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).id);
+                                                    indiaLocation.setVillage_full_name(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).tree_string);
+                                                    indiaLocation.setAganwadi(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).aANGANWADICENTER.get(m).location_name);
+                                                    indiaLocation.setVillageName(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).location_name);
+                                                    indiaLocation.setLocation_id(root.location_json.get(i).dISTRICT.get(j).bLOCK.get(k).vILLAGE.get(l).id);
+                                                    indiaLocation.setEnvironment(session.getEnvironment());
+                                                    indiaLocationRepository.insertIndiaLocation(indiaLocation);
 
-                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
+                            }
 
 
 
