@@ -187,6 +187,7 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                             try (Frame f1 = frames.first(StreamType.COLOR)) {
                                 colorFrame1 = f1;
                                 bitmap1 = frameToBitmap(colorFrame1);
+                                createPose(bitmap1);
                                 handler.post(new Runnable() {
                                     @Override
                                     public void run() {
@@ -423,9 +424,11 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
     PoseDetector poseDetector;
     AccuratePoseDetectorOptions options;
 
+    String datax="", datay="";
+
     public void createPose(Bitmap bitmap) {
         Log.i(TAG, "this is inside point 0");
-            mPersonCount = "HA";
+
             Log.i(TAG, "this is inside point 1");
             if (bitmap == null) {
                 return;
@@ -439,7 +442,7 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                                 public void onSuccess(Pose pose) {
                                     // Task completed successfully
                                     // ...
-                                    Log.i(TAG, "this is inside point 3");
+                            /*        Log.i(TAG, "this is inside point 3");
 
                                     String poseCoordinates = null;
                                     float poseTotal = 0.0f;
@@ -448,21 +451,22 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
 
                                     if(allPoseLandmarks==null && allPoseLandmarks.size() <33){
                                         mPersonCount = "NA ";
-                                        onProcessAngle();
+                                      //  onProcessAngle();
                                     }
                                     if (allPoseLandmarks != null && allPoseLandmarks.size() > 0) {
                                         poseCoordinates = "";
                                         for (int i = 0; i < allPoseLandmarks.size(); i++) {
                                             poseCoordinates = poseCoordinates + " " + allPoseLandmarks.get(i).getInFrameLikelihood() + "," + allPoseLandmarks.get(i).getPosition().x + "," + allPoseLandmarks.get(i).getPosition().y;
                                             poseTotal = poseTotal + allPoseLandmarks.get(i).getInFrameLikelihood();
-                                            if(allPoseLandmarks.get(i).getInFrameLikelihood() < 0.5){
-                                                mPersonCount = "NA "+allPoseLandmarks.get(i).getInFrameLikelihood();
+                                            if(allPoseLandmarks.get(i).getInFrameLikelihood() < 0.85){
+                                                mPersonCount = "NA "+allPoseLandmarks.get(i).getPosition().x+","+allPoseLandmarks.get(i).getPosition().y;
                                                 break;
                                             }
 
                                         }
+                                        onChildVisible(mPersonCount);
 
-                                        onProcessAngle();
+                                       // onProcessAngle();
 
                                         poseScore = (float) (poseTotal / 33.0);
                                         Log.i("ScaneModeActivity", "this is value pf pose " + poseScore + " " + poseCoordinates);
@@ -475,8 +479,53 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                                     if (ans[0] == null) {
                                         ans[0] = "0.0";
                                     }
-                                    Log.i(TAG, "this is inside point 4" + ans[0] + " " + ans[1]);
+                                    Log.i(TAG, "this is inside point 4" + ans[0] + " " + ans[1]);*/
 
+                                    List<PoseLandmark> landmarks = pose.getAllPoseLandmarks();
+
+                                    if (landmarks.isEmpty()) {
+                                       mPersonCount = "NA";
+                                        return;
+                                    }
+
+                                    // Calculate the center of the detected human (use torso landmarks or midpoint between shoulders)
+                                    PoseLandmark leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER);
+                                    PoseLandmark rightShoulder = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER);
+                                    PoseLandmark leftknee = pose.getPoseLandmark(PoseLandmark.LEFT_FOOT_INDEX);
+                                    PoseLandmark rightknee = pose.getPoseLandmark(PoseLandmark.RIGHT_FOOT_INDEX);
+
+
+                                    PoseLandmark nose = pose.getPoseLandmark(PoseLandmark.NOSE);
+
+                                    if (leftShoulder != null && rightShoulder != null) {
+                                        float humanCenterX = (leftShoulder.getPosition().x + rightShoulder.getPosition().x+leftknee.getPosition().x+rightknee.getPosition().x) / 4;
+                                        float humanCenterY = (leftShoulder.getPosition().y + rightShoulder.getPosition().y+leftknee.getPosition().y+rightknee.getPosition().y) / 4;
+
+                                        // Get Bitmap center coordinates
+                                        float bitmapCenterX = bitmap.getWidth() / 2;
+                                        float bitmapCenterY = bitmap.getHeight() / 2;
+
+                                        // Define tolerance (how close the human center should be to the Bitmap center)
+                                        float tolerance = 300.0f;
+
+                                        // Check if human is centered in the image
+                                        boolean isCentered = Math.abs(humanCenterX - bitmapCenterX) <= 145 &&
+                                                Math.abs(humanCenterY - bitmapCenterY) <= 185;
+                                        datax="";
+                                        datay="";
+                                        if (isCentered) {
+
+                                           onChildVisible(true);
+                                        } else {
+                                            if(Math.abs(humanCenterX - bitmapCenterX) > 145){
+                                                datax = "x:- "+Math.abs(humanCenterX - bitmapCenterX);
+                                            }
+                                            if(Math.abs(humanCenterY - bitmapCenterY) > 185){
+                                                datay = "Y:- "+Math.abs(humanCenterY - bitmapCenterY);
+                                            }
+                                            onChildVisible(false);
+                                        }
+                                    }
                                 }
                             })
                     .addOnFailureListener(
@@ -488,7 +537,7 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                                     Log.i(TAG, "this is inside point 5");
 
                                     mPersonCount = "NA";
-                                    onProcessAngle();
+                                  //  onProcessAngle();
                                 }
                             });
         }

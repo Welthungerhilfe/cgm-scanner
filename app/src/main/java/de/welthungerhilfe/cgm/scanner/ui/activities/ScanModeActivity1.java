@@ -6,7 +6,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -31,6 +33,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.widget.ImageViewCompat;
 import androidx.databinding.DataBindingUtil;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -118,6 +121,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     double verticalAngle=0, horizontalAngle=0;
 
     int childCount = 0;
+
+   float mOutlineAlpha = 0;
 
     public void scanStanding() {
         SCAN_MODE = AppConstants.SCAN_STANDING;
@@ -309,7 +314,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
     private AbstractIntelARCamera mCameraInstance;
     private ImageView mOutline;
-    private float mOutlineAlpha = 1;
+    private float mOutlineAlpha_bb = 1;
     AccuratePoseDetectorOptions options;
     PoseDetector poseDetector;
     ObjectDetectorOptions objectDetectorOptions;
@@ -950,7 +955,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             lastUpdatedAngle = System.currentTimeMillis();
         //    activityScanModeBinding.tvAngle.setText(""+childCount);
 
-            activityScanModeBinding.tvAngle.setText(String.format("%.0f", this.horizontalAngle));
+            activityScanModeBinding.tvAngle.setText(String.format("%.0f", this.verticalAngle));
 
         }
      //   activityScanModeBinding.tvAngle.setText(angle.substring(0,4)+"");
@@ -963,6 +968,24 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     public void onDistancereceived(Float distance) {
         // activityScanModeBinding.tvAngle.setText(String.format("%.2f", distance));
         this.distance =distance;
+    }
+
+    int color;
+    @Override
+    public void onChildVisible(boolean data) {
+
+        mOutlineAlpha_bb= mOutlineAlpha_bb * 0.9f + 0.1f;
+        int alpha = Math.max(0, (int)(mOutlineAlpha_bb * 128));
+        color = Color.GREEN;
+        if ((mCameraInstance.getTargetDistance() < AppConstants.TOO_NEAR) || (mCameraInstance.getTargetDistance() > AppConstants.TOO_FAR)) {
+            color = Color.RED;
+        } else if (!data) {
+            color = Color.RED;
+        }
+        color = Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
+        ImageViewCompat.setImageTintList(mOutline, ColorStateList.valueOf(color));
+
+
     }
 
     public void save(File file, DepthFrame depthFrame1,int frameIndex,int height, int width, byte[] byteArray) {
