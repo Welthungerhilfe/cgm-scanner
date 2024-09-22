@@ -1,7 +1,7 @@
 # Child Growth Monitor Scanner App
 Mothers and governmental frontline workers often fail to detect severe malnutrition of children. As a result, they do not help the child in the right way. The magnitude of a nutrition crises (both in emergencies and chronic hunger situations) is often blurred. This hinders a determined response by emergency workers as well as policy makers.
 
-We provide a game-changer in measurement and data processing for malnourished children under the age of 5 years. It is a fool proof solution based on a mobile app using augmented reality in combination with artificial intelligence. By determining weight and height through a 3D scan of children, the app can instantly detect malnutrition.
+We provide a game-changer in measurement and data processing for malnourished children under the age of 5 years. It is a full proof solution based on a mobile app using augmented reality in combination with artificial intelligence. By determining weight and height through a 3D scan of children, the app can instantly detect malnutrition.
 
 - [Child Growth Monitor Website](https://childgrowthmonitor.org)
 - [GitHub main project](https://github.com/Welthungerhilfe/ChildGrowthMonitor/)
