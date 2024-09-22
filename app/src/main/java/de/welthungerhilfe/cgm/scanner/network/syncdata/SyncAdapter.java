@@ -260,12 +260,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     migrateEnvironmentColumns();
                     LogFileUtils.logInfo(TAG,"this is calling getWorkflows");
                     getWorkflows();
-                    LogFileUtils.logInfoOffline(TAG,"this is calling postWorkFlowsResult");
-                    postWorkFlowsResult();
                     LogFileUtils.logInfo(TAG,"this is calling postRemainingData");
                     postRemainingData();
                     LogFileUtils.logInfo(TAG,"this is calling getLocationIndia");
                     getLocationIndia();
+                    LogFileUtils.logInfoOffline(TAG,"this is calling postWorkFlowsResult");
+                    postWorkFlowsResult();
+
 
 
                     session.setSyncTimestamp(currentTimestamp);
