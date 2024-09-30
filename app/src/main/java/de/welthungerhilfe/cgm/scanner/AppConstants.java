@@ -39,6 +39,10 @@ public class AppConstants {
     public static final String API_URL_DEMO_QA = "{API_URL_QA}/";
 
 
+    public static final String AUTH_ETHOPIA = "https://cgmb2ceth.onmicrosoft.com/cgm-api/scannerapp";
+
+    public static final String API_URL_ETHOPIA = "https://cgm-be-ci-eth-scanner-api.azurewebsites.net/api//";
+
 
 
 
@@ -70,9 +74,12 @@ public class AppConstants {
     public static final int ENV_UGANDA = 6;
     public static final int ENV_BAN = 7;
 
+
     public static final int ENV_MALAWI = 8;
 
     public static final int ENV_SIERRA = 9;
+
+    public static final int ENV_ETHOPIA = 10;
 
 
 

@@ -240,6 +240,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                         case AppConstants.ENV_DEMO_QA:
                             selectedBackend = "demo_qa";
                             break;
+                        case AppConstants.ENV_ETHOPIA:
+                            selectedBackend = "ethopia";
+                            break;
                     }
 
                     showAlert("this QR code is created by "+person.getCreatedBy()+" in "+selectedBackend+", so only "+person.getCreatedBy()+" can add measure for this QR code.");

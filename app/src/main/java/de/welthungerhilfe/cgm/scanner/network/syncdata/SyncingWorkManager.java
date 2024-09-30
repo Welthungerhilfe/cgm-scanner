@@ -77,9 +77,9 @@ public class SyncingWorkManager extends Worker {
     }
 
     public static String getAPI() {
-       if (BuildConfig.DEBUG) {
+      /* if (BuildConfig.DEBUG) {
             return "localhost";
-        }
+        }*/
         Log.d(TAG, "Url backend " + getUrl());
 
         String apiURL = getUrl();
@@ -94,10 +94,10 @@ public class SyncingWorkManager extends Worker {
     }
 
     public static String getUrl() {
-        if (BuildConfig.DEBUG) {
+        /*if (BuildConfig.DEBUG) {
             // development build
             return AppConstants.API_TESTING_URL;
-        } else {
+        } else {*/
             Context context = AppController.getInstance().getApplicationContext();
             switch (AuthenticationHandler.getEnvironment(context)) {
                 case AppConstants.ENV_SANDBOX:
@@ -118,11 +118,13 @@ public class SyncingWorkManager extends Worker {
                     return AppConstants.API_URL_MALAWI;
                 case AppConstants.ENV_SIERRA:
                     return AppConstants.API_URL_SIERRA;
+                case AppConstants.ENV_ETHOPIA:
+                    return AppConstants.API_URL_ETHOPIA;
                 default:
                     Log.e(TAG, "Environment not configured");
                     System.exit(0);
                     return null;
             }
-       }
+    //   }
     }
 }

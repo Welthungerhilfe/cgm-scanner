@@ -542,7 +542,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setSynced(false);
                     person.setCenter_location_id(center_location_id);
                     person.setLocation_id(location_id);
-                    if (BuildConfig.DEBUG) {
+                    if (BuildConfig.DEBUG && session.getEnvironment()== AppConstants.ENV_DEMO_QA) {
                         person.setCenter_location_id("1111");
                         person.setLocation_id("115566");
                     }
