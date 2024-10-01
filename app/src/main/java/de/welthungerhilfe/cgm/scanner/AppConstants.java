@@ -39,9 +39,9 @@ public class AppConstants {
     public static final String API_URL_DEMO_QA = "{API_URL_QA}/";
 
 
-    public static final String AUTH_ETHOPIA = "https://cgmb2ceth.onmicrosoft.com/cgm-api/scannerapp";
+    public static final String AUTH_ETHOPIA = "{OAUTH_SCOPE_ETHOPIA}";
 
-    public static final String API_URL_ETHOPIA = "https://cgm-be-ci-eth-scanner-api.azurewebsites.net/api//";
+    public static final String API_URL_ETHOPIA = "{API_URL_ETHOPIA}/";
 
 
 

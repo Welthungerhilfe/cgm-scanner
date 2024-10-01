@@ -27,7 +27,7 @@ APP_OAUTH_UGANDA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_conf
 APP_OAUTH_BANGLADESH_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_bangladesh.json
 APP_OAUTH_MALAWI_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_malawi.json
 APP_OAUTH_SIERRA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_sierra.json
-
+APP_OAUTH_ETHOPIA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_ethopia.json
 
 APP_CONSTANTS=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/AppConstants.java
 APP_SPLASH_ACTIVITY=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/ui/activities/SplashActivity.java
@@ -101,3 +101,11 @@ sed -i '' "s|{OAUTH_REDIRECT_URL}|$OAUTH_REDIRECT_URL|g" $APP_OAUTH_SIERRA_JSON
 sed -i '' "s|{OAUTH_URL_SIERRA}|$OAUTH_URL_SIERRA|g" $APP_OAUTH_SIERRA_JSON
 sed -i '' "s|{OAUTH_SCOPE_SIERRA}|$OAUTH_SCOPE_SIERRA|g" $APP_CONSTANTS
 sed -i '' "s|{API_URL_SIERRA}|$API_URL_SIERRA|g" $APP_CONSTANTS
+
+
+echo "Updating API sierra KEYS"
+sed -i '' "s|{OAUTH_CLIENT_ID_ETHOPIA}|$OAUTH_CLIENT_ID_ETHOPIA|g" $APP_OAUTH_ETHOPIA_JSON
+sed -i '' "s|{OAUTH_REDIRECT_URL}|$OAUTH_REDIRECT_URL|g" $APP_OAUTH_ETHOPIA_JSON
+sed -i '' "s|{OAUTH_URL_ETHOPIA}|$OAUTH_URL_ETHOPIA|g" $APP_OAUTH_ETHOPIA_JSON
+sed -i '' "s|{OAUTH_SCOPE_ETHOPIA}|$OAUTH_SCOPE_ETHOPIA|g" $APP_CONSTANTS
+sed -i '' "s|{API_URL_ETHOPIA}|$API_URL_ETHOPIA|g" $APP_CONSTANTS
