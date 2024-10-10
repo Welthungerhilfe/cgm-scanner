@@ -947,7 +947,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     @Override
     public void onAngleReceived(double verticalAngle,double horizontalAngle) {
        // activityScanModeBinding.tvAngle.setText(" "+mCameraInstance.getLightIntensity());
-        this.verticalAngle = verticalAngle-90;
+        this.verticalAngle = 90-verticalAngle;
         this.horizontalAngle = horizontalAngle;
       //  activityScanModeBinding.tvAngle.setText(""+mCameraInstance.getPersonCount());
         if (System.currentTimeMillis() - lastUpdatedAngle > 300) {

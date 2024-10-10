@@ -43,6 +43,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.appcompat.widget.SearchView;
+import androidx.test.espresso.remote.EspressoRemoteMessage;
 
 import android.util.Base64;
 import android.util.Log;
@@ -61,6 +62,7 @@ import android.widget.Toast;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.intel.realsense.librealsense.DeviceListener;
 import com.intel.realsense.librealsense.RsContext;
 import com.microsoft.appcenter.analytics.Analytics;
 import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
@@ -87,6 +89,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.DataFormat;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.PersonListViewModel;
 import de.welthungerhilfe.cgm.scanner.hardware.GPS;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractIntelARCamera;
 import de.welthungerhilfe.cgm.scanner.network.service.DeviceService;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.service.WifiStateChangereceiverHelperService;
@@ -234,10 +237,26 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         }
         RsContext.init(getApplicationContext());
 
+        AbstractIntelARCamera.getRsContext().setDevicesChangedCallback(mListener);
+
+
         LogFileUtils.logInfoOffline("MainActivity","this is test message");
 
 
     }
+
+    private DeviceListener mListener = new DeviceListener() {
+        @Override
+        public void onDeviceAttach() {
+            Toast.makeText(MainActivity.this,"Realsense camera detected",Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onDeviceDetach() {
+
+        }
+    };
+
 
     public void observePersionList(){
         final Observer<List<Person>> observer = list -> {
@@ -594,6 +613,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     private void deviceCheckPopup() {
         long timestamp = LocalPersistency.getLong(this, DeviceCheckActivity.KEY_LAST_DEVICE_CHECK);
         if (System.currentTimeMillis() - timestamp > REQUEST_DEVICE_CHECK_TIME) {
+            LocalPersistency.setLong(this, DeviceCheckActivity.KEY_LAST_DEVICE_CHECK, System.currentTimeMillis());
+
             ConfirmDialog confirmDialog = new ConfirmDialog(this);
             confirmDialog.setMessage(getString(R.string.device_check_reminder));
             confirmDialog.setConfirmListener(result -> {

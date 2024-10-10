@@ -18,6 +18,7 @@ import android.util.SizeF;
 import android.widget.ImageView;
 
 import com.intel.realsense.librealsense.DepthFrame;
+import com.intel.realsense.librealsense.RsContext;
 
 
 import java.util.ArrayList;
@@ -476,6 +477,12 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
     }
 
 
-
+ public static RsContext rsContext;
+    public static RsContext getRsContext(){
+        if(rsContext== null){
+            rsContext = new RsContext();
+        }
+        return rsContext;
+    }
 }
 
