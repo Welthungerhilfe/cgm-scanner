@@ -118,7 +118,7 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
             config.enableStream(StreamType.COLOR, 1280, 720);
             config.enableStream(StreamType.ACCEL, StreamFormat.MOTION_XYZ32F);
 
-            config.enableStream(StreamType.ACCEL);
+
 
 
 
@@ -180,7 +180,6 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                                 angle = captureGyroData(motionFrame);
                             }catch (Exception e){
                             }
-
 
 
                             // Process color frame for UI (on main thread)

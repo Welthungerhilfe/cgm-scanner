@@ -62,6 +62,9 @@ import android.widget.Toast;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.intel.realsense.librealsense.CameraInfo;
+import com.intel.realsense.librealsense.Device;
+import com.intel.realsense.librealsense.DeviceList;
 import com.intel.realsense.librealsense.DeviceListener;
 import com.intel.realsense.librealsense.RsContext;
 import com.microsoft.appcenter.analytics.Analytics;
@@ -240,15 +243,39 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         AbstractIntelARCamera.getRsContext().setDevicesChangedCallback(mListener);
 
 
+
+
         LogFileUtils.logInfoOffline("MainActivity","this is test message");
 
 
     }
 
+
+
     private DeviceListener mListener = new DeviceListener() {
         @Override
         public void onDeviceAttach() {
-            Toast.makeText(MainActivity.this,"Realsense camera detected",Toast.LENGTH_LONG).show();
+
+
+            try (DeviceList dl = AbstractIntelARCamera.getRsContext().queryDevices()) {
+                if (dl.getDeviceCount() > 0) {
+                    String serialNumber = null;
+                    try (Device device = dl.createDevice(0)) {
+                        // Get the serial number of the device
+
+                        Toast.makeText(MainActivity.this,"Realsense camera detected "+device.getInfo(CameraInfo.FIRMWARE_VERSION),Toast.LENGTH_LONG).show();
+                        // Print or display the serial number
+                    }
+
+
+
+                }else {
+
+
+                }
+            }catch (Exception e){
+
+            }
         }
 
         @Override

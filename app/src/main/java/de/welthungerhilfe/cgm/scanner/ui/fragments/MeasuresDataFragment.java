@@ -161,14 +161,15 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                 try (Device device = dl.createDevice(0)) {
                     // Get the serial number of the device
                      serialNumber = device.getInfo(CameraInfo.SERIAL_NUMBER);
+
                     // Print or display the serial number
                     System.out.println("RealSense Device Serial Number: " + serialNumber);
                 }
                 isRealsenseConnected = true;
-                Toast.makeText(getActivity(), "Realsense camera detected "+serialNumber, Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "Realsense camera serial no:- "+serialNumber, Toast.LENGTH_LONG).show();
 
             }else {
-                Toast.makeText(getActivity(), "Realsense camera not detected "+dl.getDeviceCount(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "Realsense camera not detected ", Toast.LENGTH_LONG).show();
                 isRealsenseConnected = false;
 
             }
