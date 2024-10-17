@@ -55,6 +55,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractIntelARCamera;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
@@ -155,7 +156,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
         fabCreate = view.findViewById(R.id.fabCreate);
         fabCreate.setOnClickListener(this);
-        try (DeviceList dl = mRsContext.queryDevices()) {
+        try (DeviceList dl = AbstractIntelARCamera.getRsContext().queryDevices()) {
             if (dl.getDeviceCount() > 0) {
                 String serialNumber = null;
                 try (Device device = dl.createDevice(0)) {
@@ -163,10 +164,10 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                      serialNumber = device.getInfo(CameraInfo.SERIAL_NUMBER);
 
                     // Print or display the serial number
-                    System.out.println("RealSense Device Serial Number: " + serialNumber);
+                  //  System.out.println("RealSense Device Serial Number: " + serialNumber);
                 }
                 isRealsenseConnected = true;
-                Toast.makeText(getActivity(), "Realsense camera serial no:- "+serialNumber, Toast.LENGTH_LONG).show();
+               // Toast.makeText(getActivity(), "Realsense camera serial no:- "+serialNumber, Toast.LENGTH_LONG).show();
 
             }else {
                 Toast.makeText(getActivity(), "Realsense camera not detected ", Toast.LENGTH_LONG).show();

@@ -81,7 +81,7 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
         RsContext.init(mActivity);
 
         mRsContext = new RsContext();
-        mRsContext.setDevicesChangedCallback(mListener);
+        //mRsContext.setDevicesChangedCallback(mListener);
         mPipeline = new Pipeline();
 
         try(DeviceList dl = mRsContext.queryDevices()){

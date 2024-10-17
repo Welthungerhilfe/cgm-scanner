@@ -238,6 +238,7 @@
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="45dp"
                     android:orientation="horizontal"
+                    android:background="#77000000"
                     >
 
                     <ImageView
