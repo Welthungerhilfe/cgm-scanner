@@ -388,11 +388,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     }
                     // String backendPersonId = person.getServerId();
-                    if (person== null && person.getServerId()==null) {
+                /*    if (person== null && person.getServerId()==null) {
                         continue;
-                    }
+                    }*/
 
-                    postConsentSheet(fileLog, person.getServerId());
+                    if(person!=null && person.getServerId()!=null) {
+                        postConsentSheet(fileLog, person.getServerId());
+                    }
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
