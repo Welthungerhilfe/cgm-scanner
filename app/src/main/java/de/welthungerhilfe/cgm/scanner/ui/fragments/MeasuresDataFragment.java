@@ -175,8 +175,16 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         dialogMeasureMenuBinding.btStartScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                int age = (int) ((System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24);
+
                 Intent intent = new Intent(getContext(), ScanModeActivity.class);
                 intent.putExtra(AppConstants.EXTRA_PERSON, person);
+                if(age > 730){
+                    intent.putExtra(AppConstants.EXTRA_SCAN_MODE, true);
+                }else{
+                    intent.putExtra(AppConstants.EXTRA_SCAN_MODE, false);
+                }
                 startActivity(intent);
                 alertDialog.dismiss();
             }
