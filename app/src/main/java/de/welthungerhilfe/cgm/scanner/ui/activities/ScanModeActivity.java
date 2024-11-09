@@ -220,7 +220,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_lying));
                         break;
                     case 4:
-                        SCAN_STEP = AppConstants.SCAN_STANDING_SIDE_RIGHT;
+                        SCAN_STEP = AppConstants.SCAN_LYING_SIDE_RIGHT;
                         mTitleView.setText(getString(R.string.right_scan) + " - " + getString(R.string.mode_lying));
                         break;
                 }
