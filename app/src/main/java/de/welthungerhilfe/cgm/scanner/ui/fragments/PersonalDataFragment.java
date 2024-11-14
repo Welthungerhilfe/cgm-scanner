@@ -95,6 +95,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelPr
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
 import de.welthungerhilfe.cgm.scanner.hardware.io.FileSystem;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
@@ -401,19 +402,23 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void setVillageDefault(String village){
-        Log.i(TAG,"this is value locality "+village);
+        try {
+            Log.i(TAG, "this is value locality " + village);
 
-        if(village==null){
-            return;
-        }
-        IndiaLocation indiaLocation = indiaLocationRepository.getVillageObject(village.toUpperCase(Locale.ENGLISH),session.getEnvironment());
-       if(indiaLocation!=null) {
-           Log.i(TAG, "this is value locality " + indiaLocation);
-       }
+            if (village == null) {
+                return;
+            }
+            IndiaLocation indiaLocation = indiaLocationRepository.getVillageObject(village.toUpperCase(Locale.ENGLISH), session.getEnvironment());
+            if (indiaLocation != null) {
+                Log.i(TAG, "this is value locality " + indiaLocation);
+            }
 
-        if(indiaLocation != null){
-            editArea.setText(indiaLocation.getVillage_full_name());
+            if (indiaLocation != null) {
+                editArea.setText(indiaLocation.getVillage_full_name());
 
+            }
+        }catch (Exception e){
+            LogFileUtils.logException(e,"PersonalDataFragment");
         }
     }
 
