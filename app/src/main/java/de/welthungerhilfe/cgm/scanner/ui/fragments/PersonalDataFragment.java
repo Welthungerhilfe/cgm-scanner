@@ -95,7 +95,6 @@ import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelPr
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.gpu.BitmapHelper;
 import de.welthungerhilfe.cgm.scanner.hardware.io.FileSystem;
-import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
@@ -264,8 +263,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             public void onClick(View v) {
                 if (checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED &&
                         checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                  requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
-                  return;
+                    requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
+                    return;
                 }
                 firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_START, null);
                 //startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), IMAGE_CAPTURED_REQUEST);
@@ -296,7 +295,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         .addOnFailureListener(
                                 e -> Toast.makeText(getActivity(),"Error",Toast.LENGTH_LONG).show());
             }
-            });
+        });
 
 
         return view;
@@ -333,11 +332,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }*/
 
     public void initUI() {
-        if (BuildConfig.DEBUG) {
+        /*if (BuildConfig.DEBUG) {
             editArea.setText("debug");
             editCenter.setText("debug");
 
-        }
+        }*/
         if (person == null) {
             firebaseAnalytics.logEvent(FirebaseService.CREATE_PERSON_START, null);
             setLocation(((CreateDataActivity) getActivity()).location);
@@ -378,10 +377,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
 
             setVillageDefault(loc.getLocality());
-           // if ((location == null) && (address != null) && (address.length() > 0)) {
-                if ((address != null) && (address.length() > 0)) {
+            // if ((location == null) && (address != null) && (address.length() > 0)) {
+            if ((address != null) && (address.length() > 0)) {
 
-                    if (editLocation != null) {
+                if (editLocation != null) {
                     Editable oldAddress = editLocation.getText();
                     if ((oldAddress != null) && (oldAddress.toString().compareTo(address) != 0)) {
                         editLocation.setText(address);
@@ -402,23 +401,19 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }
 
     public void setVillageDefault(String village){
-        try {
-            Log.i(TAG, "this is value locality " + village);
+        Log.i(TAG,"this is value locality "+village);
 
-            if (village == null) {
-                return;
-            }
-            IndiaLocation indiaLocation = indiaLocationRepository.getVillageObject(village.toUpperCase(Locale.ENGLISH), session.getEnvironment());
-            if (indiaLocation != null) {
-                Log.i(TAG, "this is value locality " + indiaLocation);
-            }
+        if(village==null){
+            return;
+        }
+        IndiaLocation indiaLocation = indiaLocationRepository.getVillageObject(village.toUpperCase(Locale.ENGLISH),session.getEnvironment());
+        if(indiaLocation!=null) {
+            Log.i(TAG, "this is value locality " + indiaLocation);
+        }
 
-            if (indiaLocation != null) {
-                editArea.setText(indiaLocation.getVillage_full_name());
+        if(indiaLocation != null){
+            editArea.setText(indiaLocation.getVillage_full_name());
 
-            }
-        }catch (Exception e){
-            LogFileUtils.logException(e,"PersonalDataFragment");
         }
     }
 
@@ -498,7 +493,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 DateRangePickerDialog1 dateRangePicker = new DateRangePickerDialog1();
                 dateRangePicker.setDate(new Date(timestamp));
                 dateRangePicker.setCallback(this);
-               // dateRangePicker.setStyle(DI.STYLE_NO_TITLE, 0);
+                // dateRangePicker.setStyle(DI.STYLE_NO_TITLE, 0);
                 dateRangePicker.show(getActivity().getSupportFragmentManager(), "DATE_RANGE_PICKER");
                 break;
             case R.id.btnNext:
@@ -673,13 +668,13 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         dialog.dismiss();
                     }
                 }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                editBirth.setText("");
-                onTextChanged();
-                dialog.dismiss();
-            }
-        }).show();
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        editBirth.setText("");
+                        onTextChanged();
+                        dialog.dismiss();
+                    }
+                }).show();
     }
 
     void ImageSaver(File consentFile, Context context) {
