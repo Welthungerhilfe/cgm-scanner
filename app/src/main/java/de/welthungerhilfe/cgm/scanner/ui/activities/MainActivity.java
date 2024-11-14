@@ -197,7 +197,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         adapterData.setPersonDetailListener(this);
         activityMainBinding.recyclerData.setAdapter(adapterData);
 
-        startService(new Intent(this, DeviceService.class));
+        //wstartService(new Intent(this, DeviceService.class));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (!WifiStateChangereceiverHelperService.isServiceRunning) {
                 startForegroundService(new Intent(this, WifiStateChangereceiverHelperService.class));
