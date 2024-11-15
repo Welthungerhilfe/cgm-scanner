@@ -1,3 +1,5 @@
+package de.welthungerhilfe.cgm.scanner.ui.activities;
+
 /*
  * Child Growth Monitor - quick and accurate data on malnutrition
  * Copyright (c) 2018 Markus Matiaschek <mmatiaschek@gmail.com>
@@ -16,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.welthungerhilfe.cgm.scanner.ui.activities;
+
 
 import android.Manifest;
 import android.animation.Animator;
@@ -106,7 +108,7 @@ import de.welthungerhilfe.cgm.scanner.ui.views.ScanModeView;
 import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
-public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, ScanTypeView.ScanTypeListener, SensorEventListener {
+public class ScanModeLyingActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, ScanTypeView.ScanTypeListener, SensorEventListener {
 
 
     private enum ArtifactType {CALIBRATION, DEPTH, RGB}
@@ -152,11 +154,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     @Override
     public void onScan(int buttonId, boolean isRetake) {
-       this.isRetake = isRetake;
-       if(isRetake){
-           retakeFiles.clear();
-           retakeFiles = new ArrayList<>();
-       }
+        this.isRetake = isRetake;
+        if(isRetake){
+            retakeFiles.clear();
+            retakeFiles = new ArrayList<>();
+        }
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
         } else {
@@ -222,7 +224,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
     @Override
     public void onTutorial() {
-  /*      Intent intent = new Intent(ScanModeActivity.this, TutorialActivity.class);
+  /*      Intent intent = new Intent(ScanModeLyingActivity.this, TutorialActivity.class);
         intent.putExtra(AppConstants.EXTRA_TUTORIAL_AGAIN, true);
         startActivity(intent);*/
     }
@@ -265,7 +267,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         new Thread(saveMeasure).start();
     }
 
-    private static final String TAG = ScanModeActivity.class.getSimpleName();
+    private static final String TAG = ScanModeLyingActivity.class.getSimpleName();
 
     public int SCAN_MODE = AppConstants.SCAN_STANDING;
     public int SCAN_STEP = AppConstants.SCAN_PREVIEW;
@@ -442,24 +444,24 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         objectDetector = ObjectDetection.getClient(objectDetectorOptions);
         if (age >= 730) {
-            scanStanding();
+            scanLying();
+           // scanStanding();
         } else {
-           // scanLying();
-            scanStanding();
+             scanLying();
         }
 
         activityScanModeBinding.lytScanStanding.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                scanStanding();
+             //   scanStanding();
             }
         });
 
         activityScanModeBinding.lytScanLying.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               // scanLying();
-                Toast.makeText(ScanModeActivity.this, "Lying scan is currently unavailable", Toast.LENGTH_SHORT).show();
+                 scanLying();
+                Toast.makeText(ScanModeLyingActivity.this, "Lying scan is currently unavailable", Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -541,7 +543,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void updateScanningProgress() {
-        float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 8 : 8);
+        float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 24 : 8);
         float progressToAddFloat = 100.0f / cloudsToFinishScan;
         int progressToAdd = (int) progressToAddFloat;
         //   LogFileUtils.logInfo(TAG, "currentProgress=" + mProgress + ", progressToAdd=" + progressToAdd);
@@ -565,7 +567,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             activityScanModeBinding.scanType4.setChildIcon(R.drawable.side_scan_right_svg);
 
 
-           // activityScanModeBinding.scanType2.setTitle(R.string.side_scan);
+            // activityScanModeBinding.scanType2.setTitle(R.string.side_scan);
             if (files != null) {
                 files.clear();
 
@@ -707,11 +709,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             getCurrentLocation();
         }
         if (requestCode == PERMISSION_CAMERA && (grantResults.length == 0 || grantResults[0] < 0)) {
-            Toast.makeText(ScanModeActivity.this, R.string.permission_camera, Toast.LENGTH_SHORT).show();
+            Toast.makeText(ScanModeLyingActivity.this, R.string.permission_camera, Toast.LENGTH_SHORT).show();
             finish();
         }
         if (requestCode == PERMISSION_STORAGE && (grantResults.length == 0 || grantResults[0] < 0)) {
-            Toast.makeText(ScanModeActivity.this, R.string.storage_permission_needed, Toast.LENGTH_SHORT).show();
+            Toast.makeText(ScanModeLyingActivity.this, R.string.storage_permission_needed, Toast.LENGTH_SHORT).show();
             finish();
         }
         setupScanArtifacts();
@@ -860,14 +862,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             "\nNoise amount: " + String.format(Locale.US, "%.3f", getCamera().getDepthNoiseAmount());
             runOnUiThread(() -> mTitleView.setText(text));*/
         }
-        Log.i("ScanModeActivity", "this is before on feedback update ");
+        Log.i("ScanModeLyingActivity", "this is before on feedback update ");
         onFeedbackUpdate();
 
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             float light = mCameraInstance.getLightIntensity();
             String orientation ="horizontal_angle:"+ mCameraInstance.getOrientation()+", vertical_angel:"+String.format("%.0f", angle - 90);
-            Log.i("ScanModeActivity", "this is value of orientation " + orientation);
+            Log.i("ScanModeLyingActivity", "this is value of orientation " + orientation);
             double child_distance = mCameraInstance.getTargetDistance();
             if (light > 1) {
                 light = 1.0f - (light - 1.0f);
@@ -1341,3 +1343,4 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         angleTextView.setText(String.format("Vertical Angle: %.2f°", angle));*/
     }
 }
+
