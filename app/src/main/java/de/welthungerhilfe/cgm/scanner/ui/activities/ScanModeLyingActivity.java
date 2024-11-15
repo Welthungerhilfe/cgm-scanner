@@ -887,7 +887,8 @@ public class ScanModeLyingActivity extends BaseActivity implements View.OnClickL
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             float light = mCameraInstance.getLightIntensity();
-            String orientation ="horizontal_angle:"+ mCameraInstance.getOrientation()+", vertical_angel:"+String.format("%.0f", angle - 90);
+            String orientation ="horizontal_angle:"+ mCameraInstance.getOrientation()+", vertical_angel:"+String.format("%.0f", angle);
+
             Log.i("ScanModeLyingActivity", "this is value of orientation " + orientation);
             double child_distance = mCameraInstance.getTargetDistance();
             if (light > 1) {
@@ -1331,7 +1332,9 @@ public class ScanModeLyingActivity extends BaseActivity implements View.OnClickL
                 accelerometerReading = event.values.clone();
                 break;
         }
-        calculateVerticalAngle(accelerometerReading);
+
+            calculateLyingChildAngle(accelerometerReading);
+
 
     }
 
@@ -1361,5 +1364,23 @@ public class ScanModeLyingActivity extends BaseActivity implements View.OnClickL
         /*TextView angleTextView = findViewById(R.id.angleTextView); // Assuming a TextView to display the angle
         angleTextView.setText(String.format("Vertical Angle: %.2f°", angle));*/
     }
+
+    public void calculateLyingChildAngle(float[] accelerometerValues) {
+        float x = accelerometerValues[0];
+        float y = accelerometerValues[1];
+        float z = accelerometerValues[2];
+
+        // Calculate roll angle in radians
+        float pitch = (float) Math.atan2(-x, Math.sqrt(y * y + z * z));
+
+
+        if (System.currentTimeMillis() - lastUpdatedAngle > 500) {
+            lastUpdatedAngle = System.currentTimeMillis();
+
+            angle = (float) Math.toDegrees(pitch);
+            activityScanModeBinding.tvAngle.setText(String.format("%.0f", angle));
+        }
+    }
+
 }
 

@@ -476,9 +476,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             public void onClick(View view) {
                // scanLying();
                 //Toast.makeText(ScanModeActivity.this, "Lying scan is currently unavailable", Toast.LENGTH_SHORT).show();
-                if(files!=null && files.size()>0) {
+
                     showChangeModeConfirmation("This will discard standing data. Are you sure you want to continue?");
-                }
+
             }
         });
 
