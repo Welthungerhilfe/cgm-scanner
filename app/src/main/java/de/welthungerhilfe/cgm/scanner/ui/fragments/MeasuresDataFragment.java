@@ -42,6 +42,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
+import org.jcodec.common.DictionaryCompressor;
+
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 
@@ -54,6 +56,7 @@ import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
+import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeLyingActivity;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerMeasureAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
@@ -176,14 +179,18 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             @Override
             public void onClick(View view) {
 
+
+
+
                 int age = (int) ((System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24);
 
-                Intent intent = new Intent(getContext(), ScanModeActivity.class);
-                intent.putExtra(AppConstants.EXTRA_PERSON, person);
+                Intent intent;
                 if(age > 730){
-                    intent.putExtra(AppConstants.EXTRA_SCAN_MODE, true);
+                    intent = new Intent(getContext(), ScanModeActivity.class);
+                    intent.putExtra(AppConstants.EXTRA_PERSON, person);
                 }else{
-                    intent.putExtra(AppConstants.EXTRA_SCAN_MODE, false);
+                    intent = new Intent(getContext(), ScanModeLyingActivity.class);
+                    intent.putExtra(AppConstants.EXTRA_PERSON, person);
                 }
                 startActivity(intent);
                 alertDialog.dismiss();
