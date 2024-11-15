@@ -89,6 +89,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
@@ -152,6 +153,22 @@ public class ScanModeLyingActivity extends BaseActivity implements View.OnClickL
         changeMode();
     }
 
+    private void showChangeModeConfirmation(String message) {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirmation")
+                .setMessage(message)
+                .setPositiveButton("OK", (dialog, which) -> startStandingMode())
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    public void startStandingMode(){
+        Intent intent = new Intent(ScanModeLyingActivity.this, ScanModeActivity.class);
+        intent.putExtra(AppConstants.EXTRA_PERSON, person);
+        startActivity(intent);
+        finish();
+    }
+
     @Override
     public void onScan(int buttonId, boolean isRetake) {
         this.isRetake = isRetake;
@@ -197,7 +214,7 @@ public class ScanModeLyingActivity extends BaseActivity implements View.OnClickL
                         mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_lying));
                         break;
                     case 4:
-                        SCAN_STEP = AppConstants.SCAN_STANDING_SIDE_RIGHT;
+                        SCAN_STEP = AppConstants.SCAN_LYING_SIDE_RIGHT;
                         mTitleView.setText(getString(R.string.right_scan) + " - " + getString(R.string.mode_lying));
                         break;
                 }
@@ -454,6 +471,8 @@ public class ScanModeLyingActivity extends BaseActivity implements View.OnClickL
             @Override
             public void onClick(View view) {
              //   scanStanding();
+                showChangeModeConfirmation("This will discard lying data. Are you sure you want to continue?");
+
             }
         });
 

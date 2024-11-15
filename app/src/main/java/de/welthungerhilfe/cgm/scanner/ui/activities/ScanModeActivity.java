@@ -141,6 +141,22 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         changeMode();
     }
 
+    private void showChangeModeConfirmation(String message) {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirmation")
+                .setMessage(message)
+                .setPositiveButton("OK", (dialog, which) -> startScanModeLying())
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    public void startScanModeLying(){
+        Intent intent = new Intent(ScanModeActivity.this, ScanModeLyingActivity.class);
+        intent.putExtra(AppConstants.EXTRA_PERSON, person);
+        startActivity(intent);
+        finish();
+    }
+
     public void scanLying() {
         SCAN_MODE = AppConstants.SCAN_LYING;
 
@@ -459,8 +475,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             @Override
             public void onClick(View view) {
                // scanLying();
-                Toast.makeText(ScanModeActivity.this, "Lying scan is currently unavailable", Toast.LENGTH_SHORT).show();
-
+                //Toast.makeText(ScanModeActivity.this, "Lying scan is currently unavailable", Toast.LENGTH_SHORT).show();
+                if(files!=null && files.size()>0) {
+                    showChangeModeConfirmation("This will discard standing data. Are you sure you want to continue?");
+                }
             }
         });
 
