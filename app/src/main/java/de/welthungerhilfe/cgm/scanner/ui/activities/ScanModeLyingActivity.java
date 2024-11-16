@@ -948,15 +948,17 @@ public class ScanModeLyingActivity extends BaseActivity implements View.OnClickL
         AbstractARCamera.LightConditions light = getCamera().getLightConditionState();
         boolean childDetected = getCamera().getPersonCount() == 1;
         float distance = mCameraInstance.getTargetDistance();
-        if (System.currentTimeMillis() - lastUpdatedDistance > 500) {
-            lastUpdatedDistance = System.currentTimeMillis();
 
-            formattedDistance = String.format("%.1f", distance);
-            activityScanModeBinding.tvChildDistance.setText(formattedDistance+" mts ");
-
-
-        }
         runOnUiThread(() -> {
+
+            if (System.currentTimeMillis() - lastUpdatedDistance > 500) {
+                lastUpdatedDistance = System.currentTimeMillis();
+
+                formattedDistance = String.format("%.1f", distance);
+                activityScanModeBinding.tvChildDistance.setText(formattedDistance+" mts ");
+
+
+            }
 
             if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
                 getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OFF);
