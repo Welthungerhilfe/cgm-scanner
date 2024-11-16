@@ -126,7 +126,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private float[] accelerometerReading = new float[3];
 
-    double lastUpdatedAngle = 0;
+    double lastUpdatedAngle = 0, lastUpdatedDistance = 0;
+
 
     double angle =0;
 
@@ -939,10 +940,21 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
+    String formattedDistance;
     private void onFeedbackUpdate() {
         AbstractARCamera.LightConditions light = getCamera().getLightConditionState();
         boolean childDetected = getCamera().getPersonCount() == 1;
         float distance = mCameraInstance.getTargetDistance();
+        if (System.currentTimeMillis() - lastUpdatedDistance > 500) {
+            lastUpdatedDistance = System.currentTimeMillis();
+
+            formattedDistance = String.format("%.1f", distance);
+            activityScanModeBinding.tvChildDistance.setText(formattedDistance+" mts ");
+
+
+        }
+        String formattedDistance = String.format("%.1f", distance);
+        activityScanModeBinding.tvChildDistance.setText(formattedDistance+" mts ");
         runOnUiThread(() -> {
 
             if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
