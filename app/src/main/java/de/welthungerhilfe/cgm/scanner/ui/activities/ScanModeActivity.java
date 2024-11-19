@@ -938,7 +938,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                  orientation ="horizontal_angle:"+ mCameraInstance.getOrientation()+", vertical_angel:"+String.format("%.0f", angle - 90);
 
             }else {
-                orientation ="horizontal_angle:"+ mCameraInstance.getOrientation()+", vertical_angel:"+String.format("%.0f", angle - 90);
+                orientation ="orientation_angle:"+ mCameraInstance.getOrientation()+", app_angle:"+String.format("%.0f", angle - 90);
 
             }
             Log.i("ScanModeActivity", "this is value of orientation " + orientation);
