@@ -887,7 +887,7 @@ public class ScanModeLyingActivity extends BaseActivity implements View.OnClickL
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             float light = mCameraInstance.getLightIntensity();
-            String orientation ="orientation_angle:"+ mCameraInstance.getOrientation()+", app_angel:"+String.format("%.0f", angle);
+            String orientation ="orientation_angle:"+ mCameraInstance.getOrientation()+", app_angle:"+String.format("%.0f", angle);
 
             Log.i("ScanModeLyingActivity", "this is value of orientation " + orientation);
             double child_distance = mCameraInstance.getTargetDistance();
