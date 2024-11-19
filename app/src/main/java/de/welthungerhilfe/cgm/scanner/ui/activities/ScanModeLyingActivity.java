@@ -887,7 +887,7 @@ public class ScanModeLyingActivity extends BaseActivity implements View.OnClickL
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             float light = mCameraInstance.getLightIntensity();
-            String orientation ="horizontal_angle:"+ mCameraInstance.getOrientation()+", vertical_angel:"+String.format("%.0f", angle);
+            String orientation ="orientation_angle:"+ mCameraInstance.getOrientation()+", app_angel:"+String.format("%.0f", angle-90);
 
             Log.i("ScanModeLyingActivity", "this is value of orientation " + orientation);
             double child_distance = mCameraInstance.getTargetDistance();
@@ -1354,7 +1354,7 @@ public class ScanModeLyingActivity extends BaseActivity implements View.OnClickL
 
     }
 
-    private void calculateVerticalAngle(float[] accelerometerValues) {
+    /*private void calculateVerticalAngle(float[] accelerometerValues) {
         float x = accelerometerValues[0];
         float y = accelerometerValues[1];
         float z = accelerometerValues[2];
@@ -1372,9 +1372,9 @@ public class ScanModeLyingActivity extends BaseActivity implements View.OnClickL
         }
 
         // Display the angle (or use it for other purposes)
-        /*TextView angleTextView = findViewById(R.id.angleTextView); // Assuming a TextView to display the angle
-        angleTextView.setText(String.format("Vertical Angle: %.2f°", angle));*/
-    }
+        *//*TextView angleTextView = findViewById(R.id.angleTextView); // Assuming a TextView to display the angle
+        angleTextView.setText(String.format("Vertical Angle: %.2f°", angle));*//*
+    }*/
 
     public void calculateLyingChildAngle(float[] accelerometerValues) {
         float x = accelerometerValues[0];
