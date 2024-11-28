@@ -332,11 +332,11 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
     }*/
 
     public void initUI() {
-        /*if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) {
             editArea.setText("debug");
             editCenter.setText("debug");
 
-        }*/
+        }
         if (person == null) {
             firebaseAnalytics.logEvent(FirebaseService.CREATE_PERSON_START, null);
             setLocation(((CreateDataActivity) getActivity()).location);

@@ -42,8 +42,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
-import org.jcodec.common.DictionaryCompressor;
-
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 
@@ -56,14 +54,11 @@ import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
-import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeLyingActivity;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerMeasureAdapter;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.MeasureMenuDialog;
 
 public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.ManualMeasureListener {
     private Context context;
@@ -181,16 +176,14 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
 
 
-
                 int age = (int) ((System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24);
 
-                Intent intent;
+                Intent intent = new Intent(getContext(), ScanModeActivity.class);
+                intent.putExtra(AppConstants.EXTRA_PERSON, person);
                 if(age > 730){
-                    intent = new Intent(getContext(), ScanModeActivity.class);
-                    intent.putExtra(AppConstants.EXTRA_PERSON, person);
+                    intent.putExtra(AppConstants.EXTRA_SCAN_MODE, true);
                 }else{
-                    intent = new Intent(getContext(), ScanModeLyingActivity.class);
-                    intent.putExtra(AppConstants.EXTRA_PERSON, person);
+                    intent.putExtra(AppConstants.EXTRA_SCAN_MODE, false);
                 }
                 startActivity(intent);
                 alertDialog.dismiss();

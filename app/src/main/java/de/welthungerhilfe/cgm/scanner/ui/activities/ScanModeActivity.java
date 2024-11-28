@@ -124,8 +124,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private float[] accelerometerReading = new float[3];
 
-    double lastUpdatedAngle = 0, lastUpdatedDistance = 0;
-
+    double lastUpdatedAngle = 0;
 
     double angle =0;
 
@@ -143,22 +142,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             activityScanModeBinding.lytScanStanding.setActive(true);
             changeMode();
         }
-    }
-
-    private void showChangeModeConfirmation(String message) {
-        new AlertDialog.Builder(this)
-                .setTitle("Confirmation")
-                .setMessage(message)
-                .setPositiveButton("OK", (dialog, which) -> startScanModeLying())
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-                .show();
-    }
-
-    public void startScanModeLying(){
-        Intent intent = new Intent(ScanModeActivity.this, ScanModeLyingActivity.class);
-        intent.putExtra(AppConstants.EXTRA_PERSON, person);
-        startActivity(intent);
-        finish();
     }
 
     public void scanLying() {
@@ -488,7 +471,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         if (isStanding) {
             scanStanding();
         } else {
-             scanLying();
+            scanLying();
         }
 
         activityScanModeBinding.lytScanStanding.setOnClickListener(new View.OnClickListener() {
@@ -501,12 +484,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         activityScanModeBinding.lytScanLying.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-               // scanLying();
+                scanLying();
                 //Toast.makeText(ScanModeActivity.this, "Lying scan is currently unavailable", Toast.LENGTH_SHORT).show();
-
-                    showChangeModeConfirmation("This will discard standing data. Are you sure you want to continue?");
-
 
             }
         });
@@ -935,8 +914,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             String orientation;
             if(SCAN_MODE == AppConstants.SCAN_LYING)
             {
-                 orientation ="horizontal_angle:"+ mCameraInstance.getOrientation()+", vertical_angel:"+String.format("%.0f", angle - 90);
-
+                orientation ="orientation_angle:"+ mCameraInstance.getOrientation()+", app_angle:"+String.format("%.0f", angle);
             }else {
                 orientation ="orientation_angle:"+ mCameraInstance.getOrientation()+", app_angle:"+String.format("%.0f", angle - 90);
 
@@ -995,24 +973,13 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    String formattedDistance;
     private void onFeedbackUpdate() {
         AbstractARCamera.LightConditions light = getCamera().getLightConditionState();
         boolean childDetected = getCamera().getPersonCount() == 1;
         float distance = mCameraInstance.getTargetDistance();
 
-
-
         runOnUiThread(() -> {
-
-            if (System.currentTimeMillis() - lastUpdatedDistance > 500) {
-                lastUpdatedDistance = System.currentTimeMillis();
-
-                formattedDistance = String.format("%.1f", distance);
-                activityScanModeBinding.tvChildDistance.setText(formattedDistance+" mts ");
-
-
-            }
+            String formattedDistance = String.format("%.1f", distance);
 
             if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
                 getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OFF);
@@ -1048,12 +1015,15 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
             // if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
             if (distance < 0.7) {
-                setFeedback("Too Close");
+              //  setFeedback("Too Close");
+                activityScanModeBinding.tvChildDistance.setText("Too Close");
 
             } else if (distance > 1.5f) {
-                setFeedback("Too Far");
+              //  setFeedback("Too Far");
+                activityScanModeBinding.tvChildDistance.setText("Too Far");
 
             } else {
+                activityScanModeBinding.tvChildDistance.setText(formattedDistance+" mts ");
                 setFeedback(null);
             }
             //   }
@@ -1435,7 +1405,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         // Display the angle (or use it for other purposes)
         //*TextView angleTextView = findViewById(R.id.angleTextView); // Assuming a TextView to display the angle
-       // angleTextView.setText(String.format("Vertical Angle: %.2f°", angle));*//*
+        // angleTextView.setText(String.format("Vertical Angle: %.2f°", angle));*//*
     }
 
     public void calculateLyingChildAngle(float[] accelerometerValues) {

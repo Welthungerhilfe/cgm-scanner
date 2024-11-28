@@ -165,9 +165,7 @@
             android:name=".ui.activities.ScanModeActivity"
             android:screenOrientation="portrait" />
 
-        <activity
-            android:name=".ui.activities.ScanModeLyingActivity"
-            android:screenOrientation="portrait" />
+
 
         <activity
             android:name=".ui.activities.UploadManagerActivity"
