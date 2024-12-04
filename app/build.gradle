@@ -15,7 +15,7 @@ android {
 
 
 
-        versionCode 726
+        versionCode 727
         versionName "9.0.7"
 
 
