@@ -127,22 +127,49 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     public void scanStanding() {
         SCAN_MODE = AppConstants.SCAN_STANDING;
 
-        activityScanModeBinding.lytScanLying.setActive(false);
-        activityScanModeBinding.lytScanStanding.setActive(true);
 
-        changeMode();
+
+        if(files!=null && files.size()>0) {
+            showChangeModeConfirmation("This will discard standing data. Are you sure you want to continue?",true);
+        }else {
+            activityScanModeBinding.lytScanLying.setActive(false);
+            activityScanModeBinding.lytScanStanding.setActive(true);
+            changeMode();
+        }
     }
 
     public void scanLying() {
         SCAN_MODE = AppConstants.SCAN_LYING;
 
-        activityScanModeBinding.lytScanLying.setActive(true);
-        activityScanModeBinding.lytScanStanding.setActive(false);
 
-        changeMode();
+        if(files!=null && files.size()>0) {
+            showChangeModeConfirmation("This will discard standing data. Are you sure you want to continue?",false);
+        }else {
+            activityScanModeBinding.lytScanLying.setActive(true);
+            activityScanModeBinding.lytScanStanding.setActive(false);
+            changeMode();
+        }
     }
 
-    @Override
+    private void showChangeModeConfirmation(String message, boolean isStanding) {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirmation")
+                .setMessage(message)
+                .setPositiveButton("OK", (dialog, which) -> restartActivity(isStanding))
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    public void restartActivity(boolean isStanding){
+        Intent intent = new Intent(this, ScanModeActivity.class);
+        intent.putExtra(AppConstants.EXTRA_SCAN_MODE, isStanding);
+        intent.putExtra(AppConstants.EXTRA_PERSON, person);
+        intent.putExtra(AppConstants.EXTRA_MEASURE, measure);
+
+        finish(); // End the current instance of ScanModeActivity
+        startActivity(intent); // Start a new instance with the provided data
+    }
+
     public void onScan(int buttonId, boolean isRetake) {
         this.isRetake = isRetake;
         if(isRetake){
@@ -179,7 +206,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                         mTitleView.setText(getString(R.string.front_scan) + " - " + getString(R.string.mode_lying));
                         break;
                     case 2:
-                        SCAN_STEP = AppConstants.SCAN_LYING_SIDE;
+                        SCAN_STEP = AppConstants.SCAN_LYING_SIDE_LEFT;
                         mTitleView.setText(getString(R.string.side_scan) + " - " + getString(R.string.mode_lying));
                         break;
                     case 3:
@@ -187,7 +214,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                         mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_lying));
                         break;
                     case 4:
-                        SCAN_STEP = AppConstants.SCAN_STANDING_SIDE_RIGHT;
+                        SCAN_STEP = AppConstants.SCAN_LYING_SIDE_RIGHT;
                         mTitleView.setText(getString(R.string.right_scan) + " - " + getString(R.string.mode_lying));
                         break;
                 }
@@ -198,6 +225,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             openScan();
         }
     }
+
 
     void updateRetakeFileLog(int scanStep){
         ArrayList<FileLog> toRemove = new ArrayList<>();
@@ -223,7 +251,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         measure.setCreatedBy(session.getUserEmail());
         measure.setDate(AppController.getInstance().getUniversalTimestamp());
         measure.setAge(age);
-        measure.setType("ir-1.0.0");
+        measure.setType("ir-1.0.1");
         measure.setWeight(0.0f);
         measure.setHeight(0.0f);
         measure.setHeadCircumference(0.0f);
@@ -319,6 +347,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     PoseDetector poseDetector;
     ObjectDetectorOptions objectDetectorOptions;
     ObjectDetector objectDetector;
+    public boolean isStanding;
 
     public void onStart() {
         super.onStart();
@@ -347,6 +376,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             Crashes.trackError(throwable);
             finish();
         });
+        isStanding = getIntent().getBooleanExtra(AppConstants.EXTRA_SCAN_MODE,true);
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
         measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
 
@@ -450,8 +480,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         activityScanModeBinding.lytScanLying.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // scanLying();
-                Toast.makeText(ScanModeActivity1.this, "Lying scan is currently unavailable", Toast.LENGTH_SHORT).show();
+                 scanLying();
+               // Toast.makeText(ScanModeActivity1.this, "Lying scan is currently unavailable", Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -533,7 +563,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     }
 
     private void updateScanningProgress() {
-        float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 24 : 8);
+        float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 8 : 8);
         float progressToAddFloat = 100.0f / cloudsToFinishScan;
         int progressToAdd = (int) progressToAddFloat;
         //   LogFileUtils.logInfo(TAG, "currentProgress=" + mProgress + ", progressToAdd=" + progressToAdd);
@@ -551,6 +581,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
     private void changeMode() {
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
+            resetScanStepUi();
+
             activityScanModeBinding.scanType1.setChildIcon(R.drawable.stand_front);
             activityScanModeBinding.scanType2.setChildIcon(R.drawable.side_scan_left_svg);
             activityScanModeBinding.scanType3.setChildIcon(R.drawable.stand_back);
@@ -567,8 +599,10 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             }
             files = new ArrayList<>();
             retakeFiles = new ArrayList<>();
-            getCamera().setPlaneMode(AbstractIntelARCamera.PlaneMode.LOWEST);
+          //  getCamera().setPlaneMode(AbstractARCamera.PlaneMode.LOWEST);
         } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
+
+            resetScanStepUi();
             activityScanModeBinding.scanType1.setChildIcon(R.drawable.lying_front);
             activityScanModeBinding.scanType2.setChildIcon(R.drawable.lying_side);
             activityScanModeBinding.scanType3.setChildIcon(R.drawable.lying_back);
@@ -581,7 +615,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             }
             files = new ArrayList<>();
             retakeFiles = new ArrayList<>();
-            getCamera().setPlaneMode(AbstractIntelARCamera.PlaneMode.VISIBLE);
+           // getCamera().setPlaneMode(AbstractARCamera.PlaneMode.VISIBLE);
         }
     }
 
@@ -615,6 +649,21 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         animator.setInterpolator(new AccelerateDecelerateInterpolator());
         animator.setDuration(300);
         animator.start();
+    }
+
+    public void resetScanStepUi(){
+        if(step1){
+            activityScanModeBinding.scanType1.resetScanStep(R.string.help_front_view_2);
+        }
+        if(step2){
+            activityScanModeBinding.scanType2.resetScanStep(R.string.help_lateral_view);
+        }
+        if(step3){
+            activityScanModeBinding.scanType3.resetScanStep(R.string.help_back_view);
+        }
+        if(step4){
+            activityScanModeBinding.scanType4.resetScanStep(R.string.help_right_view);
+        }
     }
 
     private void resumeScan() {
@@ -871,8 +920,14 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
         onFeedbackUpdate();
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP_REALSENSE == 0)) {
+            String orientation;
+            if(SCAN_MODE==AppConstants.SCAN_STANDING){
+                 orientation ="orientation_angle:"+ String.format("%.0f", transformAngle(horizontalAngle))+",app_angle:"+String.format("%.0f", verticalAngle);
 
-            String orientation ="horizontal_angle:"+ String.format("%.0f", transformAngle(horizontalAngle))+",vertical_angel:"+String.format("%.0f", verticalAngle);
+            }else {
+                orientation ="orientation_angle:"+ String.format("%.0f", verticalAngle)+",app_angle:"+String.format("%.0f", horizontalAngle);
+            }
+
 
             float light = mCameraInstance.getLightIntensity();
             Log.i("ScanModeActivity", "this is value of orientation " + orientation);
@@ -948,14 +1003,21 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     public void onAngleReceived(double verticalAngle,double horizontalAngle) {
        // activityScanModeBinding.tvAngle.setText(" "+mCameraInstance.getLightIntensity());
         this.verticalAngle = 90-verticalAngle;
-        this.horizontalAngle = horizontalAngle;
+
       //  activityScanModeBinding.tvAngle.setText(""+mCameraInstance.getPersonCount());
         if (System.currentTimeMillis() - lastUpdatedAngle > 300) {
 
             lastUpdatedAngle = System.currentTimeMillis();
         //    activityScanModeBinding.tvAngle.setText(""+childCount);
+            if(SCAN_MODE==AppConstants.SCAN_STANDING){
+                activityScanModeBinding.tvAngle.setText(String.format("%.0f", this.verticalAngle));
 
-            activityScanModeBinding.tvAngle.setText(String.format("%.0f", this.verticalAngle));
+            }else {
+                this.horizontalAngle = 90-horizontalAngle;
+                activityScanModeBinding.tvAngle.setText(String.format("%.0f", this.horizontalAngle));
+            }
+
+
 
         }
      //   activityScanModeBinding.tvAngle.setText(angle.substring(0,4)+"");
@@ -1539,25 +1601,5 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
     }
 
-    private void calculateVerticalAngle(float[] accelerometerValues) {
-        float x = accelerometerValues[0];
-        float y = accelerometerValues[1];
-        float z = accelerometerValues[2];
 
-        // Normalize the accelerometer vector
-        float norm = (float) Math.sqrt(x * x + y * y + z * z);
-        z /= norm;
-
-        // Calculate the vertical angle in degrees
-        angle = Math.toDegrees(Math.acos(z));
-
-        if (System.currentTimeMillis() - lastUpdatedAngle > 500) {
-            lastUpdatedAngle = System.currentTimeMillis();
-            // activityScanModeBinding.tvAngle.setText(String.format("%.0f", angle - 90));
-        }
-
-        // Display the angle (or use it for other purposes)
-        /*TextView angleTextView = findViewById(R.id.angleTextView); // Assuming a TextView to display the angle
-        angleTextView.setText(String.format("Vertical Angle: %.2f°", angle));*/
-    }
 }

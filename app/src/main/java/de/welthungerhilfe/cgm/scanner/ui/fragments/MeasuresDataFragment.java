@@ -220,10 +220,19 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             public void onClick(View view) {
 
                 if(isRealsenseConnected){
-                   // Toast.makeText(getActivity(), "start realsense ", Toast.LENGTH_LONG).show();
+
+                    int age = (int) ((System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24);
+
                     Intent intent = new Intent(getContext(), ScanModeActivity1.class);
                     intent.putExtra(AppConstants.EXTRA_PERSON, person);
+                    if(age > 730){
+                        intent.putExtra(AppConstants.EXTRA_SCAN_MODE, true);
+                    }else{
+                        intent.putExtra(AppConstants.EXTRA_SCAN_MODE, false);
+                    }
                     startActivity(intent);
+                   // Toast.makeText(getActivity(), "start realsense ", Toast.LENGTH_LONG).show();
+                  
                 }
                 else {
                     Intent intent = new Intent(getContext(), ScanModeActivity.class);

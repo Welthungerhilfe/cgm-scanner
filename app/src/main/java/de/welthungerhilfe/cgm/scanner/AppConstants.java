@@ -127,6 +127,8 @@ public class AppConstants {
     public static final int SCAN_STANDING_BACK = 102;
     public static final int SCAN_STANDING_SIDE_LEFT = 104;
     public static final int SCAN_STANDING_SIDE_RIGHT = 103;
+
+    public static final String EXTRA_SCAN_MODE ="extra_scan_mode";
     public static final int SCAN_LYING_FRONT = 200;
     public static final int SCAN_LYING_SIDE = 201;
     public static final int SCAN_LYING_BACK = 202;

@@ -54,6 +54,15 @@ public class ScanTypeView extends LinearLayout {
         mButtons.setVisibility(View.VISIBLE);
     }
 
+    public void resetScanStep(int stringId){
+        mText.setText(stringId);
+        mChildIcon.setVisibility(View.VISIBLE);
+        mScanButton.setVisibility(View.VISIBLE);
+        mButtons.setVisibility(View.GONE);
+
+    }
+
+
     public void goToNextStep() {
         mScanButton.setVisibility(View.GONE);
     }
