@@ -463,7 +463,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                 .build();
 
         objectDetector = ObjectDetection.getClient(objectDetectorOptions);
-        if (age >= 730) {
+        if (isStanding) {
             scanStanding();
         } else {
             // scanLying();
@@ -1182,6 +1182,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
       //  boolean childDetected = getCamera().getPersonCount() == 1;
         float distance = mCameraInstance.getTargetDistance();
         runOnUiThread(() -> {
+            String formattedDistance = String.format("%.1f", distance);
 
             if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
                 getCamera().setSkeletonMode(AbstractIntelARCamera.SkeletonMode.OFF);
@@ -1216,13 +1217,17 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             // }
 
             // if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
+            // if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
             if (distance < 0.7) {
-                setFeedback("Too Close");
+                //  setFeedback("Too Close");
+                activityScanModeBinding.tvChildDistance.setText("Too Close");
 
             } else if (distance > 1.5f) {
-                setFeedback("Too Far");
+                //  setFeedback("Too Far");
+                activityScanModeBinding.tvChildDistance.setText("Too Far");
 
             } else {
+                activityScanModeBinding.tvChildDistance.setText(formattedDistance+" mts ");
                 setFeedback(null);
             }
             //   }
