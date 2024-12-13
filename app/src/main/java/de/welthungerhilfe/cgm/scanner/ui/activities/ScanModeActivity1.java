@@ -75,6 +75,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Scan;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
@@ -161,7 +162,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     }
 
     public void restartActivity(boolean isStanding){
-        Intent intent = new Intent(this, ScanModeActivity.class);
+        Intent intent = new Intent(this, ScanModeActivity1.class);
         intent.putExtra(AppConstants.EXTRA_SCAN_MODE, isStanding);
         intent.putExtra(AppConstants.EXTRA_PERSON, person);
         intent.putExtra(AppConstants.EXTRA_MEASURE, measure);
@@ -467,7 +468,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             scanStanding();
         } else {
             // scanLying();
-            scanStanding();
+            scanLying();
         }
 
         activityScanModeBinding.lytScanStanding.setOnClickListener(new View.OnClickListener() {
