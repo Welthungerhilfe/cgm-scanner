@@ -35,7 +35,9 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.intel.realsense.librealsense.CameraInfo;
 import com.intel.realsense.librealsense.Device;
 import com.intel.realsense.librealsense.DeviceList;
+import com.intel.realsense.librealsense.Option;
 import com.intel.realsense.librealsense.RsContext;
+import com.intel.realsense.librealsense.Sensor;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -143,6 +145,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
         imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
     }
 
+    float beforeLaserValue, afterLaserValue;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -162,12 +165,22 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                 try (Device device = dl.createDevice(0)) {
                     // Get the serial number of the device
                      serialNumber = device.getInfo(CameraInfo.SERIAL_NUMBER);
+                    for (Sensor sensor : device.querySensors()) {
+                        if (sensor.supports(Option.LASER_POWER)) {
+                            beforeLaserValue = sensor.getValue(Option.LASER_POWER);
+                            sensor.setValue(Option.LASER_POWER, sensor.getMaxRange(Option.LASER_POWER));
+                             afterLaserValue = sensor.getValue(Option.LASER_POWER);
+                        }
+                    }
 
                     // Print or display the serial number
                   //  System.out.println("RealSense Device Serial Number: " + serialNumber);
                 }
+
                 isRealsenseConnected = true;
-               // Toast.makeText(getActivity(), "Realsense camera serial no:- "+serialNumber, Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "detected "+beforeLaserValue+"--"+afterLaserValue, Toast.LENGTH_LONG).show();
+
+                // Toast.makeText(getActivity(), "Realsense camera serial no:- "+serialNumber, Toast.LENGTH_LONG).show();
 
             }else {
                 Toast.makeText(getActivity(), "Realsense camera not detected ", Toast.LENGTH_LONG).show();
