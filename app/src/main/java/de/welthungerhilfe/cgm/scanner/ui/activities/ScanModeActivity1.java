@@ -252,7 +252,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         measure.setCreatedBy(session.getUserEmail());
         measure.setDate(AppController.getInstance().getUniversalTimestamp());
         measure.setAge(age);
-        measure.setType("ir-1.0.1");
+        measure.setType("ir-1.0.2");
         measure.setWeight(0.0f);
         measure.setHeight(0.0f);
         measure.setHeadCircumference(0.0f);

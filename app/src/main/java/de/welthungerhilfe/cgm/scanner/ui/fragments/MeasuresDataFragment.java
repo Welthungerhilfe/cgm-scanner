@@ -166,15 +166,23 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                     // Get the serial number of the device
                      serialNumber = device.getInfo(CameraInfo.SERIAL_NUMBER);
                     for (Sensor sensor : device.querySensors()) {
-                        if (sensor.supports(Option.LASER_POWER)) {
-                            beforeLaserValue = sensor.getValue(Option.LASER_POWER);
-                            sensor.setValue(Option.LASER_POWER, sensor.getMaxRange(Option.LASER_POWER));
-                             afterLaserValue = sensor.getValue(Option.LASER_POWER);
+
+                        if(sensor.supports(Option.EMITTER_ENABLED)){
+
+
+                            beforeLaserValue = sensor.getValue(Option.EMITTER_ENABLED);
+                            sensor.setValue(Option.EMITTER_ENABLED, 1);
+                            afterLaserValue = sensor.getValue(Option.EMITTER_ENABLED);
                         }
+
+                        if (sensor.supports(Option.LASER_POWER)) {
+
+                               sensor.setValue(Option.LASER_POWER, sensor.getMaxRange(Option.LASER_POWER));
+
+                        }
+
                     }
 
-                    // Print or display the serial number
-                  //  System.out.println("RealSense Device Serial Number: " + serialNumber);
                 }
 
                 isRealsenseConnected = true;
@@ -188,6 +196,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
 
             }
         }catch (Exception e){
+            Toast.makeText(getActivity(), "not detected "+e.getMessage(), Toast.LENGTH_LONG).show();
             isRealsenseConnected = false;
         }
 
