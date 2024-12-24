@@ -231,15 +231,15 @@ public class SettingsActivity extends BaseActivity {
             // Log the details in the required format
             LogFileUtils.logInfo("SettingsActivity", "serverId->" + fileLog.getServerId() +
                     ", type->" + fileLog.getType() +
-                    ", uploadDate->" + fileLog.getUploadDate() +
+                    ", uploadDate->" + DataFormat.convertMilliSeconsToServerDate(fileLog.getUploadDate()) +
                     ", qrCode->" + fileLog.getQrCode() +
-                    ", createdDate->" + fileLog.getCreateDate() +
+                    ", createdDate->" + DataFormat.convertMilliSeconsToServerDate(fileLog.getCreateDate()) +
                     ", createdBy->" + fileLog.getCreatedBy() +
                     ", status->" + fileLog.getStatus() +
                     ", environment->" + fileLog.getEnvironment() +
                     ", personServerId->" + (person != null ? person.getServerId() : "N/A") +
                     ", personEnvironment->" + (person != null ? person.getEnvironment() : "N/A") +
-                    ", personCreatedDate->" + (person != null ? person.getCreated() : "N/A") +
+                    ", personCreatedDate->" + (person != null ? DataFormat.convertMilliSeconsToServerDate(person.getCreated()) : "N/A") +
                     ", personCreatedBy->" + (person != null ? person.getCreatedBy() : "N/A") +
                     ", personQrCode->" + (person != null ? person.getQrcode() : "N/A"));
         }
