@@ -46,6 +46,9 @@ public interface FileLogDao {
     @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE deleted=1 AND environment=:environment AND status=202 AND type LIKE 'consent'")
     List<FileLog> loadConsentFile(int environment);
 
+    @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE deleted=1 AND type LIKE 'consent'")
+        List<FileLog> loadConsentFile();
+
     @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE deleted=0")
     long getArtifactCount();
 

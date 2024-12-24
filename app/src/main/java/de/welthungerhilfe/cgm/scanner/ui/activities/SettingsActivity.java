@@ -37,13 +37,20 @@ import android.view.View;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.io.File;
-
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivitySettingsBinding;
+import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
+import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.PersonRepository;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
@@ -210,7 +217,32 @@ public class SettingsActivity extends BaseActivity {
         findViewById(R.id.btnContactSupport).setOnClickListener(view -> {
             ContactSupportDialog.show(this, null, null);
             firebaseAnalytics.logEvent("contact_support",null);
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            executorService.execute(() -> logConsentFileDetails(FileLogRepository.getInstance(SettingsActivity.this).loadConsentFile()));
         });
+    }
+
+
+    public void logConsentFileDetails(List<FileLog> fileLogs) {
+        for (FileLog fileLog : fileLogs) {
+            // Retrieve Person object using the QR code from the FileLog
+            Person person = PersonRepository.getInstance(SettingsActivity.this).findPersonByQrinApp(fileLog.getQrCode());
+
+            // Log the details in the required format
+            LogFileUtils.logInfo("SettingsActivity", "serverId->" + fileLog.getServerId() +
+                    ", type->" + fileLog.getType() +
+                    ", uploadDate->" + fileLog.getUploadDate() +
+                    ", qrCode->" + fileLog.getQrCode() +
+                    ", createdDate->" + fileLog.getCreateDate() +
+                    ", createdBy->" + fileLog.getCreatedBy() +
+                    ", status->" + fileLog.getStatus() +
+                    ", environment->" + fileLog.getEnvironment() +
+                    ", personServerId->" + (person != null ? person.getServerId() : "N/A") +
+                    ", personEnvironment->" + (person != null ? person.getEnvironment() : "N/A") +
+                    ", personCreatedDate->" + (person != null ? person.getCreated() : "N/A") +
+                    ", personCreatedBy->" + (person != null ? person.getCreatedBy() : "N/A") +
+                    ", personQrCode->" + (person != null ? person.getQrcode() : "N/A"));
+        }
     }
 
     private void changeLanguage(String code) {
