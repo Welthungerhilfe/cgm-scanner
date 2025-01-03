@@ -1,0 +1,213 @@
+variables:
+  system.debug: 'false'
+  lastCommitMessage: any user can see depth data who has account with cgm
+  pr.check.id: ''
+  pr.status.id: ''
+  user-defined.APP_CENTER_KEY: 354c94b8-e6cc-45dc-9cf4-15697542b518
+  user-defined.GOOGLE_MAPS_KEY: AIzaSyA-2ofdxNlBpzHDRVa6NfgAfkx4u0QSg4Q
+  user-defined.PROJECT_NUMBER: '798468686123'
+  user-defined.PROJECT_ID: child-growth-monitor
+  user-defined.MOBILESDK_APP_ID: '1:798468686123:android:739dcaee1e669c8b'
+  user-defined.OAUTH_PATH: HG3KFO3TBAjNOYsTjEIr8WhqFLw=
+  user-defined.OAUTH_REDIRECT_URL: 'msauth://de.welthungerhilfe.cgm.scanner/HG3KFO3TBAjNOYsTjEIr8WhqFLw%3D'
+  user-defined.OAUTH_SCOPE_SANDBOX: 'https://cgmb2csandbox.onmicrosoft.com/cgm-api/scannerapp'
+  user-defined.OAUTH_CLIENT_ID_SANDBOX: cc332c9f-e319-4742-ac43-390b25dfa4f1
+  user-defined.OAUTH_URL_SANDBOX: >-
+    https://cgmb2csandbox.b2clogin.com/tfp/cgmb2csandbox.onmicrosoft.com/B2C_1_SISU_SCANNER_APP/
+  user-defined.API_URL_SANDBOX: 'https://cgm-be-ci-dev-scanner-api.azurewebsites.net/api/'
+  user-defined.OAUTH_SCOPE_QA: 'https://cgmb2cdemoqa.onmicrosoft.com/cgm-api/scannerapp'
+  user-defined.OAUTH_CLIENT_ID_QA: 389f8965-6486-4c55-8e02-8e5f35eb061c
+  user-defined.OAUTH_URL_QA: >-
+    https://cgmb2cdemoqa.b2clogin.com/tfp/cgmb2cdemoqa.onmicrosoft.com/B2C_1_SISU_SCANNER_APP/
+  user-defined.API_URL_QA: 'https://cgm-be-ci-qa-scanner-api.azurewebsites.net/api/'
+  user-defined.OAUTH_SCOPE_PRODUCTION: 'https://cgmb2cinbmz.onmicrosoft.com/cgm-api/scannerapp'
+  user-defined.OAUTH_CLIENT_ID_PRODUCTION: 39fb2688-513b-4d60-8cce-a4a57bf7b0e9
+  user-defined.OAUTH_URL_PRODUCTION: >-
+    https://cgmb2cinbmz.b2clogin.com/tfp/cgmb2cinbmz.onmicrosoft.com/B2C_1_SISU_SCANNER_APP/
+  user-defined.API_URL_PRODUCTION: 'https://cgm-be-ci-inbmz-scanner-api.azurewebsites.net/api/'
+  user-defined.OAUTH_SCOPE_NAMIBIA: 'https://cgmb2cnaunam.onmicrosoft.com/cgm-api/scannerapp'
+  user-defined.OAUTH_CLIENT_ID_NAMIBIA: 1cba918c-ab4a-423a-934f-a62dda772e7a
+  user-defined.OAUTH_URL_NAMIBIA: >-
+    https://cgmb2cnaunam.b2clogin.com/tfp/cgmb2cnaunam.onmicrosoft.com/B2C_1_SISU_SCANNER_APP/
+  user-defined.API_URL_NAMIBIA: 'https://cgm-be-ci-naunam-scanner-api.azurewebsites.net/api/'
+  user-defined.OAUTH_SCOPE_NEPAL: 'https://cgmb2cnep.onmicrosoft.com/cgm-api/scannerapp'
+  user-defined.OAUTH_CLIENT_ID_NEPAL: d5755f5d-ca6b-4210-ac9a-322d9f9f841b
+  user-defined.OAUTH_URL_NEPAL: >-
+    https://cgmb2cnep.b2clogin.com/tfp/cgmb2cnep.onmicrosoft.com/B2C_1_SISU_SCANNER_APP/
+  user-defined.API_URL_NEPAL: 'https://cgm-be-ci-nep-scanner-api.azurewebsites.net/api/'
+  user-defined.OAUTH_SCOPE_UGANDA: 'https://cgmb2cuga.onmicrosoft.com/cgm-api/scannerapp'
+  user-defined.OAUTH_CLIENT_ID_UGANDA: f215eab3-5c3e-477e-b989-69eca720a42d
+  user-defined.OAUTH_URL_UGANDA: >-
+    https://cgmb2cuga.b2clogin.com/tfp/cgmb2cuga.onmicrosoft.com/B2C_1_SISU_SCANNER_APP/
+  user-defined.API_URL_UGANDA: 'https://cgm-be-ci-uga-scanner-api.azurewebsites.net/api/'
+  user-defined.OAUTH_SCOPE_BAN: 'https://cgmb2cban.onmicrosoft.com/cgm-api/scannerapp'
+  user-defined.OAUTH_CLIENT_ID_BAN: f29063e9-fabb-4f66-a928-d3bea8f34b7e
+  user-defined.OAUTH_URL_BAN: >-
+    https://cgmb2cban.b2clogin.com/tfp/cgmb2cban.onmicrosoft.com/B2C_1_SISU_SCANNER_APP/
+  user-defined.API_URL_BAN: 'https://cgm-be-ci-ban-scanner-api.azurewebsites.net/api/'
+  user-defined.JAVA_HOME: $(JAVA_HOME_17_X64)
+  user-defined.OAUTH_SCOPE_MALAWI: 'https://cgmb2cmal.onmicrosoft.com/cgm-api/scannerapp'
+  user-defined.OAUTH_CLIENT_ID_MALAWI: 75e837c0-4a6a-4116-8838-49c66b1714f1
+  user-defined.OAUTH_URL_MALAWI: >-
+    https://cgmb2cmal.b2clogin.com/tfp/cgmb2cmal.onmicrosoft.com/B2C_1_SISU_SCANNER_APP/
+  user-defined.API_URL_MALAWI: 'https://cgm-be-ci-mal-scanner-api.azurewebsites.net/api/'
+  user-defined.OAUTH_SCOPE_SIERRA: 'https://cgmb2csie.onmicrosoft.com/cgm-api/scannerapp'
+  user-defined.OAUTH_CLIENT_ID_SIERRA: 9aa0bebf-cf88-485c-be99-6293347c5987
+  user-defined.OAUTH_URL_SIERRA: >-
+    https://cgmb2csie.b2clogin.com/tfp/cgmb2csie.onmicrosoft.com/B2C_1_SISU_SCANNER_APP/
+  user-defined.API_URL_SIERRA: 'https://cgm-be-ci-sie-scanner-api.azurewebsites.net/api/'
+  user-defined.OAUTH_SCOPE_ETHOPIA: 'https://cgmb2ceth.onmicrosoft.com/cgm-api/scannerapp'
+  user-defined.OAUTH_CLIENT_ID_ETHOPIA: 956d7212-8929-4a0f-b680-4225381cfa0c
+  user-defined.OAUTH_URL_ETHOPIA: >-
+    https://cgmb2ceth.b2clogin.com/tfp/cgmb2ceth.onmicrosoft.com/B2C_1_SISU_SCANNER_APP/
+  user-defined.API_URL_ETHOPIA: 'https://cgm-be-ci-eth-scanner-api.azurewebsites.net/api/'
+  MOBILECENTER_OUTPUT_DIRECTORY: $(Build.ArtifactStagingDirectory)/build
+  MOBILECENTER_BRANCH: develop
+  MOBILECENTER_BUILD_ID: $(Build.BuildNumber)
+  MOBILECENTER_SOURCE_DIRECTORY: $(Build.Repository.LocalPath)
+  MOBILECENTER_TRIGGER: continuous
+  APPCENTER_OUTPUT_DIRECTORY: $(Build.ArtifactStagingDirectory)/build
+  APPCENTER_BRANCH: develop
+  APPCENTER_BUILD_ID: $(Build.BuildNumber)
+  APPCENTER_SOURCE_DIRECTORY: $(Build.Repository.LocalPath)
+  APPCENTER_TRIGGER: continuous
+  artifactVersioning.build.format: timestamp
+  buildScripts.toolset: '{"app":{"postClone":"app/appcenter-post-clone.sh"}}'
+  moduleName: app
+  buildVariant: arcoreRelease
+  isRoot: 'false'
+  runTests: 'true'
+  runLint: 'true'
+  keystorePassword: null
+  keyAlias: null
+  keyPassword: null
+  keystoreFilename: cgm-scanner.keystore
+  keystoreEncoded: null
+  automaticSigning: 'false'
+  buildBundle: 'false'
+  MOBILECENTER_ANDROID_MODULE: app
+  MOBILECENTER_ANDROID_VARIANT: arcoreRelease
+  APPCENTER_ANDROID_MODULE: app
+  APPCENTER_ANDROID_VARIANT: arcoreRelease
+  sonoma.tags: 'continuous,android,signed,tests'
+  artifactVersioning.build.value: '0'
+name: $(artifactVersioning.build.value)
+resources:
+  repositories:
+    - repository: self
+      type: git
+      ref: refs/heads/develop
+jobs:
+  - job: Phase_1
+    displayName: Build
+    timeoutInMinutes: 30
+    cancelTimeoutInMinutes: 0
+    pool:
+      name: Azure Pipelines
+      vmImage: macOS-11
+    steps:
+      - checkout: self
+        clean: true
+        submodules: recursive
+        lfs: true
+      - task: PowerShell@2
+        displayName: Install build scripts
+        continueOnError: true
+        inputs:
+          targetType: inline
+          scriptName: ''
+          script: >-
+            Set-Location -Path '$(Agent.HomeDirectory)'
+
+            Invoke-WebRequest -Uri
+            'https://appcenterbuildassets.azureedge.net/buildscripts/appcenter-build-assets-latest.zip'
+            -OutFile 'appcenter-build-assets-latest.zip'
+
+            if (Test-Path ./scripts) { Remove-Item -Path ./scripts -Force
+            -Recurse }
+
+            New-Item -ItemType directory -Path 'scripts' | Out-Null
+
+            unzip -q -d 'scripts' 'appcenter-build-assets-latest.zip'
+
+            Invoke-Expression 'bash ./scripts/init.sh'
+          failOnStderr: true
+      - task: ShellScript@2
+        displayName: Tag build
+        inputs:
+          scriptPath: $(Agent.HomeDirectory)/scripts/emit-tags.sh
+          args: $(sonoma.tags)
+      - task: ShellScript@2
+        displayName: Post Clone Script
+        inputs:
+          scriptPath: app/appcenter-post-clone.sh
+      - task: ShellScript@2
+        displayName: Install Android keystore
+        inputs:
+          scriptPath: $(Agent.HomeDirectory)/scripts/install-keystore.sh
+          args: $(keystoreEncoded)
+      - task: Gradle@1
+        displayName: Gradle Task
+        inputs:
+          tasks: >-
+            clean :app:assembleArcoreRelease :app:testArcoreRelease
+            :app:lintArcoreRelease 
+          options: >-
+            -DAPPCENTER_KEYSTORE_PASSWORD="$(keystorePassword)"
+            -DMOBILECENTER_KEYSTORE_PASSWORD="$(keystorePassword)"
+            -DAPPCENTER_KEYSTORE_FILE_ID="$(keystoreFilename)"
+            -DMOBILECENTER_KEYSTORE_FILE_ID="$(keystoreFilename)"
+            -DAPPCENTER_KEY_ALIAS="$(keyAlias)"
+            -DMOBILECENTER_KEY_ALIAS="$(keyAlias)"
+            -DAPPCENTER_KEY_PASSWORD="$(keyPassword)"
+            -DMOBILECENTER_KEY_PASSWORD="$(keyPassword)"
+            -DAPPCENTER_BUILD_VERSION="$(Build.BuildNumber)"
+            -DMOBILECENTER_BUILD_VERSION="$(Build.BuildNumber)"
+          jdkArchitecture: x86
+          publishJUnitResults: false
+          sqAnalysisBreakBuildIfQualityGateFailed: false
+      - task: ShellScript@2
+        name: appcenter_android_postprocess_output
+        displayName: Android Postprocess
+        inputs:
+          scriptPath: $(Agent.HomeDirectory)/scripts/android-postprocess.sh
+          args: $(build.sourcesdirectory)/app/build/outputs/apk
+      - task: AndroidSigning@1
+        displayName: Sign APK
+        inputs:
+          files: $(build.sourcesdirectory)/app/build/**/*.apk
+          keystoreFile: .certs/keystore.jks
+          keystorePass: $(keystorePassword)
+          keystoreAlias: $(keyAlias)
+          keyPass: $(keyPassword)
+      - task: CopyFiles@2
+        displayName: Copy build files to staging
+        inputs:
+          SourceFolder: $(build.sourcesdirectory)/app/build/outputs
+          Contents: apk/**/*.apk
+          TargetFolder: $(build.artifactstagingdirectory)/build
+          OverWrite: true
+          flattenFolders: true
+      - task: CopyFiles@2
+        displayName: Copy mapping files to staging
+        inputs:
+          SourceFolder: $(build.sourcesdirectory)/app/build/outputs
+          Contents: mapping/**/mapping.txt
+          TargetFolder: $(build.artifactstagingdirectory)/mapping
+          OverWrite: true
+          flattenFolders: true
+      - task: PublishBuildArtifacts@1
+        displayName: Publish build
+        inputs:
+          PathtoPublish: $(build.artifactstagingdirectory)/build
+          ArtifactName: build
+      - task: PublishBuildArtifacts@1
+        displayName: Publish mapping
+        condition: >-
+          and(succeeded(),
+          startsWith(variables['appcenter_android_postprocess_output.mapping'],
+          true))
+        continueOnError: true
+        inputs:
+          PathtoPublish: $(build.artifactstagingdirectory)/mapping
+          ArtifactName: mapping
