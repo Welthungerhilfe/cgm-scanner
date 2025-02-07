@@ -1,4 +1,4 @@
-# Install script for directory: D:/CGM/cgm-scanner/third-party/realsense-file
+# Install script for directory: D:/merge_realsense/cgm-scanner/third-party/realsense-file
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -43,6 +43,6 @@ if(NOT DEFINED CMAKE_OBJDUMP)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "D:/CGM/cgm-scanner/build-arm64-v8a/third-party/realsense-file/librealsense-file.a")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "D:/merge_realsense/cgm-scanner/build-arm64-v8a/third-party/realsense-file/librealsense-file.a")
 endif()
 

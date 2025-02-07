@@ -62,7 +62,6 @@ public class ScanTypeView extends LinearLayout {
 
     }
 
-
     public void goToNextStep() {
         mScanButton.setVisibility(View.GONE);
     }

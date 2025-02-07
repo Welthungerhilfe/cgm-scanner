@@ -39,6 +39,11 @@ public class AppConstants {
     public static final String API_URL_DEMO_QA = "{API_URL_QA}/";
 
 
+    public static final String AUTH_ETHOPIA = "{OAUTH_SCOPE_ETHOPIA}";
+
+    public static final String API_URL_ETHOPIA = "{API_URL_ETHOPIA}/";
+
+
     public static final String API_URL_SANDBOX = "{API_URL_SANDBOX}/";
     public static final String API_URL_IN_BMZ = "{API_URL_PRODUCTION}/";
     public static final String API_URL_NAMIBIA = "{API_URL_NAMIBIA}/";
@@ -66,9 +71,12 @@ public class AppConstants {
     public static final int ENV_UGANDA = 6;
     public static final int ENV_BAN = 7;
 
+
     public static final int ENV_MALAWI = 8;
 
     public static final int ENV_SIERRA = 9;
+
+    public static final int ENV_ETHOPIA = 10;
 
 
 
@@ -86,7 +94,7 @@ public class AppConstants {
     public static final String VAL_SEX_MALE = "male";
 
     public static final String VAL_MEASURE_MANUAL = "manual";
-    public static final String VAL_MEASURE_AUTO = "v2.0.0";
+    public static final String VAL_MEASURE_AUTO = "v2.2.0";
 
     public static final String LANG_ENGLISH = "en";
     public static final String LANG_GERMAN = "de";
@@ -108,6 +116,8 @@ public class AppConstants {
     public static final String EXTRA_QR_URL = "extra_qr_url";
     public static final String EXTRA_RADIUS = "extra_radius";
     public static final String EXTRA_PERSON = "extra_person";
+
+    public static final String EXTRA_SCAN_MODE ="extra_scan_mode";
     public static final String EXTRA_MEASURE = "extra_measure";
     public static final String EXTRA_TUTORIAL_AGAIN = "extra_tutorial_again";
 
@@ -128,7 +138,7 @@ public class AppConstants {
     public static final int SCAN_STANDING_SIDE_LEFT = 104;
     public static final int SCAN_STANDING_SIDE_RIGHT = 103;
 
-    public static final String EXTRA_SCAN_MODE ="extra_scan_mode";
+
     public static final int SCAN_LYING_FRONT = 200;
     public static final int SCAN_LYING_SIDE = 201;
     public static final int SCAN_LYING_BACK = 202;

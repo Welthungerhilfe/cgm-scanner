@@ -80,6 +80,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     String malawi[] ={"Malawi"};
     String demo[] ={"Demo/Test","Demo/Test - CGM","Demo/Test - RST"};
     String sandbox[] ={"Sandbox"};
+
+    String ethopia[]={"Ethopia"};
     String organization[] = null;
 
 
@@ -137,7 +139,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                country =new String[]{"Select Country","India","Malawi","Sierra Leone","Namibia","Nepal","Uganda","Bangladesh","Demo/Test","Sandbox"};
             }
             else {
-                country =new String[]{"Select Country","India","Malawi","Sierra Leone","Namibia","Nepal","Uganda","Bangladesh","Demo/Test"};
+                country =new String[]{"Select Country","India","Malawi","Sierra Leone","Namibia","Nepal","Uganda","Bangladesh","Ethopia","Demo/Test"};
 
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -203,6 +205,11 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                         selectedCountry = country[i];
                         organization = sierra_leone;
                         break;
+                    case "Ethopia":
+                        selectedCountry = country[i];
+                        organization = ethopia;
+                        break;
+
                     default:
                         selectedCountry = null;
                         organization = null;
@@ -321,6 +328,14 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                         session.setEnvironment(AppConstants.ENV_DEMO_QA);
                         session.setEnvironmentMode(AppConstants.CGM_MODE);
                         selectedBackend = "demo_qa";
+                        break;
+                    case "Ethopia":
+                        selectedCountry = country[i];
+                        selectedOrganization = "Ethopia";
+                        session.setEnvironment(AppConstants.ENV_ETHOPIA);
+                        session.setEnvironmentMode(AppConstants.CGM_MODE);
+
+                        selectedBackend = "ethopia";
                         break;
 
                     case "Demo/Test - RST":

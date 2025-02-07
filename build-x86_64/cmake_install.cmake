@@ -1,4 +1,4 @@
-# Install script for directory: D:/CGM/cgm-scanner
+# Install script for directory: D:/merge_realsense/cgm-scanner
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -49,7 +49,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
          FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/librealsense2.so"
          RPATH "")
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE SHARED_LIBRARY FILES "D:/CGM/cgm-scanner/build/jniLibs/x86_64/librealsense2.so")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE SHARED_LIBRARY FILES "D:/merge_realsense/cgm-scanner/build/jniLibs/x86_64/librealsense2.so")
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/librealsense2.so" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/librealsense2.so")
     if(CMAKE_INSTALL_DO_STRIP)
@@ -62,14 +62,14 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "D:/CGM/cgm-scanner/include/librealsense2")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "D:/merge_realsense/cgm-scanner/include/librealsense2")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/cmake/realsense2/realsense2Targets.cmake")
     file(DIFFERENT EXPORT_FILE_CHANGED FILES
          "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/cmake/realsense2/realsense2Targets.cmake"
-         "D:/CGM/cgm-scanner/build-x86_64/CMakeFiles/Export/lib/cmake/realsense2/realsense2Targets.cmake")
+         "D:/merge_realsense/cgm-scanner/build-x86_64/CMakeFiles/Export/lib/cmake/realsense2/realsense2Targets.cmake")
     if(EXPORT_FILE_CHANGED)
       file(GLOB OLD_CONFIG_FILES "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/cmake/realsense2/realsense2Targets-*.cmake")
       if(OLD_CONFIG_FILES)
@@ -78,22 +78,22 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
       endif()
     endif()
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/realsense2" TYPE FILE FILES "D:/CGM/cgm-scanner/build-x86_64/CMakeFiles/Export/lib/cmake/realsense2/realsense2Targets.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/realsense2" TYPE FILE FILES "D:/merge_realsense/cgm-scanner/build-x86_64/CMakeFiles/Export/lib/cmake/realsense2/realsense2Targets.cmake")
   if("${CMAKE_INSTALL_CONFIG_NAME}" MATCHES "^([Dd][Ee][Bb][Uu][Gg])$")
-    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/realsense2" TYPE FILE FILES "D:/CGM/cgm-scanner/build-x86_64/CMakeFiles/Export/lib/cmake/realsense2/realsense2Targets-debug.cmake")
+    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/realsense2" TYPE FILE FILES "D:/merge_realsense/cgm-scanner/build-x86_64/CMakeFiles/Export/lib/cmake/realsense2/realsense2Targets-debug.cmake")
   endif()
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/realsense2" TYPE FILE FILES "D:/CGM/cgm-scanner/build-x86_64/realsense2Config.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/realsense2" TYPE FILE FILES "D:/merge_realsense/cgm-scanner/build-x86_64/realsense2Config.cmake")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/realsense2" TYPE FILE FILES "D:/CGM/cgm-scanner/build-x86_64/realsense2ConfigVersion.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/realsense2" TYPE FILE FILES "D:/merge_realsense/cgm-scanner/build-x86_64/realsense2ConfigVersion.cmake")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "D:/CGM/cgm-scanner/build-x86_64/config/realsense2.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "D:/merge_realsense/cgm-scanner/build-x86_64/config/realsense2.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -102,10 +102,10 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("D:/CGM/cgm-scanner/librealsense/.cxx/Debug/4h5o2c75/x86_64/third-party/json/build/cmake_install.cmake")
-  include("D:/CGM/cgm-scanner/build-x86_64/third-party/rsutils/cmake_install.cmake")
-  include("D:/CGM/cgm-scanner/build-x86_64/third-party/realsense-file/cmake_install.cmake")
-  include("D:/CGM/cgm-scanner/build-x86_64/third-party/tclap/cmake_install.cmake")
+  include("D:/merge_realsense/cgm-scanner/librealsense/.cxx/Debug/4h5o2c75/x86_64/third-party/json/build/cmake_install.cmake")
+  include("D:/merge_realsense/cgm-scanner/build-x86_64/third-party/rsutils/cmake_install.cmake")
+  include("D:/merge_realsense/cgm-scanner/build-x86_64/third-party/realsense-file/cmake_install.cmake")
+  include("D:/merge_realsense/cgm-scanner/build-x86_64/third-party/tclap/cmake_install.cmake")
 
 endif()
 

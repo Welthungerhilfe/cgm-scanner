@@ -263,8 +263,8 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             public void onClick(View v) {
                 if (checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED &&
                         checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                  requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
-                  return;
+                    requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
+                    return;
                 }
                 firebaseAnalytics.logEvent(FirebaseService.SCAN_INFORM_CONSENT_START, null);
                 //startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), IMAGE_CAPTURED_REQUEST);
@@ -295,7 +295,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         .addOnFailureListener(
                                 e -> Toast.makeText(getActivity(),"Error",Toast.LENGTH_LONG).show());
             }
-            });
+        });
 
 
         return view;
@@ -377,10 +377,10 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
 
             setVillageDefault(loc.getLocality());
-           // if ((location == null) && (address != null) && (address.length() > 0)) {
-                if ((address != null) && (address.length() > 0)) {
+            // if ((location == null) && (address != null) && (address.length() > 0)) {
+            if ((address != null) && (address.length() > 0)) {
 
-                    if (editLocation != null) {
+                if (editLocation != null) {
                     Editable oldAddress = editLocation.getText();
                     if ((oldAddress != null) && (oldAddress.toString().compareTo(address) != 0)) {
                         editLocation.setText(address);
@@ -407,9 +407,9 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
             return;
         }
         IndiaLocation indiaLocation = indiaLocationRepository.getVillageObject(village.toUpperCase(Locale.ENGLISH),session.getEnvironment());
-       if(indiaLocation!=null) {
-           Log.i(TAG, "this is value locality " + indiaLocation);
-       }
+        if(indiaLocation!=null) {
+            Log.i(TAG, "this is value locality " + indiaLocation);
+        }
 
         if(indiaLocation != null){
             editArea.setText(indiaLocation.getVillage_full_name());
@@ -493,7 +493,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                 DateRangePickerDialog1 dateRangePicker = new DateRangePickerDialog1();
                 dateRangePicker.setDate(new Date(timestamp));
                 dateRangePicker.setCallback(this);
-               // dateRangePicker.setStyle(DI.STYLE_NO_TITLE, 0);
+                // dateRangePicker.setStyle(DI.STYLE_NO_TITLE, 0);
                 dateRangePicker.show(getActivity().getSupportFragmentManager(), "DATE_RANGE_PICKER");
                 break;
             case R.id.btnNext:
@@ -542,7 +542,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setSynced(false);
                     person.setCenter_location_id(center_location_id);
                     person.setLocation_id(location_id);
-                    if (BuildConfig.DEBUG) {
+                    if (BuildConfig.DEBUG && session.getEnvironment()== AppConstants.ENV_DEMO_QA) {
                         person.setCenter_location_id("1111");
                         person.setLocation_id("115566");
                     }
@@ -668,13 +668,13 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                         dialog.dismiss();
                     }
                 }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                editBirth.setText("");
-                onTextChanged();
-                dialog.dismiss();
-            }
-        }).show();
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        editBirth.setText("");
+                        onTextChanged();
+                        dialog.dismiss();
+                    }
+                }).show();
     }
 
     void ImageSaver(File consentFile, Context context) {

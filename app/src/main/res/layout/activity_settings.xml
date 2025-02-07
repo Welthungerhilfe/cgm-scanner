@@ -238,7 +238,7 @@
                         android:layout_height="wrap_content"
                         app:titleText="@string/show_depth_data"
                         app:toggleVisible="true"
-                        android:onClick="openRemoteConfig"/>
+                        />
                 </LinearLayout>
 
             </LinearLayout>

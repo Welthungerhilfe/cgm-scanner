@@ -64,12 +64,10 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity;
 import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity1;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerMeasureAdapter;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ManualMeasureDialog;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Loc;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
-import de.welthungerhilfe.cgm.scanner.ui.dialogs.MeasureMenuDialog;
 
 public class MeasuresDataFragment extends Fragment implements View.OnClickListener, ManualMeasureDialog.ManualMeasureListener {
     private Context context;
@@ -241,6 +239,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
             @Override
             public void onClick(View view) {
 
+
                 if(isRealsenseConnected){
 
                     int age = (int) ((System.currentTimeMillis() - person.getBirthday()) / 1000 / 60 / 60 / 24);
@@ -261,6 +260,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                     intent.putExtra(AppConstants.EXTRA_PERSON, person);
                     startActivity(intent);
                 }
+
+
+
 
                 alertDialog.dismiss();
             }
@@ -325,6 +327,9 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                             break;
                         case AppConstants.ENV_DEMO_QA:
                             selectedBackend = "demo_qa";
+                            break;
+                        case AppConstants.ENV_ETHOPIA:
+                            selectedBackend = "ethopia";
                             break;
                     }
 

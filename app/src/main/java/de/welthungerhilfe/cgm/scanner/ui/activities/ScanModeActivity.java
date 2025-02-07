@@ -109,9 +109,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 public class ScanModeActivity extends BaseActivity implements View.OnClickListener, AbstractARCamera.Camera2DataListener, ScanTypeView.ScanTypeListener, SensorEventListener {
 
 
-    private enum ArtifactType {CALIBRATION, DEPTH, RGB}
-
-    ;
+    private enum ArtifactType {CALIBRATION, DEPTH, RGB};
 
     ActivityScanModeBinding activityScanModeBinding;
 
@@ -135,28 +133,55 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     public void scanStanding() {
         SCAN_MODE = AppConstants.SCAN_STANDING;
 
-        activityScanModeBinding.lytScanLying.setActive(false);
-        activityScanModeBinding.lytScanStanding.setActive(true);
 
-        changeMode();
+
+        if(files!=null && files.size()>0) {
+            showChangeModeConfirmation("This will discard standing data. Are you sure you want to continue?",true);
+        }else {
+            activityScanModeBinding.lytScanLying.setActive(false);
+            activityScanModeBinding.lytScanStanding.setActive(true);
+            changeMode();
+        }
     }
 
     public void scanLying() {
         SCAN_MODE = AppConstants.SCAN_LYING;
 
-        activityScanModeBinding.lytScanLying.setActive(true);
-        activityScanModeBinding.lytScanStanding.setActive(false);
 
-        changeMode();
+        if(files!=null && files.size()>0) {
+            showChangeModeConfirmation("This will discard standing data. Are you sure you want to continue?",false);
+        }else {
+            activityScanModeBinding.lytScanLying.setActive(true);
+            activityScanModeBinding.lytScanStanding.setActive(false);
+            changeMode();
+        }
     }
 
+    private void showChangeModeConfirmation(String message, boolean isStanding) {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirmation")
+                .setMessage(message)
+                .setPositiveButton("OK", (dialog, which) -> restartActivity(isStanding))
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    public void restartActivity(boolean isStanding){
+        Intent intent = new Intent(this, ScanModeActivity.class);
+        intent.putExtra(AppConstants.EXTRA_SCAN_MODE, isStanding);
+        intent.putExtra(AppConstants.EXTRA_PERSON, person);
+        intent.putExtra(AppConstants.EXTRA_MEASURE, measure);
+
+        finish(); // End the current instance of ScanModeActivity
+        startActivity(intent); // Start a new instance with the provided data
+    }
     @Override
     public void onScan(int buttonId, boolean isRetake) {
-       this.isRetake = isRetake;
-       if(isRetake){
-           retakeFiles.clear();
-           retakeFiles = new ArrayList<>();
-       }
+        this.isRetake = isRetake;
+        if(isRetake){
+            retakeFiles.clear();
+            retakeFiles = new ArrayList<>();
+        }
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
         } else {
@@ -187,7 +212,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         mTitleView.setText(getString(R.string.front_scan) + " - " + getString(R.string.mode_lying));
                         break;
                     case 2:
-                        SCAN_STEP = AppConstants.SCAN_LYING_SIDE;
+                        SCAN_STEP = AppConstants.SCAN_LYING_SIDE_LEFT;
                         mTitleView.setText(getString(R.string.side_scan) + " - " + getString(R.string.mode_lying));
                         break;
                     case 3:
@@ -195,7 +220,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         mTitleView.setText(getString(R.string.back_scan) + " - " + getString(R.string.mode_lying));
                         break;
                     case 4:
-                        SCAN_STEP = AppConstants.SCAN_STANDING_SIDE_RIGHT;
+                        SCAN_STEP = AppConstants.SCAN_LYING_SIDE_RIGHT;
                         mTitleView.setText(getString(R.string.right_scan) + " - " + getString(R.string.mode_lying));
                         break;
                 }
@@ -271,6 +296,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     public int SCAN_STEP = AppConstants.SCAN_PREVIEW;
     private boolean step1 = false, step2 = false, step3 = false, step4 = false;
 
+    public boolean isStanding;
     public Person person;
     public Measure measure;
     public Loc location;
@@ -355,6 +381,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             Crashes.trackError(throwable);
             finish();
         });
+        isStanding = getIntent().getBooleanExtra(AppConstants.EXTRA_SCAN_MODE,true);
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
         measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
 
@@ -441,11 +468,10 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 .build();
 
         objectDetector = ObjectDetection.getClient(objectDetectorOptions);
-        if (age >= 730) {
+        if (isStanding) {
             scanStanding();
         } else {
-           // scanLying();
-            scanStanding();
+            scanLying();
         }
 
         activityScanModeBinding.lytScanStanding.setOnClickListener(new View.OnClickListener() {
@@ -458,8 +484,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         activityScanModeBinding.lytScanLying.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               // scanLying();
-                Toast.makeText(ScanModeActivity.this, "Lying scan is currently unavailable", Toast.LENGTH_SHORT).show();
+                scanLying();
+                //Toast.makeText(ScanModeActivity.this, "Lying scan is currently unavailable", Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -541,7 +567,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void updateScanningProgress() {
-        float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 24 : 8);
+        float cloudsToFinishScan = (SCAN_STEP % 100 == 1 ? 8 : 8);
         float progressToAddFloat = 100.0f / cloudsToFinishScan;
         int progressToAdd = (int) progressToAddFloat;
         //   LogFileUtils.logInfo(TAG, "currentProgress=" + mProgress + ", progressToAdd=" + progressToAdd);
@@ -559,13 +585,15 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     private void changeMode() {
         if (SCAN_MODE == AppConstants.SCAN_STANDING) {
+            resetScanStepUi();
+
             activityScanModeBinding.scanType1.setChildIcon(R.drawable.stand_front);
             activityScanModeBinding.scanType2.setChildIcon(R.drawable.side_scan_left_svg);
             activityScanModeBinding.scanType3.setChildIcon(R.drawable.stand_back);
             activityScanModeBinding.scanType4.setChildIcon(R.drawable.side_scan_right_svg);
 
 
-           // activityScanModeBinding.scanType2.setTitle(R.string.side_scan);
+            // activityScanModeBinding.scanType2.setTitle(R.string.side_scan);
             if (files != null) {
                 files.clear();
 
@@ -577,6 +605,8 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             retakeFiles = new ArrayList<>();
             getCamera().setPlaneMode(AbstractARCamera.PlaneMode.LOWEST);
         } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
+
+            resetScanStepUi();
             activityScanModeBinding.scanType1.setChildIcon(R.drawable.lying_front);
             activityScanModeBinding.scanType2.setChildIcon(R.drawable.lying_side);
             activityScanModeBinding.scanType3.setChildIcon(R.drawable.lying_back);
@@ -623,6 +653,21 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         animator.setInterpolator(new AccelerateDecelerateInterpolator());
         animator.setDuration(300);
         animator.start();
+    }
+
+    public void resetScanStepUi(){
+        if(step1){
+            activityScanModeBinding.scanType1.resetScanStep(R.string.help_front_view_2);
+        }
+        if(step2){
+            activityScanModeBinding.scanType2.resetScanStep(R.string.help_lateral_view);
+        }
+        if(step3){
+            activityScanModeBinding.scanType3.resetScanStep(R.string.help_back_view);
+        }
+        if(step4){
+            activityScanModeBinding.scanType4.resetScanStep(R.string.help_right_view);
+        }
     }
 
     private void resumeScan() {
@@ -783,7 +828,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     public void onPostColorDataReceived(Bitmap bitmap, int frameIndex, float poseScore, String poseCoordinates, String boundingBox) {
 
         long profile = System.currentTimeMillis();
-         // cameraCalibration = mCameraInstance.getCameraCalibration();
+        // cameraCalibration = mCameraInstance.getCameraCalibration();
         cameraCalibration = session.getArcoreCaliFile();
         boolean hasCameraCalibration;
         if (cameraCalibration != null && !cameraCalibration.contains("NaN")) {
@@ -866,7 +911,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
 
             float light = mCameraInstance.getLightIntensity();
-            String orientation ="horizontal_angle:"+ mCameraInstance.getOrientation()+", vertical_angel:"+String.format("%.0f", angle - 90);
+            String orientation;
+            if(SCAN_MODE == AppConstants.SCAN_LYING)
+            {
+                orientation ="orientation_angle:"+ mCameraInstance.getOrientation()+", app_angle:"+String.format("%.0f", angle);
+            }else {
+                orientation ="orientation_angle:"+ mCameraInstance.getOrientation()+", app_angle:"+String.format("%.0f", angle - 90);
+
+            }
             Log.i("ScanModeActivity", "this is value of orientation " + orientation);
             double child_distance = mCameraInstance.getTargetDistance();
             if (light > 1) {
@@ -925,7 +977,9 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         AbstractARCamera.LightConditions light = getCamera().getLightConditionState();
         boolean childDetected = getCamera().getPersonCount() == 1;
         float distance = mCameraInstance.getTargetDistance();
+
         runOnUiThread(() -> {
+            String formattedDistance = String.format("%.1f", distance);
 
             if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
                 getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OFF);
@@ -961,12 +1015,15 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
             // if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
             if (distance < 0.7) {
-                setFeedback("Too Close");
+              //  setFeedback("Too Close");
+                activityScanModeBinding.tvChildDistance.setText("Too Close");
 
             } else if (distance > 1.5f) {
-                setFeedback("Too Far");
+              //  setFeedback("Too Far");
+                activityScanModeBinding.tvChildDistance.setText("Too Far");
 
             } else {
+                activityScanModeBinding.tvChildDistance.setText(formattedDistance+" mts ");
                 setFeedback(null);
             }
             //   }
@@ -1312,7 +1369,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 accelerometerReading = event.values.clone();
                 break;
         }
-        calculateVerticalAngle(accelerometerReading);
+        if(SCAN_MODE==AppConstants.SCAN_STANDING) {
+            calculateVerticalAngle(accelerometerReading);
+        }else {
+            calculateLyingChildAngle(accelerometerReading);
+        }
 
     }
 
@@ -1335,13 +1396,32 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         if (System.currentTimeMillis() - lastUpdatedAngle > 500) {
             lastUpdatedAngle = System.currentTimeMillis();
+
             activityScanModeBinding.tvAngle.setText(String.format("%.0f", angle - 90));
-          //  activityScanModeBinding.tvAngle.setText(""+getCamera().getPersonCount());
+
+
         }
 
 
         // Display the angle (or use it for other purposes)
-        /*TextView angleTextView = findViewById(R.id.angleTextView); // Assuming a TextView to display the angle
-        angleTextView.setText(String.format("Vertical Angle: %.2f°", angle));*/
+        //*TextView angleTextView = findViewById(R.id.angleTextView); // Assuming a TextView to display the angle
+        // angleTextView.setText(String.format("Vertical Angle: %.2f°", angle));*//*
+    }
+
+    public void calculateLyingChildAngle(float[] accelerometerValues) {
+        float x = accelerometerValues[0];
+        float y = accelerometerValues[1];
+        float z = accelerometerValues[2];
+
+        // Calculate roll angle in radians
+        float pitch = (float) Math.atan2(-x, Math.sqrt(y * y + z * z));
+
+
+        if (System.currentTimeMillis() - lastUpdatedAngle > 500) {
+            lastUpdatedAngle = System.currentTimeMillis();
+
+
+            activityScanModeBinding.tvAngle.setText(String.format("%.0f", (float) Math.toDegrees(pitch)));
+        }
     }
 }

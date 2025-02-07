@@ -107,6 +107,9 @@ public class FileLogRepository {
         return database.fileLogDao().getAll();
     }
 
+    public List<FileLog> loadConsentFile(){
+        return database.fileLogDao().loadConsentFile();
+    }
     public List<FileLog> getArtifactsForMeasure(String measureId, int environment) {
         return database.fileLogDao().getArtifactsForMeasure(measureId, environment);
     }

@@ -260,12 +260,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     migrateEnvironmentColumns();
                     LogFileUtils.logInfo(TAG,"this is calling getWorkflows");
                     getWorkflows();
-                    LogFileUtils.logInfoOffline(TAG,"this is calling postWorkFlowsResult");
-                    postWorkFlowsResult();
                     LogFileUtils.logInfo(TAG,"this is calling postRemainingData");
                     postRemainingData();
                     LogFileUtils.logInfo(TAG,"this is calling getLocationIndia");
                     getLocationIndia();
+                    LogFileUtils.logInfoOffline(TAG,"this is calling postWorkFlowsResult");
+                    postWorkFlowsResult();
+
 
 
                     session.setSyncTimestamp(currentTimestamp);
@@ -387,11 +388,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         }
                     }
                     // String backendPersonId = person.getServerId();
-                    if (person== null && person.getServerId()==null) {
+                /*    if (person== null && person.getServerId()==null) {
                         continue;
-                    }
+                    }*/
 
-                    postConsentSheet(fileLog, person.getServerId());
+                    if(person!=null && person.getServerId()!=null) {
+                        postConsentSheet(fileLog, person.getServerId());
+                    }
                 }
             } catch (Exception e) {
                 currentTimestamp = prevTimestamp;
@@ -590,12 +593,15 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             person1.setBirthdayString(DataFormat.convertMilliSecondToBirthDay(person1.getBirthday()));
             person1.setQr_scanned(DataFormat.convertMilliSeconsToServerDate(person1.getCreated()));
             person1.setDevice_updated_at(DataFormat.convertMilliSeconsToServerDate(person1.getDevice_updated_at_timestamp()));
-            /*person1.setCenter_location_id(null);
+           /* person1.setCenter_location_id(null);
             person1.setLocation_id(null);*/
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(person1))).toString());
 
             onThreadChange(1,"post person data "+(new JSONObject(gson.toJson(person1))).toString());
             LogFileUtils.logInfo(TAG, "posting person " + person1.getQrcode());
+            if(person1 == null || person1.getQrcode()==null){
+                return;
+            }
 
             retrofit.create(ApiService.class).postPerson(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -942,7 +948,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(consent))).toString());
 
             onThreadChange(1,"post consent sheet");
-            LogFileUtils.logInfo(TAG, "posting consent " + fileLog.getPath());
+            LogFileUtils.logInfo(TAG, "posting consent " + fileLog.getPath()+"--"+personId+"--"+new JSONObject(gson.toJson(consent)));
             retrofit.create(ApiService.class).postConsent(session.getAuthTokenWithBearer(), body, personId).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Consent>() {
@@ -966,7 +972,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                         public void onError(@NonNull Throwable e) {
                             LogFileUtils.logError(TAG, "consent " + fileLog.getPath() + " posting failed " + e.getMessage());
                             try {
-                                LogFileUtils.logError(TAG,"consent request body "+new JSONObject(gson.toJson(consent)));
+                                LogFileUtils.logError(TAG,"consent request body "+new JSONObject(gson.toJson(consent))+"---"+personId);
                             } catch (JSONException jsonException) {
                                 jsonException.printStackTrace();
                             }
@@ -1341,8 +1347,14 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            LogFileUtils.logInfoOffline(TAG, "this is posting postAutoDetectResult failed" + e.getMessage());
+                            try
+                            {
+                                LogFileUtils.logInfoOffline(TAG, "this is posting postAutoDetectResult failed" + e.getMessage()+"\n"+(new JSONObject(gson.toJson(resultsData))).toString());
 
+                            }catch (Exception ex){
+                                LogFileUtils.logInfoOffline(TAG, "this is posting postAutoDetectResult failed" + ex.getMessage());
+
+                            }
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
                                 error401();
@@ -1437,7 +1449,14 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            LogFileUtils.logInfoOffline(TAG,"this is posting postAppHeightResult failed "+e.getMessage());
+                            try
+                            {
+                                LogFileUtils.logInfoOffline(TAG, "this is posting postAppHeightResult failed" + e.getMessage()+"\n"+(new JSONObject(gson.toJson(resultsData))).toString());
+
+                            }catch (Exception ex){
+                                LogFileUtils.logInfoOffline(TAG, "this is posting postAppHeightResult failed" + ex.getMessage());
+
+                            }
 
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
@@ -1534,7 +1553,14 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            LogFileUtils.logInfoOffline(TAG, "this is start postAppPoseScoreResult sync failed " + e.getMessage());
+                            try
+                            {
+                                LogFileUtils.logInfoOffline(TAG, "this is posting postAppPoseScoreResult failed" + e.getMessage()+"\n"+(new JSONObject(gson.toJson(resultsData))).toString());
+
+                            }catch (Exception ex){
+                                LogFileUtils.logInfoOffline(TAG, "this is posting postAppPoseScoreResult failed" + ex.getMessage());
+
+                            }
 
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
@@ -1626,7 +1652,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             resultsData.setResults(resultList);
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
-            Log.i(TAG,"this is light score body "+(new JSONObject(gson.toJson(resultsData))).toString());
+            //    Log.i(TAG,"this is light score body "+(new JSONObject(gson.toJson(resultsData))).toString());
             onThreadChange(1,"postChildLightScore");
             LogFileUtils.logInfoOffline(TAG, "this is postChildLightScore post ");
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
@@ -1652,7 +1678,14 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            LogFileUtils.logInfoOffline(TAG, "this is postChildLightScore posted failed " + e.getMessage());
+                            try
+                            {
+                                LogFileUtils.logInfoOffline(TAG, "this is posting postChildLightScore failed" + e.getMessage()+"\n"+(new JSONObject(gson.toJson(resultsData))).toString());
+
+                            }catch (Exception ex){
+                                LogFileUtils.logInfoOffline(TAG, "this is posting postChildLightScore failed" + ex.getMessage());
+
+                            }
 
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
@@ -1716,7 +1749,6 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             resultsData.setResults(resultList);
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
-            LogFileUtils.logInfoOffline(TAG,"this is post postChildDistance id");
 
             onThreadChange(1,"postChildDistance");
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
@@ -1742,7 +1774,14 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            LogFileUtils.logInfoOffline(TAG, "this is post postChildDistance posting failed " + e.getMessage());
+                            try
+                            {
+                                LogFileUtils.logInfoOffline(TAG, "this is posting postChildDistance failed" + e.getMessage()+"\n"+(new JSONObject(gson.toJson(resultsData))).toString());
+
+                            }catch (Exception ex){
+                                LogFileUtils.logInfoOffline(TAG, "this is posting postChildDistance failed" + ex.getMessage());
+
+                            }
 
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
@@ -1926,7 +1965,14 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            LogFileUtils.logInfoOffline(TAG, "this is postAppBoundingBoxResult sync posting failed " + e.getMessage());
+                            try
+                            {
+                                LogFileUtils.logInfoOffline(TAG, "this is posting postAppBoundingBoxResult failed" + e.getMessage()+"\n"+(new JSONObject(gson.toJson(resultsData))).toString());
+
+                            }catch (Exception ex){
+                                LogFileUtils.logInfoOffline(TAG, "this is posting postAppBoundingBoxResult failed" + ex.getMessage());
+
+                            }
 
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
@@ -2014,7 +2060,14 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            LogFileUtils.logInfoOffline(TAG, "this is start postAppOrientationResult sync posting failed " + e.getMessage());
+                            try
+                            {
+                                LogFileUtils.logInfoOffline(TAG, "this is posting postAppOrientationResult failed" + e.getMessage()+"\n"+(new JSONObject(gson.toJson(resultsData))).toString());
+
+                            }catch (Exception ex){
+                                LogFileUtils.logInfoOffline(TAG, "this is posting postAppOrientationResult failed" + ex.getMessage());
+
+                            }
 
                             if (NetworkUtils.isExpiredToken(e.getMessage())) {
                                 AuthenticationHandler.restoreToken(context);
