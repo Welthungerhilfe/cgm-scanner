@@ -2,6 +2,7 @@ trigger:
   - dump_consent_sheet
   - test-keystore
   - bug_offline_results
+  - bug_offline_results_1
 
 variables:
   - group: TEST_CGM  # Properly linked variable group
