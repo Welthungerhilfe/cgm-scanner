@@ -213,5 +213,11 @@ public class AppConstants {
     public static final int CGM_RST_MODE = 3;
 
 
+    public static int NO_SENSOR_MODE_SELECTED = 0;
+    public static int NO_SENSOR_SELECTED =1;
+
+    public static int SENSOR_SELECTED = 2;
+
+
 
 }

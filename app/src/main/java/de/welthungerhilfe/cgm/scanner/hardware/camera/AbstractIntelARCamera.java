@@ -43,6 +43,8 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
         void onDistancereceived(Float distance);
 
         void onChildVisible(boolean data);
+
+        void onSensorDisconnect();
     }
 
     public enum DepthPreviewMode { OFF, SOBEL, PLANE, CENTER, CENTER_LOW_POWER, FOCUS, FOCUS_LOW_POWER, CALIBRATION };
@@ -292,6 +294,13 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
             ((Camera2DataListener)listener).onAngleReceived(verticalAngle,horizontalAngle);
         }
 
+    }
+
+    protected void onSensorDisconnect(){
+        for (Object listener : mListeners) {
+
+            ((Camera2DataListener)listener).onSensorDisconnect();
+        }
     }
 
     public void addListener(Object listener) {

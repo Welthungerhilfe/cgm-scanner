@@ -20,11 +20,13 @@ import android.media.MediaActionSound;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -35,6 +37,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.widget.ImageViewCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -51,6 +54,7 @@ import com.google.mlkit.vision.pose.PoseDetector;
 import com.google.mlkit.vision.pose.PoseLandmark;
 import com.google.mlkit.vision.pose.accurate.AccuratePoseDetectorOptions;
 import com.intel.realsense.librealsense.DepthFrame;
+import com.intel.realsense.librealsense.DeviceListener;
 import com.microsoft.appcenter.crashes.Crashes;
 
 import java.io.File;
@@ -124,6 +128,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     int childCount = 0;
 
    float mOutlineAlpha = 0;
+
+   boolean finishCreateDataActivity = false;
 
     public void scanStanding() {
         SCAN_MODE = AppConstants.SCAN_STANDING;
@@ -489,6 +495,25 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        AbstractIntelARCamera.getRsContext().setDevicesChangedCallback(new DeviceListener() {
+            @Override
+            public void onDeviceAttach() {
+            showDisconnectionAlert("Intel RealSense Connected");
+            sessionManager.setIsSensorconnected(true);
+            }
+
+            @Override
+            public void onDeviceDetach() {
+               // if(sessionManager.getSensorMode()== AppConstants.SENSOR_SELECTED){
+                  //  finish();
+                sessionManager.setIsSensorconnected(false);
+
+                onSensorDisconnect();
+               // }
+            }
+        });
+
     }
 
     @Override
@@ -523,6 +548,11 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         if (scanStarted && !scanCompleted) {
             firebaseAnalytics.logEvent(FirebaseService.SCAN_CANCELED, null);
         }
+        if(finishCreateDataActivity) {
+            Intent intent = new Intent("com.example.REALSENSE_DISCONNECTED");
+            sendBroadcast(intent);
+        }
+
     }
 
     private void setupToolbar() {
@@ -1050,6 +1080,38 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
 
     }
+
+    @Override
+    public void onSensorDisconnect() {
+        showDisconnectionAlert("Intel RealSense Disconnected");
+    }
+
+    private void showDisconnectionAlert(String title) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_realsense_disconnect, null);
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+
+        TextView tvTitle = dialogView.findViewById(R.id.tvTitle);
+        TextView tvMessage = dialogView.findViewById(R.id.tvMessage);
+        Button btnOk = dialogView.findViewById(R.id.btnOk);
+
+        tvTitle.setText(title);
+        tvMessage.setText("Inter RealSense got disconnected");
+
+        AlertDialog alertDialog = builder.create();
+
+        btnOk.setOnClickListener(v -> {
+            alertDialog.dismiss();
+            finishCreateDataActivity = true;
+            finish(); // Destroy the activity
+        });
+
+        alertDialog.show();
+    }
+
+
 
     public void save(File file, DepthFrame depthFrame1,int frameIndex,int height, int width, byte[] byteArray) {
         try {

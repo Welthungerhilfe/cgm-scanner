@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorGreenTransparent"
+        android:orientation="vertical">
+        <androidx.appcompat.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@color/colorGreenLight">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/select_tool"
+                android:textColor="@color/colorWhite"
+                android:textSize="17sp"></TextView>
+        </androidx.appcompat.widget.Toolbar>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingLeft="17dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorBlack"
+                android:fontFamily="sans-serif"
+                android:layout_marginTop="24dp"
+                android:textSize="17sp"
+                android:text="Select  Scan device:"></TextView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_marginTop="5dp"
+                android:layout_height="1dp"
+                android:background="@color/colorGreyLight"
+                android:layout_marginRight="34dp"></View>
+
+            <TextView
+                android:id="@+id/text_external_sensor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorBlack"
+                android:layout_marginTop="32dp"
+                android:textSize="15sp"
+                android:layout_marginRight="34dp"
+                android:text="External Sensor Scan: Use an external sensor attached to your phone for child scanning"></TextView>
+            <TextView
+                android:id="@+id/text_no_sensor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorBlack"
+                android:layout_marginTop="32dp"
+                android:textSize="15sp"
+                android:layout_marginRight="34dp"
+                android:text="Phone Camera Scan: Use only your phone's camera to scan the child"></TextView>
+
+            <Button
+                android:id="@+id/bt_external_sensor"
+                android:layout_width="240dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="60dp"
+                android:background="@drawable/rounded_greycolor_greenborder"
+                android:text="External Sensor Scan"
+                android:textAllCaps="false"
+                android:textColor="@color/colorPrimary"></Button>
+
+            <Button
+                android:id="@+id/bt_no_sensor"
+                android:layout_width="240dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="44dp"
+                android:text="Phone Camera Scan"
+                android:textAllCaps="false"
+                android:textColor="@color/colorPrimary"
+                android:background="@drawable/rounded_greycolor_greenborder"></Button>
+
+            <Button
+                android:id="@+id/bt_next"
+                android:layout_width="180dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="60dp"
+                android:text="@string/next_tutorial"
+                android:textColor="@color/colorWhite"></Button>
+
+            <TextView
+                android:id="@+id/tv_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textColor="@color/colorBlack"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/cancel"
+                android:layout_marginTop="22dp"></TextView>
+        </LinearLayout>
+    </LinearLayout>
+</layout>

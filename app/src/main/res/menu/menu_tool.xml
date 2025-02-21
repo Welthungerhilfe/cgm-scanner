@@ -22,8 +22,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/actionQr"
         android:title="@string/menu_qr"
-        android:icon="@drawable/ic_report_icon"
+        android:icon="@drawable/sensor_white"
         app:showAsAction="always"
+        android:visible="false"
         />
 
     <item

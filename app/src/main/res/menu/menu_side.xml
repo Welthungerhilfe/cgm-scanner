@@ -26,13 +26,13 @@
             android:title="@string/menuScans" />
     </group>
 
-    <group>
+ <!--   <group>
         <item
             android:id="@+id/menuSelectMode"
             android:icon="@drawable/ic_select_goal"
             android:title="@string/select_tool"
             android:visible="false"/>
-    </group>
+    </group>-->
     <group>
         <item
             android:id="@+id/menuUploadManager"

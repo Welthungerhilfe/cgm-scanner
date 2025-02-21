@@ -55,6 +55,11 @@ public class SessionManager {
     private final String KEY_LAST_SYNC_DAILY_REPORT= "key_last_sync_daily_report";
     private final String KEY_ENVIRONMENT_MODE= "key_environment_mode";
     private final String KEY_SELECTED_MODE= "key_selected_mode";
+    private final String KEY_SENSOR_MODE= "key_sensor_mode";
+
+    private final String KEY_SENSOR_CONNECTED= "KEY_SENSOR_CONNECTED";
+
+
     private final String KEY_AR_CORE_CALI= "key_ar_core_cali";
 
     private final String KEY_LOCATION_INDIA_VERSION= "key_location_india_version";
@@ -270,6 +275,24 @@ public class SessionManager {
 
     public int getSelectedMode() {
         return pref.getInt(KEY_SELECTED_MODE, AppConstants.NO_MODE_SELECTED);
+    }
+
+    public void setSensorMode(int selectedMode) {
+        editor.putInt(KEY_SENSOR_MODE, selectedMode);
+        editor.commit();
+    }
+
+    public int getSensorMode() {
+        return pref.getInt(KEY_SENSOR_MODE, AppConstants.NO_SENSOR_MODE_SELECTED);
+    }
+
+    public void setIsSensorconnected(boolean isConnected) {
+        editor.putBoolean(KEY_SENSOR_CONNECTED, isConnected);
+        editor.commit();
+    }
+
+    public boolean isSensorConnected() {
+        return pref.getBoolean(KEY_SENSOR_CONNECTED,false);
     }
 
     public void setSessionError(int count) {

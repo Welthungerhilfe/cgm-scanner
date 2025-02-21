@@ -61,6 +61,15 @@
         android:fontFamily="sans-serif-condensed-medium"
         android:textColor="@color/colorWhite"
         android:layout_marginLeft="50dp"></TextView>
+
+    <ImageView
+        android:id="@+id/iv_realsense_icon"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="16dp"
+        android:src="@drawable/sensor_white" />
 </RelativeLayout>
 
             <com.google.android.material.tabs.TabLayout

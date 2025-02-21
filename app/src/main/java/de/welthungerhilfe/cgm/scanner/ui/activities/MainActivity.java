@@ -53,6 +53,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -101,6 +102,7 @@ import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.DateRangePickerDialog1;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.SelectModeDialog;
+import de.welthungerhilfe.cgm.scanner.ui.dialogs.SelectSensorDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.StatisticsDialogfragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.DeviceCheckFragment;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
@@ -116,7 +118,7 @@ import static de.welthungerhilfe.cgm.scanner.ui.activities.DeviceCheckActivity.K
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog1.Callback, SelectModeDialog.SetupmodeListner {
+public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.OnPersonDetail, DateRangePickerDialog1.Callback, SelectModeDialog.SetupmodeListner, SelectSensorDialog.SensorSelectionListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final long REQUEST_DEVICE_CHECK_TIME = 1000 * 3600 * 48; //48h
@@ -131,6 +133,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
 
     public void createData(View view) {
+        if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
+            if(!session.isSensorConnected()){
+                Toast.makeText(MainActivity.this,"Please connect sensor...",Toast.LENGTH_SHORT).show();
+
+                return;
+            }
+        }
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             runnable = () -> startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.CONSENT_CAPTURED_REQUEST));
             addResultListener(PERMISSION_CAMERA, listener);
@@ -173,7 +182,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         }
 
         observePersionList();
-        if(session.getSelectedMode() == AppConstants.NO_MODE_SELECTED){
+
+        if(session.getSensorMode() == AppConstants.NO_SENSOR_MODE_SELECTED) {
+            SelectSensorDialog selectSensorDialog = new SelectSensorDialog();
+            selectSensorDialog.show(getSupportFragmentManager(),"SelectSensorDialog");
+        }
+      /*  if(session.getSelectedMode() == AppConstants.NO_MODE_SELECTED){
             if(session.getEnvironmentMode() == AppConstants.CGM_RST_MODE){
                 SelectModeDialog selectModeDialog = new SelectModeDialog();
                 selectModeDialog.show(getSupportFragmentManager(),"SelectModeDialog");
@@ -189,7 +203,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 session.setEnvironmentMode(AppConstants.CGM_MODE);
             }
 
-        }
+        }*/
 
         setupSidemenu();
         setupActionBar();
@@ -221,6 +235,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         activityMainBinding.rltAddChild.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
+                    if(!session.isSensorConnected()){
+                        Toast.makeText(MainActivity.this,"Please connect sensor...",Toast.LENGTH_SHORT).show();
+
+                        return;
+                    }
+                }
                 if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     runnable = () -> startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
                     addResultListener(PERMISSION_CAMERA, listener);
@@ -262,8 +283,19 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                     String serialNumber = null;
                     try (Device device = dl.createDevice(0)) {
                         // Get the serial number of the device
+                        sessionManager.setIsSensorconnected(true);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                 activityMainBinding.ivRealsenseIcon.setVisibility(View.VISIBLE);
+                                 activityMainBinding.ivRealsenseIcon.setImageResource(R.drawable.sensor_white);
+                            }
+                        });
 
-                        Toast.makeText(MainActivity.this,"Realsense camera detected "+device.getInfo(CameraInfo.FIRMWARE_VERSION),Toast.LENGTH_LONG).show();
+                        sessionManager.setSensorMode(AppConstants.SENSOR_SELECTED);
+                        showConnectionAlert(device.getInfo(CameraInfo.FIRMWARE_VERSION));
+
+                    //    Toast.makeText(MainActivity.this,"Realsense camera detected "+,Toast.LENGTH_LONG).show();
                         // Print or display the serial number
                     }
 
@@ -280,6 +312,14 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         @Override
         public void onDeviceDetach() {
+            sessionManager.setIsSensorconnected(false);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    activityMainBinding.ivRealsenseIcon.setImageDrawable(getDrawable(R.drawable.sensor_red));
+                }
+            });
+
 
         }
     };
@@ -311,6 +351,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     private void setupSidemenu() {
         activityMainBinding.navMenu.setNavigationItemSelectedListener(menuItem -> {
             switch (menuItem.getItemId()) {
+
+                case R.id.menuScans:
+                        SelectSensorDialog selectSensorDialog = new SelectSensorDialog();
+                        selectSensorDialog.show(getSupportFragmentManager(),"SelectSensorDialog");
+
+                    break;
                 case R.id.menuUploadManager:
                     startActivity(new Intent(MainActivity.this, UploadManagerActivity.class));
                     break;
@@ -334,12 +380,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 case R.id.menuQuitStdTest:
                     showConfirmDialog(R.string.std_test_deactivate, STD_TEST_DEACTIVE);
                     break;
-                case R.id.menuSelectMode:
+               /* case R.id.menuSelectMode:
                     if (session.getStdTestQrCode() == null) {
                         SelectModeDialog selectModeDialog = new SelectModeDialog();
                         selectModeDialog.show(getSupportFragmentManager(),"SelectModeDialog");
                         break;
-                    }
+                    }*/
 
 
 
@@ -600,6 +646,14 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     @Override
     public void onPersonDetail(Person person) {
+
+        if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
+            if(!session.isSensorConnected()){
+                Toast.makeText(MainActivity.this,"Please connect sensor...",Toast.LENGTH_SHORT).show();
+
+                return;
+            }
+        }
         Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
         intent.putExtra(AppConstants.EXTRA_QR, person.getQrcode());
         startActivity(intent);
@@ -618,7 +672,23 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         SyncingWorkManager.startSyncingWithWorkManager(getApplicationContext());
         deviceCheckPopup();
         checkIfStdTestActive();
-        setUpSelectedMode();
+      //  setUpSelectedMode();
+        if(session.getSensorMode()==AppConstants.NO_SENSOR_SELECTED){
+           activityMainBinding.ivRealsenseIcon.setVisibility(View.GONE);
+
+        }
+        else if(session.getSensorMode()==AppConstants.SENSOR_SELECTED){
+            activityMainBinding.ivRealsenseIcon.setVisibility(View.VISIBLE);
+
+
+        }
+        if(session.isSensorConnected()){
+            activityMainBinding.ivRealsenseIcon.setImageResource(R.drawable.sensor_white);
+        }
+        else
+        {
+            activityMainBinding.ivRealsenseIcon.setImageResource(R.drawable.sensor_red);
+        }
     }
 
 
@@ -714,7 +784,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 }).show();
     }
 
-    public void setUpSelectedMode(){
+
+
+   /* public void setUpSelectedMode(){
         Log.i(TAG,"this is inside setupSelectedmode");
         if(session.getSelectedMode() == AppConstants.NO_MODE_SELECTED){
             return;
@@ -738,16 +810,58 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         }
             activityMainBinding.navMenu.getMenu().findItem(R.id.menuScans).setTitle(title);
         actionBar.setTitle(title);
-    }
+    }*/
 
     @Override
     public void changeSetupMode() {
-        Intent intent = getIntent();
+        /*Intent intent = getIntent();
         overridePendingTransition(0, 0);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         finish();
         overridePendingTransition(0, 0);
         startActivity(intent);
+*/
+    }
 
+    @Override
+    public void changeSelectedSensor() {
+        if(session.getSensorMode()==AppConstants.NO_SENSOR_SELECTED){
+            Toast.makeText(MainActivity.this,"NO SENSOR",Toast.LENGTH_LONG).show();
+            activityMainBinding.ivRealsenseIcon.setVisibility(View.GONE);
+
+        }
+        else if(session.getSensorMode()==AppConstants.SENSOR_SELECTED){
+            Toast.makeText(MainActivity.this,"SENSOR SELSECTED",Toast.LENGTH_LONG).show();
+            activityMainBinding.ivRealsenseIcon.setVisibility(View.VISIBLE);
+
+
+        }
+    }
+
+    private void showConnectionAlert(String version) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_realsense_disconnect, null);
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+
+        TextView tvTitle = dialogView.findViewById(R.id.tvTitle);
+        TextView tvMessage = dialogView.findViewById(R.id.tvMessage);
+        Button btnOk = dialogView.findViewById(R.id.btnOk);
+
+        tvTitle.setText("Intel RealSense Connected "+version);
+        tvMessage.setText("Inter RealSense got disconnected");
+
+        AlertDialog alertDialog = builder.create();
+
+        btnOk.setOnClickListener(v -> {
+            //activityMainBinding.ivRealsenseIcon.setVisibility(View.VISIBLE);
+           // activityMainBinding.ivRealsenseIcon.setImageResource(R.drawable.sensor_white);
+            alertDialog.dismiss();
+
+
+        });
+
+        alertDialog.show();
     }
 }

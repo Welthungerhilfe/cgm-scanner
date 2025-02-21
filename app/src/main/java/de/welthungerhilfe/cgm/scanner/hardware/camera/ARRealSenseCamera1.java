@@ -81,7 +81,7 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
       //  RsContext.init(mActivity);
 
         mRsContext = AbstractIntelARCamera.getRsContext();
-        //mRsContext.setDevicesChangedCallback(mListener);
+        mRsContext.setDevicesChangedCallback(mListener);
         mPipeline = new Pipeline(mRsContext);
 
         try(DeviceList dl = mRsContext.queryDevices()){
@@ -348,7 +348,8 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
         @Override
         public void onDeviceDetach() {
             // showConnectLabel(true);
-            stop();
+            onSensorDisconnect();
+           // stop();
         }
     };
 
@@ -361,6 +362,7 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
             mPipeline.stop();
             stopStreaming();
             Log.d(TAG, "streaming stopped successfully");
+            //mActivity.finish();
         } catch (Exception e) {
             Log.d(TAG, "failed to stop streaming");
         }

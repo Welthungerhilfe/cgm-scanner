@@ -56,6 +56,14 @@
                             app:iconifiedByDefault="false" />
 
                     </androidx.appcompat.widget.Toolbar>
+                    <ImageView
+                        android:id="@+id/iv_realsense_icon"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_gravity="right|center_vertical"
+                        android:layout_marginRight="60dp"
+                        android:visibility="gone"
+                        android:src="@drawable/sensor_red" />
 
                 </FrameLayout>
 
@@ -199,6 +207,7 @@
             android:fitsSystemWindows="false"
             app:headerLayout="@layout/header_sidemenu"
             app:menu="@menu/menu_side"
+            android:visibility="visible"
             />
 
     </androidx.drawerlayout.widget.DrawerLayout>

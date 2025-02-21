@@ -24,19 +24,26 @@ import android.Manifest;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.ActionBar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationAvailability;
@@ -44,6 +51,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.intel.realsense.librealsense.DeviceListener;
 import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 
 import java.util.List;
@@ -58,6 +66,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModel;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelProvideFactory;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.GPS;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractIntelARCamera;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.GrowthDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasuresDataFragment;
@@ -139,8 +148,58 @@ public class CreateDataActivity extends BaseActivity {
 
         };
 
+        AbstractIntelARCamera.getRsContext().setDevicesChangedCallback(new DeviceListener() {
+            @Override
+            public void onDeviceAttach() {
+                sessionManager.setIsSensorconnected(true);
+                showDisconnectionAlert("Intel RealSense Connected");
 
+            }
+
+            @Override
+            public void onDeviceDetach() {
+                sessionManager.setIsSensorconnected(false);
+                if(sessionManager.getSensorMode()== AppConstants.SENSOR_SELECTED){
+                    showDisconnectionAlert("Intel RealSense Disconnected");
+                }
+            }
+        });
     }
+
+    private void showDisconnectionAlert(String title) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_realsense_disconnect, null);
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+
+        TextView tvTitle = dialogView.findViewById(R.id.tvTitle);
+        TextView tvMessage = dialogView.findViewById(R.id.tvMessage);
+        Button btnOk = dialogView.findViewById(R.id.btnOk);
+
+        tvTitle.setText(title);
+        tvMessage.setText("Inter RealSense got disconnected");
+
+        AlertDialog alertDialog = builder.create();
+
+        btnOk.setOnClickListener(v -> {
+            alertDialog.dismiss();
+
+            finish(); // Destroy the activity
+        });
+
+        alertDialog.show();
+    }
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            finish();
+            if ("com.example.REALSENSE_DISCONNECTED".equals(intent.getAction())) {
+                finish(); // Closes Activity C when RealSense disconnects
+            }
+        }
+    };
 
     private void setupActionBar() {
         setSupportActionBar(activityCreateBinding.toolbar);
@@ -246,6 +305,9 @@ public class CreateDataActivity extends BaseActivity {
             requestingLocationUpdates = true;
             startLocationUpdates();
         }
+
+        registerReceiver(receiver, new IntentFilter("com.example.REALSENSE_DISCONNECTED"));
+
     }
 
     private void startLocationUpdates() {
@@ -270,6 +332,7 @@ public class CreateDataActivity extends BaseActivity {
     protected void onPause() {
         super.onPause();
         stopLocationUpdates();
+        unregisterReceiver(receiver);
     }
 
     private void stopLocationUpdates() {
@@ -277,4 +340,19 @@ public class CreateDataActivity extends BaseActivity {
             requestingLocationUpdates = false;
             fusedLocationClient.removeLocationUpdates(locationCallback);
         }
-    }}
+    }
+
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+    }
+}
