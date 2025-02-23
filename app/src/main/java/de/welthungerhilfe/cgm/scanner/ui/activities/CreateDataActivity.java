@@ -152,6 +152,7 @@ public class CreateDataActivity extends BaseActivity {
             @Override
             public void onDeviceAttach() {
                 sessionManager.setIsSensorconnected(true);
+                sessionManager.setSensorMode(AppConstants.SENSOR_SELECTED);
                 showDisconnectionAlert("Intel RealSense Connected");
 
             }

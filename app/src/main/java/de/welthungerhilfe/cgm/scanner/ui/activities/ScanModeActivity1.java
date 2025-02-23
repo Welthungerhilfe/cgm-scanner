@@ -1084,6 +1084,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     @Override
     public void onSensorDisconnect() {
         showDisconnectionAlert("Intel RealSense Disconnected");
+        session.setIsSensorconnected(false);
     }
 
     private void showDisconnectionAlert(String title) {

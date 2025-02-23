@@ -67,7 +67,9 @@ import com.intel.realsense.librealsense.CameraInfo;
 import com.intel.realsense.librealsense.Device;
 import com.intel.realsense.librealsense.DeviceList;
 import com.intel.realsense.librealsense.DeviceListener;
+import com.intel.realsense.librealsense.Option;
 import com.intel.realsense.librealsense.RsContext;
+import com.intel.realsense.librealsense.Sensor;
 import com.microsoft.appcenter.analytics.Analytics;
 import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 import com.orhanobut.dialogplus.DialogPlus;
@@ -267,6 +269,21 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
 
         LogFileUtils.logInfoOffline("MainActivity","this is test message");
+        try (DeviceList dl = AbstractIntelARCamera.getRsContext().queryDevices()) {
+            if (dl.getDeviceCount() > 0) {
+                String serialNumber = null;
+
+                Toast.makeText(MainActivity.this, "detected ", Toast.LENGTH_LONG).show();
+
+                // Toast.makeText(getActivity(), "Realsense camera serial no:- "+serialNumber, Toast.LENGTH_LONG).show();
+
+            }else {
+                Toast.makeText(MainActivity.this, "Realsense camera not detected ", Toast.LENGTH_LONG).show();
+
+            }
+        }catch (Exception e){
+
+        }
 
 
     }

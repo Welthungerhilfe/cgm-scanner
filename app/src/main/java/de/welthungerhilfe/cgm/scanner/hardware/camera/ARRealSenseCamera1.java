@@ -342,6 +342,7 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
     private DeviceListener mListener = new DeviceListener() {
         @Override
         public void onDeviceAttach() {
+
             // showConnectLabel(false);
         }
 
