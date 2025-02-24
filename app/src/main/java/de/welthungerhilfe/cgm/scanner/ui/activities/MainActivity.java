@@ -135,13 +135,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
 
     public void createData(View view) {
-        /*if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
+        if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
             if(!session.isSensorConnected()){
                 Toast.makeText(MainActivity.this,"Please connect sensor...",Toast.LENGTH_SHORT).show();
 
                 return;
             }
-        }*/
+        }
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             runnable = () -> startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.CONSENT_CAPTURED_REQUEST));
             addResultListener(PERMISSION_CAMERA, listener);
@@ -272,7 +272,23 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             if (dl.getDeviceCount() > 0) {
                 String serialNumber = null;
 
-                Toast.makeText(MainActivity.this, "detected ", Toast.LENGTH_LONG).show();
+                try (Device device = dl.createDevice(0)) {
+                    // Get the serial number of the device
+                    sessionManager.setIsSensorconnected(true);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            activityMainBinding.ivRealsenseIcon.setVisibility(View.VISIBLE);
+                            activityMainBinding.ivRealsenseIcon.setImageResource(R.drawable.sensor_white);
+                        }
+                    });
+
+                    sessionManager.setSensorMode(AppConstants.SENSOR_SELECTED);
+                    showConnectionAlert(device.getInfo(CameraInfo.FIRMWARE_VERSION));
+
+
+                }
+
 
                 // Toast.makeText(getActivity(), "Realsense camera serial no:- "+serialNumber, Toast.LENGTH_LONG).show();
 
@@ -296,9 +312,21 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 try (DeviceList dl = AbstractIntelARCamera.getRsContext().queryDevices()) {
                     if (dl.getDeviceCount() > 0) {
                         String serialNumber = null;
+
+
                         try (Device device = dl.createDevice(0)) {
                             // Get the serial number of the device
-                            serialNumber = device.getInfo(CameraInfo.SERIAL_NUMBER);
+                            sessionManager.setIsSensorconnected(true);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    activityMainBinding.ivRealsenseIcon.setVisibility(View.VISIBLE);
+                                    activityMainBinding.ivRealsenseIcon.setImageResource(R.drawable.sensor_white);
+                                }
+                            });
+
+                            sessionManager.setSensorMode(AppConstants.SENSOR_SELECTED);
+                            showConnectionAlert(device.getInfo(CameraInfo.FIRMWARE_VERSION));
 
 
                         }
@@ -351,6 +379,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
 
                 }else {
+                    activityMainBinding.ivRealsenseIcon.setImageDrawable(getDrawable(R.drawable.sensor_red));
 
 
                 }
@@ -449,7 +478,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     public void logout() {
         session.setSigned(false);
-        session.setSelectedMode(AppConstants.NO_MODE_SELECTED);
+        session.setSelectedMode(AppConstants.CGM_MODE);
         session.setCurrentLogFilePath(null);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (WifiStateChangereceiverHelperService.isServiceRunning) {
@@ -702,13 +731,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     @Override
     public void onPersonDetail(Person person) {
 
-      /*  if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
+        if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
             if(!session.isSensorConnected()){
                 Toast.makeText(MainActivity.this,"Please connect sensor...",Toast.LENGTH_SHORT).show();
 
                 return;
             }
-        }*/
+        }
         Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
         intent.putExtra(AppConstants.EXTRA_QR, person.getQrcode());
         startActivity(intent);

@@ -274,7 +274,7 @@ public class SessionManager {
     }
 
     public int getSelectedMode() {
-        return pref.getInt(KEY_SELECTED_MODE, AppConstants.NO_MODE_SELECTED);
+        return pref.getInt(KEY_SELECTED_MODE, AppConstants.CGM_MODE);
     }
 
     public void setSensorMode(int selectedMode) {
