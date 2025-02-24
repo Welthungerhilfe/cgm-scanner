@@ -148,23 +148,7 @@ public class CreateDataActivity extends BaseActivity {
 
         };
 
-        AbstractIntelARCamera.getRsContext().setDevicesChangedCallback(new DeviceListener() {
-            @Override
-            public void onDeviceAttach() {
-                sessionManager.setIsSensorconnected(true);
-                sessionManager.setSensorMode(AppConstants.SENSOR_SELECTED);
-                showDisconnectionAlert("Intel RealSense Connected");
 
-            }
-
-            @Override
-            public void onDeviceDetach() {
-                sessionManager.setIsSensorconnected(false);
-                if(sessionManager.getSensorMode()== AppConstants.SENSOR_SELECTED){
-                    showDisconnectionAlert("Intel RealSense Disconnected");
-                }
-            }
-        });
     }
 
     private void showDisconnectionAlert(String title) {
@@ -307,6 +291,24 @@ public class CreateDataActivity extends BaseActivity {
             startLocationUpdates();
         }
 
+        AbstractIntelARCamera.getRsContext().setDevicesChangedCallback(new DeviceListener() {
+            @Override
+            public void onDeviceAttach() {
+                sessionManager.setIsSensorconnected(true);
+                sessionManager.setSensorMode(AppConstants.SENSOR_SELECTED);
+                showDisconnectionAlert("Intel RealSense Connected");
+
+            }
+
+            @Override
+            public void onDeviceDetach() {
+                sessionManager.setIsSensorconnected(false);
+                if(sessionManager.getSensorMode()== AppConstants.SENSOR_SELECTED){
+                    showDisconnectionAlert("Intel RealSense Disconnected");
+                }
+            }
+        });
+
         registerReceiver(receiver, new IntentFilter("com.example.REALSENSE_DISCONNECTED"));
 
     }
@@ -333,6 +335,7 @@ public class CreateDataActivity extends BaseActivity {
     protected void onPause() {
         super.onPause();
         stopLocationUpdates();
+        AbstractIntelARCamera.getRsContext().removeDevicesChangedCallback();
         unregisterReceiver(receiver);
     }
 

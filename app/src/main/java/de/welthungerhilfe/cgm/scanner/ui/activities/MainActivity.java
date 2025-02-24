@@ -135,13 +135,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
 
     public void createData(View view) {
-        if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
+        /*if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
             if(!session.isSensorConnected()){
                 Toast.makeText(MainActivity.this,"Please connect sensor...",Toast.LENGTH_SHORT).show();
 
                 return;
             }
-        }
+        }*/
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             runnable = () -> startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.CONSENT_CAPTURED_REQUEST));
             addResultListener(PERMISSION_CAMERA, listener);
@@ -267,7 +267,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
 
 
-
         LogFileUtils.logInfoOffline("MainActivity","this is test message");
         try (DeviceList dl = AbstractIntelARCamera.getRsContext().queryDevices()) {
             if (dl.getDeviceCount() > 0) {
@@ -278,13 +277,46 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 // Toast.makeText(getActivity(), "Realsense camera serial no:- "+serialNumber, Toast.LENGTH_LONG).show();
 
             }else {
+                sessionManager.setIsSensorconnected(false);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        activityMainBinding.ivRealsenseIcon.setImageDrawable(getDrawable(R.drawable.sensor_red));
+                    }
+                });
                 Toast.makeText(MainActivity.this, "Realsense camera not detected ", Toast.LENGTH_LONG).show();
 
             }
         }catch (Exception e){
 
         }
+        activityMainBinding.ivRealsenseIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try (DeviceList dl = AbstractIntelARCamera.getRsContext().queryDevices()) {
+                    if (dl.getDeviceCount() > 0) {
+                        String serialNumber = null;
+                        try (Device device = dl.createDevice(0)) {
+                            // Get the serial number of the device
+                            serialNumber = device.getInfo(CameraInfo.SERIAL_NUMBER);
 
+
+                        }
+
+
+                        Toast.makeText(MainActivity.this, "detected ", Toast.LENGTH_LONG).show();
+
+                        // Toast.makeText(getActivity(), "Realsense camera serial no:- "+serialNumber, Toast.LENGTH_LONG).show();
+
+                    }else {
+                        Toast.makeText(MainActivity.this, "Realsense camera not detected ", Toast.LENGTH_LONG).show();
+
+                    }
+                }catch (Exception e){
+
+                }
+            }
+        });
 
     }
 
@@ -586,6 +618,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+       // AbstractIntelARCamera.getRsContext().removeDevicesChangedCallback();
+    }
+
+    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
@@ -664,13 +702,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     @Override
     public void onPersonDetail(Person person) {
 
-        if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
+      /*  if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
             if(!session.isSensorConnected()){
                 Toast.makeText(MainActivity.this,"Please connect sensor...",Toast.LENGTH_SHORT).show();
 
                 return;
             }
-        }
+        }*/
         Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
         intent.putExtra(AppConstants.EXTRA_QR, person.getQrcode());
         startActivity(intent);
@@ -706,6 +744,8 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         {
             activityMainBinding.ivRealsenseIcon.setImageResource(R.drawable.sensor_red);
         }
+        AbstractIntelARCamera.getRsContext().setDevicesChangedCallback(mListener);
+
     }
 
 

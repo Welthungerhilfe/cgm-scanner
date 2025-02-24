@@ -66,6 +66,7 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
             mIsStreaming = false;
             stopStreaming();
             mPipeline.stop();
+            AbstractIntelARCamera.getRsContext().removeDevicesChangedCallback();
             Log.d(TAG, "streaming stopped successfully");
         }  catch (Exception e) {
             Log.d(TAG, "failed to stop streaming");
