@@ -135,13 +135,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
 
     public void createData(View view) {
-        if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
+   /*     if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
             if(!session.isSensorConnected()){
                 Toast.makeText(MainActivity.this,"Please connect sensor...",Toast.LENGTH_SHORT).show();
 
                 return;
             }
-        }
+        }*/
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             runnable = () -> startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.CONSENT_CAPTURED_REQUEST));
             addResultListener(PERMISSION_CAMERA, listener);
@@ -237,13 +237,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         activityMainBinding.rltAddChild.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
+                /*if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
                     if(!session.isSensorConnected()){
                         Toast.makeText(MainActivity.this,"Please connect sensor...",Toast.LENGTH_SHORT).show();
 
                         return;
                     }
-                }
+                }*/
                 if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     runnable = () -> startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
                     addResultListener(PERMISSION_CAMERA, listener);
@@ -731,13 +731,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     @Override
     public void onPersonDetail(Person person) {
 
-        if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
+      /*  if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
             if(!session.isSensorConnected()){
                 Toast.makeText(MainActivity.this,"Please connect sensor...",Toast.LENGTH_SHORT).show();
 
                 return;
             }
-        }
+        }*/
         Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
         intent.putExtra(AppConstants.EXTRA_QR, person.getQrcode());
         startActivity(intent);
