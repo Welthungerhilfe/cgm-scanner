@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.microsoft.appcenter.analytics.Analytics;
+//import com.microsoft.appcenter.analytics//.Analytics;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -129,7 +129,7 @@ public class LogFileUtils {
         } else {
             properties.put("Msg", msg + " " + sessionManager.getUserEmail() + " - " + sessionManager.getEnvironment());
         }
-        Analytics.trackEvent(TAG, properties);
+    //    Analytics.trackEvent(TAG, properties);
     }
 
     static class WriteToLogFileAsynck extends AsyncTask<String, Void, Void> {

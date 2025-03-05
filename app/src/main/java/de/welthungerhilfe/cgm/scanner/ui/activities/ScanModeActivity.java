@@ -65,7 +65,7 @@ import com.google.mlkit.vision.pose.PoseDetection;
 import com.google.mlkit.vision.pose.PoseDetector;
 import com.google.mlkit.vision.pose.PoseLandmark;
 import com.google.mlkit.vision.pose.accurate.AccuratePoseDetectorOptions;
-import com.microsoft.appcenter.crashes.Crashes;
+//import com.microsoft.appcenter.crashes.Crashes;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -378,7 +378,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             LogFileUtils.logException(throwable, "Scanemode oncreate");
-            Crashes.trackError(throwable);
+            //Crashes.trackError(throwable);
             finish();
         });
         isStanding = getIntent().getBooleanExtra(AppConstants.EXTRA_SCAN_MODE,true);
@@ -1263,9 +1263,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
     public void createPose(Bitmap bitmap, int frameIndex) {
         Log.i(TAG, "this is inside point 0");
-        LogFileUtils.logInfoOffline(TAG,"this is rgb last frame 0 "+frameIndex);
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {
-            LogFileUtils.logInfoOffline(TAG,"this is rgb last frame 1"+frameIndex);
 
             Log.i(TAG, "this is inside point 1");
             if (bitmap == null) {

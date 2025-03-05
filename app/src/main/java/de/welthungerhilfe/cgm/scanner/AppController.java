@@ -26,9 +26,13 @@ import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.Settings;
 
-import com.microsoft.appcenter.AppCenter;
+/*import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
-import com.microsoft.appcenter.crashes.Crashes;
+import com.microsoft.appcenter.crashes.Crashes;*/
+
+import com.google.android.libraries.intelligence.acceleration.Analytics;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,9 +55,11 @@ public class AppController extends Application {
         overrideFont(getApplicationContext(), "SERIF", "roboto.ttf");
 
         mInstance = this;
+        FirebaseApp.initializeApp(this);
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true);
 
-        AppCenter.start(this, AppConstants.APP_CENTER_KEY,
-                Analytics.class, Crashes.class);
+      /*  AppCenter.start(this, AppConstants.APP_CENTER_KEY,
+                Analytics.class, Crashes.class);*/
 
     }
 

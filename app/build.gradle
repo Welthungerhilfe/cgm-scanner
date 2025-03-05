@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+
 }
 
 android {
@@ -116,8 +117,15 @@ dependencies {
 
     // Network
     def appCenterSdkVersion = '4.1.0'
-    implementation "com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}"
-    implementation "com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}"
+/*    implementation "com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}"
+    implementation "com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}"*/
+
+    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+
+    // Add the dependencies for the Crashlytics and Analytics libraries
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-crashlytics")
+    implementation("com.google.firebase:firebase-analytics")
     implementation 'androidx.room:room-runtime:2.2.5' //database syntax helper
     implementation 'com.android.volley:volley:1.2.1' //Authentication answer parser
     implementation 'com.microsoft.identity.client:msal:2.0.5' //Microsoft authentication
@@ -166,10 +174,7 @@ dependencies {
 
 
 
-    //Firebase
-    implementation platform('com.google.firebase:firebase-bom:28.4.2')// When using the BoM, you don't specify versions in Firebase library dependencies
-    implementation 'com.google.firebase:firebase-analytics' // Declare the dependency for the Firebase SDK for Google Analytics
-
 
 }
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'

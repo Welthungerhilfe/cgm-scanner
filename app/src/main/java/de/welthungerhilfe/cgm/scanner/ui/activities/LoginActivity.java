@@ -82,6 +82,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     String sandbox[] ={"Sandbox"};
 
     String ethopia[]={"Ethopia"};
+
+    String syria[] ={"Syria"};
     String organization[] = null;
 
 
@@ -93,7 +95,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         Bundle bundle = new Bundle();
         bundle.putString("backend_selected",selectedBackend);
         firebaseAnalytics.logEvent("signin_started",bundle);
-
+/*
         if (BuildConfig.DEBUG) {
             if (session.getEnvironment() == AppConstants.ENV_UNKNOWN) {
                 Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
@@ -103,7 +105,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             LogFileUtils.startSession(LoginActivity.this, session);
 
             startApp();
-        } else {
+        } else {*/
             if (session.getEnvironment() != AppConstants.ENV_UNKNOWN) {
                 Log.d(TAG, "Login into " + SyncingWorkManager.getAPI());
                 activityLoginBinding.layoutLogin.setVisibility(View.GONE);
@@ -115,7 +117,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             } else {
                 Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
             }
-        }
+      //  }
     }
 
     private SessionManager session;
@@ -139,7 +141,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                country =new String[]{"Select Country","India","Malawi","Sierra Leone","Namibia","Nepal","Uganda","Bangladesh","Demo/Test","Sandbox"};
             }
             else {
-                country =new String[]{"Select Country","India","Malawi","Sierra Leone","Namibia","Nepal","Uganda","Bangladesh","Ethopia","Demo/Test"};
+                country =new String[]{"Select Country","Syria","India","Malawi","Sierra Leone","Namibia","Nepal","Uganda","Bangladesh","Ethopia","Demo/Test"};
 
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -208,6 +210,10 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                     case "Ethopia":
                         selectedCountry = country[i];
                         organization = ethopia;
+                        break;
+                    case "Syria":
+                        selectedCountry=country[i];
+                        organization=syria;
                         break;
 
                     default:
@@ -279,12 +285,20 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                         selectedBackend = "in_bmz";
                         break;
 
+                    case "Syria":
+                        selectedCountry = country[i];
+                        selectedOrganization = "Syria";
+                        session.setEnvironment(AppConstants.ENV_SYRIA);
+                        session.setEnvironmentMode(AppConstants.CGM_MODE);
+                        selectedBackend = "in_bmz";
+                        break;
+
                     case "Malawi":
                         selectedCountry = country[i];
                         selectedOrganization = "Malawi";
                         session.setEnvironment(AppConstants.ENV_MALAWI);
                         session.setEnvironmentMode(AppConstants.CGM_RST_MODE);
-                        selectedBackend = "malawi";
+                        selectedBackend = "syria";
                         break;
 
                     case "Sierra Leone":

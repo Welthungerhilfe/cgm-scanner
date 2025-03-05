@@ -74,6 +74,10 @@
         tools:replace="android:allowBackup">
 
         <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="true" />
+
+        <meta-data
             android:name="com.google.ar.core"
             android:value="${arcoreValue}" />
         <meta-data
@@ -93,9 +97,7 @@
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
             android:value="barcode" />
 
-        <meta-data
-            android:name="firebase_crashlytics_collection_enabled"
-            android:value="false" />
+
 
         <activity android:name=".ui.activities.BaseActivity" />
 
@@ -189,7 +191,7 @@
                 -->
                 <data
                     android:host="de.welthungerhilfe.cgm.scanner"
-                    android:path="/{OAUTH_PATH}"
+                    android:path="/1yf0pLcYkjlLIHk4lnmTM2N7D2w="
                     android:scheme="msauth" />
             </intent-filter>
         </activity>

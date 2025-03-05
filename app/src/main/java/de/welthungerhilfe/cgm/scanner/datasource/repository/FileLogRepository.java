@@ -18,9 +18,12 @@
  */
 package de.welthungerhilfe.cgm.scanner.datasource.repository;
 
+import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_FILE_LOG;
+
 import android.annotation.SuppressLint;
 
 import androidx.lifecycle.LiveData;
+import androidx.room.Query;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -152,5 +155,10 @@ public class FileLogRepository {
 
     public List<FileLog> loadChildLightScoreFileLog(int environment) {
         return database.fileLogDao().loadChildLightScoreFileLog(environment);
+    }
+
+
+    public LiveData<Long> getDistanceCount(int environment){
+        return database.fileLogDao().getDistanceCount(environment);
     }
 }

@@ -55,7 +55,7 @@ import com.google.mlkit.vision.pose.PoseLandmark;
 import com.google.mlkit.vision.pose.accurate.AccuratePoseDetectorOptions;
 import com.intel.realsense.librealsense.DepthFrame;
 import com.intel.realsense.librealsense.DeviceListener;
-import com.microsoft.appcenter.crashes.Crashes;
+//import com.microsoft.appcenter.crashes.Crashes;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -380,7 +380,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         firebaseAnalytics = FirebaseService.getFirebaseAnalyticsInstance(this);
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             LogFileUtils.logException(throwable, "Scanemode oncreate");
-            Crashes.trackError(throwable);
+            //Crashes.trackError(throwable);
             finish();
         });
         isStanding = getIntent().getBooleanExtra(AppConstants.EXTRA_SCAN_MODE,true);

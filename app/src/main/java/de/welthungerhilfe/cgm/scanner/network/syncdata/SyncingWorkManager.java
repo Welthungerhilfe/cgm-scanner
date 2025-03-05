@@ -14,6 +14,7 @@ import androidx.work.WorkerParameters;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +39,7 @@ public class SyncingWorkManager extends Worker {
     @Override
     public Result doWork() {
         SyncAdapter.getInstance(getApplicationContext()).startPeriodicSync();
-        return null;
+        return Result.success();
     }
 
     public static void startSyncingWithWorkManager(Context context) {
@@ -94,16 +95,18 @@ public class SyncingWorkManager extends Worker {
     }
 
     public static String getUrl() {
-        if (BuildConfig.DEBUG) {
+       /* if (BuildConfig.DEBUG) {
             // development build
             return AppConstants.API_TESTING_URL;
-        } else {
+        } else {*/
             Context context = AppController.getInstance().getApplicationContext();
             switch (AuthenticationHandler.getEnvironment(context)) {
                 case AppConstants.ENV_SANDBOX:
                     return AppConstants.API_URL_SANDBOX;
                 case AppConstants.ENV_DEMO_QA:
                     return AppConstants.API_URL_DEMO_QA;
+                case AppConstants.ENV_SYRIA:
+                    return AppConstants.API_URL_SY;
                 case AppConstants.ENV_IN_BMZ:
                     return AppConstants.API_URL_IN_BMZ;
                 case AppConstants.ENV_NAMIBIA:
@@ -126,5 +129,5 @@ public class SyncingWorkManager extends Worker {
                     return null;
             }
         }
-    }
+   // }
 }

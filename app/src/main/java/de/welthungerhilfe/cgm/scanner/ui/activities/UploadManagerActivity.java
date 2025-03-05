@@ -36,8 +36,10 @@ import java.util.Locale;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityUploadManagerBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
+import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.UploadManagerViewModel;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerUploadAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
@@ -57,12 +59,15 @@ public class UploadManagerActivity extends BaseActivity implements Runnable {
 
     ActivityUploadManagerBinding activityUploadManagerBinding;
 
+    SessionManager sessionManager;
+
     public void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
 
         activityUploadManagerBinding = DataBindingUtil.setContentView(this, R.layout.activity_upload_manager);
 
         setupToolbar();
+        sessionManager = new SessionManager(UploadManagerActivity.this);
 
         if (viewModel == null) {
             viewModel = ViewModelProviders.of(this).get(UploadManagerViewModel.class);
@@ -76,6 +81,7 @@ public class UploadManagerActivity extends BaseActivity implements Runnable {
         /*repository.getUploadMeasures().observe(this, measures -> {
             adapter.setData(measures);
         });*/
+        FileLogRepository fileLogRepository = FileLogRepository.getInstance(this);
 
         repository.getScanMeasureCount().observe(this, data ->{
             activityUploadManagerBinding.tvRemainScan.setText(""+data);
@@ -83,6 +89,10 @@ public class UploadManagerActivity extends BaseActivity implements Runnable {
 
         repository.getStdScanMeasureCount().observe(this, data ->{
             activityUploadManagerBinding.tvRemainStdscan.setText(""+data);
+        });
+
+        fileLogRepository.getDistanceCount(sessionManager.getEnvironment()).observe(this, data ->{
+            activityUploadManagerBinding.tvRemainDistanceResult.setText(""+data);
         });
 
        /* activityUploadManagerBinding.tvScan.setText("Remaining scan -> "+repository.getScanMeasureCount());

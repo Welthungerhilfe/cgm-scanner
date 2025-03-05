@@ -31,7 +31,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.microsoft.appcenter.crashes.Crashes;
+//import com.microsoft.appcenter.crashes.Crashes;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -59,7 +59,7 @@ public class BaseActivity extends AppCompatActivity {
         @Override
         public void uncaughtException(Thread thread, Throwable ex) {
             ex.printStackTrace();
-            Crashes.trackError(ex);
+          //  Crashes.trackError(ex);
         }
     }
 

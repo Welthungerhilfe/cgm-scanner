@@ -262,10 +262,11 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     getWorkflows();
                     LogFileUtils.logInfo(TAG,"this is calling postRemainingData");
                     postRemainingData();
-                    LogFileUtils.logInfo(TAG,"this is calling getLocationIndia");
-                    getLocationIndia();
                     LogFileUtils.logInfoOffline(TAG,"this is calling postWorkFlowsResult");
                     postWorkFlowsResult();
+                    LogFileUtils.logInfo(TAG,"this is calling getLocationIndia");
+                    getLocationIndia();
+
 
 
 
@@ -1279,7 +1280,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void postAutoDetectResult() {
-        LogFileUtils.logInfoOffline(TAG, "this is start postAutoDetectResult sync "+fileLogRepository.loadAutoDetectedFileLog(session.getEnvironment()));
+        LogFileUtils.logInfoOffline(TAG, "this is start postAutoDetectResult sync ");
 
         try {
             Gson gson = new GsonBuilder()

@@ -31,6 +31,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.UploadStatus;
 
 import static androidx.room.OnConflictStrategy.REPLACE;
 import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_FILE_LOG;
+import static de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase.TABLE_MEASURE;
 
 @Dao
 public interface FileLogDao {
@@ -103,4 +104,7 @@ public interface FileLogDao {
 
     @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND light_score_synced=0 AND type='depth' AND environment=:environment AND light_score IS NOT 0 ORDER BY createDate LIMIT 200")
     List<FileLog>  loadChildLightScoreFileLog(int environment);
+
+    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE child_distance_synced=0 AND environment=:environment")
+    LiveData<Long> getDistanceCount(int environment);
 }

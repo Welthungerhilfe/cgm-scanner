@@ -23,6 +23,7 @@ import android.app.Activity;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -61,6 +62,7 @@ import android.widget.Toast;
 
 
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.intel.realsense.librealsense.CameraInfo;
@@ -70,7 +72,7 @@ import com.intel.realsense.librealsense.DeviceListener;
 import com.intel.realsense.librealsense.Option;
 import com.intel.realsense.librealsense.RsContext;
 import com.intel.realsense.librealsense.Sensor;
-import com.microsoft.appcenter.analytics.Analytics;
+//import com.microsoft.appcenter.analytics.Analytics;
 import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
@@ -135,13 +137,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
 
     public void createData(View view) {
-   /*     if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
+        if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
             if(!session.isSensorConnected()){
                 Toast.makeText(MainActivity.this,"Please connect sensor...",Toast.LENGTH_SHORT).show();
 
                 return;
             }
-        }*/
+        }
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             runnable = () -> startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.CONSENT_CAPTURED_REQUEST));
             addResultListener(PERMISSION_CAMERA, listener);
@@ -237,13 +239,16 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         activityMainBinding.rltAddChild.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
+
+                //throw new RuntimeException("Test Crash"); // Force a crash
+
+                if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
                     if(!session.isSensorConnected()){
                         Toast.makeText(MainActivity.this,"Please connect sensor...",Toast.LENGTH_SHORT).show();
 
                         return;
                     }
-                }*/
+                }
                 if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     runnable = () -> startActivity(new Intent(MainActivity.this, QRScanActivity.class).putExtra(AppConstants.ACTIVITY_BEHAVIOUR_TYPE, AppConstants.QR_SCAN_REQUEST));
                     addResultListener(PERMISSION_CAMERA, listener);
@@ -345,6 +350,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 }
             }
         });
+
+        if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.O &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 10);
+        }
+
+        FirebaseCrashlytics.getInstance().setCustomKey("UserID", session.getUserEmail());
 
     }
 
@@ -731,13 +743,13 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     @Override
     public void onPersonDetail(Person person) {
 
-      /*  if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
+        if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
             if(!session.isSensorConnected()){
                 Toast.makeText(MainActivity.this,"Please connect sensor...",Toast.LENGTH_SHORT).show();
 
                 return;
             }
-        }*/
+        }
         Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
         intent.putExtra(AppConstants.EXTRA_QR, person.getQrcode());
         startActivity(intent);

@@ -23,18 +23,20 @@ import android.os.Bundle;
 import android.os.Handler;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.microsoft.appcenter.AppCenter;
+/*import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
-import com.microsoft.appcenter.crashes.Crashes;
+import com.microsoft.appcenter.crashes.Crashes;*/
+
+import com.google.android.libraries.intelligence.acceleration.Analytics;
 
 import de.welthungerhilfe.cgm.scanner.R;
 
 public class SplashActivity extends AppCompatActivity {
     public void onCreate(Bundle saveBundle) {
-        AppCenter.start(getApplication(), "{APP_CENTER_KEY}", Analytics.class, Crashes.class);
-        boolean isCrashEnabled = Crashes.isEnabled().get();
-        if (!isCrashEnabled)
-            Crashes.setEnabled(true);
+      //  AppCenter.start(getApplication(), "{APP_CENTER_KEY}", Analytics.class, Crashes.class);
+      //  boolean isCrashEnabled = Crashes.isEnabled().get();
+        /*if (!isCrashEnabled)
+            Crashes.setEnabled(true);*/
 
         super.onCreate(saveBundle);
         setContentView(R.layout.activity_splash);
