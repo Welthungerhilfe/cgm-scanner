@@ -377,54 +377,9 @@
                     android:orientation="vertical"
                     android:padding="17dp"
                     android:background="@color/colorGreenTransparent">
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="20dp">
-
-                        <TextView
-                            android:id="@+id/tv_orientation_results"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Orientation results remaining"
-                            android:textColor="@color/colorBlack"
-                            android:textSize="15sp" />
-
-                        <View
-                            android:id="@+id/dotted_line_orientation"
-                            android:layout_width="1dp"
-                            android:layout_height="5dp"
-                            android:layout_alignParentBottom="true"
-                            android:layout_toLeftOf="@+id/tv_remain_orientation_results"
-                            android:layout_toRightOf="@+id/tv_orientation_results"
-                            android:background="@drawable/dotted_line"
-                            android:layout_marginLeft="10dp"/>
-
-                        <TextView
-                            android:id="@+id/tv_remain_orientation_results"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentRight="true"
-                            android:text="10"
-                            android:textColor="@color/colorBlack"
-                            android:textSize="15sp" />
-
-                    </RelativeLayout>
-
-                    <TextView
-
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:text="Distance result remaining"
-                        android:textSize="15sp"
-                        android:layout_marginTop="18dp"
-                        android:visibility="gone"
-                        android:textColor="@color/colorBlack"/>
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="20dp"
-                        android:layout_marginTop="18dp"
                         >
 
                         <TextView
@@ -459,7 +414,40 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="20dp"
-                        android:layout_marginTop="15dp">
+                        android:layout_marginTop="7dp">
+
+                        <TextView
+                            android:id="@+id/tv_autodetected_result"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="AutoDetected result remaining"
+                            android:textColor="@color/colorBlack"
+                            android:textSize="15sp" />
+
+                        <View
+                            android:id="@+id/dotted_line_autodetected"
+                            android:layout_width="1dp"
+                            android:layout_height="5dp"
+                            android:layout_alignParentBottom="true"
+                            android:layout_marginLeft="10dp"
+                            android:layout_toRightOf="@+id/tv_autodetected_result"
+                            android:layout_toLeftOf="@+id/tv_remain_autodetected_result"
+                            android:background="@drawable/dotted_line" />
+
+                        <TextView
+                            android:id="@+id/tv_remain_autodetected_result"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:text="10"
+                            android:textColor="@color/colorBlack"
+                            android:textSize="15sp" />
+
+                    </RelativeLayout>
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:layout_marginTop="7dp">
 
                         <TextView
                             android:id="@+id/tv_posescore_results"
@@ -489,6 +477,85 @@
                             android:textSize="15sp" />
 
                     </RelativeLayout>
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:layout_marginTop="7dp">
+
+                        <TextView
+                            android:id="@+id/tv_appboundingbox_result"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="AppBoundingBox result remaining"
+                            android:textColor="@color/colorBlack"
+                            android:textSize="15sp" />
+
+                        <View
+                            android:id="@+id/dotted_line_appboundingbox"
+                            android:layout_width="1dp"
+                            android:layout_height="5dp"
+                            android:layout_alignParentBottom="true"
+                            android:layout_marginLeft="10dp"
+                            android:layout_toRightOf="@+id/tv_appboundingbox_result"
+                            android:layout_toLeftOf="@+id/tv_remain_appboundingbox_result"
+                            android:background="@drawable/dotted_line" />
+
+                        <TextView
+                            android:id="@+id/tv_remain_appboundingbox_result"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:text="10"
+                            android:textColor="@color/colorBlack"
+                            android:textSize="15sp" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:layout_marginTop="7dp">
+
+                        <TextView
+                            android:id="@+id/tv_orientation_results"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Orientation results remaining"
+                            android:textColor="@color/colorBlack"
+                            android:textSize="15sp" />
+
+                        <View
+                            android:id="@+id/dotted_line_orientation"
+                            android:layout_width="1dp"
+                            android:layout_height="5dp"
+                            android:layout_alignParentBottom="true"
+                            android:layout_toLeftOf="@+id/tv_remain_orientation_results"
+                            android:layout_toRightOf="@+id/tv_orientation_results"
+                            android:background="@drawable/dotted_line"
+                            android:layout_marginLeft="10dp"/>
+
+                        <TextView
+                            android:id="@+id/tv_remain_orientation_results"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:text="10"
+                            android:textColor="@color/colorBlack"
+                            android:textSize="15sp"
+                            />
+
+                    </RelativeLayout>
+
+                    <TextView
+
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:text="Distance result remaining"
+                        android:textSize="15sp"
+                        android:layout_marginTop="18dp"
+                        android:visibility="gone"
+                        android:textColor="@color/colorBlack"/>
 
 
 

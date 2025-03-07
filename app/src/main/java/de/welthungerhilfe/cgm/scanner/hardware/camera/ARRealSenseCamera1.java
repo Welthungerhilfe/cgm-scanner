@@ -182,7 +182,6 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                             }catch (Exception e){
                             }
 
-
                             // Process color frame for UI (on main thread)
                             try (Frame f1 = frames.first(StreamType.COLOR)) {
                                 colorFrame1 = f1;

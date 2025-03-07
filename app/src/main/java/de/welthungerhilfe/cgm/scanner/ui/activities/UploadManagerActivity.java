@@ -95,6 +95,21 @@ public class UploadManagerActivity extends BaseActivity implements Runnable {
             activityUploadManagerBinding.tvRemainDistanceResult.setText(""+data);
         });
 
+        fileLogRepository.getAutoDetectedCount(sessionManager.getEnvironment()).observe(this, data ->{
+            activityUploadManagerBinding.tvRemainAutodetectedResult.setText(""+data);
+        });
+        fileLogRepository.getAppPoseScoreCount(sessionManager.getEnvironment()).observe(this, data ->{
+            activityUploadManagerBinding.tvRemainPosescoreResults.setText(""+data);
+        });
+
+        fileLogRepository.getAppBoundingBoxCount(sessionManager.getEnvironment()).observe(this, data ->{
+            activityUploadManagerBinding.tvRemainAppboundingboxResult.setText(""+data);
+        });
+
+        fileLogRepository.getAppOrientationCount(sessionManager.getEnvironment()).observe(this, data ->{
+            activityUploadManagerBinding.tvRemainOrientationResults.setText(""+data);
+        });
+
        /* activityUploadManagerBinding.tvScan.setText("Remaining scan -> "+repository.getScanMeasureCount());
         activityUploadManagerBinding.tvStdscan.setText("Remaining STD test scan -> "+repository.getStdScanMeasureCount());*/
 

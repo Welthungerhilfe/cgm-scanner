@@ -42,6 +42,12 @@ public class SyncingWorkManager extends Worker {
         return Result.success();
     }
 
+    @Override
+    public void onStopped() {
+        super.onStopped();
+        SyncAdapter.getInstance(getApplicationContext()).stopHandlerThread();
+    }
+
     public static void startSyncingWithWorkManager(Context context) {
 
         PeriodicWorkRequest SyncingWorkManager =

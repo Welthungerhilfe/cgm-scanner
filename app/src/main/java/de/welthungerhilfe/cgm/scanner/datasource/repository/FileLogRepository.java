@@ -161,4 +161,24 @@ public class FileLogRepository {
     public LiveData<Long> getDistanceCount(int environment){
         return database.fileLogDao().getDistanceCount(environment);
     }
+
+    public LiveData<Long> getAutoDetectedCount(int environment){
+        return database.fileLogDao().getAutoDetectedCount(environment);
+    }
+
+    public LiveData<Long> getAppPoseScoreCount(int environment){
+        return database.fileLogDao().getAppPoseScoreCount(environment);
+    }
+
+    public LiveData<Long> getAppBoundingBoxCount(int environment){
+        return database.fileLogDao().getAppBoundingBoxCount(environment);
+    }
+
+    public LiveData<Long> getAppOrientationCount(int environment){
+        return database.fileLogDao().getAppOrientationCount(environment);
+    }
+
+    public LiveData<Long> getChildLightScoreCount(int environment){
+        return database.fileLogDao().getChildLightScoreCount(environment);
+    }
 }

@@ -23,6 +23,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -125,6 +127,9 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     private long lastSyncResultTimeStamp = 0L;
     private long lastSyncDailyReport = 0L;
 
+    private HandlerThread handlerThread;
+    private Handler backgroundHandler;
+
 
     public SyncAdapter(Context context) {
         this.context = context;
@@ -138,6 +143,27 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
         indiaLocationRepository = IndiaLocationRepository.getInstance(context);
         activeThreads = 0;
         session = new SessionManager(context);
+     //  startHandlerThread();
+    }
+
+    public void startHandlerThread() {
+        handlerThread = new HandlerThread("SyncAdapterThread");
+        handlerThread.start();
+        backgroundHandler = new Handler(handlerThread.getLooper()); // Remove reference to prevent memory leaks
+        LogFileUtils.logInfoOffline(TAG, "this is starthandler thread "+backgroundHandler);
+
+    }
+
+    public void stopHandlerThread() {
+        if (handlerThread != null) {
+            LogFileUtils.logInfoOffline(TAG, "this is before stop handlerthread "+backgroundHandler);
+
+            handlerThread.quitSafely();  // Stops the thread safely
+            handlerThread = null;
+        }
+        backgroundHandler = null; // Remove reference to prevent memory leaks
+        LogFileUtils.logInfoOffline(TAG, "this is after stop handlerthread "+backgroundHandler);
+
     }
 
     public static SyncAdapter getInstance(Context context) {
@@ -1264,19 +1290,26 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void postWorkFlowsResult() {
-        LogFileUtils.logInfoOffline(TAG, "this is post Workflow result ");
+        LogFileUtils.logInfoOffline(TAG, "this is post Workflow result start "+backgroundHandler);
 
-        if (System.currentTimeMillis() - lastSyncResultTimeStamp < 15000) {
+        if (backgroundHandler!=null) {
             return;
         }
         lastSyncResultTimeStamp = System.currentTimeMillis();
-        postAutoDetectResult();
-        postAppHeightResult();
-        postAppPoseScoreResult();
+
+        if(backgroundHandler == null){
+            startHandlerThread();
+        }
+
         postChildDistance();
-        postChildLightScore();
-        postAppBoundingBoxResult();
-        postAppOrientationResult();
+        //postAutoDetectResult();
+        //Not included ->postAppHeightResult();
+       // postAppPoseScoreResult();
+
+
+      //  postChildLightScore();
+      //  postAppBoundingBoxResult();
+        //postAppOrientationResult();
     }
 
     public void postAutoDetectResult() {
@@ -1288,10 +1321,11 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     .create();
             List<FileLog> fileLogsList = fileLogRepository.loadAutoDetectedFileLog(session.getEnvironment());
             if(fileLogsList != null) {
-                LogFileUtils.logInfoOffline(TAG, "this is start postAutoDetectResult sync " + fileLogsList.size());
+                LogFileUtils.logInfoOffline(TAG, "this is start postAutoDetectResult sync count " + fileLogsList.size());
             }
 
-            if (fileLogsList.size() == 0) {
+            if (fileLogsList == null || fileLogsList.size() == 0) {
+                postAppPoseScoreResult();
                 return;
             }
 
@@ -1300,6 +1334,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             LogFileUtils.logInfoOffline(TAG, "this is posting postAutoDetectResult sync id "+appAutoDetectWorkflowId);
 
             if (appAutoDetectWorkflowId == null) {
+                postAppPoseScoreResult();
                 return;
             }
             ArrayList<Results> resultList = new ArrayList();
@@ -1322,7 +1357,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             ResultsData resultsData = new ResultsData();
             resultsData.setResults(resultList);
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
-            LogFileUtils.logInfoOffline(TAG, "this is posting postAutoDetectResult sync ");
+            LogFileUtils.logInfoOffline(TAG, "this is posting postAutoDetectResult before sync ");
 
             onThreadChange(1,"Post auto detect");
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
@@ -1343,11 +1378,16 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             }
                             updated = true;
                             updateDelay = 0;
+
                             onThreadChange(-1,"Post auto detect");
+                            backgroundHandler.postDelayed(() -> postAutoDetectResult(), 500);
+
                         }
 
                         @Override
                         public void onError(@NonNull Throwable e) {
+                            postAppPoseScoreResult();
+
                             try
                             {
                                 LogFileUtils.logInfoOffline(TAG, "this is posting postAutoDetectResult failed" + e.getMessage()+"\n"+(new JSONObject(gson.toJson(resultsData))).toString());
@@ -1481,6 +1521,8 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
 
         try {
+            LogFileUtils.logInfoOffline(TAG,"this is start postAppPoseScoreResult sync ");
+
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
@@ -1489,6 +1531,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 LogFileUtils.logInfoOffline(TAG,"this is start postAppPoseScoreResult sync "+fileLogsList.size());
             }
             if (fileLogsList==null || fileLogsList.size() == 0) {
+                postChildLightScore();
                 return;
             }
             String workflow[] = AppConstants.APP_POSE_PREDICITION_1_0.split("-");
@@ -1496,6 +1539,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             LogFileUtils.logInfoOffline(TAG,"this is start postAppPoseScoreResult sync id "+appPoseScoreWorkFlowId);
 
             if (appPoseScoreWorkFlowId == null) {
+                postChildLightScore();
                 return;
             }
             ArrayList<Results> resultList = new ArrayList();
@@ -1530,7 +1574,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
 
             onThreadChange(1,"postAppPoseScoreResult");
-            LogFileUtils.logInfoOffline(TAG, "this is posting postAppPoseScoreResult  ");
+            LogFileUtils.logInfoOffline(TAG, "this is posting before postAppPoseScoreResult  ");
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<ResultsData>() {
@@ -1550,10 +1594,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             updated = true;
                             updateDelay = 0;
                             onThreadChange(-1,"postAppPoseScoreResult");
+                            backgroundHandler.postDelayed(() -> postAppPoseScoreResult(), 500);
+
                         }
 
                         @Override
                         public void onError(@NonNull Throwable e) {
+                            postChildLightScore();
                             try
                             {
                                 LogFileUtils.logInfoOffline(TAG, "this is posting postAppPoseScoreResult failed" + e.getMessage()+"\n"+(new JSONObject(gson.toJson(resultsData))).toString());
@@ -1612,6 +1659,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void postChildLightScore()  {
+        LogFileUtils.logInfo(TAG,"this is postChildLightScore start ");
 
 
         try {
@@ -1623,13 +1671,16 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 LogFileUtils.logInfo(TAG,"this is postChildLightScore start "+fileLogsList.size());
             }
             if (fileLogsList==null || fileLogsList.size() == 0) {
+                postAppBoundingBoxResult();
                 return;
             }
             String workflow[] = AppConstants.APP_LIGHT_SCORE_1_0.split("-");
             String appLightScoreWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
-            LogFileUtils.logInfoOffline(TAG,"this is postChildLightScore start id"+appLightScoreWorkFlowId);
+            LogFileUtils.logInfoOffline(TAG,"this is postChildLightScore start id "+appLightScoreWorkFlowId);
 
             if (appLightScoreWorkFlowId == null) {
+                postAppBoundingBoxResult();
+
                 return;
             }
             ArrayList<Results> resultList = new ArrayList();
@@ -1655,7 +1706,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
             //    Log.i(TAG,"this is light score body "+(new JSONObject(gson.toJson(resultsData))).toString());
             onThreadChange(1,"postChildLightScore");
-            LogFileUtils.logInfoOffline(TAG, "this is postChildLightScore post ");
+            LogFileUtils.logInfoOffline(TAG, "this is postChildLightScore before post ");
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<ResultsData>() {
@@ -1675,10 +1726,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             updated = true;
                             updateDelay = 0;
                             onThreadChange(-1,"postChildLightScore");
+                            backgroundHandler.postDelayed(() -> postChildLightScore(), 500);
+
                         }
 
                         @Override
                         public void onError(@NonNull Throwable e) {
+                            postAppBoundingBoxResult();
                             try
                             {
                                 LogFileUtils.logInfoOffline(TAG, "this is posting postChildLightScore failed" + e.getMessage()+"\n"+(new JSONObject(gson.toJson(resultsData))).toString());
@@ -1712,21 +1766,25 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
 
         try {
+            LogFileUtils.logInfoOffline(TAG,"this is start postChildDistance sync ");
+
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
             List<FileLog> fileLogsList = fileLogRepository.loadChildDistanceFileLog(session.getEnvironment());
             if(fileLogsList!=null){
-                LogFileUtils.logInfoOffline(TAG,"this is start postChildDistance sync"+fileLogsList.size());
+                LogFileUtils.logInfoOffline(TAG,"this is start postChildDistance sync count"+fileLogsList.size());
             }
             if (fileLogsList==null || fileLogsList.size() == 0) {
+                postAutoDetectResult();
                 return;
             }
             String workflow[] = AppConstants.APP_CHILD_DISTANCE_1_0.split("-");
             String appChildDistanceWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
-            LogFileUtils.logInfoOffline(TAG,"this is start postChildDistance id"+appChildDistanceWorkFlowId);
+            LogFileUtils.logInfoOffline(TAG,"this is start postChildDistance id "+appChildDistanceWorkFlowId);
 
             if (appChildDistanceWorkFlowId == null) {
+                postAutoDetectResult();
                 return;
             }
             ArrayList<Results> resultList = new ArrayList();
@@ -1750,6 +1808,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             resultsData.setResults(resultList);
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
+            LogFileUtils.logInfoOffline(TAG, "this is post postChildDistance before posting...");
 
             onThreadChange(1,"postChildDistance");
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
@@ -1771,10 +1830,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             updated = true;
                             updateDelay = 0;
                             onThreadChange(-1,"postChildDistance");
+                            backgroundHandler.postDelayed(() -> postChildDistance(), 500);
+
                         }
 
                         @Override
                         public void onError(@NonNull Throwable e) {
+                            postAutoDetectResult();
                             try
                             {
                                 LogFileUtils.logInfoOffline(TAG, "this is posting postChildDistance failed" + e.getMessage()+"\n"+(new JSONObject(gson.toJson(resultsData))).toString());
@@ -1895,6 +1957,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void postAppBoundingBoxResult() {
+        LogFileUtils.logInfo(TAG,"this is start postAppBoundingBoxResult sync ");
 
 
         try {
@@ -1906,13 +1969,15 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 LogFileUtils.logInfo(TAG,"this is start postAppBoundingBoxResult sync "+fileLogsList.size());
             }
             if (fileLogsList==null || fileLogsList.size() == 0) {
+                postAppOrientationResult();
                 return;
             }
             String workflow[] = AppConstants.APP_BOUNDING_BOX_1_0.split("-");
             String appBoundingBoxWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
-            LogFileUtils.logInfoOffline(TAG,"this is start postAppBoundingBoxResult sync workflowid:wq "+fileLogsList.size());
+            LogFileUtils.logInfoOffline(TAG,"this is start postAppBoundingBoxResult sync workflowid "+fileLogsList.size());
 
             if (appBoundingBoxWorkFlowId == null) {
+                postAppOrientationResult();
                 return;
             }
             ArrayList<Results> resultList = new ArrayList();
@@ -1962,10 +2027,13 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             updated = true;
                             updateDelay = 0;
                             onThreadChange(-1,"postAppBoundingBox");
+                            backgroundHandler.postDelayed(() -> postAppBoundingBoxResult(), 500);
+
                         }
 
                         @Override
                         public void onError(@NonNull Throwable e) {
+                            postAppOrientationResult();
                             try
                             {
                                 LogFileUtils.logInfoOffline(TAG, "this is posting postAppBoundingBoxResult failed" + e.getMessage()+"\n"+(new JSONObject(gson.toJson(resultsData))).toString());
@@ -1994,6 +2062,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void postAppOrientationResult() {
+        LogFileUtils.logInfoOffline(TAG,"this is start postAppOrientationResult sync ");
 
 
         try {
@@ -2005,6 +2074,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                 LogFileUtils.logInfoOffline(TAG,"this is start postAppOrientationResult sync "+fileLogsList.size());
             }
             if (fileLogsList==null || fileLogsList.size() == 0) {
+                stopHandlerThread();
                 return;
             }
             String workflow[] = AppConstants.APP_ORIENTATION_1_0.split("-");
@@ -2012,6 +2082,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             LogFileUtils.logInfoOffline(TAG,"this is start postAppOrientationResult sync id"+fileLogsList.size());
 
             if (appOrientationWorkFlowId == null) {
+                stopHandlerThread();
                 return;
             }
             ArrayList<Results> resultList = new ArrayList();
@@ -2057,10 +2128,14 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             updated = true;
                             updateDelay = 0;
                             onThreadChange(-1,"postappOrientationResult");
+                            backgroundHandler.postDelayed(() -> postAppOrientationResult(), 500);
+
                         }
 
                         @Override
                         public void onError(@NonNull Throwable e) {
+                            stopHandlerThread();
+
                             try
                             {
                                 LogFileUtils.logInfoOffline(TAG, "this is posting postAppOrientationResult failed" + e.getMessage()+"\n"+(new JSONObject(gson.toJson(resultsData))).toString());
