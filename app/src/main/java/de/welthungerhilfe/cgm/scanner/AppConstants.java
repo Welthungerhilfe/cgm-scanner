@@ -38,9 +38,9 @@ public class AppConstants {
 
     public static final String API_URL_DEMO_QA = "{API_URL_QA}/";
 
-    public static final String AUTH_DEMO_SY = "https://cgmb2csyr.onmicrosoft.com/cgm-api/scannerapp";
+    public static final String AUTH_SYRIA = "{OAUTH_SCOPE_SYRIA}";
 
-    public static final String API_URL_SY = "https://cgm-be-ci-syr-scanner-api.azurewebsites.net/api//";
+    public static final String API_URL_SYRIA = "{API_URL_SYRIA}/";
 
 
 

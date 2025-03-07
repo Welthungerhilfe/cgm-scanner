@@ -163,7 +163,7 @@ public class AuthenticationHandler {
             case AppConstants.ENV_DEMO_QA:
                 return new String[]{AppConstants.AUTH_DEMO_QA};
             case AppConstants.ENV_SYRIA:
-                return new String[]{AppConstants.AUTH_DEMO_SY};
+                return new String[]{AppConstants.AUTH_SYRIA};
             case AppConstants.ENV_IN_BMZ:
                 return new String[]{AppConstants.AUTH_IN_BMZ};
             case AppConstants.ENV_NAMIBIA:

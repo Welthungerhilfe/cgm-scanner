@@ -3,6 +3,7 @@ trigger:
   - test-keystore
   - bug_offline_results
   - bug_offline_results_1
+  - syria_backend_release
 
 variables:
   - group: TEST_CGM  # Properly linked variable group

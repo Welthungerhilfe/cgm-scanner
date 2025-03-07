@@ -28,6 +28,7 @@ APP_OAUTH_BANGLADESH_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_
 APP_OAUTH_MALAWI_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_malawi.json
 APP_OAUTH_SIERRA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_sierra.json
 APP_OAUTH_ETHOPIA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_ethopia.json
+APP_OAUTH_SYRIA_JSON=$BUILD_REPOSITORY_LOCALPATH/app/src/main/res/raw/auth_config_syria.json
 
 APP_CONSTANTS=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/AppConstants.java
 APP_SPLASH_ACTIVITY=$BUILD_REPOSITORY_LOCALPATH/app/src/main/java/de/welthungerhilfe/cgm/scanner/ui/activities/SplashActivity.java
@@ -109,3 +110,10 @@ sed -i '' "s|{OAUTH_REDIRECT_URL}|$OAUTH_REDIRECT_URL|g" $APP_OAUTH_ETHOPIA_JSON
 sed -i '' "s|{OAUTH_URL_ETHOPIA}|$OAUTH_URL_ETHOPIA|g" $APP_OAUTH_ETHOPIA_JSON
 sed -i '' "s|{OAUTH_SCOPE_ETHOPIA}|$OAUTH_SCOPE_ETHOPIA|g" $APP_CONSTANTS
 sed -i '' "s|{API_URL_ETHOPIA}|$API_URL_ETHOPIA|g" $APP_CONSTANTS
+
+echo "Updating API syria KEYS"
+sed -i '' "s|{OAUTH_CLIENT_ID_SYRIA}|$OAUTH_CLIENT_ID_SYRIA|g" $APP_OAUTH_SYRIA_JSON
+sed -i '' "s|{OAUTH_REDIRECT_URL}|$OAUTH_REDIRECT_URL|g" $APP_OAUTH_SYRIA_JSON
+sed -i '' "s|{OAUTH_URL_SYRIA}|$OAUTH_URL_SYRIA|g" $APP_OAUTH_SYRIA_JSON
+sed -i '' "s|{OAUTH_SCOPE_SYRIA}|$OAUTH_SCOPE_SYRIA|g" $APP_CONSTANTS
+sed -i '' "s|{API_URL_SYRIA}|$API_URL_SYRIA|g" $APP_CONSTANTS

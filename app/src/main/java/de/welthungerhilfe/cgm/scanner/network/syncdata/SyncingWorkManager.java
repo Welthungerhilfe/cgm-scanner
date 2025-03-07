@@ -14,7 +14,6 @@ import androidx.work.WorkerParameters;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 
 import java.util.concurrent.TimeUnit;
 
@@ -84,9 +83,9 @@ public class SyncingWorkManager extends Worker {
     }
 
     public static String getAPI() {
-      /* if (BuildConfig.DEBUG) {
+       if (BuildConfig.DEBUG) {
             return "localhost";
-        }*/
+        }
         Log.d(TAG, "Url backend " + getUrl());
 
         String apiURL = getUrl();
@@ -101,10 +100,10 @@ public class SyncingWorkManager extends Worker {
     }
 
     public static String getUrl() {
-       /* if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) {
             // development build
             return AppConstants.API_TESTING_URL;
-        } else {*/
+        } else {
             Context context = AppController.getInstance().getApplicationContext();
             switch (AuthenticationHandler.getEnvironment(context)) {
                 case AppConstants.ENV_SANDBOX:
@@ -112,7 +111,7 @@ public class SyncingWorkManager extends Worker {
                 case AppConstants.ENV_DEMO_QA:
                     return AppConstants.API_URL_DEMO_QA;
                 case AppConstants.ENV_SYRIA:
-                    return AppConstants.API_URL_SY;
+                    return AppConstants.API_URL_SYRIA;
                 case AppConstants.ENV_IN_BMZ:
                     return AppConstants.API_URL_IN_BMZ;
                 case AppConstants.ENV_NAMIBIA:
@@ -135,5 +134,5 @@ public class SyncingWorkManager extends Worker {
                     return null;
             }
         }
-   // }
+    }
 }
