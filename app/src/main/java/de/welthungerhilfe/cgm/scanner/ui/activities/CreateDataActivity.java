@@ -310,6 +310,22 @@ public class CreateDataActivity extends BaseActivity {
         });
 
         registerReceiver(receiver, new IntentFilter("com.example.REALSENSE_DISCONNECTED"));
+        if(sessionManager.getSensorMode()==AppConstants.NO_SENSOR_SELECTED){
+            activityCreateBinding.ivRealsenseIcon.setVisibility(View.GONE);
+
+        }
+        else if(sessionManager.getSensorMode()==AppConstants.SENSOR_SELECTED){
+            activityCreateBinding.ivRealsenseIcon.setVisibility(View.VISIBLE);
+
+
+        }
+        if(sessionManager.isSensorConnected()){
+            activityCreateBinding.ivRealsenseIcon.setImageResource(R.drawable.sensor_white);
+        }
+        else
+        {
+            activityCreateBinding.ivRealsenseIcon.setImageResource(R.drawable.sensor_red);
+        }
 
     }
 

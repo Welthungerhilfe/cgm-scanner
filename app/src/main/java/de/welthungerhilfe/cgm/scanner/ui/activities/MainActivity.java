@@ -491,6 +491,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     public void logout() {
         session.setSigned(false);
         session.setSelectedMode(AppConstants.CGM_MODE);
+        session.setSensorMode(AppConstants.NO_SENSOR_MODE_SELECTED);
         session.setCurrentLogFilePath(null);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (WifiStateChangereceiverHelperService.isServiceRunning) {
@@ -766,7 +767,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             repository.setUpdated(false);
         }
         SyncingWorkManager.startSyncingWithWorkManager(getApplicationContext());
-        deviceCheckPopup();
+      //  deviceCheckPopup();
         checkIfStdTestActive();
       //  setUpSelectedMode();
         if(session.getSensorMode()==AppConstants.NO_SENSOR_SELECTED){
