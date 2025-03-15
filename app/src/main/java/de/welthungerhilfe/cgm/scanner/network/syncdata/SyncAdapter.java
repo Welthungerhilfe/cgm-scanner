@@ -2186,6 +2186,10 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                             LogFileUtils.logInfo(TAG, "Sync location successfully fetched " + root.country);
                             onThreadChange(-1,"LocationIndia");
 
+                            if(root == null || root.country==null){
+                                return;
+                            }
+
                             switch (session.getEnvironment()){
                                 case AppConstants.ENV_DEMO_QA:
                                     if(session.getDemoQaVersionLocation() >= root.getVersion()){

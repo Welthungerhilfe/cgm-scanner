@@ -35,6 +35,7 @@ import android.location.LocationManager;
 import android.media.MediaActionSound;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -381,6 +382,11 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             //Crashes.trackError(throwable);
             finish();
         });
+
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                .detectAll()
+                .penaltyLog()
+                .build());
         isStanding = getIntent().getBooleanExtra(AppConstants.EXTRA_SCAN_MODE,true);
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
         measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);

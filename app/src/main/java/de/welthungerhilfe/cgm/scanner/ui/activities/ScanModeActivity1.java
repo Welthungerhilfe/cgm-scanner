@@ -19,6 +19,7 @@ import android.location.LocationManager;
 import android.media.MediaActionSound;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -383,6 +384,11 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             //Crashes.trackError(throwable);
             finish();
         });
+
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                .detectAll()
+                .penaltyLog()
+                .build());
         isStanding = getIntent().getBooleanExtra(AppConstants.EXTRA_SCAN_MODE,true);
         person = (Person) getIntent().getSerializableExtra(AppConstants.EXTRA_PERSON);
         measure = (Measure) getIntent().getSerializableExtra(AppConstants.EXTRA_MEASURE);
@@ -1286,7 +1292,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                 //  setFeedback("Too Close");
                 activityScanModeBinding.tvChildDistance.setText("Too Close");
 
-            } else if (distance > 1.5f) {
+            } else if (distance > 2.1f) {
                 //  setFeedback("Too Far");
                 activityScanModeBinding.tvChildDistance.setText("Too Far");
 
