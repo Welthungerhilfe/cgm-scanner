@@ -163,6 +163,7 @@ public class MeasuresDataFragment extends Fragment implements View.OnClickListen
                 try (Device device = dl.createDevice(0)) {
                     // Get the serial number of the device
                      serialNumber = device.getInfo(CameraInfo.SERIAL_NUMBER);
+                     session.setIntelrealsenseSno(serialNumber);
                     for (Sensor sensor : device.querySensors()) {
 
                         if(sensor.supports(Option.EMITTER_ENABLED)){

@@ -1659,7 +1659,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void postChildLightScore()  {
-        LogFileUtils.logInfo(TAG,"this is postChildLightScore start ");
+        LogFileUtils.logInfoOffline(TAG,"this is postChildLightScore start ");
 
 
         try {
@@ -1668,7 +1668,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     .create();
             List<FileLog> fileLogsList = fileLogRepository.loadChildLightScoreFileLog(session.getEnvironment());
             if(fileLogsList!=null){
-                LogFileUtils.logInfo(TAG,"this is postChildLightScore start "+fileLogsList.size());
+                LogFileUtils.logInfoOffline(TAG,"this is postChildLightScore start "+fileLogsList.size());
             }
             if (fileLogsList==null || fileLogsList.size() == 0) {
                 postAppBoundingBoxResult();
@@ -1957,7 +1957,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
     }
 
     public void postAppBoundingBoxResult() {
-        LogFileUtils.logInfo(TAG,"this is start postAppBoundingBoxResult sync ");
+        LogFileUtils.logInfoOffline(TAG,"this is start postAppBoundingBoxResult sync ");
 
 
         try {
@@ -1966,7 +1966,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     .create();
             List<FileLog> fileLogsList = fileLogRepository.loadAppBoundingBox(session.getEnvironment());
             if(fileLogsList!=null){
-                LogFileUtils.logInfo(TAG,"this is start postAppBoundingBoxResult sync "+fileLogsList.size());
+                LogFileUtils.logInfoOffline(TAG,"this is start postAppBoundingBoxResult sync "+fileLogsList.size());
             }
             if (fileLogsList==null || fileLogsList.size() == 0) {
                 postAppOrientationResult();
@@ -1974,7 +1974,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             }
             String workflow[] = AppConstants.APP_BOUNDING_BOX_1_0.split("-");
             String appBoundingBoxWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
-            LogFileUtils.logInfoOffline(TAG,"this is start postAppBoundingBoxResult sync workflowid "+fileLogsList.size());
+            LogFileUtils.logInfoOffline(TAG,"this is start postAppBoundingBoxResult sync workflowid "+appBoundingBoxWorkFlowId);
 
             if (appBoundingBoxWorkFlowId == null) {
                 postAppOrientationResult();
@@ -2079,7 +2079,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             }
             String workflow[] = AppConstants.APP_ORIENTATION_1_0.split("-");
             String appOrientationWorkFlowId = workflowRepository.getWorkFlowId(workflow[0], workflow[1], session.getEnvironment());
-            LogFileUtils.logInfoOffline(TAG,"this is start postAppOrientationResult sync id"+fileLogsList.size());
+            LogFileUtils.logInfoOffline(TAG,"this is start postAppOrientationResult sync id"+appOrientationWorkFlowId);
 
             if (appOrientationWorkFlowId == null) {
                 stopHandlerThread();

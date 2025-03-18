@@ -992,7 +992,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                     File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                     //depthmap.save(artifactFile);
                     save(artifactFile,depthFrame,frameIndex,height,width,byteArray);
-                    LogFileUtils.logInfoOffline("SCANMODE","this is depth -1");
+                 //   LogFileUtils.logInfoOffline("SCANMODE","this is depth -1");
 
                     //onProcessArtifact(artifactFile,ArtifactType.DEPTH, 10.0f, 0, null, distance, light_score, null,orientation);
                     onProcessArtifact(artifactFile, ArtifactType.DEPTH, 10.0f, 0, null, child_distance, light_score, null, orientation);
@@ -1001,7 +1001,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
           //       onProcessArtifact(artifactFile, ArtifactType.DEPTH, 10, 0, null, 1.0, 1.0f, null, "80.0");
 
-                        LogFileUtils.logInfoOffline("SCANMODE","this is depth 0");
+                       // LogFileUtils.logInfoOffline("SCANMODE","this is depth 0");
 
                     //   LogFileUtils.logInfo1("Scanmode","this is inside on Depthdata received 6"+depthFrame);
 
@@ -1015,7 +1015,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                         }
                     }
                 } catch (Exception e) {
-                    LogFileUtils.logInfoOffline("ScanModeActivity1", "OnDepthDataReceived "+e.getMessage());
+                  //  LogFileUtils.logInfoOffline("ScanModeActivity1", "OnDepthDataReceived "+e.getMessage());
 
                 }
 
@@ -1348,7 +1348,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
     private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight, float poseScore, String poseCordinates, double child_distance, float light_score, String boundinBox, String orientation) {
         if(type == ArtifactType.DEPTH){
-            LogFileUtils.logInfoOffline("SCANMODE","this is depth 0");
+         //   LogFileUtils.logInfoOffline("SCANMODE","this is depth 0");
         }
         if (artifactFile.exists()) {
             FileLog log = new FileLog();
@@ -1362,7 +1362,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                     break;
                 case DEPTH:
                     if(type == ArtifactType.DEPTH){
-                        LogFileUtils.logInfoOffline("SCANMODE","this is depth 1");
+                  //      LogFileUtils.logInfoOffline("SCANMODE","this is depth 1");
                     }
                     log.setStep(SCAN_STEP);
                     log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
@@ -1375,7 +1375,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                     break;
             }
             if(type == ArtifactType.DEPTH){
-                LogFileUtils.logInfoOffline("SCANMODE","this is depth 1");
+                //LogFileUtils.logInfoOffline("SCANMODE","this is depth 1");
             }
             //set information if child is detected (note: this is unsupported on ARCore devices and for lying children wrongly oriented)
            // boolean childDetected = getCamera().getPersonCount() == 1;
@@ -1387,7 +1387,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             log.setBoundingBox(boundinBox);
 
             if(type == ArtifactType.DEPTH){
-                LogFileUtils.logInfoOffline("SCANMODE","this is depth 2");
+            //    LogFileUtils.logInfoOffline("SCANMODE","this is depth 2");
             }
             //set metadata
             log.setPath(artifactFile.getPath());
@@ -1397,7 +1397,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             log.setDeleted(false);
 
             if(type == ArtifactType.DEPTH){
-                LogFileUtils.logInfoOffline("SCANMODE","this is depth 3");
+             //   LogFileUtils.logInfoOffline("SCANMODE","this is depth 3");
             }
             log.setQrCode(person.getQrcode());
             log.setCreateDate(mNowTime);
@@ -1408,7 +1408,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             log.setEnvironment(session.getEnvironment());
             log.setChild_distance(child_distance);
             if(type == ArtifactType.DEPTH){
-                LogFileUtils.logInfoOffline("SCANMODE","this is depth 4");
+               // LogFileUtils.logInfoOffline("SCANMODE","this is depth 4");
             }
             log.setLight_score(light_score);
             log.setOrientation(orientation);
