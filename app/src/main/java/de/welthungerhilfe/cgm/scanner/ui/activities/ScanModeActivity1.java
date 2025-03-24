@@ -62,6 +62,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -88,6 +89,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.Audio;
 import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARRealSenseCamera1;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.ARRealSenseCamera2;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractIntelARCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
@@ -842,7 +844,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                 }
             }
 
-            mCameraInstance = new ARRealSenseCamera1(this,depthMode,previewSize);
+            mCameraInstance = new ARRealSenseCamera2(this,depthMode,previewSize);
             // mCameraInstance = new ARRealSenseCamera1(this,depthMode,previewSize);
            /* if (AREngineCamera.shouldUseAREngine()) {
                 mCameraInstance = new AREngineCamera(this, depthMode, previewSize);
@@ -1036,8 +1038,10 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         }
     }
 
+    float[] position;
+    float[] rotation;
     @Override
-    public void onAngleReceived(double verticalAngle,double horizontalAngle) {
+    public void onAngleReceived(double verticalAngle,double horizontalAngle, float[] position, float[]rotation) {
        // activityScanModeBinding.tvAngle.setText(" "+mCameraInstance.getLightIntensity());
         this.verticalAngle = 90-verticalAngle;
 
@@ -1057,9 +1061,12 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
 
         }
+        this.position = position;
+        this.rotation =rotation;
      //   activityScanModeBinding.tvAngle.setText(angle.substring(0,4)+"");
        // this.angle = angle;
       //  activityScanModeBinding.tvAngle.setText(""+mCameraInstance.getPersonCount());
+
     }
 
     Float distance;
@@ -1138,6 +1145,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             FileOutputStream stream = new FileOutputStream(file);
             ZipOutputStream zip = new ZipOutputStream(stream);
             byte[] info = (width + "x" + height + "_0.001_7_" + getPose("_") + "\n").getBytes();
+            //LogFileUtils.logInfoOffline(TAG, "pose: " +getPose("_"));
             try {
 
             }catch (Exception e){
@@ -1154,8 +1162,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         }
     }
 
-    float[] position = new float[] {0, 0, 0};
-    float[] rotation = new float[] {0, 0, 0, 1};
+/*    float[] position = new float[] {0, 0, 0};
+    float[] rotation = new float[] {0, 0, 0, 1};*/
     public String getPose(String separator) {
         String output = "";
         output += rotation[0] + separator;

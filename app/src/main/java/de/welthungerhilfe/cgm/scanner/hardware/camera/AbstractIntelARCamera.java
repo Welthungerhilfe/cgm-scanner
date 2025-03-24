@@ -21,6 +21,7 @@ import com.intel.realsense.librealsense.DepthFrame;
 import com.intel.realsense.librealsense.RsContext;
 
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -38,7 +39,7 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
 
         void onDepthDataReceived(Depthmap depthmap, int frameIndex, DepthFrame depthFrame, int height, int width, byte[] byteArray);
 
-        void onAngleReceived(double verticalAngle, double horizontalAngle);
+        void onAngleReceived(double verticalAngle, double horizontalAngle, float[] position, float[] rotation);
 
         void onDistancereceived(Float distance);
 
@@ -217,6 +218,8 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
         }
     }
 
+
+
     protected void onProcessColorData(Bitmap bitmapPreview,Bitmap bitmapSave,int saveFrameIndex) {
         for (Object listener : mListeners) {
             if(saveFrameIndex % AppConstants.SCAN_FRAMESKIP_REALSENSE == 0 && bitmapSave!=null && bitmapPreview!=null) {
@@ -288,10 +291,10 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
 
     }
 
-    protected void onProcessAngle(){
+    protected void onProcessAngle(float[] position, float[] rotation){
         for (Object listener : mListeners) {
 
-            ((Camera2DataListener)listener).onAngleReceived(verticalAngle,horizontalAngle);
+            ((Camera2DataListener)listener).onAngleReceived(verticalAngle,horizontalAngle,position,rotation);
         }
 
     }

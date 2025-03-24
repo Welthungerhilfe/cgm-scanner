@@ -52,6 +52,8 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
     private RsContext mRsContext;
 
     private Align mAlign;
+
+
     public ARRealSenseCamera1(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
         super(activity, depthMode, previewSize);
     }
@@ -192,7 +194,7 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                                     public void run() {
                                         onProcessColorData(bitmap1, null, 0);
                                     //    createPose(bitmap1);
-                                       onProcessAngle();
+                                      // onProcessAngle(po);
                                     }
                                 });
                             }

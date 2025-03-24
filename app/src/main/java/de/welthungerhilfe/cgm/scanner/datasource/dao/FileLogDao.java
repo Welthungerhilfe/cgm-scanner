@@ -105,21 +105,21 @@ public interface FileLogDao {
     @Query("SELECT * FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND light_score_synced=0 AND type='depth' AND environment=:environment AND light_score IS NOT 0 ORDER BY createDate LIMIT 150")
     List<FileLog>  loadChildLightScoreFileLog(int environment);
 
-    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE child_distance_synced=0 AND type='depth' AND environment=:environment")
+    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND child_distance_synced=0 AND type='depth' AND environment=:environment")
     LiveData<Long> getDistanceCount(int environment);
 
-    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE autoDetectSynced=0 AND type='depth' AND environment=:environment")
+    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND autoDetectSynced=0 AND type='depth' AND environment=:environment")
     LiveData<Long> getAutoDetectedCount(int environment);
 
-    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE poseScoreSynced=0 AND type='rgb' AND environment=:environment")
+    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND poseScoreSynced=0 AND type='rgb' AND environment=:environment")
     LiveData<Long> getAppPoseScoreCount(int environment);
 
-    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE bounding_box_synced=0 AND type='rgb' AND environment=:environment")
+    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND bounding_box_synced=0 AND type='rgb' AND environment=:environment")
     LiveData<Long> getAppBoundingBoxCount(int environment);
 
-    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE orientation_synced=0 AND type='depth' AND environment=:environment")
+    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND orientation_synced=0 AND type='depth' AND environment=:environment")
     LiveData<Long> getAppOrientationCount(int environment);
 
-    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE light_score_synced=0 AND type='depth' AND environment=:environment")
+    @Query("SELECT COUNT(id) FROM " + TABLE_FILE_LOG + " WHERE scanServerId IS NOT NULL AND light_score_synced=0 AND type='depth' AND environment=:environment")
     LiveData<Long> getChildLightScoreCount(int environment);
 }
