@@ -285,7 +285,7 @@
     <string name="mam_hfa_message">Contact a local doctor or health officer</string>
 
     <!-- Upload manager !-->
-    <string name="label_overview">Upload Status</string>
+    <string name="label_overview">Upload Status:- </string>
     <string name="label_upload_speed">Upload Speed : </string>
     <string name="label_upload_expect">Expected Time : </string>
     <string name="label_total_size">Total Size : </string>

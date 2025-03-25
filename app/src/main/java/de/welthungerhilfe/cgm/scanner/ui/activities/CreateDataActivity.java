@@ -127,7 +127,7 @@ public class CreateDataActivity extends BaseActivity {
         viewModel.getCurrentTab().observe(this, tab -> {
             activityCreateBinding.viewpager.setCurrentItem(tab);
         });
-        viewModel.syncManualMeasurements(qrCode,sessionManager.getEnvironment());
+        //viewModel.syncManualMeasurements(qrCode,sessionManager.getEnvironment());
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         createLocationRequest();
 

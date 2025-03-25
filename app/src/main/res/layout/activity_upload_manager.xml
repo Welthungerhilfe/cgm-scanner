@@ -73,11 +73,23 @@
                 android:layout_height="wrap_content">
 
                 <TextView
+                    android:id="@+id/tv_upload"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/label_overview"
                     android:textColor="@color/colorBlack"
                     android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_upload_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@color/colorBlack"
+                    android:textSize="16sp"
+                    android:layout_toRightOf="@+id/tv_upload"
+                    android:layout_marginLeft="8dp"
                     android:textStyle="bold" />
 
                 <ImageView

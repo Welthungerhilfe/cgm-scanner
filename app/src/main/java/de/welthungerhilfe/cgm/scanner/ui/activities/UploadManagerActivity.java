@@ -24,7 +24,10 @@ import androidx.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBar;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -40,6 +43,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.repository.FileLogRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.MeasureRepository;
 import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.UploadManagerViewModel;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerUploadAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContactSupportDialog;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ContextMenuDialog;
@@ -122,6 +126,25 @@ public class UploadManagerActivity extends BaseActivity implements Runnable {
                 ContactSupportDialog.show(activity, null, null);
             });
         });
+
+        WorkManager.getInstance(getApplicationContext())
+                .getWorkInfosForUniqueWorkLiveData("SyncingWorkManager")
+                .observe(UploadManagerActivity.this, workInfos -> {
+                    if (workInfos == null || workInfos.isEmpty()) {
+                        activityUploadManagerBinding.tvUploadStatus.setText("not active");
+
+                        Log.d("WorkManagerStatus", "WorkManager is not active");
+                        return;
+                    }
+
+                    for (WorkInfo workInfo : workInfos) {
+                        Log.d("WorkManagerStatus", "WorkManager state: " + workInfo.getState().name());
+                        activityUploadManagerBinding.tvUploadStatus.setText(workInfo.getState().name());
+                        if (workInfo.getState() == WorkInfo.State.RUNNING) {
+
+                        }
+                    }
+                });
     }
 
     private void setupToolbar() {
