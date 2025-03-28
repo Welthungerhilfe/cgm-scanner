@@ -309,7 +309,7 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
         updated = true;
         MultipartBody.Part body = null;
         final File file = new File(log.getPath());
-        LogFileUtils.logInfo(TAG, "Uploading file " + file.getPath());
+        LogFileUtils.logInfo(TAG, "Uploading file " + file.getPath()+" ---- "+sessionManager.getAuthTokenWithBearer());
 
         try {
             FileInputStream inputStream = new FileInputStream(file);

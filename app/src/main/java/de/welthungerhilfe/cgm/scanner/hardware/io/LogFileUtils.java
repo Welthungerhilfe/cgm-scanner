@@ -13,7 +13,9 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
@@ -62,21 +64,29 @@ public class LogFileUtils {
 
     public static void logInfo(String tag, String text) {
         Log.i(tag, text);
-        String message = DataFormat.convertMilliSeconsToServerDate(System.currentTimeMillis());
+        //String message = DataFormat.convertMilliSeconsToServerDate(System.currentTimeMillis());
+        String message = getUTCTime();
+
         message += " : Info-" + tag + " -> " + text;
         startAsyncToWrite(message);
 
     }
 
+    private static String getUTCTime() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf.format(new Date());
+    }
+
     public static void logInfoOffline(String tag, String text) {
         Log.i(tag, text);
-        String message = DataFormat.convertMilliSeconsToServerDate(System.currentTimeMillis());
+        //String message = DataFormat.convertMilliSeconsToServerDate(System.currentTimeMillis());
+        String message = getUTCTime();
+
         message += " : Info-" + tag + " -> " + text;
         startAsyncToWriteOffline(message);
 
     }
-
-
 
 
     public static void logError(String tag, String text) {
