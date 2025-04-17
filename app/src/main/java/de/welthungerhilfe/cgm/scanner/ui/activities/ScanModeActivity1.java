@@ -572,8 +572,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     }
 
     private void setupScanArtifacts() {
-        File extFileDir = AppController.getInstance().getRootDirectory(this);
-
+       // File extFileDir = AppController.getInstance().getRootDirectory(this);
+        File extFileDir = AppController.getInstance().getPublicAppDirectory(this);
         LogFileUtils.logInfo(TAG, "Using directory " + extFileDir.getParent());
         mScanArtefactsOutputFolder = new File(extFileDir, person.getQrcode() + "/measurements/" + mNowTimeString + "/");
         mDepthmapSaveFolder = new File(mScanArtefactsOutputFolder, "depth");

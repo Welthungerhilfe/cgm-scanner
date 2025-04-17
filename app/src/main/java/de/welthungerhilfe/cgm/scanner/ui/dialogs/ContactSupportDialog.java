@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.media.MediaActionSound;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,10 +34,16 @@ import android.view.Window;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
@@ -112,19 +119,29 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         }
 
         Intent sendIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-        sendIntent.setType(SUPPORT_MIME);
-        sendIntent.setPackage(SUPPORT_APP);
+        sendIntent.setType("*/*");
+        sendIntent.setPackage("com.google.android.gm");
         sendIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{SUPPORT_EMAIL});
         sendIntent.putExtra(Intent.EXTRA_TEXT, message);
         sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
-        ArrayList<Uri> uris = new ArrayList<Uri>();
-        if (audioFile != null) uris.add(Uri.fromFile(audioFile));
-        if (screenshot != null) uris.add(Uri.fromFile(screenshot));
-        if (zip != null) uris.add(Uri.fromFile(zip));
-        if(zip1!=null)uris.add(Uri.fromFile(zip1));
+        ArrayList<Uri> uris = new ArrayList<>();
+        if (audioFile != null && audioFile.exists() && audioFile.canRead()) {
+            uris.add(FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", audioFile));
+        }
+        if (screenshot != null && screenshot.exists() && screenshot.canRead()) {
+            uris.add(FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", screenshot));
+        }
+        if (zip != null && zip.exists() && zip.canRead()) {
+            uris.add(FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", zip));
+        }
+        if (zip1 != null && zip1.exists() && zip1.canRead()) {
+            uris.add(FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", zip1));
+        }
         addLoggingFilesZip(uris);
         addLoggingFilesZip1(uris);
+
+        sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
         sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 
         try {
@@ -139,8 +156,19 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         File extFileDir = AppController.getInstance().getRootDirectory(context);
         File logFilesFolder = new File(extFileDir, AppConstants.LOG_FILE_FOLDER);
         if (logFilesFolder.exists()) {
-            File file[] = logFilesFolder.listFiles();
-            uris.add(attachFiles(file));
+            File[] files = logFilesFolder.listFiles();
+            if (files != null && files.length > 0) {
+                Uri zipUri = createZipFile(files, "logs.zip");
+                if (zipUri != null) {
+                    uris.add(zipUri);
+                } else {
+                    Log.e("Email", "Failed to create zip file for logs");
+                }
+            } else {
+                Log.d("Email", "No files found in log folder: " + logFilesFolder.getAbsolutePath());
+            }
+        } else {
+            Log.d("Email", "Log folder does not exist: " + logFilesFolder.getAbsolutePath());
         }
     }
 
@@ -148,8 +176,58 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         File extFileDir = AppController.getInstance().getRootDirectory(context);
         File logFilesFolder = new File(extFileDir, AppConstants.LOG_FILE_FOLDER_OFFLINE);
         if (logFilesFolder.exists()) {
-            File file[] = logFilesFolder.listFiles();
-            uris.add(attachFiles1(file));
+            File[] files = logFilesFolder.listFiles();
+            if (files != null && files.length > 0) {
+                Uri zipUri = createZipFile(files, "logs_offline.zip");
+                if (zipUri != null) {
+                    uris.add(zipUri);
+                } else {
+                    Log.e("Email", "Failed to create zip file for offline logs");
+                }
+            } else {
+                Log.d("Email", "No files found in offline log folder: " + logFilesFolder.getAbsolutePath());
+            }
+        } else {
+            Log.d("Email", "Offline log folder does not exist: " + logFilesFolder.getAbsolutePath());
+        }
+    }
+
+    Uri createZipFile(File[] files, String zipFileName) {
+        try {
+            // Create a temporary zip file in the cache directory
+            File zipFile = new File(context.getCacheDir(), zipFileName);
+            if (zipFile.exists()) {
+                zipFile.delete(); // Delete existing file to avoid conflicts
+            }
+
+            // Create zip file
+            FileOutputStream fos = new FileOutputStream(zipFile);
+            ZipOutputStream zos = new ZipOutputStream(fos);
+
+            for (File file : files) {
+                if (file.isFile() && file.canRead()) {
+                    ZipEntry zipEntry = new ZipEntry(file.getName());
+                    zos.putNextEntry(zipEntry);
+
+                    // Read the file and write to zip
+                    FileInputStream fis = new FileInputStream(file);
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = fis.read(buffer)) > 0) {
+                        zos.write(buffer, 0, length);
+                    }
+                    fis.close();
+                    zos.closeEntry();
+                }
+            }
+            zos.close();
+            fos.close();
+
+            // Generate FileProvider URI for the zip file
+            return FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", zipFile);
+        } catch (IOException e) {
+            Log.e("Email", "Error creating zip file: " + e.getMessage());
+            return null;
         }
     }
     void onCancel() {

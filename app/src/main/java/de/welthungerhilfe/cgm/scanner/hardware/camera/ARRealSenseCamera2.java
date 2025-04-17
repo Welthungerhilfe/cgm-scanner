@@ -21,16 +21,23 @@ import com.intel.realsense.librealsense.DeviceListener;
 import com.intel.realsense.librealsense.Extension;
 import com.intel.realsense.librealsense.Frame;
 import com.intel.realsense.librealsense.FrameSet;
+import com.intel.realsense.librealsense.HoleFillingFilter;
 import com.intel.realsense.librealsense.Intrinsic;
 import com.intel.realsense.librealsense.MotionFrame;
+import com.intel.realsense.librealsense.Option;
 import com.intel.realsense.librealsense.Pipeline;
 import com.intel.realsense.librealsense.RsContext;
 import com.intel.realsense.librealsense.StreamFormat;
 import com.intel.realsense.librealsense.StreamType;
 import com.intel.realsense.librealsense.VideoStreamProfile;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
@@ -100,6 +107,8 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
         }
     }
 
+    HoleFillingFilter holeFillingFilter;
+
     private void configAndStart() throws Exception {
         try (Config config = new Config()) {
             options = new AccuratePoseDetectorOptions.Builder()
@@ -111,6 +120,9 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
             config.enableStream(StreamType.COLOR, 1280, 720);
             config.enableStream(StreamType.ACCEL, StreamFormat.MOTION_XYZ32F);
             config.enableStream(StreamType.GYRO, StreamFormat.MOTION_XYZ32F); // Enable gyroscope stream
+
+            holeFillingFilter = new HoleFillingFilter();
+            holeFillingFilter.setValue(Option.HOLES_FILL, 2);
 
             mPipeline.start(config);
             mAlign = new Align(StreamType.COLOR);
@@ -216,7 +228,9 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
                             // Process depth frame (unchanged)
                             try (Frame depth = frames.first(StreamType.DEPTH)) {
                                 DepthFrame depthFrame1 = depth.as(Extension.DEPTH_FRAME);
+
                                 mTargetDistance = depthFrame1.getDistance(depthFrame1.getWidth() / 2, depthFrame1.getHeight() / 2);
+
                             }
 
                             if (mFrameIndex % AppConstants.SCAN_FRAMESKIP_REALSENSE == 0 && !isBackgrounThreadActive) {
@@ -277,7 +291,7 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
     private class SaveAlignFramesTask extends AsyncTask<Void, Void, Void> {
         private FrameSet frameSet;
         private int frameIndex;
-        private DepthFrame depthFrameSave;
+        private DepthFrame depthFrameSave, depthFrameHoleFilling;
         private Frame colorFrameSave;
         private Bitmap bitmapSave;
         private byte[] byteArray;
@@ -290,9 +304,15 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
 
         @Override
         protected Void doInBackground(Void... voids) {
+
+          //  FrameSet filteredDepthSet = holeFillingFilter.process(frameSet);
+
             try (FrameSet alignedFrames = mAlign.process(frameSet)) {
+
+
                 try (Frame f = alignedFrames.first(StreamType.DEPTH)) {
                     depthFrameSave = f.as(Extension.DEPTH_FRAME);
+                    //depthFrameSave = (DepthFrame) holeFillingFilter.process(depthFrameHoleFilling);
                 }
                 try (Frame f1 = alignedFrames.first(StreamType.COLOR)) {
                     colorFrameSave = f1;
@@ -304,8 +324,11 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
                 dataSize = stride * height;
                 byteArray = new byte[dataSize];
                 depthFrameSave.getData(byteArray);
+                byteArray = fillZeroDepths(byteArray, width, height, stride);
+
+
             } catch (Exception e) {
-                Log.d(TAG, "SaveAlignFramesTask error: " + e.getMessage());
+                LogFileUtils.logInfoOffline(TAG, "SaveAlignFramesTask error: " + e.getMessage());
             }
             return null;
         }
@@ -317,6 +340,73 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
             onProcessDepthData(null, depthFrameSave, height, width, byteArray, frameIndex);
             frameSet.close();
         }
+    }
+
+    public byte[] fillZeroDepths(byte[] byteArray, int width, int height, int stride) {
+        ByteBuffer buffer = ByteBuffer.wrap(byteArray).order(ByteOrder.LITTLE_ENDIAN);
+
+        short[][] depth = new short[height][width];
+        // Convert byte array to 2D short array
+        for (int y = 0; y < height; y++) {
+            int rowOffset = y * stride;
+            for (int x = 0; x < width; x++) {
+                depth[y][x] = buffer.getShort(rowOffset + x * 2);
+            }
+        }
+
+        // Track visited zero-pixels
+        boolean[][] visited = new boolean[height][width];
+
+        // Process depth data to fill zeros
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (depth[y][x] == 0 && !visited[y][x]) {
+                    fillConnectedZeros(depth, visited, x, y, width, height);
+                }
+            }
+        }
+
+        // Convert updated depth back to byte array
+        buffer.rewind(); // Go back to beginning of buffer
+        for (int y = 0; y < height; y++) {
+            int rowOffset = y * stride;
+            for (int x = 0; x < width; x++) {
+                buffer.putShort(rowOffset + x * 2, depth[y][x]);
+            }
+        }
+
+        return byteArray;
+    }
+    void fillConnectedZeros(short[][] depth, boolean[][] visited, int x, int y, int width, int height) {
+        List<int[]> toFill = new ArrayList<>();
+        int maxRadius = 5;
+
+        // Collect connected zeros (for a patch)
+        for (int r = 1; r <= maxRadius; r++) {
+            for (int dy = -r; dy <= r; dy++) {
+                for (int dx = -r; dx <= r; dx++) {
+                    int nx = x + dx;
+                    int ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        if (!visited[ny][nx]) {
+                            if (depth[ny][nx] == 0) {
+                                toFill.add(new int[]{nx, ny});
+                                visited[ny][nx] = true;
+                            } else {
+                                // Found a non-zero value, use it to fill all previous zeros
+                                short replacement = depth[ny][nx];
+                                for (int[] pos : toFill) {
+                                    depth[pos[1]][pos[0]] = replacement;
+                                }
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // No non-zero neighbor found, leave all as zero
     }
 
     void saveAlignFrames1(FrameSet frameSet, int frameIndex) {

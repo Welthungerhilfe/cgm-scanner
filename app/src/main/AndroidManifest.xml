@@ -182,20 +182,15 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
-                <!--
-                    Add in your scheme/host from registered redirect URI
-                    note that the leading "/" is required for android:path
-                -->
                 <data
                     android:host="de.welthungerhilfe.cgm.scanner"
                     android:path="/{OAUTH_PATH}"
                     android:scheme="msauth" />
             </intent-filter>
         </activity>
+
 
         <activity
             android:name=".ui.activities.LanguageSelectionActivity"
@@ -228,7 +223,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.provider"
+            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

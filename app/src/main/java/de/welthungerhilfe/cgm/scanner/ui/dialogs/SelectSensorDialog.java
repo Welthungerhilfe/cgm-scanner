@@ -24,7 +24,7 @@ import io.reactivex.rxjava3.annotations.Nullable;
 public class SelectSensorDialog extends DialogFragment {
 
     DialogSelsectSensorModeBinding dialogSelectModeBinding;
-    int selectedSensor = AppConstants.NO_SENSOR_SELECTED;
+    int selectedSensor = AppConstants.NO_SENSOR_MODE_SELECTED;
     SessionManager sessionManager;
     SensorSelectionListener sensorSelectionListener;
 
@@ -49,9 +49,10 @@ public class SelectSensorDialog extends DialogFragment {
         String ultrasonicSensorDesc = "<b>External Sensor Scan:</b> Use an external sensor attached to your phone for child scanning";
         dialogSelectModeBinding.textExternalSensor.setText(Html.fromHtml(ultrasonicSensorDesc, Html.FROM_HTML_MODE_LEGACY));
         sessionManager = new SessionManager(getActivity());
-
+        Log.i("SensorDialog","this is select sensor "+sessionManager.getSensorMode());
         if (sessionManager.getSensorMode() == AppConstants.NO_SENSOR_MODE_SELECTED) {
             getDialog().setCancelable(false);
+            Log.i("SensorDialog","this is select sensor "+sessionManager.getSensorMode());
         }
 
         if (sessionManager.getSensorMode() == AppConstants.NO_SENSOR_SELECTED) {
@@ -60,6 +61,8 @@ public class SelectSensorDialog extends DialogFragment {
         if (sessionManager.getSensorMode() == AppConstants.SENSOR_SELECTED) {
             selectSensor();
         }
+
+
 
 
         dialogSelectModeBinding.btExternalSensor.setOnClickListener(new View.OnClickListener() {

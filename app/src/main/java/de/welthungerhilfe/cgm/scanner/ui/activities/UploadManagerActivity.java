@@ -19,6 +19,8 @@
 package de.welthungerhilfe.cgm.scanner.ui.activities;
 
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import android.os.Bundle;
@@ -27,6 +29,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -65,6 +69,12 @@ public class UploadManagerActivity extends BaseActivity implements Runnable {
 
     SessionManager sessionManager;
 
+    private int totalItems = 0;
+    private int remainingItems = 0;
+    private int completedItems = 0;
+
+    int scanCount, stdScanCount, distanceCount, autoDetectCount, poseScoreCount,boundingBoxCount, orientationCount;
+
     public void onCreate(Bundle savedBundle) {
         super.onCreate(savedBundle);
 
@@ -89,33 +99,82 @@ public class UploadManagerActivity extends BaseActivity implements Runnable {
 
         repository.getScanMeasureCount().observe(this, data ->{
             activityUploadManagerBinding.tvRemainScan.setText(""+data);
+            scanCount = Math.toIntExact(data);
+            updateProgress();
         });
 
         repository.getStdScanMeasureCount().observe(this, data ->{
             activityUploadManagerBinding.tvRemainStdscan.setText(""+data);
+            stdScanCount = Math.toIntExact(data);
+            updateProgress();
         });
 
         fileLogRepository.getDistanceCount(sessionManager.getEnvironment()).observe(this, data ->{
             activityUploadManagerBinding.tvRemainDistanceResult.setText(""+data);
+            distanceCount = Math.toIntExact(data);
+
+            updateProgress();
         });
 
         fileLogRepository.getAutoDetectedCount(sessionManager.getEnvironment()).observe(this, data ->{
             activityUploadManagerBinding.tvRemainAutodetectedResult.setText(""+data);
+            autoDetectCount = Math.toIntExact(data);
+            updateProgress();
         });
         fileLogRepository.getAppPoseScoreCount(sessionManager.getEnvironment()).observe(this, data ->{
             activityUploadManagerBinding.tvRemainPosescoreResults.setText(""+data);
+            poseScoreCount = Math.toIntExact(data);
+            updateProgress();
         });
 
         fileLogRepository.getAppBoundingBoxCount(sessionManager.getEnvironment()).observe(this, data ->{
             activityUploadManagerBinding.tvRemainAppboundingboxResult.setText(""+data);
+            boundingBoxCount = Math.toIntExact(data);
+            updateProgress();
         });
 
         fileLogRepository.getAppOrientationCount(sessionManager.getEnvironment()).observe(this, data ->{
             activityUploadManagerBinding.tvRemainOrientationResults.setText(""+data);
+            orientationCount = Math.toIntExact(data);
+            updateProgress();
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                updateTotalItem();
+            }, 500);
         });
+
 
        /* activityUploadManagerBinding.tvScan.setText("Remaining scan -> "+repository.getScanMeasureCount());
         activityUploadManagerBinding.tvStdscan.setText("Remaining STD test scan -> "+repository.getStdScanMeasureCount());*/
+
+/*        LiveData<Long> scanCount = repository.getScanMeasureCount();
+        LiveData<Long> stdScanCount = repository.getStdScanMeasureCount();
+        LiveData<Long> distanceCount = fileLogRepository.getDistanceCount(sessionManager.getEnvironment());
+        LiveData<Long> autoDetectedCount = fileLogRepository.getAutoDetectedCount(sessionManager.getEnvironment());
+        LiveData<Long> poseScoreCount = fileLogRepository.getAppPoseScoreCount(sessionManager.getEnvironment());
+        LiveData<Long> boundingBoxCount = fileLogRepository.getAppBoundingBoxCount(sessionManager.getEnvironment());
+        LiveData<Long> orientationCount = fileLogRepository.getAppOrientationCount(sessionManager.getEnvironment());*/
+
+        // Using MediatorLiveData to combine all sources
+ /*       MediatorLiveData<Integer> combinedProgress = new MediatorLiveData<>();
+
+        combinedProgress.addSource(scanCount, value -> updateProgress(combinedProgress));
+        combinedProgress.addSource(stdScanCount, value -> updateProgress(combinedProgress));
+        combinedProgress.addSource(distanceCount, value -> updateProgress(combinedProgress));
+        combinedProgress.addSource(autoDetectedCount, value -> updateProgress(combinedProgress));
+        combinedProgress.addSource(poseScoreCount, value -> updateProgress(combinedProgress));
+        combinedProgress.addSource(boundingBoxCount, value -> updateProgress(combinedProgress));
+        combinedProgress.addSource(orientationCount, value -> updateProgress(combinedProgress));*/
+
+  /*      combinedProgress.observe(this, progress -> {
+            Log.i("Uploadmanager","this is uploas status "+totalItems);
+            if (totalItems > 0) {
+                int progressPercentage = (completedItems * 100) / totalItems;
+                activityUploadManagerBinding.progressOverallMeta.setProgress(progressPercentage);
+                activityUploadManagerBinding.txtUploadedSizeMeta.setText(
+                        String.format("Completed: %d / %d", completedItems, totalItems)
+                );
+            }
+        });*/
 
         View contextMenu = activityUploadManagerBinding.contextMenuButton;
         contextMenu.setOnClickListener(v -> {
@@ -145,6 +204,54 @@ public class UploadManagerActivity extends BaseActivity implements Runnable {
                         }
                     }
                 });
+    }
+
+    private void updateTotalItem(){
+        if (totalItems == 0) {
+            totalItems = (int) (scanCount + stdScanCount + distanceCount + autoDetectCount +
+                    poseScoreCount + boundingBoxCount + orientationCount);
+            updateProgress();
+            Log.i("UploadManager","this is size of total 0 "+totalItems +" "+completedItems);
+
+        }
+    }
+
+    private void updateProgress() {
+        // Calculate total and remaining items
+      //  Log.i("Uploadmanager", "this is uploas status 1=> " + totalItems);
+
+        MeasureRepository repository = MeasureRepository.getInstance(this);
+        FileLogRepository fileLogRepository = FileLogRepository.getInstance(this);
+
+        //  Long scanCount = repository.getScanMeasureCount().getValue() != null ? repository.getScanMeasureCount().getValue() : 0;
+
+      /*  Long stdScanCount = repository.getStdScanMeasureCount().getValue() != null ? repository.getStdScanMeasureCount().getValue() : 0;
+        Long distanceCount = fileLogRepository.getDistanceCount(sessionManager.getEnvironment()).getValue() != null ? fileLogRepository.getDistanceCount(sessionManager.getEnvironment()).getValue() : 0;
+        Long autoDetectedCount = fileLogRepository.getAutoDetectedCount(sessionManager.getEnvironment()).getValue() != null ? fileLogRepository.getAutoDetectedCount(sessionManager.getEnvironment()).getValue() : 0;
+        Long poseScoreCount = fileLogRepository.getAppPoseScoreCount(sessionManager.getEnvironment()).getValue() != null ? fileLogRepository.getAppPoseScoreCount(sessionManager.getEnvironment()).getValue() : 0;
+        Long boundingBoxCount = fileLogRepository.getAppBoundingBoxCount(sessionManager.getEnvironment()).getValue() != null ? fileLogRepository.getAppBoundingBoxCount(sessionManager.getEnvironment()).getValue() : 0;
+        Long orientationCount = fileLogRepository.getAppOrientationCount(sessionManager.getEnvironment()).getValue() != null ? fileLogRepository.getAppOrientationCount(sessionManager.getEnvironment()).getValue() : 0;
+*/
+        // Calculate totals
+        remainingItems = (int) (scanCount + stdScanCount + distanceCount + autoDetectCount +
+                poseScoreCount + boundingBoxCount + orientationCount);
+
+        // Set initial total only once
+
+
+
+        if (totalItems > 0) {
+            completedItems = totalItems - remainingItems;
+
+
+            int progressPercentage = (completedItems * 100) / totalItems;
+            activityUploadManagerBinding.progressOverallMeta.setProgress(progressPercentage);
+            //combinedProgress.setValue(completedItems);
+        }
+        Log.i("UploadManager","this is size of total 1 "+totalItems+" "+completedItems);
+        activityUploadManagerBinding.txtUploadedSizeMeta.setText(
+                String.format("Completed: %d / %d", completedItems, totalItems)
+        );
     }
 
     private void setupToolbar() {

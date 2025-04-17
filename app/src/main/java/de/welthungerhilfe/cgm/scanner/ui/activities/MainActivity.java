@@ -187,10 +187,12 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         observePersionList();
 
-        if(session.getSensorMode() == AppConstants.NO_SENSOR_MODE_SELECTED) {
+    /*    if(session.getSensorMode() == AppConstants.NO_SENSOR_MODE_SELECTED) {
             SelectSensorDialog selectSensorDialog = new SelectSensorDialog();
             selectSensorDialog.show(getSupportFragmentManager(),"SelectSensorDialog");
-        }
+        }*/
+
+        session.setSensorMode(AppConstants.SENSOR_SELECTED);
       /*  if(session.getSelectedMode() == AppConstants.NO_MODE_SELECTED){
             if(session.getEnvironmentMode() == AppConstants.CGM_RST_MODE){
                 SelectModeDialog selectModeDialog = new SelectModeDialog();
@@ -443,9 +445,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             switch (menuItem.getItemId()) {
 
                 case R.id.menuScans:
-                        SelectSensorDialog selectSensorDialog = new SelectSensorDialog();
-                        selectSensorDialog.show(getSupportFragmentManager(),"SelectSensorDialog");
-
+                     /*   SelectSensorDialog selectSensorDialog = new SelectSensorDialog();
+                        selectSensorDialog.show(getSupportFragmentManager(),"SelectSensorDialog");*/
+                    Toast.makeText(MainActivity.this,"Sensor Mode Available Only",Toast.LENGTH_LONG).show();
                     break;
                 case R.id.menuUploadManager:
                     startActivity(new Intent(MainActivity.this, UploadManagerActivity.class));
@@ -491,7 +493,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     public void logout() {
         session.setSigned(false);
         session.setSelectedMode(AppConstants.CGM_MODE);
-        session.setSensorMode(AppConstants.NO_SENSOR_MODE_SELECTED);
+        //session.setSensorMode(AppConstants.NO_SENSOR_MODE_SELECTED);
         session.setCurrentLogFilePath(null);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (WifiStateChangereceiverHelperService.isServiceRunning) {

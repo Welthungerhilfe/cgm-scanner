@@ -38,6 +38,7 @@ public class AppConstants {
 
     public static final String API_URL_DEMO_QA = "{API_URL_QA}/";
 
+
     public static final String AUTH_SYRIA = "{OAUTH_SCOPE_SYRIA}";
 
     public static final String API_URL_SYRIA = "{API_URL_SYRIA}/";

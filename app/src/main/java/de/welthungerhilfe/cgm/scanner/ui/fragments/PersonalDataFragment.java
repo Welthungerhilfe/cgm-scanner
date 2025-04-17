@@ -306,7 +306,7 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
         int resultCode = activityResult.getResultCode();
         GmsDocumentScanningResult result =
                 GmsDocumentScanningResult.fromActivityResultIntent(activityResult.getData());
-        if (result.getPages() != null) {
+        if (result!= null && result.getPages() != null) {
             File file = new File(result.getPages().get(0).getImageUri().getPath());
 
 

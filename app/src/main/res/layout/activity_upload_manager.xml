@@ -241,6 +241,71 @@
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="5dp"
+                android:layout_marginTop="22dp"
+                android:background="@color/colorGreenTransparent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="17dp"
+                    android:background="@color/colorGreenTransparent">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="META DATA"
+                        android:textSize="15sp"
+                        android:textColor="@color/colorBlack"></TextView>
+
+
+
+                    <ProgressBar
+                        android:id="@+id/progressOverall_meta"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:progress="0" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/txtUploadedSize_meta"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TextView 1"
+                            android:textSize="12sp"
+                            android:textColor="@color/colorGreen" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" of "
+                            android:textSize="12sp"
+                            android:visibility="gone"
+                            android:textColor="@color/colorGreen" />
+
+                        <TextView
+                            android:id="@+id/txtTotalSize_meta"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TextView 3"
+                            android:textSize="12sp"
+                            android:textColor="@color/colorGreen"
+                            android:visibility="gone"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
 
 
 
@@ -251,14 +316,16 @@
                 android:text="@string/label_upload_status"
                 android:textColor="@color/colorBlack"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/upload_desc"
                 android:textSize="12sp"
-                android:layout_marginTop="14dp"></TextView>
+                android:layout_marginTop="14dp"
+                android:visibility="gone"></TextView>
 
 
             <androidx.cardview.widget.CardView
@@ -266,6 +333,7 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="5dp"
                 android:layout_marginTop="14dp"
+                android:visibility="gone"
                 android:background="@color/colorGreenTransparent">
 
                 <LinearLayout
@@ -365,7 +433,8 @@
                 android:text="Offline Result status"
                 android:textColor="@color/colorBlack"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -380,6 +449,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="5dp"
+                android:visibility="gone"
                 android:layout_marginTop="14dp"
                 android:background="@color/colorGreenTransparent">
 
