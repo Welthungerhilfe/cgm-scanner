@@ -253,6 +253,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="17dp"
+                    android:visibility="gone"
                     android:background="@color/colorGreenTransparent">
 
                     <TextView
@@ -289,7 +290,7 @@
                             android:layout_height="wrap_content"
                             android:text=" of "
                             android:textSize="12sp"
-                            android:visibility="gone"
+                            android:visibility="visible"
                             android:textColor="@color/colorGreen" />
 
                         <TextView
@@ -317,7 +318,7 @@
                 android:textColor="@color/colorBlack"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:visibility="gone"/>
+                android:visibility="visible"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -325,7 +326,7 @@
                 android:text="@string/upload_desc"
                 android:textSize="12sp"
                 android:layout_marginTop="14dp"
-                android:visibility="gone"></TextView>
+                android:visibility="visible"></TextView>
 
 
             <androidx.cardview.widget.CardView
@@ -333,7 +334,7 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="5dp"
                 android:layout_marginTop="14dp"
-                android:visibility="gone"
+                android:visibility="visible"
                 android:background="@color/colorGreenTransparent">
 
                 <LinearLayout
@@ -434,7 +435,7 @@
                 android:textColor="@color/colorBlack"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:visibility="gone"/>
+                android:visibility="visible"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -449,7 +450,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="5dp"
-                android:visibility="gone"
+                android:visibility="visible"
                 android:layout_marginTop="14dp"
                 android:background="@color/colorGreenTransparent">
 
@@ -636,7 +637,7 @@
                         android:text="Distance result remaining"
                         android:textSize="15sp"
                         android:layout_marginTop="18dp"
-                        android:visibility="gone"
+                        android:visibility="visible"
                         android:textColor="@color/colorBlack"/>
 
 
@@ -648,7 +649,7 @@
             </androidx.cardview.widget.CardView>
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerScans"
-                android:visibility="gone"
+                android:visibility="visible"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 

@@ -22,8 +22,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKey;
+
 import com.google.gson.Gson;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Locale;
 
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
@@ -76,24 +81,29 @@ public class SessionManager {
 
     private final String REALSENSE_SERIALNO= "REALSENSE_SERIALNO";
 
-
-
-
-
-
-
-
-
-
-
-
-
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
 
     public SessionManager(Context ctx) {
-        pref = ctx.getSharedPreferences(PREF_KEY_USER, Context.MODE_PRIVATE);
-        editor = pref.edit();
+        try {
+            MasterKey masterKey = new MasterKey.Builder(ctx)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build();
+
+            pref = EncryptedSharedPreferences.create(
+                    ctx,
+                    PREF_KEY_USER,
+                    masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+
+            editor = pref.edit();
+
+        } catch (GeneralSecurityException | IOException e) {
+            e.printStackTrace();
+            // Fallback or handle the error appropriately
+        }
     }
 
     public void setSigned(boolean signed) {
@@ -235,18 +245,18 @@ public class SessionManager {
             return null;
 
         } else {
-        return pref.getString(KEY_USER_TOKEN, null);
-         }
+            return pref.getString(KEY_USER_TOKEN, null);
+        }
     }
 
     public String getAuthTokenWithBearer() {
-       if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) {
             return null;
 
 
         } else {
-        return "bearer " + getAuthToken();
-          }
+            return "bearer " + getAuthToken();
+        }
 
     }
 

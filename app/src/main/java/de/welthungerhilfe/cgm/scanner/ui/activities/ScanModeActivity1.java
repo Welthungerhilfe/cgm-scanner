@@ -1317,7 +1317,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         float alpha = mOutlineAlpha * 0.9f + 0.1f;
         if (visible && (alpha > 0)) {
             mOutline.setAlpha(alpha);
-            mOutline.setVisibility(View.VISIBLE);
+            mOutline.setVisibility(View.GONE);
         } else {
             mOutline.setVisibility(View.GONE);
         }

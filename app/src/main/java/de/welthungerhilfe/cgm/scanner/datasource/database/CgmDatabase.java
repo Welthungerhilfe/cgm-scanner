@@ -28,6 +28,10 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import net.sqlcipher.database.SupportFactory;
+
+import java.nio.charset.StandardCharsets;
+
 import de.welthungerhilfe.cgm.scanner.datasource.dao.DeviceDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.FileLogDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.IndiaLocationDao;
@@ -405,8 +409,14 @@ public abstract class CgmDatabase extends RoomDatabase {
 
     public static CgmDatabase getInstance(Context context) {
         synchronized (sLock) {
+
+             byte[] PASSPHRASE = "MySuperSecretPassphrase123!".getBytes(StandardCharsets.UTF_8);
+
+// Create SupportFactory with passphrase
+            SupportFactory factory = new SupportFactory(PASSPHRASE);
             if (instance == null) {
                 instance = Room.databaseBuilder(context.getApplicationContext(), CgmDatabase.class, DATABASE)
+                        .openHelperFactory(factory)
                         .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_4,
                                 MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10,
                                 MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15,

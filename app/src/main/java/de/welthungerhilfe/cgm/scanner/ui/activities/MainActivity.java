@@ -46,6 +46,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.appcompat.widget.SearchView;
 import androidx.test.espresso.remote.EspressoRemoteMessage;
 
+import android.os.Environment;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -78,6 +79,10 @@ import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
@@ -360,6 +365,20 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         FirebaseCrashlytics.getInstance().setCustomKey("UserID", session.getUserEmail());
 
+        /*File original = getDatabasePath("offline_db");
+        File exportPath = new File(Environment.getExternalStorageDirectory(), "offline_db_copy");
+
+        try {
+            FileChannel src = new FileInputStream(original).getChannel();
+            FileChannel dst = new FileOutputStream(exportPath).getChannel();
+            dst.transferFrom(src, 0, src.size());
+            src.close();
+            dst.close();
+            Log.i("DB_EXPORT", "Database copied to " + exportPath.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+
     }
 
 
@@ -445,9 +464,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             switch (menuItem.getItemId()) {
 
                 case R.id.menuScans:
-                     /*   SelectSensorDialog selectSensorDialog = new SelectSensorDialog();
-                        selectSensorDialog.show(getSupportFragmentManager(),"SelectSensorDialog");*/
-                    Toast.makeText(MainActivity.this,"Sensor Mode Available Only",Toast.LENGTH_LONG).show();
+                        SelectSensorDialog selectSensorDialog = new SelectSensorDialog();
+                        selectSensorDialog.show(getSupportFragmentManager(),"SelectSensorDialog");
+                   // Toast.makeText(MainActivity.this,"Sensor Mode Available Only",Toast.LENGTH_LONG).show();
                     break;
                 case R.id.menuUploadManager:
                     startActivity(new Intent(MainActivity.this, UploadManagerActivity.class));

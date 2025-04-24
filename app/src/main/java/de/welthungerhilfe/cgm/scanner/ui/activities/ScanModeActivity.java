@@ -989,14 +989,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
             if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
                 getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OFF);
-                setOutline(true);
+                setOutline(false);
             } else if (childDetected) {
                 getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OUTLINE);
                 setFeedback(null);
-                setOutline(true);
+                setOutline(false);
             } else {
                 getCamera().setSkeletonMode(AbstractARCamera.SkeletonMode.OFF);
-                setOutline(true);
+                setOutline(false);
             }
 
             // if (mTxtFeedback.getVisibility() == View.GONE) {

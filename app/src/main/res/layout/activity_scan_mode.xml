@@ -220,10 +220,10 @@
                     xmlns:android="http://schemas.android.com/apk/res/android"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:paddingLeft="40dp"
-                    android:paddingTop="123dp"
-                    android:paddingRight="40dp"
-                    android:paddingBottom="123dp">
+                    android:paddingLeft="0dp"
+                    android:paddingTop="30dp"
+                    android:paddingRight="0dp"
+                    android:paddingBottom="30dp">
 
 
                     <ImageView
@@ -232,13 +232,13 @@
                         android:layout_height="match_parent"
 
                         android:src="@drawable/square"
-                        android:visibility="visible" />
+                        android:visibility="gone" />
 
                     <View
                         android:id="@+id/verticalLine"
                         android:layout_width="1dp"
                         android:layout_height="match_parent"
-                        android:background="@android:color/white"
+                        android:background="#55ffffff"
                         android:layout_centerInParent="true"
                         />
 
@@ -246,7 +246,7 @@
                         android:id="@+id/horizontalLine"
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="@android:color/white"
+                        android:background="#55ffffff"
                         android:layout_centerInParent="true"
                         />
                 </RelativeLayout>
