@@ -117,8 +117,8 @@ public class AppController extends Application {
 
     public File getRootDirectory(Context c) {
 
-        return getPublicAppDirectory(c);
-      /*  if (BuildConfig.DEBUG && (Build.VERSION.SDK_INT < 30)) {
+       // return getPublicAppDirectory(c);
+        if (BuildConfig.DEBUG && (Build.VERSION.SDK_INT < 30)) {
             return getPublicAppDirectory(c);
         }
 
@@ -135,7 +135,7 @@ public class AppController extends Application {
             }
         }
 
-        return mExtFileDir;*/
+        return mExtFileDir;
     }
 
     public static String getSaltString(int length) {

@@ -37,6 +37,7 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -160,20 +161,19 @@ public class CreateDataActivity extends BaseActivity {
 
         TextView tvTitle = dialogView.findViewById(R.id.tvTitle);
         TextView tvMessage = dialogView.findViewById(R.id.tvMessage);
-        Button btnOk = dialogView.findViewById(R.id.btnOk);
+        ProgressBar progressBar = dialogView.findViewById(R.id.progressBar);
 
         tvTitle.setText(title);
-        tvMessage.setText("Inter RealSense got disconnected");
+        tvMessage.setText("Intel RealSense got disconnected");
 
         AlertDialog alertDialog = builder.create();
-
-        btnOk.setOnClickListener(v -> {
-            alertDialog.dismiss();
-
-            finish(); // Destroy the activity
-        });
-
         alertDialog.show();
+
+        // Auto close after short delay
+        new android.os.Handler().postDelayed(() -> {
+            alertDialog.dismiss();
+            finish(); // Destroy the activity
+        }, 500); // 1.5 seconds delay (adjust if needed)
     }
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {

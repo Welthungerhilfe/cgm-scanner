@@ -230,6 +230,10 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
             ImageSaver(file,QRScanActivity.this);
         }
 
+        if(result==null){
+            finish();
+        }
+
     }
 
         String currentPhotoPath;

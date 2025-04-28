@@ -58,6 +58,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -279,7 +280,6 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
 
 
-        LogFileUtils.logInfoOffline("MainActivity","this is test message");
         try (DeviceList dl = AbstractIntelARCamera.getRsContext().queryDevices()) {
             if (dl.getDeviceCount() > 0) {
                 String serialNumber = null;
@@ -321,40 +321,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         activityMainBinding.ivRealsenseIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try (DeviceList dl = AbstractIntelARCamera.getRsContext().queryDevices()) {
-                    if (dl.getDeviceCount() > 0) {
-                        String serialNumber = null;
-
-
-                        try (Device device = dl.createDevice(0)) {
-                            // Get the serial number of the device
-                            sessionManager.setIsSensorconnected(true);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    activityMainBinding.ivRealsenseIcon.setVisibility(View.VISIBLE);
-                                    activityMainBinding.ivRealsenseIcon.setImageResource(R.drawable.sensor_white);
-                                }
-                            });
-
-                            sessionManager.setSensorMode(AppConstants.SENSOR_SELECTED);
-                            showConnectionAlert(device.getInfo(CameraInfo.FIRMWARE_VERSION));
-
-
-                        }
-
-
-                        Toast.makeText(MainActivity.this, "detected ", Toast.LENGTH_LONG).show();
-
-                        // Toast.makeText(getActivity(), "Realsense camera serial no:- "+serialNumber, Toast.LENGTH_LONG).show();
-
-                    }else {
-                        Toast.makeText(MainActivity.this, "Realsense camera not detected ", Toast.LENGTH_LONG).show();
-
-                    }
-                }catch (Exception e){
-
-                }
+                checkRealsenseWithQueryDevice();
             }
         });
 
@@ -379,6 +346,44 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             e.printStackTrace();
         }*/
 
+    }
+
+    private void checkRealsenseWithQueryDevice()
+    {
+        try (DeviceList dl = AbstractIntelARCamera.getRsContext().queryDevices()) {
+            if (dl.getDeviceCount() > 0) {
+                String serialNumber = null;
+
+
+                try (Device device = dl.createDevice(0)) {
+                    // Get the serial number of the device
+                    sessionManager.setIsSensorconnected(true);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            activityMainBinding.ivRealsenseIcon.setVisibility(View.VISIBLE);
+                            activityMainBinding.ivRealsenseIcon.setImageResource(R.drawable.sensor_white);
+                        }
+                    });
+
+                    sessionManager.setSensorMode(AppConstants.SENSOR_SELECTED);
+                    //showConnectionAlert(device.getInfo(CameraInfo.FIRMWARE_VERSION));
+
+
+                }
+
+
+                //Toast.makeText(MainActivity.this, "detected ", Toast.LENGTH_LONG).show();
+
+                // Toast.makeText(getActivity(), "Realsense camera serial no:- "+serialNumber, Toast.LENGTH_LONG).show();
+
+            }else {
+               // Toast.makeText(MainActivity.this, "Realsense camera not detected ", Toast.LENGTH_LONG).show();
+
+            }
+        }catch (Exception e){
+
+        }
     }
 
 
@@ -802,12 +807,15 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         }
         if(session.isSensorConnected()){
             activityMainBinding.ivRealsenseIcon.setImageResource(R.drawable.sensor_white);
+
         }
         else
         {
             activityMainBinding.ivRealsenseIcon.setImageResource(R.drawable.sensor_red);
         }
         AbstractIntelARCamera.getRsContext().setDevicesChangedCallback(mListener);
+        checkRealsenseWithQueryDevice();
+
 
     }
 
@@ -967,20 +975,20 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         TextView tvTitle = dialogView.findViewById(R.id.tvTitle);
         TextView tvMessage = dialogView.findViewById(R.id.tvMessage);
-        Button btnOk = dialogView.findViewById(R.id.btnOk);
+        ProgressBar progressBar = dialogView.findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.GONE);
+
 
         tvTitle.setText("Intel RealSense Connected "+version);
         tvMessage.setText("Inter RealSense got disconnected");
 
         AlertDialog alertDialog = builder.create();
 
-        btnOk.setOnClickListener(v -> {
-            //activityMainBinding.ivRealsenseIcon.setVisibility(View.VISIBLE);
-           // activityMainBinding.ivRealsenseIcon.setImageResource(R.drawable.sensor_white);
+
+        new android.os.Handler().postDelayed(() -> {
             alertDialog.dismiss();
 
-
-        });
+        }, 1000);
 
         alertDialog.show();
     }

@@ -7,7 +7,6 @@
     android:background="@color/colorWhite"
     android:layout_gravity="center"
     android:elevation="8dp"
-    android:backgroundTint="@color/colorWhite"
     android:clipToOutline="true">
 
     <TextView
@@ -18,25 +17,23 @@
         android:textColor="@color/colorRed"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:paddingBottom="8dp"/>
+        android:paddingBottom="8dp" />
 
     <TextView
         android:id="@+id/tvMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Inter RealSense got disconnected"
+        android:text="Intel RealSense got disconnected"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="16sp"
-        android:visibility="gone"
-        android:paddingBottom="16dp"/>
+        android:paddingBottom="16dp" />
 
-    <Button
-        android:id="@+id/btnOk"
-        android:layout_width="match_parent"
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="OK"
-        android:textColor="@color/colorWhite"
-        android:backgroundTint="@color/colorGreen"
-        android:padding="8dp"
-        android:layout_marginTop="16dp"/>
+        android:layout_gravity="center_horizontal"
+        android:visibility="visible"
+        android:indeterminate="true"
+        android:layout_marginTop="16dp" />
 </LinearLayout>

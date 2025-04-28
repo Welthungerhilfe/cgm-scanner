@@ -553,6 +553,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     public void onDestroy() {
         super.onDestroy();
         progressDialog.dismiss();
+        alertDialogdisconnect.dismiss();
         if (scanStarted && !scanCompleted) {
             firebaseAnalytics.logEvent(FirebaseService.SCAN_CANCELED, null);
         }
@@ -572,8 +573,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     }
 
     private void setupScanArtifacts() {
-       // File extFileDir = AppController.getInstance().getRootDirectory(this);
-        File extFileDir = AppController.getInstance().getPublicAppDirectory(this);
+        File extFileDir = AppController.getInstance().getRootDirectory(this);
+       // File extFileDir = AppController.getInstance().getPublicAppDirectory(this);
         LogFileUtils.logInfo(TAG, "Using directory " + extFileDir.getParent());
         mScanArtefactsOutputFolder = new File(extFileDir, person.getQrcode() + "/measurements/" + mNowTimeString + "/");
         mDepthmapSaveFolder = new File(mScanArtefactsOutputFolder, "depth");
@@ -1100,6 +1101,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         session.setIsSensorconnected(false);
     }
 
+    AlertDialog alertDialogdisconnect;
     private void showDisconnectionAlert(String title) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
@@ -1109,20 +1111,18 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
         TextView tvTitle = dialogView.findViewById(R.id.tvTitle);
         TextView tvMessage = dialogView.findViewById(R.id.tvMessage);
-        Button btnOk = dialogView.findViewById(R.id.btnOk);
+        ProgressBar progressBar = dialogView.findViewById(R.id.progressBar);
 
         tvTitle.setText(title);
-        tvMessage.setText("Inter RealSense got disconnected");
+        tvMessage.setText("Intel RealSense got disconnected");
 
-        AlertDialog alertDialog = builder.create();
+        alertDialogdisconnect = builder.create();
+        alertDialogdisconnect.show();
 
-        btnOk.setOnClickListener(v -> {
-            alertDialog.dismiss();
-            finishCreateDataActivity = true;
+        // Auto close after short delay
+        new android.os.Handler().postDelayed(() -> {
             finish(); // Destroy the activity
-        });
-
-        alertDialog.show();
+        }, 500); // 1
     }
 
 
