@@ -553,7 +553,9 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     public void onDestroy() {
         super.onDestroy();
         progressDialog.dismiss();
-        alertDialogdisconnect.dismiss();
+        if(alertDialogdisconnect!=null) {
+            alertDialogdisconnect.dismiss();
+        }
         if (scanStarted && !scanCompleted) {
             firebaseAnalytics.logEvent(FirebaseService.SCAN_CANCELED, null);
         }
@@ -1118,7 +1120,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
         alertDialogdisconnect = builder.create();
         alertDialogdisconnect.show();
-
+        finishCreateDataActivity = true;
         // Auto close after short delay
         new android.os.Handler().postDelayed(() -> {
             finish(); // Destroy the activity
