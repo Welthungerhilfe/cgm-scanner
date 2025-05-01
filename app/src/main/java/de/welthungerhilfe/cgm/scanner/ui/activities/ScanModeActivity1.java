@@ -90,6 +90,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AREngineCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARRealSenseCamera1;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.ARRealSenseCamera2;
+import de.welthungerhilfe.cgm.scanner.hardware.camera.ARRealSenseCamera2_no_angle;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractARCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractIntelARCamera;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.Depthmap;
@@ -846,8 +847,14 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                     depthMode = AbstractIntelARCamera.DepthPreviewMode.FOCUS_LOW_POWER;
                 }
             }
+            if (LocalPersistency.getBoolean(this, SettingsActivity.KEY_SHOW_NO_IMU)) {
+                mCameraInstance = new ARRealSenseCamera2_no_angle(this,depthMode,previewSize);
 
-            mCameraInstance = new ARRealSenseCamera2(this,depthMode,previewSize);
+            }else {
+                mCameraInstance = new ARRealSenseCamera2(this,depthMode,previewSize);
+
+            }
+
             // mCameraInstance = new ARRealSenseCamera1(this,depthMode,previewSize);
            /* if (AREngineCamera.shouldUseAREngine()) {
                 mCameraInstance = new AREngineCamera(this, depthMode, previewSize);

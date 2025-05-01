@@ -239,6 +239,13 @@
                         app:titleText="@string/show_depth_data"
                         app:toggleVisible="true"
                         />
+                    <de.welthungerhilfe.cgm.scanner.ui.views.TwoLineTextView
+                        android:id="@+id/scan_without_imu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:titleText="Disable IMU data"
+                        app:toggleVisible="true"
+                        />
                 </LinearLayout>
 
             </LinearLayout>

@@ -47,6 +47,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.test.espresso.remote.EspressoRemoteMessage;
 
 import android.os.Environment;
+import android.os.Handler;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -55,6 +56,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -969,27 +972,28 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     private void showConnectionAlert(String version) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_realsense_disconnect, null);
+        View dialogView = inflater.inflate(R.layout.dialog_realsense_connected, null);
         builder.setView(dialogView);
         builder.setCancelable(false);
 
         TextView tvTitle = dialogView.findViewById(R.id.tvTitle);
         TextView tvMessage = dialogView.findViewById(R.id.tvMessage);
-        ProgressBar progressBar = dialogView.findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.GONE);
+        ImageView imageSuccess = dialogView.findViewById(R.id.imageSuccess);
 
-
-        tvTitle.setText("Intel RealSense Connected "+version);
-        tvMessage.setText("Inter RealSense got disconnected");
+        tvTitle.setText("Intel RealSense Connected " + version);
+        tvMessage.setText("Intel RealSense got Connected");
 
         AlertDialog alertDialog = builder.create();
-
-
-        new android.os.Handler().postDelayed(() -> {
-            alertDialog.dismiss();
-
-        }, 1000);
-
         alertDialog.show();
+
+        // Play checkmark animation
+        new Handler().postDelayed(() -> {
+            imageSuccess.setVisibility(View.VISIBLE);
+            Animation animation = AnimationUtils.loadAnimation(this, R.anim.scale_fade_in);
+            imageSuccess.startAnimation(animation);
+        }, 200);
+
+        // Dismiss after 1.5s
+        new Handler().postDelayed(alertDialog::dismiss, 2500);
     }
 }
