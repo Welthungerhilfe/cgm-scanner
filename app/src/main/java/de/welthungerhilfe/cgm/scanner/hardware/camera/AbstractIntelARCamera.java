@@ -170,7 +170,11 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
     public void onPause() {
         mGLSurfaceView.onPause();
 
-        closeCamera();
+        new Thread(() -> {
+            closeCamera();
+        }).start();
+
+       // closeCamera();
     }
 
     public void onResume() {

@@ -32,6 +32,7 @@ import net.sqlcipher.database.SupportFactory;
 
 import java.nio.charset.StandardCharsets;
 
+import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.DeviceDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.FileLogDao;
 import de.welthungerhilfe.cgm.scanner.datasource.dao.IndiaLocationDao;
@@ -410,7 +411,7 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static CgmDatabase getInstance(Context context) {
         synchronized (sLock) {
 
-             byte[] PASSPHRASE = "MySuperSecretPassphrase123!".getBytes(StandardCharsets.UTF_8);
+             byte[] PASSPHRASE = AppConstants.APP_DATA_SECRET.getBytes(StandardCharsets.UTF_8);
 
 // Create SupportFactory with passphrase
             SupportFactory factory = new SupportFactory(PASSPHRASE);
