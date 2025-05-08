@@ -352,7 +352,7 @@
                             android:id="@+id/tv_scan_left"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Remaining Regular Scans"
+                            android:text="Regular Scans"
                             android:textColor="@color/colorBlack"
                             android:textSize="15sp" />
 
@@ -385,16 +385,19 @@
                         android:text="Remaining Standardization"
                         android:textSize="15sp"
                         android:layout_marginTop="18dp"
-                        android:textColor="@color/colorBlack"/>
+                        android:textColor="@color/colorBlack"
+                        android:visibility="gone"/>
+
                     <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="20dp">
+                        android:layout_height="20dp"
+                        android:layout_marginTop="12dp">
 
                         <TextView
                             android:id="@+id/left_textview"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Test Scans"
+                            android:text="STD Test Scans"
                             android:textColor="@color/colorBlack"
                             android:textSize="15sp" />
 

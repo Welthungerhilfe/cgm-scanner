@@ -40,6 +40,9 @@ public class AppConstants {
 
     public static final String APP_DATA_SECRET ="{APP_DATA_SECRET}";
 
+    //public static final String APP_DATA_SECRET ="JAY";
+
+
 
     public static final String AUTH_SYRIA = "{OAUTH_SCOPE_SYRIA}";
 

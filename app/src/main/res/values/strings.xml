@@ -291,7 +291,7 @@
     <string name="label_total_size">Total Size : </string>
     <string name="label_uploaded_size">Uploaded Size : </string>
     <string name="menuUploadManager">Upload Manager</string>
-    <string name="label_upload_status">Scan Upload Status</string>
+    <string name="label_upload_status">Scan Remaining Status</string>
     <string name="upload_completed">Upload Completed</string>
     <string name="less_than_minute">less than 1 minute</string>
     <string name="minutes">minutes</string>

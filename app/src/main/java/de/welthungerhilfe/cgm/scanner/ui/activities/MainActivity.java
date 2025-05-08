@@ -48,6 +48,7 @@ import androidx.test.espresso.remote.EspressoRemoteMessage;
 
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -142,6 +143,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     private PersonListViewModel viewModel;
     private FileLogRepository fileLogRepository;
     ActionBar actionBar;
+    private boolean isActionInProgress = false;
 
 
 
@@ -252,7 +254,9 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             public void onClick(View v) {
 
                 //throw new RuntimeException("Test Crash"); // Force a crash
-
+                if (isActionInProgress) return;
+                isActionInProgress = true;
+                new Handler(Looper.getMainLooper()).postDelayed(() -> isActionInProgress = false, 2000);
                 if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
                     if(!session.isSensorConnected()){
                         Toast.makeText(MainActivity.this,"Please connect sensor...",Toast.LENGTH_SHORT).show();
@@ -273,7 +277,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         LogFileUtils.logInfo(TAG, "this is authtoken" + session.getAuthTokenWithBearer());
 
 
-        if(session.getSessionError() > 50){
+        if(session.getSessionError() > 300){
             sessionExpirePopUp();
             session.setSessionError(0);
         }
@@ -521,6 +525,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         session.setSigned(false);
         session.setSelectedMode(AppConstants.CGM_MODE);
         //session.setSensorMode(AppConstants.NO_SENSOR_MODE_SELECTED);
+        session.setSessionError(0);
         session.setCurrentLogFilePath(null);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (WifiStateChangereceiverHelperService.isServiceRunning) {
@@ -773,6 +778,10 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     @Override
     public void onPersonDetail(Person person) {
 
+        if (isActionInProgress) return;
+        isActionInProgress = true;
+        new Handler(Looper.getMainLooper()).postDelayed(() -> isActionInProgress = false, 2000);
+
         if(session.getSensorMode()== AppConstants.SENSOR_SELECTED){
             if(!session.isSensorConnected()){
                 Toast.makeText(MainActivity.this,"Please connect sensor...",Toast.LENGTH_SHORT).show();
@@ -780,6 +789,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
                 return;
             }
         }
+
         Intent intent = new Intent(MainActivity.this, CreateDataActivity.class);
         intent.putExtra(AppConstants.EXTRA_QR, person.getQrcode());
         startActivity(intent);
