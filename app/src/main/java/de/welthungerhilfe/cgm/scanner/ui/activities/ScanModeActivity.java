@@ -51,6 +51,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.security.crypto.EncryptedFile;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -68,6 +69,7 @@ import com.google.mlkit.vision.pose.PoseLandmark;
 import com.google.mlkit.vision.pose.accurate.AccuratePoseDetectorOptions;
 //import com.microsoft.appcenter.crashes.Crashes;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -847,15 +849,35 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         Runnable thread = () -> {
             try {
-
-                //write RGB data
+                // Write RGB data
                 String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
                 currentImgFilename = currentImgFilename.replace('/', '_');
                 File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
-                BitmapHelper.writeBitmapToFile(bitmap, artifactFile);
+
+                // First, convert bitmap to bytes
+                ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteStream);
+                byte[] bitmapBytes = byteStream.toByteArray();
+
+                // Create or get master key (only once in app lifetime)
+                String masterKeyAlias = "TEST";
+
+                // Use EncryptedFile to write encrypted data
+                EncryptedFile encryptedFile = new EncryptedFile.Builder(
+                        artifactFile,
+                        this, // context
+                        masterKeyAlias,
+                        EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+                ).build();
+
+                FileOutputStream outputStream = encryptedFile.openFileOutput();
+                outputStream.write(bitmapBytes);
+                outputStream.flush();
+                outputStream.close();
+
                 onProcessArtifact(artifactFile, ArtifactType.RGB, 0, poseScore, poseCoordinates, 0, 0, boundingBox, null);
 
-                //save RGB metadata
+                // Save RGB metadata
                 if (artifactFile.exists()) {
                     mColorSize += artifactFile.length();
                     mColorTime += System.currentTimeMillis() - profile;
@@ -864,6 +886,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, mColorTime);
                     }
                 }
+
 
                 //save calibration data
                 artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");

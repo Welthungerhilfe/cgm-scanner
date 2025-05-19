@@ -26,12 +26,16 @@ import android.os.Build;
 import android.os.IBinder;
 
 import androidx.annotation.Nullable;
+import androidx.security.crypto.EncryptedFile;
 
 import org.jcodec.common.io.IOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -312,19 +316,34 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
         LogFileUtils.logInfo(TAG, "Uploading file " + file.getPath());
 
         try {
-            FileInputStream inputStream = new FileInputStream(file);
-            body = MultipartBody.Part.createFormData("file", file.getName(), RequestBody.create(
-                    MediaType.parse(mime), IOUtils.toByteArray(inputStream)));
-            inputStream.close();
+            // Rebuild EncryptedFile to decrypt
+            String masterKeyAlias = "TEST";  // Same as used during encryption
+
+            EncryptedFile encryptedFile = new EncryptedFile.Builder(
+                    file,
+                    AppController.getInstance(),  // your app context
+                    masterKeyAlias,
+                    EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+            ).build();
+
+            // Read decrypted content
+            InputStream decryptedInputStream = encryptedFile.openFileInput();
+            byte[] decryptedBytes = IOUtils.toByteArray(decryptedInputStream);
+            decryptedInputStream.close();
+
+            body = MultipartBody.Part.createFormData(
+                    "file",
+                    file.getName(),
+                    RequestBody.create(MediaType.parse(mime), decryptedBytes)
+            );
+
             log.setCreateDate(AppController.getInstance().getUniversalTimestamp());
-        } catch (FileNotFoundException e) {
-            LogFileUtils.logException(e,"uploadservice filenotfound");
-
-            log.setDeleted(true);
-            log.setStatus(FILE_NOT_FOUND);
+        } catch (GeneralSecurityException | IOException e) {
+            LogFileUtils.logException(e, "uploadservice decrypt or io error");
+            log.setStatus(UPLOAD_ERROR);
             updateFileLog(log);
-
-        } catch (Exception e) {
+            return;
+        }catch (Exception e) {
             LogFileUtils.logException(e,"uploadservice execption");
 
             log.setStatus(UPLOAD_ERROR);
