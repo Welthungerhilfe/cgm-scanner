@@ -508,7 +508,7 @@ public class Measure extends CsvExportableModel implements Serializable {
                     } else {
                         diff = Integer.parseInt(timestamp);
                     }
-
+                    LogFileUtils.logInfo("Measure","this is split data => "+log.getServerId()+" "+log.getPath()+" "+diff +" "+log.getType());
                     Artifact artifact = new Artifact();
                     artifact.setFile(log.getServerId());
                     artifact.setFormat(log.getType());

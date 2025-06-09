@@ -182,6 +182,11 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            LogFileUtils.logException(throwable, "MainActivity oncreate");
+            //Crashes.trackError(throwable);
+            finish();
+        });
         fileLogRepository = FileLogRepository.getInstance(this);
         activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         session = new SessionManager(MainActivity.this);
@@ -325,19 +330,19 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         }catch (Exception e){
 
         }
-        activityMainBinding.ivRealsenseIcon.setOnClickListener(new View.OnClickListener() {
+        /*activityMainBinding.ivRealsenseIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 checkRealsenseWithQueryDevice();
             }
-        });
+        });*/
 
         if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.O &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 10);
         }
 
-        FirebaseCrashlytics.getInstance().setCustomKey("UserID", session.getUserEmail());
+        //FirebaseCrashlytics.getInstance().setCustomKey("UserID", session.getUserEmail());
 
         /*File original = getDatabasePath("offline_db");
         File exportPath = new File(Environment.getExternalStorageDirectory(), "offline_db_copy");
@@ -827,7 +832,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
             activityMainBinding.ivRealsenseIcon.setImageResource(R.drawable.sensor_red);
         }
         AbstractIntelARCamera.getRsContext().setDevicesChangedCallback(mListener);
-        checkRealsenseWithQueryDevice();
+        //checkRealsenseWithQueryDevice();
 
 
     }

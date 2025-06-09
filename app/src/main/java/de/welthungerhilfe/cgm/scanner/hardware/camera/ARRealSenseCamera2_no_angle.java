@@ -322,7 +322,7 @@ public class ARRealSenseCamera2_no_angle extends AbstractIntelARCamera  {
                 dataSize = stride * height;
                 byteArray = new byte[dataSize];
                 depthFrameSave.getData(byteArray);
-                byteArray = fillZeroDepths(byteArray, width, height, stride);
+                //byteArray = fillZeroDepths(byteArray, width, height, stride);
 
 
             } catch (Exception e) {
@@ -340,7 +340,7 @@ public class ARRealSenseCamera2_no_angle extends AbstractIntelARCamera  {
         }
     }
 
-    public byte[] fillZeroDepths(byte[] byteArray, int width, int height, int stride) {
+ /*   public byte[] fillZeroDepths(byte[] byteArray, int width, int height, int stride) {
         ByteBuffer buffer = ByteBuffer.wrap(byteArray).order(ByteOrder.LITTLE_ENDIAN);
 
         short[][] depth = new short[height][width];
@@ -405,7 +405,7 @@ public class ARRealSenseCamera2_no_angle extends AbstractIntelARCamera  {
         }
 
         // No non-zero neighbor found, leave all as zero
-    }
+    }*/
 
     void saveAlignFrames1(FrameSet frameSet, int frameIndex) {
         if (frameIndex % AppConstants.SCAN_FRAMESKIP_REALSENSE == 0 && !isBackgrounThreadActive) {

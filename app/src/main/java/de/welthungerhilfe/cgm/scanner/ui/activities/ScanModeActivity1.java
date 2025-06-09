@@ -62,13 +62,19 @@ import com.intel.realsense.librealsense.DeviceListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
@@ -134,9 +140,9 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
     int childCount = 0;
 
-   float mOutlineAlpha = 0;
+    float mOutlineAlpha = 0;
 
-   boolean finishCreateDataActivity = false;
+    boolean finishCreateDataActivity = false;
 
     public void scanStanding() {
         SCAN_MODE = AppConstants.SCAN_STANDING;
@@ -499,8 +505,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         activityScanModeBinding.lytScanLying.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                 scanLying();
-               // Toast.makeText(ScanModeActivity1.this, "Lying scan is currently unavailable", Toast.LENGTH_SHORT).show();
+                scanLying();
+                // Toast.makeText(ScanModeActivity1.this, "Lying scan is currently unavailable", Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -511,18 +517,18 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         AbstractIntelARCamera.getRsContext().setDevicesChangedCallback(new DeviceListener() {
             @Override
             public void onDeviceAttach() {
-            showDisconnectionAlert("Intel RealSense Connected");
-            sessionManager.setIsSensorconnected(true);
+                showDisconnectionAlert("Intel RealSense Connected");
+                sessionManager.setIsSensorconnected(true);
             }
 
             @Override
             public void onDeviceDetach() {
-               // if(sessionManager.getSensorMode()== AppConstants.SENSOR_SELECTED){
-                  //  finish();
+                // if(sessionManager.getSensorMode()== AppConstants.SENSOR_SELECTED){
+                //  finish();
                 sessionManager.setIsSensorconnected(false);
 
                 onSensorDisconnect();
-               // }
+                // }
             }
         });
 
@@ -580,7 +586,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
     private void setupScanArtifacts() {
         File extFileDir = AppController.getInstance().getRootDirectory(this);
-       // File extFileDir = AppController.getInstance().getPublicAppDirectory(this);
+        // File extFileDir = AppController.getInstance().getPublicAppDirectory(this);
         LogFileUtils.logInfo(TAG, "Using directory " + extFileDir.getParent());
         mScanArtefactsOutputFolder = new File(extFileDir, person.getQrcode() + "/measurements/" + mNowTimeString + "/");
         mDepthmapSaveFolder = new File(mScanArtefactsOutputFolder, "depth");
@@ -645,7 +651,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             }
             files = new ArrayList<>();
             retakeFiles = new ArrayList<>();
-          //  getCamera().setPlaneMode(AbstractARCamera.PlaneMode.LOWEST);
+            //  getCamera().setPlaneMode(AbstractARCamera.PlaneMode.LOWEST);
         } else if (SCAN_MODE == AppConstants.SCAN_LYING) {
 
             resetScanStepUi();
@@ -661,7 +667,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             }
             files = new ArrayList<>();
             retakeFiles = new ArrayList<>();
-           // getCamera().setPlaneMode(AbstractARCamera.PlaneMode.VISIBLE);
+            // getCamera().setPlaneMode(AbstractARCamera.PlaneMode.VISIBLE);
         }
     }
 
@@ -881,8 +887,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     public void onPostColorDataReceived(Bitmap bitmap, int frameIndex, float poseScore, String poseCoordinates, String boundingBox) {
 
         long profile = System.currentTimeMillis();
-          cameraCalibration = mCameraInstance.getCameraCalibration();
-       // cameraCalibration = session.getArcoreCaliFile();
+        cameraCalibration = mCameraInstance.getCameraCalibration();
+        // cameraCalibration = session.getArcoreCaliFile();
         boolean hasCameraCalibration;
         if (cameraCalibration != null && !cameraCalibration.contains("NaN")) {
             hasCameraCalibration = true;
@@ -899,26 +905,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                 currentImgFilename = currentImgFilename.replace('/', '_');
                 File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
 
-                // First, convert bitmap to bytes
-                ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteStream);
-                byte[] bitmapBytes = byteStream.toByteArray();
+                BitmapHelper.writeBitmapToFile(bitmap, artifactFile);
 
-                // Create or get master key (only once in app lifetime)
-                String masterKeyAlias = "TEST";
-
-                // Use EncryptedFile to write encrypted data
-                EncryptedFile encryptedFile = new EncryptedFile.Builder(
-                        artifactFile,
-                        this, // context
-                        masterKeyAlias,
-                        EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
-                ).build();
-
-                FileOutputStream outputStream = encryptedFile.openFileOutput();
-                outputStream.write(bitmapBytes);
-                outputStream.flush();
-                outputStream.close();
 
                 onProcessArtifact(artifactFile, ArtifactType.RGB, 0, poseScore, poseCoordinates, 0, 0, boundingBox, null);
 
@@ -994,7 +982,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP_REALSENSE == 0)) {
             String orientation;
             if(SCAN_MODE==AppConstants.SCAN_STANDING){
-                 orientation ="orientation_angle:"+ String.format("%.0f", transformAngle(horizontalAngle))+",app_angle:"+String.format("%.0f", verticalAngle);
+                orientation ="orientation_angle:"+ String.format("%.0f", transformAngle(horizontalAngle))+",app_angle:"+String.format("%.0f", verticalAngle);
 
             }else {
                 orientation ="orientation_angle:"+ String.format("%.0f", verticalAngle)+",app_angle:"+String.format("%.0f", horizontalAngle);
@@ -1027,16 +1015,16 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                     File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                     //depthmap.save(artifactFile);
                     save(artifactFile,depthFrame,frameIndex,height,width,byteArray);
-                 //   LogFileUtils.logInfoOffline("SCANMODE","this is depth -1");
+                    //   LogFileUtils.logInfoOffline("SCANMODE","this is depth -1");
 
                     //onProcessArtifact(artifactFile,ArtifactType.DEPTH, 10.0f, 0, null, distance, light_score, null,orientation);
                     onProcessArtifact(artifactFile, ArtifactType.DEPTH, 10.0f, 0, null, child_distance, light_score, null, orientation);
 
                     //  onProcessArtifact(File artifactFile, ArtifactType type, float childHeight, float poseScore, String poseCordinates, double child_distance, float light_score, String boundinBox, String orientation) {
 
-          //       onProcessArtifact(artifactFile, ArtifactType.DEPTH, 10, 0, null, 1.0, 1.0f, null, "80.0");
+                    //       onProcessArtifact(artifactFile, ArtifactType.DEPTH, 10, 0, null, 1.0, 1.0f, null, "80.0");
 
-                       // LogFileUtils.logInfoOffline("SCANMODE","this is depth 0");
+                    // LogFileUtils.logInfoOffline("SCANMODE","this is depth 0");
 
                     //   LogFileUtils.logInfo1("Scanmode","this is inside on Depthdata received 6"+depthFrame);
 
@@ -1050,7 +1038,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                         }
                     }
                 } catch (Exception e) {
-                  //  LogFileUtils.logInfoOffline("ScanModeActivity1", "OnDepthDataReceived "+e.getMessage());
+                    //  LogFileUtils.logInfoOffline("ScanModeActivity1", "OnDepthDataReceived "+e.getMessage());
 
                 }
 
@@ -1075,14 +1063,14 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     float[] rotation;
     @Override
     public void onAngleReceived(double verticalAngle,double horizontalAngle, float[] position, float[]rotation) {
-       // activityScanModeBinding.tvAngle.setText(" "+mCameraInstance.getLightIntensity());
+        // activityScanModeBinding.tvAngle.setText(" "+mCameraInstance.getLightIntensity());
         this.verticalAngle = 90-verticalAngle;
 
-      //  activityScanModeBinding.tvAngle.setText(""+mCameraInstance.getPersonCount());
+        //  activityScanModeBinding.tvAngle.setText(""+mCameraInstance.getPersonCount());
         if (System.currentTimeMillis() - lastUpdatedAngle > 300) {
 
             lastUpdatedAngle = System.currentTimeMillis();
-        //    activityScanModeBinding.tvAngle.setText(""+childCount);
+            //    activityScanModeBinding.tvAngle.setText(""+childCount);
             if(SCAN_MODE==AppConstants.SCAN_STANDING){
                 activityScanModeBinding.tvAngle.setText(String.format("%.0f", this.verticalAngle));
 
@@ -1096,9 +1084,9 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         }
         this.position = position;
         this.rotation =rotation;
-     //   activityScanModeBinding.tvAngle.setText(angle.substring(0,4)+"");
-       // this.angle = angle;
-      //  activityScanModeBinding.tvAngle.setText(""+mCameraInstance.getPersonCount());
+        //   activityScanModeBinding.tvAngle.setText(angle.substring(0,4)+"");
+        // this.angle = angle;
+        //  activityScanModeBinding.tvAngle.setText(""+mCameraInstance.getPersonCount());
 
     }
 
@@ -1194,8 +1182,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         }
     }
 
-/*    float[] position = new float[] {0, 0, 0};
-    float[] rotation = new float[] {0, 0, 0, 1};*/
+    /*    float[] position = new float[] {0, 0, 0};
+        float[] rotation = new float[] {0, 0, 0, 1};*/
     public String getPose(String separator) {
         String output = "";
         output += rotation[0] + separator;
@@ -1288,8 +1276,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     }
 
     private void onFeedbackUpdate() {
-         AbstractIntelARCamera.LightConditions light = getCamera().getLightConditionState();
-      //  boolean childDetected = getCamera().getPersonCount() == 1;
+        AbstractIntelARCamera.LightConditions light = getCamera().getLightConditionState();
+        //  boolean childDetected = getCamera().getPersonCount() == 1;
         float distance = mCameraInstance.getTargetDistance();
         runOnUiThread(() -> {
             String formattedDistance = String.format("%.1f", distance);
@@ -1388,7 +1376,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
     private void onProcessArtifact(File artifactFile, ArtifactType type, float childHeight, float poseScore, String poseCordinates, double child_distance, float light_score, String boundinBox, String orientation) {
         if(type == ArtifactType.DEPTH){
-         //   LogFileUtils.logInfoOffline("SCANMODE","this is depth 0");
+            //   LogFileUtils.logInfoOffline("SCANMODE","this is depth 0");
         }
         if (artifactFile.exists()) {
             FileLog log = new FileLog();
@@ -1402,7 +1390,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                     break;
                 case DEPTH:
                     if(type == ArtifactType.DEPTH){
-                  //      LogFileUtils.logInfoOffline("SCANMODE","this is depth 1");
+                        //      LogFileUtils.logInfoOffline("SCANMODE","this is depth 1");
                     }
                     log.setStep(SCAN_STEP);
                     log.setId(AppController.getInstance().getArtifactId("scan-depth", mNowTime));
@@ -1418,7 +1406,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                 //LogFileUtils.logInfoOffline("SCANMODE","this is depth 1");
             }
             //set information if child is detected (note: this is unsupported on ARCore devices and for lying children wrongly oriented)
-           // boolean childDetected = getCamera().getPersonCount() == 1;
+            // boolean childDetected = getCamera().getPersonCount() == 1;
             log.setChildDetected(true);
 
             log.setChildHeight(childHeight);
@@ -1427,7 +1415,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             log.setBoundingBox(boundinBox);
 
             if(type == ArtifactType.DEPTH){
-            //    LogFileUtils.logInfoOffline("SCANMODE","this is depth 2");
+                //    LogFileUtils.logInfoOffline("SCANMODE","this is depth 2");
             }
             //set metadata
             log.setPath(artifactFile.getPath());
@@ -1437,7 +1425,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             log.setDeleted(false);
 
             if(type == ArtifactType.DEPTH){
-             //   LogFileUtils.logInfoOffline("SCANMODE","this is depth 3");
+                //   LogFileUtils.logInfoOffline("SCANMODE","this is depth 3");
             }
             log.setQrCode(person.getQrcode());
             log.setCreateDate(mNowTime);
@@ -1448,7 +1436,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             log.setEnvironment(session.getEnvironment());
             log.setChild_distance(child_distance);
             if(type == ArtifactType.DEPTH){
-               // LogFileUtils.logInfoOffline("SCANMODE","this is depth 4");
+                // LogFileUtils.logInfoOffline("SCANMODE","this is depth 4");
             }
             log.setLight_score(light_score);
             log.setOrientation(orientation);
@@ -1564,14 +1552,18 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     private final Runnable saveMeasure = new Runnable() {
         @Override
         public void run() {
-            //stop receiving new data
             getCamera().removeListener(this);
-
-            //wait until everything is saved
             waitUntilFinished();
-
-            //save metadata into DB
             synchronized (lock) {
+                // First, encrypt all files
+                for (FileLog log : files) {
+                    encryptImage(log.getPath());
+                    // Verify file exists after encryption
+                    if (!new File(log.getPath()).exists()) {
+                        LogFileUtils.logError("ScanModeActivity1", "Encrypted file does not exist: " + log.getPath());
+                    }
+                }
+                // Then, insert FileLog entries
                 for (FileLog log : files) {
                     fileLogRepository.insertFileLog(log);
                 }
@@ -1579,7 +1571,6 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                 personRepository.updatePerson(person);
                 measureRepository.insertMeasure(measure);
             }
-
             runOnUiThread(() -> {
                 if (!UploadService.isInitialized()) {
                     startService(new Intent(getApplicationContext(), UploadService.class));
@@ -1716,5 +1707,125 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
     }
 
+    private static final byte[] KEY = new byte[] { 0x12, 0x34, 0x56, 0x78 };
+    public void encryptImage(String filePath) {
+        // Validate input
+        if (filePath == null || filePath.isEmpty()) {
+            LogFileUtils.logError("ScanModeActivity1", "Invalid file path");
+            return;
+        }
 
+        File file = new File(filePath);
+        File tempFile = new File(file.getParent(), UUID.randomUUID().toString() + ".tmp");
+
+        // Extract frame number for logging
+        String frameNumber = "unknown";
+        String fileName = file.getName();
+        int lastUnderscore = fileName.lastIndexOf('_');
+        int lastDot = fileName.lastIndexOf('.');
+        if (lastUnderscore > 0 && lastDot > lastUnderscore) {
+            frameNumber = fileName.substring(lastUnderscore + 1, lastDot);
+        }
+
+        // Validate file and directory
+        if (!file.exists() || !file.canRead()) {
+            LogFileUtils.logError("ScanModeActivity1", "Input file not readable: " + filePath + ", frame: " + frameNumber);
+            return;
+        }
+        if (!file.canWrite()) {
+            LogFileUtils.logError("ScanModeActivity1", "Input file not writable (possible scoped storage issue): " + filePath + ", frame: " + frameNumber);
+        }
+        if (!tempFile.getParentFile().canWrite()) {
+            LogFileUtils.logError("ScanModeActivity1", "Temp directory not writable: " + tempFile.getParent() + ", frame: " + frameNumber);
+            return;
+        }
+        if (KEY == null || KEY.length == 0) {
+            LogFileUtils.logError("ScanModeActivity1", "Invalid encryption key, frame: " + frameNumber);
+            return;
+        }
+
+        long startTime = System.currentTimeMillis();
+        LogFileUtils.logInfo("ScanModeActivity1", "Starting encryption: " + filePath + ", frame: " + frameNumber + ", time: " + startTime);
+
+        try (FileInputStream in = new FileInputStream(file);
+             FileOutputStream out = new FileOutputStream(tempFile);
+             FileChannel channel = out.getChannel();
+             FileLock lock = channel.lock()) {
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            int keyLen = KEY.length;
+
+            // Encrypt
+            while ((bytesRead = in.read(buffer)) > 0) {
+                for (int i = 0; i < bytesRead; i += keyLen) {
+                    for (int j = 0; j < keyLen && (i + j) < bytesRead; j++) {
+                        buffer[i + j] ^= KEY[j];
+                    }
+                }
+                out.write(buffer, 0, bytesRead);
+            }
+            out.flush();
+            out.getFD().sync();
+
+            LogFileUtils.logInfo("ScanModeActivity1", "Encryption done: " + filePath + ", frame: " + frameNumber + ", duration: " + (System.currentTimeMillis() - startTime) + "ms");
+
+            // Verify temp file
+            if (!tempFile.exists() || tempFile.length() == 0) {
+                LogFileUtils.logError("ScanModeActivity1", "Invalid temp file: exists=" + tempFile.exists() + ", size=" + tempFile.length() + ", path=" + tempFile.getPath() + ", frame: " + frameNumber);
+                return;
+            }
+
+            // Retry rename
+            int maxRetries = 3;
+            int retryCount = 0;
+            boolean renamed = false;
+            long delay = 50;
+            while (retryCount < maxRetries && !renamed) {
+                try {
+                    if (file.exists() && !file.delete()) {
+                        LogFileUtils.logError("ScanModeActivity1", "Failed to delete original file (retry " + (retryCount + 1) + "/" + maxRetries + "): " + file.getPath() + ", frame: " + frameNumber);
+                        retryCount++;
+                        Thread.sleep(delay);
+                        delay *= 2;
+                        continue;
+                    }
+                    if (tempFile.renameTo(file)) {
+                        renamed = true;
+                        LogFileUtils.logInfo("ScanModeActivity1", "Successfully renamed: " + file.getPath() + ", frame: " + frameNumber + ", retries=" + retryCount);
+                    } else {
+                        LogFileUtils.logError("ScanModeActivity1", "Failed to rename (retry " + (retryCount + 1) + "/" + maxRetries + "): temp=" + tempFile.getPath() + ", target=" + file.getPath() + ", frame: " + frameNumber);
+                        retryCount++;
+                        Thread.sleep(delay);
+                        delay *= 2;
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    LogFileUtils.logError("ScanModeActivity1", "Retry interrupted: " + e.getMessage() + ", frame: " + frameNumber+"----"+e);
+                    retryCount++;
+                    Thread.sleep(delay);
+                    delay *= 2;
+                }
+            }
+
+            if (!renamed) {
+                LogFileUtils.logError("ScanModeActivity1", "Failed to rename after retries: " + tempFile.getPath() + ", frame: " + frameNumber);
+                return;
+            }
+
+            // Verify final file
+            if (!file.exists() || !file.canRead() || file.length() == 0) {
+                LogFileUtils.logError("ScanModeActivity1", "Invalid final file: exists=" + file.exists() + ", readable=" + file.canRead() + ", size=" + file.length() + ", path=" + filePath + ", frame: " + frameNumber);
+                return;
+            }
+
+            LogFileUtils.logInfo("ScanModeActivity1", "Encryption completed: " + filePath + ", frame: " + frameNumber + ", total duration: " + (System.currentTimeMillis() - startTime) + "ms");
+        } catch (IOException | InterruptedException e) {
+            LogFileUtils.logError("ScanModeActivity1", "Encryption failed: " + filePath + ", frame: " + frameNumber + ", error: " + (e.getMessage() != null ? e.getMessage() : "Unknown")+"-----"+e);
+        } finally {
+            // Clean up
+            if (tempFile.exists()) {
+                tempFile.delete();
+            }
+        }
+    }
 }

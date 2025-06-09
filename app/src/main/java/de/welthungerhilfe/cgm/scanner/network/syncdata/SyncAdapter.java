@@ -467,6 +467,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
             // LogFileUtils.logInfo(TAG, "this is posting scan raw data " + (new JSONObject(gson.toJson(completeScan))).toString());
 
             onThreadChange(1,"Post Scan");
+            LogFileUtils.logInfo("SyncAdapter","this is post scan request "+(new JSONObject(gson.toJson(completeScan))).toString());
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(completeScan))).toString());
             retrofit.create(ApiService.class).postScans(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -619,9 +620,9 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             person1.setBirthdayString(DataFormat.convertMilliSecondToBirthDay(person1.getBirthday()));
             person1.setQr_scanned(DataFormat.convertMilliSeconsToServerDate(person1.getCreated()));
-            person1.setDevice_updated_at(DataFormat.convertMilliSeconsToServerDate(person1.getDevice_updated_at_timestamp()));/*
+            person1.setDevice_updated_at(DataFormat.convertMilliSeconsToServerDate(person1.getDevice_updated_at_timestamp()));
             person1.setCenter_location_id(null);
-            person1.setLocation_id(null);*/
+            person1.setLocation_id(null);
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(person1))).toString());
 
             onThreadChange(1,"post person data "+(new JSONObject(gson.toJson(person1))).toString());

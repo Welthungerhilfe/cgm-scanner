@@ -35,6 +35,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -314,41 +315,55 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
         MultipartBody.Part body = null;
         final File file = new File(log.getPath());
         LogFileUtils.logInfo(TAG, "Uploading file " + file.getPath());
+       /* if(log.getType().equals("rgb") || log.getType().equals("depth")){
+            try {
+                // 🔐 Decrypt file in memory
+                byte[] key = new byte[] { (byte) 0x12, (byte) 0x34, (byte) 0x56, (byte) 0x78 }; // Use the same key used for encryption
+                byte[] decryptedData = xorDecryptInMemory(file, key);
 
-        try {
-            // Rebuild EncryptedFile to decrypt
-            String masterKeyAlias = "TEST";  // Same as used during encryption
+                // ✅ Create request body with decrypted bytes
+                body = MultipartBody.Part.createFormData("file", file.getName(),
+                        RequestBody.create(MediaType.parse(mime), decryptedData));
 
-            EncryptedFile encryptedFile = new EncryptedFile.Builder(
-                    file,
-                    AppController.getInstance(),  // your app context
-                    masterKeyAlias,
-                    EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
-            ).build();
+                log.setCreateDate(AppController.getInstance().getUniversalTimestamp());
 
-            // Read decrypted content
-            InputStream decryptedInputStream = encryptedFile.openFileInput();
-            byte[] decryptedBytes = IOUtils.toByteArray(decryptedInputStream);
-            decryptedInputStream.close();
+            } catch (FileNotFoundException e) {
+                LogFileUtils.logException(e, "uploadservice filenotfound");
 
-            body = MultipartBody.Part.createFormData(
-                    "file",
-                    file.getName(),
-                    RequestBody.create(MediaType.parse(mime), decryptedBytes)
-            );
+                log.setDeleted(true);
+                log.setStatus(FILE_NOT_FOUND);
+                updateFileLog(log);
+                return;
 
-            log.setCreateDate(AppController.getInstance().getUniversalTimestamp());
-        } catch (GeneralSecurityException | IOException e) {
-            LogFileUtils.logException(e, "uploadservice decrypt or io error");
-            log.setStatus(UPLOAD_ERROR);
-            updateFileLog(log);
-            return;
-        }catch (Exception e) {
-            LogFileUtils.logException(e,"uploadservice execption");
+            } catch (Exception e) {
+                LogFileUtils.logException(e, "uploadservice exception");
 
-            log.setStatus(UPLOAD_ERROR);
-            updateFileLog(log);
+                log.setStatus(UPLOAD_ERROR);
+                updateFileLog(log);
+                return;
+            }
         }
+        else {*/
+            try {
+                FileInputStream inputStream = new FileInputStream(file);
+                body = MultipartBody.Part.createFormData("file", file.getName(), RequestBody.create(
+                        MediaType.parse(mime), IOUtils.toByteArray(inputStream)));
+                inputStream.close();
+                log.setCreateDate(AppController.getInstance().getUniversalTimestamp());
+            } catch (FileNotFoundException e) {
+                LogFileUtils.logException(e, "uploadservice filenotfound");
+
+                log.setDeleted(true);
+                log.setStatus(FILE_NOT_FOUND);
+                updateFileLog(log);
+
+            } catch (Exception e) {
+                LogFileUtils.logException(e, "uploadservice execption");
+
+                log.setStatus(UPLOAD_ERROR);
+                updateFileLog(log);
+            }
+       //  }
         RequestBody filename = RequestBody.create(MediaType.parse("multipart/form-data"), file.getName());
         if (retrofit == null) {
             retrofit = SyncingWorkManager.provideRetrofit();
@@ -401,6 +416,14 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
 
                     }
                 });
+    }
+
+    public static byte[] xorDecryptInMemory(File file, byte[] key) throws IOException {
+        byte[] data = Files.readAllBytes(file.toPath());
+        for (int i = 0; i < data.length; i++) {
+            data[i] ^= key[i % key.length];
+        }
+        return data;
     }
 
     private void updateFileLog(FileLog log) {

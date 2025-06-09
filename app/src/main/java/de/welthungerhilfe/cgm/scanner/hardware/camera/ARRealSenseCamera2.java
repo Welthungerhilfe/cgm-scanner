@@ -107,7 +107,6 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
         }
     }
 
-    HoleFillingFilter holeFillingFilter;
 
     private void configAndStart() throws Exception {
         try (Config config = new Config()) {
@@ -121,8 +120,7 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
             config.enableStream(StreamType.ACCEL, StreamFormat.MOTION_XYZ32F);
             config.enableStream(StreamType.GYRO, StreamFormat.MOTION_XYZ32F); // Enable gyroscope stream
 
-            holeFillingFilter = new HoleFillingFilter();
-            holeFillingFilter.setValue(Option.HOLES_FILL, 2);
+
 
             mPipeline.start(config);
             mAlign = new Align(StreamType.COLOR);
@@ -305,14 +303,12 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
         @Override
         protected Void doInBackground(Void... voids) {
 
-          //  FrameSet filteredDepthSet = holeFillingFilter.process(frameSet);
 
             try (FrameSet alignedFrames = mAlign.process(frameSet)) {
 
 
                 try (Frame f = alignedFrames.first(StreamType.DEPTH)) {
                     depthFrameSave = f.as(Extension.DEPTH_FRAME);
-                    //depthFrameSave = (DepthFrame) holeFillingFilter.process(depthFrameHoleFilling);
                 }
                 try (Frame f1 = alignedFrames.first(StreamType.COLOR)) {
                     colorFrameSave = f1;
@@ -324,7 +320,7 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
                 dataSize = stride * height;
                 byteArray = new byte[dataSize];
                 depthFrameSave.getData(byteArray);
-                byteArray = fillZeroDepths(byteArray, width, height, stride);
+                //byteArray = fillZeroDepths(byteArray, width, height, stride);
 
 
             } catch (Exception e) {
@@ -342,7 +338,7 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
         }
     }
 
-    public byte[] fillZeroDepths(byte[] byteArray, int width, int height, int stride) {
+    /*public byte[] fillZeroDepths(byte[] byteArray, int width, int height, int stride) {
         ByteBuffer buffer = ByteBuffer.wrap(byteArray).order(ByteOrder.LITTLE_ENDIAN);
 
         short[][] depth = new short[height][width];
@@ -407,7 +403,7 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
         }
 
         // No non-zero neighbor found, leave all as zero
-    }
+    }*/
 
     void saveAlignFrames1(FrameSet frameSet, int frameIndex) {
         if (frameIndex % AppConstants.SCAN_FRAMESKIP_REALSENSE == 0 && !isBackgrounThreadActive) {

@@ -68,6 +68,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.viewmodel.CreateDataViewModelPr
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractIntelARCamera;
+import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.FragmentAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.GrowthDataFragment;
 import de.welthungerhilfe.cgm.scanner.ui.fragments.MeasuresDataFragment;
@@ -104,6 +105,12 @@ public class CreateDataActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            LogFileUtils.logException(throwable, "CreateData oncreate");
+            //Crashes.trackError(throwable);
+            finish();
+        });
         activityCreateBinding = DataBindingUtil.setContentView(this, R.layout.activity_create);
 
         sessionManager = new SessionManager(this);

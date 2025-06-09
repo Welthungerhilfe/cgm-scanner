@@ -34,13 +34,20 @@ public class AppConstants {
     public static final String AUTH_SIERRA = "{OAUTH_SCOPE_SIERRA}";
 
 
-    public static final String AUTH_DEMO_QA = "{OAUTH_SCOPE_QA}";
+ /*   public static final String AUTH_DEMO_QA = "{OAUTH_SCOPE_QA}";
 
-    public static final String API_URL_DEMO_QA = "{API_URL_QA}/";
+    public static final String API_URL_DEMO_QA = "{API_URL_QA}/";*/
 
-    public static final String APP_DATA_SECRET ="{APP_DATA_SECRET}";
+    public static final String AUTH_DEMO_QA = "https://cgmb2cdemoqa.onmicrosoft.com/cgm-api/scannerapp";
 
-    //public static final String APP_DATA_SECRET ="JAY";
+    public static final String API_URL_DEMO_QA = "https://cgm-be-ci-qa-scanner-api.azurewebsites.net/api//";
+
+    //public static final String APP_DATA_SECRET ="{APP_DATA_SECRET}";
+
+    public static final String APP_DATA_SECRET ="JAY";
+
+
+
 
 
 
@@ -107,7 +114,7 @@ public class AppConstants {
     public static final String VAL_SEX_MALE = "male";
 
     public static final String VAL_MEASURE_MANUAL = "manual";
-    public static final String VAL_MEASURE_AUTO = "v2.2.0";
+    public static final String VAL_MEASURE_AUTO = "v3.0.0";
 
     public static final String LANG_ENGLISH = "en";
     public static final String LANG_GERMAN = "de";

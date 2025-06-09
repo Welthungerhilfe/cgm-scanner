@@ -51,7 +51,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
-import androidx.security.crypto.EncryptedFile;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -69,14 +68,13 @@ import com.google.mlkit.vision.pose.PoseLandmark;
 import com.google.mlkit.vision.pose.accurate.AccuratePoseDetectorOptions;
 //import com.microsoft.appcenter.crashes.Crashes;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -105,7 +103,6 @@ import de.welthungerhilfe.cgm.scanner.hardware.io.LocalPersistency;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
-import de.welthungerhilfe.cgm.scanner.ui.views.ScanModeView;
 import de.welthungerhilfe.cgm.scanner.ui.views.ScanTypeView;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
@@ -849,35 +846,17 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
         Runnable thread = () -> {
             try {
-                // Write RGB data
+
+                //write RGB data
                 String currentImgFilename = "rgb_" + person.getQrcode() + "_" + mNowTimeString + "_" + SCAN_STEP + "_" + frameIndex + ".jpg";
                 currentImgFilename = currentImgFilename.replace('/', '_');
                 File artifactFile = new File(mRgbSaveFolder, currentImgFilename);
+                BitmapHelper.writeBitmapToFile(bitmap, artifactFile);
 
-                // First, convert bitmap to bytes
-                ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteStream);
-                byte[] bitmapBytes = byteStream.toByteArray();
-
-                // Create or get master key (only once in app lifetime)
-                String masterKeyAlias = "TEST";
-
-                // Use EncryptedFile to write encrypted data
-                EncryptedFile encryptedFile = new EncryptedFile.Builder(
-                        artifactFile,
-                        this, // context
-                        masterKeyAlias,
-                        EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
-                ).build();
-
-                FileOutputStream outputStream = encryptedFile.openFileOutput();
-                outputStream.write(bitmapBytes);
-                outputStream.flush();
-                outputStream.close();
 
                 onProcessArtifact(artifactFile, ArtifactType.RGB, 0, poseScore, poseCoordinates, 0, 0, boundingBox, null);
 
-                // Save RGB metadata
+// Save RGB metadata
                 if (artifactFile.exists()) {
                     mColorSize += artifactFile.length();
                     mColorTime += System.currentTimeMillis() - profile;
@@ -886,8 +865,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                         LocalPersistency.setLong(this, SettingsPerformanceActivity.KEY_TEST_PERFORMANCE_COLOR_TIME, mColorTime);
                     }
                 }
-
-
                 //save calibration data
                 artifactFile = new File(mScanArtefactsOutputFolder, "camera_calibration.txt");
                 if (!artifactFile.exists()) {
@@ -897,7 +874,7 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                             fileOutputStream.write(cameraCalibration.getBytes());
                             fileOutputStream.flush();
                             fileOutputStream.close();
-                            onProcessArtifact(artifactFile, ArtifactType.CALIBRATION, 0, 0, null, 0, 0, null, null);
+                            onProcessArtifact(artifactFile,ArtifactType.CALIBRATION, 0, 0, null, 0, 0, null, null);
 
                         } catch (Exception e) {
                             LogFileUtils.logException(e, "scanemode runnablethread");
@@ -913,6 +890,18 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
         onThreadChange(1);
         executor.execute(thread);
 
+    }
+
+    public static void xorEncryptFile(File file, byte[] key) throws IOException {
+        RandomAccessFile raf = new RandomAccessFile(file, "rw");
+        long length = raf.length();
+        for (long i = 0; i < length; i++) {
+            raf.seek(i);
+            byte b = raf.readByte();
+            raf.seek(i);
+            raf.writeByte(b ^ key[(int)(i % key.length)]);
+        }
+        raf.close();
     }
 
     @Override
@@ -966,13 +955,14 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
 
             Runnable thread = () -> {
                 try {
-
-                    //write depthmap
+                    // Write depthmap to file
                     File artifactFile = new File(mDepthmapSaveFolder, depthmapFilename);
                     depthmap.save(artifactFile);
+
+
                     onProcessArtifact(artifactFile, ArtifactType.DEPTH, finalHeight, 0, null, child_distance, light_score, null, orientation);
 
-                    //profile process
+                    // Profile process
                     if (artifactFile.exists()) {
                         mDepthSize += artifactFile.length();
                         mDepthTime += System.currentTimeMillis() - profile;
