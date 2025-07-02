@@ -192,7 +192,7 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                                 handler.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        onProcessColorData(bitmap1, null, 0);
+                                        onProcessColorData(bitmap1, null, 0,0);
                                     //    createPose(bitmap1);
                                       // onProcessAngle(po);
                                     }
@@ -275,7 +275,7 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
         @Override
         protected void onPostExecute(Void aVoid) {
             isBackgrounThreadActive = false;
-            onProcessColorData(bitmap1, bitmapSave, frameIndex);
+            onProcessColorData(bitmap1, bitmapSave, frameIndex,0);
             onProcessDepthData(null, depthFrameSave, height, width, byteArray, frameIndex);
 
 

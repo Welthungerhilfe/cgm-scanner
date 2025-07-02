@@ -35,7 +35,7 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
 
     public interface Camera2DataListener
     {
-        void onColorDataReceived(Bitmap bitmap, int frameIndex);
+        void onColorDataReceived(Bitmap bitmap, int frameIndex, int SCAN_STEP);
 
         void onDepthDataReceived(Depthmap depthmap, int frameIndex, DepthFrame depthFrame, int height, int width, byte[] byteArray);
 
@@ -170,11 +170,11 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
     public void onPause() {
         mGLSurfaceView.onPause();
 
-        /*new Thread(() -> {
+        new Thread(() -> {
             closeCamera();
-        }).start();*/
+        }).start();
 
-        closeCamera();
+        //closeCamera();
     }
 
     public void onResume() {
@@ -224,11 +224,12 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
 
 
 
-    protected void onProcessColorData(Bitmap bitmapPreview,Bitmap bitmapSave,int saveFrameIndex) {
+    protected void onProcessColorData(Bitmap bitmapPreview,Bitmap bitmapSave,int saveFrameIndex, int SCAN_STEP) {
         for (Object listener : mListeners) {
             if(saveFrameIndex % AppConstants.SCAN_FRAMESKIP_REALSENSE == 0 && bitmapSave!=null && bitmapPreview!=null) {
+                LogFileUtils.logInfo("RGB", "this is from abstractAR "+bitmapSave+" "+saveFrameIndex);
 
-                ((Camera2DataListener) listener).onColorDataReceived(bitmapSave, saveFrameIndex);
+                ((Camera2DataListener) listener).onColorDataReceived(bitmapSave, saveFrameIndex,SCAN_STEP);
 
             }
         }
@@ -256,6 +257,7 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
 
         for (Object listener : mListeners) {
             if(frameIndex % AppConstants.SCAN_FRAMESKIP_REALSENSE == 0) {
+                LogFileUtils.logInfo("DEPTH", "this is from abstractAR "+depthFrame+" "+frameIndex);
 
                 ((Camera2DataListener)listener).onDepthDataReceived(depthmap, frameIndex,depthFrame,height,width,byteArray);
             }

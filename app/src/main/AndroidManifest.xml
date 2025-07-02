@@ -175,6 +175,10 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name=".ui.activities.ScanModeActivity2"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name=".ui.activities.UploadManagerActivity"
             android:screenOrientation="portrait" />
 

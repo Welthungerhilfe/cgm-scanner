@@ -25,3 +25,4 @@ local.properties
 # Ignore build directories
 build-arm64-v8a/
 build-x86_64/
+build-*/

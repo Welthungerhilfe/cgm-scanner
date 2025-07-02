@@ -41,6 +41,7 @@ import java.util.Queue;
 
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
+import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity1;
 
 public class ARRealSenseCamera2 extends AbstractIntelARCamera {
 
@@ -217,7 +218,7 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
                                 handler.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        onProcessColorData(bitmap1, null, 0);
+                                        onProcessColorData(bitmap1, null, 0, 0);
                                         onProcessAngle(position,rotation);
                                     }
                                 });
@@ -332,8 +333,11 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
         @Override
         protected void onPostExecute(Void aVoid) {
             isBackgrounThreadActive = false;
-            onProcessColorData(bitmap1, bitmapSave, frameIndex);
+            onProcessColorData(bitmap1, bitmapSave, frameIndex, ScanModeActivity1.SCAN_STEP);
+            LogFileUtils.logInfo("RGB", "this is from ArRealsense2 "+bitmapSave+" "+frameIndex+" "+ScanModeActivity1.SCAN_STEP);
             onProcessDepthData(null, depthFrameSave, height, width, byteArray, frameIndex);
+            LogFileUtils.logInfo("DEPTH", "this is from ArRealsense2 "+depthFrameSave+" "+frameIndex);
+
             frameSet.close();
         }
     }

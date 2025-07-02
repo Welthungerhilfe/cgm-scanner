@@ -12,7 +12,7 @@ if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)
     string(REGEX REPLACE "^[^A-Za-z0-9_]+" ""
            CMAKE_INSTALL_CONFIG_NAME "${BUILD_TYPE}")
   else()
-    set(CMAKE_INSTALL_CONFIG_NAME "Debug")
+    set(CMAKE_INSTALL_CONFIG_NAME "RelWithDebInfo")
   endif()
   message(STATUS "Install configuration: \"${CMAKE_INSTALL_CONFIG_NAME}\"")
 endif()
@@ -79,8 +79,8 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
     endif()
   endif()
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/realsense2" TYPE FILE FILES "D:/merge_realsense/cgm-scanner/build-arm64-v8a/CMakeFiles/Export/lib/cmake/realsense2/realsense2Targets.cmake")
-  if("${CMAKE_INSTALL_CONFIG_NAME}" MATCHES "^([Dd][Ee][Bb][Uu][Gg])$")
-    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/realsense2" TYPE FILE FILES "D:/merge_realsense/cgm-scanner/build-arm64-v8a/CMakeFiles/Export/lib/cmake/realsense2/realsense2Targets-debug.cmake")
+  if("${CMAKE_INSTALL_CONFIG_NAME}" MATCHES "^([Rr][Ee][Ll][Ww][Ii][Tt][Hh][Dd][Ee][Bb][Ii][Nn][Ff][Oo])$")
+    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/realsense2" TYPE FILE FILES "D:/merge_realsense/cgm-scanner/build-arm64-v8a/CMakeFiles/Export/lib/cmake/realsense2/realsense2Targets-relwithdebinfo.cmake")
   endif()
 endif()
 
@@ -102,7 +102,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("D:/merge_realsense/cgm-scanner/librealsense/.cxx/Debug/4h5o2c75/arm64-v8a/third-party/json/build/cmake_install.cmake")
+  include("D:/merge_realsense/cgm-scanner/librealsense/.cxx/RelWithDebInfo/6e4q65y5/arm64-v8a/third-party/json/build/cmake_install.cmake")
   include("D:/merge_realsense/cgm-scanner/build-arm64-v8a/third-party/rsutils/cmake_install.cmake")
   include("D:/merge_realsense/cgm-scanner/build-arm64-v8a/third-party/realsense-file/cmake_install.cmake")
   include("D:/merge_realsense/cgm-scanner/build-arm64-v8a/third-party/tclap/cmake_install.cmake")
