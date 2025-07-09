@@ -77,7 +77,7 @@
     <string name="drawer_close">Close</string>
     <string name="no_scans">No scans</string>
     <string name="add_scans">To start scanning, tap [+] button</string>
-    <string name="title_scans">Scans-Scheduled</string>
+    <string name="title_scans">Growth Monitor</string>
     <string name="data_not_synced">No permission to sync the data with the backend</string>
     <string name="logout_alert">Are you sure want to log out?</string>
 

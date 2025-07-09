@@ -147,14 +147,17 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
 
     String location_id;
 
+    String consentPath;
+
     LocationDialogFragment.PassDataToPersonDataFragment passDataToPersonDataFragment;
 
     private ActivityResultLauncher<IntentSenderRequest> scannerLauncher;
 
 
-    public static PersonalDataFragment getInstance(String qrCode) {
+    public static PersonalDataFragment getInstance(String qrCode, String consentPath) {
         PersonalDataFragment fragment = new PersonalDataFragment();
         fragment.qrCode = qrCode;
+        fragment.consentPath = consentPath;
 
         return fragment;
     }
@@ -542,11 +545,16 @@ public class PersonalDataFragment extends Fragment implements View.OnClickListen
                     person.setSynced(false);
                     person.setCenter_location_id(center_location_id);
                     person.setLocation_id(location_id);
+                    person.setLast_updated(System.currentTimeMillis());
                     if (BuildConfig.DEBUG && session.getEnvironment()== AppConstants.ENV_DEMO_QA) {
                         person.setCenter_location_id("1111");
                         person.setLocation_id("115566");
                     }
                     viewModel.savePerson(person);
+                    if(consentPath!=null){
+                        File file = new File(consentPath);
+                        ImageSaver(file,getActivity());
+                    }
                 }
 
                 break;

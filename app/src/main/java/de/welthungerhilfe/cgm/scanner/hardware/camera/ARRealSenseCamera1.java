@@ -145,6 +145,9 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
     Frame colorFrame1;
 
     boolean intrisicGenerated = false;
+
+    private float lastValidDistance = 0;
+
     String angle;
     public void startStreaming() {
         backgroundThread = new Thread(new Runnable() {
@@ -202,13 +205,16 @@ public class ARRealSenseCamera1 extends AbstractIntelARCamera{
                             try (Frame depth = frames.first(StreamType.DEPTH)) {
                                 DepthFrame depthFrame1 = depth.as(Extension.DEPTH_FRAME);
 
-                                mTargetDistance = depthFrame1.getDistance(depthFrame1.getWidth() / 2, depthFrame1.getHeight() / 2);
-                               /* handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        onProcessDistance(depthValue);
-                                    }
-                                });*/
+                                float currentDistance = depthFrame1.getDistance(depthFrame1.getWidth() / 2, depthFrame1.getHeight() / 2);
+
+                                if (currentDistance > 0) {
+                                    mTargetDistance = currentDistance;
+                                    lastValidDistance = currentDistance;  // update only if valid
+                                } else if (lastValidDistance > 0) {
+                                    mTargetDistance = lastValidDistance;  // fallback to last valid value
+                                } else {
+                                    mTargetDistance = 0;  // no valid value yet
+                                }
                             }
                             if (mFrameIndex % AppConstants.SCAN_FRAMESKIP_REALSENSE == 0 && !isBackgrounThreadActive) {
                                 saveAlignFrames1(frames,mFrameIndex);

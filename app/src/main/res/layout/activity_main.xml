@@ -26,6 +26,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize">
 
+
                     <androidx.appcompat.widget.Toolbar
                         android:id="@+id/toolbar"
                         android:layout_width="match_parent"
@@ -56,6 +57,7 @@
                             app:iconifiedByDefault="false" />
 
                     </androidx.appcompat.widget.Toolbar>
+
                     <ImageView
                         android:id="@+id/iv_realsense_icon"
                         android:layout_width="30dp"
@@ -64,6 +66,7 @@
                         android:layout_marginRight="60dp"
                         android:visibility="gone"
                         android:src="@drawable/sensor_red" />
+
 
                 </FrameLayout>
 

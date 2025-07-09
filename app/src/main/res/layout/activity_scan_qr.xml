@@ -7,6 +7,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+
+
         <de.welthungerhilfe.cgm.scanner.ui.views.QRScanView
             android:id="@+id/qrScanView"
             android:layout_width="match_parent"
@@ -95,6 +97,14 @@
                 android:textSize="18sp" />
 
         </LinearLayout>
-
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/colorWhite"
+            android:layout_centerInParent="true"
+            android:progressTint="@color/colorWhite"
+            android:visibility="gone"></ProgressBar>
     </RelativeLayout>
 </layout>

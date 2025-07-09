@@ -30,6 +30,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -219,15 +221,30 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
 
     private void handleActivityResult(ActivityResult activityResult) {
 
+
+
         int resultCode = activityResult.getResultCode();
         GmsDocumentScanningResult result =
                 GmsDocumentScanningResult.fromActivityResultIntent(activityResult.getData());
         if (result!=null && result.getPages() != null) {
+            activityScanQrBinding.progressBar.setVisibility(View.VISIBLE);
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+
             File file = new File(result.getPages().get(0).getImageUri().getPath());
+           // ImageSaver(file,QRScanActivity.this);
+            Intent intent = new Intent(QRScanActivity.this, CreateDataActivity.class);
+            intent.putExtra(AppConstants.EXTRA_QR, qrCode);
+            intent.putExtra(AppConstants.EXTRA_CONSENT_PATH,result.getPages().get(0).getImageUri().getPath());
+            startActivity(intent);
+
+                    finish();
+                }
+            }, 200);
 
 
 
-            ImageSaver(file,QRScanActivity.this);
         }
 
         if(result==null){
@@ -345,9 +362,13 @@ public class QRScanActivity extends BaseActivity implements ConfirmDialog.OnConf
             } else {
                 Intent intent = new Intent(QRScanActivity.this, CreateDataActivity.class);
                 intent.putExtra(AppConstants.EXTRA_QR, qrCode);
+
                 startActivity(intent);
                 finish();
+
+
             }
+
         } else {
             showConfirmDialog(R.string.message_legal, CAPTURED_CONSENT_SHEET_STEP);
 

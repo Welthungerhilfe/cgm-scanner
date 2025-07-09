@@ -57,6 +57,9 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
     private float[] velocity = new float[3]; // For position integration
     private long lastTimestamp = 0;
 
+    private float lastValidDistance = 0;
+
+
     public ARRealSenseCamera2(Activity activity, DepthPreviewMode depthMode, PreviewSize previewSize) {
         super(activity, depthMode, previewSize);
         // Initialize position and rotation to match AR Engine's starting state
@@ -228,7 +231,17 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
                             try (Frame depth = frames.first(StreamType.DEPTH)) {
                                 DepthFrame depthFrame1 = depth.as(Extension.DEPTH_FRAME);
 
-                                mTargetDistance = depthFrame1.getDistance(depthFrame1.getWidth() / 2, depthFrame1.getHeight() / 2);
+                                float currentDistance = depthFrame1.getDistance(depthFrame1.getWidth() / 2, depthFrame1.getHeight() / 2);
+
+                                if (currentDistance > 0) {
+                                    mTargetDistance = currentDistance;
+                                    lastValidDistance = currentDistance;  // update only if valid
+                                } else if (lastValidDistance > 0) {
+                                    mTargetDistance = lastValidDistance;  // fallback to last valid value
+                                } else {
+                                    mTargetDistance = 0;  // no valid value yet
+                                }
+                                LogFileUtils.logInfoOffline("ArRealsense2","this is value of distance "+mTargetDistance);
 
                             }
 

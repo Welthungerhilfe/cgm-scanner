@@ -56,10 +56,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
+        android:maxLines="1"
+        android:ellipsize="end"
         android:text="Title"
         android:textSize="20sp"
         android:fontFamily="sans-serif-condensed-medium"
         android:textColor="@color/colorWhite"
+        android:layout_marginRight="60dp"
         android:layout_marginLeft="50dp"></TextView>
 
     <ImageView

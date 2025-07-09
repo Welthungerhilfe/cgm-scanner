@@ -33,6 +33,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -101,6 +102,8 @@ public class CreateDataActivity extends BaseActivity {
     Person person;
     PersonRepository personRepository;
 
+    String consentPath;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,13 +119,19 @@ public class CreateDataActivity extends BaseActivity {
         sessionManager = new SessionManager(this);
         personRepository = PersonRepository.getInstance(this);
         getCurrentLocation();
-
+        consentPath = getIntent().getStringExtra(AppConstants.EXTRA_CONSENT_PATH);
         qrCode = getIntent().getStringExtra(AppConstants.EXTRA_QR);
         person = personRepository.findPersonByQr(qrCode,sessionManager.getEnvironment());
-
-
         setupActionBar();
         initFragments();
+
+    /*    new Handler().postDelayed(() -> {
+            // e.g., load list data, start animations, make API calls, etc.
+
+            initFragments();
+        }, 100);*/
+
+
 
         activityCreateBinding.ivBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -208,7 +217,7 @@ public class CreateDataActivity extends BaseActivity {
     }
 
     private void initFragments() {
-        personalFragment = PersonalDataFragment.getInstance(qrCode);
+        personalFragment = PersonalDataFragment.getInstance(qrCode,consentPath);
         measureFragment = MeasuresDataFragment.getInstance(qrCode);
         growthFragment = GrowthDataFragment.getInstance(qrCode);
 

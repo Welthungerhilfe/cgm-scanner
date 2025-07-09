@@ -1810,6 +1810,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
 
             RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), (new JSONObject(gson.toJson(resultsData))).toString());
             LogFileUtils.logInfoOffline(TAG, "this is post postChildDistance before posting...");
+            LogFileUtils.logInfoOffline(TAG, "this is posting postChildDistance data" +"\n"+(new JSONObject(gson.toJson(resultsData))).toString());
 
             onThreadChange(1,"postChildDistance");
             retrofit.create(ApiService.class).postWorkFlowsResult(session.getAuthTokenWithBearer(), body).subscribeOn(Schedulers.io())

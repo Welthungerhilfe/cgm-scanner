@@ -137,6 +137,9 @@ public class AppConstants {
     public static final String EXTRA_RADIUS = "extra_radius";
     public static final String EXTRA_PERSON = "extra_person";
 
+
+    public static final String EXTRA_CONSENT_PATH = "extra_consent_path";
+
     public static final String EXTRA_SCAN_MODE ="extra_scan_mode";
     public static final String EXTRA_MEASURE = "extra_measure";
     public static final String EXTRA_TUTORIAL_AGAIN = "extra_tutorial_again";

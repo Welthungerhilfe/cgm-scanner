@@ -544,6 +544,15 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     private void setupActionBar() {
         activityMainBinding.searchbar.setVisibility(View.GONE);
+        if(session.getSensorMode()==AppConstants.NO_SENSOR_SELECTED){
+            activityMainBinding.ivRealsenseIcon.setVisibility(View.GONE);
+
+        }
+        else if(session.getSensorMode()==AppConstants.SENSOR_SELECTED){
+            activityMainBinding.ivRealsenseIcon.setVisibility(View.VISIBLE);
+
+
+        }
         setSupportActionBar(activityMainBinding.toolbar);
          actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -568,6 +577,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
     private void openSearchBar() {
         activityMainBinding.searchbar.setVisibility(View.VISIBLE);
+        activityMainBinding.ivRealsenseIcon.setVisibility(View.GONE);
         setSupportActionBar(activityMainBinding.searchbar);
         actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -737,6 +747,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
 
         if (activityMainBinding.searchbar.getVisibility() == View.VISIBLE) {
             menuInflater.inflate(R.menu.menu_search, menu);
+            activityMainBinding.ivRealsenseIcon.setVisibility(View.GONE);
         } else {
             menuInflater.inflate(R.menu.menu_tool, menu);
         }
