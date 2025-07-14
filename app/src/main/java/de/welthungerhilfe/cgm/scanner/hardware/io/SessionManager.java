@@ -92,7 +92,7 @@ public class SessionManager {
 
             pref = EncryptedSharedPreferences.create(
                     ctx,
-                    PREF_KEY_USER,
+                    AppConstants.APP_DATA_SECRET,
                     masterKey,
                     EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                     EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
@@ -241,22 +241,22 @@ public class SessionManager {
     }
 
     public String getAuthToken() {
-        /*if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) {
             return null;
 
-        } else {*/
+        } else {
             return pref.getString(KEY_USER_TOKEN, null);
-       // }
+        }
     }
 
     public String getAuthTokenWithBearer() {
-        /*if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) {
             return null;
 
 
-        } else {*/
+        } else {
             return "bearer " + getAuthToken();
-      //  }
+       }
 
     }
 
