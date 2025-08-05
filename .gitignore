@@ -26,3 +26,4 @@ local.properties
 build-arm64-v8a/
 build-x86_64/
 build-*/
+build-arm64-v8a/
