@@ -1310,7 +1310,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         //  boolean childDetected = getCamera().getPersonCount() == 1;
         float distance = mCameraInstance.getTargetDistance();
         runOnUiThread(() -> {
-            String formattedDistance = String.format("%.1f", distance);
+            String formattedDistance = String.format("%.2f", distance);
 
             if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
                 getCamera().setSkeletonMode(AbstractIntelARCamera.SkeletonMode.OFF);
