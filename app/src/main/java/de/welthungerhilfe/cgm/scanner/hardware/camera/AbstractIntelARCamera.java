@@ -91,6 +91,8 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
     protected int mFrameIndex;
     protected float mPixelIntensity;
     protected float mTargetDistance;
+
+    protected float mWallDisyance;
     protected int mOrientation;
 
     protected float mTargetHeight;
@@ -445,6 +447,9 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
         return mTargetDistance;
     }
 
+    public float getWallDistance() {
+        return mWallDisyance;
+    }
     public float getOrientation() {
         return mOrientation;
     }

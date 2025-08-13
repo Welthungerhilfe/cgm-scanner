@@ -616,7 +616,7 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
 
     int noLandmarkCounter = 0;
 
-    public void createPose(Bitmap bitmap,  byte[] depthData, int width, int height, int stride) {
+    public void createPose(Bitmap bitmap, byte[] depthData, int width, int height, int stride) {
         if (bitmap == null || depthData == null) {
             LogFileUtils.logError(TAG, "Bitmap or DepthFrame is null in createPose");
             mPersonCount = "NA";
@@ -624,30 +624,20 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
             return;
         }
 
-        // Validate depth frame dimensions
-
-
-
-
         if (width <= 0 || height <= 0) {
             LogFileUtils.logError(TAG, "Invalid depth frame dimensions: width=" + width + ", height=" + height);
             mPersonCount = "NA";
             return;
         }
 
-        // Validate bitmap dimensions
         int bitmapWidth = bitmap.getWidth();
         int bitmapHeight = bitmap.getHeight();
         if (bitmapWidth <= 0 || bitmapHeight <= 0) {
             LogFileUtils.logError(TAG, "Invalid bitmap dimensions: width=" + bitmapWidth + ", height=" + bitmapHeight);
             mPersonCount = "NA";
-
-
             return;
         }
 
-       /* float currentDistance1 = depthFrame.getDistance(depthFrame.getWidth() / 2, depthFrame.getHeight() / 2);
-        LogFileUtils.logInfoOffline("ARRealsenseCamera2","this is temp distance1 "+currentDistance1);*/
         InputImage image = InputImage.fromBitmap(bitmap, 0);
         poseDetector.process(image)
                 .addOnSuccessListener(pose -> {
@@ -656,23 +646,24 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
                         mPersonCount = "NA";
                         LogFileUtils.logInfoOffline("ArRealsense2", "No pose landmarks detected");
                         noLandmarkCounter++;
-                        if(noLandmarkCounter> 3){
-                            float currentDistance = getDistanceFromByteArray(depthData, width, height, stride, width/2, height/2);
-
-                            LogFileUtils.logInfoOffline("ARRealsenseCamera2","this is temp distance2 "+currentDistance);
-
-
+                        if (noLandmarkCounter > 3) {
+                            float currentDistance = getDistanceFromByteArray(depthData, width, height, stride, width / 2, height / 2);
+                            LogFileUtils.logInfoOffline("ARRealsenseCamera2", "this is temp distance2 " + currentDistance);
 
                             if (currentDistance > 0) {
                                 mTargetDistance = currentDistance;
-                                lastValidDistance = currentDistance; // Update last valid distance
+                                lastValidDistance = currentDistance;
+                                mWallDisyance = currentDistance; // No child, wall distance equals child distance
                             } else if (lastValidDistance > 0) {
-                                mTargetDistance = lastValidDistance; // Fallback to last valid distance
+                                mTargetDistance = lastValidDistance;
+                                mWallDisyance = lastValidDistance; // No child, wall distance equals last valid distance
                                 LogFileUtils.logInfoOffline("ArRealsense2", "Using last valid distance wall: " + mTargetDistance + " meters");
                             } else {
-                                mTargetDistance = 0; // No valid distance available
+                                mTargetDistance = 0;
+                                mWallDisyance = 0; // No valid distance available
                                 LogFileUtils.logInfoOffline("ArRealsense2", "No valid child distance available wall");
                             }
+                            LogFileUtils.logInfoOffline("ArRealsense2", "Wall distance (no child): " + mWallDisyance + " meters");
                         }
                         return;
                     }
@@ -685,18 +676,15 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
                         PoseLandmark rightKnee = pose.getPoseLandmark(PoseLandmark.RIGHT_HIP);
 
                         if (leftShoulder != null && rightShoulder != null && leftKnee != null && rightKnee != null) {
-                            // Calculate the center point of the child
                             float humanCenterX = (leftShoulder.getPosition().x + rightShoulder.getPosition().x +
                                     leftKnee.getPosition().x + rightKnee.getPosition().x) / 4.0f;
                             float humanCenterY = (leftShoulder.getPosition().y + rightShoulder.getPosition().y +
                                     leftKnee.getPosition().y + rightKnee.getPosition().y) / 4.0f;
 
-                            // Log dimensions and coordinates for debugging
                             LogFileUtils.logInfoOffline("ArRealsense2", "Bitmap dimensions: width=" + bitmapWidth + ", height=" + bitmapHeight);
                             LogFileUtils.logInfoOffline("ArRealsense2", "Depth frame dimensions: width=" + width + ", height=" + height);
                             LogFileUtils.logInfoOffline("ArRealsense2", "Human center: x=" + humanCenterX + ", y=" + humanCenterY);
 
-                            // Validate human center coordinates
                             if (Float.isNaN(humanCenterX) || Float.isNaN(humanCenterY) ||
                                     humanCenterX < 0 || humanCenterX >= bitmapWidth ||
                                     humanCenterY < 0 || humanCenterY >= bitmapHeight) {
@@ -705,45 +693,38 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
                                 return;
                             }
 
-                            // Map RGB coordinates to depth frame coordinates (assuming aligned frames)
                             int depthX = Math.min(Math.max((int) humanCenterX, 0), width - 1);
                             int depthY = Math.min(Math.max((int) humanCenterY, 0), height - 1);
-
-                            // Log clamped coordinates
                             LogFileUtils.logInfoOffline("ArRealsense2", "Clamped depth coordinates: depthX=" + depthX + ", depthY=" + depthY);
 
-                            // Double-check bounds
-                           /* if (depthX < 0 || depthX >= depthWidth || depthY < 0 || depthY >= depthHeight) {
-                                LogFileUtils.logError(TAG, "Computed depth coordinates out of bounds: depthX=" + depthX + ", depthY=" + depthY +
-                                        ", depthWidth=" + depthWidth + ", depthHeight=" + depthHeight);
-                                mPersonCount = "NA";
-                                return;
-                            }*/
-
-
-                            // Calculate distance at the child's center point
-
-                            //float currentDistance = depthFrame.getDistance(depthX, depthY);
                             float currentDistance2 = getDistanceFromByteArray(depthData, width, height, stride, depthX, depthY);
-
-                            LogFileUtils.logInfoOffline("ARRealsenseCamera2","this is temp distance2 "+currentDistance2);
-
-
+                            LogFileUtils.logInfoOffline("ARRealsenseCamera2", "this is temp distance2 " + currentDistance2);
 
                             if (currentDistance2 > 0) {
                                 mTargetDistance = currentDistance2;
-                                lastValidDistance = currentDistance2; // Update last valid distance
+                                lastValidDistance = currentDistance2;
                                 LogFileUtils.logInfoOffline("ArRealsense2", "Child distance at center (" + depthX + ", " + depthY + "): " + mTargetDistance + " meters");
                             } else if (lastValidDistance > 0) {
-                                mTargetDistance = lastValidDistance; // Fallback to last valid distance
+                                mTargetDistance = lastValidDistance;
                                 LogFileUtils.logInfoOffline("ArRealsense2", "Using last valid distance: " + mTargetDistance + " meters");
                             } else {
-                                mTargetDistance = 0; // No valid distance available
+                                mTargetDistance = 0;
                                 LogFileUtils.logInfoOffline("ArRealsense2", "No valid child distance available");
                             }
 
-                            // Notify listeners about the distance
-                            // onDistanceReceived(mTargetDistance);
+                            // Calculate wall distance 150 pixels to the right of right shoulder
+                            float rightShoulderX = rightShoulder.getPosition().x;
+                            float rightShoulderY = rightShoulder.getPosition().y;
+                            int wallDepthX = Math.min(Math.max((int) rightShoulderX + 150, 0), width - 1);
+                            int wallDepthY = Math.min(Math.max((int) rightShoulderY, 0), height - 1);
+                            float wallDistanceTemp = getDistanceFromByteArray(depthData, width, height, stride, wallDepthX, wallDepthY);
+                            if (wallDistanceTemp > 0) {
+                                mWallDisyance = wallDistanceTemp;
+                                LogFileUtils.logInfoOffline("ArRealsense2", "Wall distance at (" + wallDepthX + ", " + wallDepthY + "): " + mWallDisyance + " meters");
+                            } else {
+                                mWallDisyance = mTargetDistance; // Fallback to child distance if wall distance is invalid
+                                LogFileUtils.logInfoOffline("ArRealsense2", "Invalid wall distance, using child distance: " + mWallDisyance + " meters");
+                            }
 
                         } else {
                             mPersonCount = "NA";

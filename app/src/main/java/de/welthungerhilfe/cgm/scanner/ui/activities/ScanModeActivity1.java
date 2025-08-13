@@ -1309,9 +1309,10 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
         AbstractIntelARCamera.LightConditions light = getCamera().getLightConditionState();
         //  boolean childDetected = getCamera().getPersonCount() == 1;
         float distance = mCameraInstance.getTargetDistance();
+        float wallDistance = mCameraInstance.getWallDistance();
         runOnUiThread(() -> {
             String formattedDistance = String.format("%.2f", distance);
-
+            String formattedwallDistance = String.format("%.2f", wallDistance);
             if ((SCAN_MODE == AppConstants.SCAN_LYING) && (SCAN_STEP != AppConstants.SCAN_LYING_FRONT)) {
                 getCamera().setSkeletonMode(AbstractIntelARCamera.SkeletonMode.OFF);
                 setOutline(true);
@@ -1346,7 +1347,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
             // if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
             // if ((mTxtFeedback.getVisibility() == View.GONE) && (distance != 0)) {
-            activityScanModeBinding.tvChildDistance.setText(formattedDistance+" mts ");
+            activityScanModeBinding.tvChildDistance.setText(formattedDistance+" mts, wall:= "+formattedwallDistance);
 
             /*if (distance < 0.7) {
                 //  setFeedback("Too Close");
