@@ -49,6 +49,16 @@ public class MeasureNotification {
     private Float height;
     private Float weight;
 
+    // --- Utility: PendingIntent flags for Android 12+ compatibility ---
+    private static int getPendingIntentFlags(int baseFlags) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // Android 12+ requires explicit mutability
+            return baseFlags | PendingIntent.FLAG_IMMUTABLE;
+        } else {
+            return baseFlags;
+        }
+    }
+
     public static MeasureNotification get(String qrCode) {
         if (qrCode == null) {
             return null;
@@ -80,7 +90,8 @@ public class MeasureNotification {
     public static void dismissNotification(Context context) {
         try {
             notifications.clear();
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationManager notificationManager =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.cancel(NOTIFICATION_ID);
         } catch (Exception e) {
             e.printStackTrace();
@@ -95,17 +106,25 @@ public class MeasureNotification {
         updated = false;
 
         Notification.Builder notificationBuilder;
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         Intent notificationIntent = new Intent(context, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                notificationIntent,
+                getPendingIntentFlags(PendingIntent.FLAG_UPDATE_CURRENT)
+        );
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "CGM Result Generation", NotificationManager.IMPORTANCE_HIGH);
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "CGM Result Generation",
+                    NotificationManager.IMPORTANCE_HIGH
+            );
             notificationManager.createNotificationChannel(channel);
-
             notificationBuilder = new Notification.Builder(context, CHANNEL_ID);
-
         } else {
             notificationBuilder = new Notification.Builder(context);
         }
@@ -119,10 +138,14 @@ public class MeasureNotification {
                 .setOngoing(false);
 
         long timestamp = System.currentTimeMillis();
-        String title = String.format(context.getString(R.string.result_generation_at) + " %s", DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE, timestamp));
-        StringBuilder text = new StringBuilder();
+        String title = String.format(
+                context.getString(R.string.result_generation_at) + " %s",
+                DataFormat.timestamp(context, DataFormat.TimestampFormat.DATE, timestamp)
+        );
 
+        StringBuilder text = new StringBuilder();
         boolean valid = false;
+
         SessionManager sessionManager = new SessionManager(context);
         for (String qrCode : notifications.keySet()) {
             if (sessionManager.getStdTestQrCode() != null) {
@@ -167,23 +190,32 @@ public class MeasureNotification {
         }
         String NOTIFICATION_CHANNEL_ID = "de.welthungerhilfe.cgm.scanner";
         String channelName = "UploadService";
-        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+        NotificationChannel chan = new NotificationChannel(
+                NOTIFICATION_CHANNEL_ID,
+                channelName,
+                NotificationManager.IMPORTANCE_DEFAULT
+        );
         chan.setLightColor(Color.BLUE);
         chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager manager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         assert manager != null;
         manager.createNotificationChannel(chan);
 
         Intent notificationIntent = new Intent(context, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context,
-                0, notificationIntent, 0);
-        Notification notification = new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                notificationIntent,
+                getPendingIntentFlags(0)
+        );
+
+        return new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(text)
                 .setSmallIcon(R.drawable.icon_notif)
                 .setContentIntent(pendingIntent)
                 .build();
-        return notification;
     }
 
 }
