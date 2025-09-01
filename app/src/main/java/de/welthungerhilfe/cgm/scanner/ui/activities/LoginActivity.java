@@ -100,7 +100,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         Bundle bundle = new Bundle();
         bundle.putString("backend_selected",selectedBackend);
         firebaseAnalytics.logEvent("signin_started",bundle);
-        if (BuildConfig.DEBUG) {
+        /*if (BuildConfig.DEBUG) {
             if (session.getEnvironment() == AppConstants.ENV_UNKNOWN) {
                 Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
                 return;
@@ -109,19 +109,19 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             LogFileUtils.startSession(LoginActivity.this, session);
 
             startApp();
+        } else {*/
+        if (session.getEnvironment() != AppConstants.ENV_UNKNOWN) {
+            Log.d(TAG, "Login into " + SyncingWorkManager.getAPI());
+            activityLoginBinding.layoutLogin.setVisibility(View.GONE);
+            activityLoginBinding.loginProgressbar.setVisibility(View.VISIBLE);
+            new AuthenticationHandler(this, this, () -> runOnUiThread(() -> {
+                activityLoginBinding.layoutLogin.setVisibility(View.VISIBLE);
+                activityLoginBinding.loginProgressbar.setVisibility(View.GONE);
+            }));
         } else {
-            if (session.getEnvironment() != AppConstants.ENV_UNKNOWN) {
-                Log.d(TAG, "Login into " + SyncingWorkManager.getAPI());
-                activityLoginBinding.layoutLogin.setVisibility(View.GONE);
-                activityLoginBinding.loginProgressbar.setVisibility(View.VISIBLE);
-                new AuthenticationHandler(this, this, () -> runOnUiThread(() -> {
-                    activityLoginBinding.layoutLogin.setVisibility(View.VISIBLE);
-                    activityLoginBinding.loginProgressbar.setVisibility(View.GONE);
-                }));
-            } else {
-                Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
-            }
+            Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
         }
+        //   }
     }
 
     private SessionManager session;
@@ -141,8 +141,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             String version = pInfo.versionName;
             if (version.contains("dev")) {
-              //  activityLoginBinding.rbSandbox.setVisibility(View.VISIBLE);
-               country =new String[]{"Select Country","India","Malawi","Sierra Leone","Namibia","Nepal","Uganda","Bangladesh","Demo/Test","Sandbox"};
+                //  activityLoginBinding.rbSandbox.setVisibility(View.VISIBLE);
+                country =new String[]{"Select Country","India","Malawi","Sierra Leone","Namibia","Nepal","Uganda","Bangladesh","Demo/Test","Sandbox"};
             }
             else {
                 country =new String[]{"Select Country","Syria","India","Malawi","Sierra Leone","Namibia","Nepal","Uganda","Bangladesh","Ethopia","Demo/Test"};
@@ -511,13 +511,19 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     }*/
 
     public boolean checkStoragePermissions() {
+        Log.d(TAG, "Checking permissions for Android API " + Build.VERSION.SDK_INT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+ needs media-specific permissions
             boolean hasImages = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED;
             boolean hasVideo = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) == PackageManager.PERMISSION_GRANTED;
             boolean hasAudio = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED;
-
+            Log.d(TAG, "Images: " + hasImages + ", Video: " + hasVideo + ", Audio: " + hasAudio);
             if (!hasImages || !hasVideo || !hasAudio) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_IMAGES) ||
+                        ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_VIDEO) ||
+                        ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_AUDIO)) {
+                    Toast.makeText(this, "This app needs media permissions to function properly.", Toast.LENGTH_LONG).show();
+                }
+                Log.d(TAG, "Requesting media permissions");
                 ActivityCompat.requestPermissions(this,
                         new String[]{
                                 Manifest.permission.READ_MEDIA_IMAGES,
@@ -529,9 +535,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                 return false;
             }
             return true;
-
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Android 11–12 (API 30–32)
             if (!Environment.isExternalStorageManager()) {
                 try {
                     Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
@@ -545,10 +549,11 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                 return false;
             }
             return true;
-
         } else {
-            // Android 6–10
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    Toast.makeText(this, "This app needs storage permissions to function properly.", Toast.LENGTH_LONG).show();
+                }
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
                         STORAGE_PEMISSION
@@ -556,6 +561,37 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                 return false;
             }
             return true;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == STORAGE_PEMISSION) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                boolean allGranted = grantResults.length > 0;
+                for (int result : grantResults) {
+                    if (result != PackageManager.PERMISSION_GRANTED) {
+                        allGranted = false;
+                        break;
+                    }
+                }
+                if (allGranted) {
+                    Log.d(TAG, "All media permissions granted, proceeding with sign-in");
+                    doSignIn();
+                } else {
+                    Log.d(TAG, "Media permissions denied");
+                    Toast.makeText(this, "Media permissions are required to proceed.", Toast.LENGTH_LONG).show();
+                }
+            } else {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "Storage permissions granted, proceeding with sign-in");
+                    doSignIn();
+                } else {
+                    Log.d(TAG, "Storage permissions denied");
+                    Toast.makeText(this, "Storage permissions are required to proceed.", Toast.LENGTH_LONG).show();
+                }
+            }
         }
     }
 

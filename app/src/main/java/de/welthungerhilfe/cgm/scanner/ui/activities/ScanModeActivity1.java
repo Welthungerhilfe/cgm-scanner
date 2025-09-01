@@ -17,9 +17,13 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.MediaActionSound;
+import android.net.Uri;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.StrictMode;
+import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,6 +41,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.widget.ImageViewCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -154,6 +159,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     float mOutlineAlpha = 0;
 
     boolean finishCreateDataActivity = false;
+
+    private static final int PERMISSION_STORAGE = 101;
 
     public void scanStanding() {
         SCAN_MODE = AppConstants.SCAN_STANDING;
@@ -478,7 +485,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                 .setView(R.layout.dialog_loading)
                 .create();
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (!checkStoragePermissions()) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
         }
 
@@ -550,6 +557,63 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             }
         });
 
+    }
+
+    public boolean checkStoragePermissions() {
+        Log.d(TAG, "Checking permissions for Android API " + Build.VERSION.SDK_INT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ media permissions (adjust based on needs; e.g., only IMAGES if no video/audio)
+            boolean hasImages = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED;
+            boolean hasVideo = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) == PackageManager.PERMISSION_GRANTED;
+            boolean hasAudio = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED;
+            Log.d(TAG, "Images: " + hasImages + ", Video: " + hasVideo + ", Audio: " + hasAudio);
+            if (!hasImages || !hasVideo || !hasAudio) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_IMAGES) ||
+                        ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_VIDEO) ||
+                        ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_AUDIO)) {
+                    Toast.makeText(this, "This app needs media permissions to save and process scan data.", Toast.LENGTH_LONG).show();
+                }
+                Log.d(TAG, "Requesting media permissions");
+                ActivityCompat.requestPermissions(this,
+                        new String[]{
+                                Manifest.permission.READ_MEDIA_IMAGES,
+                                Manifest.permission.READ_MEDIA_VIDEO,
+                                Manifest.permission.READ_MEDIA_AUDIO
+                        },
+                        PERMISSION_STORAGE
+                );
+                return false;
+            }
+            return true;
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Android 11–12: All files access
+            if (!Environment.isExternalStorageManager()) {
+                try {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                    intent.setData(Uri.parse("package:" + getPackageName()));
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Intent intent = new Intent();
+                    intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                    startActivity(intent);
+                }
+                return false;
+            }
+            return true;
+        } else {
+            // Android 6–10: Legacy storage permissions
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    Toast.makeText(this, "This app needs storage permissions to save and process scan data.", Toast.LENGTH_LONG).show();
+                }
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                        PERMISSION_STORAGE
+                );
+                return false;
+            }
+            return true;
+        }
     }
 
     @Override
