@@ -214,7 +214,8 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             retakeFiles.clear();
             retakeFiles = new ArrayList<>();
         }
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        if (!checkStoragePermissions()) {
+            Toast.makeText(ScanModeActivity1.this,"No permission "+checkStoragePermissions(),Toast.LENGTH_LONG).show();
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.CAMERA"}, PERMISSION_CAMERA);
         } else {
             if (SCAN_MODE == AppConstants.SCAN_STANDING) {
@@ -562,37 +563,30 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
     public boolean checkStoragePermissions() {
         Log.d(TAG, "Checking permissions for Android API " + Build.VERSION.SDK_INT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+ media permissions (adjust based on needs; e.g., only IMAGES if no video/audio)
+            // Android 13+: Request only READ_MEDIA_IMAGES (since app handles images)
             boolean hasImages = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED;
-            boolean hasVideo = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) == PackageManager.PERMISSION_GRANTED;
-            boolean hasAudio = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED;
-            Log.d(TAG, "Images: " + hasImages + ", Video: " + hasVideo + ", Audio: " + hasAudio);
-            if (!hasImages || !hasVideo || !hasAudio) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_IMAGES) ||
-                        ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_VIDEO) ||
-                        ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_AUDIO)) {
-                    Toast.makeText(this, "This app needs media permissions to save and process scan data.", Toast.LENGTH_LONG).show();
-                }
-                Log.d(TAG, "Requesting media permissions");
+            Log.d(TAG, "Images permission: " + hasImages);
+            if (!hasImages) {
+                // Show toast for all requests to explain the need
+                Toast.makeText(this, "This app needs access to photos to save scan images.", Toast.LENGTH_LONG).show();
+                Log.d(TAG, "Requesting READ_MEDIA_IMAGES permission");
                 ActivityCompat.requestPermissions(this,
-                        new String[]{
-                                Manifest.permission.READ_MEDIA_IMAGES,
-                                Manifest.permission.READ_MEDIA_VIDEO,
-                                Manifest.permission.READ_MEDIA_AUDIO
-                        },
+                        new String[]{Manifest.permission.READ_MEDIA_IMAGES},
                         PERMISSION_STORAGE
                 );
                 return false;
             }
             return true;
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Android 11–12: All files access
+            // Android 11–12: All files access (if external storage is used)
             if (!Environment.isExternalStorageManager()) {
+                Toast.makeText(this, "This app needs full storage access to save scan data. Please enable it in settings.", Toast.LENGTH_LONG).show();
                 try {
                     Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
                     intent.setData(Uri.parse("package:" + getPackageName()));
                     startActivity(intent);
                 } catch (Exception e) {
+                    Log.e(TAG, "Error opening MANAGE_ALL_FILES_ACCESS_PERMISSION: " + e.getMessage());
                     Intent intent = new Intent();
                     intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
                     startActivity(intent);
@@ -601,11 +595,10 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
             }
             return true;
         } else {
-            // Android 6–10: Legacy storage permissions
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    Toast.makeText(this, "This app needs storage permissions to save and process scan data.", Toast.LENGTH_LONG).show();
-                }
+            // Android 6–10 (Huawei P30 Pro): Legacy storage permissions
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "This app needs storage access to save scan data.", Toast.LENGTH_LONG).show();
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
                         PERMISSION_STORAGE

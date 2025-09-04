@@ -119,8 +119,8 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
                     .build();
             poseDetector = PoseDetection.getClient(options);
 
-            config.enableStream(StreamType.DEPTH, 1280, 720);
-            config.enableStream(StreamType.COLOR, 1280, 720);
+            config.enableStream(StreamType.DEPTH, 640, 480);
+            config.enableStream(StreamType.COLOR, 640, 480);
             config.enableStream(StreamType.ACCEL, StreamFormat.MOTION_XYZ32F);
             config.enableStream(StreamType.GYRO, StreamFormat.MOTION_XYZ32F); // Enable gyroscope stream
 
@@ -449,8 +449,8 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
     }
 
     public Bitmap frameToBitmap(Frame colorFrame) {
-        int width = 1280;
-        int height = 720;
+        int width = 640;
+        int height = 480;
         byte[] data = new byte[width * height * 3];
         colorFrame.getData(data);
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
