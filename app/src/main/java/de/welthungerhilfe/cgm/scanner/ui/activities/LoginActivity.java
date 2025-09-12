@@ -90,6 +90,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
     public void doSignIn() {
         if (!checkStoragePermissions()) {
+            Toast.makeText(this, "Storage", Toast.LENGTH_LONG).show();
             return;
         }
         Bundle bundle = new Bundle();

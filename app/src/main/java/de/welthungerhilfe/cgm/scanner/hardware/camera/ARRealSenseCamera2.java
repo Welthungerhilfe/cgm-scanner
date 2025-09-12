@@ -91,6 +91,7 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
         mRsContext = AbstractIntelARCamera.getRsContext();
         mRsContext.setDevicesChangedCallback(mListener);
         mPipeline = new Pipeline(mRsContext);
+        LogFileUtils.logInfoOffline(TAG, "streaming stopped successfully");
 
         try (DeviceList dl = mRsContext.queryDevices()) {
             if (dl.getDeviceCount() > 0) {

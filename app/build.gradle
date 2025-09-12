@@ -15,7 +15,7 @@ android {
         targetSdkVersion 34
 
         versionCode 726
-        versionName "12.0.0"
+        versionName "12.0.0-test"
 
 
 
