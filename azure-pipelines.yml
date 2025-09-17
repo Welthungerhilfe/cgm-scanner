@@ -9,9 +9,10 @@ trigger:
   - master-realsense-aab
 
 variables:
-  - group: TEST_CGM
+  - group: TEST_CGM  # Properly linked variable group
   - name: system.debug
     value: 'false'
+
   - name: MOBILECENTER_OUTPUT_DIRECTORY
     value: $(Build.ArtifactStagingDirectory)/build
   - name: MOBILECENTER_BRANCH
@@ -88,25 +89,14 @@ jobs:
         submodules: recursive
         lfs: true
 
+      # Install Java and set JAVA_HOME
       - task: JavaToolInstaller@0
         inputs:
           versionSpec: '17'
           jdkArchitectureOption: 'x64'
           jdkSourceOption: 'PreInstalled'
 
-      - task: NodeTool@0
-        inputs:
-          versionSpec: '16.x'
-        displayName: 'Install Node.js 16.x'
-
-      - task: Bash@3
-        displayName: Install Latest App Center CLI
-        inputs:
-          targetType: inline
-          script: |
-            npm install -g appcenter-cli
-            appcenter --version
-
+      # Debug step to verify variable group loading
       - task: Bash@3
         displayName: Debug Variable Group Loading
         inputs:
@@ -119,11 +109,6 @@ jobs:
             echo "API_KEY: $(API_KEY)"
             echo "API_URL_SYRIA: $(API_URL_SYRIA)"
             echo "OAUTH_URL_SYRIA: $(OAUTH_URL_SYRIA)"
-            echo "Verify Java installation:"
-            echo "JAVA_HOME: $JAVA_HOME"
-            echo "OAUTH_SCOPE_SYRIA: $(OAUTH_SCOPE_SYRIA)"
-            echo "OAUTH_CLIENT_ID_SYRIA: $(OAUTH_CLIENT_ID_SYRIA)"
-            echo "Verify Java installation:"
             echo "JAVA_HOME: $JAVA_HOME"
             java -version
 
@@ -169,10 +154,10 @@ jobs:
           KEY_PASSWORD: $(KEY_PASSWORD)
 
       - task: Gradle@1
-        displayName: Build and Sign AAB
+        displayName: Build and Sign APK + AAB
         inputs:
           tasks: >-
-            clean :app:bundleArcoreRelease :app:testArcoreRelease :app:lintArcoreRelease
+            clean :app:assembleArcoreRelease :app:bundleArcoreRelease :app:testArcoreRelease :app:lintArcoreRelease
           options: >-
             -Pandroid.injected.signing.store.file="$(KEYSTORE_PATH)"
             -Pandroid.injected.signing.store.password="$(KEYSTORE_PASSWORD)"
@@ -190,13 +175,25 @@ jobs:
           KEY_PASSWORD: $(KEY_PASSWORD)
 
       - task: CopyFiles@2
-        displayName: Copy build files to staging
+        displayName: Copy APK + AAB to staging
         inputs:
           SourceFolder: $(build.sourcesdirectory)/app/build/outputs
-          Contents: bundle/**/*.aab
+          Contents: |
+            apk/**/*.apk
+            bundle/**/*.aab
           TargetFolder: $(build.artifactstagingdirectory)/build
           OverWrite: true
           flattenFolders: true
+
+      - task: Bash@3
+        displayName: Rename artifacts with build number
+        inputs:
+          targetType: inline
+          script: |
+            cd $(build.artifactstagingdirectory)/build
+            for file in *.apk; do mv "$file" "${file%.apk}-$(Build.BuildNumber).apk"; done
+            for file in *.aab; do mv "$file" "${file%.aab}-$(Build.BuildNumber).aab"; done
+            ls -la
 
       - task: PublishBuildArtifacts@1
         displayName: Publish build
