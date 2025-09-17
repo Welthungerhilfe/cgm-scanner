@@ -94,6 +94,19 @@ jobs:
           jdkArchitectureOption: 'x64'
           jdkSourceOption: 'PreInstalled'
 
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '16.x'
+        displayName: 'Install Node.js 16.x'
+
+      - task: Bash@3
+        displayName: Install Latest App Center CLI
+        inputs:
+          targetType: inline
+          script: |
+            npm install -g appcenter-cli
+            appcenter --version
+
       - task: Bash@3
         displayName: Debug Variable Group Loading
         inputs:
