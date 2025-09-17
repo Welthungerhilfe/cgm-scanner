@@ -6,12 +6,12 @@ trigger:
   - syria_backend_release
   - 11.0.0-release
   - master-realsense
+  - master-realsense-aab
 
 variables:
-  - group: TEST_CGM  # Properly linked variable group
+  - group: TEST_CGM
   - name: system.debug
     value: 'false'
-
   - name: MOBILECENTER_OUTPUT_DIRECTORY
     value: $(Build.ArtifactStagingDirectory)/build
   - name: MOBILECENTER_BRANCH
@@ -51,7 +51,7 @@ variables:
   - name: automaticSigning
     value: 'false'
   - name: buildBundle
-    value: 'false'
+    value: 'true'
   - name: MOBILECENTER_ANDROID_MODULE
     value: app
   - name: MOBILECENTER_ANDROID_VARIANT
@@ -88,14 +88,12 @@ jobs:
         submodules: recursive
         lfs: true
 
-      # Install Java and set JAVA_HOME
       - task: JavaToolInstaller@0
         inputs:
           versionSpec: '17'
           jdkArchitectureOption: 'x64'
           jdkSourceOption: 'PreInstalled'
 
-      # Debug step to verify variable group loading
       - task: Bash@3
         displayName: Debug Variable Group Loading
         inputs:
@@ -149,10 +147,7 @@ jobs:
         inputs:
           targetType: inline
           script: |
-            # Print keystore information
             keytool -list -v -keystore "$(KEYSTORE_PATH)" -storepass "$(KEYSTORE_PASSWORD)" -alias "$(KEY_ALIAS)"
-            
-            # Generate and print the key hash
             HASH=$(keytool -exportcert -alias "$(KEY_ALIAS)" -keystore "$(KEYSTORE_PATH)" -storepass "$(KEYSTORE_PASSWORD)" | openssl sha1 -binary | openssl base64)
             echo "Generated Key Hash: $HASH"
         env:
@@ -161,10 +156,10 @@ jobs:
           KEY_PASSWORD: $(KEY_PASSWORD)
 
       - task: Gradle@1
-        displayName: Build and Sign APK
+        displayName: Build and Sign AAB
         inputs:
           tasks: >-
-            clean :app:assembleArcoreRelease :app:testArcoreRelease :app:lintArcoreRelease
+            clean :app:bundleArcoreRelease :app:testArcoreRelease :app:lintArcoreRelease
           options: >-
             -Pandroid.injected.signing.store.file="$(KEYSTORE_PATH)"
             -Pandroid.injected.signing.store.password="$(KEYSTORE_PASSWORD)"
@@ -185,7 +180,7 @@ jobs:
         displayName: Copy build files to staging
         inputs:
           SourceFolder: $(build.sourcesdirectory)/app/build/outputs
-          Contents: apk/**/*.apk
+          Contents: bundle/**/*.aab
           TargetFolder: $(build.artifactstagingdirectory)/build
           OverWrite: true
           flattenFolders: true
