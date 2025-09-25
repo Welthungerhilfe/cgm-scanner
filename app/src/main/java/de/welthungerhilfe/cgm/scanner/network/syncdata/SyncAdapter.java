@@ -279,7 +279,7 @@ public class SyncAdapter implements FileLogRepository.OnFileLogsLoad {
                     LogFileUtils.logInfo(TAG,"this is calling processConsentSheet");
                     processConsentSheet();
                     LogFileUtils.logInfo(TAG,"this is calling processMeasureResults");
-                  //  processMeasureResults();
+                    processMeasureResults();
                     LogFileUtils.logInfo(TAG,"this is calling getSyncPersons");
                     getSyncPersons();
                     LogFileUtils.logInfo(TAG,"this is calling migrateEnvironmentColumns");

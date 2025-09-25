@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.renderscript.Float3;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.pose.PoseDetection;
@@ -45,7 +46,7 @@ import de.welthungerhilfe.cgm.scanner.ui.activities.ScanModeActivity1;
 
 public class ARRealSenseCamera2 extends AbstractIntelARCamera {
 
-    private static final String TAG = "librs capture example";
+    private static final String TAG = "ARRealSenseCamera2";
     private boolean mIsStreaming = false;
     private Pipeline mPipeline;
     private RsContext mRsContext;
@@ -88,14 +89,23 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
 
     @Override
     protected void openCamera() {
+        LogFileUtils.logInfoOffline(TAG, "Opening RealSense camera");
         mRsContext = AbstractIntelARCamera.getRsContext();
         mRsContext.setDevicesChangedCallback(mListener);
         mPipeline = new Pipeline(mRsContext);
 
         try (DeviceList dl = mRsContext.queryDevices()) {
+            LogFileUtils.logInfoOffline(TAG, "Device count: " + dl.getDeviceCount());
             if (dl.getDeviceCount() > 0) {
                 start();
+            } else {
+                LogFileUtils.logInfoOffline(TAG, "No RealSense devices found");
+                mActivity.runOnUiThread(() -> Toast.makeText(mActivity, "No RealSense device detected", Toast.LENGTH_LONG).show());
+                onSensorDisconnect();
             }
+        } catch (Exception e) {
+            LogFileUtils.logInfoOffline(TAG, "Failed to open camera: " + e.getMessage());
+            mActivity.runOnUiThread(() -> Toast.makeText(mActivity, "Camera initialization failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
         }
     }
 
@@ -113,24 +123,45 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
 
 
     private void configAndStart() throws Exception {
+        LogFileUtils.logInfoOffline(TAG, "Configuring and starting RealSense pipeline");
         try (Config config = new Config()) {
             options = new AccuratePoseDetectorOptions.Builder()
                     .setDetectorMode(AccuratePoseDetectorOptions.SINGLE_IMAGE_MODE)
                     .build();
             poseDetector = PoseDetection.getClient(options);
 
-            config.enableStream(StreamType.DEPTH, 640, 480);
-            config.enableStream(StreamType.COLOR, 640, 480);
+       /*     config.enableStream(StreamType.DEPTH, 1280, 720);
+            config.enableStream(StreamType.COLOR, 1280, 720);*/
+
+            config.enableStream(
+                    StreamType.DEPTH,     // which stream
+                    -1,                   // index (-1 = default)
+                    1280,                 // width
+                    720,                  // height
+                    StreamFormat.Z16,     // format
+                    6                // FPS
+            );
+
+// Color stream at 640x480, 30 FPS
+            config.enableStream(
+                    StreamType.COLOR,
+                    -1,
+                    1280,
+                    720,
+                    StreamFormat.RGB8,
+                    6
+            );
             config.enableStream(StreamType.ACCEL, StreamFormat.MOTION_XYZ32F);
-            config.enableStream(StreamType.GYRO, StreamFormat.MOTION_XYZ32F); // Enable gyroscope stream
+            config.enableStream(StreamType.GYRO, StreamFormat.MOTION_XYZ32F);
 
-
-
+            LogFileUtils.logInfoOffline(TAG, "Starting pipeline with config");
             mPipeline.start(config);
             mAlign = new Align(StreamType.COLOR);
+            LogFileUtils.logInfoOffline(TAG, "Pipeline started, starting streaming");
             startStreaming();
         } catch (Exception e) {
-            Log.d(TAG, "configAndStart failed: " + e.getMessage());
+            LogFileUtils.logInfoOffline(TAG, "configAndStart failed: " + e.getMessage());
+            throw e;
         }
     }
 
@@ -142,6 +173,7 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
     String angle;
 
     public void startStreaming() {
+        LogFileUtils.logInfoOffline(TAG, "Starting streaming thread, mIsStreaming: " + mIsStreaming);
         backgroundThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -150,8 +182,9 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
                         if (!mIsStreaming) {
                             return;
                         }
-
+                        LogFileUtils.logInfoOffline(TAG, "Waiting for frames");
                         try (FrameSet frames = mPipeline.waitForFrames()) {
+                            LogFileUtils.logInfoOffline(TAG, "Received frameset");
                             if (!intrisicGenerated) {
                                 VideoStreamProfile videoStreamProfile = frames.getProfile().as(Extension.VIDEO_PROFILE);
                                 Intrinsic intrinsics = videoStreamProfile.getIntrinsic();
@@ -216,13 +249,21 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
                             // Process color frame (unchanged)
                             try (Frame f1 = frames.first(StreamType.COLOR)) {
                                 colorFrame1 = f1;
+
+                                LogFileUtils.logInfoOffline(TAG, "Processing color frame");
+
                                 bitmap1 = frameToBitmap(colorFrame1);
                                 //createPose(bitmap1);
                                 handler.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        onProcessColorData(bitmap1, null, 0, 0);
-                                        onProcessAngle(position,rotation);
+                                        if (bitmap1 != null) {
+                                            LogFileUtils.logInfoOffline(TAG, "Calling onProcessColorData with frameIndex: " + mFrameIndex);
+                                            onProcessColorData(bitmap1, null, 0, 0);
+                                            onProcessAngle(position, rotation);
+                                        } else {
+                                            LogFileUtils.logInfoOffline(TAG, "Failed to convert color frame to bitmap");
+                                        }
                                     }
                                 });
                             }
@@ -260,7 +301,7 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
                         }
                         mFrameIndex++;
                     } catch (Exception e) {
-                        Log.d(TAG, "Streaming loop error: " + e.getMessage());
+                        LogFileUtils.logInfoOffline(TAG, "Streaming loop error: " + e.getMessage());
                     }
                 }
             }
@@ -449,8 +490,8 @@ public class ARRealSenseCamera2 extends AbstractIntelARCamera {
     }
 
     public Bitmap frameToBitmap(Frame colorFrame) {
-        int width = 640;
-        int height = 480;
+        int width = 1280;
+        int height = 720;
         byte[] data = new byte[width * height * 3];
         colorFrame.getData(data);
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);

@@ -69,6 +69,8 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
     protected ArrayList<Object> mListeners;
     int color;
 
+    String TAG = "AbstractIntelARCamera";
+
     //camera calibration
     protected float[] mColorCameraIntrinsic;
     protected float[] mDepthCameraIntrinsic;
@@ -183,12 +185,21 @@ public abstract class AbstractIntelARCamera implements GLSurfaceView.Renderer {
         mGLSurfaceView.onResume();
         mRTT.reset();
 
+        LogFileUtils.logInfoOffline(TAG, "Opening RealSense camera before");
+
+
         if (mActivity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LogFileUtils.logInfoOffline(TAG, "Opening RealSense camera after 1");
+
             if (mActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                if (mActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                LogFileUtils.logInfoOffline(TAG, "Opening RealSense camera after 2");
+
+                //if (mActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                    LogFileUtils.logInfoOffline(TAG, "Opening RealSense camera after 3");
+
                     openCamera();
                 }
-            }
+         //   }
         }
     }
 
