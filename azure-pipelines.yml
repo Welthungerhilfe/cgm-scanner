@@ -77,7 +77,7 @@ resources:
 jobs:
   - job: Phase_1
     displayName: Build
-    timeoutInMinutes: 30
+    timeoutInMinutes: 120
     cancelTimeoutInMinutes: 0
     pool:
       name: Azure Pipelines
