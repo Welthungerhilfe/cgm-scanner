@@ -82,6 +82,7 @@ import java.util.concurrent.Executors;
 import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
+import de.welthungerhilfe.cgm.scanner.Utils;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityScanModeBinding;
 import de.welthungerhilfe.cgm.scanner.datasource.database.CgmDatabase;
 import de.welthungerhilfe.cgm.scanner.datasource.models.FileLog;
@@ -1251,14 +1252,27 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
     private final Runnable saveMeasure = new Runnable() {
         @Override
         public void run() {
-            //stop receiving new data
             getCamera().removeListener(this);
-
-            //wait until everything is saved
             waitUntilFinished();
-
-            //save metadata into DB
             synchronized (lock) {
+                // First, encrypt all files
+                //logArtifactSummary("Before encryption- aes",files);
+                // logArtifactSummary("Before encryption", files, AppConstants.SCAN_STANDING_FRONT); // Example for type 100
+                // logArtifactSummary("Before encryption", files, AppConstants.SCAN_STANDING_BACK); // Example for type 100
+                // logArtifactSummary("Before encryption", files, AppConstants.SCAN_STANDING_SIDE_LEFT); // Example for type 100
+                // logArtifactSummary("Before encryption", files, AppConstants.SCAN_STANDING_SIDE_RIGHT); // Example for type 100
+                for (FileLog log : files) {
+                    // encryptImage(log.getPath());
+                    Utils.encryptFile(log.getPath(),AppConstants.APP_DATA_SECRET);
+                    // Verify file exists after
+                    if (!new File(log.getPath()).exists()) {
+                        LogFileUtils.logError("ScanModeActivity1", "Encrypted file does not exist: " + log.getPath());
+                    }
+                }
+
+                // logArtifactSummary("After encryption",files);
+
+                // Then, insert FileLog entries
                 for (FileLog log : files) {
                     fileLogRepository.insertFileLog(log);
                 }
@@ -1266,7 +1280,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
                 personRepository.updatePerson(person);
                 measureRepository.insertMeasure(measure);
             }
-
             runOnUiThread(() -> {
                 if (!UploadService.isInitialized()) {
                     startService(new Intent(getApplicationContext(), UploadService.class));
@@ -1279,7 +1292,6 @@ public class ScanModeActivity extends BaseActivity implements View.OnClickListen
             });
         }
     };
-
     public void createPose(Bitmap bitmap, int frameIndex) {
         Log.i(TAG, "this is inside point 0");
         if (mIsRecording && (frameIndex % AppConstants.SCAN_FRAMESKIP == 0)) {

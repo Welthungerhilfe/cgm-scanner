@@ -110,7 +110,7 @@ public class AppConstants {
     public static final String VAL_SEX_MALE = "male";
 
     public static final String VAL_MEASURE_MANUAL = "manual";
-    public static final String VAL_MEASURE_AUTO = "v3.0.0";
+    public static final String VAL_MEASURE_AUTO = "v4.0.0";
 
     public static final String LANG_ENGLISH = "en";
     public static final String LANG_GERMAN = "de";
