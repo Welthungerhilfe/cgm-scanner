@@ -6,6 +6,7 @@ trigger:
   - syria_backend_release
   - 11.0.0-release
   - master-realsense
+  - master-realsense-aab
 
 variables:
   - group: TEST_CGM  # Properly linked variable group
