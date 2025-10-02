@@ -6,7 +6,6 @@ trigger:
   - syria_backend_release
   - 11.0.0-release
   - master-realsense
-  - master-realsense-aab
 
 variables:
   - group: TEST_CGM  # Properly linked variable group
@@ -52,7 +51,7 @@ variables:
   - name: automaticSigning
     value: 'false'
   - name: buildBundle
-    value: 'true'
+    value: 'false'
   - name: MOBILECENTER_ANDROID_MODULE
     value: app
   - name: MOBILECENTER_ANDROID_VARIANT
@@ -109,6 +108,11 @@ jobs:
             echo "API_KEY: $(API_KEY)"
             echo "API_URL_SYRIA: $(API_URL_SYRIA)"
             echo "OAUTH_URL_SYRIA: $(OAUTH_URL_SYRIA)"
+            echo "Verify Java installation:"
+            echo "JAVA_HOME: $JAVA_HOME"
+            echo "OAUTH_SCOPE_SYRIA: $(OAUTH_SCOPE_SYRIA)"
+            echo "OAUTH_CLIENT_ID_SYRIA: $(OAUTH_CLIENT_ID_SYRIA)"
+            echo "Verify Java installation:"
             echo "JAVA_HOME: $JAVA_HOME"
             java -version
 
@@ -145,7 +149,10 @@ jobs:
         inputs:
           targetType: inline
           script: |
+            # Print keystore information
             keytool -list -v -keystore "$(KEYSTORE_PATH)" -storepass "$(KEYSTORE_PASSWORD)" -alias "$(KEY_ALIAS)"
+            
+            # Generate and print the key hash
             HASH=$(keytool -exportcert -alias "$(KEY_ALIAS)" -keystore "$(KEYSTORE_PATH)" -storepass "$(KEYSTORE_PASSWORD)" | openssl sha1 -binary | openssl base64)
             echo "Generated Key Hash: $HASH"
         env:
@@ -154,10 +161,10 @@ jobs:
           KEY_PASSWORD: $(KEY_PASSWORD)
 
       - task: Gradle@1
-        displayName: Build and Sign APK + AAB
+        displayName: Build and Sign APK
         inputs:
           tasks: >-
-            clean :app:assembleArcoreRelease :app:bundleArcoreRelease :app:testArcoreRelease :app:lintArcoreRelease
+            clean :app:assembleArcoreRelease :app:testArcoreRelease :app:lintArcoreRelease
           options: >-
             -Pandroid.injected.signing.store.file="$(KEYSTORE_PATH)"
             -Pandroid.injected.signing.store.password="$(KEYSTORE_PASSWORD)"
@@ -175,25 +182,13 @@ jobs:
           KEY_PASSWORD: $(KEY_PASSWORD)
 
       - task: CopyFiles@2
-        displayName: Copy APK + AAB to staging
+        displayName: Copy build files to staging
         inputs:
           SourceFolder: $(build.sourcesdirectory)/app/build/outputs
-          Contents: |
-            apk/**/*.apk
-            bundle/**/*.aab
+          Contents: apk/**/*.apk
           TargetFolder: $(build.artifactstagingdirectory)/build
           OverWrite: true
           flattenFolders: true
-
-      - task: Bash@3
-        displayName: Rename artifacts with build number
-        inputs:
-          targetType: inline
-          script: |
-            cd $(build.artifactstagingdirectory)/build
-            for file in *.apk; do mv "$file" "${file%.apk}-$(Build.BuildNumber).apk"; done
-            for file in *.aab; do mv "$file" "${file%.aab}-$(Build.BuildNumber).aab"; done
-            ls -la
 
       - task: PublishBuildArtifacts@1
         displayName: Publish build
