@@ -118,9 +118,9 @@ public class AppController extends Application {
     public File getRootDirectory(Context c) {
 
         //return getPublicAppDirectory(c);
-        if (BuildConfig.DEBUG || (Build.VERSION.SDK_INT < 30)) {
+   /*     if (BuildConfig.DEBUG || (Build.VERSION.SDK_INT < 30)) {
             return getPublicAppDirectory(c);
-        }
+        }*/
 
         File mExtFileDir = new File(c.getApplicationInfo().dataDir);
         File oldDir = new File(Environment.getExternalStorageDirectory(), "Child Growth Monitor Scanner App");
