@@ -14,7 +14,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 35
 
-        versionCode 1735045470
+        versionCode 1735045475
         versionName "12.0.0-test"
 
 
