@@ -102,7 +102,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("D:/master_realsense/cgm-scanner/librealsense/.cxx/Debug/4h5o2c75/arm64-v8a/third-party/json/build/cmake_install.cmake")
+  include("D:/master_realsense/cgm-scanner/librealsense/.cxx/Debug/1276a325/arm64-v8a/third-party/json/build/cmake_install.cmake")
   include("D:/master_realsense/cgm-scanner/build-arm64-v8a/third-party/rsutils/cmake_install.cmake")
   include("D:/master_realsense/cgm-scanner/build-arm64-v8a/third-party/realsense-file/cmake_install.cmake")
   include("D:/master_realsense/cgm-scanner/build-arm64-v8a/third-party/tclap/cmake_install.cmake")

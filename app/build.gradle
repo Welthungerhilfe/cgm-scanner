@@ -5,14 +5,14 @@ plugins {
 
 android {
     namespace "de.welthungerhilfe.cgm.scanner"
-    compileSdk 34
+    compileSdk 35
 
 
     ndkVersion "23.2.8568313"
     defaultConfig {
         applicationId "de.welthungerhilfe.cgm.scanner"
         minSdkVersion 24
-        targetSdkVersion 34
+        targetSdkVersion 35
 
         versionCode 1735045470
         versionName "12.0.0-test"
