@@ -30,6 +30,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -41,7 +42,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -49,9 +55,21 @@ import de.welthungerhilfe.cgm.scanner.AppConstants;
 import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.DialogContactSupportBinding;
+import de.welthungerhilfe.cgm.scanner.datasource.models.DeviceLogResponse;
 import de.welthungerhilfe.cgm.scanner.hardware.Audio;
 import de.welthungerhilfe.cgm.scanner.hardware.io.FileSystem;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
+import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
+import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
 import de.welthungerhilfe.cgm.scanner.ui.activities.BaseActivity;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Retrofit;
 
 public class ContactSupportDialog extends Dialog implements View.OnClickListener {
 
@@ -73,8 +91,15 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
     private File screenshot;
     private File zip, zip1;
 
+    private Retrofit retrofit;
+
 
     DialogContactSupportBinding dialogContactSupportBinding;
+
+    SessionManager sessionManager;
+
+
+
 
 
     void onRecord() {
@@ -101,56 +126,188 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         }
     }
 
+    //    void onConfirm() {
+//        if (recording) {
+//            onRecord();
+//        }
+//        dismiss();
+//
+//        if (type == null) {
+//            type = "";
+//        } else {
+//            type = " - " + type;
+//        }
+//        String subject = "CGM-Scanner version " + AppController.getInstance().getAppVersion() + type;
+//        String message = dialogContactSupportBinding.inputMessage.getText().toString();
+//        if (footer != null) {
+//            message += "\n\n" + footer;
+//        }
+//
+//        Intent sendIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+//        sendIntent.setType("*/*");
+//        sendIntent.setPackage("com.google.android.gm");
+//        sendIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{SUPPORT_EMAIL});
+//        sendIntent.putExtra(Intent.EXTRA_TEXT, message);
+//        sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+//
+//        ArrayList<Uri> uris = new ArrayList<>();
+//        if (audioFile != null && audioFile.exists() && audioFile.canRead()) {
+//            uris.add(FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", audioFile));
+//        }
+//        if (screenshot != null && screenshot.exists() && screenshot.canRead()) {
+//            uris.add(FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", screenshot));
+//        }
+//        if (zip != null && zip.exists() && zip.canRead()) {
+//            uris.add(FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", zip));
+//        }
+//        if (zip1 != null && zip1.exists() && zip1.canRead()) {
+//            uris.add(FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", zip1));
+//        }
+//        addLoggingFilesZip(uris);
+//        addLoggingFilesZip1(uris);
+//
+//        sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+//        sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+//
+//        try {
+//            context.startActivity(sendIntent);
+//        } catch (Exception e) {
+//            sendIntent.setPackage(null);
+//            context.startActivity(sendIntent);
+//        }
+//    }
+
     void onConfirm() {
+
+        //Stop recording if active
         if (recording) {
             onRecord();
         }
-        dismiss();
 
-        if (type == null) {
-            type = "";
-        } else {
-            type = " - " + type;
-        }
-        String subject = "CGM-Scanner version " + AppController.getInstance().getAppVersion() + type;
-        String message = dialogContactSupportBinding.inputMessage.getText().toString();
-        if (footer != null) {
-            message += "\n\n" + footer;
-        }
-
-        Intent sendIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-        sendIntent.setType("*/*");
-        sendIntent.setPackage("com.google.android.gm");
-        sendIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{SUPPORT_EMAIL});
-        sendIntent.putExtra(Intent.EXTRA_TEXT, message);
-        sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-
+        // FIRST: create ALL zip files exactly like before
         ArrayList<Uri> uris = new ArrayList<>();
-        if (audioFile != null && audioFile.exists() && audioFile.canRead()) {
-            uris.add(FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", audioFile));
-        }
-        if (screenshot != null && screenshot.exists() && screenshot.canRead()) {
-            uris.add(FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", screenshot));
-        }
+
+
         if (zip != null && zip.exists() && zip.canRead()) {
-            uris.add(FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", zip));
+            uris.add(FileProvider.getUriForFile(context,
+                    context.getPackageName() + ".fileprovider", zip));
         }
-        if (zip1 != null && zip1.exists() && zip1.canRead()) {
-            uris.add(FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", zip1));
-        }
-        addLoggingFilesZip(uris);
-        addLoggingFilesZip1(uris);
+       /* if (zip1 != null && zip1.exists() && zip1.canRead()) {
+            uris.add(FileProvider.getUriForFile(context,
+                    context.getPackageName() + ".fileprovider", zip1));
+        }*/
 
-        sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
-        sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+        // IMPORTANT: These two create logs.zip and logs_offline.zip NOW
+        addLoggingFilesZip(uris);     // creates logs.zip
+        // addLoggingFilesZip1(uris);    // creates logs_offline.zip
 
-        try {
-            context.startActivity(sendIntent);
-        } catch (Exception e) {
-            sendIntent.setPackage(null);
-            context.startActivity(sendIntent);
+        // NOW decide which file to upload:
+        File zipToUpload = null;
+
+        if (zip != null && zip.exists()) {
+            zipToUpload = zip;
+        } /*else if (zip1 != null && zip1.exists()) {
+            zipToUpload = zip1;
+        }*/
+
+        // If still null, maybe logs.zip was created
+        File logsZip = new File(context.getCacheDir(), "logs.zip");
+        if (zipToUpload == null && logsZip.exists()) {
+            zipToUpload = logsZip;
         }
+
+        File logsOfflineZip = new File(context.getCacheDir(), "logs_offline.zip");
+        if (zipToUpload == null && logsOfflineZip.exists()) {
+            zipToUpload = logsOfflineZip;
+        }
+
+        if (zipToUpload == null) {
+            Toast.makeText(context, "Zip file not found!", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Prepare payload
+        RequestBody logType = RequestBody.create(MultipartBody.FORM, "application");
+        DateTimeFormatter formatter =
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
+// 1️⃣ logDataFrom → 10 days earlier at 00:00:00 UTC
+        String logDataFromStr = LocalDate.now()
+                .minusDays(10)
+                .atStartOfDay(ZoneId.of("UTC"))
+                .format(formatter);
+
+        RequestBody logDataFrom = RequestBody.create(
+                MultipartBody.FORM, logDataFromStr
+        );
+
+// 2️⃣ logDataTo → today at 00:00:00 UTC
+        String logDataToStr = LocalDate.now()
+                .atStartOfDay(ZoneId.of("UTC"))
+                .format(formatter);
+
+        RequestBody logDataTo = RequestBody.create(
+                MultipartBody.FORM, logDataToStr
+        );
+
+// 3️⃣ generatedAt → current instant (current date + current time) UTC
+        String generatedAtStr = Instant.now()
+                .atZone(ZoneId.of("UTC"))
+                .format(formatter);
+
+        RequestBody generatedAt = RequestBody.create(
+                MultipartBody.FORM, generatedAtStr
+        );
+        RequestBody appVersion = RequestBody.create(MultipartBody.FORM,
+                AppController.getInstance().getAppVersion());
+        RequestBody deviceInfo = RequestBody.create(MultipartBody.FORM,
+                "Android " + android.os.Build.VERSION.RELEASE);
+
+        RequestBody filename = RequestBody.create(MultipartBody.FORM, zipToUpload.getName());
+        RequestBody requestFile = RequestBody.create(MediaType.parse("application/zip"), zipToUpload);
+        MultipartBody.Part filePart = MultipartBody.Part.createFormData("file",
+                zipToUpload.getName(), requestFile);
+
+        if (retrofit == null) retrofit = SyncingWorkManager.provideRetrofit();
+
+        retrofit.create(ApiService.class).uploadDeviceLogs(
+                        sessionManager.getAuthTokenWithBearer(),
+                        getOrCreateUUID(),
+                        logType, logDataFrom, logDataTo, generatedAt,
+                        appVersion, deviceInfo, filename, filePart
+                )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<DeviceLogResponse>() {
+                    @Override
+                    public void onNext(DeviceLogResponse response) {
+                        Toast.makeText(context, "Uploaded Successfully!", Toast.LENGTH_LONG).show();
+                        dismiss();
+                    }
+
+                    @Override public void onError(Throwable e) {
+                        Toast.makeText(context, "Upload Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        Log.e("UploadError", e.getMessage());
+                    }
+
+                    @Override public void onComplete() {}
+                    @Override public void onSubscribe(@NonNull Disposable d) {}
+                });
     }
+
+    public String getOrCreateUUID() {
+        String uuid = sessionManager.getDeviceId();
+        if(uuid == null) {
+
+
+            // Generate new UUIDv4
+            uuid = UUID.randomUUID().toString();
+
+            sessionManager.setDeviceId(uuid);
+        }
+        return uuid;
+    }
+
 
     void addLoggingFilesZip(ArrayList<Uri> uris) {
         File extFileDir = AppController.getInstance().getRootDirectory(context);
@@ -248,6 +405,7 @@ public class ContactSupportDialog extends Dialog implements View.OnClickListener
         dialogContactSupportBinding.recordAudio.setOnClickListener(this);
         dialogContactSupportBinding.txtCancel.setOnClickListener(this);
         dialogContactSupportBinding.txtOK.setOnClickListener(this);
+        sessionManager = new SessionManager(context);
 
     }
 

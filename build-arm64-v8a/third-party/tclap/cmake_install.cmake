@@ -1,4 +1,4 @@
-# Install script for directory: D:/master_realsense/cgm-scanner/third-party/tclap
+# Install script for directory: D:/test_cgm_error/cgm-scanner/third-party/tclap
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

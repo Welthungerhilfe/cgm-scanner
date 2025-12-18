@@ -44,3 +44,6 @@ Makefile
 *.o
 *.a
 *.so
+
+build*/
+**/build-*/

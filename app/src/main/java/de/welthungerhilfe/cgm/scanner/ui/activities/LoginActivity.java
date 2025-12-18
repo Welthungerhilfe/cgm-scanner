@@ -44,15 +44,22 @@ import de.welthungerhilfe.cgm.scanner.AppController;
 import de.welthungerhilfe.cgm.scanner.BuildConfig;
 import de.welthungerhilfe.cgm.scanner.R;
 import de.welthungerhilfe.cgm.scanner.databinding.ActivityLoginBinding;
+import de.welthungerhilfe.cgm.scanner.datasource.models.AppConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.models.RemoteConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.repository.LanguageSelectedRepository;
 import de.welthungerhilfe.cgm.scanner.hardware.io.LogFileUtils;
 import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 import de.welthungerhilfe.cgm.scanner.network.authenticator.AuthenticationHandler;
+import de.welthungerhilfe.cgm.scanner.network.service.ApiService;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
 import de.welthungerhilfe.cgm.scanner.network.service.UploadService;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncAdapter;
 import de.welthungerhilfe.cgm.scanner.network.syncdata.SyncingWorkManager;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import retrofit2.Retrofit;
 
 public class LoginActivity extends AccountAuthenticatorActivity implements AuthenticationHandler.IAuthenticationCallback, CompoundButton.OnCheckedChangeListener {
 
@@ -85,6 +92,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
     String syria[] ={"Syria"};
     String organization[] = null;
+
+    Retrofit retrofit;
 
 
 
@@ -444,11 +453,15 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
                 setAccountAuthenticatorResult(intent.getExtras());
                 setResult(RESULT_OK, intent);
 
+                getSecrets(session.getAuthTokenWithBearer());
+
                 //start the app
-                SyncAdapter.getInstance(getApplicationContext()).resetRetrofit();
+                /*SyncAdapter.getInstance(getApplicationContext()).resetRetrofit();
                 UploadService.resetRetrofit();
                 LogFileUtils.startSession(LoginActivity.this, session);
-                startApp();
+                startApp();*/
+
+
 
             } else if (feedback) {
                 Toast.makeText(LoginActivity.this, R.string.login_error_invalid, Toast.LENGTH_LONG).show();
@@ -461,6 +474,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             }
         }
     }
+
 
     @Override
     public void onCheckedChanged(CompoundButton button, boolean checked) {
@@ -508,6 +522,44 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
     private void requestStoragePermission() {
         requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PEMISSION);
+    }
+
+    public void getSecrets(String auth){
+        if (retrofit == null) {
+            retrofit = SyncingWorkManager.provideRetrofit();
+            LogFileUtils.logInfo(TAG, "Start syncing requested after retrofit null");
+
+        }
+        retrofit.create(ApiService.class).getAppConfig(auth).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<AppConfig>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull AppConfig appConfig) {
+                        Toast.makeText(LoginActivity.this,"this is +"+appConfig.getApp_sec(),Toast.LENGTH_LONG).show();
+
+                        SyncAdapter.getInstance(getApplicationContext()).resetRetrofit();
+                        UploadService.resetRetrofit();
+                        LogFileUtils.startSession(LoginActivity.this, session);
+                        session.setAppSecret(appConfig.getApp_sec());
+                        startApp();
+
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
     }
 
 

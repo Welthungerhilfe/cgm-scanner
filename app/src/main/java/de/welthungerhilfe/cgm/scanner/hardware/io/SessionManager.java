@@ -81,6 +81,10 @@ public class SessionManager {
 
     private final String REALSENSE_SERIALNO= "REALSENSE_SERIALNO";
 
+    private final String APP_SECRET = "APP_SECREAT";
+
+    private final String DEVICE_ID = "DEVICE_ID";
+
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
 
@@ -92,7 +96,7 @@ public class SessionManager {
 
             pref = EncryptedSharedPreferences.create(
                     ctx,
-                    AppConstants.APP_DATA_SECRET,
+                    PREF_KEY_USER,
                     masterKey,
                     EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                     EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
@@ -423,6 +427,25 @@ public class SessionManager {
         editor.putInt(BACKGROUND_TASK_COUNT, count);
         editor.commit();
     }
+
+    public String getAppSecret() {
+        return pref.getString(APP_SECRET, null);
+    }
+
+    public void setAppSecret(String secret) {
+        editor.putString(APP_SECRET, secret);
+        editor.commit();
+    }
+
+    public String getDeviceId() {
+        return pref.getString(DEVICE_ID, null);
+    }
+
+    public void setDeviceId(String id) {
+        editor.putString(DEVICE_ID, id);
+        editor.commit();
+    }
+
 
     public String getIntelrealsenseSno() {
         return pref.getString(REALSENSE_SERIALNO, null);

@@ -19,8 +19,10 @@
 package de.welthungerhilfe.cgm.scanner.network.service;
 
 import de.welthungerhilfe.cgm.scanner.datasource.location.india.Root;
+import de.welthungerhilfe.cgm.scanner.datasource.models.AppConfig;
 import de.welthungerhilfe.cgm.scanner.datasource.models.CompleteScan;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Consent;
+import de.welthungerhilfe.cgm.scanner.datasource.models.DeviceLogResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.EstimatesResponse;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
@@ -97,6 +99,24 @@ public interface ApiService {
 
     @GET("get_locations_hierarchy?country=INDIA")
     Observable<Root> getLocationIndia(@Header("Authorization") String auth);
+
+    @GET("app-config")
+    Observable<AppConfig> getAppConfig(@Header("Authorization") String auth);
+
+    @Multipart
+    @POST("device/{device_id}/logs")
+    Observable<DeviceLogResponse> uploadDeviceLogs(
+            @Header("Authorization") String auth,
+            @Path("device_id") String deviceId,
+            @Part("log_type") RequestBody logType,
+            @Part("log_data_from") RequestBody logDataFrom,
+            @Part("log_data_to") RequestBody logDataTo,
+            @Part("generated_at") RequestBody generatedAt,
+            @Part("app_version") RequestBody appVersion,
+            @Part("device_info") RequestBody deviceInfo,
+            @Part("filename") RequestBody filename,
+            @Part MultipartBody.Part file
+    );
 
 }
 
