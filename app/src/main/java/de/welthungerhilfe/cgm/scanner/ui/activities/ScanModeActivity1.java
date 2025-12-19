@@ -1597,7 +1597,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
                // logArtifactSummary("Before encryption", files, AppConstants.SCAN_STANDING_SIDE_RIGHT); // Example for type 100
                 for (FileLog log : files) {
                    // encryptImage(log.getPath());
-                    encryptFile(log.getPath(),AppConstants.APP_DATA_SECRET);
+                    encryptFile(log.getPath(),sessionManager.getAppSecret());
                     // Verify file exists after
                     if (!new File(log.getPath()).exists()) {
                         LogFileUtils.logError("ScanModeActivity1", "Encrypted file does not exist: " + log.getPath());

@@ -421,13 +421,13 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         new Thread(() -> {
             AppController.getInstance().getRootDirectory(getApplicationContext());
             runOnUiThread(() -> {
-                if (languageSelectedRepository.getLanguageSelectedId(session.getUserEmail())!= null)
+               /* if (languageSelectedRepository.getLanguageSelectedId(session.getUserEmail())!= null)*/
                     startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                else
-                    startActivity(new Intent(getApplicationContext(), LanguageSelectionActivity.class));
+                /*else
+                    startActivity(new Intent(getApplicationContext(), LanguageSelectionActivity.class));*/
                 Bundle bundle = new Bundle();
                 bundle.putString("backend_selected",selectedBackend);
-                firebaseAnalytics.logEvent("signin_finished",bundle);
+                //firebaseAnalytics.logEvent("signin_finished",bundle);
                 finish();
             });
         }).start();

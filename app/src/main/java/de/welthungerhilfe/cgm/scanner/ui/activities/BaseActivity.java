@@ -67,11 +67,11 @@ public class BaseActivity extends AppCompatActivity {
         super.onCreate(saveBundle);
         languageSelectedRepository = LanguageSelectedRepository.getInstance(this);
         sessionManager = new SessionManager(this);
-        String lang = languageSelectedRepository.getLanguageSelectedId(sessionManager.getUserEmail());
-        if(lang==null) {
+        /*String lang = languageSelectedRepository.getLanguageSelectedId(sessionManager.getUserEmail());*/
+       /* if(lang==null) {
             lang = AppConstants.LANG_ENGLISH;
-        }
-        forceSelectedLanguage(this,lang);
+        }*/
+        forceSelectedLanguage(this,AppConstants.LANG_ENGLISH);
         Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
     }
 

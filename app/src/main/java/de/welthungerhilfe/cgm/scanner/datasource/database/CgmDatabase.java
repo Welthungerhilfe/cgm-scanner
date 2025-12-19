@@ -25,6 +25,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -49,6 +50,7 @@ import de.welthungerhilfe.cgm.scanner.datasource.models.Measure;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Person;
 import de.welthungerhilfe.cgm.scanner.datasource.models.PostScanResult;
 import de.welthungerhilfe.cgm.scanner.datasource.models.Workflow;
+import de.welthungerhilfe.cgm.scanner.hardware.io.SessionManager;
 
 @Database(entities = {Person.class, Measure.class, FileLog.class, Device.class, PostScanResult.class, Workflow.class, LanguageSelected.class, IndiaLocation.class}, version = 40)
 public abstract class CgmDatabase extends RoomDatabase {
@@ -411,7 +413,9 @@ public abstract class CgmDatabase extends RoomDatabase {
     public static CgmDatabase getInstance(Context context) {
         synchronized (sLock) {
 
-             byte[] PASSPHRASE = AppConstants.APP_DATA_SECRET.getBytes(StandardCharsets.UTF_8);
+            SessionManager sessionManager = new SessionManager(context);
+            Log.i("CGM database ","this is secret "+sessionManager.getAppSecret());
+             byte[] PASSPHRASE = sessionManager.getAppSecret().getBytes(StandardCharsets.UTF_8);
 
 // Create SupportFactory with passphrase
             SupportFactory factory = new SupportFactory(PASSPHRASE);

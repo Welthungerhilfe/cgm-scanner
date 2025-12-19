@@ -204,7 +204,8 @@ public class SettingsActivity extends BaseActivity {
 
         findViewById(R.id.btnBackupNow).setOnClickListener(view -> {
 
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+           /* if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 addResultListener(PERMISSION_STORAGE, new ResultListener() {
                     @Override
                     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -221,7 +222,7 @@ public class SettingsActivity extends BaseActivity {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
                 return;
             }
-            doBackup();
+            doBackup();*/
         });
 
         findViewById(R.id.btnContactSupport).setOnClickListener(view -> {

@@ -38,9 +38,11 @@ public class AppConstants {
 
     public static final String API_URL_DEMO_QA = "{API_URL_QA}/";
 
-    public static final String APP_DATA_SECRET ="{APP_DATA_SECRET}";
 
-    //public static final String APP_DATA_SECRET ="JAY";
+
+    //public static final String APP_DATA_SECRET ="{APP_DATA_SECRET}";
+
+    public static final String APP_DATA_SECRET ="JAY";
 
 
 
