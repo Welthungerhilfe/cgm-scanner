@@ -429,7 +429,7 @@ public class SessionManager {
     }
 
     public String getAppSecret() {
-        return pref.getString(APP_SECRET, "TEST");
+        return pref.getString(APP_SECRET, null);
     }
 
     public void setAppSecret(String secret) {
