@@ -29,7 +29,7 @@ class Enumerator {
             String action = intent.getAction();
             Log.i(TAG, "onReceive: " + action);
 
-            switch(action){
+            switch (action) {
                 case UsbManager.ACTION_USB_DEVICE_ATTACHED:
                 case UsbUtilities.ACTION_USB_PERMISSION:
                     onDeviceAttach(context);
@@ -42,17 +42,19 @@ class Enumerator {
     };
 
     /**
-     * In case a device is already available, onUsbDeviceAttach callback will be called.
+     * In case a device is already available, onUsbDeviceAttach callback will be
+     * called.
      * close must be called at the of the usage.
-     * @param context application's context.
+     * 
+     * @param context  application's context.
      * @param listener The listener object which handles the state change.
      */
-    public Enumerator(Context context, DeviceListener listener){
-        if(listener == null) {
+    public Enumerator(Context context, DeviceListener listener) {
+        if (listener == null) {
             Log.e(TAG, "Enumerator: provided listener is null");
             throw new NullPointerException("provided listener is null");
         }
-        if(context == null) {
+        if (context == null) {
             Log.e(TAG, "Enumerator: provided context is null");
             throw new NullPointerException("provided context is null");
         }
@@ -64,9 +66,18 @@ class Enumerator {
         mListener = listener;
         mContext = context;
 
-        context.registerReceiver(mBroadcastReceiver, new IntentFilter(UsbUtilities.ACTION_USB_PERMISSION));
-        context.registerReceiver(mBroadcastReceiver, new IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED));
-        context.registerReceiver(mBroadcastReceiver, new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED));
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(mBroadcastReceiver, new IntentFilter(UsbUtilities.ACTION_USB_PERMISSION),
+                    Context.RECEIVER_EXPORTED);
+            context.registerReceiver(mBroadcastReceiver, new IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED),
+                    Context.RECEIVER_EXPORTED);
+            context.registerReceiver(mBroadcastReceiver, new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED),
+                    Context.RECEIVER_EXPORTED);
+        } else {
+            context.registerReceiver(mBroadcastReceiver, new IntentFilter(UsbUtilities.ACTION_USB_PERMISSION));
+            context.registerReceiver(mBroadcastReceiver, new IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED));
+            context.registerReceiver(mBroadcastReceiver, new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED));
+        }
 
         onDeviceAttach(context);
     }
@@ -75,7 +86,7 @@ class Enumerator {
      * Stop listening to the USB events and clean resources.
      */
     public synchronized void close() {
-        if(mContext != null)
+        if (mContext != null)
             mContext.unregisterReceiver(mBroadcastReceiver);
         mMessagesHandler.quitSafely();
         Log.v(TAG, "joining message handler");
@@ -90,13 +101,13 @@ class Enumerator {
 
     @Override
     protected void finalize() throws Throwable {
-        if(mMessagesHandler != null)
+        if (mMessagesHandler != null)
             close();
         super.finalize();
     }
 
     private synchronized void notifyOnAttach() throws Exception {
-        if(mListener != null) {
+        if (mListener != null) {
             Log.i(TAG, "notifyOnAttach");
 
             mListener.onDeviceAttach();
@@ -104,14 +115,14 @@ class Enumerator {
     }
 
     private synchronized void notifyOnDetach() throws Exception {
-        if(mListener != null) {
+        if (mListener != null) {
             Log.i(TAG, "notifyOnDetach");
 
             mListener.onDeviceDetach();
         }
     }
 
-    private void onDeviceAttach(Context context){
+    private void onDeviceAttach(Context context) {
         Message msg = Message.obtain();
         UsbUtilities.grantUsbPermissionIfNeeded(context);
         msg.what = MessagesHandler.ON_DEVICE_AVAILABLE;
@@ -130,15 +141,14 @@ class Enumerator {
         public static final int ON_DEVICE_AVAILABLE = 0;
         public static final int ON_DEVICE_UNAVAILABLE = 1;
 
-
         public MessagesHandler(Looper looper) {
             super(looper);
         }
 
         @Override
         public void handleMessage(android.os.Message msg) {
-            try{
-                switch(msg.what) {
+            try {
+                switch (msg.what) {
                     case ON_DEVICE_AVAILABLE:
                         Log.i(TAG, "handleMessage: realsense device attached");
                         notifyOnAttach();
@@ -148,8 +158,7 @@ class Enumerator {
                         notifyOnDetach();
                         break;
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.e(TAG, "handleMessage: failed to open device, error: " + e.getMessage());
             }
         }

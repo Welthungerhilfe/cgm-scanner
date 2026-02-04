@@ -33,6 +33,7 @@
 
     <!--for foreground service-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <!--for wifi state change-->
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
@@ -265,7 +266,8 @@
         <service
             android:name=".network.service.WifiStateChangereceiverHelperService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"
+            android:foregroundServiceType="dataSync" />
     </application>
 
 </manifest>

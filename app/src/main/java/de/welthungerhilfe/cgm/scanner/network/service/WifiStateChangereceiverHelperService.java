@@ -31,7 +31,18 @@ public class WifiStateChangereceiverHelperService extends Service {
         super.onCreate();
         isServiceRunning = true;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForeground(FN_ID_WIFI_STATE_CHANGE_SERVICE, MeasureNotification.createForegroundNotification(getApplicationContext(), getApplicationContext().getString(R.string.app_name), getApplicationContext().getString(R.string.wifi_state_change_watcher)));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(FN_ID_WIFI_STATE_CHANGE_SERVICE,
+                        MeasureNotification.createForegroundNotification(getApplicationContext(),
+                                getApplicationContext().getString(R.string.app_name),
+                                getApplicationContext().getString(R.string.wifi_state_change_watcher)),
+                        android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+            } else {
+                startForeground(FN_ID_WIFI_STATE_CHANGE_SERVICE,
+                        MeasureNotification.createForegroundNotification(getApplicationContext(),
+                                getApplicationContext().getString(R.string.app_name),
+                                getApplicationContext().getString(R.string.wifi_state_change_watcher)));
+            }
             wifiStateChangeReceiver = new WifiStateChangeReceiver();
             IntentFilter filter = new IntentFilter();
             filter.addAction("android.net.wifi.STATE_CHANGE");
@@ -50,7 +61,6 @@ public class WifiStateChangereceiverHelperService extends Service {
         }
         return START_STICKY;
     }
-
 
     @Override
     public void onDestroy() {
