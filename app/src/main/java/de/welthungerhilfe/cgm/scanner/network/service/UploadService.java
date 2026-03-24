@@ -170,6 +170,8 @@ public class UploadService extends Service implements FileLogRepository.OnFileLo
     }
 
     private void loadQueueFileLogs() {
+
+
         if (!NetworkUtils.isUploadAllowed(this)) {
             LogFileUtils.logInfo(TAG, "Skipped due to not available network");
             stopSelf();

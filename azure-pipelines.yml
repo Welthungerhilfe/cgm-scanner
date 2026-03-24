@@ -5,6 +5,7 @@ trigger:
   - bug_offline_results_1
   - syria_backend_release
   - 11.0.0-release
+  - multi-device
 
 variables:
   - group: TEST_CGM  # Properly linked variable group

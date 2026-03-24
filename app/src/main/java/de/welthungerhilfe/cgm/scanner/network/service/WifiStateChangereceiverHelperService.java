@@ -1,6 +1,7 @@
 package de.welthungerhilfe.cgm.scanner.network.service;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
@@ -46,7 +47,7 @@ public class WifiStateChangereceiverHelperService extends Service {
             wifiStateChangeReceiver = new WifiStateChangeReceiver();
             IntentFilter filter = new IntentFilter();
             filter.addAction("android.net.wifi.STATE_CHANGE");
-            registerReceiver(wifiStateChangeReceiver, filter);
+            registerReceiver(wifiStateChangeReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
         }
     }
 

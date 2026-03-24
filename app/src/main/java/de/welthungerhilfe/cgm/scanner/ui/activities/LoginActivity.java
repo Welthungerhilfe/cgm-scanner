@@ -100,7 +100,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         Bundle bundle = new Bundle();
         bundle.putString("backend_selected",selectedBackend);
         firebaseAnalytics.logEvent("signin_started",bundle);
-        /*if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) {
             if (session.getEnvironment() == AppConstants.ENV_UNKNOWN) {
                 Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
                 return;
@@ -109,7 +109,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
             LogFileUtils.startSession(LoginActivity.this, session);
 
             startApp();
-        } else {*/
+        } else {
         if (session.getEnvironment() != AppConstants.ENV_UNKNOWN) {
             Log.d(TAG, "Login into " + SyncingWorkManager.getAPI());
             activityLoginBinding.layoutLogin.setVisibility(View.GONE);
@@ -121,7 +121,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
         } else {
             Toast.makeText(this, R.string.login_backend_environment, Toast.LENGTH_LONG).show();
         }
-        //   }
+           }
     }
 
     private SessionManager session;

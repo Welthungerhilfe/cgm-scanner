@@ -33,6 +33,7 @@ import com.microsoft.appcenter.crashes.Crashes;*/
 import com.google.android.libraries.intelligence.acceleration.Analytics;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.intel.realsense.librealsense.R;
 
 import java.io.File;
 import java.io.IOException;
@@ -108,7 +109,7 @@ public class AppController extends Application {
 
     public File getPublicAppDirectory(Context context) {
         File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-        root = new File(root, context.getString(R.string.app_name_long));
+        root = new File(root, context.getString(R.string.app_name));
         if (!root.exists()) {
             root.mkdirs();
         }
@@ -133,7 +134,7 @@ public class AppController extends Application {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+        } 
 
         return mExtFileDir;
     }

@@ -325,7 +325,7 @@ public class CreateDataActivity extends BaseActivity {
             }
         });
 
-        registerReceiver(receiver, new IntentFilter("com.example.REALSENSE_DISCONNECTED"));
+        registerReceiver(receiver, new IntentFilter("com.example.REALSENSE_DISCONNECTED"), Context.RECEIVER_NOT_EXPORTED);
         if(sessionManager.getSensorMode()==AppConstants.NO_SENSOR_SELECTED){
             activityCreateBinding.ivRealsenseIcon.setVisibility(View.GONE);
 
