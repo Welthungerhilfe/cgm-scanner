@@ -1,19 +1,19 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    
+
     repositories {
         google()
         jcenter()
         mavenCentral()
-       // maven { url "https://maven.aliyun.com/repository/jcenter" }
+        // maven { url "https://maven.aliyun.com/repository/jcenter" }
         maven { url "http://developer.huawei.com/repo/"
             allowInsecureProtocol = true
         }
         maven { url "https://kotlin.bintray.com/kotlinx/" }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.0.2'
+        classpath 'com.android.tools.build:gradle:8.1.1'
         classpath 'com.google.gms:google-services:4.3.10'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
 
