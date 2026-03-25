@@ -9,6 +9,7 @@ trigger:
   - master-realsense-aab
   - 12.0.1-test
   - multi-device
+  - main-realsense
 
 variables:
   - group: TEST_CGM  # Properly linked variable group
