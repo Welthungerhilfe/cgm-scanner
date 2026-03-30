@@ -110,7 +110,7 @@ import de.welthungerhilfe.cgm.scanner.hardware.GPS;
 import de.welthungerhilfe.cgm.scanner.hardware.camera.AbstractIntelARCamera;
 import de.welthungerhilfe.cgm.scanner.network.service.DeviceService;
 import de.welthungerhilfe.cgm.scanner.network.service.FirebaseService;
-import de.welthungerhilfe.cgm.scanner.network.service.WifiStateChangereceiverHelperService;
+
 import de.welthungerhilfe.cgm.scanner.network.syncdata.MeasureNotification;
 import de.welthungerhilfe.cgm.scanner.ui.adapters.RecyclerPersonAdapter;
 import de.welthungerhilfe.cgm.scanner.ui.dialogs.ConfirmDialog;
@@ -242,11 +242,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         activityMainBinding.recyclerData.setAdapter(adapterData);
 
         //wstartService(new Intent(this, DeviceService.class));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (!WifiStateChangereceiverHelperService.isServiceRunning) {
-                startForegroundService(new Intent(this, WifiStateChangereceiverHelperService.class));
-            }
-        }
+
         activityMainBinding.rltSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -532,12 +528,7 @@ public class MainActivity extends BaseActivity implements RecyclerPersonAdapter.
         //session.setSensorMode(AppConstants.NO_SENSOR_MODE_SELECTED);
         session.setSessionError(0);
         session.setCurrentLogFilePath(null);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (WifiStateChangereceiverHelperService.isServiceRunning) {
-                startForegroundService(new Intent(this, WifiStateChangereceiverHelperService.class)
-                        .putExtra(AppConstants.STOP_SERVICE, true));
-            }
-        }
+
         startActivity(new Intent(MainActivity.this, LoginActivity.class));
         finish();
     }

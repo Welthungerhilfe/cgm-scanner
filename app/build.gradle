@@ -14,7 +14,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 35
 
-        versionCode 1735045485
+        versionCode 1735045495
         versionName "13.0.1"
 
 

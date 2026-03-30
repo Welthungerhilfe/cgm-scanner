@@ -50,8 +50,14 @@ public class SyncingWorkManager extends Worker {
 
     public static void startSyncingWithWorkManager(Context context) {
 
+        androidx.work.Constraints constraints = new androidx.work.Constraints.Builder()
+                .setRequiredNetworkType(androidx.work.NetworkType.UNMETERED)
+                .build();
+
         PeriodicWorkRequest SyncingWorkManager =
-                new PeriodicWorkRequest.Builder(SyncingWorkManager.class, 16, TimeUnit.MINUTES).build();
+                new PeriodicWorkRequest.Builder(SyncingWorkManager.class, 16, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .build();
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                 "SyncingWorkManager",
                 ExistingPeriodicWorkPolicy.REPLACE,
