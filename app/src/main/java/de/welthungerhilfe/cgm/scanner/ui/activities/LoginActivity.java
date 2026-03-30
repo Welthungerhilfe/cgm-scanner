@@ -512,30 +512,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
 
     public boolean checkStoragePermissions() {
         Log.d(TAG, "Checking permissions for Android API " + Build.VERSION.SDK_INT);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            boolean hasImages = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED;
-            boolean hasVideo = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) == PackageManager.PERMISSION_GRANTED;
-            boolean hasAudio = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED;
-            Log.d(TAG, "Images: " + hasImages + ", Video: " + hasVideo + ", Audio: " + hasAudio);
-            if (!hasImages || !hasVideo || !hasAudio) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_IMAGES) ||
-                        ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_VIDEO) ||
-                        ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_AUDIO)) {
-                    Toast.makeText(this, "This app needs media permissions to function properly.", Toast.LENGTH_LONG).show();
-                }
-                Log.d(TAG, "Requesting media permissions");
-                ActivityCompat.requestPermissions(this,
-                        new String[]{
-                                Manifest.permission.READ_MEDIA_IMAGES,
-                                Manifest.permission.READ_MEDIA_VIDEO,
-                                Manifest.permission.READ_MEDIA_AUDIO
-                        },
-                        STORAGE_PEMISSION
-                );
-                return false;
-            }
-            return true;
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (!Environment.isExternalStorageManager()) {
                 try {
                     Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
@@ -568,29 +545,12 @@ public class LoginActivity extends AccountAuthenticatorActivity implements Authe
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == STORAGE_PEMISSION) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                boolean allGranted = grantResults.length > 0;
-                for (int result : grantResults) {
-                    if (result != PackageManager.PERMISSION_GRANTED) {
-                        allGranted = false;
-                        break;
-                    }
-                }
-                if (allGranted) {
-                    Log.d(TAG, "All media permissions granted, proceeding with sign-in");
-                    doSignIn();
-                } else {
-                    Log.d(TAG, "Media permissions denied");
-                    Toast.makeText(this, "Media permissions are required to proceed.", Toast.LENGTH_LONG).show();
-                }
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Storage permissions granted, proceeding with sign-in");
+                doSignIn();
             } else {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "Storage permissions granted, proceeding with sign-in");
-                    doSignIn();
-                } else {
-                    Log.d(TAG, "Storage permissions denied");
-                    Toast.makeText(this, "Storage permissions are required to proceed.", Toast.LENGTH_LONG).show();
-                }
+                Log.d(TAG, "Storage permissions denied");
+                Toast.makeText(this, "Storage permissions are required to proceed.", Toast.LENGTH_LONG).show();
             }
         }
     }

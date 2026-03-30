@@ -574,30 +574,7 @@ public class ScanModeActivity1 extends BaseActivity implements View.OnClickListe
 
     public boolean checkStoragePermissions() {
         LogFileUtils.logInfoOffline(TAG, "Checking permissions for Android API " + Build.VERSION.SDK_INT);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            boolean hasImages = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED;
-            boolean hasVideo = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) == PackageManager.PERMISSION_GRANTED;
-            boolean hasAudio = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED;
-            LogFileUtils.logInfoOffline(TAG, "Images: " + hasImages + ", Video: " + hasVideo + ", Audio: " + hasAudio);
-            if (!hasImages || !hasVideo || !hasAudio) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_IMAGES) ||
-                        ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_VIDEO) ||
-                        ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_AUDIO)) {
-                    Toast.makeText(this, "This app needs media permissions to save and process scan data.", Toast.LENGTH_LONG).show();
-                }
-                LogFileUtils.logInfoOffline(TAG, "Requesting media permissions");
-                ActivityCompat.requestPermissions(this,
-                        new String[]{
-                                Manifest.permission.READ_MEDIA_IMAGES,
-                                Manifest.permission.READ_MEDIA_VIDEO,
-                                Manifest.permission.READ_MEDIA_AUDIO
-                        },
-                        PERMISSION_STORAGE
-                );
-                return false;
-            }
-            return true;
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (!Environment.isExternalStorageManager()) {
                 try {
                     Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
