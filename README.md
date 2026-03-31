@@ -9,14 +9,19 @@ We provide a game-changer in measurement and data processing for malnourished ch
 
 ## Branch policy
 
+#### main branch
+
+- Main branch contains source codes of the version on Google Play in Closed Alpha, Public Beta and Production tracks for Arengine camera and Intel RealSense camera
+- We merge main-realsense into main after using by users for some period of time
+#### main-realsense branch
+- Main-realsense branch contains source codes of the version for Intel RealSense camera
+- We merge develop into main-realsense after passing all tests
 #### master branch
-- Master branch contains source codes of the version on Google Play in Closed Alpha, Public Beta and Production tracks
+- Master branch contains source codes of the version on Google Play in Closed Alpha, Public Beta and Production tracks for Arengine camera
 - We merge testing into master after using by users for some period of time
-
 #### testing branch
-- Testing branch contains source codes of the version on Google Play in Internal Testing and Demo/QA tracks
+- Testing branch contains source codes of the version on Google Play in Internal Testing and Demo/QA tracks for Arengine camera
 - We merge develop into testing after passing all tests
-
 #### develop branch
-- All features merged into develop are finished and tested
+- Develop branch contains source codes of all features for Arengine camera
 - Developers do all pull requests into develop
